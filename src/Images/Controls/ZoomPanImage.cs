@@ -17,6 +17,10 @@ namespace Images.Controls;
 public sealed class ZoomPanImage : ContentControl
 {
     private readonly Image _image = new() { Stretch = Stretch.Uniform };
+    // Flip lives BEFORE rotate in the transform stack so a horizontal flip flips the image in
+    // its own canvas frame rather than the post-rotation frame — that's what users expect.
+    // Order: flip → rotate → zoom-scale → pan-translate (TransformGroup applies children in order).
+    private readonly ScaleTransform _flip = new(1, 1);
     private readonly ScaleTransform _scale = new(1, 1);
     private readonly TranslateTransform _translate = new(0, 0);
     private readonly RotateTransform _rotate = new(0);
@@ -76,9 +80,30 @@ public sealed class ZoomPanImage : ContentControl
         _rotate.BeginAnimation(RotateTransform.AngleProperty, anim);
     }
 
+    public static readonly DependencyProperty FlipHorizontalProperty = DependencyProperty.Register(
+        nameof(FlipHorizontal), typeof(bool), typeof(ZoomPanImage),
+        new PropertyMetadata(false, (d, e) => ((ZoomPanImage)d)._flip.ScaleX = (bool)e.NewValue ? -1 : 1));
+
+    public bool FlipHorizontal
+    {
+        get => (bool)GetValue(FlipHorizontalProperty);
+        set => SetValue(FlipHorizontalProperty, value);
+    }
+
+    public static readonly DependencyProperty FlipVerticalProperty = DependencyProperty.Register(
+        nameof(FlipVertical), typeof(bool), typeof(ZoomPanImage),
+        new PropertyMetadata(false, (d, e) => ((ZoomPanImage)d)._flip.ScaleY = (bool)e.NewValue ? -1 : 1));
+
+    public bool FlipVertical
+    {
+        get => (bool)GetValue(FlipVerticalProperty);
+        set => SetValue(FlipVerticalProperty, value);
+    }
+
     public ZoomPanImage()
     {
         var group = new TransformGroup();
+        group.Children.Add(_flip);
         group.Children.Add(_rotate);
         group.Children.Add(_scale);
         group.Children.Add(_translate);
