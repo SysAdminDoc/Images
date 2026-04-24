@@ -2,7 +2,9 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media.Animation;
+using Images.Services;
 using Images.ViewModels;
 
 namespace Images;
@@ -18,6 +20,15 @@ public partial class MainWindow : Window
         Viewport.MouseEnter += (_, _) => FadeArrows(1.0);
         Viewport.MouseLeave += (_, _) => FadeArrows(0.0);
         Loaded += (_, _) => Focus();
+        SourceInitialized += OnSourceInitialized;
+    }
+
+    private void OnSourceInitialized(object? sender, EventArgs e)
+    {
+        // Flip the native title bar to dark so the Catppuccin Mocha interior doesn't sit inside a
+        // default light caption. Best-effort — pre-20H1 no-ops cleanly via the service.
+        var hwnd = new WindowInteropHelper(this).Handle;
+        WindowChrome.ApplyDarkCaption(hwnd);
     }
 
     public void OpenPath(string path) => Vm.OpenFile(path);
