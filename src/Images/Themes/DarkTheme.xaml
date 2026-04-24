@@ -51,6 +51,24 @@
     <SolidColorBrush x:Key="FocusRingBrush" Color="#CC89B4FA" />
     <SolidColorBrush x:Key="DropOverlayBrush" Color="#D911111B" />
 
+    <!-- Shared FocusVisualStyle — explicit, WCAG-AA ring so focus is never invisible.
+         Applied by every interactive style below; without this, templated controls
+         silently suppress the platform dotted ring and rely solely on IsKeyboardFocused
+         triggers. Per A-03 (ROADMAP Accessibility track). -->
+    <Style x:Key="FocusVisual">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Rectangle Margin="2"
+                               Stroke="{StaticResource FocusRingBrush}"
+                               StrokeThickness="1.5"
+                               StrokeDashArray="2 2"
+                               SnapsToDevicePixels="True" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Base text defaults -->
     <Style TargetType="Window">
         <Setter Property="Background" Value="{StaticResource BaseBrush}" />
@@ -76,6 +94,7 @@
         <Setter Property="MinHeight" Value="34" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FontSize" Value="13" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -164,6 +183,7 @@
         <Setter Property="Foreground" Value="#FFEAEAEA" />
         <Setter Property="FontSize" Value="28" />
         <Setter Property="FontFamily" Value="Segoe UI Symbol" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -215,6 +235,7 @@
         <Setter Property="Padding" Value="8,6" />
         <Setter Property="MinHeight" Value="34" />
         <Setter Property="FontSize" Value="14" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
