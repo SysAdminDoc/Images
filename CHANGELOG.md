@@ -4,6 +4,8 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+## v0.1.1 — 2026-04-24
+
 ### Changed
 
 - Folder watcher (`FileSystemWatcher`) now actually runs — external add/delete/rename from Explorer or another app refreshes the list without pressing F5. The position chip updates live, and if the currently displayed file vanishes, the viewer advances to the next slot the navigator lands on.
@@ -15,6 +17,7 @@ All notable changes to **Images** are documented here.
 ### Docs
 
 - README zoom row clarifies wheel-zoom anchors on the cursor; removed the stray `Ctrl+wheel` alias claim that the code never honored.
+- README architecture tree no longer claims a shipped `Resources/icon.ico` (icon is a v0.1.2 follow-up).
 
 ## v0.1.0 — 2026-04-24
 
