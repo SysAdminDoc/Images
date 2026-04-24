@@ -7,9 +7,9 @@ Effort tags: **S** ≤ 2 days · **M** ≤ 1 week · **L** > 1 week · **XL** mu
 
 > **Vision**: One Windows app that replaces Photos, IrfanView, XnConvert, Upscayl, and a light Lightroom — by cannibalising the best ideas from a dozen OSS/freeware projects. Local-first, fast, dark-mode, no cloud, no subscription. The killer features are **CLIP semantic search** on a local library, **live inline rename** (already shipped), **Squoosh-style visual-diff converter**, and — differentiator nobody else ships — **network-egress transparency**: the viewer never touches the network silently, and you can see every call it makes.
 
-## Current state (v0.1.2 — shipped 2026-04-24)
+## Current state (v0.1.3 — shipped 2026-04-24)
 
-Core viewer. Natural-sort folder nav. Zoom/pan/rotate. Live inline rename with 600 ms debounce, conflict resolution, 10-deep undo stack. Drag-drop. FSW. Catppuccin Mocha dark theme. ~100 formats via WIC + Magick.NET 14.12.0. Framework-dependent win-x64. Branded (icon.ico multi-res + banner + logo.png WPF Resource) as of the 2026-04-24 branding pass staged in `Unreleased`. No persistence, no editor, no organizer, no batch.
+Core viewer. Natural-sort folder nav. Zoom/pan/rotate. Live inline rename with 600 ms debounce, conflict resolution, 10-deep undo stack. Drag-drop. FSW. Catppuccin Mocha dark theme. ~100 formats via WIC + Magick.NET 14.13.0. **Animated GIFs play inline** (V20-15 core shipped). **>256 MB files decode via MemoryMappedFile view** (V20-06). Framework-dependent win-x64. Branded (icon.ico multi-res + banner + logo.png WPF Resource). Toolbar + nav-arrow glyphs render on Win11 IoT / enterprise images that previously showed tofu blocks (icon-font fallback fix). No persistence, no editor, no organizer, no batch.
 
 Companion research:
 - [docs/research-viewers-editors.md](docs/research-viewers-editors.md) — IrfanView, XnView MP, ImageGlass, nomacs, qView, JPEGView, FastStone, Honeyview, Windows Photos, QuickLook/Seer/Peek, Pictus.
@@ -149,7 +149,7 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [ ] **V20-03** *P0* — **Preload next + previous** image in a background thread. Cancellation token on navigate. Target: N-1 and N+1 decoded before user asks.
 - [ ] **V20-04** *P1* — **Persistent thumbnail cache** at `%LOCALAPPDATA%\Images\thumbs\<hash>.webp` keyed by `(path, mtime, size)`. Respect SCH-01 — rebuildable from originals.
 - [ ] **V20-05** *P1* — SIMD-accelerated decode path via SkiaSharp (AVX2/SSE2 automatic).
-- [ ] **V20-06** *P1* — Memory-mapped I/O for files >256 MB (avoids blowing the managed heap on 500 MP RAW). `MemoryMappedFile.CreateFromFile`.
+- [x] **V20-06** *P1* — Memory-mapped I/O for files >256 MB (avoids blowing the managed heap on 500 MP RAW). `MemoryMappedFile.CreateFromFile`. *(shipped v0.1.3 — `ImageLoader.LoadFromMemoryMapped` opens a read-only mapping and feeds separate `CreateViewStream` instances to the WIC primary + Magick.NET fallback; `DecoderUsed` reports "WIC (memory-mapped)" / "Magick.NET (memory-mapped)")*
 - [ ] **V20-07** *P2* — Settings UI surface — expose the V20-02 keys: theme (dark/light/high-contrast [A-02]), locale [I-01], telemetry [P-02], update check [P-04], hotkeys.
 
 ### Format expansion
@@ -158,7 +158,7 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [ ] **V20-12** *P1* — **JPEG XL via Microsoft's WIC JPEG XL Image Extension** (Store deep-link pattern [F-05]). Don't bundle libjxl directly until Microsoft ships it OS-default — adoption is still flag-gated in Chrome 145 as of Feb 2026 and Nightly-only in Firefox.
 - [ ] **V20-13** *P1* — WebP + animated WebP. WIC path preferred; libwebp floor in S-09.
 - [ ] **V20-14** *P1* — RAW decode via `Sdcb.LibRaw` 0.21 (MIT wrapper / LGPL native) — Canon CR2/CR3, Nikon NEF, Sony ARW, Fuji RAF, DNG.
-- [ ] **V20-15** *P2* — Animated GIF / APNG / animated AVIF with transport controls (play/pause/frame-step/speed).
+- [~] **V20-15** *P2* — Animated GIF / APNG / animated AVIF with transport controls (play/pause/frame-step/speed). *(core playback shipped v0.1.3 — `MagickImageCollection.Coalesce` + `AnimationSequence` + WPF `ObjectAnimationUsingKeyFrames` on `Image.SourceProperty` in `ZoomPanImage`; per-frame delays and GIF loop count honored; green "N frames" chip in the bottom toolbar. Transport controls deferred to a follow-up.)*
 - [ ] **V20-16** *P2* — Multi-frame TIF / ICO / multi-page PDF / DICOM — per-frame navigation UI (ImageGlass pattern).
 - [ ] **V20-17** *P2* — **Images inside archives** — ZIP/7Z/RAR/CBR/CBZ browsing without extraction (Honeyview's moat). `SharpCompress` MIT covers all formats; S-01 canonicalization is load-bearing here.
 - [ ] **V20-18** *P2* — **Store-extension detect + prompt** (F-01): on unknown-format open, probe `Windows.ApplicationModel.Store.CurrentApp`-free registry for HEIF / AV1 / WebP / JPEG XL / Raw extensions; if missing, toast with one-click `ms-windows-store://pdp/?productid=...` deep-link. Effort: S.

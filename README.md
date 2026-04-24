@@ -4,7 +4,7 @@
 
 # Images
 
-[![Version](https://img.shields.io/badge/version-0.1.2-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
+[![Version](https://img.shields.io/badge/version-0.1.3-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
 [![License](https://img.shields.io/badge/license-MIT-a6e3a1?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-cba6f7?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-9.0-f38ba8?style=flat-square)](#)
@@ -22,6 +22,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 ## Features
 
 - **~100 formats** via WPF's built-in WIC (BMP/JPG/PNG/GIF/TIFF/WEBP/HEIC/ICO) plus [Magick.NET](https://github.com/dlemstra/Magick.NET) fallback (JXL, AVIF, PSD, TGA, RAW / DNG / NEF / CR2 / ARW / RW2, and ~90 more).
+- **Animated GIFs play inline** — multi-frame GIFs (and animated WebP / APNG when the Magick build supports them) decode via `MagickImageCollection.Coalesce()` and cycle through `ZoomPanImage` with the original per-frame delays + loop count intact. A green "N frames" chip in the bottom toolbar marks animated files.
 - **Classic Windows 7 Photo Viewer layout** — centered image, bottom toolbar, hover-reveal circular arrows on the left and right edges. But in **Catppuccin Mocha** dark.
 - **Live inline rename** — split stem + extension editor on the right. Extension is locked by default (no more accidentally renaming `photo.jpg` → `photo.jp`). Debounced auto-save; no Save button.
 - **Conflict-safe** — if a target name already exists in the folder, the rename preview shows exactly what it will become (`name (2).jpg`) before it commits.

@@ -80,6 +80,29 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
+    // Animated-frame payload. Non-null when the current file is a multi-frame GIF / APNG /
+    // animated WebP. ZoomPanImage consumes this to drive an ObjectAnimationUsingKeyFrames on
+    // the inner Image.SourceProperty. CurrentImage still carries the first frame so dimension
+    // + decoder readouts continue to work even when Magick.NET's animated path is live.
+    private AnimationSequence? _currentAnimation;
+    public AnimationSequence? CurrentAnimation
+    {
+        get => _currentAnimation;
+        private set
+        {
+            if (Set(ref _currentAnimation, value))
+            {
+                Raise(nameof(IsAnimated));
+                Raise(nameof(AnimationFrameCountText));
+            }
+        }
+    }
+
+    public bool IsAnimated => CurrentAnimation is not null;
+
+    public string AnimationFrameCountText =>
+        CurrentAnimation is null ? "" : $"{CurrentAnimation.Frames.Count} frames";
+
     private string? _currentPath;
     public string? CurrentPath
     {
@@ -373,6 +396,7 @@ public sealed class MainViewModel : ObservableObject
         if (path is null)
         {
             CurrentImage = null;
+            CurrentAnimation = null;
             CurrentPath = null;
             PixelWidth = PixelHeight = 0;
             _fileSize = 0;
@@ -385,7 +409,11 @@ public sealed class MainViewModel : ObservableObject
         try
         {
             var res = ImageLoader.Load(path);
+            // Order matters: CurrentImage first so ZoomPanImage.OnSourceChanged runs and clears
+            // any animation from the previous file; then CurrentAnimation, which either applies
+            // new keyframes or stays null for a static image.
             CurrentImage = res.Image;
+            CurrentAnimation = res.Animation;
             PixelWidth = res.PixelWidth;
             PixelHeight = res.PixelHeight;
             DecoderUsed = res.DecoderUsed;
@@ -404,6 +432,7 @@ public sealed class MainViewModel : ObservableObject
         catch (Exception ex)
         {
             CurrentImage = null;
+            CurrentAnimation = null;
             PixelWidth = PixelHeight = 0;
             DecoderUsed = "Unavailable";
             LoadErrorMessage = $"This file could not be decoded. {ex.Message}";
