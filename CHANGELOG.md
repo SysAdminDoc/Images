@@ -4,6 +4,15 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### CI
+
+- Bumped release workflow actions off the deprecated Node 20 runner: `actions/checkout@v4` → `@v6`, `actions/setup-dotnet@v4` → `@v5`. GitHub removes Node 20 runners on 2026-06-02 — this clears that deprecation well ahead of the deadline.
+
+### Docs
+
+- Added `ROADMAP.md` tracking v0.1.2 polish + branding pass (workflow bump shipped, logo brief ready, icon + screenshot follow-ups noted as blocked on asset / GUI smoke).
+- Added `assets/logo-prompt.md` — five self-contained image-gen prompts (minimal icon / app icon / wordmark / emblem / abstract) aligned to the Windows 7 Photo Viewer tone + Catppuccin Mocha palette. Single-session runs defer image generation; next factory run wires the generated assets into `src/Images/Resources/` + `<ApplicationIcon>` + README header.
+
 ## v0.1.1 — 2026-04-24
 
 ### Changed
