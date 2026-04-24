@@ -63,7 +63,17 @@ public sealed class MainViewModel : ObservableObject
     // -------------------- Image state --------------------
 
     private ImageSource? _currentImage;
-    public ImageSource? CurrentImage { get => _currentImage; private set => Set(ref _currentImage, value); }
+    public ImageSource? CurrentImage
+    {
+        get => _currentImage;
+        private set
+        {
+            if (Set(ref _currentImage, value))
+            {
+                Raise(nameof(HasDisplayImage));
+            }
+        }
+    }
 
     private string? _currentPath;
     public string? CurrentPath
@@ -77,13 +87,32 @@ public sealed class MainViewModel : ObservableObject
                 Raise(nameof(CurrentFileName));
                 Raise(nameof(CurrentFolder));
                 Raise(nameof(PositionText));
+                Raise(nameof(IsViewerEmpty));
+                CommandManager.InvalidateRequerySuggested();
             }
         }
     }
 
     public bool HasImage => !string.IsNullOrEmpty(CurrentPath) && File.Exists(CurrentPath);
+    public bool HasDisplayImage => CurrentImage is not null;
+    public bool IsViewerEmpty => CurrentPath is null;
     public string CurrentFileName => CurrentPath is null ? "" : Path.GetFileName(CurrentPath);
     public string CurrentFolder => CurrentPath is null ? "" : Path.GetDirectoryName(CurrentPath) ?? "";
+
+    private string? _loadErrorMessage;
+    public string? LoadErrorMessage
+    {
+        get => _loadErrorMessage;
+        private set
+        {
+            if (Set(ref _loadErrorMessage, value))
+            {
+                Raise(nameof(HasLoadError));
+            }
+        }
+    }
+
+    public bool HasLoadError => !string.IsNullOrWhiteSpace(LoadErrorMessage);
 
     private int _pixelWidth;
     public int PixelWidth { get => _pixelWidth; private set { if (Set(ref _pixelWidth, value)) Raise(nameof(DimensionsText)); } }
@@ -168,7 +197,27 @@ public sealed class MainViewModel : ObservableObject
     public enum RenameStatusKind { Idle, Pending, Saved, Conflict, Error }
 
     private RenameStatusKind _renameStatus = RenameStatusKind.Idle;
-    public RenameStatusKind RenameStatus { get => _renameStatus; set => Set(ref _renameStatus, value); }
+    public RenameStatusKind RenameStatus
+    {
+        get => _renameStatus;
+        set
+        {
+            if (Set(ref _renameStatus, value))
+            {
+                Raise(nameof(RenameStatusText));
+            }
+        }
+    }
+
+    public string RenameStatusText => RenameStatus switch
+    {
+        RenameStatusKind.Pending => "Unsaved changes",
+        RenameStatusKind.Saved => "Saved",
+        RenameStatusKind.Conflict => "Saved with safe suffix",
+        RenameStatusKind.Error => "Needs attention",
+        _ when HasImage => "Name is current",
+        _ => "Open an image to rename"
+    };
 
     // -------------------- Recent renames --------------------
 
@@ -274,6 +323,8 @@ public sealed class MainViewModel : ObservableObject
             CurrentPath = null;
             PixelWidth = PixelHeight = 0;
             _fileSize = 0;
+            LoadErrorMessage = null;
+            DecoderUsed = null;
             Raise(nameof(FileSizeText));
             return;
         }
@@ -286,11 +337,15 @@ public sealed class MainViewModel : ObservableObject
             PixelHeight = res.PixelHeight;
             DecoderUsed = res.DecoderUsed;
             Rotation = 0;
+            LoadErrorMessage = null;
         }
         catch (Exception ex)
         {
             CurrentImage = null;
-            Toast($"Could not decode: {ex.Message}");
+            PixelWidth = PixelHeight = 0;
+            DecoderUsed = "Unavailable";
+            LoadErrorMessage = $"This file could not be decoded. {ex.Message}";
+            Toast("Could not decode this image");
         }
 
         CurrentPath = path;
