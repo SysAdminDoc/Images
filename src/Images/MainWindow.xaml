@@ -6,7 +6,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         Title="Images"
         Width="1280" Height="820"
-        MinWidth="800" MinHeight="540"
+        MinWidth="860" MinHeight="560"
         WindowStartupLocation="CenterScreen"
         AllowDrop="True"
         DragEnter="Window_DragEnter"
@@ -15,149 +15,109 @@
         DragOver="Window_DragOver"
         KeyDown="Window_KeyDown"
         Background="{StaticResource BaseBrush}"
-        TextOptions.TextFormattingMode="Display">
+        TextOptions.TextFormattingMode="Display"
+        UseLayoutRounding="True">
 
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
 
-    <Window.Resources>
-        <Style x:Key="StatusDot" TargetType="Ellipse">
-            <Setter Property="Width" Value="8" />
-            <Setter Property="Height" Value="8" />
-            <Setter Property="Margin" Value="0,0,8,0" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-
-        <Style x:Key="SectionLabel" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Foreground" Value="{StaticResource OverlayBrush}" />
-            <Setter Property="Margin" Value="2,0,0,8" />
-        </Style>
-
-        <Style x:Key="MetaLabel" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource OverlayBrush}" />
-            <Setter Property="Margin" Value="0,0,14,8" />
-            <Setter Property="FontSize" Value="12" />
-        </Style>
-
-        <Style x:Key="MetaValue" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-            <Setter Property="Margin" Value="0,0,0,8" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-        </Style>
-    </Window.Resources>
-
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="340" />
+            <ColumnDefinition Width="360" />
         </Grid.ColumnDefinitions>
 
-        <!-- ============ LEFT: Image viewport + nav chrome + bottom toolbar ============ -->
+        <!-- ============ LEFT: Viewport, floating chrome, bottom toolbar ============ -->
         <Grid Grid.Column="0" Background="{StaticResource ViewportBrush}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- Viewport with hover-reveal arrows -->
             <Grid x:Name="Viewport" Grid.Row="0" ClipToBounds="True">
                 <ctl:ZoomPanImage x:Name="Canvas"
                                    Source="{Binding CurrentImage}"
                                    Rotation="{Binding Rotation}" />
 
-                <!-- Empty state -->
-                <Border HorizontalAlignment="Center"
+                <!-- Empty state — centered invitational card -->
+                <Border Style="{StaticResource ElevatedCard}"
+                        HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        MaxWidth="430"
-                        Padding="34,32"
-                        Background="{StaticResource PanelBrush}"
-                        BorderBrush="{StaticResource HairlineBrush}"
-                        BorderThickness="1"
-                        CornerRadius="14"
+                        MaxWidth="440"
                         Visibility="{Binding IsViewerEmpty, Converter={StaticResource BoolToVis}}">
                     <StackPanel>
                         <Image Source="Resources/logo.png"
-                               Width="74"
-                               Height="74"
+                               Width="84"
+                               Height="84"
                                HorizontalAlignment="Center"
-                               RenderOptions.BitmapScalingMode="HighQuality" />
-                        <TextBlock Text="Open an image to begin"
-                                   Foreground="{StaticResource TextBrush}"
+                               RenderOptions.BitmapScalingMode="HighQuality"
+                               Opacity="0.94" />
+                        <TextBlock Style="{StaticResource Text.Display}"
+                                   Text="Open an image to begin"
                                    HorizontalAlignment="Center"
-                                   Margin="0,18,0,0"
-                                   FontSize="20"
-                                   FontWeight="SemiBold" />
-                        <TextBlock Text="Drag a file here, browse from disk, then rename, review, rotate, or move through the folder without leaving the viewer."
-                                   Foreground="{StaticResource SubtextBrush}"
+                                   Margin="0,20,0,0" />
+                        <TextBlock Style="{StaticResource Text.Subtitle}"
+                                   Text="Drop a file anywhere in the window, or browse from disk. Navigate the folder, rename inline, and undo — without leaving the viewer."
                                    HorizontalAlignment="Center"
                                    TextAlignment="Center"
-                                   TextWrapping="Wrap"
-                                   LineHeight="20"
-                                   Margin="0,8,0,0"
-                                   FontSize="13" />
-                        <Button Content="Open image"
+                                   Margin="0,10,0,0"
+                                   MaxWidth="360" />
+                        <Button Content="Open image…"
                                 Command="{Binding OpenCommand}"
                                 Style="{StaticResource PrimaryButton}"
                                 HorizontalAlignment="Center"
-                                Margin="0,22,0,0"
-                                Padding="24,9"
-                                AutomationProperties.Name="Open image" />
+                                Margin="0,26,0,0"
+                                AutomationProperties.Name="Open image"
+                                AutomationProperties.HelpText="Choose an image file from disk" />
+                        <TextBlock Style="{StaticResource Text.Hint}"
+                                   Text="Tip — arrow keys browse the folder, Enter commits a rename."
+                                   HorizontalAlignment="Center"
+                                   Margin="0,18,0,0" />
                     </StackPanel>
                 </Border>
 
-                <!-- Decode error state -->
-                <Border HorizontalAlignment="Center"
+                <!-- Decode error state — semantic-red tinted card -->
+                <Border Style="{StaticResource ElevatedCard}"
+                        HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        MaxWidth="480"
-                        Padding="28,26"
-                        Background="{StaticResource PanelBrush}"
+                        MaxWidth="500"
+                        Background="{StaticResource DangerPanelBrush}"
                         BorderBrush="{StaticResource RedBrush}"
-                        BorderThickness="1"
-                        CornerRadius="14"
                         Visibility="{Binding HasLoadError, Converter={StaticResource BoolToVis}}">
                     <StackPanel>
                         <TextBlock Text="&#xE783;"
                                    FontFamily="Segoe MDL2 Assets"
-                                   FontSize="34"
+                                   FontSize="38"
                                    HorizontalAlignment="Center"
                                    Foreground="{StaticResource RedBrush}" />
-                        <TextBlock Text="This image could not be displayed"
-                                   Foreground="{StaticResource TextBrush}"
+                        <TextBlock Style="{StaticResource Text.Title}"
+                                   Text="This image couldn't be displayed"
                                    HorizontalAlignment="Center"
-                                   Margin="0,12,0,0"
-                                   FontSize="18"
-                                   FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding LoadErrorMessage}"
-                                   Foreground="{StaticResource SubtextBrush}"
+                                   Margin="0,14,0,0" />
+                        <TextBlock Style="{StaticResource Text.Subtitle}"
+                                   Text="{Binding LoadErrorMessage}"
                                    TextAlignment="Center"
-                                   TextWrapping="Wrap"
-                                   LineHeight="20"
-                                   Margin="0,8,0,0" />
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                                   Margin="0,10,0,0" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,22,0,0">
                             <Button Content="Try another image"
                                     Command="{Binding OpenCommand}"
                                     Style="{StaticResource PrimaryButton}"
-                                    Padding="18,8"
                                     AutomationProperties.Name="Try another image" />
                             <Button Content="Reveal file"
                                     Command="{Binding RevealCommand}"
                                     Style="{StaticResource ChromeButton}"
-                                    Margin="10,0,0,0"
-                                    Padding="18,8"
+                                    Margin="12,0,0,0"
                                     AutomationProperties.Name="Reveal current file in Explorer" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
 
                 <!-- Drag-and-drop confidence layer -->
-                <Border Margin="28"
+                <Border Margin="32"
                         Background="{StaticResource DropOverlayBrush}"
-                        BorderThickness="1.5"
-                        CornerRadius="18"
+                        BorderThickness="2"
+                        CornerRadius="{StaticResource Radius.Xl.CR}"
                         Visibility="{Binding IsDropTargetActive, Converter={StaticResource BoolToVis}}">
                     <Border.Style>
                         <Style TargetType="Border">
@@ -169,116 +129,114 @@
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <Grid>
-                        <Border Width="390"
-                                MaxWidth="390"
-                                Padding="28,24"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Background="{StaticResource ToastBrush}"
-                                BorderBrush="{StaticResource HairlineBrush}"
-                                BorderThickness="1"
-                                CornerRadius="14">
-                            <StackPanel>
-                                <TextBlock Text="{Binding IsDropAccepted, Converter={StaticResource DropAcceptedIcon}}"
-                                           FontFamily="Segoe MDL2 Assets"
-                                           FontSize="34"
-                                           HorizontalAlignment="Center">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsDropAccepted}" Value="True">
-                                                    <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                                <TextBlock Text="{Binding DropOverlayTitle}"
-                                           Foreground="{StaticResource TextBrush}"
-                                           HorizontalAlignment="Center"
-                                           TextAlignment="Center"
-                                           FontSize="19"
-                                           FontWeight="SemiBold"
-                                           Margin="0,12,0,0" />
-                                <TextBlock Text="{Binding DropOverlayMessage}"
-                                           Foreground="{StaticResource SubtextBrush}"
-                                           TextAlignment="Center"
-                                           TextWrapping="Wrap"
-                                           LineHeight="20"
-                                           Margin="0,7,0,0" />
-                            </StackPanel>
-                        </Border>
-                    </Grid>
+                    <Border Style="{StaticResource ElevatedCard}"
+                            Background="{StaticResource DropOverlayPanelBrush}"
+                            MaxWidth="420"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                        <StackPanel>
+                            <TextBlock Text="{Binding IsDropAccepted, Converter={StaticResource DropAcceptedIcon}}"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="38"
+                                       HorizontalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsDropAccepted}" Value="True">
+                                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource Text.Title}"
+                                       Text="{Binding DropOverlayTitle}"
+                                       HorizontalAlignment="Center"
+                                       TextAlignment="Center"
+                                       Margin="0,14,0,0" />
+                            <TextBlock Style="{StaticResource Text.Subtitle}"
+                                       Text="{Binding DropOverlayMessage}"
+                                       TextAlignment="Center"
+                                       Margin="0,8,0,0" />
+                        </StackPanel>
+                    </Border>
                 </Border>
 
-                <!-- Hover-reveal nav arrows (only when image present) -->
+                <!-- Floating chrome (only when an image is present) -->
                 <Grid Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}">
+
+                    <!-- Hover-reveal nav arrows -->
                     <Button x:Name="PrevArrow"
                             Style="{StaticResource NavArrowButton}"
                             Command="{Binding PrevCommand}"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
-                            Margin="18,0,0,0"
+                            Margin="22,0,0,0"
                             Content="&#xE76B;"
-                            FontFamily="Segoe MDL2 Assets"
-                            FontSize="20"
                             Opacity="0"
-                            AutomationProperties.Name="Previous image">
-                        <Button.Triggers>
-                            <EventTrigger RoutedEvent="Button.Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard />
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Button.Triggers>
-                    </Button>
+                            AutomationProperties.Name="Previous image"
+                            AutomationProperties.HelpText="Left arrow or Backspace" />
                     <Button x:Name="NextArrow"
                             Style="{StaticResource NavArrowButton}"
                             Command="{Binding NextCommand}"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
-                            Margin="0,0,18,0"
+                            Margin="0,0,22,0"
                             Content="&#xE76C;"
-                            FontFamily="Segoe MDL2 Assets"
-                            FontSize="20"
                             Opacity="0"
-                            AutomationProperties.Name="Next image" />
+                            AutomationProperties.Name="Next image"
+                            AutomationProperties.HelpText="Right arrow or Space" />
 
-                    <!-- Position chip -->
-                    <Border HorizontalAlignment="Center"
+                    <!-- Position chip — elevated pill -->
+                    <Border Style="{StaticResource FloatingPill}"
+                            HorizontalAlignment="Center"
                             VerticalAlignment="Top"
-                            Margin="0,16,0,0"
-                            Background="{StaticResource FloatingChromeBrush}"
-                            BorderBrush="{StaticResource FloatingChromeBorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="14"
-                            Padding="12,6">
+                            Margin="0,20,0,0"
+                            AutomationProperties.LiveSetting="Polite"
+                            AutomationProperties.Name="Folder position">
                         <TextBlock Text="{Binding PositionText}"
-                                   Foreground="#FFEAEAEA"
-                                   FontSize="12" />
+                                   Foreground="{StaticResource FloatingChromeTextBrush}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold" />
                     </Border>
 
-                    <!-- Toast notification -->
-                    <Border HorizontalAlignment="Center"
+                    <!-- Toast notification — elevated pill, fades on show via Opacity trigger -->
+                    <Border x:Name="ToastHost"
+                            HorizontalAlignment="Center"
                             VerticalAlignment="Bottom"
-                            Margin="0,0,0,80"
-                            Background="{StaticResource ToastBrush}"
-                            BorderBrush="{StaticResource AccentBrush}"
-                            BorderThickness="1"
-                            CornerRadius="10"
-                            Padding="14,10"
-                            Visibility="{Binding ToastMessage, Converter={StaticResource BoolToVis}}">
+                            Margin="0,0,0,88"
+                            Visibility="{Binding ToastMessage, Converter={StaticResource BoolToVis}}"
+                            AutomationProperties.LiveSetting="Polite">
+                        <Border.Style>
+                            <Style TargetType="Border" BasedOn="{StaticResource Toast}">
+                                <Setter Property="Opacity" Value="0" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsVisible" Value="True">
+                                        <Trigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                     From="0" To="1"
+                                                                     Duration="{StaticResource Motion.Base}">
+                                                        <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut" /></DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </Trigger.EnterActions>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE930;"
                                        FontFamily="Segoe MDL2 Assets"
                                        FontSize="13"
                                        Foreground="{StaticResource AccentBrush}"
                                        VerticalAlignment="Center"
-                                       Margin="0,0,9,0" />
+                                       Margin="0,0,10,0" />
                             <TextBlock Text="{Binding ToastMessage}"
-                                       Foreground="#FFEAEAEA"
+                                       Foreground="{StaticResource FloatingChromeTextBrush}"
                                        FontSize="13"
                                        VerticalAlignment="Center" />
                         </StackPanel>
@@ -286,25 +244,25 @@
                 </Grid>
             </Grid>
 
-            <!-- Bottom toolbar (Win7-style row) -->
+            <!-- Bottom toolbar — premium horizontal chrome bar -->
             <Border Grid.Row="1"
                     Background="{StaticResource MantleBrush}"
-                    BorderBrush="{StaticResource Surface0Brush}"
+                    BorderBrush="{StaticResource HairlineBrush}"
                     BorderThickness="0,1,0,0">
-                <Grid Margin="14,9">
+                <Grid Margin="20,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- Left: info -->
+                    <!-- Left: current file info -->
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="{Binding CurrentFileName}"
                                    Foreground="{StaticResource TextBrush}"
                                    FontWeight="SemiBold"
                                    FontSize="13"
-                                   MaxWidth="280"
+                                   MaxWidth="300"
                                    TextTrimming="CharacterEllipsis"
                                    VerticalAlignment="Center" />
                         <TextBlock Text="  ·  "
@@ -321,50 +279,48 @@
                                    VerticalAlignment="Center" />
                     </StackPanel>
 
-                    <!-- Center: primary controls (Win7 layout: prev, rotate-l, play, rotate-r, next, delete) -->
+                    <!-- Center: primary nav + rotate + delete cluster -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrevCommand}"     Content="&#xE76B;" ToolTip="Previous (Left)" AutomationProperties.Name="Previous image" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCcwCommand}" Content="&#xE7AD;" ToolTip="Rotate left" Margin="6,0,0,0" AutomationProperties.Name="Rotate left" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenCommand}"      Content="&#xE8E5;" ToolTip="Open…" Margin="6,0,0,0" AutomationProperties.Name="Open image" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCwCommand}"  Content="&#xE7AC;" ToolTip="Rotate right" Margin="6,0,0,0" AutomationProperties.Name="Rotate right" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding NextCommand}"      Content="&#xE76C;" ToolTip="Next (Right)" Margin="6,0,0,0" AutomationProperties.Name="Next image" />
-                        <Border Width="1" Background="{StaticResource Surface1Brush}" Margin="10,4" />
+                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCcwCommand}" Content="&#xE7AD;" ToolTip="Rotate left" Margin="4,0,0,0" AutomationProperties.Name="Rotate left" />
+                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenCommand}"      Content="&#xE8E5;" ToolTip="Open…" Margin="4,0,0,0" AutomationProperties.Name="Open image" />
+                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCwCommand}"  Content="&#xE7AC;" ToolTip="Rotate right" Margin="4,0,0,0" AutomationProperties.Name="Rotate right" />
+                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding NextCommand}"      Content="&#xE76C;" ToolTip="Next (Right)" Margin="4,0,0,0" AutomationProperties.Name="Next image" />
+                        <Border Width="1" Background="{StaticResource HairlineBrush}" Margin="14,6" />
                         <Button Style="{StaticResource ToolbarButton}" Command="{Binding DeleteCommand}"    Content="&#xE74D;" ToolTip="Delete (Recycle Bin)" AutomationProperties.Name="Send image to Recycle Bin" />
                     </StackPanel>
 
-                    <!-- Right: utility -->
+                    <!-- Right: utility cluster -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}"  Content="&#xE838;" ToolTip="Reveal in Explorer" AutomationProperties.Name="Reveal image in Explorer" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="Copy path" Margin="6,0,0,0" AutomationProperties.Name="Copy file path" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding RefreshCommand}"  Content="&#xE72C;" ToolTip="Refresh folder (F5)" Margin="6,0,0,0" AutomationProperties.Name="Refresh folder" />
+                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}"   Content="&#xE838;" ToolTip="Reveal in Explorer" AutomationProperties.Name="Reveal image in Explorer" />
+                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="Copy path" Margin="4,0,0,0" AutomationProperties.Name="Copy file path" />
+                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding RefreshCommand}"  Content="&#xE72C;" ToolTip="Refresh folder (F5)" Margin="4,0,0,0" AutomationProperties.Name="Refresh folder" />
                     </StackPanel>
                 </Grid>
             </Border>
         </Grid>
 
-        <!-- ============ RIGHT: Rename panel ============ -->
+        <!-- ============ RIGHT: Rename + Recent + Details panel ============ -->
         <Border Grid.Column="1"
                 Background="{StaticResource MantleBrush}"
-                BorderBrush="{StaticResource Surface0Brush}"
+                BorderBrush="{StaticResource HairlineBrush}"
                 BorderThickness="1,0,0,0">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
-                <StackPanel Margin="18">
+                <StackPanel Margin="22,22,22,28">
 
-                    <StackPanel Margin="0,0,0,18">
-                        <TextBlock Text="Images"
-                                   FontSize="22"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextBrush}" />
-                        <TextBlock Text="Review, rename, and move through a folder without breaking flow."
-                                   Foreground="{StaticResource SubtextBrush}"
-                                   TextWrapping="Wrap"
-                                   LineHeight="19"
-                                   Margin="0,5,0,0" />
+                    <!-- Panel header -->
+                    <StackPanel Margin="0,0,0,22">
+                        <TextBlock Style="{StaticResource Text.Display}"
+                                   Text="Images" />
+                        <TextBlock Style="{StaticResource Text.Subtitle}"
+                                   Text="Review, rename, and move through a folder without breaking flow."
+                                   Margin="0,6,0,0" />
                     </StackPanel>
 
-                    <TextBlock Text="RENAME" Style="{StaticResource SectionLabel}" />
+                    <!-- RENAME section -->
+                    <TextBlock Text="Rename" Style="{StaticResource SectionLabel}" />
 
-                    <!-- Stem + extension chip, side by side -->
+                    <!-- Stem editor + locked extension chip -->
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -378,21 +334,21 @@
                                  PreviewKeyDown="StemEditor_PreviewKeyDown"
                                  AutomationProperties.Name="File name without extension" />
                         <Button Grid.Column="1"
-                                Margin="8,0,0,0"
-                                Padding="10,0"
-                                MinWidth="64"
-                                Height="34"
+                                Margin="10,0,0,0"
+                                Padding="11,0"
+                                MinWidth="68"
+                                Height="36"
                                 Command="{Binding UnlockExtensionCommand}"
                                 IsEnabled="{Binding HasImage}"
                                 Style="{StaticResource ChromeButton}"
-                                ToolTip="Click to edit extension (normally locked)"
+                                ToolTip="Click to edit the extension (normally locked)"
                                 AutomationProperties.Name="Toggle extension editing">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE72E;"
                                            FontFamily="Segoe MDL2 Assets"
                                            FontSize="11"
                                            VerticalAlignment="Center"
-                                           Margin="0,0,6,0"
+                                           Margin="0,0,7,0"
                                            Foreground="{StaticResource SubtextBrush}"
                                            Visibility="{Binding IsExtensionUnlocked, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}" />
                                 <TextBlock Text="{Binding Extension}"
@@ -403,33 +359,29 @@
                         </Button>
                     </Grid>
 
-                    <!-- Extension unlocked warning + editor -->
-                    <Border Margin="0,10,0,0"
-                            Padding="11,9"
+                    <!-- Extension-unlocked warning + editor -->
+                    <Border Margin="0,12,0,0"
+                            Padding="13,11"
                             Background="{StaticResource WarningPanelBrush}"
                             BorderBrush="{StaticResource YellowBrush}"
                             BorderThickness="1"
-                            CornerRadius="8"
+                            CornerRadius="{StaticResource Radius.Sm.CR}"
                             Visibility="{Binding IsExtensionUnlocked, Converter={StaticResource BoolToVis}}">
                         <StackPanel>
-                        <TextBlock Text="Extension editing is unlocked. This renames the file only; it does not convert image data."
-                                   Foreground="{StaticResource YellowBrush}"
-                                   FontSize="12"
-                                   TextWrapping="Wrap" />
-                        <TextBox Text="{Binding Extension, UpdateSourceTrigger=PropertyChanged}"
-                                 Margin="0,6,0,0"
-                                 FontFamily="Consolas"
-                                 AutomationProperties.Name="File extension" />
+                            <TextBlock Text="Changing the extension renames the file — it won't convert the image."
+                                       Foreground="{StaticResource YellowBrush}"
+                                       FontSize="12"
+                                       LineHeight="17"
+                                       TextWrapping="Wrap" />
+                            <TextBox Text="{Binding Extension, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,8,0,0"
+                                     FontFamily="Consolas"
+                                     AutomationProperties.Name="File extension" />
                         </StackPanel>
                     </Border>
 
-                    <!-- Live preview + status -->
-                    <Border Margin="0,12,0,0"
-                            Padding="12,10"
-                            Background="{StaticResource SurfacePanelBrush}"
-                            BorderBrush="{StaticResource HairlineBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8">
+                    <!-- Live status card — preview + colored status dot -->
+                    <Border Style="{StaticResource Card}" Margin="0,14,0,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -461,46 +413,39 @@
                             <StackPanel Grid.Column="1">
                                 <TextBlock Text="{Binding RenameStatusText}"
                                            Foreground="{StaticResource TextBrush}"
-                                           FontSize="12"
+                                           FontSize="12.5"
                                            FontWeight="SemiBold" />
                                 <TextBlock Text="{Binding RenamePreview}"
                                            Foreground="{StaticResource SubtextBrush}"
                                            FontSize="12"
-                                           Margin="0,2,0,0"
+                                           Margin="0,3,0,0"
                                            TextTrimming="CharacterEllipsis" />
                             </StackPanel>
                         </Grid>
                     </Border>
 
-                    <TextBlock Text="Renames save automatically after a short pause. Enter saves immediately; Esc reverts the edit."
-                               Foreground="{StaticResource OverlayBrush}"
-                               FontSize="11"
-                               Margin="0,8,0,0"
-                               TextWrapping="Wrap"
-                               LineHeight="16" />
+                    <TextBlock Style="{StaticResource Text.Hint}"
+                               Text="Renames save on pause. Enter commits now · Esc reverts."
+                               Margin="1,10,0,0" />
 
-                    <!-- Divider -->
-                    <Border Height="1" Background="{StaticResource Surface0Brush}" Margin="0,18,0,18" />
+                    <Border Style="{StaticResource Divider}" />
 
-                    <!-- Recent renames -->
-                    <TextBlock Text="RECENT RENAMES" Style="{StaticResource SectionLabel}" />
+                    <!-- RECENT RENAMES section -->
+                    <TextBlock Text="Recent renames" Style="{StaticResource SectionLabel}" />
 
-                    <Border Padding="12,11"
-                            Background="{StaticResource SurfacePanelBrush}"
-                            BorderBrush="{StaticResource HairlineBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8"
+                    <Border Style="{StaticResource Card}"
                             Visibility="{Binding RecentRenames.Count, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
                         <StackPanel>
-                            <TextBlock Text="No rename history yet"
+                            <TextBlock Text="No renames yet"
                                        Foreground="{StaticResource TextBrush}"
-                                       FontSize="12"
+                                       FontSize="12.5"
                                        FontWeight="SemiBold" />
-                            <TextBlock Text="Renames you make here will appear with one-click undo."
+                            <TextBlock Text="Your undo list will appear here."
                                        Foreground="{StaticResource OverlayBrush}"
                                        FontSize="12"
+                                       LineHeight="17"
                                        TextWrapping="Wrap"
-                                       Margin="0,3,0,0" />
+                                       Margin="0,4,0,0" />
                         </StackPanel>
                     </Border>
 
@@ -510,12 +455,9 @@
                                   AutomationProperties.Name="Recent renames">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="{StaticResource SurfacePanelBrush}"
-                                        BorderBrush="{StaticResource HairlineBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="8"
-                                        Padding="11,9"
-                                        Margin="0,0,0,7">
+                                <Border Style="{StaticResource Card}"
+                                        Padding="13,10"
+                                        Margin="0,0,0,8">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -526,7 +468,7 @@
                                                 <Run Text="{Binding FromPath, Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}"
                                                      Foreground="{StaticResource SubtextBrush}" />
                                             </TextBlock>
-                                            <TextBlock FontSize="12" TextTrimming="CharacterEllipsis">
+                                            <TextBlock FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,2,0,0">
                                                 <Run Text="→ " Foreground="{StaticResource OverlayBrush}" />
                                                 <Run Text="{Binding ToPath, Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}"
                                                      Foreground="{StaticResource TextBrush}" />
@@ -535,9 +477,10 @@
                                         <Button Grid.Column="1"
                                                 Content="Undo"
                                                 Style="{StaticResource ChromeButton}"
-                                                Padding="12,3"
+                                                Padding="14,4"
+                                                MinHeight="28"
                                                 VerticalAlignment="Center"
-                                                Margin="10,0,0,0"
+                                                Margin="12,0,0,0"
                                                 Command="{Binding DataContext.UndoRenameCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                 CommandParameter="{Binding}"
                                                 AutomationProperties.Name="Undo rename" />
@@ -547,13 +490,12 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
-                    <!-- Divider -->
-                    <Border Height="1" Background="{StaticResource Surface0Brush}" Margin="0,18,0,18" />
+                    <Border Style="{StaticResource Divider}" />
 
-                    <!-- Metadata -->
-                    <TextBlock Text="DETAILS" Style="{StaticResource SectionLabel}" />
+                    <!-- DETAILS section -->
+                    <TextBlock Text="Details" Style="{StaticResource SectionLabel}" />
 
-                    <Grid Margin="2,0,0,0">
+                    <Grid Margin="1,0,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
@@ -565,17 +507,17 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Folder" Style="{StaticResource MetaLabel}" />
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentFolder}" Style="{StaticResource MetaValue}" />
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Folder"  Style="{StaticResource MetaLabel}" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentFolder}"   Style="{StaticResource MetaValue}" ToolTip="{Binding CurrentFolder}" />
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Size" Style="{StaticResource MetaLabel}" />
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding FileSizeText}" Style="{StaticResource MetaValue}" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Size"    Style="{StaticResource MetaLabel}" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding FileSizeText}"    Style="{StaticResource MetaValue}" />
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Pixels" Style="{StaticResource MetaLabel}" />
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DimensionsText}" Style="{StaticResource MetaValue}" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Pixels"  Style="{StaticResource MetaLabel}" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DimensionsText}"  Style="{StaticResource MetaValue}" />
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="Decoder" Style="{StaticResource MetaLabel}" />
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DecoderUsed}" Style="{StaticResource MetaValue}" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DecoderUsed}"     Style="{StaticResource MetaValue}" />
                     </Grid>
 
                 </StackPanel>
