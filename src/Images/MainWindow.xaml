@@ -201,6 +201,47 @@
                                    FontWeight="SemiBold" />
                     </Border>
 
+                    <!-- First-run gesture hint — fades in + slides up, auto-dismisses after 2.4s -->
+                    <Border HorizontalAlignment="Center"
+                            VerticalAlignment="Bottom"
+                            Margin="0,0,0,144"
+                            Visibility="{Binding ShowGestureHint, Converter={StaticResource BoolToVis}}"
+                            IsHitTestVisible="False"
+                            AutomationProperties.LiveSetting="Polite">
+                        <Border.Style>
+                            <Style TargetType="Border" BasedOn="{StaticResource FloatingPill}">
+                                <Setter Property="Opacity" Value="0" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsVisible" Value="True">
+                                        <Trigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                     From="0" To="1"
+                                                                     Duration="{StaticResource Motion.Slow}">
+                                                        <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut" /></DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </Trigger.EnterActions>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE7A5;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="13"
+                                       Foreground="{StaticResource AccentBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,10,0" />
+                            <TextBlock Text="Scroll to zoom  ·  drag to pan  ·  double-click to fit"
+                                       Foreground="{StaticResource FloatingChromeTextBrush}"
+                                       FontSize="12"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+
                     <!-- Toast notification — elevated pill, fades on show via Opacity trigger -->
                     <Border x:Name="ToastHost"
                             HorizontalAlignment="Center"
@@ -244,12 +285,20 @@
                 </Grid>
             </Grid>
 
-            <!-- Bottom toolbar — premium horizontal chrome bar -->
-            <Border Grid.Row="1"
-                    Background="{StaticResource MantleBrush}"
-                    BorderBrush="{StaticResource HairlineBrush}"
-                    BorderThickness="0,1,0,0">
-                <Grid Margin="20,12">
+            <!-- Bottom toolbar — premium horizontal chrome bar with 1-px top highlight -->
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <!-- Subtle top highlight: sits just inside the divider line, gives the toolbar a
+                     gently lit edge like polished macOS / Win11 chrome. -->
+                <Border Grid.Row="0" Height="1" Background="#12CDD6F4" />
+                <Border Grid.Row="1"
+                        Background="{StaticResource MantleBrush}"
+                        BorderBrush="{StaticResource HairlineBrush}"
+                        BorderThickness="0,1,0,0">
+                    <Grid Margin="20,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -296,8 +345,9 @@
                         <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="Copy path" Margin="4,0,0,0" AutomationProperties.Name="Copy file path" />
                         <Button Style="{StaticResource ToolbarButton}" Command="{Binding RefreshCommand}"  Content="&#xE72C;" ToolTip="Refresh folder (F5)" Margin="4,0,0,0" AutomationProperties.Name="Refresh folder" />
                     </StackPanel>
-                </Grid>
-            </Border>
+                    </Grid>
+                </Border>
+            </Grid>
         </Grid>
 
         <!-- ============ RIGHT: Rename + Recent + Details panel ============ -->
@@ -388,7 +438,13 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <Ellipse Grid.Column="0">
+                            <!-- Status dot: color transitions are DataTrigger SolidColorBrush swaps.
+                                 The success-pulse ScaleTransform grows on 'Saved' via a triggered
+                                 storyboard so a rename commit feels confirmed, not silent. -->
+                            <Ellipse Grid.Column="0" RenderTransformOrigin="0.5,0.5">
+                                <Ellipse.RenderTransform>
+                                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                                </Ellipse.RenderTransform>
                                 <Ellipse.Style>
                                     <Style TargetType="Ellipse" BasedOn="{StaticResource StatusDot}">
                                         <Setter Property="Fill" Value="{StaticResource OverlayBrush}" />
@@ -398,6 +454,26 @@
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding RenameStatus}" Value="Saved">
                                                 <Setter Property="Fill" Value="{StaticResource GreenBrush}" />
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <!-- Walk the RenderTransform path so the animation resolves on the triggered
+                                                                 Ellipse itself; style-scoped TargetName can't reach a templated child. -->
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                                             From="1" To="1.5"
+                                                                             AutoReverse="True"
+                                                                             Duration="{StaticResource Motion.Base}">
+                                                                <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut" /></DoubleAnimation.EasingFunction>
+                                                            </DoubleAnimation>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                                             From="1" To="1.5"
+                                                                             AutoReverse="True"
+                                                                             Duration="{StaticResource Motion.Base}">
+                                                                <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut" /></DoubleAnimation.EasingFunction>
+                                                            </DoubleAnimation>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.EnterActions>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding RenameStatus}" Value="Conflict">
                                                 <Setter Property="Fill" Value="{StaticResource MauveBrush}" />
@@ -455,7 +531,7 @@
                                   AutomationProperties.Name="Recent renames">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Style="{StaticResource Card}"
+                                <Border Style="{StaticResource InteractiveCard}"
                                         Padding="13,10"
                                         Margin="0,0,0,8">
                                     <Grid>
@@ -517,7 +593,15 @@
                         <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DimensionsText}"  Style="{StaticResource MetaValue}" />
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="Decoder" Style="{StaticResource MetaLabel}" />
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DecoderUsed}"     Style="{StaticResource MetaValue}" />
+                        <Border Grid.Row="3" Grid.Column="1"
+                                Style="{StaticResource Badge}"
+                                Margin="0,0,0,10"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding DecoderUsed}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource SubtextBrush}" />
+                        </Border>
                     </Grid>
 
                 </StackPanel>
