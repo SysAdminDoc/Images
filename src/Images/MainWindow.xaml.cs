@@ -91,12 +91,31 @@ public partial class MainWindow : Window
 
     private void Window_DragOver(object sender, DragEventArgs e)
     {
-        e.Effects = GetDroppedPath(e) is not null ? DragDropEffects.Copy : DragDropEffects.None;
+        var accepted = GetDroppedPath(e) is not null;
+        Vm.IsDropTargetActive = true;
+        Vm.IsDropAccepted = accepted;
+        e.Effects = accepted ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void Window_DragEnter(object sender, DragEventArgs e)
+    {
+        var accepted = GetDroppedPath(e) is not null;
+        Vm.IsDropTargetActive = true;
+        Vm.IsDropAccepted = accepted;
+        e.Effects = accepted ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void Window_DragLeave(object sender, DragEventArgs e)
+    {
+        Vm.IsDropTargetActive = false;
         e.Handled = true;
     }
 
     private void Window_Drop(object sender, DragEventArgs e)
     {
+        Vm.IsDropTargetActive = false;
         var path = GetDroppedPath(e);
         if (path is null) return;
         Vm.OpenFile(path);

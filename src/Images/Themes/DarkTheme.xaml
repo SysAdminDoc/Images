@@ -6,6 +6,7 @@
 
     <!-- Converters (global, reusable from any view) -->
     <vm:BooleanToVisibilityConverter x:Key="BoolToVis" />
+    <vm:DropAcceptedIconConverter x:Key="DropAcceptedIcon" />
 
     <!-- Catppuccin Mocha palette -->
     <Color x:Key="BaseColor">#FF1E1E2E</Color>
@@ -48,6 +49,7 @@
     <SolidColorBrush x:Key="ToastBrush" Color="#E611111B" />
     <SolidColorBrush x:Key="WarningPanelBrush" Color="#22F9E2AF" />
     <SolidColorBrush x:Key="FocusRingBrush" Color="#CC89B4FA" />
+    <SolidColorBrush x:Key="DropOverlayBrush" Color="#D911111B" />
 
     <!-- Base text defaults -->
     <Style TargetType="Window">

@@ -114,6 +114,32 @@ public sealed class MainViewModel : ObservableObject
 
     public bool HasLoadError => !string.IsNullOrWhiteSpace(LoadErrorMessage);
 
+    private bool _isDropTargetActive;
+    public bool IsDropTargetActive
+    {
+        get => _isDropTargetActive;
+        set => Set(ref _isDropTargetActive, value);
+    }
+
+    private bool _isDropAccepted;
+    public bool IsDropAccepted
+    {
+        get => _isDropAccepted;
+        set
+        {
+            if (Set(ref _isDropAccepted, value))
+            {
+                Raise(nameof(DropOverlayTitle));
+                Raise(nameof(DropOverlayMessage));
+            }
+        }
+    }
+
+    public string DropOverlayTitle => IsDropAccepted ? "Drop to open image" : "Unsupported file";
+    public string DropOverlayMessage => IsDropAccepted
+        ? "Images will load this file and scan the folder for navigation."
+        : "Drop a supported image file such as JPG, PNG, WEBP, HEIC, AVIF, TIFF, PSD, or RAW.";
+
     private int _pixelWidth;
     public int PixelWidth { get => _pixelWidth; private set { if (Set(ref _pixelWidth, value)) Raise(nameof(DimensionsText)); } }
 
