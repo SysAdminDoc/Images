@@ -93,6 +93,7 @@ public sealed class MainViewModel : ObservableObject
                 Raise(nameof(CurrentFolder));
                 Raise(nameof(PositionText));
                 Raise(nameof(IsViewerEmpty));
+                Raise(nameof(WindowTitle));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -113,6 +114,11 @@ public sealed class MainViewModel : ObservableObject
     }
     public string CurrentFileName => CurrentPath is null ? "" : Path.GetFileName(CurrentPath);
     public string CurrentFolder => CurrentPath is null ? "" : Path.GetDirectoryName(CurrentPath) ?? "";
+
+    // Window title — filename first (Windows convention), app name second, em-dash separator.
+    // Falls back to bare "Images" when no file is open.
+    public string WindowTitle =>
+        CurrentPath is null ? "Images" : $"{Path.GetFileName(CurrentPath)} — Images";
 
     private string? _loadErrorMessage;
     public string? LoadErrorMessage
