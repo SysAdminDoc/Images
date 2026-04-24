@@ -1,0 +1,184 @@
+# Windows Image Viewer Landscape Research - Feature Harvest (Iteration 1)
+
+## (1) Direct OSS Competitors - Feature Candidates
+
+- Cross-platform support (Windows, macOS, Linux) using Avalonia UI. Provenance: ImageGlass 10.
+- Redesigned slideshow mode with explicit controls and improved logic for massive collections. Provenance: ImageGlass 10.
+- Asynchronous I/O pipeline for fast image navigation without UI lag. Provenance: ImageGlass 10.
+- Fluid panning & zooming for high-resolution images. Provenance: ImageGlass 10.
+- Dependency: SkiaSharp for modern rendering. Provenance: ImageGlass 10.
+- Dependency: Magick.NET for modern rendering. Provenance: ImageGlass 10.
+- Technology: Complete rewrite to modern .NET stack. Provenance: ImageGlass 10.
+- Multi-platform support (Windows, Linux, macOS, FreeBSD, OS/2). Provenance: nomacs.
+- Support for RAW and PSD image formats. Provenance: nomacs.
+- Synchronize multiple viewer instances for comparing images (zoom/pan). Provenance: nomacs.
+- Basic image manipulation (brightness, contrast, saturation, hue, gamma, exposure). Provenance: nomacs.
+- Browse images directly within ZIP archives or MS Office files. Provenance: nomacs.
+- Semi-transparent widgets for thumbnails, metadata (EXIF), and histograms. Provenance: nomacs.
+- File filtering within a directory using strings or regular expressions. Provenance: nomacs.
+- Pattern: Open Source, licensed under GNU GPL v3. Provenance: nomacs.
+- Minimalist interface with no toolbars, focusing on the image. Provenance: qView.
+- Fast and lightweight with low memory/CPU usage for quick image switching. Provenance: qView.
+- Animated GIF controls (pause, speed up/down). Provenance: qView.
+- Multithreaded preloading for smooth transitions. Provenance: qView.
+- Image manipulation (rotation, mirroring, flipping). Provenance: qView.
+- Slideshow mode. Provenance: qView.
+- Open images directly from URLs. Provenance: qView.
+- Highly configurable zoom behavior, navigation, and keyboard shortcuts. Provenance: qView.
+- Broad image format compatibility (JPG, PNG, GIF, BMP, TIFF, WebP). Provenance: qView.
+- Cross-platform (Windows, macOS, Linux). Provenance: qView.
+- Pattern: Free and Open Source, licensed under GPLv3, built with Qt. Provenance: qView.
+- High performance utilizing SSE2 and up to 4 CPU cores. Provenance: JPEGView.
+- Minimalist GUI with controls appearing on hover. Provenance: JPEGView.
+- Real-time image processing (sharpness, color balance, rotation, contrast, exposure). Provenance: JPEGView.
+- Wide format support including JPEG, BMP, PNG, WEBP, TGA, GIF, TIFF, and Camera RAW (DNG, CR2, NEF). Provenance: JPEGView.
+- "Movie Mode" to play a folder of JPEGs as a video. Provenance: JPEGView.
+- Advanced tools like batch renaming and EXIF date changing. Provenance: JPEGView.
+- High-quality resampling filter. Provenance: JPEGView.
+- Pattern: Portable application, configurable via `.ini` files. Provenance: JPEGView.
+- Full-screen viewer with unique fly-out menu panels. Provenance: FastStone Image Viewer.
+- Extensive editing tools (resize, resample, rotate, flip, crop, sharpen, blur, color adjustments, curves/levels). Provenance: FastStone Image Viewer.
+- Image effects (annotation, drop shadow, framing, bump map, sketch, oil painting, lens). Provenance: FastStone Image Viewer.
+- Image tagging, drag-and-drop, and "Copy To/Move To Folder" functionality. Provenance: FastStone Image Viewer.
+- Batch convert and batch rename tools. Provenance: FastStone Image Viewer.
+- Side-by-side image comparison (up to 4 images). Provenance: FastStone Image Viewer.
+- Slideshow with 150+ transition effects and music support (MP3, WMA, WAV). Provenance: FastStone Image Viewer.
+- Supports major graphic formats including RAW. Provenance: FastStone Image Viewer.
+- Screen capture capability. Provenance: FastStone Image Viewer.
+- "Draw Board" for adding text, lines, shapes. Provenance: FastStone Image Viewer.
+- Pattern: Free for personal/educational use, commercial license required. Provenance: FastStone Image Viewer.
+- Wide format support: JPG, PNG, BMP, GIF, PSD, RAW (DNG, CR2, NEF), animated (WebP, GIF, PNG). Provenance: Honeyview.
+- View images directly inside compressed files (ZIP, RAR, 7Z, LZH, TAR, CBR, CBZ). Provenance: Honeyview.
+- High-speed performance for rapid image loading and navigation. Provenance: Honeyview.
+- Displays detailed EXIF metadata. Provenance: Honeyview.
+- Displays GPS information on Google Maps if present in EXIF. Provenance: Honeyview.
+- Batch image format conversion. Provenance: Honeyview.
+- Batch image resizing. Provenance: Honeyview.
+- Customizable slideshow with transition effects. Provenance: Honeyview.
+- Basic image rotation and resizing. Provenance: Honeyview.
+- Pattern: No longer actively updated (succeeded by BandiView). Provenance: Honeyview.
+- High performance with image preloading for smooth browsing. Provenance: Pictus.
+- Minimalist and uncluttered UI. Provenance: Pictus.
+- Wide format support including BMP, GIF, JPG, PCX, PNG, PSD, PSP, TGA, TIFF, WBMP, WEBP, XYZ. Provenance: Pictus.
+- Windows Explorer integration with shell extension for thumbnail display of supported formats (including PSD). Provenance: Pictus.
+- Basic real-time color adjustments (brightness, contrast, gamma) and rotation. Provenance: Pictus.
+- Highly customizable keyboard and mouse controls. Provenance: Pictus.
+- Automatic handling of EXIF orientation data. Provenance: Pictus.
+- Pattern: Open-source. Provenance: Pictus.
+- Wide format support including HDR, EXR, SVG, PSD, DDS, TGA, and various RAW formats. Provenance: Oculante.
+- Image analysis: pixel information (position, RGBA), color histograms, color picker. Provenance: Oculante.
+- Non-destructive editing (cropping, resizing, rotating, blurring, painting) via a tool stack. Provenance: Oculante.
+- Lossless JPEG editing (cropping, rotating, mirroring). Provenance: Oculante.
+- Hardware acceleration (GPU) for fast rendering and smooth zooming/panning. Provenance: Oculante.
+- Built-in file manager with sidebar, directory browsing, favorites, quick switching. Provenance: Oculante.
+- Image comparison mode (flip between two images with synchronized zoom/position). Provenance: Oculante.
+- Network Listen Mode to receive and display images over a network port. Provenance: Oculante.
+- Cross-platform (Windows, macOS, Linux, FreeBSD, NetBSD). Provenance: Oculante.
+- Pattern: Free and open-source, written in Rust. Provenance: Oculante.
+- Pattern: Privacy-focused (no data collection, ads, telemetry). Provenance: Oculante.
+- Multi-threaded for high performance with multicore CPUs (macOS only). Provenance: Lyn.
+- Non-destructive color editing (exposure, brightness, contrast, curves, levels) via dedicated inspector (macOS only). Provenance: Lyn.
+- Native support for standard, RAW, HDR, HEIC, WebP, animated GIFs (macOS only). Provenance: Lyn.
+- Integration with Apple Photos, Lightroom, Aperture libraries (macOS only). Provenance: Lyn.
+- Geotagging with map layout and drag-and-drop location editing (macOS only). Provenance: Lyn.
+- Viewing and editing EXIF, IPTC, GPS metadata (macOS only). Provenance: Lyn.
+- Built-in sharing options (Flickr, Dropbox, SmugMug) (macOS only). Provenance: Lyn.
+- Integrated movie player and simple PDF viewer (macOS only). Provenance: Lyn.
+- Batch processing (rename/convert) (macOS only). Provenance: Lyn.
+- Smart Folders for organization (macOS only). Provenance: Lyn.
+- Supports over 500 image formats (RAW, HEIC, WebP, OpenEXR, PDF). Provenance: XnView MP.
+- Multiple viewing modes: Thumbnail, Full-Screen, Filmstrip, Side-by-Side comparison. Provenance: XnView MP.
+- View and edit EXIF, IPTC, XMP metadata. Provenance: XnView MP.
+- Basic editing (resizing, cropping, rotating, lossless JPEG rotation). Provenance: XnView MP.
+- Adjustments (brightness, contrast, gamma, color depth). Provenance: XnView MP.
+- Image filters and effects. Provenance: XnView MP.
+- Duplicate file finder. Provenance: XnView MP.
+- Category-based image management. Provenance: XnView MP.
+- Powerful batch conversion (resize, filters) module. Provenance: XnView MP.
+- Batch renaming with customizable templates. Provenance: XnView MP.
+- Create slideshows, contact sheets, image strips. Provenance: XnView MP.
+- Generate HTML web galleries. Provenance: XnView MP.
+- Create video frame thumbnails/contact sheets. Provenance: XnView MP.
+- Cross-platform (Windows, macOS, Linux). Provenance: XnView MP.
+- Pattern: Free for private, educational, non-profit use; commercial license required. Provenance: XnView MP.
+
+## (2) Commercial - Feature Candidates
+
+- AI-powered Generative Erase to remove distractions. Provenance: Windows Photos.
+- AI-powered Background Blur & Removal/Replacement. Provenance: Windows Photos.
+- Microsoft Designer integration for advanced AI image editing. Provenance: Windows Photos.
+- Multi-source gallery consolidating photos from PC, OneDrive, iCloud, mobile devices. Provenance: Windows Photos.
+- Seamless importing from cameras, phones, external drives. Provenance: Windows Photos.
+- "Memories" feature for automatically generated compilations. Provenance: Windows Photos.
+- Search and filter photos by date, folder, source. Provenance: Windows Photos.
+- Dynamic zoom (10% to 800%). Provenance: Windows Photos.
+- Display of metadata (file size, dimensions). Provenance: Windows Photos.
+- Multi-view for side-by-side image comparison. Provenance: Windows Photos.
+- OCR (Optical Character Recognition) to copy text from images. Provenance: Windows Photos.
+- Markup tools for drawing, highlighting, notes. Provenance: Windows Photos.
+- Desktop-optimized workflow for local storage and performance. Provenance: Lightroom Classic.
+- Advanced AI-powered masking for subject, sky, and background selection. Provenance: Lightroom Classic.
+- Content-Aware Remove for object removal. Provenance: Lightroom Classic.
+- AI-powered Lens Blur for realistic bokeh effects. Provenance: Lightroom Classic.
+- Faster preview generation and smoother slider interactions (performance improvement). Provenance: Lightroom Classic.
+- Robust catalog system with folders, collections, and smart keywords for organization. Provenance: Lightroom Classic.
+- Pattern: Digital Asset Management (DAM) system with integrated editing. Provenance: Lightroom Classic.
+- Fast and compact (small footprint). Provenance: IrfanView.
+- Extensive format support for image, video, and audio. Provenance: IrfanView.
+- Batch conversion and renaming. Provenance: IrfanView.
+- Lossless JPG rotation, cropping, color depth changes, basic painting. Provenance: IrfanView.
+- Support for Adobe Photoshop filters. Provenance: IrfanView.
+- Multipage TIF editing. Provenance: IrfanView.
+- Shell extensions. Provenance: IrfanView.
+- Built-in video and audio player. Provenance: IrfanView.
+- Pattern: Freeware for non-commercial, private, and educational use. Provenance: IrfanView.
+
+## (3) Adjacent - Feature Candidates
+
+- Pattern: Real-time side-by-side comparison slider for image compression/quality. Provenance: Squoosh (converter UX).
+- Feature: Advanced codec support for optimization (AVIF, WebP, MozJPEG, OxiPNG). Provenance: Squoosh (converter UX).
+- Pattern: 100% local processing (no server upload) for privacy. Provenance: Squoosh (converter UX).
+- Pattern: Offline functionality (PWA). Provenance: Squoosh (converter UX).
+- Feature: Granular compression controls (quality, effort, color palette reduction). Provenance: Squoosh (converter UX).
+- Feature: Built-in resize and crop tools. Provenance: Squoosh (converter UX).
+- Pattern: Instant feedback on output file size and reduction percentage. Provenance: Squoosh (converter UX).
+- Feature: Non-destructive editing (changes stored in XMP sidecars and database). Provenance: darktable (DAM).
+- Feature: High precision with 4x32-bit floating point pixel buffers. Provenance: darktable (DAM).
+- Feature: GPU acceleration via OpenCL for image processing. Provenance: darktable (DAM).
+- Feature: Professional color management with automatic display profile detection and ICC support. Provenance: darktable (DAM).
+- Feature: Cross-platform (Linux, macOS, Windows, BSD, Solaris). Provenance: darktable (DAM).
+- Feature: Filtering and sorting image collections by tags, ratings, color labels, metadata queries. Provenance: darktable (DAM).
+- Feature: Imports standard, RAW, and HDR formats. Provenance: darktable (DAM).
+- Feature: Zero-latency UI with multi-level software caches for fluid zooming. Provenance: darktable (DAM).
+- Feature: Tethered shooting with live view. Provenance: darktable (DAM).
+- Feature: Powerful export system to various formats and destinations (disk, email, Piwigo). Provenance: darktable (DAM).
+- Feature: Masking (drawn and parametric) for selective effects. Provenance: darktable (DAM).
+- Feature: Scripting capabilities using Lua. Provenance: darktable (DAM).
+- Feature: Geotagging with integrated map display. Provenance: darktable (DAM).
+- Feature: Organize photos into albums, sub-albums, and custom collections for large libraries (100,000+ images). Provenance: digiKam (DAM).
+- Feature: Full support for EXIF, IPTC, and XMP metadata. Provenance: digiKam (DAM).
+- Feature: AI-driven tagging and facial recognition. Provenance: digiKam (DAM).
+- Feature: Advanced image editor with color correction, sharpening, noise reduction, special effects, and 16-bit color depth. Provenance: digiKam (DAM).
+- Feature: Comprehensive RAW file support (1,000+ formats) via LibRaw library. Provenance: digiKam (DAM).
+- Feature: "Light Table" for side-by-side image comparison. Provenance: digiKam (DAM).
+- Feature: Batch Queue Manager for applying edits, renaming, conversions. Provenance: digiKam (DAM).
+- Feature: Geotagging with interactive map. Provenance: digiKam (DAM).
+- Feature: Plugin support for exporting to online services (Google Photos, Flickr, Imgur). Provenance: digiKam (DAM).
+- Dependency: LibRaw library for RAW support. Provenance: digiKam (DAM).
+- Feature: AI-powered image upscaling (up to 4x per pass, 16x with Double Upscayl) using Real-ESRGAN neural networks. Provenance: Upscayl (AI).
+- Feature: Local processing on GPU for privacy and offline capability. Provenance: Upscayl (AI).
+- Feature: Batch processing for multiple images or folders. Provenance: Upscayl (AI).
+- Feature: Multiple specialized AI models (UltraSharp, Remacri, High Fidelity, Ultramix Balanced). Provenance: Upscayl (AI).
+- Feature: Custom model support (NCNN-compatible). Provenance: Upscayl (AI).
+- Pattern: Side-by-side comparison slider for original and upscaled images. Provenance: Upscayl (AI).
+- Feature: Cross-platform (Windows, macOS, Linux). Provenance: Upscayl (AI).
+- Pattern: Optional cloud service (Upscayl Cloud) for faster processing. Provenance: Upscayl (AI).
+- Pattern: Visual node editor for building image processing pipelines. Provenance: chaiNNer (plugin host).
+- Feature: Leverage community-trained AI models with multiple backends (PyTorch, NCNN, ONNX, TensorRT). Provenance: chaiNNer (plugin host).
+- Feature: Comprehensive image processing operations (filters, color adjustments, transforms, blending, effects). Provenance: chaiNNer (plugin host).
+- Feature: Batch processing for folders of images/video frames, with CLI support. Provenance: chaiNNer (plugin host).
+- Feature: GPU acceleration for Nvidia, AMD, Apple Silicon, and Intel. Provenance: chaiNNer (plugin host).
+- Feature: Smart validation for node "chains." Provenance: chaiNNer (plugin host).
+- Feature: Self-contained (no existing Python required). Provenance: chaiNNer (plugin host).
+- Feature: Conditional logic (branching) in processing pipelines. Provenance: chaiNNer (plugin host).
+- Feature: Cross-platform (Windows, macOS, Linux). Provenance: chaiNNer (plugin host).
