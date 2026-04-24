@@ -41,6 +41,19 @@ public partial class MainWindow : Window
 
         switch (e.Key)
         {
+            case Key.Escape:
+                // A-03: Escape closes any active drop overlay and returns focus to the
+                // window shell. Rename-TextBox Escape is handled inside StemEditor_PreviewKeyDown
+                // and never reaches here because the TextBox owns focus.
+                if (Vm.IsDropTargetActive)
+                {
+                    Vm.IsDropTargetActive = false;
+                    Vm.IsDropAccepted = false;
+                }
+                Keyboard.ClearFocus();
+                Focus();
+                e.Handled = true;
+                break;
             case Key.Left:
             case Key.Back:
                 Vm.PrevCommand.Execute(null); e.Handled = true; break;
