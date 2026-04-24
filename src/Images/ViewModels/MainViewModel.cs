@@ -297,6 +297,12 @@ public sealed class MainViewModel : ObservableObject
         _toastTimer.Start();
     }
 
+    public void DismissToast()
+    {
+        _toastTimer.Stop();
+        ToastMessage = null;
+    }
+
     // -------------------- Commands --------------------
 
     public ICommand OpenCommand { get; }

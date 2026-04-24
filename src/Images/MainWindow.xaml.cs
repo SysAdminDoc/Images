@@ -22,13 +22,16 @@ public partial class MainWindow : Window
 
     public void OpenPath(string path) => Vm.OpenFile(path);
 
+    private static readonly CubicEase _easeOut = new() { EasingMode = EasingMode.EaseOut };
+
     private void FadeArrows(double target)
     {
         if (!Vm.HasImage) return;
         var anim = new DoubleAnimation
         {
             To = target,
-            Duration = TimeSpan.FromMilliseconds(180)
+            Duration = TimeSpan.FromMilliseconds(180),
+            EasingFunction = _easeOut,
         };
         PrevArrow.BeginAnimation(OpacityProperty, anim);
         NextArrow.BeginAnimation(OpacityProperty, anim);
@@ -42,13 +45,17 @@ public partial class MainWindow : Window
         switch (e.Key)
         {
             case Key.Escape:
-                // A-03: Escape closes any active drop overlay and returns focus to the
+                // A-03: Escape closes any active overlay / toast and returns focus to the
                 // window shell. Rename-TextBox Escape is handled inside StemEditor_PreviewKeyDown
                 // and never reaches here because the TextBox owns focus.
                 if (Vm.IsDropTargetActive)
                 {
                     Vm.IsDropTargetActive = false;
                     Vm.IsDropAccepted = false;
+                }
+                if (!string.IsNullOrEmpty(Vm.ToastMessage))
+                {
+                    Vm.DismissToast();
                 }
                 Keyboard.ClearFocus();
                 Focus();
