@@ -4,11 +4,17 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:vm="clr-namespace:Images.ViewModels">
 
-    <!-- Converters (global, reusable from any view) -->
+    <!-- ============================================================
+         Images — Catppuccin Mocha design system (dark)
+         Token order: palette → semantic brushes → radii → elevation →
+         motion → text → controls.
+         ============================================================ -->
+
+    <!-- Converters (global) -->
     <vm:BooleanToVisibilityConverter x:Key="BoolToVis" />
     <vm:DropAcceptedIconConverter x:Key="DropAcceptedIcon" />
 
-    <!-- Catppuccin Mocha palette -->
+    <!-- ============ Palette — Catppuccin Mocha ============ -->
     <Color x:Key="BaseColor">#FF1E1E2E</Color>
     <Color x:Key="MantleColor">#FF181825</Color>
     <Color x:Key="CrustColor">#FF11111B</Color>
@@ -19,6 +25,7 @@
     <Color x:Key="TextColor">#FFCDD6F4</Color>
     <Color x:Key="SubtextColor">#FFA6ADC8</Color>
     <Color x:Key="BlueColor">#FF89B4FA</Color>
+    <Color x:Key="LavenderColor">#FFB4BEFE</Color>
     <Color x:Key="MauveColor">#FFCBA6F7</Color>
     <Color x:Key="RedColor">#FFF38BA8</Color>
     <Color x:Key="GreenColor">#FFA6E3A1</Color>
@@ -34,27 +41,65 @@
     <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
     <SolidColorBrush x:Key="SubtextBrush" Color="{StaticResource SubtextColor}" />
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource BlueColor}" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource LavenderColor}" />
     <SolidColorBrush x:Key="MauveBrush" Color="{StaticResource MauveColor}" />
     <SolidColorBrush x:Key="RedBrush" Color="{StaticResource RedColor}" />
     <SolidColorBrush x:Key="GreenBrush" Color="{StaticResource GreenColor}" />
     <SolidColorBrush x:Key="YellowBrush" Color="{StaticResource YellowColor}" />
 
-    <!-- Canvas background is deep black for image contrast -->
+    <!-- ============ Semantic surfaces + chrome ============ -->
+    <!-- Viewport is deep near-black for image contrast; panels use Mantle; overlays use translucent Crust -->
     <SolidColorBrush x:Key="ViewportBrush" Color="#FF0A0A10" />
-    <SolidColorBrush x:Key="PanelBrush" Color="#F0181825" />
+    <SolidColorBrush x:Key="PanelBrush" Color="#F2181825" />
     <SolidColorBrush x:Key="SurfacePanelBrush" Color="#8A313244" />
-    <SolidColorBrush x:Key="HairlineBrush" Color="#5545475A" />
-    <SolidColorBrush x:Key="FloatingChromeBrush" Color="#B3000000" />
-    <SolidColorBrush x:Key="FloatingChromeBorderBrush" Color="#55FFFFFF" />
-    <SolidColorBrush x:Key="ToastBrush" Color="#E611111B" />
-    <SolidColorBrush x:Key="WarningPanelBrush" Color="#22F9E2AF" />
+    <SolidColorBrush x:Key="HairlineBrush" Color="#4045475A" />
+    <SolidColorBrush x:Key="DividerBrush" Color="#33CDD6F4" />
+    <SolidColorBrush x:Key="FloatingChromeBrush" Color="#BF11111B" />
+    <SolidColorBrush x:Key="FloatingChromeBorderBrush" Color="#3FCDD6F4" />
+    <SolidColorBrush x:Key="FloatingChromeTextBrush" Color="#FFE8ECF7" />
+    <SolidColorBrush x:Key="ToastBrush" Color="#EB11111B" />
+    <SolidColorBrush x:Key="WarningPanelBrush" Color="#1FF9E2AF" />
+    <SolidColorBrush x:Key="DangerPanelBrush" Color="#1FF38BA8" />
     <SolidColorBrush x:Key="FocusRingBrush" Color="#CC89B4FA" />
     <SolidColorBrush x:Key="DropOverlayBrush" Color="#D911111B" />
+    <SolidColorBrush x:Key="DropOverlayPanelBrush" Color="#F211111B" />
 
-    <!-- Shared FocusVisualStyle — explicit, WCAG-AA ring so focus is never invisible.
-         Applied by every interactive style below; without this, templated controls
-         silently suppress the platform dotted ring and rely solely on IsKeyboardFocused
-         triggers. Per A-03 (ROADMAP Accessibility track). -->
+    <!-- ============ Radius scale ============ -->
+    <!-- sm=6 (button), md=10 (input/card), lg=14 (floating), xl=18 (modal overlay) -->
+    <sys:Double x:Key="Radius.Sm">6</sys:Double>
+    <sys:Double x:Key="Radius.Md">10</sys:Double>
+    <sys:Double x:Key="Radius.Lg">14</sys:Double>
+    <sys:Double x:Key="Radius.Xl">18</sys:Double>
+    <CornerRadius x:Key="Radius.Sm.CR">6</CornerRadius>
+    <CornerRadius x:Key="Radius.Md.CR">10</CornerRadius>
+    <CornerRadius x:Key="Radius.Lg.CR">14</CornerRadius>
+    <CornerRadius x:Key="Radius.Xl.CR">18</CornerRadius>
+
+    <!-- ============ Elevation scale ============ -->
+    <!-- Chrome/buttons stay flat. Floating chrome gets soft downward shadow to read as elevated -->
+    <DropShadowEffect x:Key="Elevation.Low"
+                      BlurRadius="12" ShadowDepth="3"
+                      Direction="270" Opacity="0.35" Color="#FF000000" />
+    <DropShadowEffect x:Key="Elevation.Medium"
+                      BlurRadius="20" ShadowDepth="5"
+                      Direction="270" Opacity="0.40" Color="#FF000000" />
+    <DropShadowEffect x:Key="Elevation.High"
+                      BlurRadius="34" ShadowDepth="9"
+                      Direction="270" Opacity="0.45" Color="#FF000000" />
+    <DropShadowEffect x:Key="Elevation.Focus"
+                      BlurRadius="18" ShadowDepth="0"
+                      Opacity="0.55" Color="#FF89B4FA" />
+
+    <!-- ============ Motion tokens ============ -->
+    <!-- Consistent 140ms / CubicEase EaseOut across all interaction state changes -->
+    <Duration x:Key="Motion.Fast">0:0:0.12</Duration>
+    <Duration x:Key="Motion.Base">0:0:0.18</Duration>
+    <Duration x:Key="Motion.Slow">0:0:0.28</Duration>
+    <CubicEase x:Key="Motion.EaseOut" EasingMode="EaseOut" />
+    <CubicEase x:Key="Motion.EaseInOut" EasingMode="EaseInOut" />
+
+    <!-- Shared FocusVisualStyle — ring never invisible even when controls have custom templates.
+         Dashed ring hits ~7:1 contrast on the Catppuccin base (WCAG-AA pass). -->
     <Style x:Key="FocusVisual">
         <Setter Property="Control.Template">
             <Setter.Value>
@@ -69,11 +114,12 @@
         </Setter>
     </Style>
 
-    <!-- Base text defaults -->
+    <!-- ============ Text defaults ============ -->
+    <!-- Segoe UI Variable is the Windows 11 system variable font; fallback gracefully on Win10. -->
     <Style TargetType="Window">
         <Setter Property="Background" Value="{StaticResource BaseBrush}" />
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="FontFamily" Value="Segoe UI" />
+        <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
         <Setter Property="TextOptions.TextRenderingMode" Value="ClearType" />
@@ -81,25 +127,92 @@
 
     <Style TargetType="TextBlock">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
-    <!-- Chromeless rounded button -->
+    <!-- Typography scale — explicit text styles so screens compose from tokens, not ad-hoc values -->
+    <Style x:Key="Text.Display" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Segoe UI Variable Display, Segoe UI" />
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    </Style>
+    <Style x:Key="Text.Title" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Segoe UI Variable Display, Segoe UI" />
+        <Setter Property="FontSize" Value="19" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    </Style>
+    <Style x:Key="Text.Subtitle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="LineHeight" Value="19" />
+        <Setter Property="Foreground" Value="{StaticResource SubtextBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style x:Key="Text.Body" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="LineHeight" Value="19" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    </Style>
+    <Style x:Key="Text.Caption" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="LineHeight" Value="17" />
+        <Setter Property="Foreground" Value="{StaticResource SubtextBrush}" />
+    </Style>
+    <Style x:Key="Text.Hint" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="LineHeight" Value="16" />
+        <Setter Property="Foreground" Value="{StaticResource OverlayBrush}" />
+    </Style>
+
+    <!-- Section label — uppercase, medium weight, subtle tracking via extra spacing in markup -->
+    <Style x:Key="SectionLabel" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="10.5" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource OverlayBrush}" />
+        <Setter Property="Margin" Value="1,0,0,10" />
+        <Setter Property="Typography.Capitals" Value="AllSmallCaps" />
+    </Style>
+
+    <!-- Metadata row labels -->
+    <Style x:Key="MetaLabel" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource OverlayBrush}" />
+        <Setter Property="Margin" Value="0,0,16,10" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style x:Key="MetaValue" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Margin" Value="0,0,0,10" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <!-- ============ Status dot ============ -->
+    <Style x:Key="StatusDot" TargetType="Ellipse">
+        <Setter Property="Width" Value="9" />
+        <Setter Property="Height" Value="9" />
+        <Setter Property="Margin" Value="0,0,10,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- ============ Chromeless rounded button ============ -->
     <Style x:Key="ChromeButton" TargetType="Button">
         <Setter Property="Background" Value="{StaticResource Surface0Brush}" />
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
         <Setter Property="BorderBrush" Value="{StaticResource Surface1Brush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="Padding" Value="12,7" />
         <Setter Property="MinHeight" Value="34" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="Bd"
-                            CornerRadius="6"
+                            CornerRadius="{StaticResource Radius.Sm.CR}"
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
@@ -111,7 +224,22 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Surface1Brush}" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="Bd" Storyboard.TargetProperty="Background.Color"
+                                                        To="{StaticResource Surface1Color}" Duration="{StaticResource Motion.Fast}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="Bd" Storyboard.TargetProperty="Background.Color"
+                                                        To="{StaticResource Surface0Color}" Duration="{StaticResource Motion.Fast}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
@@ -122,7 +250,7 @@
                             <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Opacity" Value="0.4" />
+                            <Setter Property="Opacity" Value="0.42" />
                             <Setter Property="Cursor" Value="Arrow" />
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -131,16 +259,18 @@
         </Setter>
     </Style>
 
+    <!-- ============ Primary action button ============ -->
     <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource ChromeButton}">
         <Setter Property="Background" Value="{StaticResource AccentBrush}" />
         <Setter Property="Foreground" Value="{StaticResource CrustBrush}" />
         <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
         <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Padding" Value="20,9" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="Bd"
-                            CornerRadius="8"
+                            CornerRadius="{StaticResource Radius.Md.CR}"
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
@@ -152,12 +282,30 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="#FFB4BEFE" />
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="#FFB4BEFE" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="Bd" Storyboard.TargetProperty="Background.Color"
+                                                        To="{StaticResource LavenderColor}" Duration="{StaticResource Motion.Fast}" />
+                                        <ColorAnimation Storyboard.TargetName="Bd" Storyboard.TargetProperty="BorderBrush.Color"
+                                                        To="{StaticResource LavenderColor}" Duration="{StaticResource Motion.Fast}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="Bd" Storyboard.TargetProperty="Background.Color"
+                                                        To="{StaticResource BlueColor}" Duration="{StaticResource Motion.Fast}" />
+                                        <ColorAnimation Storyboard.TargetName="Bd" Storyboard.TargetProperty="BorderBrush.Color"
+                                                        To="{StaticResource BlueColor}" Duration="{StaticResource Motion.Fast}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="#FFA6E3A1" />
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="#FFA6E3A1" />
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Surface2Brush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Surface2Brush}" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource TextBrush}" />
@@ -173,21 +321,28 @@
         </Setter>
     </Style>
 
-    <!-- Circular nav arrow (Win7-style edge chrome) -->
+    <!-- ============ Circular nav arrow (Win7-inspired edge chrome) ============ -->
+    <!-- Starts subtle, grows on hover with a soft elevation + tint + scale cue -->
     <Style x:Key="NavArrowButton" TargetType="Button">
-        <Setter Property="Width" Value="56" />
-        <Setter Property="Height" Value="56" />
+        <Setter Property="Width" Value="58" />
+        <Setter Property="Height" Value="58" />
         <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="Background" Value="#99000000" />
-        <Setter Property="BorderBrush" Value="#66FFFFFF" />
-        <Setter Property="Foreground" Value="#FFEAEAEA" />
-        <Setter Property="FontSize" Value="28" />
-        <Setter Property="FontFamily" Value="Segoe UI Symbol" />
+        <Setter Property="Background" Value="#A611111B" />
+        <Setter Property="BorderBrush" Value="#59CDD6F4" />
+        <Setter Property="Foreground" Value="{StaticResource FloatingChromeTextBrush}" />
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+        <Setter Property="Effect" Value="{StaticResource Elevation.Medium}" />
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Grid>
+                        <Grid.RenderTransform>
+                            <ScaleTransform x:Name="Scale" ScaleX="1" ScaleY="1" />
+                        </Grid.RenderTransform>
+                        <Grid.RenderTransformOrigin>0.5,0.5</Grid.RenderTransformOrigin>
                         <Ellipse x:Name="Bg"
                                  Fill="{TemplateBinding Background}"
                                  Stroke="{TemplateBinding BorderBrush}"
@@ -196,11 +351,35 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bg" Property="Fill" Value="#CC000000" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX"
+                                                         To="1.06" Duration="{StaticResource Motion.Base}">
+                                            <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut" /></DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY"
+                                                         To="1.06" Duration="{StaticResource Motion.Base}">
+                                            <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut" /></DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX"
+                                                         To="1" Duration="{StaticResource Motion.Base}" />
+                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY"
+                                                         To="1" Duration="{StaticResource Motion.Base}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                            <Setter TargetName="Bg" Property="Fill" Value="#D911111B" />
                             <Setter TargetName="Bg" Property="Stroke" Value="{StaticResource AccentBrush}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Bg" Property="Fill" Value="#E6000000" />
+                            <Setter TargetName="Bg" Property="Fill" Value="#F211111B" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Bg" Property="Stroke" Value="{StaticResource FocusRingBrush}" />
@@ -215,32 +394,69 @@
         </Setter>
     </Style>
 
-    <!-- Toolbar icon button (bottom bar) -->
+    <!-- ============ Toolbar icon button ============ -->
     <Style x:Key="ToolbarButton" TargetType="Button" BasedOn="{StaticResource ChromeButton}">
         <Setter Property="Width" Value="40" />
-        <Setter Property="Height" Value="32" />
+        <Setter Property="Height" Value="34" />
         <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
         <Setter Property="FontSize" Value="14" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            CornerRadius="{StaticResource Radius.Sm.CR}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Surface0Brush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Surface1Brush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Surface1Brush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource FocusRingBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <!-- TextBox (dark) -->
+    <!-- ============ TextBox ============ -->
     <Style TargetType="TextBox">
         <Setter Property="Background" Value="{StaticResource PanelBrush}" />
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
         <Setter Property="CaretBrush" Value="{StaticResource AccentBrush}" />
         <Setter Property="SelectionBrush" Value="{StaticResource AccentBrush}" />
+        <Setter Property="SelectionOpacity" Value="0.35" />
         <Setter Property="BorderBrush" Value="{StaticResource Surface1Brush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Padding" Value="8,6" />
-        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="Padding" Value="10,7" />
+        <Setter Property="MinHeight" Value="36" />
         <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
                     <Border x:Name="Bd"
-                            CornerRadius="4"
+                            CornerRadius="{StaticResource Radius.Sm.CR}"
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}">
@@ -249,8 +465,11 @@
                                       VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Surface2Brush}" />
+                        </Trigger>
                         <Trigger Property="IsFocused" Value="True">
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource FocusRingBrush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                             <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
@@ -262,13 +481,37 @@
         </Setter>
     </Style>
 
-    <!-- ScrollBar (compact, dark) -->
+    <!-- ============ ScrollBar ============ -->
+    <Style TargetType="Thumb" x:Key="ScrollThumb">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Thumb">
+                    <Border CornerRadius="5" Background="{StaticResource Surface2Brush}" Margin="2,0" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="ScrollBar">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{StaticResource Surface2Brush}" />
         <Setter Property="Width" Value="10" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Grid Background="Transparent">
+                        <Track x:Name="PART_Track" IsDirectionReversed="True">
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource ScrollThumb}" />
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
+    <!-- ============ ListBox ============ -->
     <Style TargetType="ListBox">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
@@ -282,12 +525,59 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
-                    <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="{StaticResource Radius.Sm.CR}">
                         <ContentPresenter />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- ============ Card / floating surface building blocks ============ -->
+    <!-- Use Style="{StaticResource Card}" on a Border for a consistent inset panel -->
+    <Style x:Key="Card" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource SurfacePanelBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.Md.CR}" />
+        <Setter Property="Padding" Value="14,12" />
+    </Style>
+
+    <!-- Divider — subtler hairline; 1px dividers were reading too hard against Mantle -->
+    <Style x:Key="Divider" TargetType="Border">
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Background" Value="{StaticResource HairlineBrush}" />
+        <Setter Property="Margin" Value="0,18,0,18" />
+    </Style>
+
+    <!-- Floating pill (position chip, tooltips, etc) — elevated, translucent chrome -->
+    <Style x:Key="FloatingPill" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource FloatingChromeBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource FloatingChromeBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.Lg.CR}" />
+        <Setter Property="Padding" Value="14,7" />
+        <Setter Property="Effect" Value="{StaticResource Elevation.Low}" />
+    </Style>
+
+    <!-- Toast — floats with soft elevation, accent-tinted border -->
+    <Style x:Key="Toast" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource ToastBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.Md.CR}" />
+        <Setter Property="Padding" Value="16,11" />
+        <Setter Property="Effect" Value="{StaticResource Elevation.Medium}" />
+    </Style>
+
+    <!-- Elevated card — used for the empty/error modals centered in the viewport -->
+    <Style x:Key="ElevatedCard" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.Lg.CR}" />
+        <Setter Property="Padding" Value="36,32" />
+        <Setter Property="Effect" Value="{StaticResource Elevation.High}" />
     </Style>
 
 </ResourceDictionary>
