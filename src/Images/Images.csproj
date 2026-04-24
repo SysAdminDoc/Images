@@ -9,9 +9,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>Images</AssemblyName>
     <RootNamespace>Images</RootNamespace>
-    <Version>0.1.3</Version>
-    <FileVersion>0.1.3.0</FileVersion>
-    <AssemblyVersion>0.1.3.0</AssemblyVersion>
+    <Version>0.1.4</Version>
+    <FileVersion>0.1.4.0</FileVersion>
+    <AssemblyVersion>0.1.4.0</AssemblyVersion>
     <Product>Images</Product>
     <Company>SysAdminDoc</Company>
     <Copyright>Copyright (c) 2026 SysAdminDoc</Copyright>

@@ -4,7 +4,7 @@
 
 # Images
 
-[![Version](https://img.shields.io/badge/version-0.1.3-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
+[![Version](https://img.shields.io/badge/version-0.1.4-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
 [![License](https://img.shields.io/badge/license-MIT-a6e3a1?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-cba6f7?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-9.0-f38ba8?style=flat-square)](#)
@@ -34,13 +34,24 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 
 ## Install
 
-### From release (recommended)
+Both artifacts ship alongside every release. They're the same build — pick whichever fits your workflow.
 
-1. Grab the latest `Images-vX.Y.Z-win-x64.zip` from [Releases](https://github.com/SysAdminDoc/Images/releases).
-2. Extract anywhere — it's framework-dependent, so make sure **[.NET 9 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/9.0)** is installed.
-3. Run `Images.exe`.
+### Installer (recommended for most users)
 
-To associate file types: right-click any image → **Open with** → **Choose another app** → browse to `Images.exe` → tick **Always use this app**.
+1. Grab `Images-vX.Y.Z-setup-win-x64.exe` from [Releases](https://github.com/SysAdminDoc/Images/releases).
+2. Run it. Installs to `%ProgramFiles%\Images` by default (admin) or `%LOCALAPPDATA%\Programs\Images` if you choose per-user at the UAC prompt.
+3. Optional boxes on the wizard: **Desktop icon**, **Add to "Open with" menu** (non-destructive — adds *Images* to the Windows "Open with" list without overriding whatever you currently have set as default for those extensions).
+4. Uninstalls cleanly from Settings → Apps → Installed apps.
+
+The installer checks for the **.NET 9 Desktop Runtime** before running and offers to open the Microsoft download page if it's missing.
+
+### Portable (zero install)
+
+1. Grab `Images-vX.Y.Z-win-x64.zip` from [Releases](https://github.com/SysAdminDoc/Images/releases).
+2. Extract anywhere. Install **[.NET 9 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/9.0)** if you don't already have it.
+3. Run `Images.exe`. Leaves no registry writes.
+
+To associate file types from a portable install: right-click any image → **Open with** → **Choose another app** → browse to `Images.exe` → tick **Always use this app**.
 
 ### From source
 
@@ -50,6 +61,8 @@ cd Images
 dotnet build -c Release
 dotnet run --project src/Images
 ```
+
+To build the installer locally, install [Inno Setup 6](https://jrsoftware.org/isdl.php), run `dotnet publish src/Images -c Release -r win-x64 --no-self-contained -o publish`, then `iscc /DMyAppVersion=0.1.4 installer\Images.iss`. Output lands at `installer\output\Images-vX.Y.Z-setup-win-x64.exe`.
 
 ## Keyboard
 
