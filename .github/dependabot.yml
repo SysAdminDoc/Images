@@ -1,0 +1,54 @@
+# Dependabot configuration — Images
+# Surfaces lagging pins before the next release so security advisories
+# (see ROADMAP S-03 / S-06 / S-09 on Magick.NET + native codec CVEs) can
+# be triaged via PR instead of discovered on the shipped artifact.
+#
+# Docs: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+version: 2
+
+updates:
+  # NuGet — Magick.NET, Magick.NET.Core, Microsoft.VisualBasic today;
+  # any libheif / libavif / libwebp / libjxl bindings tomorrow (per ROADMAP S-09).
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "nuget"
+    groups:
+      magick-net:
+        patterns:
+          - "Magick.NET*"
+      runtime-compat:
+        patterns:
+          - "Microsoft.*"
+
+  # GitHub Actions — release.yml pins actions/checkout + actions/setup-dotnet.
+  # Weekly sweep catches the Node 20 → 24 deprecation cadence (2026-06-02) and any
+  # future runner-image rollouts without flooding the PR queue on every minor bump.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    groups:
+      actions-toolkit:
+        patterns:
+          - "actions/*"
