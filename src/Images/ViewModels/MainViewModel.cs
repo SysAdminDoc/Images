@@ -39,8 +39,13 @@ public sealed class MainViewModel : ObservableObject
         DeleteCommand = new RelayCommand(DeleteCurrent, () => HasImage);
         RotateCwCommand = new RelayCommand(() => Rotate(90), () => HasImage);
         RotateCcwCommand = new RelayCommand(() => Rotate(-90), () => HasImage);
+        Rotate180Command = new RelayCommand(() => Rotate(180), () => HasImage);
+        FlipHorizontalCommand = new RelayCommand(() => { FlipHorizontal = !FlipHorizontal; }, () => HasImage);
+        FlipVerticalCommand = new RelayCommand(() => { FlipVertical = !FlipVertical; }, () => HasImage);
         RevealCommand = new RelayCommand(RevealInExplorer, () => HasImage);
         CopyPathCommand = new RelayCommand(CopyPath, () => HasImage);
+        SetAsWallpaperCommand = new RelayCommand(SetAsWallpaper, () => HasImage);
+        ReloadCommand = new RelayCommand(ReloadCurrent, () => HasImage);
         RefreshCommand = new RelayCommand(() => { _nav.Refresh(); RefreshFromNav(); });
         CommitRenameCommand = new RelayCommand(() => { _renameTimer.Stop(); FlushPendingRename(); });
         CancelRenameCommand = new RelayCommand(CancelRenameEdit);
@@ -201,6 +206,16 @@ public sealed class MainViewModel : ObservableObject
     private double _rotation;
     public double Rotation { get => _rotation; private set => Set(ref _rotation, value); }
 
+    // V15-02/V15-08: FlipHorizontal / FlipVertical are exposed as independent booleans so a
+    // double-flip via the context menu toggles cleanly. ZoomPanImage consumes both via bindings
+    // and multiplies them into its flip ScaleTransform — composing with rotate + zoom without
+    // disturbing either.
+    private bool _flipHorizontal;
+    public bool FlipHorizontal { get => _flipHorizontal; private set => Set(ref _flipHorizontal, value); }
+
+    private bool _flipVertical;
+    public bool FlipVertical { get => _flipVertical; private set => Set(ref _flipVertical, value); }
+
     private string? _decoderUsed;
     public string? DecoderUsed { get => _decoderUsed; private set => Set(ref _decoderUsed, value); }
 
@@ -357,8 +372,13 @@ public sealed class MainViewModel : ObservableObject
     public ICommand DeleteCommand { get; }
     public ICommand RotateCwCommand { get; }
     public ICommand RotateCcwCommand { get; }
+    public ICommand Rotate180Command { get; }
+    public ICommand FlipHorizontalCommand { get; }
+    public ICommand FlipVerticalCommand { get; }
     public ICommand RevealCommand { get; }
     public ICommand CopyPathCommand { get; }
+    public ICommand SetAsWallpaperCommand { get; }
+    public ICommand ReloadCommand { get; }
     public ICommand RefreshCommand { get; }
     public ICommand CommitRenameCommand { get; }
     public ICommand CancelRenameCommand { get; }
@@ -418,6 +438,8 @@ public sealed class MainViewModel : ObservableObject
             PixelHeight = res.PixelHeight;
             DecoderUsed = res.DecoderUsed;
             Rotation = 0;
+            FlipHorizontal = false;
+            FlipVertical = false;
             LoadErrorMessage = null;
 
             // First-run only — surface the gesture hint pill the first time an image lands.
@@ -553,6 +575,39 @@ public sealed class MainViewModel : ObservableObject
     private void Rotate(double delta)
     {
         Rotation = (Rotation + delta) % 360;
+    }
+
+    // V15-04: Reload re-enumerates the current file through the loader, re-applying WIC /
+    // Magick / animated-GIF path as appropriate. Useful after external edit (Photoshop,
+    // mspaint). Rotation + flip state survive because LoadCurrent only reassigns them when
+    // a NEW path is loaded; here the path is identical so we keep whatever the user had.
+    private void ReloadCurrent()
+    {
+        var savedRotation = Rotation;
+        var savedFlipH = FlipHorizontal;
+        var savedFlipV = FlipVertical;
+        LoadCurrent();
+        Rotation = savedRotation;
+        FlipHorizontal = savedFlipH;
+        FlipVertical = savedFlipV;
+        Toast("Reloaded");
+    }
+
+    // V15-02: Set current image as the desktop wallpaper. Delegates to WallpaperService which
+    // copies to %LOCALAPPDATA%\Images\wallpaper\current.<ext> before calling SystemParametersInfo,
+    // so a later rename / move of the source file doesn't break the desktop.
+    private void SetAsWallpaper()
+    {
+        if (CurrentPath is null) return;
+        try
+        {
+            var dest = WallpaperService.SetFromFile(CurrentPath);
+            Toast($"Set as wallpaper: {Path.GetFileName(dest)}");
+        }
+        catch (Exception ex)
+        {
+            Toast($"Wallpaper failed: {ex.Message}");
+        }
     }
 
     private void RevealInExplorer()
