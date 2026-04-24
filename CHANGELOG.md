@@ -4,14 +4,19 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### Branding
+
+- Added the project logo. `src/Images/Resources/logo.png` ships as a WPF `<Resource>` for in-app use; `src/Images/Resources/icon.ico` is a 7-frame multi-resolution Windows app icon (16/24/32/48/64/128/256, Catmull-Rom downscale from a square-padded 431×431 source) wired via `<ApplicationIcon>` in `Images.csproj` — the built `Images.exe` now shows the logo in Explorer, the taskbar, and Alt-Tab. `icon.svg` is a PNG-embedded SVG wrapper for web/README contexts.
+- Added the project banner at `assets/banner.png` and embedded it at the top of the README.
+
 ### CI
 
 - Bumped release workflow actions off the deprecated Node 20 runner: `actions/checkout@v4` → `@v6`, `actions/setup-dotnet@v4` → `@v5`. GitHub removes Node 20 runners on 2026-06-02 — this clears that deprecation well ahead of the deadline.
 
 ### Docs
 
-- Added `ROADMAP.md` tracking v0.1.2 polish + branding pass (workflow bump shipped, logo brief ready, icon + screenshot follow-ups noted as blocked on asset / GUI smoke).
-- Added `assets/logo-prompt.md` — five self-contained image-gen prompts (minimal icon / app icon / wordmark / emblem / abstract) aligned to the Windows 7 Photo Viewer tone + Catppuccin Mocha palette. Single-session runs defer image generation; next factory run wires the generated assets into `src/Images/Resources/` + `<ApplicationIcon>` + README header.
+- Added `ROADMAP.md` tracking v0.1.2 polish + branding pass.
+- README architecture tree now shows `Resources/icon.ico`, `icon.svg`, `logo.png` instead of the "not yet added" placeholder.
 
 ## v0.1.1 — 2026-04-24
 
