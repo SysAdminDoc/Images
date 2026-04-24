@@ -493,14 +493,22 @@ public sealed class MainViewModel : ObservableObject
     private void RevealInExplorer()
     {
         if (CurrentPath is null) return;
+        string full;
+        try { full = System.IO.Path.GetFullPath(CurrentPath); }
+        catch (Exception ex) { Toast($"Could not open Explorer: {ex.Message}"); return; }
+
         try
         {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            var psi = new System.Diagnostics.ProcessStartInfo
             {
                 FileName = "explorer.exe",
-                Arguments = $"/select,\"{CurrentPath}\"",
-                UseShellExecute = true
-            });
+                UseShellExecute = false,
+            };
+            // ArgumentList bypasses CommandLineToArgvW quoting rules entirely — the single token
+            // "/select,C:\path with space.jpg" goes through verbatim as argv[1] so no injection
+            // vector via embedded quotes or commas in the filename.
+            psi.ArgumentList.Add("/select," + full);
+            System.Diagnostics.Process.Start(psi);
         }
         catch (Exception ex) { Toast($"Could not open Explorer: {ex.Message}"); }
     }

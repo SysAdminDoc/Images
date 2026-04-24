@@ -32,7 +32,29 @@ public partial class App : Application
         var window = new MainWindow();
         window.Show();
 
-        if (e.Args.Length > 0 && System.IO.File.Exists(e.Args[0]))
-            window.OpenPath(e.Args[0]);
+        if (e.Args.Length > 0 && TryResolveArgPath(e.Args[0], out var resolved))
+            window.OpenPath(resolved);
+    }
+
+    private static bool TryResolveArgPath(string raw, out string resolved)
+    {
+        resolved = string.Empty;
+        if (string.IsNullOrWhiteSpace(raw)) return false;
+        // Reject device-namespace / UNC-style / registry-ish shapes before any Path API touches them.
+        if (raw.StartsWith("\\\\?\\", StringComparison.Ordinal) ||
+            raw.StartsWith("\\\\.\\", StringComparison.Ordinal))
+            return false;
+
+        string full;
+        try { full = System.IO.Path.GetFullPath(raw); }
+        catch { return false; }
+
+        // GetFullPath resolves "..\..\whatever" into a canonical absolute path.
+        // The File.Exists check then pins the outcome to a real file on disk;
+        // the viewer's charter is to display a single image, not enumerate a tree.
+        if (!System.IO.File.Exists(full)) return false;
+
+        resolved = full;
+        return true;
     }
 }
