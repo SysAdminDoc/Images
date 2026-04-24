@@ -504,7 +504,10 @@
                         </StackPanel>
                     </Border>
 
-                    <ItemsControl ItemsSource="{Binding RecentRenames}">
+                    <ItemsControl ItemsSource="{Binding RecentRenames}"
+                                  KeyboardNavigation.DirectionalNavigation="Cycle"
+                                  KeyboardNavigation.TabNavigation="Continue"
+                                  AutomationProperties.Name="Recent renames">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Background="{StaticResource SurfacePanelBrush}"
