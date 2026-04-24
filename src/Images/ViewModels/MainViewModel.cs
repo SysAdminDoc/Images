@@ -51,6 +51,7 @@ public sealed class MainViewModel : ObservableObject
         CancelRenameCommand = new RelayCommand(CancelRenameEdit);
         UnlockExtensionCommand = new RelayCommand(() => IsExtensionUnlocked = !IsExtensionUnlocked);
         UndoRenameCommand = new RelayCommand(p => UndoOne(p as RenameService.UndoEntry), p => p is RenameService.UndoEntry);
+        AboutCommand = new RelayCommand(ShowAboutWindow);
 
         _rename.Renamed += (_, e) => PushUndoEntry(e);
 
@@ -401,6 +402,7 @@ public sealed class MainViewModel : ObservableObject
     public ICommand CancelRenameCommand { get; }
     public ICommand UnlockExtensionCommand { get; }
     public ICommand UndoRenameCommand { get; }
+    public ICommand AboutCommand { get; }
 
     // -------------------- Navigation --------------------
 
@@ -655,6 +657,17 @@ public sealed class MainViewModel : ObservableObject
         if (CurrentPath is null) return;
         try { Clipboard.SetText(CurrentPath); Toast("Copied path"); }
         catch (Exception ex) { Toast($"Copy failed: {ex.Message}"); }
+    }
+
+    // V15-06: open the About dialog. Owner is resolved via the active main window so the dialog
+    // centers on-owner rather than on-screen and inherits taskbar semantics.
+    private void ShowAboutWindow()
+    {
+        var about = new Images.AboutWindow
+        {
+            Owner = Application.Current?.MainWindow
+        };
+        about.ShowDialog();
     }
 
     private void RefreshFromNav() => LoadCurrent();

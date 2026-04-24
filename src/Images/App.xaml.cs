@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Threading;
+using Images.Services;
 
 namespace Images;
 
@@ -9,24 +10,33 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // V15-09: route all three fatal-exception channels through CrashLog so we capture
+        // whatever killed the app regardless of where it fired. Dispatcher handler also
+        // sets Handled=true so the user sees a dialog instead of the app disappearing.
         DispatcherUnhandledException += (_, args) =>
         {
-            try
-            {
-                var log = System.IO.Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "Images", "crash.log");
-                System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(log)!);
-                System.IO.File.AppendAllText(log, $"[{DateTime.Now:O}]\n{args.Exception}\n\n");
-            }
-            catch { }
-
+            CrashLog.Append("DispatcherUnhandledException", args.Exception);
             MessageBox.Show(
-                args.Exception.ToString(),
+                $"{args.Exception.Message}\n\nDetails written to:\n{CrashLog.LogPath}",
                 "Images — unexpected error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
             args.Handled = true;
+        };
+
+        // Non-UI thread exceptions — can't Handle these, but we can at least log before the
+        // runtime terminates us.
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+            CrashLog.Append("AppDomain.UnhandledException",
+                args.ExceptionObject as Exception,
+                $"IsTerminating={args.IsTerminating}");
+
+        // Background Task faults that were never awaited. Setting Observed=true prevents the
+        // process from being torn down by the TaskScheduler finalizer.
+        TaskScheduler.UnobservedTaskException += (_, args) =>
+        {
+            CrashLog.Append("TaskScheduler.UnobservedTaskException", args.Exception);
+            args.SetObserved();
         };
 
         var window = new MainWindow();

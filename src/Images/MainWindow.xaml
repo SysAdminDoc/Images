@@ -501,13 +501,29 @@
                 <StackPanel Margin="22,22,22,28">
 
                     <!-- Panel header -->
-                    <StackPanel Margin="0,0,0,22">
-                        <TextBlock Style="{StaticResource Text.Display}"
-                                   Text="Images" />
-                        <TextBlock Style="{StaticResource Text.Subtitle}"
-                                   Text="Review, rename, and move through a folder without breaking flow."
-                                   Margin="0,6,0,0" />
-                    </StackPanel>
+                    <Grid Margin="0,0,0,22">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Style="{StaticResource Text.Display}"
+                                       Text="Images" />
+                            <TextBlock Style="{StaticResource Text.Subtitle}"
+                                       Text="Review, rename, and move through a folder without breaking flow."
+                                       Margin="0,6,0,0" />
+                        </StackPanel>
+                        <!-- V15-06: click the info icon for the About dialog. Keeps the header
+                             visually clean — no visible button chrome, just an accent on hover. -->
+                        <Button Grid.Column="1"
+                                Command="{Binding AboutCommand}"
+                                Style="{StaticResource ToolbarButton}"
+                                Content="&#xE946;"
+                                ToolTip="About Images"
+                                AutomationProperties.Name="About Images"
+                                VerticalAlignment="Top"
+                                Margin="8,0,0,0" />
+                    </Grid>
 
                     <!-- RENAME section -->
                     <TextBlock Text="Rename" Style="{StaticResource SectionLabel}" />
