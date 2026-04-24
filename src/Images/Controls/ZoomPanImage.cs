@@ -179,6 +179,17 @@ public sealed class ZoomPanImage : ContentControl
 
     private void OnWheel(object sender, MouseWheelEventArgs e)
     {
+        // V15-05: Shift + wheel pans horizontally instead of zooming. Matches browser + editor
+        // muscle memory. Zoom stays on the plain wheel, vertical pan stays on drag-pan + arrow
+        // keys. Delta scale picked so one full wheel notch moves ~80 px at the current zoom,
+        // which feels right on both a MX Master and a stock mouse wheel.
+        if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+        {
+            _translate.X += e.Delta > 0 ? 80 : -80;
+            e.Handled = true;
+            return;
+        }
+
         var factor = e.Delta > 0 ? 1.15 : 1 / 1.15;
         var newScale = Math.Clamp(_scale.ScaleX * factor, 0.1, 20);
         var rel = e.GetPosition(_image);

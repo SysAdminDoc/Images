@@ -140,6 +140,23 @@ public sealed class MainViewModel : ObservableObject
         get => _showGestureHint;
         private set => Set(ref _showGestureHint, value);
     }
+
+    // V15-03: keyboard cheatsheet overlay toggled by `?`. Dismissed on any key or click.
+    private bool _showCheatsheet;
+    public bool ShowCheatsheet
+    {
+        get => _showCheatsheet;
+        set => Set(ref _showCheatsheet, value);
+    }
+
+    // V15-07: fullscreen toggled by F11. The view collapses the side panel + floats the toolbar
+    // when fullscreen, restores everything on exit.
+    private bool _isFullscreen;
+    public bool IsFullscreen
+    {
+        get => _isFullscreen;
+        set => Set(ref _isFullscreen, value);
+    }
     public string CurrentFileName => CurrentPath is null ? "" : Path.GetFileName(CurrentPath);
     public string CurrentFolder => CurrentPath is null ? "" : Path.GetDirectoryName(CurrentPath) ?? "";
 

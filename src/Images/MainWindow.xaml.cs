@@ -48,6 +48,35 @@ public partial class MainWindow : Window
         NextArrow.BeginAnimation(OpacityProperty, anim);
     }
 
+    // V15-07: F11 toggles fullscreen. Borderless maximized, side panel collapses via the
+    // IsFullscreen VM flag. Previous window state is remembered so exit restores it exactly.
+    private WindowState _preFullscreenState = WindowState.Normal;
+    private WindowStyle _preFullscreenStyle = WindowStyle.SingleBorderWindow;
+
+    private void ToggleFullscreen()
+    {
+        if (Vm.IsFullscreen)
+        {
+            // Restore
+            WindowStyle = _preFullscreenStyle;
+            WindowState = _preFullscreenState;
+            ResizeMode = ResizeMode.CanResize;
+            Vm.IsFullscreen = false;
+        }
+        else
+        {
+            _preFullscreenState = WindowState;
+            _preFullscreenStyle = WindowStyle;
+            // Normal-state first so the Maximized toggle re-fires on a borderless window even
+            // if we were already maximized — otherwise WPF no-ops the state-set.
+            WindowState = WindowState.Normal;
+            WindowStyle = WindowStyle.None;
+            ResizeMode = ResizeMode.NoResize;
+            WindowState = WindowState.Maximized;
+            Vm.IsFullscreen = true;
+        }
+    }
+
     // V15-01: 5-button mouse browsers have trained everyone that XButton1 = back / XButton2 =
     // forward. Hooking PreviewMouseDown at the window level catches the event before any
     // element captures it (e.g. drag-pan on ZoomPanImage). We gate on HasImage via the command
@@ -76,12 +105,30 @@ public partial class MainWindow : Window
         // Don't steal keys from the rename editor.
         if (Keyboard.FocusedElement is TextBox) return;
 
+        // V15-03: any key while the cheatsheet is open dismisses it and swallows the key so
+        // the user doesn't trigger whatever shortcut they pressed by accident.
+        if (Vm.ShowCheatsheet && e.Key != Key.OemQuestion)
+        {
+            Vm.ShowCheatsheet = false;
+            e.Handled = true;
+            return;
+        }
+
         switch (e.Key)
         {
             case Key.Escape:
                 // A-03: Escape closes any active overlay / toast and returns focus to the
                 // window shell. Rename-TextBox Escape is handled inside StemEditor_PreviewKeyDown
                 // and never reaches here because the TextBox owns focus.
+                if (Vm.ShowCheatsheet)
+                {
+                    Vm.ShowCheatsheet = false;
+                }
+                if (Vm.IsFullscreen)
+                {
+                    // Escape also exits fullscreen — standard convention.
+                    ToggleFullscreen();
+                }
                 if (Vm.IsDropTargetActive)
                 {
                     Vm.IsDropTargetActive = false;
@@ -93,6 +140,21 @@ public partial class MainWindow : Window
                 }
                 Keyboard.ClearFocus();
                 Focus();
+                e.Handled = true;
+                break;
+            case Key.OemQuestion:
+                // V15-03: ? toggles the cheatsheet. Handling Shift+/ explicitly — OemQuestion
+                // is the Shift+/ combo on US layouts; other layouts will need a follow-up.
+                Vm.ShowCheatsheet = !Vm.ShowCheatsheet;
+                e.Handled = true;
+                break;
+            case Key.F11:
+                ToggleFullscreen();
+                e.Handled = true;
+                break;
+            case Key.R when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
+                // V15-04: Ctrl+Shift+R reload current image.
+                Vm.ReloadCommand.Execute(null);
                 e.Handled = true;
                 break;
             case Key.Left:
