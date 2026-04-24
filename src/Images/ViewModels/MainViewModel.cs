@@ -18,6 +18,8 @@ public sealed class MainViewModel : ObservableObject
     private bool _suppressStemChange;
     private string _committedStemOnDisk = string.Empty;
 
+    private readonly DispatcherTimer _hintTimer;
+
     public MainViewModel()
     {
         _renameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(600) };
@@ -25,6 +27,9 @@ public sealed class MainViewModel : ObservableObject
 
         _toastTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.5) };
         _toastTimer.Tick += (_, _) => { _toastTimer.Stop(); ToastMessage = null; };
+
+        _hintTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(2400) };
+        _hintTimer.Tick += (_, _) => { _hintTimer.Stop(); ShowGestureHint = false; };
 
         OpenCommand = new RelayCommand(OpenFileDialog);
         NextCommand = new RelayCommand(Next, () => HasImage);
@@ -96,6 +101,16 @@ public sealed class MainViewModel : ObservableObject
     public bool HasImage => !string.IsNullOrEmpty(CurrentPath) && File.Exists(CurrentPath);
     public bool HasDisplayImage => CurrentImage is not null;
     public bool IsViewerEmpty => CurrentPath is null;
+
+    // First-run gesture hint. Flipped true exactly once — the first time an image successfully
+    // lands in the viewport. The view animates the pill in, then fades it out after 2.4 s.
+    private bool _hasShownGestureHint;
+    private bool _showGestureHint;
+    public bool ShowGestureHint
+    {
+        get => _showGestureHint;
+        private set => Set(ref _showGestureHint, value);
+    }
     public string CurrentFileName => CurrentPath is null ? "" : Path.GetFileName(CurrentPath);
     public string CurrentFolder => CurrentPath is null ? "" : Path.GetDirectoryName(CurrentPath) ?? "";
 
@@ -370,6 +385,15 @@ public sealed class MainViewModel : ObservableObject
             DecoderUsed = res.DecoderUsed;
             Rotation = 0;
             LoadErrorMessage = null;
+
+            // First-run only — surface the gesture hint pill the first time an image lands.
+            if (!_hasShownGestureHint)
+            {
+                _hasShownGestureHint = true;
+                ShowGestureHint = true;
+                _hintTimer.Stop();
+                _hintTimer.Start();
+            }
         }
         catch (Exception ex)
         {
