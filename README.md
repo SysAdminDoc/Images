@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/banner.png" alt="Images — a Windows 7–style classic image viewer, reimagined in dark mode" width="100%" />
+
 # Images
 
 [![Version](https://img.shields.io/badge/version-0.1.1-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
@@ -83,7 +85,7 @@ src/Images/
 │   └── ZoomPanImage.cs         # Wheel-zoom + drag-pan image host
 ├── Themes/
 │   └── DarkTheme.xaml          # Catppuccin Mocha tokens + control styles
-└── Resources/                  # (app icon goes here — not yet added)
+└── Resources/                  # icon.ico (app icon), icon.svg (vector wrapper), logo.png
 ```
 
 ## Credits / inspiration

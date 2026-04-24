@@ -16,7 +16,13 @@
     <Company>SysAdminDoc</Company>
     <Copyright>Copyright (c) 2026 SysAdminDoc</Copyright>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\icon.ico" />
+    <Resource Include="Resources\logo.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.12.0" />
