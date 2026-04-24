@@ -37,10 +37,35 @@
             </Grid.RowDefinitions>
 
             <Grid x:Name="Viewport" Grid.Row="0" ClipToBounds="True">
+                <!-- V15-02: right-click context menu on the viewport. Rename-TextBox's own
+                     built-in edit menu is unaffected because ContextMenu here is attached to
+                     this Grid, not to descendants. -->
+                <Grid.ContextMenu>
+                    <ContextMenu Style="{StaticResource ViewportContextMenu}">
+                        <MenuItem Header="Open…"             Command="{Binding OpenCommand}"           InputGestureText="Ctrl+O" />
+                        <MenuItem Header="Reload"            Command="{Binding ReloadCommand}"         InputGestureText="Ctrl+Shift+R" />
+                        <Separator />
+                        <MenuItem Header="Reveal in Explorer" Command="{Binding RevealCommand}" />
+                        <MenuItem Header="Copy path"          Command="{Binding CopyPathCommand}" />
+                        <Separator />
+                        <MenuItem Header="Rotate left"   Command="{Binding RotateCcwCommand}" />
+                        <MenuItem Header="Rotate right"  Command="{Binding RotateCwCommand}" />
+                        <MenuItem Header="Rotate 180°"   Command="{Binding Rotate180Command}" />
+                        <MenuItem Header="Flip horizontal" Command="{Binding FlipHorizontalCommand}" />
+                        <MenuItem Header="Flip vertical"   Command="{Binding FlipVerticalCommand}" />
+                        <Separator />
+                        <MenuItem Header="Set as desktop wallpaper" Command="{Binding SetAsWallpaperCommand}" />
+                        <Separator />
+                        <MenuItem Header="Delete (Recycle Bin)" Command="{Binding DeleteCommand}" InputGestureText="Del" />
+                    </ContextMenu>
+                </Grid.ContextMenu>
+
                 <ctl:ZoomPanImage x:Name="Canvas"
                                    Source="{Binding CurrentImage}"
                                    Animation="{Binding CurrentAnimation}"
-                                   Rotation="{Binding Rotation}" />
+                                   Rotation="{Binding Rotation}"
+                                   FlipHorizontal="{Binding FlipHorizontal}"
+                                   FlipVertical="{Binding FlipVertical}" />
 
                 <!-- Empty state — centered invitational card -->
                 <Border Style="{StaticResource ElevatedCard}"
