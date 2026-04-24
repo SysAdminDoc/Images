@@ -7,7 +7,7 @@ Effort tags: **S** ≤ 2 days · **M** ≤ 1 week · **L** > 1 week · **XL** mu
 
 > **Vision**: One Windows app that replaces Photos, IrfanView, XnConvert, Upscayl, and a light Lightroom — by cannibalising the best ideas from a dozen OSS/freeware projects. Local-first, fast, dark-mode, no cloud, no subscription. The killer features are **CLIP semantic search** on a local library, **live inline rename** (already shipped), **Squoosh-style visual-diff converter**, and — differentiator nobody else ships — **network-egress transparency**: the viewer never touches the network silently, and you can see every call it makes.
 
-## Current state (v0.1.1 — shipped 2026-04-24)
+## Current state (v0.1.2 — shipped 2026-04-24)
 
 Core viewer. Natural-sort folder nav. Zoom/pan/rotate. Live inline rename with 600 ms debounce, conflict resolution, 10-deep undo stack. Drag-drop. FSW. Catppuccin Mocha dark theme. ~100 formats via WIC + Magick.NET 14.12.0. Framework-dependent win-x64. Branded (icon.ico multi-res + banner + logo.png WPF Resource) as of the 2026-04-24 branding pass staged in `Unreleased`. No persistence, no editor, no organizer, no batch.
 

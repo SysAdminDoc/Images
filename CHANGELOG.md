@@ -4,6 +4,10 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+## v0.1.2 — 2026-04-24
+
+Security + accessibility + CI hardening plus a three-wave premium-polish pass that elevates the product from functional to intentional.
+
 ### UI / UX — premium polish pass (wave 3)
 
 - **Smooth rotate** — `ZoomPanImage.RotationProperty` now animates the `RotateTransform` via an eased (`CubicEase EaseInOut`) `DoubleAnimation` instead of snapping the angle. Duration scales with angular delta (180 ms base + up to 162 ms for a 180-degree flip) so a single rotate-left still feels quick while a 270-degree round trip stays controlled.
