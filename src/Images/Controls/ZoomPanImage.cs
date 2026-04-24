@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 
 namespace Images.Controls;
@@ -32,12 +33,31 @@ public sealed class ZoomPanImage : ContentControl
 
     public static readonly DependencyProperty RotationProperty = DependencyProperty.Register(
         nameof(Rotation), typeof(double), typeof(ZoomPanImage),
-        new PropertyMetadata(0.0, (d, e) => ((ZoomPanImage)d)._rotate.Angle = (double)e.NewValue));
+        new PropertyMetadata(0.0, (d, e) => ((ZoomPanImage)d).OnRotationChanged((double)e.NewValue)));
 
     public double Rotation
     {
         get => (double)GetValue(RotationProperty);
         set => SetValue(RotationProperty, value);
+    }
+
+    private static readonly CubicEase _rotateEase = new() { EasingMode = EasingMode.EaseInOut };
+
+    private void OnRotationChanged(double target)
+    {
+        // 90-degree flips snap in the source model; animating the RotateTransform gives the
+        // viewer a premium spin-to-new-orientation feel instead of a frame-one teleport.
+        // Duration scales with angular delta so large jumps (e.g. 0 -> 270) still feel controlled.
+        var delta = Math.Abs(target - _rotate.Angle);
+        var duration = TimeSpan.FromMilliseconds(180 + Math.Min(delta, 180) * 0.9);
+        var anim = new DoubleAnimation
+        {
+            To = target,
+            Duration = duration,
+            EasingFunction = _rotateEase,
+            FillBehavior = FillBehavior.HoldEnd,
+        };
+        _rotate.BeginAnimation(RotateTransform.AngleProperty, anim);
     }
 
     public ZoomPanImage()
