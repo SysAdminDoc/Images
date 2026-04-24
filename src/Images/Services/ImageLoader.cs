@@ -18,8 +18,10 @@ public static class ImageLoader
         byte[] bytes;
         using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
         {
+            if (fs.Length == 0)
+                throw new InvalidOperationException($"'{Path.GetFileName(path)}' is empty.");
             bytes = new byte[fs.Length];
-            _ = fs.Read(bytes, 0, bytes.Length);
+            fs.ReadExactly(bytes);
         }
 
         // Primary: WIC via BitmapImage. CacheOption.OnLoad fully reads the stream during EndInit,
