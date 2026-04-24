@@ -4,12 +4,15 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using Images.Services;
 
 namespace Images.Controls;
 
 /// <summary>
 /// A content host that draws its image with wheel-zoom, drag-pan, and double-click fit/1:1 toggle.
-/// Used as the photo canvas.
+/// Used as the photo canvas. When the <see cref="Animation"/> DP is set, the inner Image cycles
+/// through the frames of the supplied <see cref="AnimationSequence"/> via WPF's keyframe animator —
+/// all pan/zoom/rotate transforms stay intact on top of the moving image.
 /// </summary>
 public sealed class ZoomPanImage : ContentControl
 {
@@ -39,6 +42,19 @@ public sealed class ZoomPanImage : ContentControl
     {
         get => (double)GetValue(RotationProperty);
         set => SetValue(RotationProperty, value);
+    }
+
+    public static readonly DependencyProperty AnimationProperty = DependencyProperty.Register(
+        nameof(Animation), typeof(AnimationSequence), typeof(ZoomPanImage),
+        new PropertyMetadata(null, (d, e) => ((ZoomPanImage)d).OnAnimationChanged((AnimationSequence?)e.NewValue)));
+
+    /// <summary>
+    /// Multi-frame animation played on top of <see cref="Source"/>. Null means static image.
+    /// </summary>
+    public AnimationSequence? Animation
+    {
+        get => (AnimationSequence?)GetValue(AnimationProperty);
+        set => SetValue(AnimationProperty, value);
     }
 
     private static readonly CubicEase _rotateEase = new() { EasingMode = EasingMode.EaseInOut };
@@ -84,8 +100,38 @@ public sealed class ZoomPanImage : ContentControl
 
     private void OnSourceChanged(ImageSource? src)
     {
+        // A new source always wins over whatever animation was playing. The Animation DP will
+        // re-apply its keyframes in its own PropertyChanged callback; we rely on the view model
+        // to raise CurrentImage *before* CurrentAnimation so the final state is "new image,
+        // new animation" rather than "new image, stale frames".
+        _image.BeginAnimation(Image.SourceProperty, null);
         _image.Source = src;
         ResetView();
+    }
+
+    private void OnAnimationChanged(AnimationSequence? seq)
+    {
+        // Cancel whatever was playing before — either starts a fresh keyframe animation or
+        // reverts the Image.Source to its baseline (which OnSourceChanged set moments ago).
+        _image.BeginAnimation(Image.SourceProperty, null);
+        if (seq is null || seq.Frames.Count < 2) return;
+
+        var anim = new ObjectAnimationUsingKeyFrames();
+        var t = TimeSpan.Zero;
+        for (int i = 0; i < seq.Frames.Count; i++)
+        {
+            anim.KeyFrames.Add(new DiscreteObjectKeyFrame(seq.Frames[i], KeyTime.FromTimeSpan(t)));
+            t += seq.Delays[i];
+        }
+        anim.Duration = t;
+        anim.RepeatBehavior = seq.LoopCount <= 0
+            ? RepeatBehavior.Forever
+            : new RepeatBehavior(seq.LoopCount);
+
+        // HandoffBehavior.SnapshotAndReplace ensures we don't blend with a lingering previous
+        // animation's interpolator (discrete keyframes wouldn't blend anyway, but it's the
+        // conservative default for source swaps).
+        _image.BeginAnimation(Image.SourceProperty, anim, HandoffBehavior.SnapshotAndReplace);
     }
 
     public void ResetView()
