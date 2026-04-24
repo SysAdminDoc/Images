@@ -114,6 +114,14 @@
         </Setter>
     </Style>
 
+    <!-- ============ Icon font ============ -->
+    <!-- Win11 24H2+ canonicalizes the icon font as "Segoe Fluent Icons"; Win10 ships "Segoe MDL2
+         Assets". Both share the same PUA glyph codepoints (E70F, E76B, E838, ...). On some Win11
+         installs (notably IoT LTSC / enterprise images) WPF's MDL2 resolution lands on a text
+         fallback, rendering every button as an empty tofu block. Declaring Fluent Icons first +
+         MDL2 second + a guaranteed Symbol fallback collapses all three worlds. -->
+    <FontFamily x:Key="IconFontFamily">Segoe Fluent Icons, Segoe MDL2 Assets, Symbol</FontFamily>
+
     <!-- ============ Text defaults ============ -->
     <!-- Segoe UI Variable is the Windows 11 system variable font; fallback gracefully on Win10. -->
     <Style TargetType="Window">
@@ -331,7 +339,7 @@
         <Setter Property="BorderBrush" Value="#59CDD6F4" />
         <Setter Property="Foreground" Value="{StaticResource FloatingChromeTextBrush}" />
         <Setter Property="FontSize" Value="24" />
-        <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+        <Setter Property="FontFamily" Value="{StaticResource IconFontFamily}" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
         <Setter Property="Effect" Value="{StaticResource Elevation.Medium}" />
         <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
@@ -401,7 +409,7 @@
         <Setter Property="Padding" Value="0" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+        <Setter Property="FontFamily" Value="{StaticResource IconFontFamily}" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Template">
             <Setter.Value>

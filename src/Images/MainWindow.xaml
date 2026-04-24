@@ -38,6 +38,7 @@
             <Grid x:Name="Viewport" Grid.Row="0" ClipToBounds="True">
                 <ctl:ZoomPanImage x:Name="Canvas"
                                    Source="{Binding CurrentImage}"
+                                   Animation="{Binding CurrentAnimation}"
                                    Rotation="{Binding Rotation}" />
 
                 <!-- Empty state — centered invitational card -->
@@ -87,7 +88,7 @@
                         Visibility="{Binding HasLoadError, Converter={StaticResource BoolToVis}}">
                     <StackPanel>
                         <TextBlock Text="&#xE783;"
-                                   FontFamily="Segoe MDL2 Assets"
+                                   FontFamily="{StaticResource IconFontFamily}"
                                    FontSize="38"
                                    HorizontalAlignment="Center"
                                    Foreground="{StaticResource RedBrush}" />
@@ -136,7 +137,7 @@
                             VerticalAlignment="Center">
                         <StackPanel>
                             <TextBlock Text="{Binding IsDropAccepted, Converter={StaticResource DropAcceptedIcon}}"
-                                       FontFamily="Segoe MDL2 Assets"
+                                       FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="38"
                                        HorizontalAlignment="Center">
                                 <TextBlock.Style>
@@ -230,7 +231,7 @@
                         </Border.Style>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE7A5;"
-                                       FontFamily="Segoe MDL2 Assets"
+                                       FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="13"
                                        Foreground="{StaticResource AccentBrush}"
                                        VerticalAlignment="Center"
@@ -271,7 +272,7 @@
                         </Border.Style>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE930;"
-                                       FontFamily="Segoe MDL2 Assets"
+                                       FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="13"
                                        Foreground="{StaticResource AccentBrush}"
                                        VerticalAlignment="Center"
@@ -326,6 +327,33 @@
                         <TextBlock Text="{Binding FileSizeText}"
                                    Foreground="{StaticResource SubtextBrush}"
                                    VerticalAlignment="Center" />
+
+                        <!-- Animated-image chip — only surfaces when CurrentAnimation is non-null.
+                             Small green pill so the GIF/APNG/animated-WebP state reads at a glance
+                             without competing with the primary metadata row. -->
+                        <Border Margin="10,0,0,0"
+                                Padding="8,2"
+                                CornerRadius="{StaticResource Radius.Sm.CR}"
+                                Background="#2AA6E3A1"
+                                BorderBrush="{StaticResource GreenBrush}"
+                                BorderThickness="1"
+                                VerticalAlignment="Center"
+                                Visibility="{Binding IsAnimated, Converter={StaticResource BoolToVis}}"
+                                AutomationProperties.Name="Animated image">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE768;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="10"
+                                           Foreground="{StaticResource GreenBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,5,0" />
+                                <TextBlock Text="{Binding AnimationFrameCountText}"
+                                           FontSize="10.5"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource GreenBrush}"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
 
                     <!-- Center: primary nav + rotate + delete cluster -->
@@ -408,7 +436,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <!-- Locked padlock -->
                                 <TextBlock Text="&#xE72E;"
-                                           FontFamily="Segoe MDL2 Assets"
+                                           FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="11"
                                            VerticalAlignment="Center"
                                            Margin="0,0,7,0"
@@ -416,7 +444,7 @@
                                            Visibility="{Binding IsExtensionUnlocked, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}" />
                                 <!-- Unlocked pencil-edit -->
                                 <TextBlock Text="&#xE70F;"
-                                           FontFamily="Segoe MDL2 Assets"
+                                           FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="11"
                                            VerticalAlignment="Center"
                                            Margin="0,0,7,0"
