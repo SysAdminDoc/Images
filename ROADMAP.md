@@ -7,7 +7,7 @@ Effort tags: **S** ≤ 2 days · **M** ≤ 1 week · **L** > 1 week · **XL** mu
 
 > **Vision**: One Windows app that replaces Photos, IrfanView, XnConvert, Upscayl, and a light Lightroom — by cannibalising the best ideas from a dozen OSS/freeware projects. Local-first, fast, dark-mode, no cloud, no subscription. The killer features are **CLIP semantic search** on a local library, **live inline rename** (already shipped), **Squoosh-style visual-diff converter**, and — differentiator nobody else ships — **network-egress transparency**: the viewer never touches the network silently, and you can see every call it makes.
 
-## Current state (v0.1.4 — shipped 2026-04-24)
+## Current state (v0.1.5 — shipped 2026-04-24)
 
 Core viewer. Natural-sort folder nav. Zoom/pan/rotate. Live inline rename with 600 ms debounce, conflict resolution, 10-deep undo stack. Drag-drop. FSW. Catppuccin Mocha dark theme. ~100 formats via WIC + Magick.NET 14.13.0. **Animated GIFs play inline** (V20-15 core shipped). **>256 MB files decode via MemoryMappedFile view** (V20-06). Framework-dependent win-x64 portable zip **and Inno Setup installer** ship on every release (D-01b). Branded (icon.ico multi-res + banner + logo.png WPF Resource). Toolbar + nav-arrow glyphs render on Win11 IoT / enterprise images that previously showed tofu blocks (icon-font fallback fix). No persistence, no editor, no organizer, no batch.
 
@@ -31,6 +31,25 @@ Companion research:
 - [ ] **V02-07** *P2* — "Copy crash details + open GitHub Issue" dialog on unhandled exception. No network call. [O-04]
 
 Promote `Unreleased` → `v0.1.2 — <date>` once V02-04 and V02-05 are complete.
+
+---
+
+## v0.1.5 — Input + discovery polish (factory iter-1 harvest, S, 1 day)
+
+Replenishes ROADMAP from Phase 3 scoring at `docs/research/iter-1-scored.md`. All additive, none touch the decoder or persistence layers. Composite scores in brackets.
+
+- [x] **V15-01** *P0* — **Mouse XButton1 / XButton2 bind to Prev / Next**. *(shipped v0.1.5 — `Window_PreviewMouseDown` in MainWindow.xaml.cs dispatches XButton1→Prev / XButton2→Next; TextBox focus short-circuits so in-progress renames aren't disturbed.)*
+- [x] **V15-02** *P0* — **Right-click context menu on viewport**. *(shipped v0.1.5 — 11-item ContextMenu bound on the viewport Grid; new `SetAsWallpaperCommand` → `WallpaperService` copies to `%LOCALAPPDATA%\Images\wallpaper\current.<ext>` before `SystemParametersInfo(SPI_SETDESKWALLPAPER)` so renames don't break the desktop. Themed MenuItem / Separator / ContextMenu styles added to DarkTheme.xaml.)*
+- [x] **V15-03** *P0* — **Keyboard cheatsheet overlay** (`?` key). *(shipped v0.1.5 — `ShowCheatsheet` VM flag, full-width translucent overlay in MainWindow.xaml groups Navigate / View / File shortcuts; any key dismisses and swallows the key so the shortcut doesn't double-fire.)*
+- [x] **V15-04** *P0* — **Ctrl+Shift+R reload current image**. *(shipped v0.1.5 — `ReloadCommand` re-runs `LoadCurrent` on the same path; rotation + flip state preserved across reload.)*
+- [x] **V15-05** *P0* — **Shift + scroll-wheel pans horizontally**. *(shipped v0.1.5 — `ZoomPanImage.OnWheel` branches on `ModifierKeys.Shift`, translating X by ±80 px per notch.)*
+- [x] **V15-06** *P1* — **About dialog**. *(shipped v0.1.5 — new `AboutWindow.xaml` + `AboutWindow.xaml.cs` + `AppInfo` service; binds version / ProductVersion-with-SHA / .NET runtime / OS description / decoder list; GitHub + Crash-log-folder buttons; dark native caption applied.)*
+- [x] **V15-07** *P1* — **F11 toggles fullscreen**. *(shipped v0.1.5 — `MainWindow.ToggleFullscreen` saves WindowState/Style, flips to None + Maximized, collapses the side panel via `IsFullscreen` VM flag; Escape also exits fullscreen.)*
+- [x] **V15-08** *P1* — **Flip horizontal / vertical**. *(shipped v0.1.5 — `FlipHorizontal` / `FlipVertical` DPs on ZoomPanImage; flip ScaleTransform sits before rotate in the TransformGroup so flip H flips in image frame, not post-rotation frame.)*
+- [x] **V15-09** *P1* — **Unhandled-exception → text crash log** at `%LOCALAPPDATA%\Images\crash.log`. *(shipped v0.1.5 — new `CrashLog` service captures AppDomain + Dispatcher + TaskScheduler exceptions with version + runtime + OS + full inner-exception chain; thread-safe Append method reusable for non-fatal diagnostics.)*
+- [ ] **V15-10** *P2* — **Print current image**. `PrintDialog` → `FixedDocument` with one page scaled to fit paper dimensions (portrait if image is portrait, landscape otherwise). No layout options this version. Composite: 24. [B22 / NOW-10] *(deferred from this iteration — candidate for v0.1.6 polish run.)*
+
+Deferred from Phase 3 NOW tier to iter-2: **NOW-05 window-state + recent-folders JSON persistence** — pushed into V20-02 settings work so the persistence layer lands in one place.
 
 ---
 

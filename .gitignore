@@ -57,6 +57,7 @@ Desktop.ini
 CLAUDE.md
 CODEX_CHANGELOG.md
 .claude/
+.claude-octopus/
 
 ## Factory loop working state
 .factory/
