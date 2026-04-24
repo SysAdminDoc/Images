@@ -7,7 +7,8 @@ namespace Images.ViewModels;
 
 /// <summary>
 /// Overrides the built-in BooleanToVisibilityConverter with an "Inverse" parameter.
-/// Registered in DarkTheme.xaml under the key "BoolToVis" so XAML keeps using the familiar name.
+/// Registered in Themes/DarkTheme.xaml under the key "BoolToVis" so every view
+/// can reference it as {StaticResource BoolToVis} without a per-view declaration.
 /// </summary>
 public sealed class BooleanToVisibilityConverter : IValueConverter
 {

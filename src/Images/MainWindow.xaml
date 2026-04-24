@@ -20,8 +20,6 @@
     </Window.DataContext>
 
     <Window.Resources>
-        <vm:BooleanToVisibilityConverter x:Key="BoolToVis" />
-
         <Style x:Key="StatusDot" TargetType="Ellipse">
             <Setter Property="Width" Value="10" />
             <Setter Property="Height" Value="10" />

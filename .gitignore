@@ -53,3 +53,6 @@ Desktop.ini
 CLAUDE.md
 CODEX_CHANGELOG.md
 .claude/
+
+## Factory loop working state
+.factory/

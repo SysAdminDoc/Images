@@ -43,6 +43,21 @@ public sealed class MainViewModel : ObservableObject
         UndoRenameCommand = new RelayCommand(p => UndoOne(p as RenameService.UndoEntry), p => p is RenameService.UndoEntry);
 
         _rename.Renamed += (_, e) => PushUndoEntry(e);
+
+        // External file add/remove/rename from Explorer or another app re-enumerates the folder.
+        // Resync position chip + stale-current guard (if our current file vanished, advance).
+        _nav.ListChanged += OnDirectoryListChanged;
+    }
+
+    private void OnDirectoryListChanged(object? sender, EventArgs e)
+    {
+        Raise(nameof(PositionText));
+        if (CurrentPath is not null && !File.Exists(CurrentPath))
+        {
+            // Current file was deleted externally — pick whatever slot the navigator landed on.
+            if (_nav.CurrentPath is string fallback) LoadCurrent();
+            else { CurrentImage = null; CurrentPath = null; Raise(nameof(HasImage)); }
+        }
     }
 
     // -------------------- Image state --------------------

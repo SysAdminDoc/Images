@@ -22,10 +22,11 @@ public static class ImageLoader
             _ = fs.Read(bytes, 0, bytes.Length);
         }
 
-        // Primary: WIC via BitmapImage.
+        // Primary: WIC via BitmapImage. CacheOption.OnLoad fully reads the stream during EndInit,
+        // so the MemoryStream can be disposed immediately after.
         try
         {
-            var ms = new MemoryStream(bytes, writable: false);
+            using var ms = new MemoryStream(bytes, writable: false);
             var bmp = new BitmapImage();
             bmp.BeginInit();
             bmp.CacheOption = BitmapCacheOption.OnLoad;
@@ -35,7 +36,14 @@ public static class ImageLoader
             bmp.Freeze();
             return new LoadResult(bmp, bmp.PixelWidth, bmp.PixelHeight, "WIC");
         }
-        catch
+        // Narrow: only fall through for decode/format failures. Let OOM, stack overflow,
+        // and thread aborts bubble up — those aren't "try the other decoder" situations.
+        catch (Exception ex) when (
+            ex is NotSupportedException or
+                  System.Runtime.InteropServices.COMException or
+                  FileFormatException or
+                  InvalidOperationException or
+                  ArgumentException)
         {
             // Fall through to Magick.NET
         }

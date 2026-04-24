@@ -1,5 +1,6 @@
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows.Threading;
 
 namespace Images.Services;
 
@@ -27,6 +28,9 @@ public sealed class DirectoryNavigator : IDisposable
 
     private List<string> _files = new();
     private string? _folder;
+    private FileSystemWatcher? _watcher;
+    private DispatcherTimer? _watchDebounce;
+    private readonly Dispatcher _dispatcher;
 
     public IReadOnlyList<string> Files => _files;
     public int Count => _files.Count;
@@ -36,7 +40,11 @@ public sealed class DirectoryNavigator : IDisposable
 
     public event EventHandler? ListChanged;
 
-    public DirectoryNavigator() { }
+    public DirectoryNavigator()
+    {
+        // Captured so FSW event callbacks (raised on a ThreadPool thread) can marshal back.
+        _dispatcher = Dispatcher.CurrentDispatcher;
+    }
 
     /// <summary>
     /// Load the folder containing <paramref name="path"/> and point CurrentIndex at it.
@@ -45,14 +53,23 @@ public sealed class DirectoryNavigator : IDisposable
     {
         if (string.IsNullOrWhiteSpace(path)) return;
 
-        // Normalize to absolute Windows-style path so matching against Directory.EnumerateFiles results succeeds.
         string full;
         try { full = Path.GetFullPath(path); }
         catch { return; }
         if (!File.Exists(full)) return;
 
         var folder = Path.GetDirectoryName(full)!;
+
+        // Short-circuit: if we're already watching this folder, just move the index.
+        if (_folder is not null && string.Equals(_folder, folder, StringComparison.OrdinalIgnoreCase))
+        {
+            CurrentIndex = _files.FindIndex(f => string.Equals(f, full, StringComparison.OrdinalIgnoreCase));
+            if (CurrentIndex < 0 && _files.Count > 0) CurrentIndex = 0;
+            return;
+        }
+
         Rescan(folder);
+        AttachWatcher(folder);
         CurrentIndex = _files.FindIndex(f => string.Equals(f, full, StringComparison.OrdinalIgnoreCase));
         if (CurrentIndex < 0 && _files.Count > 0)
         {
@@ -131,14 +148,88 @@ public sealed class DirectoryNavigator : IDisposable
             return;
         }
 
-        var found = Directory
-            .EnumerateFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
-            .Where(f => SupportedExtensions.Contains(Path.GetExtension(f)))
-            .ToList();
+        List<string> found;
+        try
+        {
+            found = Directory
+                .EnumerateFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
+                .Where(f => SupportedExtensions.Contains(Path.GetExtension(f)))
+                .ToList();
+        }
+        // IO/permission races: disk disconnect mid-enumeration, ACL denial, or path going away
+        // between the Exists() check and the enumerator. Leave the prior list intact and still
+        // signal ListChanged so the UI can re-evaluate (it may show "no image").
+        catch (Exception ex) when (ex is UnauthorizedAccessException or DirectoryNotFoundException or IOException or System.Security.SecurityException)
+        {
+            ListChanged?.Invoke(this, EventArgs.Empty);
+            return;
+        }
 
         found.Sort(NaturalCompare);
         _files = found;
         ListChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void AttachWatcher(string folder)
+    {
+        DetachWatcher();
+        try
+        {
+            _watcher = new FileSystemWatcher(folder)
+            {
+                IncludeSubdirectories = false,
+                NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite,
+                EnableRaisingEvents = true
+            };
+            _watcher.Created += OnFsEvent;
+            _watcher.Deleted += OnFsEvent;
+            _watcher.Renamed += OnFsEvent;
+        }
+        // Network path vanished, path too long, permission denied — degrade to "no watcher,
+        // user can still F5". Never let an FSW failure crash the viewer.
+        catch (Exception ex) when (ex is ArgumentException or FileNotFoundException or System.Security.SecurityException or IOException)
+        {
+            _watcher = null;
+        }
+    }
+
+    private void DetachWatcher()
+    {
+        if (_watcher is null) return;
+        try
+        {
+            _watcher.EnableRaisingEvents = false;
+            _watcher.Created -= OnFsEvent;
+            _watcher.Deleted -= OnFsEvent;
+            _watcher.Renamed -= OnFsEvent;
+            _watcher.Dispose();
+        }
+        catch { /* disposal best-effort */ }
+        _watcher = null;
+    }
+
+    private void OnFsEvent(object sender, FileSystemEventArgs e)
+    {
+        // Filter early on the background thread — ignore non-image changes.
+        var ext = Path.GetExtension(e.Name ?? string.Empty);
+        if (!string.IsNullOrEmpty(ext) && !SupportedExtensions.Contains(ext)) return;
+
+        // Debounce on the UI thread: FSW often fires a burst (create + several write events)
+        // for a single file copy. One Refresh per quiet period is enough.
+        _dispatcher.BeginInvoke(new Action(() =>
+        {
+            _watchDebounce ??= new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+            _watchDebounce.Tick -= WatchDebounce_Tick;
+            _watchDebounce.Tick += WatchDebounce_Tick;
+            _watchDebounce.Stop();
+            _watchDebounce.Start();
+        }));
+    }
+
+    private void WatchDebounce_Tick(object? sender, EventArgs e)
+    {
+        _watchDebounce?.Stop();
+        Refresh();
     }
 
     [DllImport("shlwapi.dll", CharSet = CharSet.Unicode)]
@@ -146,5 +237,14 @@ public sealed class DirectoryNavigator : IDisposable
 
     private static int NaturalCompare(string a, string b) => StrCmpLogicalW(a, b);
 
-    public void Dispose() { }
+    public void Dispose()
+    {
+        DetachWatcher();
+        if (_watchDebounce is not null)
+        {
+            _watchDebounce.Stop();
+            _watchDebounce.Tick -= WatchDebounce_Tick;
+            _watchDebounce = null;
+        }
+    }
 }

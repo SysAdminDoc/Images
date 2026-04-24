@@ -25,7 +25,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Conflict-safe** — if a target name already exists in the folder, the rename preview shows exactly what it will become (`name (2).jpg`) before it commits.
 - **Recent Renames panel** — the last 10 renames are stacked on the side with **Undo** buttons.
 - **Full directory navigation** — open one photo, scroll through the whole folder with ← / → keys or the hover arrows. Wraps at the ends. Natural-sorted so `IMG_2.jpg` comes before `IMG_10.jpg`.
-- **Zoom + pan** — mouse wheel to zoom, drag to pan, double-click to toggle fit/1:1.
+- **Zoom + pan** — mouse wheel to zoom in/out about the cursor, drag to pan, double-click to toggle fit/1:1.
 - **Rotate**, **delete-to-Recycle-Bin**, **Reveal in Explorer**, **Copy path**.
 - **No confirmation dialogs** — actions happen immediately with toast feedback.
 
