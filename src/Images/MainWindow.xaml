@@ -14,6 +14,7 @@
         Drop="Window_Drop"
         DragOver="Window_DragOver"
         KeyDown="Window_KeyDown"
+        PreviewMouseDown="Window_PreviewMouseDown"
         Background="{StaticResource BaseBrush}"
         TextOptions.TextFormattingMode="Display"
         UseLayoutRounding="True">

@@ -48,6 +48,29 @@ public partial class MainWindow : Window
         NextArrow.BeginAnimation(OpacityProperty, anim);
     }
 
+    // V15-01: 5-button mouse browsers have trained everyone that XButton1 = back / XButton2 =
+    // forward. Hooking PreviewMouseDown at the window level catches the event before any
+    // element captures it (e.g. drag-pan on ZoomPanImage). We gate on HasImage via the command
+    // CanExecute; when no image is loaded nothing fires. LeftButton / RightButton / MiddleButton
+    // are untouched so drag-pan + the V15-02 context menu coexist.
+    private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        // TextBoxes should not be hijacked — rename-in-progress shouldn't eat XButton events.
+        if (Keyboard.FocusedElement is TextBox) return;
+
+        switch (e.ChangedButton)
+        {
+            case MouseButton.XButton1:
+                Vm.PrevCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case MouseButton.XButton2:
+                Vm.NextCommand.Execute(null);
+                e.Handled = true;
+                break;
+        }
+    }
+
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
         // Don't steal keys from the rename editor.
