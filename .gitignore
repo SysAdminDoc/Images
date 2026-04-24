@@ -38,6 +38,10 @@ artifacts/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
+## Installer build outputs — Inno Setup compiled artifacts live here
+installer/output/
+installer/*.exe
+
 ## OS
 Thumbs.db
 ehthumbs.db
