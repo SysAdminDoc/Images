@@ -1,0 +1,429 @@
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
+using Images.Services;
+
+namespace Images.ViewModels;
+
+public sealed class MainViewModel : ObservableObject
+{
+    private readonly DirectoryNavigator _nav = new();
+    private readonly RenameService _rename = new();
+    private readonly DispatcherTimer _renameTimer;
+    private readonly DispatcherTimer _toastTimer;
+
+    private bool _suppressStemChange;
+    private string _committedStemOnDisk = string.Empty;
+
+    public MainViewModel()
+    {
+        _renameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(600) };
+        _renameTimer.Tick += (_, _) => { _renameTimer.Stop(); FlushPendingRename(); };
+
+        _toastTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.5) };
+        _toastTimer.Tick += (_, _) => { _toastTimer.Stop(); ToastMessage = null; };
+
+        OpenCommand = new RelayCommand(OpenFileDialog);
+        NextCommand = new RelayCommand(Next, () => HasImage);
+        PrevCommand = new RelayCommand(Prev, () => HasImage);
+        FirstCommand = new RelayCommand(First, () => HasImage);
+        LastCommand = new RelayCommand(Last, () => HasImage);
+        DeleteCommand = new RelayCommand(DeleteCurrent, () => HasImage);
+        RotateCwCommand = new RelayCommand(() => Rotate(90), () => HasImage);
+        RotateCcwCommand = new RelayCommand(() => Rotate(-90), () => HasImage);
+        RevealCommand = new RelayCommand(RevealInExplorer, () => HasImage);
+        CopyPathCommand = new RelayCommand(CopyPath, () => HasImage);
+        RefreshCommand = new RelayCommand(() => { _nav.Refresh(); RefreshFromNav(); });
+        CommitRenameCommand = new RelayCommand(() => { _renameTimer.Stop(); FlushPendingRename(); });
+        CancelRenameCommand = new RelayCommand(CancelRenameEdit);
+        UnlockExtensionCommand = new RelayCommand(() => IsExtensionUnlocked = !IsExtensionUnlocked);
+        UndoRenameCommand = new RelayCommand(p => UndoOne(p as RenameService.UndoEntry), p => p is RenameService.UndoEntry);
+
+        _rename.Renamed += (_, e) => PushUndoEntry(e);
+    }
+
+    // -------------------- Image state --------------------
+
+    private ImageSource? _currentImage;
+    public ImageSource? CurrentImage { get => _currentImage; private set => Set(ref _currentImage, value); }
+
+    private string? _currentPath;
+    public string? CurrentPath
+    {
+        get => _currentPath;
+        private set
+        {
+            if (Set(ref _currentPath, value))
+            {
+                Raise(nameof(HasImage));
+                Raise(nameof(CurrentFileName));
+                Raise(nameof(CurrentFolder));
+                Raise(nameof(PositionText));
+            }
+        }
+    }
+
+    public bool HasImage => !string.IsNullOrEmpty(CurrentPath) && File.Exists(CurrentPath);
+    public string CurrentFileName => CurrentPath is null ? "" : Path.GetFileName(CurrentPath);
+    public string CurrentFolder => CurrentPath is null ? "" : Path.GetDirectoryName(CurrentPath) ?? "";
+
+    private int _pixelWidth;
+    public int PixelWidth { get => _pixelWidth; private set { if (Set(ref _pixelWidth, value)) Raise(nameof(DimensionsText)); } }
+
+    private int _pixelHeight;
+    public int PixelHeight { get => _pixelHeight; private set { if (Set(ref _pixelHeight, value)) Raise(nameof(DimensionsText)); } }
+
+    public string DimensionsText => PixelWidth > 0 ? $"{PixelWidth} × {PixelHeight}" : "";
+
+    private long _fileSize;
+    public string FileSizeText => _fileSize <= 0 ? "" : FormatSize(_fileSize);
+
+    public string PositionText =>
+        _nav.Count == 0 ? "" : $"{_nav.CurrentIndex + 1} / {_nav.Count}";
+
+    private double _rotation;
+    public double Rotation { get => _rotation; private set => Set(ref _rotation, value); }
+
+    private string? _decoderUsed;
+    public string? DecoderUsed { get => _decoderUsed; private set => Set(ref _decoderUsed, value); }
+
+    // -------------------- Rename editor state --------------------
+
+    private string _editableStem = string.Empty;
+    public string EditableStem
+    {
+        get => _editableStem;
+        set
+        {
+            if (!Set(ref _editableStem, value)) return;
+            if (_suppressStemChange) return;
+            Raise(nameof(RenamePreview));
+            RenameStatus = RenameStatusKind.Pending;
+            _renameTimer.Stop();
+            _renameTimer.Start();
+        }
+    }
+
+    private string _extension = string.Empty;
+    public string Extension
+    {
+        get => _extension;
+        set
+        {
+            // Normalize user-typed extension: ensure leading dot, no spaces/invalid chars.
+            var normalized = value?.Trim() ?? string.Empty;
+            if (normalized.Length > 0 && !normalized.StartsWith('.'))
+                normalized = "." + normalized;
+            if (!Set(ref _extension, normalized)) return;
+            Raise(nameof(RenamePreview));
+            if (IsExtensionUnlocked)
+            {
+                RenameStatus = RenameStatusKind.Pending;
+                _renameTimer.Stop();
+                _renameTimer.Start();
+            }
+        }
+    }
+
+    private bool _isExtensionUnlocked;
+    public bool IsExtensionUnlocked { get => _isExtensionUnlocked; set => Set(ref _isExtensionUnlocked, value); }
+
+    /// <summary>
+    /// Preview of what the target name will be after commit — including any " (2)" conflict suffix.
+    /// </summary>
+    public string RenamePreview
+    {
+        get
+        {
+            if (CurrentPath is null) return "";
+            var clean = RenameService.Sanitize(EditableStem);
+            if (string.IsNullOrEmpty(clean)) return "";
+            var target = RenameService.ResolveTargetPath(
+                Path.GetDirectoryName(CurrentPath)!, clean, Extension, CurrentPath);
+            var targetName = Path.GetFileName(target);
+            return string.Equals(targetName, Path.GetFileName(CurrentPath), StringComparison.OrdinalIgnoreCase)
+                ? ""
+                : $"→ {targetName}";
+        }
+    }
+
+    public enum RenameStatusKind { Idle, Pending, Saved, Conflict, Error }
+
+    private RenameStatusKind _renameStatus = RenameStatusKind.Idle;
+    public RenameStatusKind RenameStatus { get => _renameStatus; set => Set(ref _renameStatus, value); }
+
+    // -------------------- Recent renames --------------------
+
+    public ObservableCollection<RenameService.UndoEntry> RecentRenames { get; } = new();
+
+    private void PushUndoEntry(RenameService.UndoEntry entry)
+    {
+        RecentRenames.Insert(0, entry);
+        while (RecentRenames.Count > 10) RecentRenames.RemoveAt(RecentRenames.Count - 1);
+    }
+
+    private void UndoOne(RenameService.UndoEntry? entry)
+    {
+        if (entry is null) return;
+        try
+        {
+            var result = _rename.Revert(entry);
+            if (result is null)
+            {
+                Toast("Cannot undo — file no longer exists at that path");
+                RecentRenames.Remove(entry);
+                return;
+            }
+
+            RecentRenames.Remove(entry);
+
+            // If the reverted file is the currently open one, follow it.
+            if (string.Equals(CurrentPath, entry.FromPath, StringComparison.OrdinalIgnoreCase))
+            {
+                CurrentPath = result.ToPath;
+                _nav.UpdateCurrentPath(result.ToPath);
+                SyncRenameEditorFromDisk();
+            }
+            Toast($"Reverted to {Path.GetFileName(result.ToPath)}");
+        }
+        catch (Exception ex)
+        {
+            Toast($"Undo failed: {ex.Message}");
+        }
+    }
+
+    // -------------------- Toast --------------------
+
+    private string? _toast;
+    public string? ToastMessage { get => _toast; private set => Set(ref _toast, value); }
+
+    private void Toast(string message)
+    {
+        ToastMessage = message;
+        _toastTimer.Stop();
+        _toastTimer.Start();
+    }
+
+    // -------------------- Commands --------------------
+
+    public ICommand OpenCommand { get; }
+    public ICommand NextCommand { get; }
+    public ICommand PrevCommand { get; }
+    public ICommand FirstCommand { get; }
+    public ICommand LastCommand { get; }
+    public ICommand DeleteCommand { get; }
+    public ICommand RotateCwCommand { get; }
+    public ICommand RotateCcwCommand { get; }
+    public ICommand RevealCommand { get; }
+    public ICommand CopyPathCommand { get; }
+    public ICommand RefreshCommand { get; }
+    public ICommand CommitRenameCommand { get; }
+    public ICommand CancelRenameCommand { get; }
+    public ICommand UnlockExtensionCommand { get; }
+    public ICommand UndoRenameCommand { get; }
+
+    // -------------------- Navigation --------------------
+
+    public void OpenFile(string path)
+    {
+        FlushPendingRename();
+        _nav.Open(path);
+        LoadCurrent();
+    }
+
+    private void OpenFileDialog()
+    {
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Open image",
+            Filter = "Images|" + string.Join(";", DirectoryNavigator.SupportedExtensions.Select(e => "*" + e))
+                     + "|All files|*.*"
+        };
+        if (dlg.ShowDialog() == true) OpenFile(dlg.FileName);
+    }
+
+    private void Next() { FlushPendingRename(); if (_nav.MoveNext()) LoadCurrent(); }
+    private void Prev() { FlushPendingRename(); if (_nav.MovePrevious()) LoadCurrent(); }
+    private void First() { FlushPendingRename(); if (_nav.MoveFirst()) LoadCurrent(); }
+    private void Last() { FlushPendingRename(); if (_nav.MoveLast()) LoadCurrent(); }
+
+    private void LoadCurrent()
+    {
+        var path = _nav.CurrentPath;
+        if (path is null)
+        {
+            CurrentImage = null;
+            CurrentPath = null;
+            PixelWidth = PixelHeight = 0;
+            _fileSize = 0;
+            Raise(nameof(FileSizeText));
+            return;
+        }
+
+        try
+        {
+            var res = ImageLoader.Load(path);
+            CurrentImage = res.Image;
+            PixelWidth = res.PixelWidth;
+            PixelHeight = res.PixelHeight;
+            DecoderUsed = res.DecoderUsed;
+            Rotation = 0;
+        }
+        catch (Exception ex)
+        {
+            CurrentImage = null;
+            Toast($"Could not decode: {ex.Message}");
+        }
+
+        CurrentPath = path;
+        try { _fileSize = new FileInfo(path).Length; } catch { _fileSize = 0; }
+        Raise(nameof(FileSizeText));
+
+        SyncRenameEditorFromDisk();
+    }
+
+    private void SyncRenameEditorFromDisk()
+    {
+        if (CurrentPath is null) { Extension = ""; _committedStemOnDisk = ""; return; }
+        var stem = Path.GetFileNameWithoutExtension(CurrentPath);
+        var ext = Path.GetExtension(CurrentPath);
+        _committedStemOnDisk = stem;
+        Extension = ext;
+        IsExtensionUnlocked = false;
+
+        _suppressStemChange = true;
+        EditableStem = stem;
+        _suppressStemChange = false;
+        RenameStatus = RenameStatusKind.Idle;
+        Raise(nameof(RenamePreview));
+    }
+
+    // -------------------- Rename --------------------
+
+    public void FlushPendingRename()
+    {
+        _renameTimer.Stop();
+        if (CurrentPath is null) return;
+        if (string.Equals(EditableStem, _committedStemOnDisk, StringComparison.Ordinal) && !IsExtensionUnlocked)
+        {
+            RenameStatus = RenameStatusKind.Idle;
+            return;
+        }
+
+        try
+        {
+            var newPath = _rename.Commit(CurrentPath, EditableStem, Extension);
+            if (string.Equals(newPath, CurrentPath, StringComparison.OrdinalIgnoreCase))
+            {
+                RenameStatus = RenameStatusKind.Idle;
+                return;
+            }
+
+            _nav.UpdateCurrentPath(newPath);
+            CurrentPath = newPath;
+            _committedStemOnDisk = Path.GetFileNameWithoutExtension(newPath);
+            Extension = Path.GetExtension(newPath);
+
+            var conflicted = !string.Equals(
+                _committedStemOnDisk,
+                RenameService.Sanitize(EditableStem),
+                StringComparison.Ordinal);
+
+            RenameStatus = conflicted ? RenameStatusKind.Conflict : RenameStatusKind.Saved;
+            Toast(conflicted
+                ? $"Saved as {Path.GetFileName(newPath)} (name taken)"
+                : $"Renamed → {Path.GetFileName(newPath)}");
+
+            if (conflicted)
+            {
+                _suppressStemChange = true;
+                EditableStem = _committedStemOnDisk;
+                _suppressStemChange = false;
+            }
+            Raise(nameof(RenamePreview));
+        }
+        catch (Exception ex)
+        {
+            RenameStatus = RenameStatusKind.Error;
+            Toast($"Rename failed: {ex.Message}");
+        }
+    }
+
+    private void CancelRenameEdit()
+    {
+        _renameTimer.Stop();
+        _suppressStemChange = true;
+        EditableStem = _committedStemOnDisk;
+        _suppressStemChange = false;
+        RenameStatus = RenameStatusKind.Idle;
+        Raise(nameof(RenamePreview));
+    }
+
+    // -------------------- Other actions --------------------
+
+    private void DeleteCurrent()
+    {
+        if (CurrentPath is null || !File.Exists(CurrentPath)) return;
+        _renameTimer.Stop();
+
+        var toDelete = CurrentPath;
+        try
+        {
+            Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
+                toDelete,
+                Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
+                Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin,
+                Microsoft.VisualBasic.FileIO.UICancelOption.DoNothing);
+
+            _nav.RemoveCurrent();
+            Toast($"Sent to Recycle Bin: {Path.GetFileName(toDelete)}");
+            if (_nav.CurrentPath is null) { CurrentImage = null; CurrentPath = null; return; }
+            LoadCurrent();
+        }
+        catch (Exception ex)
+        {
+            Toast($"Delete failed: {ex.Message}");
+        }
+    }
+
+    private void Rotate(double delta)
+    {
+        Rotation = (Rotation + delta) % 360;
+    }
+
+    private void RevealInExplorer()
+    {
+        if (CurrentPath is null) return;
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = $"/select,\"{CurrentPath}\"",
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex) { Toast($"Could not open Explorer: {ex.Message}"); }
+    }
+
+    private void CopyPath()
+    {
+        if (CurrentPath is null) return;
+        try { Clipboard.SetText(CurrentPath); Toast("Copied path"); }
+        catch (Exception ex) { Toast($"Copy failed: {ex.Message}"); }
+    }
+
+    private void RefreshFromNav() => LoadCurrent();
+
+    private static string FormatSize(long bytes)
+    {
+        string[] units = { "B", "KB", "MB", "GB" };
+        double v = bytes;
+        int i = 0;
+        while (v >= 1024 && i < units.Length - 1) { v /= 1024; i++; }
+        return $"{v:0.##} {units[i]}";
+    }
+}

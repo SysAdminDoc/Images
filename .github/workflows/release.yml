@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version (e.g. 0.1.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build -c Release --no-restore
+
+      - name: Publish (framework-dependent, win-x64)
+        run: >
+          dotnet publish src/Images
+          -c Release
+          -r win-x64
+          --no-self-contained
+          -p:PublishSingleFile=false
+          -p:Version=${{ github.event.inputs.version }}
+          -o publish
+
+      - name: Package zip
+        shell: pwsh
+        run: |
+          $zip = "Images-v${{ github.event.inputs.version }}-win-x64.zip"
+          Compress-Archive -Path publish\* -DestinationPath $zip -Force
+          "ZIP=$zip" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $tag = "v${{ github.event.inputs.version }}"
+          $exists = gh release view $tag 2>$null
+          if (-not $exists) {
+            gh release create $tag --title $tag --notes "Images $tag"
+          }
+          gh release upload $tag $env:ZIP --clobber
