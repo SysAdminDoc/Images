@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Security.Cryptography;
 using ImageMagick;
 
 namespace Images.Services;
@@ -52,13 +54,90 @@ public static class CodecRuntime
                 GhostscriptAvailable: ghostscriptDirectory is not null,
                 GhostscriptDirectory: ghostscriptDirectory,
                 GhostscriptSource: ghostscriptSource,
-                MagickStatus: "Magick.NET 14.13 configured",
+                MagickStatus: $"Magick.NET {GetMagickAssemblyVersion()} configured",
                 DocumentStatus: ghostscriptDirectory is null
                     ? "EPS/PDF/PS/AI previews need bundled or installed Ghostscript"
                     : $"EPS/PDF/PS/AI previews enabled via {ghostscriptSource}");
 
             _configured = true;
             return _status;
+        }
+    }
+
+    /// <summary>
+    /// Returns the assembly-informational version of Magick.NET, falling back to the file
+    /// version on failure. Used by both runtime status and CLI/About reports so the version
+    /// shown to users always matches what's actually loaded into the process.
+    /// </summary>
+    public static string GetMagickAssemblyVersion()
+    {
+        try
+        {
+            var asm = typeof(MagickNET).Assembly;
+            var info = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            if (!string.IsNullOrWhiteSpace(info)) return info;
+            return asm.GetName().Version?.ToString() ?? "unknown";
+        }
+        catch
+        {
+            return "unknown";
+        }
+    }
+
+    /// <summary>
+    /// Returns the on-disk path of the loaded Magick.NET managed assembly, when discoverable.
+    /// Used in provenance reports (About + <c>--system-info</c>) so users can verify they
+    /// are running an app-local copy and not something shimmed in from elsewhere.
+    /// </summary>
+    public static string? GetMagickAssemblyPath()
+    {
+        try
+        {
+            var loc = typeof(MagickNET).Assembly.Location;
+            return string.IsNullOrEmpty(loc) ? null : loc;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Returns the path to the Ghostscript shared library actually configured for Magick.NET,
+    /// or <c>null</c> when Ghostscript is not available. The path is also where the SHA-256
+    /// fingerprint in <see cref="GetGhostscriptDllSha256"/> is computed from.
+    /// </summary>
+    public static string? GetGhostscriptDllPath()
+    {
+        var status = Status;
+        if (status.GhostscriptDirectory is null) return null;
+
+        var dll64 = Path.Combine(status.GhostscriptDirectory, "gsdll64.dll");
+        if (File.Exists(dll64)) return dll64;
+        var dll32 = Path.Combine(status.GhostscriptDirectory, "gsdll32.dll");
+        if (File.Exists(dll32)) return dll32;
+        return null;
+    }
+
+    /// <summary>
+    /// Hex-encoded SHA-256 of the configured Ghostscript shared library, or <c>null</c> when
+    /// the library is missing/unreadable. Provenance: lets the user (or release maintainer)
+    /// verify the bundled DLL matches the approved redistributable that was reviewed.
+    /// </summary>
+    public static string? GetGhostscriptDllSha256()
+    {
+        var path = GetGhostscriptDllPath();
+        if (path is null) return null;
+
+        try
+        {
+            using var stream = File.OpenRead(path);
+            var hash = SHA256.HashData(stream);
+            return Convert.ToHexStringLower(hash);
+        }
+        catch
+        {
+            return null;
         }
     }
 

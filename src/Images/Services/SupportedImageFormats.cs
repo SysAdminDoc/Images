@@ -99,4 +99,86 @@ public static class SupportedImageFormats
             ext.Equals(".wmf", StringComparison.OrdinalIgnoreCase)) return "vector";
         return "image";
     }
+
+    /// <summary>
+    /// Human-readable family label for an extension — used by the capability matrix and
+    /// CLI report (<c>--codec-report</c>). Returns <c>null</c> when the extension is not
+    /// recognized; callers should display a generic "unknown" message in that case.
+    /// </summary>
+    public static string? FamilyLabelForExtension(string extension)
+    {
+        var ext = Normalize(extension);
+        if (string.IsNullOrEmpty(ext)) return null;
+
+        if (CommonExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
+            return "Common images";
+        if (DesignExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
+            return "Design and production";
+        if (PortableAndScientificExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
+            return "Portable and scientific";
+        if (VectorExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
+            return "Vector previews";
+        if (DocumentPreviewExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
+            return "Document previews";
+        if (RawExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
+            return "Camera RAW";
+        return null;
+    }
+
+    /// <summary>
+    /// Returns a short, human-readable hint for files Images cannot open. Suggestions are
+    /// keyed off the extension and point at the closest workflow Images actually supports
+    /// (export to a supported format, install Ghostscript, ship a different decoder, etc.).
+    /// Returns <c>null</c> when there's no specific guidance — the caller falls back to a
+    /// generic "unsupported file type" message in that case.
+    /// </summary>
+    public static string? SuggestionForUnsupported(string extension)
+    {
+        var ext = Normalize(extension);
+        if (string.IsNullOrEmpty(ext)) return null;
+
+        return ext switch
+        {
+            ".mp4" or ".mov" or ".m4v" or ".mkv" or ".webm" or ".avi" or ".wmv"
+                => "Images is a still-image viewer. Open video files in Films & TV, VLC, or mpv.",
+
+            ".mp3" or ".wav" or ".flac" or ".ogg" or ".aac" or ".m4a" or ".opus"
+                => "Audio files aren't viewable. Open them in Groove, foobar2000, or VLC.",
+
+            ".zip" or ".cbz" or ".rar" or ".cbr" or ".7z" or ".cb7"
+                => "Archive/comic-book mode is not built yet (V20-33). Extract the archive or wait for the next milestone.",
+
+            ".doc" or ".docx" or ".rtf" or ".odt" or ".pages"
+                => "Word-processor documents aren't images. Use Word, LibreOffice, or your default editor.",
+
+            ".xls" or ".xlsx" or ".ods" or ".numbers"
+                => "Spreadsheets aren't images. Open in Excel or LibreOffice Calc.",
+
+            ".ppt" or ".pptx" or ".odp" or ".key"
+                => "Presentations aren't images. Open in PowerPoint, Keynote, or LibreOffice Impress.",
+
+            ".txt" or ".md" or ".log" or ".json" or ".xml" or ".html" or ".htm"
+                => "Text files aren't images. Open in Notepad, VS Code, or a browser.",
+
+            ".indd" or ".idml" or ".cdr" or ".afphoto" or ".afdesign" or ".sketch"
+                => "Native design-suite documents aren't supported. Export the artboards to PSD, PDF, PNG, or TIFF and open the export.",
+
+            ".xcf"
+                => "GIMP's native XCF should usually open. If this file fails, save a flattened PNG/TIFF copy from GIPM and open that.",
+
+            ".heif" or ".heic" or ".hif"
+                => "HEIC/HEIF should open through Magick.NET. If this file fails, install the Microsoft HEIF Image Extension or convert to PNG/JPG first.",
+
+            ".pdf" or ".ps" or ".ps2" or ".ps3" or ".eps" or ".epsf" or ".epsi" or ".ai"
+                => "Document previews require Ghostscript. Install Ghostscript or place an approved runtime in the app's Codecs\\Ghostscript folder.",
+
+            _ => null
+        };
+    }
+
+    private static string Normalize(string extension)
+    {
+        if (string.IsNullOrEmpty(extension)) return string.Empty;
+        return extension.StartsWith('.') ? extension.ToLowerInvariant() : "." + extension.ToLowerInvariant();
+    }
 }

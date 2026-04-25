@@ -13,6 +13,19 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // V20-37: CLI report modes (--system-info / --codec-report / --version / --help).
+        // Resolved BEFORE codec runtime configuration so a missing/broken codec doesn't take
+        // the diagnostic surface down with it; CliReport.Run reaches into CodecRuntime.Status
+        // which configures lazily on first access. Once a CLI mode runs we exit immediately —
+        // no MainWindow, no FSW, no SQLite session, no update check.
+        var cliMode = CliReport.TryResolveMode(e.Args);
+        if (cliMode is not null)
+        {
+            var exitCode = CliReport.Run(cliMode.Value);
+            Shutdown(exitCode);
+            return;
+        }
+
         var info = AppInfo.Current;
         _log.LogInformation("Images {Version} starting — {Runtime} on {Os}",
             info.DisplayVersion, info.RuntimeDescription, info.OsDescription);

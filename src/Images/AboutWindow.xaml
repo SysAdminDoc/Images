@@ -191,6 +191,60 @@
                 </Border>
             </StackPanel>
 
+            <!-- Capability matrix (X-02) — per-family rows so "broad codec support" is auditable. -->
+            <TextBlock Style="{StaticResource SectionLabel}"
+                       Text="Capability matrix"
+                       Margin="1,18,0,10" />
+
+            <ItemsControl x:Name="CapabilityMatrixItems"
+                          AutomationProperties.Name="Codec capability matrix">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource Card}" Margin="0,0,0,8">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                               Style="{StaticResource Text.Caption}"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrush}"
+                                               Text="{Binding Family}" />
+                                    <TextBlock Grid.Column="1"
+                                               Style="{StaticResource Text.Caption}"
+                                               Foreground="{StaticResource SubtextBrush}"
+                                               Text="{Binding CountSummary}" />
+                                </Grid>
+                                <TextBlock Style="{StaticResource Text.Hint}"
+                                           Foreground="{StaticResource SubtextBrush}"
+                                           Margin="0,4,0,0"
+                                           Text="{Binding Facets}" />
+                                <TextBlock Style="{StaticResource Text.Hint}"
+                                           Foreground="{StaticResource SubtextBrush}"
+                                           Margin="0,2,0,0"
+                                           Text="{Binding RuntimeLine}" />
+                                <TextBlock Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,4,0,0"
+                                           Text="{Binding Notes}" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Runtime provenance — paths/versions/hashes for support and license review. -->
+            <TextBlock Style="{StaticResource SectionLabel}"
+                       Text="Runtime provenance"
+                       Margin="1,12,0,10" />
+
+            <Border Style="{StaticResource Card}">
+                <StackPanel x:Name="ProvenancePanel" />
+            </Border>
+
             <!-- V20-02: update-check opt-out surface. Persisted to settings.db. -->
             <CheckBox x:Name="UpdateCheckCheckBox"
                       Content="Automatically check for updates"
