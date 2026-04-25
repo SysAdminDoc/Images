@@ -45,23 +45,95 @@
                      this Grid, not to descendants. -->
                 <Grid.ContextMenu>
                     <ContextMenu Style="{StaticResource ViewportContextMenu}">
-                        <MenuItem Header="Open…"             Command="{Binding OpenCommand}"           InputGestureText="Ctrl+O" />
-                        <MenuItem Header="Reload"            Command="{Binding ReloadCommand}"         InputGestureText="Ctrl+Shift+R" />
-                        <MenuItem Header="Save a copy…"      Command="{Binding SaveAsCopyCommand}"     InputGestureText="Ctrl+Shift+S" />
-                        <MenuItem Header="Print…"            Command="{Binding PrintCommand}"          InputGestureText="Ctrl+P" />
+                        <MenuItem Header="Open…" Command="{Binding OpenCommand}" InputGestureText="Ctrl+O">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Reload" Command="{Binding ReloadCommand}" InputGestureText="Ctrl+Shift+R">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE72C;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Save a copy…" Command="{Binding SaveAsCopyCommand}" InputGestureText="Ctrl+Shift+S">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE74E;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Print…" Command="{Binding PrintCommand}" InputGestureText="Ctrl+P">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE749;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <Separator />
-                        <MenuItem Header="Reveal in Explorer" Command="{Binding RevealCommand}" />
-                        <MenuItem Header="Copy path"          Command="{Binding CopyPathCommand}" />
+                        <MenuItem Header="Reveal in Explorer" Command="{Binding RevealCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE838;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <Separator />
-                        <MenuItem Header="Rotate left"   Command="{Binding RotateCcwCommand}" />
-                        <MenuItem Header="Rotate right"  Command="{Binding RotateCwCommand}" />
-                        <MenuItem Header="Rotate 180°"   Command="{Binding Rotate180Command}" />
-                        <MenuItem Header="Flip horizontal" Command="{Binding FlipHorizontalCommand}" />
-                        <MenuItem Header="Flip vertical"   Command="{Binding FlipVerticalCommand}" />
+                        <MenuItem Header="Rotate left" Command="{Binding RotateCcwCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7AD;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Rotate right" Command="{Binding RotateCwCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7AC;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Rotate 180°" Command="{Binding Rotate180Command}">
+                            <MenuItem.Icon>
+                                <TextBlock FontSize="10.5"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource OverlayBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Text="180" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Flip horizontal" Command="{Binding FlipHorizontalCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock FontFamily="Segoe UI Symbol"
+                                           FontSize="13"
+                                           Foreground="{StaticResource OverlayBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Text="↔" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Flip vertical" Command="{Binding FlipVerticalCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock FontFamily="Segoe UI Symbol"
+                                           FontSize="13"
+                                           Foreground="{StaticResource OverlayBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Text="↕" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <Separator />
-                        <MenuItem Header="Set as desktop wallpaper" Command="{Binding SetAsWallpaperCommand}" />
+                        <MenuItem Header="Set as desktop wallpaper" Command="{Binding SetAsWallpaperCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock FontFamily="Segoe UI Symbol"
+                                           FontSize="12"
+                                           Foreground="{StaticResource OverlayBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Text="▣" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <Separator />
-                        <MenuItem Header="Delete (Recycle Bin)" Command="{Binding DeleteCommand}" InputGestureText="Del" />
+                        <MenuItem Header="Delete (Recycle Bin)" Command="{Binding DeleteCommand}" InputGestureText="Del">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE74D;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                     </ContextMenu>
                 </Grid.ContextMenu>
 
