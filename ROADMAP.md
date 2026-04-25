@@ -3,13 +3,13 @@
 Tracks planned work. `[ ]` pending, `[x]` shipped. Priorities `P0` must / `P1` should / `P2` nice.
 Effort tags: **S** ≤ 2 days · **M** ≤ 1 week · **L** > 1 week · **XL** multi-week project.
 
-> **Document version**: v2 · 2026-04-24. Supersedes the v1 seeded during the factory-loop v0.1.2 staging run. Adds cross-cutting tracks (security, privacy, accessibility, i18n, observability, testing, distribution, catalog-schema strategy, migration-from-competing-tools) that the v1 draft did not cover, refreshes with April 2026 intelligence (Windows ML GA, WIC CVE-2025-50165, ImageGlass 10 Beta, JPEG XL Chrome-145-flag status, cjpegli, C2PA v2.3, Oculante, Copilot+ NPU auto-EP), and appends a merged sources list so every item is traceable.
+> **Document version**: v3 · 2026-04-25. Supersedes v2 (2026-04-24). Folds in the April 2026 research pass — adds 5 net-new items from competitive research (V20-32 `--peek` CLI mode, V20-15-Loop animation-loop badge, V-OCR text-on-image spike, D-05a SignPath.io evaluation, S-11 libde265 floor), updates the S-09 version floors with fresh CVE references (libheif 1.21.0, libavif 1.3.0, libde265 1.0.17), elevates P-05 C2PA verify to P0 on the EU AI Act Article 50 regulatory deadline (Aug 2 2026), marks all v0.1.5–v0.1.7 shipments closed with commit refs, and — the biggest change — appends a **Sources Appendix** at the end of this document so every bracket-citation resolves to a URL.
 
 > **Vision**: One Windows app that replaces Photos, IrfanView, XnConvert, Upscayl, and a light Lightroom — by cannibalising the best ideas from a dozen OSS/freeware projects. Local-first, fast, dark-mode, no cloud, no subscription. The killer features are **CLIP semantic search** on a local library, **live inline rename** (already shipped), **Squoosh-style visual-diff converter**, and — differentiator nobody else ships — **network-egress transparency**: the viewer never touches the network silently, and you can see every call it makes.
 
-## Current state (v0.1.7 — shipped 2026-04-24)
+## Current state (v0.1.7 — shipped 2026-04-25)
 
-Core viewer. Natural-sort folder nav. Zoom/pan/rotate. Live inline rename with 600 ms debounce, conflict resolution, 10-deep undo stack. Drag-drop. FSW. Catppuccin Mocha dark theme. ~100 formats via WIC + Magick.NET 14.13.0. **Animated GIFs play inline** (V20-15 core shipped). **>256 MB files decode via MemoryMappedFile view** (V20-06). Framework-dependent win-x64 portable zip **and Inno Setup installer** ship on every release (D-01b). Branded (icon.ico multi-res + banner + logo.png WPF Resource). Toolbar + nav-arrow glyphs render on Win11 IoT / enterprise images that previously showed tofu blocks (icon-font fallback fix). No persistence, no editor, no organizer, no batch.
+Core viewer. Natural-sort folder nav. Zoom/pan/rotate/flip. Four zoom modes (Fit / 1:1 / FitWidth / FitHeight / Fill) [V20-20]. Live inline rename with 600 ms debounce, conflict resolution, 10-deep undo stack. Drag-drop. FSW. Catppuccin Mocha dark theme. ~100 formats via WIC + Magick.NET 14.13.0 [[S-MAGICK-RELEASES]](https://github.com/dlemstra/Magick.NET/releases). **Animated GIFs play inline** (V20-15 core shipped). **>256 MB files decode via MemoryMappedFile view** (V20-06). **SQLite persistence** (V20-02): window state restored across sessions, recent folders MRU, update-check opt-out. **Preload N±1 ring** (V20-03). **Thumbnail cache disk layer** (V20-04, UI consumer pending). **UIA peer** (A-01). **Structured logging** via Serilog (V02-06) + **minidump on fatal** with crash dialog that can open a GitHub issue w/ context pre-filled (V02-07). **Pull-only update check** against GitHub Releases, 24-h throttle, opt-out toggle in About (P-04). **Print** (V15-10) + **Save-as-copy** (E6). Framework-dependent win-x64 portable zip **and Inno Setup installer** ship on every release (D-01b). No editor, no organizer, no batch, no filmstrip UI.
 
 Companion research:
 - [docs/research-viewers-editors.md](docs/research-viewers-editors.md) — IrfanView, XnView MP, ImageGlass, nomacs, qView, JPEGView, FastStone, Honeyview, Windows Photos, QuickLook/Seer/Peek, Pictus.
@@ -69,8 +69,15 @@ The current codebase inherits the full WIC + Magick.NET + (eventually) libheif/l
 - [ ] **S-06** *P1* — **WIC JPEG re-encode gate**. On pre-patch `windowscodecs.dll` (< 10.0.26100.4946), thumbnails skip the 12-bit / 16-bit re-encode path that triggers CVE-2025-50165. Toast "Windows update recommended" once. Effort: M. [ESET CVE-2025-50165]
 - [ ] **S-07** *P1* — **MSIX + Win32 App Isolation** side-artifact. AppContainer, declare `picturesLibrary` + `broadFileSystemAccess` brokered. Unpackaged zip stays the primary artifact for file-association UX. Effort: L. [MS Learn AppContainer; Win32 App Isolation report]
 - [ ] **S-08** *P2* — **Wasmtime-hosted libheif / libavif / libwebp spike** — opt-in "Paranoid Mode" routes untrusted-source decode through a capability-only Wasm sandbox (~1.3× CPU cost). Research spike; prototype only until a proven libheif-in-wasmtime crate exists. Effort: L. [Wasmtime security model; Hyperlight Wasm; Gobi USENIX]
-- [ ] **S-09** *P1* — **On bundled decoders**: if we ever vendor libheif / libavif / libwebp / libjxl directly (today they come via WIC + extensions), minima are libheif ≥ 1.21.2, libavif ≥ 1.3.0, libwebp ≥ 1.3.2, libjxl current. Effort: conditional. [Ubuntu/Debian CVE trackers]
-- [ ] **S-10** *P2* — **libwebp-in-WIC isolation** — prefer Microsoft's shipped WebP path (OS-patched) over bundling `libwebp.dll`; if forced to bundle for non-Windows or MSIX sandbox, keep version current and consider the same wasm-sandbox route in S-08. Effort: conditional. [libwebp CVE-2023-4863 / Isosceles]
+- [ ] **S-09** *P1* — **On bundled decoders**: if we ever vendor libheif / libavif / libwebp / libjxl / libde265 directly (today they come via WIC + Store extensions), minima are:
+  - libheif ≥ **1.21.0** [[S-LIBHEIF]](https://github.com/advisories/GHSA-j87x-4gmq-cqfq) — CVE-2025-68431 heap-buffer-overread in `HeifPixelImage::overlay()` `iovl` path, fixed 1.21.0
+  - libavif ≥ **1.3.0** [[S-LIBAVIF]](https://github.com/advisories/GHSA-f6x7-5x3c-j3rg) — CVE-2025-48174 integer overflow in `makeRoom` in stream.c, fixed 1.3.0
+  - libwebp ≥ **1.3.2** [[S-LIBWEBP]](https://github.com/advisories/GHSA-j7hp-h8jx-5ppr) — CVE-2023-4863 BLASTPASS OOB write in `BuildHuffmanTable`, fixed 1.3.2
+  - libde265 ≥ **1.0.17** [[S-LIBDE265-64]](https://github.com/advisories/GHSA-wqrf-6rf5-v78r) [[S-LIBDE265-65]](https://github.com/advisories/GHSA-653q-9f73-8hvg) — CVE-2026-33164 + CVE-2026-33165 HEVC-SPS-triggered OOB heap writes, fixed 1.0.17 (HEVC decoder shipped under libheif)
+  - libjxl current
+  Effort: conditional.
+- [ ] **S-10** *P2* — **libwebp-in-WIC isolation** — prefer Microsoft's shipped WebP path (OS-patched) over bundling `libwebp.dll`; if forced to bundle for non-Windows or MSIX sandbox, keep version current and consider the same wasm-sandbox route in S-08. Effort: conditional. [[S-LIBWEBP-ORCA]](https://orca.security/resources/blog/understanding-libwebp-vulnerability/)
+- [ ] **S-11** *P1* — **Transitive-dep pinning**: when a S-09 floor implies a deeper library (libde265 under libheif, aom under libheif-AV1, LittleCMS under most), verify the pin transitively. The release-workflow CVE gate [S-04] must walk the transitive tree. Effort: S. [[S-LIBDE265-64]](https://github.com/advisories/GHSA-wqrf-6rf5-v78r)
 
 ### Privacy
 
@@ -80,7 +87,7 @@ No competitor in the OSS viewer space makes network egress auditable. That's the
 - [ ] **P-02** *P0* — **Default-off opt-in telemetry**. First-run banner, toggle in Settings, local JSON preview of what would be sent before enabling. No IP, no MAC, no hostname. VS Code is the reference pattern. Effort: S. [VS Code telemetry docs; TelemetryDeck privacy FAQ]
 - [ ] **P-03** *P1* — **Network-egress log panel**. Every call (update check, C2PA fetch, extension-install deep-link, crash-report upload if enabled) logs `{url, purpose, bytes, ms}` to a visible pane. No competitor ships this. Effort: M.
 - [x] **P-04** *P0* — **Update check is pull-only** to GitHub Releases API, no PII, opt-out switch. Store `last_checked` locally, no server-side record. Effort: S. *(shipped v0.1.6 — `UpdateCheckService` does a read-only GET against `/releases/latest`, 24-h throttle for silent startup check, manual "Check for updates" button in About dialog bypasses throttle. Every call logged with URL + bytes + duration. Last-checked persisted to `%LOCALAPPDATA%\Images\update-check.json`.)*
-- [ ] **P-05** *P1* — **C2PA read/verify** via `c2patool` CLI shellout (no .NET SDK exists as of April 2026). Toolbar badge: green (signed + verified + Trust List), amber (signed but cert unlisted), red (invalid/tampered). Effort: M. [contentauth/c2pa-rs; C2PA v2.3 whitepaper Oct 2025; AttestTrail camera tracker]
+- [ ] **P-05** *P0* — **C2PA read/verify** via `c2patool` CLI shellout (no .NET SDK exists as of April 2026). Toolbar badge: green (signed + verified + Trust List), amber (signed but cert unlisted), red (invalid/tampered). Effort: M. *Promoted P1 → P0 on the 2026-04-25 research pass: **C2PA v2.3** shipped Feb 2026; **EU AI Act Article 50** makes machine-readable AI-content marking mandatory **2026-08-02** [[S-C2PA]](https://contentcredentials.org/) [[S-C2PA-2026]](https://aiphotocheck.com/blog/c2pa-specification-latest-version-2026). Real-world signed files now ubiquitous via Pixel 10 (Titan M2 hw signing by default), Leica M11-P, Sony α9 III / α1 II (cloud opt-in), Samsung S25 (AI-edited only). Nikon Z6 III suspended C2PA after Sept 2025 cert-revocation incident — illustrates trust-list consequence.*
 - [ ] **P-06** *P2* — **C2PA P/Invoke spike** — bind directly to `c2pa-rs` C API for in-process verify instead of shelling out to `c2patool`. Eliminates ~30 ms per-file process spawn. Effort: L. [c2pa-rs README]
 - [ ] **P-07** *P2* — **C2PA write-on-export** — stamp "edited with Images v0.x" + operation list on every export from v0.3/v0.5. Requires signing identity (Azure Trusted Signing works). Defers until P-05 is stable. Effort: M.
 
@@ -132,7 +139,8 @@ Primary = GitHub Releases (source of truth). Secondary = winget + Scoop extras. 
 - [ ] **D-02** *P0* — **`winget` publishing** via `WinGet Releaser` GitHub Action (`vedantmgoyal9/winget-releaser`). First submission manual via `wingetcreate new`; subsequent releases auto-fire on `release: [published]`. Requires classic PAT + forked `microsoft/winget-pkgs`. Effort: S. [WinGet Releaser action; Grafana k6 PR #5203]
 - [ ] **D-03** *P1* — **Scoop `extras` bucket manifest** with `autoupdate` section pointed at the GitHub release URL template. Effort: S. [ScoopInstaller/Extras]
 - [ ] **D-04** *P1* — **Microsoft Store via MSIX** for discovery, paired with S-07 AppContainer work. GitHub Releases stays primary. Effort: M. [MS Learn MSIX overview]
-- [ ] **D-05** *P0* — **Azure Trusted Signing** ($9.99/mo Basic, 5,000 sigs) via `azure/trusted-signing-action` in the release workflow. SmartScreen reputation warm-up still applies (since 2023 even EV is throttled for new publishers) — so no reason to pay for EV. Effort: M. [Trusted Signing FAQ; Authenticode in 2025 — Eric Lawrence]
+- [ ] **D-05** *P0* — **Azure Artifact Signing** (rebrand of Azure Trusted Signing, now GA April 2026) via `azure/artifact-signing-action` in the release workflow. SmartScreen reputation warm-up still applies (since 2023 even EV is throttled for new publishers) — so no reason to pay for EV. Self-employed individuals now eligible (no 3-yr history requirement); restricted to US/CA/EU/UK businesses/individuals. Effort: M. [[S-ARTIFACT-SIGNING]](https://azure.microsoft.com/en-us/products/artifact-signing) [[S-SMARTSCREEN-REGRESSION]](https://learn.microsoft.com/en-us/answers/questions/5855708/trusted-signing-regression-in-smartscreen-reputati) *Risk flagged 2026-03/04: Microsoft silently rotated issuing CAs (EOC CA 02 → AOC CA 03 → EOC CA 04) which broke SmartScreen reputation for existing customers. Expect the first ~500 installs to trip "Unrecognized app" even with a valid cert. Hanselman has the working GitHub-Actions setup [[S-HANSELMAN-SIGN]](https://www.hanselman.com/blog/automatically-signing-a-windows-exe-with-azure-trusted-signing-dotnet-sign-and-github-actions).*
+- [ ] **D-05a** *P1* — **SignPath.io OSS code-signing evaluation** (new, 2026-04-25 research). Free certificate via SignPath Foundation for OSS projects (used by PicView). Pre-requisite: GitHub Actions integration + SignPath-approved project status. Evaluate in parallel with D-05 — whichever lands first wins; both are fine to keep running simultaneously (dual-signing is supported by Authenticode). Effort: S (application) + M (pipeline). [[S-PICVIEW]](https://github.com/Ruben2776/PicView)
 - [ ] **D-06** — **Chocolatey parked** until v1.x. Community-feed moderation runs days-to-weeks; low ROI for an OSS viewer with winget + Scoop already covered.
 - [ ] **D-07** *P2* — **Trim-warning audit spike** — enable `<PublishTrimmed>true</PublishTrimmed>` once, capture every IL2xxx warning, decide whether WPF is trimmable enough in .NET 9 to justify the ~50-70 MB saving. If net-negative, park. Effort: M. [MS Learn trim self-contained]
 
@@ -177,8 +185,9 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [ ] **V20-11** *P0* — AVIF via `AV1 Video Extension` + libavif fallback (S-09).
 - [ ] **V20-12** *P1* — **JPEG XL via Microsoft's WIC JPEG XL Image Extension** (Store deep-link pattern [F-05]). Don't bundle libjxl directly until Microsoft ships it OS-default — adoption is still flag-gated in Chrome 145 as of Feb 2026 and Nightly-only in Firefox.
 - [ ] **V20-13** *P1* — WebP + animated WebP. WIC path preferred; libwebp floor in S-09.
-- [ ] **V20-14** *P1* — RAW decode via `Sdcb.LibRaw` 0.21 (MIT wrapper / LGPL native) — Canon CR2/CR3, Nikon NEF, Sony ARW, Fuji RAF, DNG.
+- [ ] **V20-14** *P1* — RAW decode via `Sdcb.LibRaw` (MIT wrapper / LGPL native) — Canon CR2/CR3, Nikon NEF, Sony ARW, Fuji RAF, DNG. [[S-SDCB-LIBRAW]](https://github.com/sdcb/Sdcb.LibRaw) [[S-LIBRAW-022]](https://www.libraw.org/news/libraw-0-22-0-release) *Upstream LibRaw 0.22.0 shipped 2026-01 with DNG 1.7 + JPEG-XL compression support, CR3 ≥ 4 GB fix, +Canon R5 Mark II / R6 Mark II / R8 / R50 / R100 / Ra / EOS R1 / R5 C, Fujifilm X-T50 / GFX100-II / X-H2 / X-H2S, Sony A9-III / A7 R V / A7CR / A7C II / FX30, plus TALOS-2026-2359/2363/2364 security fixes. Sdcb.LibRaw NuGet still tracks 0.21.x as of 2026-04 — V20-14 ships with whatever Sdcb has; v0.22 arrives when the wrapper bumps (or we shell out to native `dcraw_emu`).*
 - [~] **V20-15** *P2* — Animated GIF / APNG / animated AVIF with transport controls (play/pause/frame-step/speed). *(core playback shipped v0.1.3 — `MagickImageCollection.Coalesce` + `AnimationSequence` + WPF `ObjectAnimationUsingKeyFrames` on `Image.SourceProperty` in `ZoomPanImage`; per-frame delays and GIF loop count honored; green "N frames" chip in the bottom toolbar. Transport controls deferred to a follow-up.)*
+- [ ] **V20-15-Loop** *P2* — **Animation loop-count badge on the "N frames" chip** (new, 2026-04-25 research). When the decoded `AnimationSequence.LoopCount > 0` render the chip as `{N} frames · plays {LoopCount}×`; when zero (GIF convention = infinite) render as `{N} frames · loops`. We already HONOR the loop count — we just don't surface it. Effort: S. [own shipment review]
 - [ ] **V20-16** *P2* — Multi-frame TIF / ICO / multi-page PDF / DICOM — per-frame navigation UI (ImageGlass pattern).
 - [ ] **V20-17** *P2* — **Images inside archives** — ZIP/7Z/RAR/CBR/CBZ browsing without extraction (Honeyview's moat). `SharpCompress` MIT covers all formats; S-01 canonicalization is load-bearing here.
 - [ ] **V20-18** *P2* — **Store-extension detect + prompt** (F-01): on unknown-format open, probe `Windows.ApplicationModel.Store.CurrentApp`-free registry for HEIF / AV1 / WebP / JPEG XL / Raw extensions; if missing, toast with one-click `ms-windows-store://pdp/?productid=...` deep-link. Effort: S.
@@ -195,7 +204,8 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [ ] **V20-28** *P2* — **Individual color-channel isolation** (ImageGlass R/G/B/A only views).
 - [ ] **V20-29** *P2* — **Command palette** (Ctrl+Shift+P) — greenfield; no viewer does this well.
 - [ ] **V20-30** *P2* — **File Explorer sort-order sync** (ImageGlass v9.3+) — read Explorer's current sort, match it.
-- [ ] **V20-31** *P2* — **Network-listen mode** (`Images.exe -l <port>`) accepting paths on a local socket (borrow from Oculante). Unlocks pipelined workflows — "ImageMagick outputs to this pipe, viewer refreshes live." Egress log panel (P-03) surfaces it. Effort: M. [Oculante README]
+- [ ] **V20-31** *P2* — **Network-listen mode** (`Images.exe -l <port>`) accepting paths on a local socket (borrow from Oculante). Unlocks pipelined workflows — "ImageMagick outputs to this pipe, viewer refreshes live." Egress log panel (P-03) surfaces it. Effort: M. [[S-OCULANTE]](https://github.com/woelper/oculante)
+- [ ] **V20-32** *P1* — **`--peek <path>` CLI mode** (new, 2026-04-25 research). Same invocation PowerToys Peek uses (`PowerToys.Peek.UI.exe <file>`) — lets Images drop into any workflow that expects an external preview tool (File Explorer context menus, terminal previewers, editor integrations). Accept a single path, open it as a standalone chromeless window, exit on Escape. ~20 LOC on top of the existing argv path. Effort: S. [[S-PEEK]](https://learn.microsoft.com/en-us/windows/powertoys/peek)
 
 ---
 
@@ -358,6 +368,7 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - **C2PA durable credentials (watermark + fingerprint + manifest)** for exports — separate from P-05/P-07 manifest signing; lets social-media-stripped C2PA survive re-upload. Standard is still moving; wait for stable spec. [C2PA whitepaper Oct 2025]
 - **Hardware NPU routing per-model** — decide per-model whether CPU / DirectML / NPU wins at runtime, not compile-time. WinML auto-EP gets us most of this for free already.
 - **Screenreader voice-over demo video** in the README — after A-01 through A-05 ship, a 30s clip of Narrator reading the viewer is a marketing differentiator.
+- **V-OCR — OCR text-on-image** via Tesseract or IronOCR (new, 2026-04-25 research). "Select text on the image" is a Phone-Photos / ACDSee / Google Lens feature users increasingly expect. Tesseract .NET SDK is MIT + requires ~40 MB tessdata; IronOCR has better preprocessing but commercial license ($749+). Defer to v0.4+ because: (a) the rectangle-select UI + copy-text surface is non-trivial, (b) tessdata inflates portable-zip by 40%, (c) Windows 11 already ships an OCR via the Snipping Tool for the same workflow. **CHARTER-REVIEW** — a viewer doing OCR drifts toward DAM territory. [[S-TESSERACT]](https://github.com/tesseract-ocr/tesseract)
 
 ## Dropped / won't-do (with reasons)
 
@@ -486,7 +497,53 @@ Adjacent cleanup that falls out naturally:
 
 ## Appendix A — Sources
 
-Merged, deduplicated list from the three research docs (`docs/research-viewers-editors.md`, `docs/research-organizers-converters.md`, `docs/research-advanced-features.md`) plus the two gap-research passes (`GAP_RESEARCH.md`, `docs/gap-research-report-2.md`). Every item in this roadmap is traceable to at least one of these URLs.
+Merged, deduplicated list from the three research docs (`docs/research-viewers-editors.md`, `docs/research-organizers-converters.md`, `docs/research-advanced-features.md`), the two gap-research passes (`GAP_RESEARCH.md`, `docs/gap-research-report-2.md`), the three factory-loop iterations (`docs/research/iter-{1,2,3}-*.md`), and the 2026-04-25 roadmap research pass (`docs/research/roadmap-2026-04-25-harvest.md`). Every item in this roadmap is traceable to at least one of these URLs.
+
+### Keyed anchors (cited inline as `[S-XXX]`)
+
+These are the short keys used in the inline citations elsewhere in this document. Kept separate at the top so an inline `[[S-C2PA]](...)` link resolves without the reader scrolling a 200-entry list.
+
+- **[S-IG10]** — ImageGlass 10 Beta 1 release notes: https://imageglass.org/news/imageglass-10-beta-1-is-here-99 · ImageGlass 2026 roadmap update: https://imageglass.org/news/imageglass-roadmap-update-2026-98
+- **[S-PV]** — PicView (Avalonia rewrite, SignPath-signed, Native AOT): https://github.com/Ruben2776/PicView · https://picview.org/download/
+- **[S-PEEK]** — PowerToys Peek docs + CLI: https://learn.microsoft.com/en-us/windows/powertoys/peek
+- **[S-NOMACS]** — nomacs 3.22 release notes: https://github.com/nomacs/nomacs/releases · https://nomacs.org/
+- **[S-JPEGVIEW]** — JPEGView sylikc fork releases: https://github.com/sylikc/jpegview/releases · v1.3.46: https://github.com/sylikc/jpegview/releases/tag/v1.3.46
+- **[S-OCULANTE]** — Oculante (Rust viewer with network-listen mode): https://github.com/woelper/oculante · https://crates.io/crates/oculante
+- **[S-QVIEW]** — qView changelog: https://github.com/jurplel/qView/releases · https://interversehq.com/qview/changelog/
+- **[S-XNVIEW]** — XnView MP 1.10.5 changelog: https://www.xnview.com/xnviewmp_update.txt
+- **[S-MAGICK-RELEASES]** — Magick.NET release index: https://github.com/dlemstra/Magick.NET/releases
+- **[S-MAGICK-14-12-0]** — Magick.NET 14.12.0 notes: https://github.com/dlemstra/Magick.NET/releases/tag/14.12.0
+- **[S-MAGICK-14-11-1]** — Magick.NET 14.11.1 security fix (GHSA-8793-7xv6-82cf InterpretImageFilename overflow): https://github.com/dlemstra/Magick.NET/releases
+- **[S-MAGICK-14-10-2]** — Magick.NET 14.10.2 batch CVE fixes (BilateralBlur, OpenCL XML, MSL NULL, MSL stack overflow, XBM parser): https://github.com/dlemstra/Magick.NET/releases/tag/14.10.2
+- **[S-LIBHEIF]** — CVE-2025-68431 libheif heap-buffer-overread in `HeifPixelImage::overlay()` (fixed 1.21.0): https://github.com/advisories/GHSA-j87x-4gmq-cqfq
+- **[S-LIBAVIF]** — CVE-2025-48174 libavif integer overflow in `makeRoom` (fixed 1.3.0): https://github.com/advisories/GHSA-f6x7-5x3c-j3rg
+- **[S-LIBWEBP]** — CVE-2023-4863 libwebp BLASTPASS OOB write in `BuildHuffmanTable` (fixed 1.3.2): https://github.com/advisories/GHSA-j7hp-h8jx-5ppr
+- **[S-LIBWEBP-ORCA]** — Orca Security writeup of CVE-2023-4863: https://orca.security/resources/blog/understanding-libwebp-vulnerability/
+- **[S-LIBDE265-64]** — CVE-2026-33164 libde265 OOB heap write via crafted HEVC (fixed 1.0.17): https://github.com/advisories/GHSA-wqrf-6rf5-v78r
+- **[S-LIBDE265-65]** — CVE-2026-33165 libde265 companion advisory (fixed 1.0.17): https://github.com/advisories/GHSA-653q-9f73-8hvg
+- **[S-JXL-CANIUSE]** — Can I use JPEG XL: https://caniuse.com/jpegxl
+- **[S-JXL-DEVCLASS]** — Chromium JXL reversal (Nov 2025, lands Chrome 145 flag-gated): https://devclass.com/2025/11/24/googles-chromium-team-decides-it-will-add-jpeg-xl-support-reverses-obsolete-declaration/
+- **[S-C2PA]** — Content Credentials: https://contentcredentials.org/ · C2PA 2.2 spec: https://spec.c2pa.org/specifications/specifications/2.2/specs/C2PA_Specification.html
+- **[S-C2PA-2026]** — C2PA v2.3 + c2patool v0.26.27 (Feb 2026) + EU AI Act Article 50 deadline Aug 2 2026: https://aiphotocheck.com/blog/c2pa-specification-latest-version-2026
+- **[S-SKIASHARP]** — SkiaSharp 3.119.2 on NuGet: https://www.nuget.org/packages/SkiaSharp/ · https://github.com/mono/SkiaSharp/releases
+- **[S-SERILOG]** — Serilog 4.3.1 release: https://github.com/serilog/serilog/releases
+- **[S-SERILOG-FILE]** — Serilog.Sinks.File 7.0.0 release: https://github.com/serilog/serilog-sinks-file/releases · https://www.nuget.org/packages/Serilog.Sinks.File/
+- **[S-LIBRAW-022]** — LibRaw 0.22.0 release notes (DNG 1.7 + JPEG-XL compression + CR3 fix + +Canon R5 II/R6 II/R8/R50/R100, Fujifilm X-T50, Sony A9-III): https://www.libraw.org/news/libraw-0-22-0-release
+- **[S-SDCB-LIBRAW]** — Sdcb.LibRaw .NET wrapper (currently tracks 0.21.x): https://github.com/sdcb/Sdcb.LibRaw · https://www.nuget.org/packages/Sdcb.LibRaw
+- **[S-SHARPCOMPRESS]** — SharpCompress 0.44.0 (multi-TFM .NET 8/10/Framework 4.8, async I/O): https://github.com/adamhathcock/sharpcompress · https://www.nuget.org/packages/SharpCompress
+- **[S-ARTIFACT-SIGNING]** — Azure Artifact Signing (rebrand of Trusted Signing, GA April 2026): https://azure.microsoft.com/en-us/products/artifact-signing · https://learn.microsoft.com/en-us/azure/artifact-signing/concept-trust-models
+- **[S-SMARTSCREEN-REGRESSION]** — SmartScreen reputation regression after CA rotation (March-April 2026): https://learn.microsoft.com/en-us/answers/questions/5855708/trusted-signing-regression-in-smartscreen-reputati · https://github.com/Azure/artifact-signing-action/issues/128
+- **[S-HANSELMAN-SIGN]** — Hanselman's Azure Trusted Signing + GitHub Actions setup: https://www.hanselman.com/blog/automatically-signing-a-windows-exe-with-azure-trusted-signing-dotnet-sign-and-github-actions
+- **[S-WINGET-RELEASER]** — WinGet Releaser GitHub Action (289 stars, 2026-03 update): https://github.com/marketplace/actions/winget-releaser · https://github.com/vedantmgoyal9/winget-releaser
+- **[S-WINML]** — Windows ML GA docs: https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview · introduction blog: https://blogs.windows.com/windowsdeveloper/2025/05/19/introducing-windows-ml-the-future-of-machine-learning-development-on-windows/ · NVIDIA TensorRT-for-RTX EP: https://developer.nvidia.com/blog/deploy-ai-models-faster-with-windows-ml-on-rtx-pcs/ · AMD NPU EP: https://www.amd.com/en/developer/resources/technical-articles/2026/ai-model-deployment-using-windows-ml-on-amd-npu.html
+- **[S-WIN32-ISOLATION]** — Win32 App Isolation (AppContainer + MSIX capability manifest, preview): https://learn.microsoft.com/en-us/windows/win32/secauthz/appcontainer-isolation · https://learn.microsoft.com/en-us/windows/security/book/application-security-application-isolation · https://www.bleepingcomputer.com/news/microsoft/windows-11-win32-app-isolation-security-feature-now-in-preview/
+- **[S-HEIF-CODEC]** — HEIF WIC codec docs: https://learn.microsoft.com/en-us/windows/win32/wic/heif-codec · Store HEIF Image Extension: https://apps.microsoft.com/detail/9pmmsr1cgpwg
+- **[S-TESSERACT]** — Tesseract OCR: https://github.com/tesseract-ocr/tesseract · IronOCR C# guide: https://ironsoftware.com/csharp/ocr/blog/ocr-tools/install-tesseract/
+- **[S-UPSCAYL]** — Upscayl: https://github.com/upscayl/upscayl · https://upscayl.org/ · Real-ESRGAN: https://github.com/xinntao/Real-ESRGAN · OpenModelDB: https://openmodeldb.info/
+- **[S-EXIF]** — EXIF 3.0 Wikipedia entry (UTF-8 support, May 2023): https://en.wikipedia.org/wiki/Exif · ExifTool DateTimeOriginal forum: https://exiftool.org/forum/index.php?topic=13474.0
+- **[S-ALTERNATIVES]** — AlternativeTo IrfanView alternatives: https://alternativeto.net/software/irfanview/ · Slant image viewers for Windows: https://www.slant.co/topics/4022/~image-viewers-for-windows
+- **[S-SQLITE]** — Microsoft.Data.Sqlite (what we ship): https://www.nuget.org/packages/Microsoft.Data.Sqlite
+- **[S-CBZ]** — CBZ file format primer: https://www.online-convert.com/file-format/cbz
 
 ### Viewers, editors, organizers, converters
 - https://www.irfanview.com/
