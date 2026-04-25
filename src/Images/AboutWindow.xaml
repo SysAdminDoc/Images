@@ -52,6 +52,7 @@
                         <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
+                        <RowDefinition />
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" Text="Build" />
@@ -63,8 +64,11 @@
                     <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" Text="OS" />
                     <TextBlock Grid.Row="2" Grid.Column="1" x:Name="OsText"      Style="{StaticResource MetaValue}" />
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" Text="Decoders" />
-                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="WIC · Magick.NET 14.13" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" Text="Codecs" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" x:Name="CodecText" Style="{StaticResource MetaValue}" TextWrapping="Wrap" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" Text="Documents" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" x:Name="DocumentCodecText" Style="{StaticResource MetaValue}" TextWrapping="Wrap" />
                 </Grid>
             </Border>
 

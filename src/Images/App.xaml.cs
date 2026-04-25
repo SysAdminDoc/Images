@@ -17,6 +17,12 @@ public partial class App : Application
         _log.LogInformation("Images {Version} starting — {Runtime} on {Os}",
             info.DisplayVersion, info.RuntimeDescription, info.OsDescription);
 
+        var codecStatus = CodecRuntime.Configure();
+        _log.LogInformation("Codec runtime: {MagickStatus}; {DocumentStatus}; GhostscriptDirectory={GhostscriptDirectory}",
+            codecStatus.MagickStatus,
+            codecStatus.DocumentStatus,
+            codecStatus.GhostscriptDirectory ?? "(none)");
+
         // V15-09 + V02-06 + V02-07: fatal-exception channels go through both the structured
         // logger (for day-to-day diagnostics via Serilog rolling file) AND CrashLog (for the
         // plain-text dump + minidump + user-facing "Copy details" dialog). CrashLog is the

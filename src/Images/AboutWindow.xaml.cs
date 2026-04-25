@@ -19,6 +19,12 @@ public partial class AboutWindow : Window
         RuntimeText.Text = info.RuntimeDescription;
         OsText.Text      = info.OsDescription;
 
+        var codec = CodecRuntime.Status;
+        CodecText.Text = $"WIC + Magick.NET 14.13; {SupportedImageFormats.Extensions.Count} discoverable image, design, RAW, vector, and production extensions";
+        DocumentCodecText.Text = codec.GhostscriptAvailable
+            ? $"Ghostscript enabled ({CodecRuntime.GetGhostscriptVersion() ?? codec.GhostscriptSource})"
+            : "Ghostscript not bundled or installed; EPS, PDF, PS, and AI previews are unavailable";
+
         UpdateCheckCheckBox.IsChecked = UpdateCheckService.OptedIn;
 
         // Dark native caption — same pattern as MainWindow so the About window matches.

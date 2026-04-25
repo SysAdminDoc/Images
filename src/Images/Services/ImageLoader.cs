@@ -9,8 +9,9 @@ using ImageMagick;
 namespace Images.Services;
 
 /// <summary>
-/// Loads an image from disk. Tries WIC first (native, fast, handles most formats on modern Windows)
-/// and falls back to Magick.NET for anything WIC can't decode (JXL/AVIF/PSD/TGA/RAW if no WIC codec installed).
+/// Loads an image from disk. Tries WIC first for native Windows codecs, falls back to Magick.NET
+/// for broad raster/RAW/vector coverage, and routes PostScript-family documents through the
+/// configured Ghostscript runtime when available.
 /// </summary>
 public static class ImageLoader
 {
@@ -38,6 +39,7 @@ public static class ImageLoader
     // memory-mapped view. Keeps a 500 MB RAW or multi-GB PSD off the LOH entirely — the OS pages
     // the mapping in on demand and can evict clean pages without touching swap.
     private const long MemoryMapThreshold = 256L * 1024 * 1024;
+    private const int DocumentPreviewDpi = 144;
 
     public static LoadResult Load(string path)
     {
@@ -46,6 +48,9 @@ public static class ImageLoader
             throw new FileNotFoundException($"'{Path.GetFileName(path)}' does not exist.", path);
         if (fi.Length == 0)
             throw new InvalidOperationException($"'{Path.GetFileName(path)}' is empty.");
+
+        if (SupportedImageFormats.RequiresGhostscript(path))
+            return LoadDocumentPreview(path);
 
         // V20-06: large files bypass the byte[] round-trip entirely. Animation probe is skipped
         // too — a 256 MB+ GIF is a pathological edge case and multi-frame decode needs random
@@ -105,6 +110,55 @@ public static class ImageLoader
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Could not decode '{Path.GetFileName(path)}': {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Renders the first page/artboard of a PostScript-family file through Magick.NET with the
+    /// configured Ghostscript runtime. This path deliberately reads from the file instead of a
+    /// byte[] so large PDFs/AI files do not hit the LOH before rasterization.
+    /// </summary>
+    private static LoadResult LoadDocumentPreview(string path)
+    {
+        var runtime = CodecRuntime.Status;
+        var ext = Path.GetExtension(path).ToUpperInvariant();
+        if (!runtime.GhostscriptAvailable)
+        {
+            throw new InvalidOperationException(
+                $"{ext} preview requires Ghostscript. This build can use a bundled copy in the app's " +
+                "Codecs\\Ghostscript folder, IMAGES_GHOSTSCRIPT_DIR, or an installed Ghostscript runtime.");
+        }
+
+        try
+        {
+            var settings = new MagickReadSettings
+            {
+                Density = new Density(DocumentPreviewDpi),
+                FrameIndex = 0,
+                FrameCount = 1,
+                BackgroundColor = MagickColors.White
+            };
+
+            using var collection = new MagickImageCollection(new FileInfo(path), settings);
+            if (collection.Count == 0)
+                throw new InvalidOperationException("The document did not produce a preview page.");
+
+            using var first = collection[0].Clone();
+            first.BackgroundColor = MagickColors.White;
+            first.Alpha(AlphaOption.Remove);
+
+            var wb = MagickToBitmap(first);
+            var pageSuffix = collection.Count > 1 ? $", page 1 of {collection.Count}" : "";
+            return new LoadResult(
+                wb,
+                wb.PixelWidth,
+                wb.PixelHeight,
+                $"Magick.NET + Ghostscript ({SupportedImageFormats.FormatFamily(path)} preview, {DocumentPreviewDpi} DPI{pageSuffix})");
+        }
+        catch (MagickException ex)
+        {
+            throw new InvalidOperationException(
+                $"Could not render '{Path.GetFileName(path)}' with Ghostscript: {ex.Message}", ex);
         }
     }
 

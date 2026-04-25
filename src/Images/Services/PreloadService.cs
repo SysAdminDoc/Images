@@ -36,6 +36,7 @@ public sealed class PreloadService : IDisposable
     {
         if (string.IsNullOrEmpty(path)) return;
         if (!DirectoryNavigator.SupportedExtensions.Contains(Path.GetExtension(path))) return;
+        if (SupportedImageFormats.RequiresGhostscript(path)) return;
 
         _lastAccess[path] = DateTime.UtcNow;
         if (_cache.ContainsKey(path)) return;
