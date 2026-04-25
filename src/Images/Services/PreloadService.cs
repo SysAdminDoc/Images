@@ -20,6 +20,7 @@ public sealed class PreloadService : IDisposable
 {
     private const int SlotCap = 3;
     private const long MegapixelSkipThreshold = 40L * 1_000_000;
+    private const long FileSizeSkipThreshold = 128L * 1024 * 1024;
 
     private readonly ConcurrentDictionary<string, Lazy<Task<ImageLoader.LoadResult?>>> _cache =
         new(StringComparer.OrdinalIgnoreCase);
@@ -41,10 +42,17 @@ public sealed class PreloadService : IDisposable
         _lastAccess[path] = DateTime.UtcNow;
         if (_cache.ContainsKey(path)) return;
 
-        // Probe the file size first — if it's a monster RAW / panorama, skip. The on-demand
-        // path will decode it only if the user actually navigates there.
+        // Probe size first — if it's a monster RAW / panorama / layered production file, skip.
+        // The on-demand path will decode it only if the user actually navigates there.
         try
         {
+            var fi = new FileInfo(path);
+            if (!fi.Exists || fi.Length >= FileSizeSkipThreshold)
+            {
+                _log.LogDebug("preload skip: {Path} is {Bytes} bytes", path, fi.Exists ? fi.Length : 0);
+                return;
+            }
+
             var (w, h) = ImageLoader.QuickDimensions(path);
             if ((long)w * h > MegapixelSkipThreshold)
             {
