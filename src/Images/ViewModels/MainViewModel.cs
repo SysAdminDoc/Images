@@ -13,6 +13,7 @@ public sealed class MainViewModel : ObservableObject
     private readonly DirectoryNavigator _nav = new();
     private readonly RenameService _rename = new();
     private readonly PreloadService _preload = new();
+    private readonly Dispatcher _uiDispatcher = Dispatcher.CurrentDispatcher;
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
 
@@ -62,6 +63,7 @@ public sealed class MainViewModel : ObservableObject
         UndoRenameCommand = new RelayCommand(p => UndoOne(p as RenameService.UndoEntry), p => p is RenameService.UndoEntry);
         AboutCommand = new RelayCommand(ShowAboutWindow);
         OpenRecentFolderCommand = new RelayCommand(p => OpenRecentFolder(p as string), p => p is string);
+        OpenPreviewItemCommand = new RelayCommand(p => OpenPreviewItem(p as FolderPreviewItem), p => p is FolderPreviewItem);
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
         // panel renders prior-session folders before the user opens anything.
@@ -82,6 +84,10 @@ public sealed class MainViewModel : ObservableObject
             // Current file was deleted externally — pick whatever slot the navigator landed on.
             if (_nav.CurrentPath is not null) { ResetPageState(); LoadCurrent(); }
             else ClearCurrentState();
+        }
+        else
+        {
+            RefreshFolderPreview();
         }
     }
 
@@ -460,6 +466,74 @@ public sealed class MainViewModel : ObservableObject
 
     public ObservableCollection<RenameService.UndoEntry> RecentRenames { get; } = new();
 
+    // -------------------- Folder preview strip --------------------
+
+    public ObservableCollection<FolderPreviewItem> FolderPreviewItems { get; } = new();
+
+    private int _folderPreviewGeneration;
+
+    private void RefreshFolderPreview()
+    {
+        _folderPreviewGeneration++;
+        FolderPreviewItems.Clear();
+
+        if (_nav.Count < 2 || _nav.CurrentIndex < 0)
+            return;
+
+        var files = _nav.Files;
+        var count = files.Count;
+        var indices = BuildPreviewIndices(count, _nav.CurrentIndex);
+
+        foreach (var index in indices)
+        {
+            var item = new FolderPreviewItem(
+                files[index],
+                Path.GetFileName(files[index]),
+                $"{index + 1} / {count}",
+                index == _nav.CurrentIndex);
+
+            FolderPreviewItems.Add(item);
+            QueueThumbnailLoad(item, _folderPreviewGeneration);
+        }
+    }
+
+    private static IReadOnlyList<int> BuildPreviewIndices(int count, int currentIndex)
+    {
+        if (count <= 9)
+            return Enumerable.Range(0, count).ToArray();
+
+        var indices = new List<int>(9);
+        for (var offset = -4; offset <= 4; offset++)
+        {
+            var index = (currentIndex + offset + count) % count;
+            indices.Add(index);
+        }
+        return indices;
+    }
+
+    private void QueueThumbnailLoad(FolderPreviewItem item, int generation)
+    {
+        _ = Task.Run(() =>
+        {
+            var thumbnail = ThumbnailCache.Instance.GetOrCreateImageSource(item.Path);
+            if (thumbnail is null) return;
+
+            _ = _uiDispatcher.InvokeAsync(() =>
+            {
+                if (generation != _folderPreviewGeneration) return;
+                if (!FolderPreviewItems.Contains(item)) return;
+
+                item.Thumbnail = thumbnail;
+            });
+        });
+    }
+
+    private void OpenPreviewItem(FolderPreviewItem? item)
+    {
+        if (item is null || !File.Exists(item.Path)) return;
+        OpenFile(item.Path);
+    }
+
     private void PushUndoEntry(RenameService.UndoEntry entry)
     {
         RecentRenames.Insert(0, entry);
@@ -586,6 +660,7 @@ public sealed class MainViewModel : ObservableObject
     public ICommand UndoRenameCommand { get; }
     public ICommand AboutCommand { get; }
     public ICommand OpenRecentFolderCommand { get; }
+    public ICommand OpenPreviewItemCommand { get; }
 
     // -------------------- Navigation --------------------
 
@@ -741,6 +816,7 @@ public sealed class MainViewModel : ObservableObject
         CurrentPath = path;
         try { _fileSize = new FileInfo(path).Length; } catch { _fileSize = 0; }
         Raise(nameof(FileSizeText));
+        RefreshFolderPreview();
 
         SyncRenameEditorFromDisk();
 
@@ -1110,6 +1186,8 @@ public sealed class MainViewModel : ObservableObject
         LoadErrorMessage = null;
         DecoderUsed = null;
         ResetPageState();
+        _folderPreviewGeneration++;
+        FolderPreviewItems.Clear();
         RenameStatus = RenameStatusKind.Idle;
         SyncRenameEditorFromDisk();
         Raise(nameof(FileSizeText));
@@ -1125,4 +1203,34 @@ public sealed class MainViewModel : ObservableObject
         while (v >= 1024 && i < units.Length - 1) { v /= 1024; i++; }
         return $"{v:0.##} {units[i]}";
     }
+}
+
+public sealed class FolderPreviewItem : ObservableObject
+{
+    private ImageSource? _thumbnail;
+
+    public FolderPreviewItem(string path, string fileName, string positionText, bool isCurrent)
+    {
+        Path = path;
+        FileName = fileName;
+        PositionText = positionText;
+        IsCurrent = isCurrent;
+    }
+
+    public string Path { get; }
+    public string FileName { get; }
+    public string PositionText { get; }
+    public bool IsCurrent { get; }
+
+    public ImageSource? Thumbnail
+    {
+        get => _thumbnail;
+        set
+        {
+            if (Set(ref _thumbnail, value))
+                Raise(nameof(HasThumbnail));
+        }
+    }
+
+    public bool HasThumbnail => Thumbnail is not null;
 }
