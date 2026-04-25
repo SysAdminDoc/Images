@@ -710,7 +710,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         if (!SupportedImageFormats.IsSupported(path))
         {
-            Toast($"Unsupported file type: {Path.GetExtension(path)}");
+            // V20-37 / item 86: human-readable suggestion when a recognized non-image type is
+            // dropped (video, archive, document) so the user understands why nothing happened.
+            var ext = Path.GetExtension(path);
+            var suggestion = SupportedImageFormats.SuggestionForUnsupported(ext);
+            Toast(suggestion is null
+                ? $"Unsupported file type: {ext}"
+                : $"Unsupported {ext}. {suggestion}");
             return;
         }
 
@@ -883,24 +889,30 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void SetLoadError(Exception ex)
     {
         var needsGhostscript = ex.Message.Contains("requires Ghostscript", StringComparison.OrdinalIgnoreCase);
+        var path = _nav.CurrentPath;
+        var ext = path is null ? "" : Path.GetExtension(path);
+        var suggestion = string.IsNullOrEmpty(ext)
+            ? null
+            : SupportedImageFormats.SuggestionForUnsupported(ext);
 
-        LoadErrorTitle = needsGhostscript
-            ? "Document preview needs Ghostscript"
-            : "This image couldn't be displayed";
+        if (needsGhostscript)
+        {
+            LoadErrorTitle = "Document preview needs Ghostscript";
+            LoadErrorMessage = "This file type depends on Ghostscript for document and Adobe Illustrator previews. Images can use a bundled runtime, IMAGES_GHOSTSCRIPT_DIR, or an installed Ghostscript copy.";
+            LoadErrorHelpText = "Open codec details to see the active runtime status and copy a support report.";
+            LoadErrorShowsCodecDetails = true;
+            Toast("Document preview needs Ghostscript");
+            return;
+        }
 
-        LoadErrorMessage = needsGhostscript
-            ? "This file type depends on Ghostscript for document and Adobe Illustrator previews. Images can use a bundled runtime, IMAGES_GHOSTSCRIPT_DIR, or an installed Ghostscript copy."
-            : $"This file could not be decoded. {ex.Message}";
-
-        LoadErrorHelpText = needsGhostscript
-            ? "Open codec details to see the active runtime status and copy a support report."
-            : "Try another file, reveal the file in Explorer, or reload after another app finishes writing it.";
-
-        LoadErrorShowsCodecDetails = needsGhostscript;
-
-        Toast(needsGhostscript
-            ? "Document preview needs Ghostscript"
-            : "Could not decode this file");
+        // Item 86: surface a recognized format-family hint when one applies — gives the user a
+        // concrete next step (e.g. "open in VLC", "extract the archive") instead of "decode failed".
+        LoadErrorTitle = "This image couldn't be displayed";
+        LoadErrorMessage = $"This file could not be decoded. {ex.Message}";
+        LoadErrorHelpText = suggestion
+            ?? "Try another file, reveal the file in Explorer, or reload after another app finishes writing it.";
+        LoadErrorShowsCodecDetails = false;
+        Toast("Could not decode this file");
     }
 
     private void ClearLoadError()
