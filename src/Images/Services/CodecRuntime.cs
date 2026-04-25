@@ -128,11 +128,7 @@ public static class CodecRuntime
             File.Exists(Path.Combine(directory, "gsdll64.dll")) ||
             File.Exists(Path.Combine(directory, "gsdll32.dll"));
 
-        var hasConsoleExe =
-            File.Exists(Path.Combine(directory, "gswin64c.exe")) ||
-            File.Exists(Path.Combine(directory, "gswin32c.exe"));
-
-        return hasDll && hasConsoleExe;
+        return hasDll;
     }
 
     public static string? GetGhostscriptVersion()

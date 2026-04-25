@@ -248,7 +248,7 @@ public sealed class MainViewModel : ObservableObject
     public string DropOverlayTitle => IsDropAccepted ? "Drop to open file" : "Unsupported file";
     public string DropOverlayMessage => IsDropAccepted
         ? "Images will load this file and scan the folder for navigation."
-        : "Drop a supported image, RAW, design, vector, or document preview file.";
+        : SupportedImageFormats.DropUnsupportedMessage;
 
     private int _pixelWidth;
     public int PixelWidth { get => _pixelWidth; private set { if (Set(ref _pixelWidth, value)) Raise(nameof(DimensionsText)); } }
@@ -581,8 +581,8 @@ public sealed class MainViewModel : ObservableObject
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
             Title = "Open image or preview",
-            Filter = "Images|" + string.Join(";", DirectoryNavigator.SupportedExtensions.Select(e => "*" + e))
-                     + "|All files|*.*"
+            Filter = SupportedImageFormats.OpenDialogFilter,
+            FilterIndex = 1
         };
         if (dlg.ShowDialog() == true) OpenFile(dlg.FileName);
     }
