@@ -283,83 +283,89 @@
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 MaxWidth="540"
+                                MaxHeight="520"
                                 Padding="30,26,30,28">
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource Text.Title}"
-                                           Text="Keyboard shortcuts"
-                                           HorizontalAlignment="Center" />
-                                <TextBlock Style="{StaticResource Text.Subtitle}"
-                                           Text="Press any key to dismiss."
-                                           HorizontalAlignment="Center"
-                                           Margin="0,6,0,22" />
+                            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          CanContentScroll="False"
+                                          Focusable="False">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource Text.Title}"
+                                               Text="Keyboard shortcuts"
+                                               HorizontalAlignment="Center" />
+                                    <TextBlock Style="{StaticResource Text.Subtitle}"
+                                               Text="Press any key to dismiss."
+                                               HorizontalAlignment="Center"
+                                               Margin="0,6,0,22" />
 
-                                <TextBlock Text="Navigate" Style="{StaticResource SectionLabel}" />
-                                <Grid Margin="0,0,0,14">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
-                                    </Grid.RowDefinitions>
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="← / →" />
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Previous / next image" />
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Home / End" />
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="First / last image" />
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Space / Bksp" />
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Next / previous image" />
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Mouse X1 / X2" />
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Previous / next image (5-button mouse)" />
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="F5" />
-                                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Rescan folder" />
-                                </Grid>
+                                    <TextBlock Text="Navigate" Style="{StaticResource SectionLabel}" />
+                                    <Grid Margin="0,0,0,14">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="← / →" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Previous / next image" />
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Home / End" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="First / last image" />
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Space / Bksp" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Next / previous image" />
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Mouse X1 / X2" />
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Previous / next image (5-button mouse)" />
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="F5" />
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Rescan folder" />
+                                    </Grid>
 
-                                <TextBlock Text="View" Style="{StaticResource SectionLabel}" />
-                                <Grid Margin="0,0,0,14">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
-                                    </Grid.RowDefinitions>
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Wheel" />
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom about cursor" />
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Shift + Wheel" />
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Pan horizontally" />
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="+ / −" />
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom in / out" />
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="0 / 1" />
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Fit to viewport / 1:1 pixel" />
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="F11" />
-                                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle fullscreen" />
-                                </Grid>
+                                    <TextBlock Text="View" Style="{StaticResource SectionLabel}" />
+                                    <Grid Margin="0,0,0,14">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Wheel" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom about cursor" />
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Shift + Wheel" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Pan horizontally" />
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="+ / −" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom in / out" />
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="0 / 1" />
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Fit to viewport / 1:1 pixel" />
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="F11" />
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle fullscreen" />
+                                    </Grid>
 
-                                <TextBlock Text="File" Style="{StaticResource SectionLabel}" />
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
-                                    </Grid.RowDefinitions>
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+O" />
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open image" />
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+S" />
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Save a copy" />
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+P" />
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Print current image" />
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Del" />
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Send to Recycle Bin" />
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+R" />
-                                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Reload current image" />
-                                    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
-                                    <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
-                                    <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
-                                    <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
-                                </Grid>
-                            </StackPanel>
+                                    <TextBlock Text="File" Style="{StaticResource SectionLabel}" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+O" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open image" />
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+S" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Save a copy" />
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+P" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Print current image" />
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Del" />
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Send to Recycle Bin" />
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+R" />
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Reload current image" />
+                                        <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
+                                        <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
+                                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
+                                        <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
+                                    </Grid>
+                                </StackPanel>
+                            </ScrollViewer>
                         </Border>
                     </Grid>
 
