@@ -312,6 +312,7 @@
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Bd" Property="Background" Value="{StaticResource Surface2Brush}" />
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Surface2Brush}" />
+                            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource TextBrush}" />
