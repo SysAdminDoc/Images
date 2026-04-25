@@ -19,11 +19,8 @@ public partial class AboutWindow : Window
         RuntimeText.Text = info.RuntimeDescription;
         OsText.Text      = info.OsDescription;
 
-        var codec = CodecRuntime.Status;
-        CodecText.Text = $"WIC + Magick.NET 14.13; {SupportedImageFormats.Extensions.Count} discoverable image, design, RAW, vector, and production extensions";
-        DocumentCodecText.Text = codec.GhostscriptAvailable
-            ? $"Ghostscript enabled ({CodecRuntime.GetGhostscriptVersion() ?? codec.GhostscriptSource})"
-            : "Ghostscript not bundled or installed; EPS, PDF, PS, and AI previews are unavailable";
+        CodecText.Text = CodecCapabilityService.BuildOverviewText();
+        DocumentCodecText.Text = CodecCapabilityService.BuildDocumentStatusText();
 
         UpdateCheckCheckBox.IsChecked = UpdateCheckService.OptedIn;
 
@@ -60,6 +57,19 @@ public partial class AboutWindow : Window
         Process.Start(psi);
     }
 
+    private void CopyCodecReportButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Clipboard.SetText(CodecCapabilityService.BuildClipboardReport());
+            ShowUpdateStatus("Codec report copied to clipboard.", "Success");
+        }
+        catch (Exception ex)
+        {
+            ShowUpdateStatus($"Could not copy codec report: {ex.Message}", "Warning");
+        }
+    }
+
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
 
     private void UpdateCheckOptIn_Changed(object sender, RoutedEventArgs e)
@@ -73,7 +83,7 @@ public partial class AboutWindow : Window
         // Manual check bypasses the 24-h throttle. Gate the button against concurrent clicks.
         if (sender is not System.Windows.Controls.Button btn) return;
         btn.IsEnabled = false;
-        btn.Content = "Checking...";
+        CheckUpdatesButtonText.Text = "Checking...";
         _latestReleaseUrl = null;
         UpdateReleaseButton.Visibility = Visibility.Collapsed;
         ShowUpdateStatus("Checking GitHub Releases...", "Info");
@@ -99,7 +109,7 @@ public partial class AboutWindow : Window
         finally
         {
             btn.IsEnabled = true;
-            btn.Content = "Check for updates";
+            CheckUpdatesButtonText.Text = "Check updates";
         }
     }
 

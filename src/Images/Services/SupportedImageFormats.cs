@@ -11,16 +11,19 @@ public static class SupportedImageFormats
 {
     public static readonly string[] CommonExtensions =
     [
-        ".jpg", ".jpeg", ".jpe", ".jfif", ".png", ".gif", ".webp", ".heic", ".heif",
-        ".hif", ".avif", ".jxl", ".tif", ".tiff", ".bmp", ".dib", ".ico", ".cur",
-        ".hdp", ".jxr", ".wdp"
+        ".jpg", ".jpeg", ".jpe", ".jfif", ".jif", ".png", ".apng", ".gif", ".webp",
+        ".heic", ".heif", ".hif", ".avif", ".jxl", ".tif", ".tiff", ".bmp", ".dib",
+        ".ico", ".cur", ".hdp", ".jxr", ".wdp", ".wbmp"
     ];
 
     public static readonly string[] DesignExtensions =
     [
         ".psd", ".psb", ".tga", ".targa", ".pcx", ".dds", ".qoi", ".exr", ".hdr",
         ".pic", ".dpx", ".cin", ".sgi", ".rgb", ".rgba", ".bw", ".jp2", ".j2k",
-        ".j2c", ".jpc", ".jpf", ".jpx", ".jpm", ".xcf", ".ora"
+        ".j2c", ".jpc", ".jpf", ".jpx", ".jpm", ".jpt", ".jps", ".pgx", ".xcf",
+        ".ora", ".dcx", ".rle", ".otb", ".pcd", ".pcds", ".picon", ".pix", ".pwp",
+        ".sfw", ".tim", ".vicar", ".viff", ".vips", ".xv", ".six", ".sixel",
+        ".farbfeld", ".ff"
     ];
 
     public static readonly string[] PortableAndScientificExtensions =
@@ -32,19 +35,20 @@ public static class SupportedImageFormats
 
     public static readonly string[] VectorExtensions =
     [
-        ".svg", ".svgz", ".emf", ".wmf"
+        ".svg", ".svgz", ".emf", ".wmf", ".wpg", ".mvg", ".msvg"
     ];
 
     public static readonly string[] DocumentPreviewExtensions =
     [
-        ".pdf", ".ps", ".ps2", ".ps3", ".eps", ".epsf", ".epsi", ".epi", ".ept", ".ai"
+        ".pdf", ".pdfa", ".epdf", ".ps", ".ps2", ".ps3", ".eps", ".epsf", ".epsi",
+        ".epi", ".ept", ".ept2", ".ept3", ".ai"
     ];
 
     public static readonly string[] RawExtensions =
     [
         ".cr2", ".cr3", ".crw", ".nef", ".nrw", ".arw", ".srf", ".sr2",
         ".dng", ".raf", ".rw2", ".orf", ".pef", ".3fr", ".erf", ".mef",
-        ".mrw", ".x3f", ".rwl", ".iiq", ".kdc", ".dcr", ".srw", ".mos",
+        ".mrw", ".x3f", ".rwl", ".iiq", ".kdc", ".k25", ".dcr", ".srw", ".mos",
         ".fff", ".gpr", ".bay", ".cap"
     ];
 
