@@ -374,6 +374,15 @@
                             <Style TargetType="Border" BasedOn="{StaticResource Toast}">
                                 <Setter Property="Opacity" Value="0" />
                                 <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ToastTone}" Value="Success">
+                                        <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ToastTone}" Value="Warning">
+                                        <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ToastTone}" Value="Error">
+                                        <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
+                                    </DataTrigger>
                                     <Trigger Property="IsVisible" Value="True">
                                         <Trigger.EnterActions>
                                             <BeginStoryboard>
@@ -391,12 +400,31 @@
                             </Style>
                         </Border.Style>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE930;"
-                                       FontFamily="{StaticResource IconFontFamily}"
+                            <TextBlock FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="13"
-                                       Foreground="{StaticResource AccentBrush}"
                                        VerticalAlignment="Center"
-                                       Margin="0,0,10,0" />
+                                       Margin="0,0,10,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="&#xE930;" />
+                                        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ToastTone}" Value="Success">
+                                                <Setter Property="Text" Value="&#xE73E;" />
+                                                <Setter Property="Foreground" Value="{StaticResource GreenBrush}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ToastTone}" Value="Warning">
+                                                <Setter Property="Text" Value="&#xE783;" />
+                                                <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ToastTone}" Value="Error">
+                                                <Setter Property="Text" Value="&#xE783;" />
+                                                <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                             <TextBlock Text="{Binding ToastMessage}"
                                        Foreground="{StaticResource FloatingChromeTextBrush}"
                                        FontSize="13"

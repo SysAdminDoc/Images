@@ -420,14 +420,51 @@ public sealed class MainViewModel : ObservableObject
 
     // -------------------- Toast --------------------
 
+    public enum ToastToneKind { Info, Success, Warning, Error }
+
     private string? _toast;
     public string? ToastMessage { get => _toast; private set => Set(ref _toast, value); }
 
+    private ToastToneKind _toastTone = ToastToneKind.Info;
+    public ToastToneKind ToastTone { get => _toastTone; private set => Set(ref _toastTone, value); }
+
     private void Toast(string message)
     {
+        ToastTone = InferToastTone(message);
         ToastMessage = message;
         _toastTimer.Stop();
         _toastTimer.Start();
+    }
+
+    private static ToastToneKind InferToastTone(string message)
+    {
+        var m = message.ToLowerInvariant();
+        if (m.Contains("failed") ||
+            m.Contains("could not") ||
+            m.Contains("cannot") ||
+            m.Contains("unreachable") ||
+            m.Contains("no longer exists") ||
+            m.Contains("busy"))
+            return ToastToneKind.Error;
+
+        if (m.Contains("no images") ||
+            m.Contains("unsupported") ||
+            m.Contains("name taken") ||
+            m.Contains("new version"))
+            return ToastToneKind.Warning;
+
+        if (m.Contains("copied") ||
+            m.Contains("saved") ||
+            m.Contains("renamed") ||
+            m.Contains("reverted") ||
+            m.Contains("sent") ||
+            m.Contains("set as wallpaper") ||
+            m.Contains("reloaded") ||
+            m.Contains("refreshed") ||
+            m.Contains("latest version"))
+            return ToastToneKind.Success;
+
+        return ToastToneKind.Info;
     }
 
     public void DismissToast()
