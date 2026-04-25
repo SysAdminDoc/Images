@@ -470,7 +470,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="← / →" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Previous / next image" />
@@ -503,6 +503,8 @@
                                         <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Fit to viewport / 1:1 pixel" />
                                         <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="F11" />
                                         <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle fullscreen" />
+                                        <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="T" />
+                                        <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle filmstrip" />
                                     </Grid>
 
                                     <TextBlock Text="File" Style="{StaticResource SectionLabel}" />
@@ -626,10 +628,91 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
+                        <Border Grid.Row="0"
+                                Margin="0,0,0,10"
+                                Visibility="{Binding ShowFilmstrip, Converter={StaticResource BoolToVis}}">
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                          VerticalScrollBarVisibility="Disabled"
+                                          Padding="0,0,0,4"
+                                          CanContentScroll="False"
+                                          MaxHeight="110">
+                                <ItemsControl ItemsSource="{Binding FolderPreviewItems}"
+                                              KeyboardNavigation.DirectionalNavigation="Cycle"
+                                              KeyboardNavigation.TabNavigation="Continue"
+                                              AutomationProperties.Name="Bottom folder filmstrip">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Command="{Binding DataContext.OpenPreviewItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Width="78"
+                                                    MinHeight="88"
+                                                    Margin="0,0,7,0"
+                                                    Padding="4"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    VerticalContentAlignment="Stretch"
+                                                    ToolTip="{Binding Path}"
+                                                    AutomationProperties.Name="{Binding FileName}">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
+                                                        <Setter Property="Background" Value="{StaticResource Surface0Brush}" />
+                                                        <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                                <StackPanel>
+                                                    <Border Height="48"
+                                                            CornerRadius="{StaticResource Radius.Sm.CR}"
+                                                            Background="{StaticResource ViewportBrush}"
+                                                            BorderBrush="{StaticResource HairlineBrush}"
+                                                            BorderThickness="1"
+                                                            ClipToBounds="True">
+                                                        <Grid>
+                                                            <Image Source="{Binding Thumbnail}"
+                                                                   Stretch="UniformToFill"
+                                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                                   Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVis}}" />
+                                                            <TextBlock Text="&#xEB9F;"
+                                                                       FontFamily="{StaticResource IconFontFamily}"
+                                                                       FontSize="16"
+                                                                       Foreground="{StaticResource OverlayBrush}"
+                                                                       HorizontalAlignment="Center"
+                                                                       VerticalAlignment="Center"
+                                                                       Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}" />
+                                                        </Grid>
+                                                    </Border>
+                                                    <TextBlock Text="{Binding FileName}"
+                                                               Foreground="{StaticResource TextBrush}"
+                                                               FontSize="10.5"
+                                                               FontWeight="SemiBold"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               Margin="1,5,1,0" />
+                                                    <TextBlock Text="{Binding PositionText}"
+                                                               Foreground="{StaticResource OverlayBrush}"
+                                                               FontSize="10"
+                                                               Margin="1,1,1,0" />
+                                                </StackPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Border>
+
                         <!-- Current file info gets its own row so command clusters never collide on narrow widths. -->
-                        <Grid Grid.Row="0"
+                        <Grid Grid.Row="1"
                               MinHeight="20"
                               Margin="0,0,0,9">
                             <StackPanel Orientation="Horizontal"
@@ -727,7 +810,7 @@
                         </Grid>
 
                         <!-- Wrapping command row preserves all actions instead of clipping at the minimum width. -->
-                        <WrapPanel Grid.Row="1"
+                        <WrapPanel Grid.Row="2"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center">
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrevCommand}" Content="&#xE76B;" ToolTip="Previous (Left)" AutomationProperties.Name="Previous image" />
@@ -735,6 +818,24 @@
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenCommand}" Content="&#xE8E5;" ToolTip="Open…" Margin="4,0,0,0" AutomationProperties.Name="Open image" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCwCommand}" Content="&#xE7AC;" ToolTip="Rotate right" Margin="4,0,0,0" AutomationProperties.Name="Rotate right" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding NextCommand}" Content="&#xE76C;" ToolTip="Next (Right)" Margin="4,0,0,0" AutomationProperties.Name="Next image" />
+                            <Button Command="{Binding ToggleFilmstripCommand}"
+                                    Content="&#xEB9F;"
+                                    ToolTip="{Binding FilmstripToggleTooltip}"
+                                    Margin="4,0,0,0"
+                                    Visibility="{Binding CanToggleFilmstrip, Converter={StaticResource BoolToVis}}"
+                                    AutomationProperties.Name="Toggle filmstrip">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsFilmstripVisible}" Value="True">
+                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
                             <Border Width="1"
                                     Height="22"
                                     Background="{StaticResource HairlineBrush}"
@@ -850,9 +951,9 @@
                         </Grid>
                     </Border>
 
-                    <!-- FOLDER PREVIEW section — consumes the thumbnail cache as a compact
-                         near-current filmstrip without turning the viewer into a full DAM. -->
-                    <StackPanel Visibility="{Binding FolderPreviewItems.Count, Converter={StaticResource BoolToVis}}">
+                    <!-- FOLDER PREVIEW fallback — remains in the side panel when the bottom
+                         filmstrip is hidden so thumbnail jumping is never lost. -->
+                    <StackPanel Visibility="{Binding ShowSideFolderPreview, Converter={StaticResource BoolToVis}}">
                         <TextBlock Text="Folder preview" Style="{StaticResource SectionLabel}" />
                         <ScrollViewer HorizontalScrollBarVisibility="Auto"
                                       VerticalScrollBarVisibility="Disabled"
