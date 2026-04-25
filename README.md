@@ -30,6 +30,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Recent Renames panel** — the last 10 renames are stacked on the side with **Undo** buttons.
 - **Full directory navigation** — open one photo, scroll through the whole folder with ← / → keys or the hover arrows. Wraps at the ends. Natural-sorted so `IMG_2.jpg` comes before `IMG_10.jpg`.
 - **Zoom + pan** — mouse wheel to zoom in/out about the cursor, drag to pan, double-click to toggle fit/1:1.
+- **Export a copy** to JPEG, PNG, WebP, AVIF, JXL, HEIC, TIFF, BMP, GIF, TGA, DDS, QOI, EXR, HDR, JPEG 2000, and portable bitmap formats.
 - **Rotate**, **delete-to-Recycle-Bin**, **Reveal in Explorer**, **Copy path**.
 - **No confirmation dialogs** — actions happen immediately with toast feedback.
 
@@ -102,6 +103,7 @@ src/Images/
 │   └── MainViewModel.cs        # All view state + commands
 ├── Services/
 │   ├── ImageLoader.cs          # WIC-first, Magick.NET fallback, cached decoding
+│   ├── ImageExportService.cs   # Codec-aware Save a copy / conversion output
 │   ├── SupportedImageFormats.cs # Central extension catalog for discovery/dialogs
 │   ├── CodecRuntime.cs         # Optional app-local Ghostscript runtime discovery
 │   ├── DirectoryNavigator.cs   # Natural-sort folder scan, prev/next/wrap, FileSystemWatcher
