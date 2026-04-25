@@ -82,4 +82,4 @@ if (-not (Test-GhostscriptRuntime $destinationFull)) {
 Write-Host "Ghostscript runtime copied."
 Write-Host "Source:      $resolvedSource"
 Write-Host "Destination: $destinationFull"
-Write-Host "Next: dotnet publish src/Images -c Release -r win-x64 --no-self-contained -o publish"
+Write-Host "Next: dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish"
