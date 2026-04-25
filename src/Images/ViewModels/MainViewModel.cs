@@ -50,6 +50,7 @@ public sealed class MainViewModel : ObservableObject
         PrintCommand = new RelayCommand(PrintCurrent, () => HasImage);
         SaveAsCopyCommand = new RelayCommand(SaveAsCopy, () => HasImage);
         CheckForUpdatesCommand = new RelayCommand(async () => await CheckForUpdatesAsync(userInitiated: true), () => true);
+        OpenLatestUpdateCommand = new RelayCommand(OpenLatestUpdate, () => HasUpdateAvailable);
         RefreshCommand = new RelayCommand(() => { _nav.Refresh(); RefreshFromNav(); });
         CommitRenameCommand = new RelayCommand(() => { _renameTimer.Stop(); FlushPendingRename(); });
         CancelRenameCommand = new RelayCommand(CancelRenameEdit);
@@ -458,6 +459,7 @@ public sealed class MainViewModel : ObservableObject
     public ICommand PrintCommand { get; }
     public ICommand SaveAsCopyCommand { get; }
     public ICommand CheckForUpdatesCommand { get; }
+    public ICommand OpenLatestUpdateCommand { get; }
     public ICommand RefreshCommand { get; }
     public ICommand CommitRenameCommand { get; }
     public ICommand CancelRenameCommand { get; }
@@ -815,12 +817,36 @@ public sealed class MainViewModel : ObservableObject
     public string? LatestUpdateTag
     {
         get => _latestUpdateTag;
-        private set { if (Set(ref _latestUpdateTag, value)) Raise(nameof(HasUpdateAvailable)); }
+        private set
+        {
+            if (Set(ref _latestUpdateTag, value))
+            {
+                Raise(nameof(HasUpdateAvailable));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
     }
 
     public string? LatestUpdateUrl { get; private set; }
 
     public bool HasUpdateAvailable => !string.IsNullOrEmpty(LatestUpdateTag);
+
+    private void OpenLatestUpdate()
+    {
+        if (string.IsNullOrWhiteSpace(LatestUpdateUrl)) return;
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = LatestUpdateUrl,
+                UseShellExecute = true,
+            });
+        }
+        catch (Exception ex)
+        {
+            Toast($"Could not open release page: {ex.Message}");
+        }
+    }
 
     // E6: save a copy of the current image to a user-chosen path. The written bytes are a
     // re-encode of the displayed first-frame via WIC's format-appropriate encoder (JpegBitmapEncoder
