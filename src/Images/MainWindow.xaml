@@ -650,8 +650,9 @@
                                 Height="36"
                                 Command="{Binding UnlockExtensionCommand}"
                                 IsEnabled="{Binding HasImage}"
-                                ToolTip="Click to edit the extension (normally locked)"
-                                AutomationProperties.Name="Toggle extension editing">
+                                ToolTip="{Binding ExtensionLockHelpText}"
+                                AutomationProperties.Name="{Binding ExtensionLockText}"
+                                AutomationProperties.HelpText="{Binding ExtensionLockHelpText}">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                     <Style.Triggers>
