@@ -52,29 +52,38 @@ public static class ImageExportService
     public static MagickFormat? TryResolveFormat(string extension)
         => ResolveMagickFormat(extension.ToLowerInvariant());
 
+    public static string ResolveWritablePath(string requestedPath)
+        => ResolveWritableTarget(requestedPath).Path;
+
     public static string Save(BitmapSource source, string path)
     {
-        var ext = Path.GetExtension(path).ToLowerInvariant();
-        var format = ResolveMagickFormat(ext);
-        if (format is null || !CanWrite(format.Value))
-        {
-            path = Path.ChangeExtension(path, ".png");
-            format = MagickFormat.Png;
-        }
+        var target = ResolveWritableTarget(path);
 
         using var image = ToMagickImage(source);
 
-        image.Format = format.Value;
+        image.Format = target.Format;
         image.Quality = 92;
 
-        if (RequiresOpaqueBackground(format.Value))
+        if (RequiresOpaqueBackground(target.Format))
         {
             image.BackgroundColor = MagickColors.White;
             image.Alpha(AlphaOption.Remove);
         }
 
-        image.Write(path);
-        return path;
+        image.Write(target.Path);
+        return target.Path;
+    }
+
+    private static (string Path, MagickFormat Format) ResolveWritableTarget(string requestedPath)
+    {
+        if (string.IsNullOrWhiteSpace(requestedPath))
+            throw new ArgumentException("A destination path is required.", nameof(requestedPath));
+
+        var ext = Path.GetExtension(requestedPath).ToLowerInvariant();
+        var format = ResolveMagickFormat(ext);
+        return format is not null && CanWrite(format.Value)
+            ? (requestedPath, format.Value)
+            : (Path.ChangeExtension(requestedPath, ".png"), MagickFormat.Png);
     }
 
     private static MagickImage ToMagickImage(BitmapSource source)

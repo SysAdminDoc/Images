@@ -1167,12 +1167,31 @@ public sealed class MainViewModel : ObservableObject
 
         try
         {
-            var savedPath = ImageExportService.Save(bs, dlg.FileName);
+            var targetPath = ImageExportService.ResolveWritablePath(dlg.FileName);
+            if (PathsReferToSameFile(targetPath, CurrentPath))
+            {
+                Toast("Choose a different filename for the copy");
+                return;
+            }
+
+            var savedPath = ImageExportService.Save(bs, targetPath);
             Toast($"Saved copy → {Path.GetFileName(savedPath)}");
         }
         catch (Exception ex)
         {
             Toast($"Save failed: {ex.Message}");
+        }
+    }
+
+    private static bool PathsReferToSameFile(string left, string right)
+    {
+        try
+        {
+            return string.Equals(Path.GetFullPath(left), Path.GetFullPath(right), StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
         }
     }
 
