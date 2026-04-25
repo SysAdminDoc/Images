@@ -139,7 +139,7 @@
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator />
-                        <MenuItem Header="Move to Recycle Bin..." Command="{Binding DeleteCommand}" InputGestureText="Del">
+                        <MenuItem Header="Move to Recycle Bin…" Command="{Binding DeleteCommand}" InputGestureText="Del">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE74D;" />
                             </MenuItem.Icon>
