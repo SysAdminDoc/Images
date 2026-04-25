@@ -3,7 +3,7 @@
 Tracks planned work. `[ ]` pending, `[x]` shipped. Priorities `P0` must / `P1` should / `P2` nice.
 Effort tags: **S** ≤ 2 days · **M** ≤ 1 week · **L** > 1 week · **XL** multi-week project.
 
-> **Document version**: v4 · 2026-04-25. Supersedes v3 (2026-04-25). Adds a supplemental project-mining pass across PicView, NeeView, YACReader, PhotoDemon, Czkawka/Krokiet, PureRef, Eagle, Hydrus, OpenSeadragon, OpenSlide, Bio-Formats, napari, QuPath, libvips, OpenImageIO, and OpenColorIO. The new findings translate into archive/book mode, a gallery workbench, clipboard/URL/Base64 ingress, reference-board mode, duplicate cleanup, bad-extension scanning, deep-zoom viewing, scientific/whole-slide format evaluation, multidimensional channel/time navigation, a streaming batch backend spike, OCIO/ACES color-management work, and macro/action editing. Retains the v3 research additions: V20-32 `--peek` CLI mode, V20-15-Loop animation-loop badge, V-OCR text-on-image spike, D-05a SignPath.io evaluation, S-11 libde265 floor, updated S-09 codec security floors, P-05 C2PA verify promoted to P0, and the Sources Appendix.
+> **Document version**: v5 · 2026-04-25. Supersedes v4 (2026-04-25). Adds an end-to-end strategic intelligence refresh: local repo reconnaissance, current OSS activity snapshot via `gh repo view`, direct competitor and commercial feature mining, adjacent-domain architecture research, dependency/security deltas, a raw feature/scoring matrix, explicit tier moves/rejections, and a Phase 5 self-audit. Retains the v4 supplemental project-mining pass across PicView, NeeView, YACReader, PhotoDemon, Czkawka/Krokiet, PureRef, Eagle, Hydrus, OpenSeadragon, OpenSlide, Bio-Formats, napari, QuPath, libvips, OpenImageIO, and OpenColorIO.
 
 > **Vision**: One Windows app that replaces Photos, IrfanView, XnConvert, Upscayl, and a light Lightroom — by cannibalising the best ideas from a dozen OSS/freeware projects. Local-first, fast, dark-mode, no cloud, no subscription. The killer features are **CLIP semantic search** on a local library, **live inline rename** (already shipped), **Squoosh-style visual-diff converter**, and — differentiator nobody else ships — **network-egress transparency**: the viewer never touches the network silently, and you can see every call it makes.
 
@@ -17,6 +17,184 @@ Companion research:
 - [docs/research-advanced-features.md](docs/research-advanced-features.md) — AI (Upscayl/Real-ESRGAN, rembg/BiRefNet, CLIP, YOLO, OCR, faces), editors (GIMP/Krita/Paint.NET/darktable), panorama (Hugin), HDR (enfuse), lossless transforms, plugin hosts, canvas-engine decision.
 - [docs/gap-research-report-1.md](docs/gap-research-report-1.md) — accessibility, i18n, observability, distribution, testing, migration importers, catalog schema strategy.
 - [docs/gap-research-report-2.md](docs/gap-research-report-2.md) — security/privacy/CVEs, Azure Trusted Signing vs EV, winget/Scoop/MSIX status, Windows ML vs DirectML, OSS viewer release tracker, 2026 codec status, LaMa/chaiNNer/OpenModelDB.
+
+---
+
+## Strategic intelligence refresh — 2026-04-25
+
+Scope: Phase 0 through Phase 5 re-run against the current checkout. External research used official project pages, GitHub repo metadata through authenticated `gh repo view`, web search/fetch, NuGet, standards/spec docs, security advisory pages, and community threads. The unauthenticated GitHub REST API returned `403 rate limit exceeded`; the authenticated `gh` CLI supplied the star/activity snapshot below.
+
+### Phase 0 state memo
+
+- **What Images does today**: Windows 10/11 WPF viewer on .NET 9, local-first, dark, classic Photo Viewer layout, inline rename with undo, natural folder navigation, folder preview strip, WIC-first/Magick.NET fallback decode, optional app-local Ghostscript for PDF/EPS/PS/AI, animated image playback, multi-page navigation, cache/preload, codec-aware export, print, wallpaper, safe recycle-bin delete, update check with opt-out, Serilog logs, minidumps, crash dialog, installer plus portable release.
+- **What the project claims**: replace the friction of Photos/IrfanView/XnConvert/Upscayl/light-Lightroom while staying local, fast, transparent, and non-subscription. The visible differentiators are inline rename, broad codecs, dark/minimal UI, and network-egress transparency.
+- **What is incomplete**: no full settings surface, no high-contrast/light theme, no localization, no gallery/library/catalog mode, no batch processor, no smart search, no OCR, no capability matrix UI, no plugin boundary, no deep-zoom engine, no test corpus/golden decode tests, no code signing, no package-manager distribution, no real color-management pipeline, no editor history/non-destructive model.
+- **Hard constraints**: WPF/Windows-only, `.NET 9.0-windows`, MIT repo code, Magick.NET Apache-2.0 with native codec bundle, Ghostscript redistribution must be approved before bundling binaries, release path is self-contained win-x64 plus Inno Setup, runtime binaries stay out of source control, no silent network use, local cache/settings are disposable and must not become the only source of truth.
+- **Design philosophy to preserve**: image-first, keyboard-friendly, no cloud dependency, no surprise telemetry, minimal chrome until context demands more, reversible/destructive actions are calm and explicit, and advanced power is discoverable without making the default viewer feel heavy.
+
+### Phase 1 source coverage
+
+| Required source class | Coverage in this pass | Main receipts |
+|---|---|---|
+| Direct OSS competitors | ImageGlass, nomacs, qView, JPEGView, PicView, QuickLook, qimgv, Oculante, NeeView, YACReader, Geeqie/Pictus references | [[S-IG10]](https://imageglass.org/news/imageglass-10-beta-1-is-here-99), [[S-NOMACS]](https://github.com/nomacs/nomacs/releases), [[S-NOMACS-SYNC]](https://nomacs.org/blog/synchronization/), [[S-QVIEW]](https://interversehq.com/qview/), [[S-JPEGVIEW]](https://github.com/sylikc/jpegview), [[S-PICVIEW-ORG]](https://picview.org/), [[S-QUICKLOOK]](https://github.com/QL-Win/QuickLook), [[S-NEEVIEW-GUIDE]](https://neelabo.github.io/NeeView/en-us/userguide.html), [[S-YACREADER]](https://www.yacreader.com/) |
+| Commercial / closed competitors | XnView MP, FastStone, ACDSee, Eagle, PureRef, Seer, Adobe Bridge/Lightroom signals from prior docs | [[S-XNVIEW-HOME]](https://www.xnview.com/en/), [[S-FASTSTONE]](https://www.faststone.org/FSViewerDetail.htm), [[S-ACDSEE-AI]](https://www.acdsee.com/en/photo-studio/ai/), [[S-EAGLE]](https://www.eagle.cool/), [[S-PUREREF]](https://www.pureref.com/handbook/2.0/features/) |
+| Adjacent-domain projects | digiKam, Immich, PhotoPrism, Hydrus, Czkawka, PhotoDemon, OpenSeadragon, OpenSlide, Bio-Formats, napari, QuPath, libvips, OpenImageIO, OpenColorIO | [[S-DIGIKAM-FEATURES]](https://www.digikam.org/about/features/), [[S-IMMICH]](https://github.com/immich-app/immich), [[S-PHOTOPRISM]](https://www.photoprism.app/features), [[S-HYDRUS]](https://hydrusnetwork.github.io/hydrus/), [[S-CZKAWKA]](https://github.com/qarmin/czkawka), [[S-PHOTODEMON]](https://photodemon.org/), [[S-OPENSEADRAGON]](https://openseadragon.github.io/), [[S-OPENSLIDE]](https://openslide.org/), [[S-BIOFORMATS]](https://www.openmicroscopy.org/bio-formats/), [[S-NAPARI]](https://napari.org/stable/), [[S-QUPATH]](https://qupath.github.io/), [[S-LIBVIPS]](https://www.libvips.org/), [[S-OIIO]](https://openimageio.readthedocs.io/en/latest/), [[S-OCIO]](https://opencolorio.org/) |
+| Awesome-lists / directories | Awesome image-processing/image-viewer/self-hosted-photo/computer-vision directories used as harvest cross-check, not primary evidence | [[S-AWESOME-IMAGE-PROCESSING]](https://awesome.ecosyste.ms/projects?keyword=imagemagick), [[S-AWESOME-CV]](https://github.com/awesomelistsio/awesome-computer-vision), [[S-AWESOME-SELFHOSTED]](https://github.com/awesome-selfhosted/awesome-selfhosted) |
+| Community signal | Reddit/HN-style signals: Windows Photos speed complaints, lightweight viewer requests, favorite/tagging gaps, offline photo-organizer complaints, C2PA skepticism | [[S-REDDIT-WINVIEWER]](https://www.reddit.com/r/software/comments/1bkcctt), [[S-REDDIT-FOSS-VIEWERS]](https://www.reddit.com/r/foss/comments/1qdpfz6/foss_image_viewer_for_windows/), [[S-REDDIT-OFFLINE-DAM]](https://www.reddit.com/r/software/comments/1m30kyr/offline_not_selfhosted_photo_organization_software/), [[S-REDDIT-C2PA]](https://www.reddit.com/r/photojournalism/comments/1s8ihws/thoughts_on_content_credentials_c2pa/) |
+| Standards, specs, platform APIs | C2PA 2.4, HEIF WIC, Win32 App Isolation, Windows ML, OCIO/ACES 2.0, OpenSeadragon DZI/IIIF | [[S-C2PA-24]](https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html), [[S-HEIF-CODEC]](https://learn.microsoft.com/en-us/windows/win32/wic/heif-codec), [[S-WIN32-ISOLATION]](https://learn.microsoft.com/en-us/windows/win32/secauthz/appcontainer-isolation), [[S-WINML]](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview), [[S-OCIO-25]](https://opencolorio.readthedocs.io/en/latest/releases/ocio_2_5.html), [[S-OPENSEADRAGON-DZI]](https://openseadragon.github.io/examples/tilesource-dzi/) |
+| Academic / engineering blogs / talks | OpenSeadragon/IIIF training, napari multidimensional workflows, Bio-Formats OME model, libvips 8.18 engineering notes, OCIO 2.5 notes | [[S-IIIF-OSD]](https://training.iiif.io/intro-to-iiif/OPENSEADRAGON.html), [[S-NAPARI-VIEWER]](https://napari.org/stable/tutorials/fundamentals/viewer.html), [[S-BIOFORMATS]](https://www.openmicroscopy.org/bio-formats/), [[S-LIBVIPS-818]](https://www.libvips.org/2025/12/04/What%27s-new-in-8.18.html), [[S-OCIO-25]](https://opencolorio.readthedocs.io/en/latest/releases/ocio_2_5.html) |
+| Dependency changelogs | Magick.NET 14.13.0, Serilog/Sinks.File, Microsoft.Data.Sqlite, SharpCompress, .NET 9 current servicing | [[S-MAGICK-RELEASES]](https://github.com/dlemstra/Magick.NET/releases), [[S-SERILOG]](https://github.com/serilog/serilog/releases), [[S-SERILOG-FILE]](https://github.com/serilog/serilog-sinks-file/releases), [[S-SQLITE]](https://www.nuget.org/packages/Microsoft.Data.Sqlite), [[S-SHARPCOMPRESS]](https://www.nuget.org/packages/SharpCompress), [[S-DOTNET9]](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) |
+| Security advisories / CVEs | ImageMagick/Magick.NET GHSA stream, Ghostscript CVE stream, libheif/libavif/libwebp/libde265 floors, `dotnet list package --vulnerable` local scan | [[S-MAGICK-RELEASES]](https://github.com/dlemstra/Magick.NET/releases), [[S-GHOSTSCRIPT-CVE]](https://ghostscript.com/releases/cve/index.html), [[S-LIBHEIF]](https://github.com/advisories/GHSA-j87x-4gmq-cqfq), [[S-LIBAVIF]](https://github.com/advisories/GHSA-f6x7-5x3c-j3rg), [[S-LIBWEBP]](https://github.com/advisories/GHSA-j7hp-h8jx-5ppr), [[S-LIBDE265-64]](https://github.com/advisories/GHSA-wqrf-6rf5-v78r) |
+
+### OSS activity snapshot
+
+Snapshot date: 2026-04-25. Stars/last push/latest release came from authenticated `gh repo view`; project URLs are the source of record.
+
+| Project | Class | Stars | Last push | Latest release | Activity read |
+|---|---:|---:|---|---|---|
+| [ImageGlass](https://github.com/d2phap/ImageGlass) | direct viewer | 12,949 | 2026-04-17 | 9.4.1.15 / 2026-01-02 | Active; roadmap risk is v9 to v10 architecture transition |
+| [nomacs](https://github.com/nomacs/nomacs) | direct viewer | 2,904 | 2026-04-17 | 3.22.1 / 2026-04-17 | Active; sync/compare and KImageFormats are still instructive |
+| [qView](https://github.com/jurplel/qView) | direct viewer | 3,249 | 2026-04-04 | 7.1 / 2025-07-26 | Active enough; minimalism and preload/settings lessons |
+| [JPEGView](https://github.com/sylikc/jpegview) | direct viewer | 2,844 | 2024-08-09 | v1.3.46 / 2023-10-07 | Slower release cadence; still a benchmark for instant lightweight display |
+| [PicView](https://github.com/Ruben2776/PicView) | direct viewer | 3,183 | 2026-04-25 | 4.2.0 / 2026-03-29 | Very active; closest Windows/Avalonia rival for codec breadth and UX |
+| [QuickLook](https://github.com/QL-Win/QuickLook) | direct previewer | 23,132 | 2026-04-25 | 4.5.0 / 2026-04-14 | Very active; validates peek/overlay integration demand |
+| [qimgv](https://github.com/easymodo/qimgv) | direct viewer | 3,010 | 2026-01-19 | v1.0.2 / 2021-09-29 | Mature but quiet; video/image hybrid should stay rejected for now |
+| [Oculante](https://github.com/woelper/oculante) | direct viewer | 1,574 | 2026-04-24 | 0.9.2 / 2025-01-12 | Active; network-listen/IPC ideas belong behind privacy gates |
+| [NeeView](https://github.com/neelabo/NeeView) | archive/book viewer | 808 | 2026-04-21 | 45.3 / 2026-03-17 | Active; best source for book/archive comfort UX |
+| [YACReader](https://github.com/YACReader/yacreader) | comic reader/library | 1,250 | 2026-04-20 | 9.16.3 / 2026-01-03 | Active; library/read-position/system-info ideas |
+| [Czkawka](https://github.com/qarmin/czkawka) | cleanup/duplicates | 30,726 | 2026-04-21 | 11.0.1 / 2026-02-21 | Very active; duplicate/bad-extension/broken-file center is high confidence |
+| [Hydrus](https://github.com/hydrusnetwork/hydrus) | local media DB | 3,037 | 2026-04-22 | v669 / 2026-04-22 | Very active; tag namespace/relationship model should be simplified |
+| [OpenImageIO](https://github.com/OpenImageIO/oiio) | image I/O stack | 2,282 | 2026-04-23 | v3.1.12.0 / 2026-04-01 | Active; use as optional pro/VFX sidecar reference |
+| [libvips](https://github.com/libvips/libvips) | streaming image processing | 11,263 | 2026-04-25 | v8.18.2 / 2026-03-31 | Very active; strongest batch/deep-zoom backend spike |
+| [OpenSlide](https://github.com/openslide/openslide) | WSI reader | 484 | 2026-04-24 | v4.0.0 / 2023-10-11 | Active source with sparse releases; optional Lab Pack only |
+| [napari](https://github.com/napari/napari) | multidim viewer/plugin host | 2,644 | 2026-04-24 | v0.7.0 / 2026-03-23 | Active; plugin and multidimensional UX reference |
+| [QuPath](https://github.com/qupath/qupath) | bioimage analysis | 1,349 | 2026-04-24 | v0.7.0 / 2026-03-02 | Active; annotation/whole-slide UX reference |
+| [Immich](https://github.com/immich-app/immich) | photo management | 98,599 | 2026-04-25 | v2.7.5 / 2026-04-13 | Extremely active; mobile/cloud workflows are mostly philosophical misfits |
+| [PhotoPrism](https://github.com/photoprism/photoprism) | photo DAM | 39,572 | 2026-04-25 | 260305-fad9d5395 / 2026-03-05 | Active; search/indexing lessons, but not server-first architecture |
+| [PhotoDemon](https://github.com/tannerhelland/PhotoDemon) | editor/batch/macro | 2,178 | 2026-04-24 | v2025.12 / 2025-12-12 | Active; editor quality bar, not a code source |
+| [ImageMagick](https://github.com/ImageMagick/ImageMagick) | codec/processing stack | 16,258 | 2026-04-25 | 7.1.2-21 / 2026-04-21 | Very active and security-sensitive |
+| [Magick.NET](https://github.com/dlemstra/Magick.NET) | current decode dependency | 3,924 | 2026-04-24 | 14.13.0 / 2026-04-24 | Current in repo; keep CVE/update gates |
+| [Bio-Formats](https://github.com/ome/bioformats) | microscopy bridge | 418 | 2026-03-18 | v8.5.0 / 2026-03-18 | Active; process-isolated bridge only |
+| [OpenColorIO](https://github.com/AcademySoftwareFoundation/OpenColorIO) | color pipeline | 2,036 | 2026-04-24 | v2.5.1 / 2026-01-13 | Active; OCIO/ACES plan before RAW/VFX claims |
+| [SharpCompress](https://github.com/adamhathcock/sharpcompress) | archive dependency candidate | 2,534 | 2026-04-25 | 0.47.4 / 2026-04-04 | Active; candidate for archive mode after sandbox/provenance review |
+
+### Phase 2/3 feature harvest and scoring matrix
+
+Scoring shorthand: `F/I/E/R` = Fit, Impact, Effort, Risk on 1-5 where higher fit/impact is better and higher effort/risk is costlier. `Now` means highest practical leverage for the next implementation passes; `Next` means important but blocked by foundations; `Later` means useful after the product surface grows; `UC` means under consideration; `Rejected` means explicitly out of philosophy or too risky now.
+
+| # | Candidate | Category | Prevalence | F/I/E/R | Dependencies | Novelty | Tier |
+|---:|---|---|---|---|---|---|---|
+| 1 | Capability matrix UI for open/animate/pages/metadata/export/sandbox/runtime limits [[S-PICVIEW-ORG]](https://picview.org/) [[S-BIOFORMATS]](https://www.openmicroscopy.org/bio-formats/) | UX, docs, codecs | table-stakes for broad-codec apps | 5/5/3/2 | codec report service | parity plus trust moat | **Now** |
+| 2 | Full settings window: General, Appearance, Privacy, Advanced, Hotkeys | UX, accessibility | table-stakes | 5/5/3/2 | SQLite settings | parity | **Now** |
+| 3 | High-contrast theme using `SystemColors` and reduced-motion toggle | accessibility | table-stakes | 5/4/2/1 | settings UI | parity | **Now** |
+| 4 | Localization resource extraction and BCP-47 language setting | i18n/l10n | common in mature viewers | 4/3/4/2 | string inventory | parity | **Next** |
+| 5 | Keyboard shortcut editor with conflict detection | UX, accessibility | common in power tools | 5/3/3/2 | hotkey table | parity | **Next** |
+| 6 | Gallery workbench with virtualized thumbnails, filters, selection, context menu [[S-PICVIEW-ORG]](https://picview.org/) [[S-XNVIEW-HOME]](https://www.xnview.com/en/) | UX, data | common | 5/5/3/2 | thumbnail cache | parity | **Now** |
+| 7 | Filmstrip/thumbnail rail backed by disk cache | UX, performance | table-stakes | 5/4/2/2 | thumbnail cache | parity | **Now** |
+| 8 | Archive/book mode for CBZ/ZIP first, then CBR/7z if safe [[S-NEEVIEW-GUIDE]](https://neelabo.github.io/NeeView/en-us/userguide.html) [[S-YACREADER]](https://www.yacreader.com/) | platform/OS, UX | common in comic readers | 5/5/4/3 | archive safety policy | parity | **Next** |
+| 9 | Reader comfort controls: dual-page, RTL/manga order, read position | UX, i18n | common in comic readers | 4/3/3/2 | archive mode | parity | **Later** |
+| 10 | Universal open/paste ingress: files, folders, clipboard image, Base64, opt-in URL [[S-PICVIEW-ORG]](https://picview.org/) | UX, integrations | emerging | 5/4/3/3 | network-egress log | parity plus privacy | **Next** |
+| 11 | `--system-info` / `--codec-report` CLI for support [[S-YACREADER]](https://www.yacreader.com/) | dev-experience, docs | uncommon but valuable | 5/3/1/1 | capability matrix data | leapfrog | **Now** |
+| 12 | Multi-instance sync zoom/pan/next/previous [[S-NOMACS-SYNC]](https://nomacs.org/blog/synchronization/) | UX, multi-user | rare | 4/3/4/3 | window/session channel | parity with nomacs | **Later** |
+| 13 | Compare mode with split/overlay/fade slider | UX | common in DAMs | 5/4/3/2 | multi-open state | parity | **Next** |
+| 14 | Duplicate and similar-image cleanup center [[S-CZKAWKA]](https://github.com/qarmin/czkawka) [[S-DIGIKAM-FEATURES]](https://www.digikam.org/about/features/) | data, reliability | common in DAMs | 5/5/4/3 | catalog + quarantine | parity | **Next** |
+| 15 | Bad-extension, corrupt-file, zero-byte, broken-image scanner [[S-CZKAWKA]](https://github.com/qarmin/czkawka) | reliability, security | rare-but-high-value | 5/4/3/2 | safe scan queue | leapfrog for viewer | **Now** |
+| 16 | Non-destructive quarantine/recycle workflow for cleanup actions | data safety, UX | table-stakes | 5/4/2/2 | cleanup center | parity | **Now** |
+| 17 | SQLite catalog for indexed folders, thumbnails, metadata, hashes | data, performance | table-stakes in DAMs | 5/5/5/3 | schema migrations | parity | **Next** |
+| 18 | XMP sidecar policy and import/export | migration, data | table-stakes | 5/4/4/3 | catalog schema | parity | **Next** |
+| 19 | Ratings/favorites/color labels | UX, data | table-stakes | 5/4/3/2 | catalog | parity | **Next** |
+| 20 | Tag namespaces and aliases/siblings/parents [[S-HYDRUS]](https://hydrusnetwork.github.io/hydrus/) | data | rare | 3/3/5/4 | catalog + UX education | leapfrog | **Later** |
+| 21 | Import inbox workflow with tag/rate/dedupe/privacy-strip before library commit [[S-HYDRUS]](https://hydrusnetwork.github.io/hydrus/) | UX, data | rare | 4/4/4/3 | catalog + cleanup | leapfrog | **Later** |
+| 22 | Smart filters: tag, rating, format, color, orientation, dimensions, date [[S-EAGLE]](https://www.eagle.cool/) | UX, data | table-stakes in asset managers | 5/4/3/2 | catalog | parity | **Next** |
+| 23 | Color search / palette extraction [[S-EAGLE]](https://www.eagle.cool/) | data, UX | common in design DAMs | 4/3/3/2 | catalog + palette extractor | parity | **Later** |
+| 24 | Local CLIP semantic search | AI, data | emerging | 5/5/5/4 | catalog + model runtime | leapfrog | **Later** |
+| 25 | OCR text-on-image overlay/search [[S-TESSERACT]](https://github.com/tesseract-ocr/tesseract) | AI, UX | emerging | 4/4/4/3 | OCR runtime + UX | parity with Photos/Lens | **Later** |
+| 26 | Face clustering/local people tags [[S-DIGIKAM-FEATURES]](https://www.digikam.org/about/features/) [[S-ACDSEE-AI]](https://www.acdsee.com/en/photo-studio/ai/) | AI, data | common in DAMs | 3/4/5/4 | catalog + consent UX | parity | **Later** |
+| 27 | Metadata panel/HUD with EXIF, ICC, GPS, histogram | UX, data | table-stakes | 5/4/3/2 | metadata extractor | parity | **Now** |
+| 28 | Metadata editor for IPTC/XMP/EXIF-safe fields | data, migration | common | 4/4/4/4 | sidecar policy | parity | **Next** |
+| 29 | GPS map opener and local geotag view | integrations, privacy | common | 3/3/3/3 | network-egress disclosure | parity | **Later** |
+| 30 | C2PA verify/read with clear trust UX [[S-C2PA-24]](https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html) | security, trust | emerging | 5/4/3/3 | c2patool/provenance policy | leapfrog | **Now** |
+| 31 | C2PA write/export provenance after edits/converts | trust, data | rare | 4/3/5/4 | verify first + editor/export provenance | leapfrog | **Later** |
+| 32 | Network-egress log panel and per-feature consent | privacy, observability | rare | 5/5/3/2 | settings UI + update service | leapfrog | **Now** |
+| 33 | Local diagnostics viewer for logs/minidumps/update checks | observability, UX | uncommon | 5/4/3/2 | Serilog log paths | leapfrog | **Next** |
+| 34 | Dependency/CVE CI gate for NuGet and bundled runtimes | security, dev-experience | table-stakes | 5/5/2/2 | CI workflow | parity | **Now** |
+| 35 | Ghostscript floor, provenance, update cadence, and visible warning [[S-GHOSTSCRIPT-CVE]](https://ghostscript.com/releases/cve/index.html) | security, codecs | mandatory for bundled PS/PDF | 5/5/2/3 | license approval | parity | **Now** |
+| 36 | Decoder/runtime provenance policy for every bundled binary | security, licensing | table-stakes | 5/5/2/2 | docs + release workflow | parity | **Now** |
+| 37 | Optional decoder process isolation for Ghostscript/archives/Bio-Formats | security, reliability | uncommon in viewers | 5/5/5/4 | sidecar host design | leapfrog | **Next** |
+| 38 | MSIX/AppContainer sandbox spike [[S-WIN32-ISOLATION]](https://learn.microsoft.com/en-us/windows/win32/secauthz/appcontainer-isolation) | security, distribution | emerging | 4/4/5/4 | MSIX packaging | leapfrog | **Later** |
+| 39 | Winget/Scoop/Microsoft Store package flow | distribution | table-stakes | 5/4/3/2 | signing/versioning | parity | **Next** |
+| 40 | Authenticode signing via Artifact Signing or SignPath | distribution, trust | table-stakes | 5/5/3/3 | account approval | parity | **Now** |
+| 41 | Update channel UI: stable/prerelease/manual-only | distribution, UX | common | 4/3/2/2 | settings UI | parity | **Next** |
+| 42 | Golden decode/export corpus and regression diff | testing, codecs | table-stakes for codec apps | 5/5/4/2 | sample corpus licensing | parity | **Now** |
+| 43 | FlaUI smoke: open/nav/rename/delete/dialog/update | testing, accessibility | table-stakes | 5/4/3/2 | test harness | parity | **Now** |
+| 44 | Accessibility automation tree snapshot test | testing, accessibility | rare | 5/3/3/2 | UIA surface | leapfrog | **Next** |
+| 45 | Performance budget telemetry stored locally only | observability, performance | uncommon | 5/4/3/2 | log schema | leapfrog | **Next** |
+| 46 | Memory cache controls and huge-file guardrails UI | performance, UX | common in pro tools | 5/4/2/2 | settings UI | parity | **Now** |
+| 47 | Deep-zoom tile pyramid engine [[S-OPENSEADRAGON]](https://openseadragon.github.io/) [[S-LIBVIPS]](https://www.libvips.org/) | performance, data | common in WSI/web viewers | 5/5/5/4 | tile cache + renderer | leapfrog | **Later** |
+| 48 | Whole-slide Lab Pack: OpenSlide optional runtime [[S-OPENSLIDE]](https://openslide.org/) | codecs, platform | rare in consumer apps | 4/4/5/4 | deep zoom + license/CVE plan | leapfrog | **Later** |
+| 49 | Bio-Formats bridge as isolated Java sidecar [[S-BIOFORMATS]](https://www.openmicroscopy.org/bio-formats/) | codecs, platform | rare | 3/3/5/5 | process host + JVM policy | leapfrog | **UC** |
+| 50 | Multidimensional channel/Z/time navigator [[S-NAPARI-VIEWER]](https://napari.org/stable/tutorials/fundamentals/viewer.html) | UX, scientific | rare | 3/3/5/4 | multidim metadata | leapfrog | **UC** |
+| 51 | Streaming batch backend spike with libvips [[S-LIBVIPS-818]](https://www.libvips.org/2025/12/04/What%27s-new-in-8.18.html) | performance, batch | common in servers | 5/5/4/3 | batch processor | leapfrog | **Next** |
+| 52 | OpenImageIO sidecar evaluation for VFX formats/idiff/iinfo [[S-OIIO]](https://openimageio.readthedocs.io/en/latest/) | codecs, dev-experience | common in VFX | 4/3/5/4 | sidecar host | parity in VFX | **Later** |
+| 53 | ICC display transform and embedded profile warnings | color, trust | table-stakes for pro | 5/5/4/3 | renderer/color pipeline | parity | **Next** |
+| 54 | OCIO/ACES 2.0 config plan [[S-OCIO-25]](https://opencolorio.readthedocs.io/en/latest/releases/ocio_2_5.html) | color, pro workflow | table-stakes in VFX | 4/4/5/4 | ICC plan first | parity | **Later** |
+| 55 | UltraHDR/gainmap awareness [[S-LIBVIPS-818]](https://www.libvips.org/2025/12/04/What%27s-new-in-8.18.html) | codecs, color | emerging | 3/3/4/3 | color pipeline | parity | **Later** |
+| 56 | Batch converter with preview, presets, overwrite protection [[S-XNVIEW-HOME]](https://www.xnview.com/en/) [[S-FASTSTONE]](https://www.faststone.org/FSViewerDetail.htm) | batch, UX | table-stakes | 5/5/4/3 | export service + queue | parity | **Next** |
+| 57 | Batch rename with tokens/date/EXIF and collision preview | batch, migration | table-stakes | 5/4/3/2 | rename service extraction | parity | **Next** |
+| 58 | Macro recorder/action runner as JSON [[S-PHOTODEMON]](https://photodemon.org/) | automation, dev-experience | rare | 4/4/5/4 | batch processor | leapfrog | **Later** |
+| 59 | Squoosh-style visual-diff converter | UX, batch | rare desktop | 5/5/4/3 | export service + compare view | leapfrog | **Next** |
+| 60 | Lossless JPEG transforms and optimizer | performance, batch | common | 4/4/3/3 | codec-specific operations | parity | **Later** |
+| 61 | External editor handoff with watched reload | integrations, UX | common | 5/3/2/2 | reload watcher | parity | **Now** |
+| 62 | Scanner acquire/import flow [[S-FASTSTONE]](https://www.faststone.org/FSViewerDetail.htm) | platform/OS | common in older viewers | 2/2/4/3 | WIA/TWAIN research | parity | **Later** |
+| 63 | Contact sheet generator [[S-XNVIEW-HOME]](https://www.xnview.com/en/) [[S-FASTSTONE]](https://www.faststone.org/FSViewerDetail.htm) | docs/export | common | 3/3/3/2 | batch/layout engine | parity | **Later** |
+| 64 | Slideshow builder | UX/export | common but low-fit | 2/2/4/2 | media timeline | parity | **UC** |
+| 65 | Reference board / moodboard mode [[S-PUREREF]](https://www.pureref.com/handbook/2.0/features/) | UX, creative | rare | 4/4/5/3 | multi-image canvas | leapfrog | **Later** |
+| 66 | Pinned overlay/click-through current image [[S-PUREREF]](https://www.pureref.com/handbook/2.0/features/) | UX, integrations | rare | 4/3/3/3 | exit affordances | leapfrog | **Later** |
+| 67 | Eyedropper, pixel coordinate, ruler/selection dimensions [[S-PUREREF]](https://www.pureref.com/handbook/2.0/features/) | UX, pro tools | common in design tools | 5/3/2/1 | image canvas events | parity | **Now** |
+| 68 | Animation timeline, scrubber, frame export [[S-PUREREF]](https://www.pureref.com/handbook/2.0/features/) | UX, codecs | uncommon | 4/3/3/2 | animation service | parity | **Next** |
+| 69 | Crop/rotate/writeback with non-destructive history | editing, data | table-stakes | 4/4/5/4 | history model | parity | **Later** |
+| 70 | Content-aware repair/inpaint [[S-PHOTODEMON]](https://photodemon.org/) [[S-UPSCAYL]](https://github.com/upscayl/upscayl) | AI, editing | emerging | 2/3/5/5 | model runtime + history | parity | **UC** |
+| 71 | Upscale/background remove local models [[S-UPSCAYL]](https://github.com/upscayl/upscayl) | AI, editing | common in AI tools | 3/4/5/4 | Windows ML/model manager | parity | **Later** |
+| 72 | Windows ML model runtime split path [[S-WINML]](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview) | AI, distribution | emerging | 4/4/4/3 | model features | leapfrog | **Later** |
+| 73 | Plugin boundary design doc before implementation [[S-NAPARI]](https://napari.org/stable/) [[S-OIIO]](https://openimageio.readthedocs.io/en/latest/) | plugin ecosystem | common in platforms | 5/4/3/3 | trust model | parity | **Now** |
+| 74 | Signed/local-only plugins disabled by default | security, plugin ecosystem | table-stakes | 5/4/4/4 | boundary design | parity | **Next** |
+| 75 | Marketplace/gallery of plugins | plugin ecosystem | common but risky | 2/2/5/5 | plugin trust + moderation | parity | **Rejected** |
+| 76 | Full cloud sync / hosted accounts | multi-user, cloud | common in DAMs | 1/4/5/5 | server/product shift | misfit | **Rejected** |
+| 77 | Mobile backup client | mobile, cloud | common in Immich | 1/4/5/5 | mobile/server stack | misfit | **Rejected** |
+| 78 | Video playback/library parity | mobile/media | common in DAMs | 2/3/5/4 | media pipeline | scope creep | **Rejected** |
+| 79 | LAN sync/control between viewers [[S-NOMACS-SYNC]](https://nomacs.org/blog/synchronization/) | multi-user, integrations | rare | 3/2/4/4 | network consent | novelty | **UC** |
+| 80 | Opt-in URL open/download cache [[S-PICVIEW-ORG]](https://picview.org/) | integrations, privacy | emerging | 3/3/3/4 | egress log + sandbox | parity with privacy | **Later** |
+| 81 | Path/device namespace/folder traversal hardening test suite | security, testing | table-stakes | 5/4/2/2 | unit tests | parity | **Now** |
+| 82 | Archive extraction sandbox and zip-slip tests [[S-SHARPCOMPRESS]](https://www.nuget.org/packages/SharpCompress) | security, archive | table-stakes | 5/5/3/3 | archive mode | parity | **Now** |
+| 83 | Dependency update ring: NuGet majors in compatibility branch first | dev-experience, reliability | common | 5/3/2/2 | CI matrix | parity | **Now** |
+| 84 | Move to .NET 10 LTS decision record after WPF/runtime validation [[S-DOTNET9]](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) | upgrade strategy | table-stakes | 4/3/3/2 | release smoke + package test | parity | **Next** |
+| 85 | App-local codec pack manifest with hashes and versions | security, distribution | common in serious apps | 5/5/2/2 | release workflow | leapfrog | **Now** |
+| 86 | Human-readable failure suggestions per unsupported format | UX, error states | table-stakes | 5/4/2/1 | capability matrix | parity | **Now** |
+| 87 | Empty/loading/skeleton states for gallery/catalog/batch | UX, accessibility | table-stakes | 5/3/2/1 | those surfaces | parity | **Next** |
+| 88 | Local crash-report package builder with redaction preview | observability, privacy | rare | 5/4/3/3 | diagnostics viewer | leapfrog | **Next** |
+| 89 | Migration importers: Picasa, Lightroom, digiKam, XnView, Apple Photos | migration | common in DAMs | 4/4/5/4 | catalog + sidecars | parity | **Later** |
+| 90 | Docs: release support policy, codec support policy, privacy policy | docs, trust | table-stakes | 5/5/2/1 | docs pass | parity | **Now** |
+
+### Phase 3 tier decisions
+
+**Now** should move the product from "broad viewer" to "trustworthy platform foundation": capability matrix, settings shell, high contrast/reduced motion, gallery/filmstrip consumer, codec/system-info CLI, bad-extension scanner, cleanup quarantine, metadata HUD, C2PA verify, network-egress log, CVE gate, Ghostscript/runtime provenance, signing evaluation, golden decode corpus, FlaUI smoke, cache guardrails UI, eyedropper/ruler, plugin-boundary design, archive safety tests, dependency update ring, codec manifest, better unsupported-format guidance, and trust docs.
+
+**Next** should add the first major power workflows after foundations are stable: archive/book mode, universal ingress, compare mode, duplicate center, catalog, XMP sidecars, ratings/tags, smart filters, local diagnostics viewer, decoder process isolation spike, package-manager distribution, update channel UI, accessibility UIA tests, local performance budgets, libvips batch spike, ICC color pipeline, batch convert/rename, Squoosh-style converter, animation timeline, signed plugin host, .NET 10 LTS decision, gallery/catalog/batch empty-state polish, and redacted report packaging.
+
+**Later** covers strategic differentiation once the app has a stable catalog and trust model: reader comfort controls, multi-instance sync, tag namespaces, import inbox, color search, CLIP, OCR, face clustering, GPS map, C2PA write, MSIX/AppContainer, deep zoom, OpenSlide Lab Pack, OpenImageIO, OCIO/ACES, UltraHDR, macro recorder, lossless transforms, scanner, contact sheet, reference board, overlay mode, edit history/crop, local AI enhance models, opt-in URL open, migration importers.
+
+**Under consideration** remains intentionally constrained: Bio-Formats bridge, multidimensional navigator, slideshow builder, content-aware repair, and LAN sync. All have plausible value, but each can distort the product unless the core viewer/catalog/trust foundations land first.
+
+**Rejected for now**: plugin marketplace, hosted cloud sync/accounts, mobile backup client, and video-library parity. They contradict the Windows-local-first charter or would force a new server/mobile/media product.
+
+### Phase 5 self-audit
+
+- **Traceability**: every new matrix row cites a keyed source or a source key already present in Appendix A; newly introduced keys are appended below.
+- **Tier justification**: every row has Fit/Impact/Effort/Risk, dependency, novelty, and tier. Tier summaries above explain grouping.
+- **Category coverage**: security, accessibility, i18n/l10n, observability, testing, docs, distribution, plugin ecosystem, mobile, offline/resilience, multi-user/collab, migration, upgrade strategy, and licensing are all covered. Mobile/cloud/video are consciously rejected or deferred as charter misfits.
+- **Dependency/security check**: `dotnet list src\Images\Images.csproj package --outdated --include-transitive` shows Microsoft/Serilog packages have newer versions; `dotnet list ... --vulnerable --include-transitive` reports no vulnerable NuGet packages from configured sources. Ghostscript and codec runtimes still need a release-time binary provenance/CVE process.
+- **Adversarial review**: the most naive risk would be chasing every competitor feature and bloating the viewer. The roadmap counters this by putting trust/capability/settings/test foundations before editor/DAM/AI work and by explicitly rejecting cloud/mobile/video expansion.
+- **Internal consistency**: `Now` items are prerequisites or direct reliability/trust wins; `Next` items depend on those foundations; `Later` and `UC` items are heavier product bets. No new item requires copying competitor code.
 
 ---
 
@@ -567,10 +745,15 @@ These are the short keys used in the inline citations elsewhere in this document
 - **[S-PV]** — PicView (Avalonia rewrite, SignPath-signed, Native AOT): https://github.com/Ruben2776/PicView · https://picview.org/download/
 - **[S-PEEK]** — PowerToys Peek docs + CLI: https://learn.microsoft.com/en-us/windows/powertoys/peek
 - **[S-NOMACS]** — nomacs 3.22 release notes: https://github.com/nomacs/nomacs/releases · https://nomacs.org/
+- **[S-NOMACS-SYNC]** — nomacs multi-instance and LAN synchronization feature notes: https://nomacs.org/blog/synchronization/
 - **[S-JPEGVIEW]** — JPEGView sylikc fork releases: https://github.com/sylikc/jpegview/releases · v1.3.46: https://github.com/sylikc/jpegview/releases/tag/v1.3.46
 - **[S-OCULANTE]** — Oculante (Rust viewer with network-listen mode): https://github.com/woelper/oculante · https://crates.io/crates/oculante
 - **[S-QVIEW]** — qView changelog: https://github.com/jurplel/qView/releases · https://interversehq.com/qview/changelog/
+- **[S-QUICKLOOK]** — QuickLook Windows previewer: https://github.com/QL-Win/QuickLook
 - **[S-XNVIEW]** — XnView MP 1.10.5 changelog: https://www.xnview.com/xnviewmp_update.txt
+- **[S-XNVIEW-HOME]** — XnView product feature page: viewer, organizer, batch rename, batch converter, duplicate finder, compare, contact sheets, slideshow: https://www.xnview.com/en/
+- **[S-FASTSTONE]** — FastStone Image Viewer feature page: browser/converter/editor, hidden-edge toolbars, scanner, histogram, batch, contact sheets, slideshow: https://www.faststone.org/FSViewerDetail.htm
+- **[S-ACDSEE-AI]** — ACDSee Photo Studio AI file-management and face-recognition feature page: https://www.acdsee.com/en/photo-studio/ai/
 - **[S-MAGICK-RELEASES]** — Magick.NET release index: https://github.com/dlemstra/Magick.NET/releases
 - **[S-MAGICK-14-12-0]** — Magick.NET 14.12.0 notes: https://github.com/dlemstra/Magick.NET/releases/tag/14.12.0
 - **[S-MAGICK-14-11-1]** — Magick.NET 14.11.1 security fix (GHSA-8793-7xv6-82cf InterpretImageFilename overflow): https://github.com/dlemstra/Magick.NET/releases
@@ -584,13 +767,16 @@ These are the short keys used in the inline citations elsewhere in this document
 - **[S-JXL-CANIUSE]** — Can I use JPEG XL: https://caniuse.com/jpegxl
 - **[S-JXL-DEVCLASS]** — Chromium JXL reversal (Nov 2025, lands Chrome 145 flag-gated): https://devclass.com/2025/11/24/googles-chromium-team-decides-it-will-add-jpeg-xl-support-reverses-obsolete-declaration/
 - **[S-C2PA]** — Content Credentials: https://contentcredentials.org/ · C2PA 2.2 spec: https://spec.c2pa.org/specifications/specifications/2.2/specs/C2PA_Specification.html
+- **[S-C2PA-24]** — C2PA Content Credentials 2.4 technical specification: https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html
 - **[S-C2PA-2026]** — C2PA v2.3 + c2patool v0.26.27 (Feb 2026) + EU AI Act Article 50 deadline Aug 2 2026: https://aiphotocheck.com/blog/c2pa-specification-latest-version-2026
 - **[S-SKIASHARP]** — SkiaSharp 3.119.2 on NuGet: https://www.nuget.org/packages/SkiaSharp/ · https://github.com/mono/SkiaSharp/releases
 - **[S-SERILOG]** — Serilog 4.3.1 release: https://github.com/serilog/serilog/releases
 - **[S-SERILOG-FILE]** — Serilog.Sinks.File 7.0.0 release: https://github.com/serilog/serilog-sinks-file/releases · https://www.nuget.org/packages/Serilog.Sinks.File/
+- **[S-DOTNET9]** — .NET 9 download and servicing page: https://dotnet.microsoft.com/en-us/download/dotnet/9.0
 - **[S-LIBRAW-022]** — LibRaw 0.22.0 release notes (DNG 1.7 + JPEG-XL compression + CR3 fix + +Canon R5 II/R6 II/R8/R50/R100, Fujifilm X-T50, Sony A9-III): https://www.libraw.org/news/libraw-0-22-0-release
 - **[S-SDCB-LIBRAW]** — Sdcb.LibRaw .NET wrapper (currently tracks 0.21.x): https://github.com/sdcb/Sdcb.LibRaw · https://www.nuget.org/packages/Sdcb.LibRaw
-- **[S-SHARPCOMPRESS]** — SharpCompress 0.44.0 (multi-TFM .NET 8/10/Framework 4.8, async I/O): https://github.com/adamhathcock/sharpcompress · https://www.nuget.org/packages/SharpCompress
+- **[S-SHARPCOMPRESS]** — SharpCompress archive library and NuGet release stream; `gh repo view` snapshot found 0.47.4 current on 2026-04-25: https://github.com/adamhathcock/sharpcompress · https://www.nuget.org/packages/SharpCompress
+- **[S-GHOSTSCRIPT-CVE]** — Ghostscript CVE list by fixed version: https://ghostscript.com/releases/cve/index.html
 - **[S-ARTIFACT-SIGNING]** — Azure Artifact Signing (rebrand of Trusted Signing, GA April 2026): https://azure.microsoft.com/en-us/products/artifact-signing · https://learn.microsoft.com/en-us/azure/artifact-signing/concept-trust-models
 - **[S-SMARTSCREEN-REGRESSION]** — SmartScreen reputation regression after CA rotation (March-April 2026): https://learn.microsoft.com/en-us/answers/questions/5855708/trusted-signing-regression-in-smartscreen-reputati · https://github.com/Azure/artifact-signing-action/issues/128
 - **[S-HANSELMAN-SIGN]** — Hanselman's Azure Trusted Signing + GitHub Actions setup: https://www.hanselman.com/blog/automatically-signing-a-windows-exe-with-azure-trusted-signing-dotnet-sign-and-github-actions
@@ -613,14 +799,28 @@ These are the short keys used in the inline citations elsewhere in this document
 - **[S-EAGLE]** — Eagle asset-manager feature map: semantic/visual search, browser capture, smart folders, tags, annotation, duplicate merge, hover preview, plugin system: https://www.eagle.cool/
 - **[S-HYDRUS]** — Hydrus Network docs: local tag-first media management, tag sharing optionality, duplicates, sidecars, import/download flows, no silent phoning home: https://hydrusnetwork.github.io/hydrus/
 - **[S-OPENSEADRAGON]** — OpenSeadragon docs: open-source high-resolution zoomable image viewer, DZI/IIIF/IIP/Zoomify/custom tile sources, sequence/reference-strip/collection modes: https://openseadragon.github.io/
+- **[S-OPENSEADRAGON-DZI]** — OpenSeadragon DZI tile-source documentation: https://openseadragon.github.io/examples/tilesource-dzi/
+- **[S-IIIF-OSD]** — IIIF training notes on OpenSeadragon deep-zooming and native IIIF support: https://training.iiif.io/intro-to-iiif/OPENSEADRAGON.html
 - **[S-OPENSLIDE]** — OpenSlide docs: whole-slide image library, DICOM WSI, SVS, NDPI, SCN, MRXS, SVSLIDE, BIF, CZI, tiled TIFF, Deep Zoom generator: https://openslide.org/
 - **[S-BIOFORMATS]** — OME Bio-Formats: proprietary microscopy image data/metadata reader, standardized interface, 160+ formats and OME data model mapping: https://www.openmicroscopy.org/bio-formats/
 - **[S-NAPARI]** — napari docs: fast interactive 2D/3D/higher-dimensional image viewer, overlays, annotation/editing of derived datasets, plugin ecosystem: https://napari.org/stable/
+- **[S-NAPARI-VIEWER]** — napari viewer tutorial covering multidimensional data, channel axes, and 3D/time workflows: https://napari.org/stable/tutorials/fundamentals/viewer.html
 - **[S-QUPATH]** — QuPath: open-source bioimage analysis and whole-slide visualization/annotation platform: https://qupath.github.io/
 - **[S-LIBVIPS]** — libvips project: demand-driven, horizontally threaded image-processing stack, .NET binding availability, streaming/large-image processing reference: https://www.libvips.org/
+- **[S-LIBVIPS-818]** — libvips 8.18 notes: UltraHDR, RAW loader, Oklab/Oklch color features: https://www.libvips.org/2025/12/04/What%27s-new-in-8.18.html
 - **[S-OIIO]** — OpenImageIO docs: VFX/animation image I/O, format-agnostic API, bundled plugins, ImageCache/TextureSystem, `iinfo`, `iconvert`, `igrep`, `idiff`, `maketx`: https://openimageio.readthedocs.io/en/latest/
 - **[S-OCIO]** — OpenColorIO: production color-management solution, OCIO v2.5, config merging, Vulkan GPU support, ACES 2.0 built-ins: https://opencolorio.org/
+- **[S-OCIO-25]** — OpenColorIO 2.5 release notes: VFX Reference Platform 2026, built-in ACES 2.0 configs, Vulkan GPU API, Color Interop IDs: https://opencolorio.readthedocs.io/en/latest/releases/ocio_2_5.html
 - **[S-DIGIKAM-FEATURES]** — digiKam feature overview: face recognition, similarity database, duplicate discovery, full photo workflow reference: https://www.digikam.org/about/features/
+- **[S-IMMICH]** — Immich self-hosted photo and video management repository: https://github.com/immich-app/immich
+- **[S-PHOTOPRISM]** — PhotoPrism feature overview: https://www.photoprism.app/features
+- **[S-AWESOME-IMAGE-PROCESSING]** — Awesome-list index for ImageMagick/libvips/image-processing projects: https://awesome.ecosyste.ms/projects?keyword=imagemagick
+- **[S-AWESOME-CV]** — Awesome Computer Vision curated list: https://github.com/awesomelistsio/awesome-computer-vision
+- **[S-AWESOME-SELFHOSTED]** — Awesome Selfhosted curated list: https://github.com/awesome-selfhosted/awesome-selfhosted
+- **[S-REDDIT-WINVIEWER]** — Reddit community complaint signal about Windows Photos slowness and lightweight viewer demand: https://www.reddit.com/r/software/comments/1bkcctt
+- **[S-REDDIT-FOSS-VIEWERS]** — Reddit FOSS Windows viewer recommendation thread: https://www.reddit.com/r/foss/comments/1qdpfz6/foss_image_viewer_for_windows/
+- **[S-REDDIT-OFFLINE-DAM]** — Reddit offline photo-organization demand signal: https://www.reddit.com/r/software/comments/1m30kyr/offline_not_selfhosted_photo_organization_software/
+- **[S-REDDIT-C2PA]** — Reddit photojournalism discussion signal on C2PA trust/user skepticism: https://www.reddit.com/r/photojournalism/comments/1s8ihws/thoughts_on_content_credentials_c2pa/
 
 ### Viewers, editors, organizers, converters
 - https://www.irfanview.com/
