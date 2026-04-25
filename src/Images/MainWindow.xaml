@@ -751,6 +751,47 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
+                    <!-- RECENT FOLDERS section (V20-02 UI consumer — data layer shipped v0.1.7).
+                         Whole block hides when the MRU is empty so a fresh install / first-run
+                         user doesn't see an orphan "Recent folders" header above nothing. -->
+                    <StackPanel Visibility="{Binding RecentFolders.Count, Converter={StaticResource BoolToVis}}">
+                        <Border Style="{StaticResource Divider}" />
+                        <TextBlock Text="Recent folders" Style="{StaticResource SectionLabel}" />
+                        <ItemsControl ItemsSource="{Binding RecentFolders}"
+                                      KeyboardNavigation.DirectionalNavigation="Cycle"
+                                      KeyboardNavigation.TabNavigation="Continue"
+                                      AutomationProperties.Name="Recent folders">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Stretch"
+                                            Padding="13,9"
+                                            Margin="0,0,0,8"
+                                            Command="{Binding DataContext.OpenRecentFolderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="{Binding}"
+                                            AutomationProperties.Name="{Binding}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE8B7;"
+                                                       FontFamily="{StaticResource IconFontFamily}"
+                                                       FontSize="13"
+                                                       Foreground="{StaticResource SubtextBrush}"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,10,0" />
+                                            <TextBlock Text="{Binding Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}"
+                                                       FontSize="12.5"
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Foreground="{StaticResource TextBrush}"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- DETAILS section -->
