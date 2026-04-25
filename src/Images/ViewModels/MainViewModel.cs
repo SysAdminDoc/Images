@@ -691,7 +691,25 @@ public sealed class MainViewModel : ObservableObject
     public void OpenFile(string path)
     {
         FlushPendingRename();
-        _nav.Open(path);
+
+        if (!SupportedImageFormats.IsSupported(path))
+        {
+            Toast($"Unsupported file type: {Path.GetExtension(path)}");
+            return;
+        }
+
+        var previousFolder = _nav.Folder;
+        if (!_nav.Open(path))
+        {
+            Toast(File.Exists(path)
+                ? $"Could not open {Path.GetFileName(path)}"
+                : "File no longer exists");
+            return;
+        }
+
+        if (!string.Equals(previousFolder, _nav.Folder, StringComparison.OrdinalIgnoreCase))
+            _preload.Reset();
+
         ResetPageState();
         LoadCurrent();
 
