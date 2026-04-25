@@ -1,6 +1,7 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Windows.Media;
 using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
@@ -15,8 +16,8 @@ namespace Images.Services;
 /// Per SCH-01: the cache is disposable. Deleting the thumbs dir is always a safe recovery —
 /// everything rebuilds from originals on next access.
 ///
-/// No UI consumer yet this iter (V20-21 filmstrip ships later). Disk layer ships now so UI
-/// code can land without re-architecting the cache shape.
+/// The main viewer consumes this as a compact folder preview strip. Cached WebP files stay
+/// disposable implementation detail; callers receive frozen WPF image sources.
 /// </summary>
 public sealed class ThumbnailCache
 {
@@ -93,6 +94,7 @@ public sealed class ThumbnailCache
             var cachePath = GetCachePath(sourcePath, fi.LastWriteTimeUtc.Ticks, fi.Length);
             if (File.Exists(cachePath)) return cachePath;
 
+            CodecRuntime.Configure();
             using var image = new ImageMagick.MagickImage(sourcePath);
             image.Resize(new ImageMagick.MagickGeometry((uint)_thumbSize, (uint)_thumbSize) { Greater = true });
             image.Strip(); // drop EXIF + XMP — thumbs don't need it, reduces bytes
@@ -106,6 +108,31 @@ public sealed class ThumbnailCache
         catch (Exception ex)
         {
             _log.LogDebug(ex, "GenerateAndCache failed for {Path}", sourcePath);
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Gets a frozen WPF thumbnail image, generating the cache entry first when needed.
+    /// </summary>
+    public ImageSource? GetOrCreateImageSource(string sourcePath)
+    {
+        try
+        {
+            var fi = new FileInfo(sourcePath);
+            if (!fi.Exists) return null;
+
+            var cachePath = GetCachePath(sourcePath, fi.LastWriteTimeUtc.Ticks, fi.Length);
+            if (!File.Exists(cachePath))
+                cachePath = GenerateAndCache(sourcePath);
+
+            if (cachePath is null || !File.Exists(cachePath)) return null;
+
+            return ImageLoader.Load(cachePath).Image;
+        }
+        catch (Exception ex)
+        {
+            _log.LogDebug(ex, "GetOrCreateImageSource failed for {Path}", sourcePath);
             return null;
         }
     }
