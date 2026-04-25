@@ -38,17 +38,17 @@ public sealed class MainViewModel : ObservableObject
         FirstCommand = new RelayCommand(First, () => HasImage);
         LastCommand = new RelayCommand(Last, () => HasImage);
         DeleteCommand = new RelayCommand(DeleteCurrent, () => HasImage);
-        RotateCwCommand = new RelayCommand(() => Rotate(90), () => HasImage);
-        RotateCcwCommand = new RelayCommand(() => Rotate(-90), () => HasImage);
-        Rotate180Command = new RelayCommand(() => Rotate(180), () => HasImage);
-        FlipHorizontalCommand = new RelayCommand(() => { FlipHorizontal = !FlipHorizontal; }, () => HasImage);
-        FlipVerticalCommand = new RelayCommand(() => { FlipVertical = !FlipVertical; }, () => HasImage);
+        RotateCwCommand = new RelayCommand(() => Rotate(90), () => HasDisplayImage);
+        RotateCcwCommand = new RelayCommand(() => Rotate(-90), () => HasDisplayImage);
+        Rotate180Command = new RelayCommand(() => Rotate(180), () => HasDisplayImage);
+        FlipHorizontalCommand = new RelayCommand(() => { FlipHorizontal = !FlipHorizontal; }, () => HasDisplayImage);
+        FlipVerticalCommand = new RelayCommand(() => { FlipVertical = !FlipVertical; }, () => HasDisplayImage);
         RevealCommand = new RelayCommand(RevealInExplorer, () => HasImage);
         CopyPathCommand = new RelayCommand(CopyPath, () => HasImage);
         SetAsWallpaperCommand = new RelayCommand(SetAsWallpaper, () => HasImage);
         ReloadCommand = new RelayCommand(ReloadCurrent, () => HasImage);
-        PrintCommand = new RelayCommand(PrintCurrent, () => HasImage);
-        SaveAsCopyCommand = new RelayCommand(SaveAsCopy, () => HasImage);
+        PrintCommand = new RelayCommand(PrintCurrent, () => HasDisplayImage);
+        SaveAsCopyCommand = new RelayCommand(SaveAsCopy, () => HasDisplayImage);
         CheckForUpdatesCommand = new RelayCommand(async () => await CheckForUpdatesAsync(userInitiated: true), () => true);
         OpenLatestUpdateCommand = new RelayCommand(OpenLatestUpdate, () => HasUpdateAvailable);
         RefreshCommand = new RelayCommand(RefreshFolder, () => HasImage);
@@ -92,6 +92,7 @@ public sealed class MainViewModel : ObservableObject
             if (Set(ref _currentImage, value))
             {
                 Raise(nameof(HasDisplayImage));
+                CommandManager.InvalidateRequerySuggested();
             }
         }
     }
