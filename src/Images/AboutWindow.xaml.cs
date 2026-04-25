@@ -90,6 +90,54 @@ public partial class AboutWindow : Window
         }
     }
 
+    /// <summary>
+    /// V20-37 / item 33: writes the same content as `Images.exe --system-info` to a temp
+    /// file (UTF-8 with BOM so Notepad opens it cleanly) and reveals it in Explorer.
+    /// Lets users attach a one-shot diagnostics dump to bug reports without dropping into a
+    /// terminal.
+    /// </summary>
+    private void SaveSystemInfoButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+            var path = Path.Combine(Path.GetTempPath(), $"images-system-info-{stamp}.txt");
+            File.WriteAllText(path, CliReport.BuildSystemInfo(), new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+
+            // /select, highlights the file in a new Explorer window. We use ArgumentList so a
+            // path with spaces or commas can't compose against CommandLineToArgvW quoting.
+            var psi = new ProcessStartInfo { FileName = "explorer.exe", UseShellExecute = false };
+            psi.ArgumentList.Add("/select," + path);
+            Process.Start(psi);
+
+            ShowUpdateStatus($"Saved to {path}", "Success");
+        }
+        catch (Exception ex)
+        {
+            ShowUpdateStatus($"Could not save system info: {ex.Message}", "Warning");
+        }
+    }
+
+    /// <summary>
+    /// Item 33 (diagnostics viewer): opens %LOCALAPPDATA%\Images so users can reach Logs,
+    /// crash.log, settings.db, update-check.json, and thumbs in one click. Falls back to
+    /// the temp folder when the AppStorage helper can't reach LocalAppData.
+    /// </summary>
+    private void OpenAppDataButton_Click(object sender, RoutedEventArgs e)
+    {
+        var dir = AppStorage.TryGetAppDirectory() ?? Path.GetTempPath();
+        try
+        {
+            var psi = new ProcessStartInfo { FileName = "explorer.exe", UseShellExecute = false };
+            psi.ArgumentList.Add(dir);
+            Process.Start(psi);
+        }
+        catch (Exception ex)
+        {
+            ShowUpdateStatus($"Could not open data folder: {ex.Message}", "Warning");
+        }
+    }
+
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
 
     private void ApplyCodecSummary(CodecCapabilityService.CodecCapabilitySummary summary)

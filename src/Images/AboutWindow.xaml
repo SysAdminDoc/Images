@@ -360,6 +360,37 @@
                 </Button>
             </UniformGrid>
 
+            <UniformGrid Columns="2" Margin="0,8,0,0">
+                <Button Style="{StaticResource ChromeButton}"
+                        Click="SaveSystemInfoButton_Click"
+                        Margin="0,0,6,0"
+                        AutomationProperties.Name="Save system info to a text file"
+                        ToolTip="Writes Images --system-info output to a text file in your temp folder and reveals it in Explorer.">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xE74E;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="12"
+                                   Margin="0,0,8,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="Save system info" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource ChromeButton}"
+                        Click="OpenAppDataButton_Click"
+                        Margin="6,0,0,0"
+                        AutomationProperties.Name="Open Images data folder"
+                        ToolTip="Opens %LOCALAPPDATA%\Images — logs, settings.db, thumbs, update-check.json all live here.">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xE8DA;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="12"
+                                   Margin="0,0,8,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="Open data folder" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </UniformGrid>
+
             <Button Style="{StaticResource PrimaryButton}"
                     Click="CloseButton_Click"
                     Margin="0,14,0,0"
