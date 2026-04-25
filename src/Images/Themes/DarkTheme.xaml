@@ -28,6 +28,7 @@
     <Color x:Key="LavenderColor">#FFB4BEFE</Color>
     <Color x:Key="MauveColor">#FFCBA6F7</Color>
     <Color x:Key="RedColor">#FFF38BA8</Color>
+    <Color x:Key="RedHoverColor">#FFFFA4BA</Color>
     <Color x:Key="GreenColor">#FFA6E3A1</Color>
     <Color x:Key="YellowColor">#FFF9E2AF</Color>
 
@@ -44,6 +45,7 @@
     <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource LavenderColor}" />
     <SolidColorBrush x:Key="MauveBrush" Color="{StaticResource MauveColor}" />
     <SolidColorBrush x:Key="RedBrush" Color="{StaticResource RedColor}" />
+    <SolidColorBrush x:Key="RedHoverBrush" Color="{StaticResource RedHoverColor}" />
     <SolidColorBrush x:Key="GreenBrush" Color="{StaticResource GreenColor}" />
     <SolidColorBrush x:Key="YellowBrush" Color="{StaticResource YellowColor}" />
 
@@ -312,6 +314,77 @@
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Bd" Property="Background" Value="{StaticResource Surface2Brush}" />
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Surface2Brush}" />
+                            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource TextBrush}" />
+                            <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============ Destructive action button ============ -->
+    <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource ChromeButton}">
+        <Setter Property="Background" Value="{StaticResource RedBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource CrustBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Padding" Value="18,9" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            CornerRadius="{StaticResource Radius.Md.CR}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="Bd"
+                                                        Storyboard.TargetProperty="Background.Color"
+                                                        To="{StaticResource RedHoverColor}"
+                                                        Duration="{StaticResource Motion.Fast}" />
+                                        <ColorAnimation Storyboard.TargetName="Bd"
+                                                        Storyboard.TargetProperty="BorderBrush.Color"
+                                                        To="{StaticResource RedHoverColor}"
+                                                        Duration="{StaticResource Motion.Fast}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="Bd"
+                                                        Storyboard.TargetProperty="Background.Color"
+                                                        To="{StaticResource RedColor}"
+                                                        Duration="{StaticResource Motion.Fast}" />
+                                        <ColorAnimation Storyboard.TargetName="Bd"
+                                                        Storyboard.TargetProperty="BorderBrush.Color"
+                                                        To="{StaticResource RedColor}"
+                                                        Duration="{StaticResource Motion.Fast}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Surface2Brush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource RedBrush}" />
                             <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
