@@ -27,6 +27,23 @@ jobs:
       - name: Restore
         run: dotnet restore
 
+      # ROADMAP item 34: refuse to ship a release that depends on a NuGet
+      # package with a known CVE. Mirrors the standalone Security workflow but
+      # gates the actual upload — every published artifact is provably scanned.
+      - name: Vulnerable package gate
+        shell: pwsh
+        run: |
+          $output = dotnet list src/Images/Images.csproj package --vulnerable --include-transitive 2>&1 | Out-String
+          Write-Host $output
+          if ($output -match "has the following vulnerable packages") {
+              Write-Error "Vulnerable packages detected — refusing to publish."
+              exit 1
+          }
+          if ($output -notmatch "no vulnerable packages") {
+              Write-Error "Unexpected vulnerable-package scan output."
+              exit 1
+          }
+
       - name: Build
         run: dotnet build -c Release --no-restore
 

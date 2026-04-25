@@ -120,6 +120,21 @@ src/Images/
 └── Resources/                  # icon.ico (app icon), icon.svg (vector wrapper), logo.png
 ```
 
+## Diagnostics
+
+Images carries its own diagnostics surface — no terminal required for the common cases:
+
+- **About → Save system info** writes the same content as `Images.exe --system-info` to a file in `%TEMP%` and reveals it in Explorer. Attach the file to a bug report.
+- **About → Open data folder** opens `%LOCALAPPDATA%\Images\` so logs (`Logs\images-<date>.log`), crash records (`crash.log`, `crash-*.dmp`), settings (`settings.db`), and caches (`thumbs/`, `update-check.json`) are reachable in one click.
+- **About → Codec report** copies the per-format capability matrix and supported-extension list to the clipboard.
+- `Images.exe --system-info` and `Images.exe --codec-report` print the same content to stdout for support tickets and CI smoke tests.
+
+## Policies
+
+- [Release support policy](docs/release-support-policy.md) — what versions get servicing and for how long.
+- [Codec support policy](docs/codec-support-policy.md) — bundled-vs-optional tiers and the gate every new optional decoder must pass.
+- [Privacy policy](docs/privacy-policy.md) — exactly one network call (the opt-out update check), every file persisted to disk, and a four-step verification recipe.
+
 ## Credits / inspiration
 
 Architectural inspiration taken from existing OSS viewers (no code copied, both are GPL-3):
