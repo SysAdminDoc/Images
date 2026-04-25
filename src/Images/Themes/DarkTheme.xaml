@@ -484,7 +484,7 @@
 
     <Style TargetType="MenuItem">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="Padding" Value="10,7" />
+        <Setter Property="Padding" Value="10,7,12,7" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="MenuItem">
@@ -494,14 +494,20 @@
                             Padding="{TemplateBinding Padding}">
                         <Grid>
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="22" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <ContentPresenter Grid.Column="0"
+                                              ContentSource="Icon"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="0,0,10,0" />
+                            <ContentPresenter Grid.Column="1"
                                               ContentSource="Header"
                                               VerticalAlignment="Center"
                                               RecognizesAccessKey="True" />
-                            <TextBlock Grid.Column="1"
+                            <TextBlock Grid.Column="2"
                                        Text="{TemplateBinding InputGestureText}"
                                        Foreground="{StaticResource OverlayBrush}"
                                        Margin="24,0,0,0"
@@ -519,6 +525,15 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style x:Key="MenuItemIcon" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource IconFontFamily}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{StaticResource OverlayBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextAlignment" Value="Center" />
     </Style>
 
     <Style TargetType="Separator">
