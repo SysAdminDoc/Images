@@ -42,6 +42,11 @@ artifacts/
 installer/output/
 installer/*.exe
 
+## Optional third-party codec runtimes
+src/Images/Codecs/Ghostscript/**
+!src/Images/Codecs/Ghostscript/
+!src/Images/Codecs/Ghostscript/README.txt
+
 ## OS
 Thumbs.db
 ehthumbs.db
