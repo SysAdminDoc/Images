@@ -8,7 +8,7 @@ using Images.Services;
 
 namespace Images.ViewModels;
 
-public sealed class MainViewModel : ObservableObject
+public sealed class MainViewModel : ObservableObject, IDisposable
 {
     private readonly DirectoryNavigator _nav = new();
     private readonly RenameService _rename = new();
@@ -21,6 +21,7 @@ public sealed class MainViewModel : ObservableObject
 
     private bool _suppressStemChange;
     private string _committedStemOnDisk = string.Empty;
+    private bool _isDisposed;
 
     private readonly DispatcherTimer _hintTimer;
 
@@ -80,6 +81,8 @@ public sealed class MainViewModel : ObservableObject
 
     private void OnDirectoryListChanged(object? sender, EventArgs e)
     {
+        if (_isDisposed) return;
+
         Raise(nameof(PositionText));
         if (CurrentPath is not null && !File.Exists(CurrentPath))
         {
@@ -1264,6 +1267,28 @@ public sealed class MainViewModel : ObservableObject
         int i = 0;
         while (v >= 1024 && i < units.Length - 1) { v /= 1024; i++; }
         return $"{v:0.##} {units[i]}";
+    }
+
+    public void Dispose()
+    {
+        if (_isDisposed) return;
+
+        FlushPendingRename();
+        _isDisposed = true;
+
+        _renameTimer.Stop();
+        _toastTimer.Stop();
+        _hintTimer.Stop();
+
+        _nav.ListChanged -= OnDirectoryListChanged;
+        _folderPreviewGeneration++;
+        _folderPreviewCts.Cancel();
+        _folderPreviewCts.Dispose();
+        _thumbnailDecodeGate.Dispose();
+        _preload.Dispose();
+        _nav.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 }
 

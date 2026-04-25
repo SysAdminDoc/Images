@@ -21,6 +21,7 @@ public partial class MainWindow : Window
         // correctly; save on Closing.
         RestoreWindowState();
         Closing += SaveWindowState;
+        Closed += (_, _) => Vm.Dispose();
 
         Viewport.MouseEnter += (_, _) => FadeArrows(1.0);
         Viewport.MouseLeave += (_, _) => FadeArrows(0.0);

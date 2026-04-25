@@ -47,6 +47,8 @@ public static class ImageLoader
     // the mapping in on demand and can evict clean pages without touching swap.
     private const long MemoryMapThreshold = 256L * 1024 * 1024;
     private const int DocumentPreviewDpi = 144;
+    private const int StableReadRetryCount = 3;
+    private const int StableReadRetryDelayMs = 80;
 
     public static LoadResult Load(string path, int pageIndex = 0)
     {
@@ -72,12 +74,7 @@ public static class ImageLoader
             return LoadFromMemoryMapped(path);
 
         // Load the file into memory first so we never hold a lock on the original (rename/delete must work).
-        byte[] bytes;
-        using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
-        {
-            bytes = new byte[fs.Length];
-            fs.ReadExactly(bytes);
-        }
+        var bytes = ReadStableFileBytes(path);
 
         // Animation probe first — only for formats that actually support it. If the file is a
         // multi-frame GIF / animated WebP / APNG, return the full sequence so the canvas can play it.
@@ -176,6 +173,44 @@ public static class ImageLoader
             throw new InvalidOperationException(
                 $"Could not render '{Path.GetFileName(path)}' with Ghostscript: {ex.Message}", ex);
         }
+    }
+
+    private static byte[] ReadStableFileBytes(string path)
+    {
+        var fileName = Path.GetFileName(path);
+        Exception? lastError = null;
+
+        for (var attempt = 1; attempt <= StableReadRetryCount; attempt++)
+        {
+            try
+            {
+                using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                var length = fs.Length;
+
+                if (length <= 0)
+                    throw new InvalidOperationException($"'{fileName}' is empty.");
+
+                if (length >= MemoryMapThreshold || length > int.MaxValue)
+                    throw new IOException("File size changed while it was being read.");
+
+                var bytes = new byte[(int)length];
+                fs.ReadExactly(bytes);
+
+                if (fs.Length == length)
+                    return bytes;
+
+                lastError = new IOException("File size changed while it was being read.");
+            }
+            catch (IOException ex)
+            {
+                lastError = ex;
+            }
+
+            if (attempt < StableReadRetryCount)
+                Thread.Sleep(StableReadRetryDelayMs);
+        }
+
+        throw new InvalidOperationException($"'{fileName}' is still being written or changed. Try again in a moment.", lastError);
     }
 
     private static LoadResult? TryLoadPagedRaster(string path, int requestedPageIndex)
@@ -396,10 +431,23 @@ public static class ImageLoader
         image.Format = MagickFormat.Bgra;
         image.Alpha(AlphaOption.Set);
 
+        if (image.Width <= 0 || image.Height <= 0 || image.Width > int.MaxValue || image.Height > int.MaxValue)
+            throw new InvalidOperationException("Decoded image dimensions are not supported.");
+
         var w = (int)image.Width;
         var h = (int)image.Height;
+        if (w > int.MaxValue / 4)
+            throw new InvalidOperationException("Decoded image is too large to render.");
+
+        var stride = w * 4;
+        var expectedLength = (long)stride * h;
+        if (expectedLength > int.MaxValue)
+            throw new InvalidOperationException("Decoded image is too large to render.");
+
         var pixels = image.GetPixelsUnsafe().ToByteArray(PixelMapping.BGRA)
                      ?? throw new InvalidOperationException("Magick.NET returned null pixel buffer");
+        if (pixels.LongLength != expectedLength)
+            throw new InvalidOperationException("Magick.NET returned an unexpected pixel buffer size.");
 
         var wb = new WriteableBitmap(w, h, 96, 96, PixelFormats.Bgra32, null);
         wb.Lock();
@@ -420,7 +468,7 @@ public static class ImageLoader
     {
         try
         {
-            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
             var frame = BitmapFrame.Create(fs, BitmapCreateOptions.DelayCreation, BitmapCacheOption.None);
             return (frame.PixelWidth, frame.PixelHeight);
         }
