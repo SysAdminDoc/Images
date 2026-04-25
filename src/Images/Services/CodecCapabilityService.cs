@@ -5,9 +5,36 @@ namespace Images.Services;
 
 public static class CodecCapabilityService
 {
+    public sealed record CodecCapabilitySummary(
+        string OpenTitle,
+        string OpenDetail,
+        string ExportTitle,
+        string ExportDetail,
+        string DocumentTitle,
+        string DocumentDetail,
+        bool DocumentReady);
+
     public static string BuildOverviewText()
         => $"WIC + bundled Magick.NET; {SupportedImageFormats.Extensions.Count} open extensions; " +
            $"{ImageExportService.ExportExtensions.Length} export extensions";
+
+    public static CodecCapabilitySummary BuildSummary()
+    {
+        var codec = CodecRuntime.Status;
+        var writableExports = CountWritableExportFormats();
+        var ghostscriptDetail = codec.GhostscriptAvailable
+            ? $"PDF, EPS, PS, and AI previews are enabled through {CodecRuntime.GetGhostscriptVersion() ?? codec.GhostscriptSource}."
+            : "PDF, EPS, PS, and AI previews need bundled Ghostscript, IMAGES_GHOSTSCRIPT_DIR, or an installed runtime.";
+
+        return new CodecCapabilitySummary(
+            "Broad open support",
+            $"{SupportedImageFormats.Extensions.Count} extensions across common images, RAW, PSD/PSB, vector, scientific, and document preview formats.",
+            "Format-aware export",
+            $"{writableExports} verified writable targets are available through Save a copy.",
+            codec.GhostscriptAvailable ? "Document previews ready" : "Document previews need Ghostscript",
+            ghostscriptDetail,
+            codec.GhostscriptAvailable);
+    }
 
     public static string BuildDocumentStatusText()
     {
