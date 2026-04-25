@@ -17,6 +17,8 @@ public partial class AboutWindow : Window
         RuntimeText.Text = info.RuntimeDescription;
         OsText.Text      = info.OsDescription;
 
+        UpdateCheckCheckBox.IsChecked = UpdateCheckService.OptedIn;
+
         // Dark native caption — same pattern as MainWindow so the About window matches.
         SourceInitialized += (_, _) =>
         {
@@ -51,6 +53,12 @@ public partial class AboutWindow : Window
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
+
+    private void UpdateCheckOptIn_Changed(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.CheckBox cb)
+            UpdateCheckService.OptedIn = cb.IsChecked == true;
+    }
 
     private async void CheckUpdatesButton_Click(object sender, RoutedEventArgs e)
     {
