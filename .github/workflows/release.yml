@@ -52,12 +52,12 @@ jobs:
 
           powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Prepare-GhostscriptBundle.ps1 -Source $source -Force
 
-      - name: Publish (framework-dependent, win-x64)
+      - name: Publish (self-contained, win-x64)
         run: >
           dotnet publish src/Images
           -c Release
           -r win-x64
-          --no-self-contained
+          --self-contained true
           -p:PublishSingleFile=false
           -p:Version=${{ github.event.inputs.version }}
           -o publish
