@@ -603,7 +603,7 @@
                                 <TextBlock Text="  ·  "
                                            Foreground="{StaticResource OverlayBrush}"
                                            VerticalAlignment="Center" />
-                                <TextBlock Text="Open or drop an image to start reviewing."
+                                <TextBlock Text="Open or drop a supported file to start reviewing."
                                            Foreground="{StaticResource SubtextBrush}"
                                            VerticalAlignment="Center" />
                             </StackPanel>
