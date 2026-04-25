@@ -6,6 +6,10 @@ on:
       version:
         description: "Version (e.g. 0.1.0)"
         required: true
+      ghostscript_bundle_url:
+        description: "Optional URL to an approved Ghostscript runtime zip to bundle"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -25,6 +29,28 @@ jobs:
 
       - name: Build
         run: dotnet build -c Release --no-restore
+
+      - name: Bundle Ghostscript runtime (optional)
+        if: ${{ github.event.inputs.ghostscript_bundle_url != '' }}
+        shell: pwsh
+        run: |
+          $url = "${{ github.event.inputs.ghostscript_bundle_url }}"
+          New-Item -ItemType Directory -Path codec-artifacts -Force | Out-Null
+          $archive = "codec-artifacts\ghostscript.zip"
+          Invoke-WebRequest -Uri $url -OutFile $archive
+          Expand-Archive -Path $archive -DestinationPath "codec-artifacts\ghostscript" -Force
+
+          $dll = Get-ChildItem -Path "codec-artifacts\ghostscript" -Recurse -Include gsdll64.dll,gsdll32.dll |
+            Select-Object -First 1
+          if (-not $dll) { throw "Ghostscript archive did not contain gsdll64.dll or gsdll32.dll" }
+
+          $source = $dll.Directory.FullName
+          $parent = $dll.Directory.Parent
+          if ($parent -and (Test-Path -LiteralPath (Join-Path $parent.FullName "bin"))) {
+            $source = $parent.FullName
+          }
+
+          powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Prepare-GhostscriptBundle.ps1 -Source $source -Force
 
       - name: Publish (framework-dependent, win-x64)
         run: >

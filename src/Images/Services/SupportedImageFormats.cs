@@ -9,47 +9,73 @@ namespace Images.Services;
 /// </summary>
 public static class SupportedImageFormats
 {
-    public static readonly HashSet<string> Extensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        // Windows/WIC classics
-        ".bmp", ".dib", ".rle", ".jpg", ".jpeg", ".jpe", ".jfif", ".png", ".gif",
-        ".tif", ".tiff", ".ico", ".cur", ".hdp", ".jxr", ".wdp",
+    public static readonly string[] CommonExtensions =
+    [
+        ".jpg", ".jpeg", ".jpe", ".jfif", ".png", ".gif", ".webp", ".heic", ".heif",
+        ".hif", ".avif", ".jxl", ".tif", ".tiff", ".bmp", ".dib", ".ico", ".cur",
+        ".hdp", ".jxr", ".wdp"
+    ];
 
-        // Modern photo/web formats. Some are WIC when the Windows codec is installed; Magick.NET
-        // provides fallback coverage for most current builds.
-        ".webp", ".heic", ".heif", ".hif", ".avif", ".jxl",
+    public static readonly string[] DesignExtensions =
+    [
+        ".psd", ".psb", ".tga", ".targa", ".pcx", ".dds", ".qoi", ".exr", ".hdr",
+        ".pic", ".dpx", ".cin", ".sgi", ".rgb", ".rgba", ".bw", ".jp2", ".j2k",
+        ".j2c", ".jpc", ".jpf", ".jpx", ".jpm", ".xcf", ".ora"
+    ];
 
-        // Adobe/pro design raster formats
-        ".psd", ".psb", ".tga", ".targa", ".pcx", ".dds", ".qoi",
+    public static readonly string[] PortableAndScientificExtensions =
+    [
+        ".xpm", ".xbm", ".pbm", ".pgm", ".ppm", ".pnm", ".pam", ".pfm", ".miff",
+        ".mng", ".jng", ".dcm", ".dicom", ".fits", ".fit", ".fts", ".pict", ".pct",
+        ".ras", ".sun", ".xwd", ".fax", ".g3", ".g4"
+    ];
 
-        // High-bit-depth, scientific, and production formats
-        ".exr", ".hdr", ".pic", ".dpx", ".cin", ".sgi", ".rgb", ".rgba", ".bw",
-        ".jp2", ".j2k", ".j2c", ".jpc", ".jpf", ".jpx", ".jpm",
+    public static readonly string[] VectorExtensions =
+    [
+        ".svg", ".svgz", ".emf", ".wmf"
+    ];
 
-        // Portable / X11 / exchange formats
-        ".xpm", ".xbm", ".pbm", ".pgm", ".ppm", ".pnm", ".pam", ".pfm", ".miff", ".mng", ".jng",
+    public static readonly string[] DocumentPreviewExtensions =
+    [
+        ".pdf", ".ps", ".ps2", ".ps3", ".eps", ".epsf", ".epsi", ".epi", ".ept", ".ai"
+    ];
 
-        // Scientific, medical, and legacy interchange formats
-        ".dcm", ".dicom", ".fits", ".fit", ".fts", ".xcf", ".ora", ".pict", ".pct",
-        ".ras", ".sun", ".xwd", ".fax", ".g3", ".g4",
-
-        // Vector and metafile formats that Magick.NET can rasterize without Ghostscript.
-        ".svg", ".svgz", ".emf", ".wmf",
-
-        // PostScript/PDF/Illustrator-family previews. These need Ghostscript configured.
-        ".pdf", ".ps", ".ps2", ".ps3", ".eps", ".epsf", ".epsi", ".epi", ".ept", ".ai",
-
-        // Camera RAW formats
+    public static readonly string[] RawExtensions =
+    [
         ".cr2", ".cr3", ".crw", ".nef", ".nrw", ".arw", ".srf", ".sr2",
         ".dng", ".raf", ".rw2", ".orf", ".pef", ".3fr", ".erf", ".mef",
         ".mrw", ".x3f", ".rwl", ".iiq", ".kdc", ".dcr", ".srw", ".mos",
         ".fff", ".gpr", ".bay", ".cap"
-    };
+    ];
 
-    private static readonly HashSet<string> GhostscriptExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".pdf", ".ps", ".ps2", ".ps3", ".eps", ".epsf", ".epsi", ".epi", ".ept", ".ai"
-    };
+    public static readonly HashSet<string> Extensions = new(
+        CommonExtensions
+            .Concat(DesignExtensions)
+            .Concat(PortableAndScientificExtensions)
+            .Concat(VectorExtensions)
+            .Concat(DocumentPreviewExtensions)
+            .Concat(RawExtensions),
+        StringComparer.OrdinalIgnoreCase);
+
+    private static readonly HashSet<string> GhostscriptExtensions = new(
+        DocumentPreviewExtensions,
+        StringComparer.OrdinalIgnoreCase);
+
+    public static string OpenDialogFilter => string.Join("|",
+    [
+        "Supported files|" + ToFilter(Extensions.OrderBy(e => e, StringComparer.OrdinalIgnoreCase)),
+        "Common images|" + ToFilter(CommonExtensions),
+        "Design and production|" + ToFilter(DesignExtensions),
+        "Camera RAW|" + ToFilter(RawExtensions),
+        "Vector and document previews|" + ToFilter(VectorExtensions.Concat(DocumentPreviewExtensions)),
+        "All files|*.*"
+    ]);
+
+    public static string DropUnsupportedMessage =>
+        "Drop a supported image, RAW, design, vector, or document preview file.";
+
+    private static string ToFilter(IEnumerable<string> extensions)
+        => string.Join(";", extensions.Select(e => "*" + e));
 
     public static bool IsSupported(string path)
         => Extensions.Contains(Path.GetExtension(path));

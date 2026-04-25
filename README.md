@@ -65,9 +65,11 @@ dotnet run --project src/Images
 
 ### Optional bundled Ghostscript
 
-PDF, EPS, PS, and AI previews require Ghostscript. For a self-contained release experience, place the approved Ghostscript runtime under `src/Images/Codecs/Ghostscript` before publishing; the project copies that folder into the app output automatically. A typical layout is `Codecs/Ghostscript/bin/gsdll64.dll` plus `Codecs/Ghostscript/bin/gswin64c.exe`.
+PDF, EPS, PS, and AI previews require Ghostscript. For a self-contained release experience, place the approved Ghostscript runtime under `src/Images/Codecs/Ghostscript` before publishing; the project copies that folder into the app output automatically. A typical layout is `Codecs/Ghostscript/bin/gsdll64.dll` with the matching Ghostscript support files beside `bin`; `gswin64c.exe` is optional and only used for version display.
 
 Images also detects `IMAGES_GHOSTSCRIPT_DIR` and normal system installs under `%ProgramFiles%\gs`. Keep third-party binaries out of source control unless redistribution rights for the exact package are already approved.
+
+Release builders can use `scripts/Prepare-GhostscriptBundle.ps1`; see `docs/codec-bundling.md`.
 
 To build the installer locally, install [Inno Setup 6](https://jrsoftware.org/isdl.php), run `dotnet publish src/Images -c Release -r win-x64 --no-self-contained -o publish`, then `iscc /DMyAppVersion=0.1.4 installer\Images.iss`. Output lands at `installer\output\Images-vX.Y.Z-setup-win-x64.exe`.
 
