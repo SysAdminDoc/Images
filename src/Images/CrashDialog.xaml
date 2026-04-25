@@ -83,24 +83,63 @@
                 </Border>
 
                 <UniformGrid Columns="2" Rows="2">
-                    <Button Content="Copy details"
-                            Style="{StaticResource ChromeButton}"
+                    <Button Style="{StaticResource ChromeButton}"
                             Click="CopyButton_Click"
-                            Margin="0,0,6,6" />
-                    <Button Content="Open log folder"
-                            Style="{StaticResource ChromeButton}"
+                            Margin="0,0,6,6"
+                            AutomationProperties.Name="Copy crash details">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="&#xE8C8;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="Copy details" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource ChromeButton}"
                             Click="OpenLogsButton_Click"
-                            Margin="6,0,0,6" />
-                    <Button Content="Open GitHub issue"
-                            Style="{StaticResource ChromeButton}"
+                            Margin="6,0,0,6"
+                            AutomationProperties.Name="Open crash log folder">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="&#xE838;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="Open log folder" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource ChromeButton}"
                             Click="OpenIssueButton_Click"
-                            Margin="0,6,6,0" />
-                    <Button Content="Close"
-                            Style="{StaticResource PrimaryButton}"
+                            Margin="0,6,6,0"
+                            AutomationProperties.Name="Open GitHub issue">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="&#xE71B;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="Open GitHub issue" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource PrimaryButton}"
                             Click="CloseButton_Click"
                             Margin="6,6,0,0"
                             IsDefault="True"
-                            IsCancel="True" />
+                            IsCancel="True"
+                            AutomationProperties.Name="Close crash dialog">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="&#xE711;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="Close"
+                                       Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                 </UniformGrid>
             </StackPanel>
         </Grid>
