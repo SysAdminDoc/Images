@@ -46,6 +46,9 @@ public sealed class MainViewModel : ObservableObject
         CopyPathCommand = new RelayCommand(CopyPath, () => HasImage);
         SetAsWallpaperCommand = new RelayCommand(SetAsWallpaper, () => HasImage);
         ReloadCommand = new RelayCommand(ReloadCurrent, () => HasImage);
+        PrintCommand = new RelayCommand(PrintCurrent, () => HasImage);
+        SaveAsCopyCommand = new RelayCommand(SaveAsCopy, () => HasImage);
+        CheckForUpdatesCommand = new RelayCommand(async () => await CheckForUpdatesAsync(userInitiated: true), () => true);
         RefreshCommand = new RelayCommand(() => { _nav.Refresh(); RefreshFromNav(); });
         CommitRenameCommand = new RelayCommand(() => { _renameTimer.Stop(); FlushPendingRename(); });
         CancelRenameCommand = new RelayCommand(CancelRenameEdit);
@@ -380,6 +383,9 @@ public sealed class MainViewModel : ObservableObject
         ToastMessage = null;
     }
 
+    /// <summary>View-facing toast helper so the code-behind doesn't have to reach through Set().</summary>
+    public void ShowToast(string message) => Toast(message);
+
     // -------------------- Commands --------------------
 
     public ICommand OpenCommand { get; }
@@ -397,6 +403,9 @@ public sealed class MainViewModel : ObservableObject
     public ICommand CopyPathCommand { get; }
     public ICommand SetAsWallpaperCommand { get; }
     public ICommand ReloadCommand { get; }
+    public ICommand PrintCommand { get; }
+    public ICommand SaveAsCopyCommand { get; }
+    public ICommand CheckForUpdatesCommand { get; }
     public ICommand RefreshCommand { get; }
     public ICommand CommitRenameCommand { get; }
     public ICommand CancelRenameCommand { get; }
@@ -657,6 +666,107 @@ public sealed class MainViewModel : ObservableObject
         if (CurrentPath is null) return;
         try { Clipboard.SetText(CurrentPath); Toast("Copied path"); }
         catch (Exception ex) { Toast($"Copy failed: {ex.Message}"); }
+    }
+
+    // P-04: checks GitHub Releases API for a newer tag. userInitiated=true fires regardless of
+    // the 24-h throttle (manual check from the About dialog); userInitiated=false obeys the
+    // throttle (silent startup check).
+    public async Task CheckForUpdatesAsync(bool userInitiated)
+    {
+        if (!userInitiated && !UpdateCheckService.IsDueForBackgroundCheck())
+            return;
+
+        var result = await UpdateCheckService.CheckAsync().ConfigureAwait(true);
+        UpdateCheckService.LastCheckedUtc = DateTime.UtcNow;
+
+        if (result.Error is not null)
+        {
+            if (userInitiated) Toast($"Update check failed: {result.Error}");
+            return;
+        }
+
+        if (result.NewerAvailable)
+        {
+            Toast($"New version {result.LatestTag} available");
+            LatestUpdateTag = result.LatestTag;
+            LatestUpdateUrl = result.LatestHtmlUrl;
+        }
+        else if (userInitiated)
+        {
+            Toast("You're on the latest version");
+        }
+    }
+
+    private string? _latestUpdateTag;
+    public string? LatestUpdateTag
+    {
+        get => _latestUpdateTag;
+        private set { if (Set(ref _latestUpdateTag, value)) Raise(nameof(HasUpdateAvailable)); }
+    }
+
+    public string? LatestUpdateUrl { get; private set; }
+
+    public bool HasUpdateAvailable => !string.IsNullOrEmpty(LatestUpdateTag);
+
+    // E6: save a copy of the current image to a user-chosen path. The written bytes are a
+    // re-encode of the displayed first-frame via WIC's format-appropriate encoder (JpegBitmapEncoder
+    // for .jpg, PngBitmapEncoder for .png, etc.). Rotation and flip are NOT baked in — print
+    // keeps the viewer's in-session edits out of the file (same convention as Windows Photos).
+    // If the user wants the transformed version, they can screenshot the viewer.
+    private void SaveAsCopy()
+    {
+        if (CurrentImage is not System.Windows.Media.Imaging.BitmapSource bs || CurrentPath is null) return;
+
+        var dlg = new Microsoft.Win32.SaveFileDialog
+        {
+            Title = "Save a copy",
+            FileName = Path.GetFileNameWithoutExtension(CurrentPath) + "_copy" + Path.GetExtension(CurrentPath),
+            Filter = "JPEG|*.jpg;*.jpeg|PNG|*.png|BMP|*.bmp|TIFF|*.tif;*.tiff|All files|*.*",
+            InitialDirectory = Path.GetDirectoryName(CurrentPath),
+        };
+        if (dlg.ShowDialog() != true) return;
+
+        try
+        {
+            var ext = Path.GetExtension(dlg.FileName).ToLowerInvariant();
+            System.Windows.Media.Imaging.BitmapEncoder encoder = ext switch
+            {
+                ".jpg" or ".jpeg" or ".jfif" => new System.Windows.Media.Imaging.JpegBitmapEncoder { QualityLevel = 92 },
+                ".png" => new System.Windows.Media.Imaging.PngBitmapEncoder(),
+                ".bmp" => new System.Windows.Media.Imaging.BmpBitmapEncoder(),
+                ".tif" or ".tiff" => new System.Windows.Media.Imaging.TiffBitmapEncoder(),
+                ".gif" => new System.Windows.Media.Imaging.GifBitmapEncoder(),
+                _ => new System.Windows.Media.Imaging.PngBitmapEncoder(), // default to PNG for lossless
+            };
+            encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bs));
+            using (var fs = new FileStream(dlg.FileName, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                encoder.Save(fs);
+            }
+            Toast($"Saved copy → {Path.GetFileName(dlg.FileName)}");
+        }
+        catch (Exception ex)
+        {
+            Toast($"Save failed: {ex.Message}");
+        }
+    }
+
+    // V15-10: print current image via PrintDialog. Prints the CurrentImage exactly as decoded —
+    // rotation + flip aren't applied to the printed output (same convention as Preview / Photos).
+    // If users want the rotated version printed, they save-as-copy first (E6) then print that.
+    private void PrintCurrent()
+    {
+        if (CurrentImage is not System.Windows.Media.Imaging.BitmapSource bs || CurrentPath is null) return;
+        try
+        {
+            var title = System.IO.Path.GetFileName(CurrentPath);
+            if (PrintService.Print(bs, title))
+                Toast("Sent to printer");
+        }
+        catch (Exception ex)
+        {
+            Toast($"Print failed: {ex.Message}");
+        }
     }
 
     // V15-06: open the About dialog. Owner is resolved via the active main window so the dialog
