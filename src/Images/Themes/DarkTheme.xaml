@@ -115,12 +115,10 @@
     </Style>
 
     <!-- ============ Icon font ============ -->
-    <!-- Win11 24H2+ canonicalizes the icon font as "Segoe Fluent Icons"; Win10 ships "Segoe MDL2
-         Assets". Both share the same PUA glyph codepoints (E70F, E76B, E838, ...). On some Win11
-         installs (notably IoT LTSC / enterprise images) WPF's MDL2 resolution lands on a text
-         fallback, rendering every button as an empty tofu block. Declaring Fluent Icons first +
-         MDL2 second + a guaranteed Symbol fallback collapses all three worlds. -->
-    <FontFamily x:Key="IconFontFamily">Segoe Fluent Icons, Segoe MDL2 Assets, Symbol</FontFamily>
+    <!-- The app uses MDL2 PUA glyphs throughout. Keep icon-only controls pinned to the stable
+         Windows MDL2 font instead of relying on composite fallback, which can render blank
+         glyph boxes inside templated button content on some WPF/font stacks. -->
+    <FontFamily x:Key="IconFontFamily">Segoe MDL2 Assets</FontFamily>
 
     <!-- ============ Text defaults ============ -->
     <!-- Segoe UI Variable is the Windows 11 system variable font; fallback gracefully on Win10. -->
@@ -355,7 +353,12 @@
                                  Fill="{TemplateBinding Background}"
                                  Stroke="{TemplateBinding BorderBrush}"
                                  StrokeThickness="1.25" />
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <TextBlock Text="{TemplateBinding Content}"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="{TemplateBinding FontSize}"
+                                   Foreground="{TemplateBinding Foreground}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -421,9 +424,12 @@
                             BorderThickness="1"
                             Padding="{TemplateBinding Padding}"
                             SnapsToDevicePixels="True">
-                        <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"
-                                          RecognizesAccessKey="True" />
+                        <TextBlock Text="{TemplateBinding Content}"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="{TemplateBinding FontSize}"
+                                   Foreground="{TemplateBinding Foreground}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
