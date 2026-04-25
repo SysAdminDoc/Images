@@ -23,6 +23,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private string _committedStemOnDisk = string.Empty;
     private bool _isDisposed;
     private int _metadataGeneration;
+    private bool _isFilmstripVisible;
 
     private readonly DispatcherTimer _hintTimer;
 
@@ -36,6 +37,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         _hintTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(2400) };
         _hintTimer.Tick += (_, _) => { _hintTimer.Stop(); ShowGestureHint = false; };
+
+        _isFilmstripVisible = SettingsService.Instance.GetBool(Keys.FilmstripVisible, true);
 
         OpenCommand = new RelayCommand(OpenFileDialog);
         NextCommand = new RelayCommand(Next, () => HasImage);
@@ -68,6 +71,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         AboutCommand = new RelayCommand(ShowAboutWindow);
         OpenRecentFolderCommand = new RelayCommand(p => OpenRecentFolder(p as string), p => p is string);
         OpenPreviewItemCommand = new RelayCommand(p => OpenPreviewItem(p as FolderPreviewItem), p => p is FolderPreviewItem);
+        ToggleFilmstripCommand = new RelayCommand(ToggleFilmstrip, () => CanToggleFilmstrip);
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
         // panel renders prior-session folders before the user opens anything.
@@ -545,6 +549,25 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private int _folderPreviewGeneration;
 
+    public bool IsFilmstripVisible
+    {
+        get => _isFilmstripVisible;
+        private set
+        {
+            if (!Set(ref _isFilmstripVisible, value)) return;
+            SettingsService.Instance.SetBool(Keys.FilmstripVisible, value);
+            RaiseFolderPreviewState();
+        }
+    }
+
+    public bool CanToggleFilmstrip => _nav.Count > 1;
+
+    public bool ShowFilmstrip => IsFilmstripVisible && FolderPreviewItems.Count > 0;
+
+    public bool ShowSideFolderPreview => !IsFilmstripVisible && FolderPreviewItems.Count > 0;
+
+    public string FilmstripToggleTooltip => IsFilmstripVisible ? "Hide filmstrip (T)" : "Show filmstrip (T)";
+
     private void RefreshFolderPreview()
     {
         _folderPreviewGeneration++;
@@ -552,6 +575,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _folderPreviewCts.Dispose();
         _folderPreviewCts = new CancellationTokenSource();
         FolderPreviewItems.Clear();
+        RaiseFolderPreviewState();
 
         if (_nav.Count < 2 || _nav.CurrentIndex < 0)
             return;
@@ -572,6 +596,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             FolderPreviewItems.Add(item);
             QueueThumbnailLoad(item, _folderPreviewGeneration, token);
         }
+
+        RaiseFolderPreviewState();
     }
 
     private static IReadOnlyList<int> BuildPreviewIndices(int count, int currentIndex)
@@ -630,6 +656,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         if (item is null || !File.Exists(item.Path)) return;
         OpenFile(item.Path);
+    }
+
+    private void ToggleFilmstrip()
+    {
+        if (!CanToggleFilmstrip) return;
+
+        IsFilmstripVisible = !IsFilmstripVisible;
+        Toast(IsFilmstripVisible ? "Filmstrip shown" : "Filmstrip hidden");
+    }
+
+    private void RaiseFolderPreviewState()
+    {
+        Raise(nameof(CanToggleFilmstrip));
+        Raise(nameof(ShowFilmstrip));
+        Raise(nameof(ShowSideFolderPreview));
+        Raise(nameof(FilmstripToggleTooltip));
+        CommandManager.InvalidateRequerySuggested();
     }
 
     private void PushUndoEntry(RenameService.UndoEntry entry)
@@ -759,6 +802,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand AboutCommand { get; }
     public ICommand OpenRecentFolderCommand { get; }
     public ICommand OpenPreviewItemCommand { get; }
+    public ICommand ToggleFilmstripCommand { get; }
 
     // -------------------- Navigation --------------------
 
@@ -1380,6 +1424,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _folderPreviewGeneration++;
         _folderPreviewCts.Cancel();
         FolderPreviewItems.Clear();
+        RaiseFolderPreviewState();
         RenameStatus = RenameStatusKind.Idle;
         SyncRenameEditorFromDisk();
         Raise(nameof(FileSizeText));
