@@ -110,8 +110,23 @@ public sealed class MainViewModel : ObservableObject
 
     public bool IsAnimated => CurrentAnimation is not null;
 
-    public string AnimationFrameCountText =>
-        CurrentAnimation is null ? "" : $"{CurrentAnimation.Frames.Count} frames";
+    // V20-15-Loop: surface LoopCount on the existing animated chip. GIF convention is
+    // LoopCount=0 → infinite (rendered as "loops"); any positive value is the exact iteration
+    // count (rendered as "plays Mx"). Mirrors the ternary in ZoomPanImage.OnAnimationChanged
+    // where we already honor the count via RepeatBehavior.Forever vs new RepeatBehavior(N).
+    public string AnimationFrameCountText
+    {
+        get
+        {
+            if (CurrentAnimation is null) return "";
+            var n = CurrentAnimation.Frames.Count;
+            var frames = n == 1 ? "1 frame" : $"{n} frames";
+            var loop = CurrentAnimation.LoopCount <= 0
+                ? "loops"
+                : $"plays {CurrentAnimation.LoopCount}\u00D7";
+            return $"{frames} \u00B7 {loop}";
+        }
+    }
 
     private string? _currentPath;
     public string? CurrentPath
