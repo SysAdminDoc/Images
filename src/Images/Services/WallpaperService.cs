@@ -32,9 +32,8 @@ public static class WallpaperService
 
         // Copy to a stable location so the wallpaper doesn't break if the user later renames
         // or deletes the source file from their folder.
-        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        var wallpaperDir = Path.Combine(localAppData, "Images", "wallpaper");
-        Directory.CreateDirectory(wallpaperDir);
+        var wallpaperDir = AppStorage.TryGetAppDirectory("wallpaper")
+            ?? throw new InvalidOperationException("Could not create a stable wallpaper folder.");
 
         var ext = Path.GetExtension(imagePath);
         // Single wallpaper slot — overwrite any prior one. "current" is enough of a handle for

@@ -19,9 +19,7 @@ public static class CrashLog
         get
         {
             if (_cachedPath is not null) return _cachedPath;
-            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            var dir = Path.Combine(localAppData, "Images");
-            Directory.CreateDirectory(dir);
+            var dir = AppStorage.TryGetAppDirectory() ?? Path.GetTempPath();
             _cachedPath = Path.Combine(dir, "crash.log");
             return _cachedPath;
         }
@@ -85,9 +83,9 @@ public static class CrashLog
     {
         try
         {
-            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            var dir = Path.Combine(localAppData, "Images", "Logs");
-            Directory.CreateDirectory(dir);
+            var dir = AppStorage.TryGetAppDirectory("Logs");
+            if (dir is null) return null;
+
             var dumpPath = Path.Combine(dir, $"crash-{DateTime.Now:yyyyMMdd-HHmmss}.dmp");
 
             using var fs = new FileStream(dumpPath, FileMode.Create, FileAccess.Write, FileShare.None);

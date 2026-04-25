@@ -20,15 +20,27 @@ public sealed class SettingsService
     private readonly ILogger _log = Log.For<SettingsService>();
     private bool _isAvailable;
 
-    public static readonly SettingsService Instance = new(DefaultDbPath());
+    public static readonly SettingsService Instance = CreateDefault();
 
-    private static string DefaultDbPath()
+    private SettingsService()
     {
-        var dir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Images");
-        Directory.CreateDirectory(dir);
-        return Path.Combine(dir, "settings.db");
+        _connectionString = string.Empty;
+        _isAvailable = false;
+    }
+
+    private static SettingsService CreateDefault()
+    {
+        try
+        {
+            var dir = AppStorage.TryGetAppDirectory();
+            return dir is null
+                ? new SettingsService()
+                : new SettingsService(Path.Combine(dir, "settings.db"));
+        }
+        catch
+        {
+            return new SettingsService();
+        }
     }
 
     public SettingsService(string dbPath)
