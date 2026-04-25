@@ -22,12 +22,21 @@ public partial class MainWindow : Window
         RestoreWindowState();
         Closing += SaveWindowState;
         Closed += (_, _) => Vm.Dispose();
+        Vm.FolderPreviewItems.CollectionChanged += (_, _) => QueueCenterCurrentPreviewItems();
+        Vm.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(MainViewModel.ShowFilmstrip) or nameof(MainViewModel.ShowSideFolderPreview))
+            {
+                QueueCenterCurrentPreviewItems();
+            }
+        };
 
         Viewport.MouseEnter += (_, _) => FadeArrows(1.0);
         Viewport.MouseLeave += (_, _) => FadeArrows(0.0);
         Loaded += (_, _) =>
         {
             Focus();
+            QueueCenterCurrentPreviewItems();
             if (Vm.IsPeekMode) return;
 
             // P-04: kick off a throttled update check 3 seconds after UI is interactive so the
@@ -40,6 +49,65 @@ public partial class MainWindow : Window
             });
         };
         SourceInitialized += OnSourceInitialized;
+    }
+
+    private bool _previewCenterQueued;
+
+    private void QueueCenterCurrentPreviewItems()
+    {
+        if (_previewCenterQueued) return;
+
+        _previewCenterQueued = true;
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+            _previewCenterQueued = false;
+            CenterCurrentPreviewItems();
+        }), System.Windows.Threading.DispatcherPriority.Background);
+    }
+
+    private void CenterCurrentPreviewItems()
+    {
+        CenterCurrentPreviewItem(FilmstripItems, FilmstripScroll);
+        CenterCurrentPreviewItem(SidePreviewItems, SidePreviewScroll);
+    }
+
+    private static void CenterCurrentPreviewItem(ItemsControl items, ScrollViewer scroll)
+    {
+        if (!scroll.IsVisible || items.Items.Count == 0) return;
+
+        items.UpdateLayout();
+        scroll.UpdateLayout();
+        if (scroll.ViewportWidth <= 0) return;
+
+        object? current = null;
+        foreach (var item in items.Items)
+        {
+            if (item is FolderPreviewItem { IsCurrent: true })
+            {
+                current = item;
+                break;
+            }
+        }
+
+        if (current is null) return;
+        if (items.ItemContainerGenerator.ContainerFromItem(current) is not FrameworkElement container) return;
+        if (container.RenderSize.Width <= 0) return;
+
+        Rect bounds;
+        try
+        {
+            bounds = container.TransformToAncestor(scroll)
+                .TransformBounds(new Rect(new Point(0, 0), container.RenderSize));
+        }
+        catch (InvalidOperationException)
+        {
+            return;
+        }
+
+        var target = scroll.HorizontalOffset + bounds.Left + bounds.Width / 2 - scroll.ViewportWidth / 2;
+        if (double.IsNaN(target) || double.IsInfinity(target)) return;
+
+        scroll.ScrollToHorizontalOffset(Math.Clamp(target, 0, scroll.ScrollableWidth));
     }
 
     private void OnSourceInitialized(object? sender, EventArgs e)
