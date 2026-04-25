@@ -75,17 +75,37 @@ public partial class CrashDialog : Window
 
     private void CopyButton_Click(object sender, RoutedEventArgs e)
     {
-        try { Clipboard.SetText(_detailsText); }
-        catch { /* clipboard in-use is a known WPF race; ignore */ }
+        try
+        {
+            Clipboard.SetText(_detailsText);
+            ShowStatus("Copied crash details to the clipboard.", "Success");
+        }
+        catch
+        {
+            ShowStatus("Clipboard is busy. Try again in a moment.", "Warning");
+        }
     }
 
     private void OpenLogsButton_Click(object sender, RoutedEventArgs e)
     {
         var dir = Path.GetDirectoryName(CrashLog.LogPath);
-        if (dir is null || !Directory.Exists(dir)) return;
-        var psi = new ProcessStartInfo { FileName = "explorer.exe", UseShellExecute = false };
-        psi.ArgumentList.Add(dir);
-        Process.Start(psi);
+        if (dir is null || !Directory.Exists(dir))
+        {
+            ShowStatus("The log folder is not available yet.", "Warning");
+            return;
+        }
+
+        try
+        {
+            var psi = new ProcessStartInfo { FileName = "explorer.exe", UseShellExecute = false };
+            psi.ArgumentList.Add(dir);
+            Process.Start(psi);
+            ShowStatus("Opened the crash log folder.", "Success");
+        }
+        catch (Exception ex)
+        {
+            ShowStatus($"Could not open the log folder: {ex.Message}", "Warning");
+        }
     }
 
     private void OpenIssueButton_Click(object sender, RoutedEventArgs e)
@@ -104,13 +124,41 @@ public partial class CrashDialog : Window
         try
         {
             Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+            ShowStatus("Opened a pre-filled GitHub issue.", "Success");
         }
         catch
         {
-            Clipboard.SetText(url);
-            MessageBox.Show(
-                "Couldn't open the browser. The issue URL was copied to your clipboard — paste it into a browser.",
-                "Images", MessageBoxButton.OK, MessageBoxImage.Information);
+            try
+            {
+                Clipboard.SetText(url);
+                ShowStatus("Could not open the browser. The issue URL was copied to the clipboard.", "Warning");
+            }
+            catch
+            {
+                ShowStatus("Could not open the browser or copy the issue URL.", "Warning");
+            }
+        }
+    }
+
+    private void ShowStatus(string message, string tone)
+    {
+        StatusCard.Visibility = Visibility.Visible;
+        StatusText.Text = message;
+
+        switch (tone)
+        {
+            case "Success":
+                StatusIcon.Text = "\uE73E";
+                StatusIcon.Foreground = (System.Windows.Media.Brush)FindResource("GreenBrush");
+                StatusCard.BorderBrush = (System.Windows.Media.Brush)FindResource("GreenBrush");
+                StatusCard.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x1F, 0xA6, 0xE3, 0xA1));
+                break;
+            default:
+                StatusIcon.Text = "\uE783";
+                StatusIcon.Foreground = (System.Windows.Media.Brush)FindResource("YellowBrush");
+                StatusCard.BorderBrush = (System.Windows.Media.Brush)FindResource("YellowBrush");
+                StatusCard.Background = (System.Windows.Media.Brush)FindResource("WarningPanelBrush");
+                break;
         }
     }
 
