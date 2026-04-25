@@ -113,7 +113,11 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
-    public bool IsAnimated => CurrentAnimation is not null;
+    // IsAnimated mirrors ZoomPanImage.OnAnimationChanged's `Frames.Count < 2` early-return so
+    // a defensive 1-frame sequence never claims animation in the chip when the canvas isn't
+    // actually playing. ImageLoader.TryLoadAnimated already returns null for <2 frames; this
+    // guards future code paths that bypass the loader.
+    public bool IsAnimated => CurrentAnimation is { Frames.Count: >= 2 };
 
     // V20-15-Loop: surface LoopCount on the existing animated chip. GIF convention is
     // LoopCount=0 → infinite (rendered as "loops"); any positive value is the exact iteration
@@ -123,9 +127,11 @@ public sealed class MainViewModel : ObservableObject
     {
         get
         {
-            if (CurrentAnimation is null) return "";
-            var n = CurrentAnimation.Frames.Count;
-            var frames = n == 1 ? "1 frame" : $"{n} frames";
+            // Same gate as IsAnimated — chip text is meaningful only when the canvas would
+            // actually animate.
+            if (!IsAnimated) return "";
+            var n = CurrentAnimation!.Frames.Count;
+            var frames = $"{n} frames";
             var loop = CurrentAnimation.LoopCount <= 0
                 ? "loops"
                 : $"plays {CurrentAnimation.LoopCount}\u00D7";
