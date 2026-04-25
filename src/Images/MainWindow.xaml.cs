@@ -27,6 +27,8 @@ public partial class MainWindow : Window
         Loaded += (_, _) =>
         {
             Focus();
+            if (Vm.IsPeekMode) return;
+
             // P-04: kick off a throttled update check 3 seconds after UI is interactive so the
             // first image load isn't competing with HTTPS handshake. Fire-and-forget; any
             // failure is swallowed inside CheckForUpdatesAsync.
@@ -131,6 +133,8 @@ public partial class MainWindow : Window
 
     private void SaveWindowState(object? sender, System.ComponentModel.CancelEventArgs e)
     {
+        if (Vm.IsPeekMode) return;
+
         var settings = SettingsService.Instance;
         // Only record non-maximized geometry; if the user's maximized, the RestoreBounds holds
         // what they'd get back after unmaximize, so that's what we want to persist.

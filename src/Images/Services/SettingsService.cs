@@ -18,6 +18,7 @@ public sealed class SettingsService
     private const int CurrentSchemaVersion = 1;
     private readonly string _connectionString;
     private readonly ILogger _log = Log.For<SettingsService>();
+    private bool _isAvailable;
 
     public static readonly SettingsService Instance = new(DefaultDbPath());
 
@@ -39,25 +40,67 @@ public sealed class SettingsService
             Cache = SqliteCacheMode.Shared,
         }.ToString();
 
+        _isAvailable = TryEnsureSchema(dbPath);
+    }
+
+    private bool TryEnsureSchema(string dbPath)
+    {
         try
         {
             EnsureSchema();
+            return true;
         }
-        catch (SqliteException ex)
+        catch (Exception ex) when (IsRecoverableStorageFailure(ex))
         {
-            // Corrupt DB — quarantine and retry fresh. SCH-01: sidecars are authoritative;
-            // losing the settings cache is recoverable (users just lose prefs and recent folders).
-            _log.LogError(ex, "settings.db corrupt or unreadable — quarantining and starting fresh");
-            QuarantineAndReset(dbPath);
+            // Corrupt / locked / unreadable DB — quarantine and retry fresh. SCH-01: sidecars
+            // are authoritative; losing the settings cache is recoverable.
+            _log.LogError(ex, "settings.db unavailable — quarantining and starting fresh");
+            if (!TryQuarantineAndReset(dbPath))
+                return false;
+        }
+
+        try
+        {
             EnsureSchema();
+            return true;
+        }
+        catch (Exception ex) when (IsRecoverableStorageFailure(ex))
+        {
+            _log.LogError(ex, "settings.db unavailable after reset — disabling persistent settings for this session");
+            return false;
         }
     }
 
-    private static void QuarantineAndReset(string dbPath)
+    private static bool TryQuarantineAndReset(string dbPath)
     {
-        if (!File.Exists(dbPath)) return;
+        SqliteConnection.ClearAllPools();
+
+        if (!File.Exists(dbPath)) return true;
         var quarantinePath = dbPath + ".corrupt-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
-        try { File.Move(dbPath, quarantinePath); } catch { /* best-effort */ }
+        try
+        {
+            File.Move(dbPath, quarantinePath);
+            TryDeleteSqliteSidecar(dbPath + "-wal");
+            TryDeleteSqliteSidecar(dbPath + "-shm");
+            SqliteConnection.ClearAllPools();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static void TryDeleteSqliteSidecar(string path)
+    {
+        try
+        {
+            if (File.Exists(path)) File.Delete(path);
+        }
+        catch
+        {
+            // Best-effort cleanup; a later successful open will reconcile SQLite sidecars.
+        }
     }
 
     private void EnsureSchema()
@@ -110,6 +153,8 @@ public sealed class SettingsService
 
     public string? GetString(string key, string? defaultValue = null)
     {
+        if (!_isAvailable) return defaultValue;
+
         try
         {
             using var conn = Open();
@@ -118,7 +163,7 @@ public sealed class SettingsService
             cmd.Parameters.AddWithValue("$k", key);
             return cmd.ExecuteScalar() as string ?? defaultValue;
         }
-        catch (SqliteException ex)
+        catch (Exception ex) when (IsRecoverableStorageFailure(ex))
         {
             _log.LogWarning(ex, "GetString({Key}) failed — returning default", key);
             return defaultValue;
@@ -127,6 +172,8 @@ public sealed class SettingsService
 
     public void SetString(string key, string value)
     {
+        if (!_isAvailable) return;
+
         try
         {
             using var conn = Open();
@@ -139,7 +186,7 @@ public sealed class SettingsService
             cmd.Parameters.AddWithValue("$v", value);
             cmd.ExecuteNonQuery();
         }
-        catch (SqliteException ex)
+        catch (Exception ex) when (IsRecoverableStorageFailure(ex))
         {
             _log.LogWarning(ex, "SetString({Key}) failed", key);
         }
@@ -148,7 +195,7 @@ public sealed class SettingsService
     public bool GetBool(string key, bool defaultValue)
     {
         var raw = GetString(key);
-        return raw is null ? defaultValue : raw.Equals("true", StringComparison.OrdinalIgnoreCase);
+        return bool.TryParse(raw, out var value) ? value : defaultValue;
     }
 
     public void SetBool(string key, bool value) => SetString(key, value ? "true" : "false");
@@ -175,6 +222,8 @@ public sealed class SettingsService
     public void TouchRecentFolder(string path)
     {
         if (string.IsNullOrWhiteSpace(path)) return;
+        if (!_isAvailable) return;
+
         try
         {
             using var conn = Open();
@@ -190,7 +239,7 @@ public sealed class SettingsService
             cmd.Parameters.AddWithValue("$t", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
             cmd.ExecuteNonQuery();
         }
-        catch (SqliteException ex)
+        catch (Exception ex) when (IsRecoverableStorageFailure(ex))
         {
             _log.LogWarning(ex, "TouchRecentFolder failed");
         }
@@ -199,6 +248,8 @@ public sealed class SettingsService
     public IReadOnlyList<string> GetRecentFolders(int max = 10)
     {
         var result = new List<string>();
+        if (!_isAvailable) return result;
+
         try
         {
             using var conn = Open();
@@ -213,12 +264,15 @@ public sealed class SettingsService
                 if (Directory.Exists(path)) result.Add(path);
             }
         }
-        catch (SqliteException ex)
+        catch (Exception ex) when (IsRecoverableStorageFailure(ex))
         {
             _log.LogWarning(ex, "GetRecentFolders failed");
         }
         return result;
     }
+
+    private static bool IsRecoverableStorageFailure(Exception ex)
+        => ex is SqliteException or IOException or UnauthorizedAccessException or InvalidOperationException;
 }
 
 /// <summary>

@@ -2,6 +2,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Media;
+using ImageMagick;
 using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
@@ -28,6 +29,8 @@ public sealed class ThumbnailCache
     private readonly int _thumbSize;
     private readonly long _capBytes;
     private readonly ILogger _log = Log.For<ThumbnailCache>();
+    private readonly object _evictionSync = new();
+    private DateTime _lastEvictionSweepUtc = DateTime.MinValue;
 
     public static readonly ThumbnailCache Instance = new(DefaultRoot(), DefaultThumbSize, DefaultDiskCapBytes);
 
@@ -95,14 +98,15 @@ public sealed class ThumbnailCache
             if (File.Exists(cachePath)) return cachePath;
 
             CodecRuntime.Configure();
-            using var image = new ImageMagick.MagickImage(sourcePath);
-            image.Resize(new ImageMagick.MagickGeometry((uint)_thumbSize, (uint)_thumbSize) { Greater = true });
+            using var image = ReadFirstFrameForThumbnail(sourcePath);
+            image.Resize(new MagickGeometry((uint)_thumbSize, (uint)_thumbSize) { Greater = true });
             image.Strip(); // drop EXIF + XMP — thumbs don't need it, reduces bytes
             image.Quality = 80;
-            image.Format = ImageMagick.MagickFormat.WebP;
+            image.Format = MagickFormat.WebP;
             image.Write(cachePath);
 
             _log.LogDebug("thumb cached: {Cache} ({Bytes} bytes) from {Src}", cachePath, new FileInfo(cachePath).Length, sourcePath);
+            ScheduleEvictionSweep();
             return cachePath;
         }
         catch (Exception ex)
@@ -110,6 +114,46 @@ public sealed class ThumbnailCache
             _log.LogDebug(ex, "GenerateAndCache failed for {Path}", sourcePath);
             return null;
         }
+    }
+
+    private static MagickImage ReadFirstFrameForThumbnail(string sourcePath)
+    {
+        var settings = new MagickReadSettings
+        {
+            FrameIndex = 0,
+            FrameCount = 1,
+            BackgroundColor = MagickColors.White
+        };
+
+        if (SupportedImageFormats.RequiresGhostscript(sourcePath))
+            settings.Density = new Density(72);
+
+        using var frames = new MagickImageCollection(new FileInfo(sourcePath), settings);
+        if (frames.Count == 0)
+            throw new InvalidOperationException("No thumbnail frame was decoded.");
+
+        var image = (MagickImage)frames[0].Clone();
+
+        if (SupportedImageFormats.RequiresGhostscript(sourcePath))
+        {
+            image.BackgroundColor = MagickColors.White;
+            image.Alpha(AlphaOption.Remove);
+        }
+
+        return image;
+    }
+
+    private void ScheduleEvictionSweep()
+    {
+        lock (_evictionSync)
+        {
+            if ((DateTime.UtcNow - _lastEvictionSweepUtc) < TimeSpan.FromMinutes(5))
+                return;
+
+            _lastEvictionSweepUtc = DateTime.UtcNow;
+        }
+
+        _ = Task.Run(EvictIfOverCap);
     }
 
     /// <summary>

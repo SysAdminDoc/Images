@@ -32,13 +32,29 @@ public sealed class RenameService
     }
 
     /// <summary>
+    /// Normalize a user-editable extension. Extensions are rename metadata, not paths:
+    /// keep one leading dot, remove whitespace, remove invalid filename characters, and
+    /// collapse accidental compound/path-like input into a single safe suffix.
+    /// </summary>
+    public static string NormalizeExtension(string extension)
+    {
+        if (string.IsNullOrWhiteSpace(extension)) return string.Empty;
+
+        var raw = extension.Trim().TrimStart('.');
+        var filtered = new string(raw
+            .Where(c => !char.IsWhiteSpace(c) && c != '.' && Array.IndexOf(_invalid, c) < 0)
+            .ToArray());
+
+        return filtered.Length == 0 ? string.Empty : "." + filtered;
+    }
+
+    /// <summary>
     /// Resolve the final on-disk path given a desired stem + extension.
     /// If the target exists (and isn't the same file), append " (2)", " (3)", etc.
     /// </summary>
     public static string ResolveTargetPath(string folder, string desiredStem, string extension, string? currentPath)
     {
-        var ext = string.IsNullOrEmpty(extension) ? "" :
-                  extension.StartsWith('.') ? extension : "." + extension;
+        var ext = NormalizeExtension(extension);
 
         var baseName = desiredStem;
         var candidate = Path.Combine(folder, baseName + ext);

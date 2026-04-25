@@ -14,8 +14,10 @@ public sealed class MainViewModel : ObservableObject
     private readonly RenameService _rename = new();
     private readonly PreloadService _preload = new();
     private readonly Dispatcher _uiDispatcher = Dispatcher.CurrentDispatcher;
+    private readonly SemaphoreSlim _thumbnailDecodeGate = new(2);
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
+    private CancellationTokenSource _folderPreviewCts = new();
 
     private bool _suppressStemChange;
     private string _committedStemOnDisk = string.Empty;
@@ -366,10 +368,7 @@ public sealed class MainViewModel : ObservableObject
         get => _extension;
         set
         {
-            // Normalize user-typed extension: ensure leading dot, no spaces/invalid chars.
-            var normalized = value?.Trim() ?? string.Empty;
-            if (normalized.Length > 0 && !normalized.StartsWith('.'))
-                normalized = "." + normalized;
+            var normalized = RenameService.NormalizeExtension(value ?? string.Empty);
             if (!Set(ref _extension, normalized)) return;
             Raise(nameof(RenamePreview));
             Raise(nameof(ExtensionLockText));
@@ -475,11 +474,15 @@ public sealed class MainViewModel : ObservableObject
     private void RefreshFolderPreview()
     {
         _folderPreviewGeneration++;
+        _folderPreviewCts.Cancel();
+        _folderPreviewCts.Dispose();
+        _folderPreviewCts = new CancellationTokenSource();
         FolderPreviewItems.Clear();
 
         if (_nav.Count < 2 || _nav.CurrentIndex < 0)
             return;
 
+        var token = _folderPreviewCts.Token;
         var files = _nav.Files;
         var count = files.Count;
         var indices = BuildPreviewIndices(count, _nav.CurrentIndex);
@@ -493,7 +496,7 @@ public sealed class MainViewModel : ObservableObject
                 index == _nav.CurrentIndex);
 
             FolderPreviewItems.Add(item);
-            QueueThumbnailLoad(item, _folderPreviewGeneration);
+            QueueThumbnailLoad(item, _folderPreviewGeneration, token);
         }
     }
 
@@ -511,20 +514,41 @@ public sealed class MainViewModel : ObservableObject
         return indices;
     }
 
-    private void QueueThumbnailLoad(FolderPreviewItem item, int generation)
+    private void QueueThumbnailLoad(FolderPreviewItem item, int generation, CancellationToken token)
     {
-        _ = Task.Run(() =>
+        _ = Task.Run(async () =>
         {
-            var thumbnail = ThumbnailCache.Instance.GetOrCreateImageSource(item.Path);
-            if (thumbnail is null) return;
-
-            _ = _uiDispatcher.InvokeAsync(() =>
+            try
             {
-                if (generation != _folderPreviewGeneration) return;
-                if (!FolderPreviewItems.Contains(item)) return;
+                await _thumbnailDecodeGate.WaitAsync(token).ConfigureAwait(false);
+                try
+                {
+                    if (token.IsCancellationRequested) return;
 
-                item.Thumbnail = thumbnail;
-            });
+                    var thumbnail = ThumbnailCache.Instance.GetOrCreateImageSource(item.Path);
+                    if (thumbnail is null || token.IsCancellationRequested) return;
+
+                    _ = _uiDispatcher.InvokeAsync(() =>
+                    {
+                        if (token.IsCancellationRequested || generation != _folderPreviewGeneration) return;
+                        if (!FolderPreviewItems.Contains(item)) return;
+
+                        item.Thumbnail = thumbnail;
+                    });
+                }
+                finally
+                {
+                    _thumbnailDecodeGate.Release();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Superseded navigation state. The next refresh owns the visible thumbnail set.
+            }
+            catch
+            {
+                // Folder preview is opportunistic; decode failures are already logged by the cache.
+            }
         });
     }
 
@@ -1187,6 +1211,7 @@ public sealed class MainViewModel : ObservableObject
         DecoderUsed = null;
         ResetPageState();
         _folderPreviewGeneration++;
+        _folderPreviewCts.Cancel();
         FolderPreviewItems.Clear();
         RenameStatus = RenameStatusKind.Idle;
         SyncRenameEditorFromDisk();
