@@ -54,8 +54,8 @@ UninstallDisplayName={#MyAppName} v{#MyAppVersion}
 PrivilegesRequired=admin
 PrivilegesRequiredOverridesAllowed=dialog commandline
 
-; Modern 64-bit only. Anything < 1809 (17763) lacks the WIC HEIF/AVIF codec
-; path we lean on and cannot install the .NET 9 Desktop Runtime anyway.
+; Modern 64-bit only. Anything < 1809 (17763) lacks several WIC and shell
+; integration paths the app uses; the release itself is self-contained.
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0.17763
@@ -81,9 +81,9 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "fileassoc"; Description: "Add to ""Open with"" menu for supported image, design, RAW, and document formats"; GroupDescription: "File associations:"; Flags: unchecked
 
 [Files]
-; ..\publish is the dotnet publish output the workflow generates right before
-; invoking ISCC. A local compile needs to run `dotnet publish ... -o publish`
-; from the repo root first.
+; ..\publish is the self-contained dotnet publish output the workflow generates
+; right before invoking ISCC. A local compile needs to run
+; `dotnet publish ... --self-contained true -o publish` from the repo root first.
 Source: "..\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
@@ -341,79 +341,3 @@ Root: HKA; Subkey: "Software\{#MyAppName}\Capabilities\FileAssociations"; ValueT
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
-
-[Code]
-// -----------------------------------------------------------------------------
-// .NET 9 Desktop Runtime prerequisite check.
-// The framework-dependent publish needs Microsoft.WindowsDesktop.App 9.x.
-// We probe the on-disk shared-framework directory — it's the authoritative
-// source that both the CLI and the runtime loader agree on, and it skips the
-// registry quirks between per-machine vs per-user dotnet installs.
-// -----------------------------------------------------------------------------
-
-function IsDotNet9DesktopRuntimeInstalled(): Boolean;
-var
-  FindRec: TFindRec;
-  SearchPath: String;
-  Found: Boolean;
-begin
-  Found := False;
-  // Per-machine x64 install (most common).
-  SearchPath := ExpandConstant('{commonpf64}\dotnet\shared\Microsoft.WindowsDesktop.App');
-  if DirExists(SearchPath) then
-  begin
-    if FindFirst(SearchPath + '\9.*', FindRec) then
-    begin
-      try
-        Found := True;
-      finally
-        FindClose(FindRec);
-      end;
-    end;
-  end;
-
-  // Fallback: some enterprise images ship the runtime under the ProgramFiles
-  // redirection layer (32-bit view on 64-bit) or as a user-profile install.
-  if not Found then
-  begin
-    SearchPath := ExpandConstant('{localappdata}\Microsoft\dotnet\shared\Microsoft.WindowsDesktop.App');
-    if DirExists(SearchPath) then
-    begin
-      if FindFirst(SearchPath + '\9.*', FindRec) then
-      begin
-        try
-          Found := True;
-        finally
-          FindClose(FindRec);
-        end;
-      end;
-    end;
-  end;
-
-  Result := Found;
-end;
-
-function InitializeSetup(): Boolean;
-var
-  ErrorCode: Integer;
-  Response: Integer;
-begin
-  Result := True;
-  if IsDotNet9DesktopRuntimeInstalled then
-    Exit;
-
-  Response := MsgBox(
-    '{#MyAppName} needs the .NET 9 Desktop Runtime to run.' + #13#10 + #13#10 +
-    'Click OK to open the Microsoft download page. After installing the runtime, run this setup again.' + #13#10 + #13#10 +
-    'Choose "Desktop Runtime" (not ASP.NET or the SDK) and match your CPU architecture (x64).',
-    mbInformation, MB_OKCANCEL);
-
-  if Response = IDOK then
-  begin
-    ShellExec('open',
-      'https://dotnet.microsoft.com/download/dotnet/9.0/runtime?cid=getdotnetcore&runtime=desktop',
-      '', '', SW_SHOW, ewNoWait, ErrorCode);
-  end;
-
-  Result := False;
-end;
