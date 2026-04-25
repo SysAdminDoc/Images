@@ -4,6 +4,12 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### Features
+
+- **V20-32 `--peek <path>` CLI mode** — chromeless, topmost, maximized overlay for PowerToys-Peek-style invocation. Side panel + bottom toolbar hidden; image fills the whole window. Escape closes. Lets Images drop into any external workflow that expects a single-image preview tool (File Explorer add-ons, terminal previewers, editor integrations). Path resolved through the same canonicalizer the regular open path uses so device-namespace shapes are rejected before downstream consumption. Two-token contract enforced exactly (`args.Length == 2`) — trailing junk falls through to regular argv handling.
+- **V20-15-Loop animation loop-count badge** — the existing animated-image chip now surfaces `AnimationSequence.LoopCount`. Reads `{N} frames · loops` for the GIF-spec infinite case (`LoopCount <= 0`) and `{N} frames · plays Mx` for finite loops. `IsAnimated` tightened to require `Frames.Count >= 2` so the chip can never disagree with `ZoomPanImage.OnAnimationChanged`'s gate.
+- **RecentUI — recent-folders menu in side panel** — V20-02 SQLite recent-folders MRU (data layer shipped v0.1.7) is now a clickable list between Recent renames and Details. Each entry is a folder-icon + basename card with full-path tooltip + `AutomationProperties.Name` for screen readers. Click loads the first supported image in that folder via `DirectoryNavigator.SupportedExtensions`. Empty / unreachable folders surface a toast; never crashes. Whole section hides on a fresh-install empty MRU.
+
 ## v0.1.7 — 2026-04-24
 
 Factory iter-3 foundations release. Lays the persistence + preload + thumbnail-cache + UIA-peer quartet that multiple v0.2.0 items were blocked on. Seven ROADMAP items closed. All foundational — no user-visible UI surfaces change yet (those ship in v0.1.8+), but every open-file feels quicker after the first arrow-press thanks to preload, window geometry survives restarts, and the update check now has a proper opt-out toggle.
