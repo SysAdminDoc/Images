@@ -1025,16 +1025,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private static bool ConfirmRecycleBinDelete(string path)
     {
-        var fileName = Path.GetFileName(path);
-        var result = MessageBox.Show(
-            Application.Current?.MainWindow,
-            $"Move \"{fileName}\" to the Recycle Bin?\n\nThe file can be restored from the Recycle Bin until it is emptied.",
-            "Move to Recycle Bin",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning,
-            MessageBoxResult.No);
-
-        return result == MessageBoxResult.Yes;
+        return ConfirmDialog.ConfirmRecycleBinMove(Application.Current?.MainWindow, path);
     }
 
     private void Rotate(double delta)
