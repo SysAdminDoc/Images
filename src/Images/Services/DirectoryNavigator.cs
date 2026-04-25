@@ -58,35 +58,57 @@ public sealed class DirectoryNavigator : IDisposable
     /// <summary>
     /// Load the folder containing <paramref name="path"/> and point CurrentIndex at it.
     /// </summary>
-    public void Open(string path)
+    public bool Open(string path)
     {
-        if (string.IsNullOrWhiteSpace(path)) return;
+        if (string.IsNullOrWhiteSpace(path)) return false;
 
         string full;
         try { full = Path.GetFullPath(path); }
-        catch { return; }
-        if (!File.Exists(full)) return;
+        catch { return false; }
+        if (!File.Exists(full)) return false;
+        if (!SupportedExtensions.Contains(Path.GetExtension(full))) return false;
 
-        var folder = Path.GetDirectoryName(full)!;
+        var folder = Path.GetDirectoryName(full);
+        if (string.IsNullOrEmpty(folder)) return false;
 
-        // Short-circuit: if we're already watching this folder, just move the index.
+        // Short-circuit: if we're already watching this folder, move to the exact file. If the
+        // file was created after the last scan, rescan once before declaring the open failed.
         if (_folder is not null && string.Equals(_folder, folder, StringComparison.OrdinalIgnoreCase))
         {
-            CurrentIndex = _files.FindIndex(f => string.Equals(f, full, StringComparison.OrdinalIgnoreCase));
-            if (CurrentIndex < 0 && _files.Count > 0) CurrentIndex = 0;
-            return;
+            if (TrySetCurrentIndex(full)) return true;
+            if (!Rescan(folder)) return false;
+            return TrySetCurrentIndex(full);
         }
 
-        Rescan(folder);
+        var previousFolder = _folder;
+        var previousFiles = _files;
+        var previousIndex = CurrentIndex;
+
+        if (!Rescan(folder) || !TrySetCurrentIndex(full))
+        {
+            _folder = previousFolder;
+            _files = previousFiles;
+            CurrentIndex = previousIndex;
+            return false;
+        }
+
         AttachWatcher(folder);
-        CurrentIndex = _files.FindIndex(f => string.Equals(f, full, StringComparison.OrdinalIgnoreCase));
-        if (CurrentIndex < 0 && _files.Count > 0)
+        return true;
+    }
+
+    private bool TrySetCurrentIndex(string full)
+    {
+        var idx = _files.FindIndex(f => string.Equals(f, full, StringComparison.OrdinalIgnoreCase));
+        if (idx < 0)
         {
             // Fallback match on filename only — handles case where normalization differs on comparison.
             var name = Path.GetFileName(full);
-            CurrentIndex = _files.FindIndex(f => string.Equals(Path.GetFileName(f), name, StringComparison.OrdinalIgnoreCase));
-            if (CurrentIndex < 0) CurrentIndex = 0;
+            idx = _files.FindIndex(f => string.Equals(Path.GetFileName(f), name, StringComparison.OrdinalIgnoreCase));
         }
+
+        if (idx < 0) return false;
+        CurrentIndex = idx;
+        return true;
     }
 
     /// <summary>
@@ -146,7 +168,7 @@ public sealed class DirectoryNavigator : IDisposable
         if (CurrentIndex >= _files.Count) CurrentIndex = _files.Count - 1;
     }
 
-    private void Rescan(string folder)
+    private bool Rescan(string folder)
     {
         _folder = folder;
         if (!Directory.Exists(folder))
@@ -154,7 +176,7 @@ public sealed class DirectoryNavigator : IDisposable
             _files = new List<string>();
             CurrentIndex = -1;
             ListChanged?.Invoke(this, EventArgs.Empty);
-            return;
+            return true;
         }
 
         List<string> found;
@@ -171,12 +193,13 @@ public sealed class DirectoryNavigator : IDisposable
         catch (Exception ex) when (ex is UnauthorizedAccessException or DirectoryNotFoundException or IOException or System.Security.SecurityException)
         {
             ListChanged?.Invoke(this, EventArgs.Empty);
-            return;
+            return false;
         }
 
         found.Sort(NaturalCompare);
         _files = found;
         ListChanged?.Invoke(this, EventArgs.Empty);
+        return true;
     }
 
     private void AttachWatcher(string folder)
@@ -225,14 +248,21 @@ public sealed class DirectoryNavigator : IDisposable
 
         // Debounce on the UI thread: FSW often fires a burst (create + several write events)
         // for a single file copy. One Refresh per quiet period is enough.
-        _dispatcher.BeginInvoke(new Action(() =>
+        try
         {
-            _watchDebounce ??= new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
-            _watchDebounce.Tick -= WatchDebounce_Tick;
-            _watchDebounce.Tick += WatchDebounce_Tick;
-            _watchDebounce.Stop();
-            _watchDebounce.Start();
-        }));
+            _dispatcher.BeginInvoke(new Action(() =>
+            {
+                _watchDebounce ??= new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+                _watchDebounce.Tick -= WatchDebounce_Tick;
+                _watchDebounce.Tick += WatchDebounce_Tick;
+                _watchDebounce.Stop();
+                _watchDebounce.Start();
+            }));
+        }
+        catch (InvalidOperationException)
+        {
+            // Dispatcher is shutting down; ignore late file-system notifications.
+        }
     }
 
     private void WatchDebounce_Tick(object? sender, EventArgs e)

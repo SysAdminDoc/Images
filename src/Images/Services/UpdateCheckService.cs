@@ -68,7 +68,7 @@ public static class UpdateCheckService
                 return new CheckResult(false, release.TagName, release.HtmlUrl, "version parse failed");
 
             var newer = CompareVersion(latest.Value, current.Value) > 0;
-            return new CheckResult(newer, release.TagName, release.HtmlUrl ?? ReleasesHtmlUrl, null);
+            return new CheckResult(newer, release.TagName, NormalizeTrustedReleaseUrl(release.HtmlUrl), null);
         }
         catch (TaskCanceledException)
         {
@@ -103,6 +103,25 @@ public static class UpdateCheckService
         if (a.major != b.major) return a.major.CompareTo(b.major);
         if (a.minor != b.minor) return a.minor.CompareTo(b.minor);
         return a.patch.CompareTo(b.patch);
+    }
+
+    private static string NormalizeTrustedReleaseUrl(string? htmlUrl)
+    {
+        if (!Uri.TryCreate(htmlUrl, UriKind.Absolute, out var uri))
+            return ReleasesHtmlUrl;
+
+        if (!string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+            return ReleasesHtmlUrl;
+
+        if (!string.Equals(uri.Host, "github.com", StringComparison.OrdinalIgnoreCase))
+            return ReleasesHtmlUrl;
+
+        var path = uri.AbsolutePath.TrimEnd('/');
+        if (path.Equals("/SysAdminDoc/Images/releases/latest", StringComparison.OrdinalIgnoreCase) ||
+            path.StartsWith("/SysAdminDoc/Images/releases/tag/", StringComparison.OrdinalIgnoreCase))
+            return uri.AbsoluteUri;
+
+        return ReleasesHtmlUrl;
     }
 
     /// <summary>
