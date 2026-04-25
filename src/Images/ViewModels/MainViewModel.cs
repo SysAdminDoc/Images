@@ -309,6 +309,7 @@ public sealed class MainViewModel : ObservableObject
                 normalized = "." + normalized;
             if (!Set(ref _extension, normalized)) return;
             Raise(nameof(RenamePreview));
+            Raise(nameof(ExtensionLockText));
             if (IsExtensionUnlocked)
             {
                 RenameStatus = RenameStatusKind.Pending;
@@ -319,7 +320,26 @@ public sealed class MainViewModel : ObservableObject
     }
 
     private bool _isExtensionUnlocked;
-    public bool IsExtensionUnlocked { get => _isExtensionUnlocked; set => Set(ref _isExtensionUnlocked, value); }
+    public bool IsExtensionUnlocked
+    {
+        get => _isExtensionUnlocked;
+        set
+        {
+            if (Set(ref _isExtensionUnlocked, value))
+            {
+                Raise(nameof(ExtensionLockText));
+                Raise(nameof(ExtensionLockHelpText));
+            }
+        }
+    }
+
+    public string ExtensionLockText => IsExtensionUnlocked
+        ? $"Extension editing unlocked: {Extension}"
+        : $"Extension locked: {Extension}";
+
+    public string ExtensionLockHelpText => IsExtensionUnlocked
+        ? "Extension changes rename the file but do not convert image format."
+        : "Unlock only if you need to rename the file extension.";
 
     /// <summary>
     /// Preview of what the target name will be after commit — including any " (2)" conflict suffix.
