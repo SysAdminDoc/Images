@@ -529,103 +529,105 @@
                         Background="{StaticResource MantleBrush}"
                         BorderBrush="{StaticResource HairlineBrush}"
                         BorderThickness="0,1,0,0">
-                    <Grid Margin="20,12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+                    <Grid Margin="20,10,20,12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                    <!-- Left: current file info -->
-                    <StackPanel Grid.Column="0"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center"
-                                Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="{Binding CurrentFileName}"
-                                   Foreground="{StaticResource TextBrush}"
-                                   FontWeight="SemiBold"
-                                   FontSize="13"
-                                   MaxWidth="300"
-                                   TextTrimming="CharacterEllipsis"
-                                   VerticalAlignment="Center" />
-                        <TextBlock Text="  ·  "
-                                   Foreground="{StaticResource OverlayBrush}"
-                                   VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding DimensionsText}"
-                                   Foreground="{StaticResource SubtextBrush}"
-                                   VerticalAlignment="Center" />
-                        <TextBlock Text="  ·  "
-                                   Foreground="{StaticResource OverlayBrush}"
-                                   VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding FileSizeText}"
-                                   Foreground="{StaticResource SubtextBrush}"
-                                   VerticalAlignment="Center" />
-
-                        <!-- Animated-image chip — only surfaces when CurrentAnimation is non-null.
-                             Small green pill so the GIF/APNG/animated-WebP state reads at a glance
-                             without competing with the primary metadata row. -->
-                        <Border Margin="10,0,0,0"
-                                Padding="8,2"
-                                CornerRadius="{StaticResource Radius.Sm.CR}"
-                                Background="#2AA6E3A1"
-                                BorderBrush="{StaticResource GreenBrush}"
-                                BorderThickness="1"
-                                VerticalAlignment="Center"
-                                Visibility="{Binding IsAnimated, Converter={StaticResource BoolToVis}}"
-                                AutomationProperties.Name="Animated image">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE768;"
-                                           FontFamily="{StaticResource IconFontFamily}"
-                                           FontSize="10"
-                                           Foreground="{StaticResource GreenBrush}"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,5,0" />
-                                <TextBlock Text="{Binding AnimationFrameCountText}"
-                                           FontSize="10.5"
+                        <!-- Current file info gets its own row so command clusters never collide on narrow widths. -->
+                        <Grid Grid.Row="0"
+                              MinHeight="20"
+                              Margin="0,0,0,9">
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="{Binding CurrentFileName}"
+                                           Foreground="{StaticResource TextBrush}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource GreenBrush}"
+                                           FontSize="13"
+                                           MaxWidth="260"
+                                           TextTrimming="CharacterEllipsis"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Text="  ·  "
+                                           Foreground="{StaticResource OverlayBrush}"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding DimensionsText}"
+                                           Foreground="{StaticResource SubtextBrush}"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Text="  ·  "
+                                           Foreground="{StaticResource OverlayBrush}"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding FileSizeText}"
+                                           Foreground="{StaticResource SubtextBrush}"
+                                           VerticalAlignment="Center" />
+
+                                <!-- Animated-image chip — only surfaces when CurrentAnimation is non-null.
+                                     Small green pill so the GIF/APNG/animated-WebP state reads at a glance
+                                     without competing with the primary command row. -->
+                                <Border Margin="10,0,0,0"
+                                        Padding="8,2"
+                                        CornerRadius="{StaticResource Radius.Sm.CR}"
+                                        Background="#2AA6E3A1"
+                                        BorderBrush="{StaticResource GreenBrush}"
+                                        BorderThickness="1"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding IsAnimated, Converter={StaticResource BoolToVis}}"
+                                        AutomationProperties.Name="Animated image">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE768;"
+                                                   FontFamily="{StaticResource IconFontFamily}"
+                                                   FontSize="10"
+                                                   Foreground="{StaticResource GreenBrush}"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,5,0" />
+                                        <TextBlock Text="{Binding AnimationFrameCountText}"
+                                                   FontSize="10.5"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{StaticResource GreenBrush}"
+                                                   VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
+                                <TextBlock Text="Ready"
+                                           Foreground="{StaticResource TextBrush}"
+                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Text="  ·  "
+                                           Foreground="{StaticResource OverlayBrush}"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Text="Open or drop an image to start reviewing."
+                                           Foreground="{StaticResource SubtextBrush}"
                                            VerticalAlignment="Center" />
                             </StackPanel>
-                        </Border>
-                    </StackPanel>
+                        </Grid>
 
-                    <StackPanel Grid.Column="0"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center"
-                                Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
-                        <TextBlock Text="Ready"
-                                   Foreground="{StaticResource TextBrush}"
-                                   FontWeight="SemiBold"
-                                   FontSize="13"
-                                   VerticalAlignment="Center" />
-                        <TextBlock Text="  ·  "
-                                   Foreground="{StaticResource OverlayBrush}"
-                                   VerticalAlignment="Center" />
-                        <TextBlock Text="Open or drop an image to start reviewing."
-                                   Foreground="{StaticResource SubtextBrush}"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-
-                    <!-- Center: primary nav + rotate + delete cluster -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrevCommand}"     Content="&#xE76B;" ToolTip="Previous (Left)" AutomationProperties.Name="Previous image" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCcwCommand}" Content="&#xE7AD;" ToolTip="Rotate left" Margin="4,0,0,0" AutomationProperties.Name="Rotate left" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenCommand}"      Content="&#xE8E5;" ToolTip="Open…" Margin="4,0,0,0" AutomationProperties.Name="Open image" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCwCommand}"  Content="&#xE7AC;" ToolTip="Rotate right" Margin="4,0,0,0" AutomationProperties.Name="Rotate right" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding NextCommand}"      Content="&#xE76C;" ToolTip="Next (Right)" Margin="4,0,0,0" AutomationProperties.Name="Next image" />
-                        <Border Width="1" Background="{StaticResource HairlineBrush}" Margin="14,6" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding DeleteCommand}"    Content="&#xE74D;" ToolTip="Delete (Recycle Bin)" AutomationProperties.Name="Send image to Recycle Bin" />
-                    </StackPanel>
-
-                    <!-- Right: utility cluster -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding SaveAsCopyCommand}" Content="&#xE74E;" ToolTip="Save a copy (Ctrl+Shift+S)" AutomationProperties.Name="Save a copy" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrintCommand}"      Content="&#xE749;" ToolTip="Print (Ctrl+P)" Margin="4,0,0,0" AutomationProperties.Name="Print image" />
-                        <Border Width="1" Background="{StaticResource HairlineBrush}" Margin="14,6" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}"   Content="&#xE838;" ToolTip="Reveal in Explorer" AutomationProperties.Name="Reveal image in Explorer" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="Copy path" Margin="4,0,0,0" AutomationProperties.Name="Copy file path" />
-                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding RefreshCommand}"  Content="&#xE72C;" ToolTip="Refresh folder (F5)" Margin="4,0,0,0" AutomationProperties.Name="Refresh folder" />
-                    </StackPanel>
+                        <!-- Wrapping command row preserves all actions instead of clipping at the minimum width. -->
+                        <WrapPanel Grid.Row="1"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center">
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrevCommand}" Content="&#xE76B;" ToolTip="Previous (Left)" AutomationProperties.Name="Previous image" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCcwCommand}" Content="&#xE7AD;" ToolTip="Rotate left" Margin="4,0,0,0" AutomationProperties.Name="Rotate left" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenCommand}" Content="&#xE8E5;" ToolTip="Open…" Margin="4,0,0,0" AutomationProperties.Name="Open image" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCwCommand}" Content="&#xE7AC;" ToolTip="Rotate right" Margin="4,0,0,0" AutomationProperties.Name="Rotate right" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding NextCommand}" Content="&#xE76C;" ToolTip="Next (Right)" Margin="4,0,0,0" AutomationProperties.Name="Next image" />
+                            <Border Width="1" Height="22" Background="{StaticResource HairlineBrush}" Margin="12,6" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding DeleteCommand}" Content="&#xE74D;" ToolTip="Delete (Recycle Bin)" AutomationProperties.Name="Send image to Recycle Bin" />
+                            <Border Width="1" Height="22" Background="{StaticResource HairlineBrush}" Margin="12,6" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding SaveAsCopyCommand}" Content="&#xE74E;" ToolTip="Save a copy (Ctrl+Shift+S)" AutomationProperties.Name="Save a copy" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrintCommand}" Content="&#xE749;" ToolTip="Print (Ctrl+P)" Margin="4,0,0,0" AutomationProperties.Name="Print image" />
+                            <Border Width="1" Height="22" Background="{StaticResource HairlineBrush}" Margin="12,6" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}" Content="&#xE838;" ToolTip="Reveal in Explorer" AutomationProperties.Name="Reveal image in Explorer" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="Copy path" Margin="4,0,0,0" AutomationProperties.Name="Copy file path" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RefreshCommand}" Content="&#xE72C;" ToolTip="Refresh folder (F5)" Margin="4,0,0,0" AutomationProperties.Name="Refresh folder" />
+                        </WrapPanel>
                     </Grid>
                 </Border>
             </Grid>
