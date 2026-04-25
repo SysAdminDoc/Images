@@ -541,6 +541,9 @@
 
                     <!-- Right: utility cluster -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding SaveAsCopyCommand}" Content="&#xE74E;" ToolTip="Save a copy (Ctrl+Shift+S)" AutomationProperties.Name="Save a copy" />
+                        <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrintCommand}"      Content="&#xE749;" ToolTip="Print (Ctrl+P)" Margin="4,0,0,0" AutomationProperties.Name="Print image" />
+                        <Border Width="1" Background="{StaticResource HairlineBrush}" Margin="14,6" />
                         <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}"   Content="&#xE838;" ToolTip="Reveal in Explorer" AutomationProperties.Name="Reveal image in Explorer" />
                         <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="Copy path" Margin="4,0,0,0" AutomationProperties.Name="Copy file path" />
                         <Button Style="{StaticResource ToolbarButton}" Command="{Binding RefreshCommand}"  Content="&#xE72C;" ToolTip="Refresh folder (F5)" Margin="4,0,0,0" AutomationProperties.Name="Refresh folder" />
