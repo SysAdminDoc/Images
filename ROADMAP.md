@@ -433,7 +433,7 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 ### Viewer UX
 - [~] **V20-20** *P0* — **Six zoom modes** (ImageGlass): Auto, Lock-to-%, Fit-to-Width, Fit-to-Height, Fit (uniform), Fill. *(four of six shipped v0.1.6 — `ZoomPanImage.ZoomMode` enum exposes Fit / OneToOne / FitWidth / FitHeight / Fill; Ctrl+F cycles with toast. Auto + Lock-to-% deferred until V20-02 settings lands so the mode persists across sessions.)*
 - [ ] **V20-21** *P0* — **Filmstrip** at bottom (togglable), virtualised, synced to current index. Honor A-03 (focus ring).
-- [ ] **V20-22** *P1* — **EXIF overlay** (togglable HUD) — camera/lens/ISO/shutter/aperture/date/GPS. Tap-to-expand for full panel. Date via I-04 (`DateTimeOffset`).
+- [~] **V20-22** *P1* — **EXIF overlay** (togglable HUD) — camera/lens/ISO/shutter/aperture/date/GPS. Initial slice shipped: side-panel Details now reads EXIF locally via `ImageMetadataService`, formats captured date through I-04 (`MetadataDate` / `DateTimeOffset`), and shows camera, lens, exposure, focal length, and GPS coordinates with loading/empty states. **Remaining**: togglable viewport HUD, tap-to-expand full metadata panel, ICC/histogram tie-in, and map actions behind explicit egress disclosure.
 - [ ] **V20-23** *P1* — **GPS coordinates overlay** with click-to-open-in-map (Honeyview). P-01 "Strip location" one click away.
 - [ ] **V20-24** *P1* — **Histogram overlay** per-channel + luminance (`0.299R + 0.587G + 0.114B`, log-scale toggle).
 - [ ] **V20-25** *P1* — **Color picker** eyedropper — hex + RGB + HSL + LAB readout (PixiEditor.ColorPicker MIT).

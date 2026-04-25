@@ -22,6 +22,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool _suppressStemChange;
     private string _committedStemOnDisk = string.Empty;
     private bool _isDisposed;
+    private int _metadataGeneration;
 
     private readonly DispatcherTimer _hintTimer;
 
@@ -481,6 +482,63 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public ObservableCollection<RenameService.UndoEntry> RecentRenames { get; } = new();
 
+    // -------------------- Photo metadata --------------------
+
+    public ObservableCollection<MetadataFact> PhotoMetadataRows { get; } = new();
+
+    private string _metadataStatusText = "";
+    public string MetadataStatusText
+    {
+        get => _metadataStatusText;
+        private set => Set(ref _metadataStatusText, value);
+    }
+
+    private void RefreshPhotoMetadata(string path)
+    {
+        var generation = ++_metadataGeneration;
+        PhotoMetadataRows.Clear();
+        MetadataStatusText = "Reading photo metadata...";
+
+        _ = LoadPhotoMetadataAsync(path, generation);
+    }
+
+    private async Task LoadPhotoMetadataAsync(string path, int generation)
+    {
+        PhotoMetadata metadata;
+        try
+        {
+            metadata = await Task.Run(() => ImageMetadataService.Read(path)).ConfigureAwait(false);
+        }
+        catch
+        {
+            metadata = PhotoMetadata.Empty;
+        }
+
+        await _uiDispatcher.InvokeAsync(() =>
+        {
+            if (_isDisposed || generation != _metadataGeneration ||
+                !string.Equals(path, CurrentPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            PhotoMetadataRows.Clear();
+            foreach (var row in metadata.Rows)
+                PhotoMetadataRows.Add(row);
+
+            MetadataStatusText = PhotoMetadataRows.Count == 0
+                ? "No embedded camera metadata."
+                : "";
+        });
+    }
+
+    private void ClearPhotoMetadata()
+    {
+        _metadataGeneration++;
+        PhotoMetadataRows.Clear();
+        MetadataStatusText = "";
+    }
+
     // -------------------- Folder preview strip --------------------
 
     public ObservableCollection<FolderPreviewItem> FolderPreviewItems { get; } = new();
@@ -878,6 +936,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         try { _fileSize = new FileInfo(path).Length; } catch { _fileSize = 0; }
         Raise(nameof(FileSizeText));
         RefreshFolderPreview();
+        if (CurrentImage is null)
+            ClearPhotoMetadata();
+        else
+            RefreshPhotoMetadata(path);
 
         SyncRenameEditorFromDisk();
 
@@ -1314,6 +1376,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClearLoadError();
         DecoderUsed = null;
         ResetPageState();
+        ClearPhotoMetadata();
         _folderPreviewGeneration++;
         _folderPreviewCts.Cancel();
         FolderPreviewItems.Clear();
@@ -1345,6 +1408,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _hintTimer.Stop();
 
         _nav.ListChanged -= OnDirectoryListChanged;
+        _metadataGeneration++;
         _folderPreviewGeneration++;
         _folderPreviewCts.Cancel();
         _folderPreviewCts.Dispose();

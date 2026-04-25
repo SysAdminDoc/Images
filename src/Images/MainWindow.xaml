@@ -1261,6 +1261,47 @@
                         </Border>
                     </Grid>
 
+                    <StackPanel Visibility="{Binding PhotoMetadataRows.Count, Converter={StaticResource BoolToVis}}">
+                        <Border Style="{StaticResource Divider}" />
+                        <TextBlock Text="Photo metadata" Style="{StaticResource SectionLabel}" />
+                        <ItemsControl ItemsSource="{Binding PhotoMetadataRows}"
+                                      AutomationProperties.Name="Photo metadata">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="1,0,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding Label}"
+                                                   Style="{StaticResource MetaLabel}" />
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Value}"
+                                                   Style="{StaticResource MetaValue}"
+                                                   ToolTip="{Binding Value}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <Border Style="{StaticResource Card}"
+                            Margin="0,4,0,0"
+                            Visibility="{Binding MetadataStatusText, Converter={StaticResource BoolToVis}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE946;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Foreground="{StaticResource OverlayBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,9,0" />
+                            <TextBlock Text="{Binding MetadataStatusText}"
+                                       Style="{StaticResource Text.Hint}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+
                 </StackPanel>
             </ScrollViewer>
         </Border>
