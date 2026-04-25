@@ -909,42 +909,29 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
-    // E6: save a copy of the current image to a user-chosen path. The written bytes are a
-    // re-encode of the displayed first-frame via WIC's format-appropriate encoder (JpegBitmapEncoder
-    // for .jpg, PngBitmapEncoder for .png, etc.). Rotation and flip are NOT baked in — print
-    // keeps the viewer's in-session edits out of the file (same convention as Windows Photos).
-    // If the user wants the transformed version, they can screenshot the viewer.
+    // E6: save a copy of the decoded first frame to a user-chosen path. Rotation and flip are
+    // not baked in, matching Windows Photos: temporary viewing transforms stay temporary.
     private void SaveAsCopy()
     {
         if (CurrentImage is not System.Windows.Media.Imaging.BitmapSource bs || CurrentPath is null) return;
 
+        var sourceExtension = ImageExportService.NormalizeExportExtension(Path.GetExtension(CurrentPath));
+
         var dlg = new Microsoft.Win32.SaveFileDialog
         {
             Title = "Save a copy",
-            FileName = Path.GetFileNameWithoutExtension(CurrentPath) + "_copy" + Path.GetExtension(CurrentPath),
-            Filter = "JPEG|*.jpg;*.jpeg|PNG|*.png|BMP|*.bmp|TIFF|*.tif;*.tiff|All files|*.*",
+            FileName = Path.GetFileNameWithoutExtension(CurrentPath) + "_copy" + sourceExtension,
+            Filter = ImageExportService.ExportFilter,
+            DefaultExt = sourceExtension.TrimStart('.'),
+            AddExtension = true,
             InitialDirectory = Path.GetDirectoryName(CurrentPath),
         };
         if (dlg.ShowDialog() != true) return;
 
         try
         {
-            var ext = Path.GetExtension(dlg.FileName).ToLowerInvariant();
-            System.Windows.Media.Imaging.BitmapEncoder encoder = ext switch
-            {
-                ".jpg" or ".jpeg" or ".jfif" => new System.Windows.Media.Imaging.JpegBitmapEncoder { QualityLevel = 92 },
-                ".png" => new System.Windows.Media.Imaging.PngBitmapEncoder(),
-                ".bmp" => new System.Windows.Media.Imaging.BmpBitmapEncoder(),
-                ".tif" or ".tiff" => new System.Windows.Media.Imaging.TiffBitmapEncoder(),
-                ".gif" => new System.Windows.Media.Imaging.GifBitmapEncoder(),
-                _ => new System.Windows.Media.Imaging.PngBitmapEncoder(), // default to PNG for lossless
-            };
-            encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bs));
-            using (var fs = new FileStream(dlg.FileName, FileMode.Create, FileAccess.Write, FileShare.None))
-            {
-                encoder.Save(fs);
-            }
-            Toast($"Saved copy → {Path.GetFileName(dlg.FileName)}");
+            var savedPath = ImageExportService.Save(bs, dlg.FileName);
+            Toast($"Saved copy → {Path.GetFileName(savedPath)}");
         }
         catch (Exception ex)
         {
