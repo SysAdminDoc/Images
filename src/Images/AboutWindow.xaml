@@ -6,13 +6,16 @@
         MinWidth="500" MinHeight="560"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
-        ResizeMode="NoResize"
+        ResizeMode="CanResizeWithGrip"
         Background="{StaticResource BaseBrush}"
         TextOptions.TextFormattingMode="Display"
         UseLayoutRounding="True">
 
     <Border Padding="28,24,28,22">
-        <StackPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      CanContentScroll="False">
+            <StackPanel>
             <!-- Logo -->
             <Image Source="Resources/logo.png"
                    Width="80" Height="80"
@@ -134,6 +137,7 @@
                         IsDefault="True"
                         IsCancel="True" />
             </UniformGrid>
-        </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
     </Border>
 </Window>
