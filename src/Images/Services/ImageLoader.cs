@@ -26,7 +26,8 @@ public static class ImageLoader
         int PixelWidth,
         int PixelHeight,
         string DecoderUsed,
-        AnimationSequence? Animation = null);
+        AnimationSequence? Animation = null,
+        PageSequence? Pages = null);
 
     // Extensions worth probing for animated content. Pure-photo formats (JPEG, RAW, etc.) skip the
     // MagickImageCollection path so we don't pay for a second decoder on every single-frame image.
@@ -35,13 +36,19 @@ public static class ImageLoader
         ".gif", ".webp", ".apng", ".png"
     };
 
+    private static readonly HashSet<string> PagedRasterExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".tif", ".tiff", ".psd", ".psb", ".ico", ".cur", ".dcx", ".dcm", ".dicom",
+        ".fits", ".fit", ".fts", ".jpm"
+    };
+
     // Files at or above this size skip the managed byte[] path and decode directly from a
     // memory-mapped view. Keeps a 500 MB RAW or multi-GB PSD off the LOH entirely — the OS pages
     // the mapping in on demand and can evict clean pages without touching swap.
     private const long MemoryMapThreshold = 256L * 1024 * 1024;
     private const int DocumentPreviewDpi = 144;
 
-    public static LoadResult Load(string path)
+    public static LoadResult Load(string path, int pageIndex = 0)
     {
         var fi = new FileInfo(path);
         if (!fi.Exists)
@@ -50,7 +57,13 @@ public static class ImageLoader
             throw new InvalidOperationException($"'{Path.GetFileName(path)}' is empty.");
 
         if (SupportedImageFormats.RequiresGhostscript(path))
-            return LoadDocumentPreview(path);
+            return LoadDocumentPreview(path, pageIndex);
+
+        if (PagedRasterExtensions.Contains(Path.GetExtension(path)))
+        {
+            var paged = TryLoadPagedRaster(path, pageIndex);
+            if (paged is not null) return paged;
+        }
 
         // V20-06: large files bypass the byte[] round-trip entirely. Animation probe is skipped
         // too — a 256 MB+ GIF is a pathological edge case and multi-frame decode needs random
@@ -118,7 +131,7 @@ public static class ImageLoader
     /// configured Ghostscript runtime. This path deliberately reads from the file instead of a
     /// byte[] so large PDFs/AI files do not hit the LOH before rasterization.
     /// </summary>
-    private static LoadResult LoadDocumentPreview(string path)
+    private static LoadResult LoadDocumentPreview(string path, int requestedPageIndex)
     {
         var runtime = CodecRuntime.Status;
         var ext = Path.GetExtension(path).ToUpperInvariant();
@@ -131,10 +144,12 @@ public static class ImageLoader
 
         try
         {
+            var pageCount = CountImageFrames(path, CreateDocumentReadSettings(countOnly: true));
+            var pageIndex = ClampPageIndex(requestedPageIndex, pageCount);
             var settings = new MagickReadSettings
             {
                 Density = new Density(DocumentPreviewDpi),
-                FrameIndex = 0,
+                FrameIndex = (uint)pageIndex,
                 FrameCount = 1,
                 BackgroundColor = MagickColors.White
             };
@@ -148,18 +163,92 @@ public static class ImageLoader
             first.Alpha(AlphaOption.Remove);
 
             var wb = MagickToBitmap(first);
-            var pageSuffix = collection.Count > 1 ? $", page 1 of {collection.Count}" : "";
+            var pageSuffix = pageCount > 1 ? $", page {pageIndex + 1} of {pageCount}" : "";
             return new LoadResult(
                 wb,
                 wb.PixelWidth,
                 wb.PixelHeight,
-                $"Magick.NET + Ghostscript ({SupportedImageFormats.FormatFamily(path)} preview, {DocumentPreviewDpi} DPI{pageSuffix})");
+                $"Magick.NET + Ghostscript ({SupportedImageFormats.FormatFamily(path)} preview, {DocumentPreviewDpi} DPI{pageSuffix})",
+                Pages: pageCount > 1 ? new PageSequence(pageIndex, pageCount, "Page") : null);
         }
         catch (MagickException ex)
         {
             throw new InvalidOperationException(
                 $"Could not render '{Path.GetFileName(path)}' with Ghostscript: {ex.Message}", ex);
         }
+    }
+
+    private static LoadResult? TryLoadPagedRaster(string path, int requestedPageIndex)
+    {
+        try
+        {
+            var pageCount = CountImageFrames(path);
+            if (pageCount <= 1) return null;
+
+            var pageIndex = ClampPageIndex(requestedPageIndex, pageCount);
+            var settings = new MagickReadSettings
+            {
+                FrameIndex = (uint)pageIndex,
+                FrameCount = 1,
+                BackgroundColor = MagickColors.White
+            };
+
+            using var collection = new MagickImageCollection(new FileInfo(path), settings);
+            if (collection.Count == 0) return null;
+
+            using var frame = collection[0].Clone();
+            var wb = MagickToBitmap(frame);
+            var label = PageLabelFor(path);
+            return new LoadResult(
+                wb,
+                wb.PixelWidth,
+                wb.PixelHeight,
+                $"Magick.NET ({SupportedImageFormats.FormatFamily(path)} {label.ToLowerInvariant()} {pageIndex + 1} of {pageCount})",
+                Pages: new PageSequence(pageIndex, pageCount, label));
+        }
+        catch (MagickException)
+        {
+            return null;
+        }
+        catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+    private static MagickReadSettings CreateDocumentReadSettings(bool countOnly)
+        => new()
+        {
+            Density = new Density(countOnly ? 72 : DocumentPreviewDpi),
+            BackgroundColor = MagickColors.White
+        };
+
+    private static int CountImageFrames(string path, MagickReadSettings? settings = null)
+    {
+        try
+        {
+            var pages = settings is null
+                ? MagickImageInfo.ReadCollection(new FileInfo(path))
+                : MagickImageInfo.ReadCollection(new FileInfo(path), settings);
+            return Math.Max(1, pages.Count());
+        }
+        catch
+        {
+            return 1;
+        }
+    }
+
+    private static int ClampPageIndex(int requestedPageIndex, int pageCount)
+        => Math.Clamp(requestedPageIndex, 0, Math.Max(1, pageCount) - 1);
+
+    private static string PageLabelFor(string path)
+    {
+        var ext = Path.GetExtension(path);
+        return ext.Equals(".ico", StringComparison.OrdinalIgnoreCase) ||
+               ext.Equals(".cur", StringComparison.OrdinalIgnoreCase) ||
+               ext.Equals(".dcx", StringComparison.OrdinalIgnoreCase)
+            ? "Frame"
+            : "Page";
     }
 
     /// <summary>
@@ -371,4 +460,9 @@ public sealed class AnimationSequence
             return total;
         }
     }
+}
+
+public sealed record PageSequence(int PageIndex, int PageCount, string Label)
+{
+    public bool HasMultiplePages => PageCount > 1;
 }
