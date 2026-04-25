@@ -1,0 +1,56 @@
+name: Security
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "**/*.csproj"
+      - "**/*.sln"
+      - "**/packages.lock.json"
+      - ".github/workflows/security.yml"
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "**/*.csproj"
+      - "**/*.sln"
+      - "**/packages.lock.json"
+  schedule:
+    # Daily at 09:00 UTC. Catches advisories that land on already-pinned packages
+    # without anyone touching the project files.
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  vulnerable-packages:
+    name: dotnet list package --vulnerable
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore
+        run: dotnet restore Images.sln
+
+      # Per ROADMAP item 34: dependency/CVE CI gate. Runs the same scan that the
+      # local Definition-of-Done expects ahead of release. Job fails when ANY
+      # package in the resolved graph (direct or transitive) has a known CVE.
+      - name: Scan for vulnerable NuGet packages
+        shell: pwsh
+        run: |
+          $output = dotnet list src/Images/Images.csproj package --vulnerable --include-transitive 2>&1 | Out-String
+          Write-Host $output
+          if ($output -match "has the following vulnerable packages") {
+              Write-Error "Vulnerable packages detected — see output above."
+              exit 1
+          }
+          if ($output -notmatch "no vulnerable packages") {
+              Write-Error "Unexpected vulnerable-package scan output."
+              exit 1
+          }
+          Write-Host "Vulnerable-package scan: clean."
