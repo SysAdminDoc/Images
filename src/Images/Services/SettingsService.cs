@@ -302,4 +302,7 @@ public static class Keys
     public const string WindowWidth  = "window.width";
     public const string WindowHeight = "window.height";
     public const string WindowMaximized = "window.maximized";
+
+    // Viewer chrome
+    public const string FilmstripVisible = "viewer.filmstrip.visible";
 }

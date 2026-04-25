@@ -286,6 +286,10 @@ public partial class MainWindow : Window
                 Canvas.SetZoomMode(NextZoomMode());
                 e.Handled = true;
                 break;
+            case Key.T:
+                Vm.ToggleFilmstripCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.Left:
             case Key.Back:
                 Vm.PrevCommand.Execute(null); e.Handled = true; break;
