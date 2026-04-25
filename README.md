@@ -21,7 +21,8 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 
 ## Features
 
-- **~100 formats** via WPF's built-in WIC (BMP/JPG/PNG/GIF/TIFF/WEBP/HEIC/ICO) plus [Magick.NET](https://github.com/dlemstra/Magick.NET) fallback (JXL, AVIF, PSD, TGA, RAW / DNG / NEF / CR2 / ARW / RW2, and ~90 more).
+- **Broad format coverage** via WPF's built-in WIC plus [Magick.NET](https://github.com/dlemstra/Magick.NET): JPG, PNG, GIF, TIFF, WEBP, HEIC, AVIF, JXL, PSD/PSB, TGA, DDS, QOI, EXR, HDR, DPX, JPEG 2000, DICOM, FITS, XCF/ORA, SVG, WMF/EMF, RAW/DNG/NEF/CR2/CR3/ARW/RW2/RAF/ORF/PEF, and more.
+- **Document/vector previews** for PDF, EPS, PS, and AI when Ghostscript is bundled app-local or installed on the machine. Images auto-detects `Codecs\Ghostscript`, `IMAGES_GHOSTSCRIPT_DIR`, and standard Ghostscript installs.
 - **Animated GIFs play inline** — multi-frame GIFs (and animated WebP / APNG when the Magick build supports them) decode via `MagickImageCollection.Coalesce()` and cycle through `ZoomPanImage` with the original per-frame delays + loop count intact. A green "N frames" chip in the bottom toolbar marks animated files.
 - **Classic Windows 7 Photo Viewer layout** — centered image, bottom toolbar, hover-reveal circular arrows on the left and right edges. But in **Catppuccin Mocha** dark.
 - **Live inline rename** — split stem + extension editor on the right. Extension is locked by default (no more accidentally renaming `photo.jpg` → `photo.jp`). Debounced auto-save; no Save button.
@@ -62,6 +63,12 @@ dotnet build -c Release
 dotnet run --project src/Images
 ```
 
+### Optional bundled Ghostscript
+
+PDF, EPS, PS, and AI previews require Ghostscript. For a self-contained release experience, place the approved Ghostscript runtime under `src/Images/Codecs/Ghostscript` before publishing; the project copies that folder into the app output automatically. A typical layout is `Codecs/Ghostscript/bin/gsdll64.dll` plus `Codecs/Ghostscript/bin/gswin64c.exe`.
+
+Images also detects `IMAGES_GHOSTSCRIPT_DIR` and normal system installs under `%ProgramFiles%\gs`. Keep third-party binaries out of source control unless redistribution rights for the exact package are already approved.
+
 To build the installer locally, install [Inno Setup 6](https://jrsoftware.org/isdl.php), run `dotnet publish src/Images -c Release -r win-x64 --no-self-contained -o publish`, then `iscc /DMyAppVersion=0.1.4 installer\Images.iss`. Output lands at `installer\output\Images-vX.Y.Z-setup-win-x64.exe`.
 
 ## Keyboard
@@ -93,6 +100,8 @@ src/Images/
 │   └── MainViewModel.cs        # All view state + commands
 ├── Services/
 │   ├── ImageLoader.cs          # WIC-first, Magick.NET fallback, cached decoding
+│   ├── SupportedImageFormats.cs # Central extension catalog for discovery/dialogs
+│   ├── CodecRuntime.cs         # Optional app-local Ghostscript runtime discovery
 │   ├── DirectoryNavigator.cs   # Natural-sort folder scan, prev/next/wrap, FileSystemWatcher
 │   └── RenameService.cs        # Debounced File.Move, conflict resolution, undo history
 ├── Controls/
