@@ -290,6 +290,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    private string _loadErrorTitle = "This image couldn't be displayed";
+    public string LoadErrorTitle { get => _loadErrorTitle; private set => Set(ref _loadErrorTitle, value); }
+
+    private string _loadErrorHelpText = "";
+    public string LoadErrorHelpText { get => _loadErrorHelpText; private set => Set(ref _loadErrorHelpText, value); }
+
+    private bool _loadErrorShowsCodecDetails;
+    public bool LoadErrorShowsCodecDetails
+    {
+        get => _loadErrorShowsCodecDetails;
+        private set => Set(ref _loadErrorShowsCodecDetails, value);
+    }
+
     public bool HasLoadError => !string.IsNullOrWhiteSpace(LoadErrorMessage);
 
     private bool _isDropTargetActive;
@@ -834,7 +847,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Rotation = 0;
             FlipHorizontal = false;
             FlipVertical = false;
-            LoadErrorMessage = null;
+            ClearLoadError();
 
             // First-run only — surface the gesture hint pill the first time an image lands.
             if (!_hasShownGestureHint)
@@ -852,10 +865,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             PixelWidth = PixelHeight = 0;
             DecoderUsed = "Unavailable";
             ResetPageState();
-            LoadErrorMessage = $"This file could not be decoded. {ex.Message}";
-            Toast(ex.Message.Contains("requires Ghostscript", StringComparison.OrdinalIgnoreCase)
-                ? "Document preview needs Ghostscript"
-                : "Could not decode this file");
+            SetLoadError(ex);
         }
 
         CurrentPath = path;
@@ -868,6 +878,37 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         // V20-03: after loading, enqueue neighbours so the next arrow-press is instant.
         // The preload itself runs off the UI thread.
         EnqueueNeighbours();
+    }
+
+    private void SetLoadError(Exception ex)
+    {
+        var needsGhostscript = ex.Message.Contains("requires Ghostscript", StringComparison.OrdinalIgnoreCase);
+
+        LoadErrorTitle = needsGhostscript
+            ? "Document preview needs Ghostscript"
+            : "This image couldn't be displayed";
+
+        LoadErrorMessage = needsGhostscript
+            ? "This file type depends on Ghostscript for document and Adobe Illustrator previews. Images can use a bundled runtime, IMAGES_GHOSTSCRIPT_DIR, or an installed Ghostscript copy."
+            : $"This file could not be decoded. {ex.Message}";
+
+        LoadErrorHelpText = needsGhostscript
+            ? "Open codec details to see the active runtime status and copy a support report."
+            : "Try another file, reveal the file in Explorer, or reload after another app finishes writing it.";
+
+        LoadErrorShowsCodecDetails = needsGhostscript;
+
+        Toast(needsGhostscript
+            ? "Document preview needs Ghostscript"
+            : "Could not decode this file");
+    }
+
+    private void ClearLoadError()
+    {
+        LoadErrorTitle = "This image couldn't be displayed";
+        LoadErrorHelpText = "";
+        LoadErrorShowsCodecDetails = false;
+        LoadErrorMessage = null;
     }
 
     private void ApplyPageSequence(PageSequence? pages)
@@ -1258,7 +1299,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Rotation = 0;
         FlipHorizontal = false;
         FlipVertical = false;
-        LoadErrorMessage = null;
+        ClearLoadError();
         DecoderUsed = null;
         ResetPageState();
         _folderPreviewGeneration++;
