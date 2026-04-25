@@ -257,6 +257,10 @@ public partial class MainWindow : Window
                 ToggleFullscreen();
                 e.Handled = true;
                 break;
+            case Key.O when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
+                Vm.OpenCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.R when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
                 // V15-04: Ctrl+Shift+R reload current image.
                 Vm.ReloadCommand.Execute(null);
