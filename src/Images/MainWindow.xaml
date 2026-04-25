@@ -830,6 +830,87 @@
                         </Grid>
                     </Border>
 
+                    <!-- FOLDER PREVIEW section — consumes the thumbnail cache as a compact
+                         near-current filmstrip without turning the viewer into a full DAM. -->
+                    <StackPanel Visibility="{Binding FolderPreviewItems.Count, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="Folder preview" Style="{StaticResource SectionLabel}" />
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                      VerticalScrollBarVisibility="Disabled"
+                                      Padding="0,0,0,6"
+                                      Margin="0,0,0,16"
+                                      CanContentScroll="False">
+                            <ItemsControl ItemsSource="{Binding FolderPreviewItems}"
+                                          KeyboardNavigation.DirectionalNavigation="Cycle"
+                                          KeyboardNavigation.TabNavigation="Continue"
+                                          AutomationProperties.Name="Folder preview thumbnails">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding DataContext.OpenPreviewItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"
+                                                Width="88"
+                                                MinHeight="104"
+                                                Margin="0,0,8,0"
+                                                Padding="5"
+                                                HorizontalContentAlignment="Stretch"
+                                                VerticalContentAlignment="Stretch"
+                                                ToolTip="{Binding Path}"
+                                                AutomationProperties.Name="{Binding FileName}">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
+                                                    <Setter Property="Background" Value="{StaticResource Surface0Brush}" />
+                                                    <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                            <Setter Property="Background" Value="#1F89B4FA" />
+                                                            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                            <StackPanel>
+                                                <Border Height="56"
+                                                        CornerRadius="{StaticResource Radius.Sm.CR}"
+                                                        Background="{StaticResource ViewportBrush}"
+                                                        BorderBrush="{StaticResource HairlineBrush}"
+                                                        BorderThickness="1"
+                                                        ClipToBounds="True">
+                                                    <Grid>
+                                                        <Image Source="{Binding Thumbnail}"
+                                                               Stretch="UniformToFill"
+                                                               RenderOptions.BitmapScalingMode="HighQuality"
+                                                               Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVis}}" />
+                                                        <TextBlock Text="&#xEB9F;"
+                                                                   FontFamily="{StaticResource IconFontFamily}"
+                                                                   FontSize="18"
+                                                                   Foreground="{StaticResource OverlayBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}" />
+                                                    </Grid>
+                                                </Border>
+                                                <TextBlock Text="{Binding FileName}"
+                                                           Foreground="{StaticResource TextBrush}"
+                                                           FontSize="11.5"
+                                                           FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Margin="1,7,1,0" />
+                                                <TextBlock Text="{Binding PositionText}"
+                                                           Foreground="{StaticResource OverlayBrush}"
+                                                           FontSize="10.5"
+                                                           Margin="1,1,1,0" />
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
+
                     <!-- RENAME section -->
                     <TextBlock Text="Rename" Style="{StaticResource SectionLabel}" />
 
