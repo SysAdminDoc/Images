@@ -46,6 +46,27 @@ public sealed class DirectoryNavigator : IDisposable
         _dispatcher = Dispatcher.CurrentDispatcher;
     }
 
+    public static string? FirstSupportedImageInFolder(string folder)
+    {
+        if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder)) return null;
+
+        try
+        {
+            var files = Directory
+                .EnumerateFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
+                .Where(f => SupportedExtensions.Contains(Path.GetExtension(f)))
+                .ToList();
+            if (files.Count == 0) return null;
+
+            files.Sort(NaturalCompare);
+            return files[0];
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or DirectoryNotFoundException or IOException or System.Security.SecurityException)
+        {
+            return null;
+        }
+    }
+
     /// <summary>
     /// Load the folder containing <paramref name="path"/> and point CurrentIndex at it.
     /// </summary>

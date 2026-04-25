@@ -504,9 +504,7 @@ public sealed class MainViewModel : ObservableObject
 
         try
         {
-            var first = Directory.EnumerateFiles(folder)
-                .Where(f => DirectoryNavigator.SupportedExtensions.Contains(Path.GetExtension(f)))
-                .FirstOrDefault();
+            var first = DirectoryNavigator.FirstSupportedImageInFolder(folder);
             if (first is null)
             {
                 Toast($"No images in {Path.GetFileName(folder)}");
