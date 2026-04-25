@@ -634,12 +634,14 @@
                         <Border Grid.Row="0"
                                 Margin="0,0,0,10"
                                 Visibility="{Binding ShowFilmstrip, Converter={StaticResource BoolToVis}}">
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                            <ScrollViewer x:Name="FilmstripScroll"
+                                          HorizontalScrollBarVisibility="Auto"
                                           VerticalScrollBarVisibility="Disabled"
                                           Padding="0,0,0,4"
                                           CanContentScroll="False"
                                           MaxHeight="110">
-                                <ItemsControl ItemsSource="{Binding FolderPreviewItems}"
+                                <ItemsControl x:Name="FilmstripItems"
+                                              ItemsSource="{Binding FolderPreviewItems}"
                                               KeyboardNavigation.DirectionalNavigation="Cycle"
                                               KeyboardNavigation.TabNavigation="Continue"
                                               AutomationProperties.Name="Bottom folder filmstrip">
@@ -659,7 +661,9 @@
                                                     HorizontalContentAlignment="Stretch"
                                                     VerticalContentAlignment="Stretch"
                                                     ToolTip="{Binding Path}"
-                                                    AutomationProperties.Name="{Binding FileName}">
+                                                    AutomationProperties.Name="{Binding FileName}"
+                                                    AutomationProperties.HelpText="{Binding PositionText}"
+                                                    AutomationProperties.ItemStatus="{Binding PositionText}">
                                                 <Button.Style>
                                                     <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                                         <Setter Property="Background" Value="{StaticResource Surface0Brush}" />
@@ -669,6 +673,10 @@
                                                                 <Setter Property="Background" Value="#1F89B4FA" />
                                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                             </DataTrigger>
+                                                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                                                <Setter Property="Background" Value="#2689B4FA" />
+                                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                            </Trigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Button.Style>
@@ -955,12 +963,14 @@
                          filmstrip is hidden so thumbnail jumping is never lost. -->
                     <StackPanel Visibility="{Binding ShowSideFolderPreview, Converter={StaticResource BoolToVis}}">
                         <TextBlock Text="Folder preview" Style="{StaticResource SectionLabel}" />
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                        <ScrollViewer x:Name="SidePreviewScroll"
+                                      HorizontalScrollBarVisibility="Auto"
                                       VerticalScrollBarVisibility="Disabled"
                                       Padding="0,0,0,6"
                                       Margin="0,0,0,16"
                                       CanContentScroll="False">
-                            <ItemsControl ItemsSource="{Binding FolderPreviewItems}"
+                            <ItemsControl x:Name="SidePreviewItems"
+                                          ItemsSource="{Binding FolderPreviewItems}"
                                           KeyboardNavigation.DirectionalNavigation="Cycle"
                                           KeyboardNavigation.TabNavigation="Continue"
                                           AutomationProperties.Name="Folder preview thumbnails">
@@ -980,7 +990,9 @@
                                                 HorizontalContentAlignment="Stretch"
                                                 VerticalContentAlignment="Stretch"
                                                 ToolTip="{Binding Path}"
-                                                AutomationProperties.Name="{Binding FileName}">
+                                                AutomationProperties.Name="{Binding FileName}"
+                                                AutomationProperties.HelpText="{Binding PositionText}"
+                                                AutomationProperties.ItemStatus="{Binding PositionText}">
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                                     <Setter Property="Background" Value="{StaticResource Surface0Brush}" />
@@ -990,6 +1002,10 @@
                                                             <Setter Property="Background" Value="#1F89B4FA" />
                                                             <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                         </DataTrigger>
+                                                        <Trigger Property="IsKeyboardFocused" Value="True">
+                                                            <Setter Property="Background" Value="#2689B4FA" />
+                                                            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                        </Trigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </Button.Style>
