@@ -37,3 +37,13 @@ The GitHub release workflow also has an optional `ghostscript_bundle_url` input.
 ## Source-control policy
 
 Runtime binaries are intentionally ignored by `.gitignore`; only the placeholder README is tracked. Do not commit Ghostscript binaries unless the release owner has confirmed redistribution rights for the exact package and license model being shipped.
+
+## Verifying provenance at runtime
+
+The shipped app reports the active decoder runtime through three matching surfaces:
+
+- About → **Runtime provenance** card. Shows Magick.NET version + assembly path, Ghostscript availability, source label (`bundled`/`IMAGES_GHOSTSCRIPT_DIR`/`installed`), Ghostscript version (when `gswin*c.exe` is present), absolute DLL path, and the SHA-256 of the loaded `gsdll64.dll` / `gsdll32.dll`.
+- About → **Codec report** button. Copies the same data to the clipboard alongside the per-format capability matrix.
+- `Images.exe --system-info` and `Images.exe --codec-report`. Print the same content to stdout for support tickets, CI smoke tests, and offline diagnostics.
+
+Compare the reported SHA-256 against the hash recorded for the approved Ghostscript redistributable in your release notes. A drift means the bundled DLL is not the package that was reviewed — investigate before shipping.
