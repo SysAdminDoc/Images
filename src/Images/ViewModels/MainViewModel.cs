@@ -56,6 +56,11 @@ public sealed class MainViewModel : ObservableObject
         UnlockExtensionCommand = new RelayCommand(() => IsExtensionUnlocked = !IsExtensionUnlocked);
         UndoRenameCommand = new RelayCommand(p => UndoOne(p as RenameService.UndoEntry), p => p is RenameService.UndoEntry);
         AboutCommand = new RelayCommand(ShowAboutWindow);
+        OpenRecentFolderCommand = new RelayCommand(p => OpenRecentFolder(p as string), p => p is string);
+
+        // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
+        // panel renders prior-session folders before the user opens anything.
+        RefreshRecentFolders();
 
         _rename.Renamed += (_, e) => PushUndoEntry(e);
 
@@ -352,6 +357,20 @@ public sealed class MainViewModel : ObservableObject
         _ => "Open an image to rename"
     };
 
+    // -------------------- Recent folders (V20-02 UI consumer) --------------------
+
+    // Mirror of SettingsService.GetRecentFolders() suitable for ItemsControl binding. Refreshed
+    // on construction + after every OpenFile. Stays a string collection; folder basename is
+    // resolved at render time via PathToFileNameConverter.
+    public ObservableCollection<string> RecentFolders { get; } = new();
+
+    private void RefreshRecentFolders()
+    {
+        var fresh = SettingsService.Instance.GetRecentFolders();
+        RecentFolders.Clear();
+        foreach (var f in fresh) RecentFolders.Add(f);
+    }
+
     // -------------------- Recent renames --------------------
 
     public ObservableCollection<RenameService.UndoEntry> RecentRenames { get; } = new();
@@ -439,6 +458,7 @@ public sealed class MainViewModel : ObservableObject
     public ICommand UnlockExtensionCommand { get; }
     public ICommand UndoRenameCommand { get; }
     public ICommand AboutCommand { get; }
+    public ICommand OpenRecentFolderCommand { get; }
 
     // -------------------- Navigation --------------------
 
@@ -452,7 +472,44 @@ public sealed class MainViewModel : ObservableObject
         // recent-folders is a convenience, not critical.
         var folder = Path.GetDirectoryName(path);
         if (!string.IsNullOrEmpty(folder))
+        {
             SettingsService.Instance.TouchRecentFolder(folder);
+            // V20-02 UI consumer: keep the side-panel "Recent folders" list current within the
+            // session — TouchRecentFolder reorders the underlying table, this re-pulls the
+            // top-N for the UI binding.
+            RefreshRecentFolders();
+        }
+    }
+
+    // V20-02 UI consumer: open the first supported image in <folder>. Click handler for the
+    // side-panel "Recent folders" cards. EnumerateFiles avoids materializing a full list when
+    // the folder is huge (medium-DAM scenario — we only need the first match).
+    private void OpenRecentFolder(string? folder)
+    {
+        if (string.IsNullOrWhiteSpace(folder)) return;
+        if (!Directory.Exists(folder))
+        {
+            Toast("Folder no longer exists");
+            RefreshRecentFolders(); // GetRecentFolders filters missing folders — re-pull.
+            return;
+        }
+
+        try
+        {
+            var first = Directory.EnumerateFiles(folder)
+                .Where(f => DirectoryNavigator.SupportedExtensions.Contains(Path.GetExtension(f)))
+                .FirstOrDefault();
+            if (first is null)
+            {
+                Toast($"No images in {Path.GetFileName(folder)}");
+                return;
+            }
+            OpenFile(first);
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+        {
+            Toast("Folder unreachable");
+        }
     }
 
     private void OpenFileDialog()
