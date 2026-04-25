@@ -78,7 +78,10 @@ public partial class App : Application
     private static bool TryResolvePeekArgs(string[] args, out string resolved)
     {
         resolved = string.Empty;
-        if (args.Length < 2) return false;
+        // Exact two-token contract: `--peek <path>`. Trailing junk (e.g. a third token) means
+        // someone's passing flags we don't understand and we should NOT silently treat the
+        // launch as a peek invocation — fall through to regular argv handling instead.
+        if (args.Length != 2) return false;
         if (!string.Equals(args[0], "--peek", StringComparison.OrdinalIgnoreCase)) return false;
         return TryResolveArgPath(args[1], out resolved);
     }
