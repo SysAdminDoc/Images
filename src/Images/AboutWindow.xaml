@@ -65,10 +65,19 @@
                 </Grid>
             </Border>
 
+            <!-- V20-02: update-check opt-out surface. Persisted to settings.db. -->
+            <CheckBox x:Name="UpdateCheckCheckBox"
+                      Content="Automatically check for updates"
+                      HorizontalAlignment="Center"
+                      Margin="0,16,0,0"
+                      Foreground="{StaticResource SubtextBrush}"
+                      Checked="UpdateCheckOptIn_Changed"
+                      Unchecked="UpdateCheckOptIn_Changed" />
+
             <TextBlock Style="{StaticResource Text.Caption}"
                        Text="MIT licensed · © 2026 SysAdminDoc"
                        HorizontalAlignment="Center"
-                       Margin="0,18,0,0" />
+                       Margin="0,12,0,0" />
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,16,0,0">
                 <Button Content="Check for updates"
