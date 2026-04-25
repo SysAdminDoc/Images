@@ -997,6 +997,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _renameTimer.Stop();
 
         var toDelete = CurrentPath;
+        if (!ConfirmRecycleBinDelete(toDelete))
+        {
+            Toast("Delete canceled");
+            return;
+        }
+
         try
         {
             Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
@@ -1015,6 +1021,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             Toast($"Delete failed: {ex.Message}");
         }
+    }
+
+    private static bool ConfirmRecycleBinDelete(string path)
+    {
+        var fileName = Path.GetFileName(path);
+        var result = MessageBox.Show(
+            Application.Current?.MainWindow,
+            $"Move \"{fileName}\" to the Recycle Bin?\n\nThe file can be restored from the Recycle Bin until it is emptied.",
+            "Move to Recycle Bin",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning,
+            MessageBoxResult.No);
+
+        return result == MessageBoxResult.Yes;
     }
 
     private void Rotate(double delta)
