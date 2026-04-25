@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Media;
 using Images.Services;
 
 namespace Images;
@@ -21,6 +22,7 @@ public partial class AboutWindow : Window
 
         CodecText.Text = CodecCapabilityService.BuildOverviewText();
         DocumentCodecText.Text = CodecCapabilityService.BuildDocumentStatusText();
+        ApplyCodecSummary(CodecCapabilityService.BuildSummary());
 
         UpdateCheckCheckBox.IsChecked = UpdateCheckService.OptedIn;
 
@@ -85,6 +87,21 @@ public partial class AboutWindow : Window
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
+
+    private void ApplyCodecSummary(CodecCapabilityService.CodecCapabilitySummary summary)
+    {
+        OpenCapabilityTitleText.Text = summary.OpenTitle;
+        OpenCapabilityDetailText.Text = summary.OpenDetail;
+        ExportCapabilityTitleText.Text = summary.ExportTitle;
+        ExportCapabilityDetailText.Text = summary.ExportDetail;
+        DocumentCapabilityTitleText.Text = summary.DocumentTitle;
+        DocumentCapabilityDetailText.Text = summary.DocumentDetail;
+
+        DocumentCapabilityIcon.Text = summary.DocumentReady ? "\uE73E" : "\uE783";
+        DocumentCapabilityIcon.Foreground = ThemeBrush(summary.DocumentReady ? "GreenBrush" : "YellowBrush");
+        DocumentCapabilityCard.BorderBrush = ThemeBrush(summary.DocumentReady ? "GreenBrush" : "YellowBrush");
+        DocumentCapabilityCard.Background = ThemeBrush(summary.DocumentReady ? "SurfacePanelBrush" : "WarningPanelBrush");
+    }
 
     private void UpdateCheckOptIn_Changed(object sender, RoutedEventArgs e)
     {
@@ -153,28 +170,30 @@ public partial class AboutWindow : Window
         {
             case "Warning":
                 UpdateStatusIcon.Text = "\uE783";
-                UpdateStatusIcon.Foreground = (System.Windows.Media.Brush)FindResource("YellowBrush");
-                UpdateStatusCard.BorderBrush = (System.Windows.Media.Brush)FindResource("YellowBrush");
-                UpdateStatusCard.Background = (System.Windows.Media.Brush)FindResource("WarningPanelBrush");
+                UpdateStatusIcon.Foreground = ThemeBrush("YellowBrush");
+                UpdateStatusCard.BorderBrush = ThemeBrush("YellowBrush");
+                UpdateStatusCard.Background = ThemeBrush("WarningPanelBrush");
                 break;
             case "Success":
                 UpdateStatusIcon.Text = "\uE73E";
-                UpdateStatusIcon.Foreground = (System.Windows.Media.Brush)FindResource("GreenBrush");
-                UpdateStatusCard.BorderBrush = (System.Windows.Media.Brush)FindResource("GreenBrush");
-                UpdateStatusCard.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x1F, 0xA6, 0xE3, 0xA1));
+                UpdateStatusIcon.Foreground = ThemeBrush("GreenBrush");
+                UpdateStatusCard.BorderBrush = ThemeBrush("GreenBrush");
+                UpdateStatusCard.Background = new SolidColorBrush(Color.FromArgb(0x1F, 0xA6, 0xE3, 0xA1));
                 break;
             case "Update":
                 UpdateStatusIcon.Text = "\uE895";
-                UpdateStatusIcon.Foreground = (System.Windows.Media.Brush)FindResource("AccentBrush");
-                UpdateStatusCard.BorderBrush = (System.Windows.Media.Brush)FindResource("AccentBrush");
-                UpdateStatusCard.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x1F, 0x89, 0xB4, 0xFA));
+                UpdateStatusIcon.Foreground = ThemeBrush("AccentBrush");
+                UpdateStatusCard.BorderBrush = ThemeBrush("AccentBrush");
+                UpdateStatusCard.Background = new SolidColorBrush(Color.FromArgb(0x1F, 0x89, 0xB4, 0xFA));
                 break;
             default:
                 UpdateStatusIcon.Text = "\uE930";
-                UpdateStatusIcon.Foreground = (System.Windows.Media.Brush)FindResource("AccentBrush");
-                UpdateStatusCard.BorderBrush = (System.Windows.Media.Brush)FindResource("HairlineBrush");
-                UpdateStatusCard.Background = (System.Windows.Media.Brush)FindResource("SurfacePanelBrush");
+                UpdateStatusIcon.Foreground = ThemeBrush("AccentBrush");
+                UpdateStatusCard.BorderBrush = ThemeBrush("HairlineBrush");
+                UpdateStatusCard.Background = ThemeBrush("SurfacePanelBrush");
                 break;
         }
     }
+
+    private Brush ThemeBrush(string key) => (Brush)FindResource(key);
 }

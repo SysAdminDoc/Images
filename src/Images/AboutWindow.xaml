@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="About Images"
-        Width="520" Height="620"
-        MinWidth="500" MinHeight="560"
+        Width="540" Height="720"
+        MinWidth="500" MinHeight="620"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         ResizeMode="CanResizeWithGrip"
@@ -72,6 +72,125 @@
                 </Grid>
             </Border>
 
+            <TextBlock Style="{StaticResource SectionLabel}"
+                       Text="Codec capability"
+                       Margin="1,18,0,10" />
+
+            <StackPanel>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Width="34"
+                                Height="34"
+                                CornerRadius="{StaticResource Radius.Md.CR}"
+                                Background="#1F89B4FA"
+                                BorderBrush="{StaticResource AccentBrush}"
+                                BorderThickness="1"
+                                Margin="0,0,12,0"
+                                VerticalAlignment="Top">
+                            <TextBlock Text="&#xE8B9;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="14"
+                                       Foreground="{StaticResource AccentBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock x:Name="OpenCapabilityTitleText"
+                                       Style="{StaticResource Text.Caption}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextBrush}" />
+                            <TextBlock x:Name="OpenCapabilityDetailText"
+                                       Style="{StaticResource Text.Hint}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,3,0,0" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Card}" Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Width="34"
+                                Height="34"
+                                CornerRadius="{StaticResource Radius.Md.CR}"
+                                Background="#1FA6E3A1"
+                                BorderBrush="{StaticResource GreenBrush}"
+                                BorderThickness="1"
+                                Margin="0,0,12,0"
+                                VerticalAlignment="Top">
+                            <TextBlock Text="&#xE74E;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="14"
+                                       Foreground="{StaticResource GreenBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock x:Name="ExportCapabilityTitleText"
+                                       Style="{StaticResource Text.Caption}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextBrush}" />
+                            <TextBlock x:Name="ExportCapabilityDetailText"
+                                       Style="{StaticResource Text.Hint}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,3,0,0" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border x:Name="DocumentCapabilityCard"
+                        Style="{StaticResource Card}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Width="34"
+                                Height="34"
+                                CornerRadius="{StaticResource Radius.Md.CR}"
+                                Background="#1FF9E2AF"
+                                BorderBrush="{StaticResource YellowBrush}"
+                                BorderThickness="1"
+                                Margin="0,0,12,0"
+                                VerticalAlignment="Top">
+                            <TextBlock x:Name="DocumentCapabilityIcon"
+                                       Text="&#xE783;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="14"
+                                       Foreground="{StaticResource YellowBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock x:Name="DocumentCapabilityTitleText"
+                                       Style="{StaticResource Text.Caption}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextBrush}" />
+                            <TextBlock x:Name="DocumentCapabilityDetailText"
+                                       Style="{StaticResource Text.Hint}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,3,0,0" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
             <!-- V20-02: update-check opt-out surface. Persisted to settings.db. -->
             <CheckBox x:Name="UpdateCheckCheckBox"
                       Content="Automatically check for updates"
@@ -130,10 +249,10 @@
                        HorizontalAlignment="Center"
                        Margin="0,14,0,0" />
 
-            <UniformGrid Columns="2" Rows="3" Margin="0,18,0,0">
+            <UniformGrid Columns="2" Margin="0,18,0,0">
                 <Button Style="{StaticResource ChromeButton}"
                         Click="CheckUpdatesButton_Click"
-                        Margin="0,0,6,6"
+                        Margin="0,0,6,8"
                         AutomationProperties.Name="Check for updates">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="&#xE72C;"
@@ -148,7 +267,7 @@
                 </Button>
                 <Button Style="{StaticResource ChromeButton}"
                         Click="GitHubButton_Click"
-                        Margin="6,0,0,6"
+                        Margin="6,0,0,8"
                         AutomationProperties.Name="Open GitHub project page">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="&#xE71B;"
@@ -161,7 +280,7 @@
                 </Button>
                 <Button Style="{StaticResource ChromeButton}"
                         Click="CrashLogButton_Click"
-                        Margin="0,6,6,0"
+                        Margin="0,0,6,0"
                         AutomationProperties.Name="Open crash log folder">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="&#xE838;"
@@ -170,11 +289,11 @@
                                    Margin="0,0,8,0"
                                    VerticalAlignment="Center" />
                         <TextBlock Text="Crash logs" VerticalAlignment="Center" />
-                        </StackPanel>
+                    </StackPanel>
                 </Button>
                 <Button Style="{StaticResource ChromeButton}"
                         Click="CopyCodecReportButton_Click"
-                        Margin="0,6,6,0"
+                        Margin="6,0,0,0"
                         AutomationProperties.Name="Copy codec report">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="&#xE8C8;"
@@ -185,25 +304,27 @@
                         <TextBlock Text="Codec report" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
-                <Button Style="{StaticResource PrimaryButton}"
-                        Click="CloseButton_Click"
-                        Margin="6,6,0,0"
-                        IsDefault="True"
-                        IsCancel="True"
-                        AutomationProperties.Name="Close About window">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <TextBlock Text="&#xE711;"
-                                   FontFamily="{StaticResource IconFontFamily}"
-                                   FontSize="12"
-                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                   Margin="0,0,8,0"
-                                   VerticalAlignment="Center" />
-                        <TextBlock Text="Close"
-                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
             </UniformGrid>
+
+            <Button Style="{StaticResource PrimaryButton}"
+                    Click="CloseButton_Click"
+                    Margin="0,14,0,0"
+                    HorizontalAlignment="Stretch"
+                    IsDefault="True"
+                    IsCancel="True"
+                    AutomationProperties.Name="Close About window">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="&#xE711;"
+                               FontFamily="{StaticResource IconFontFamily}"
+                               FontSize="12"
+                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                               Margin="0,0,8,0"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="Close"
+                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
             </StackPanel>
         </ScrollViewer>
     </Border>
