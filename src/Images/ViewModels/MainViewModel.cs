@@ -245,10 +245,10 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
-    public string DropOverlayTitle => IsDropAccepted ? "Drop to open image" : "Unsupported file";
+    public string DropOverlayTitle => IsDropAccepted ? "Drop to open file" : "Unsupported file";
     public string DropOverlayMessage => IsDropAccepted
         ? "Images will load this file and scan the folder for navigation."
-        : "Drop a supported image file such as JPG, PNG, WEBP, HEIC, AVIF, TIFF, PSD, or RAW.";
+        : "Drop a supported image, RAW, design, vector, or document preview file.";
 
     private int _pixelWidth;
     public int PixelWidth { get => _pixelWidth; private set { if (Set(ref _pixelWidth, value)) Raise(nameof(DimensionsText)); } }
@@ -580,7 +580,7 @@ public sealed class MainViewModel : ObservableObject
     {
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "Open image",
+            Title = "Open image or preview",
             Filter = "Images|" + string.Join(";", DirectoryNavigator.SupportedExtensions.Select(e => "*" + e))
                      + "|All files|*.*"
         };
@@ -635,7 +635,9 @@ public sealed class MainViewModel : ObservableObject
             PixelWidth = PixelHeight = 0;
             DecoderUsed = "Unavailable";
             LoadErrorMessage = $"This file could not be decoded. {ex.Message}";
-            Toast("Could not decode this image");
+            Toast(ex.Message.Contains("requires Ghostscript", StringComparison.OrdinalIgnoreCase)
+                ? "Document preview needs Ghostscript"
+                : "Could not decode this file");
         }
 
         CurrentPath = path;

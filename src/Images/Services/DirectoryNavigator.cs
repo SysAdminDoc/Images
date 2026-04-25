@@ -10,21 +10,9 @@ namespace Images.Services;
 /// </summary>
 public sealed class DirectoryNavigator : IDisposable
 {
-    public static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        // WIC native
-        ".bmp", ".dib", ".jpg", ".jpeg", ".jpe", ".jfif", ".png", ".gif", ".tif", ".tiff",
-        ".ico", ".cur", ".hdp", ".jxr", ".wdp",
-        // Windows Store codecs (WIC with extension installed)
-        ".webp", ".heic", ".heif", ".avif", ".jxl",
-        // Magick.NET fallbacks
-        ".psd", ".psb", ".tga", ".pcx", ".xpm", ".xbm", ".pbm", ".pgm", ".ppm",
-        ".svg", ".svgz", ".emf", ".wmf",
-        // RAW
-        ".cr2", ".cr3", ".crw", ".nef", ".nrw", ".arw", ".srf", ".sr2",
-        ".dng", ".raf", ".rw2", ".orf", ".pef", ".3fr", ".erf", ".mef",
-        ".mrw", ".x3f", ".rwl", ".iiq", ".kdc", ".dcr"
-    };
+    public static readonly HashSet<string> SupportedExtensions = new(
+        SupportedImageFormats.Extensions,
+        StringComparer.OrdinalIgnoreCase);
 
     private List<string> _files = new();
     private string? _folder;
