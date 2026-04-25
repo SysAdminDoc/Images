@@ -76,8 +76,8 @@ public sealed class MainViewModel : ObservableObject
         if (CurrentPath is not null && !File.Exists(CurrentPath))
         {
             // Current file was deleted externally — pick whatever slot the navigator landed on.
-            if (_nav.CurrentPath is string fallback) LoadCurrent();
-            else { CurrentImage = null; CurrentPath = null; Raise(nameof(HasImage)); }
+            if (_nav.CurrentPath is not null) LoadCurrent();
+            else ClearCurrentState();
         }
     }
 
@@ -576,14 +576,7 @@ public sealed class MainViewModel : ObservableObject
         var path = _nav.CurrentPath;
         if (path is null)
         {
-            CurrentImage = null;
-            CurrentAnimation = null;
-            CurrentPath = null;
-            PixelWidth = PixelHeight = 0;
-            _fileSize = 0;
-            LoadErrorMessage = null;
-            DecoderUsed = null;
-            Raise(nameof(FileSizeText));
+            ClearCurrentState();
             return;
         }
 
@@ -649,7 +642,17 @@ public sealed class MainViewModel : ObservableObject
 
     private void SyncRenameEditorFromDisk()
     {
-        if (CurrentPath is null) { Extension = ""; _committedStemOnDisk = ""; return; }
+        if (CurrentPath is null)
+        {
+            Extension = "";
+            _committedStemOnDisk = "";
+            _suppressStemChange = true;
+            EditableStem = "";
+            _suppressStemChange = false;
+            IsExtensionUnlocked = false;
+            Raise(nameof(RenamePreview));
+            return;
+        }
         var stem = Path.GetFileNameWithoutExtension(CurrentPath);
         var ext = Path.GetExtension(CurrentPath);
         _committedStemOnDisk = stem;
@@ -742,7 +745,7 @@ public sealed class MainViewModel : ObservableObject
 
             _nav.RemoveCurrent();
             Toast($"Sent to Recycle Bin: {Path.GetFileName(toDelete)}");
-            if (_nav.CurrentPath is null) { CurrentImage = null; CurrentPath = null; return; }
+            if (_nav.CurrentPath is null) { ClearCurrentState(); return; }
             LoadCurrent();
         }
         catch (Exception ex)
@@ -963,6 +966,26 @@ public sealed class MainViewModel : ObservableObject
     }
 
     private void RefreshFromNav() => LoadCurrent();
+
+    private void ClearCurrentState()
+    {
+        _renameTimer.Stop();
+        CurrentImage = null;
+        CurrentAnimation = null;
+        CurrentPath = null;
+        PixelWidth = PixelHeight = 0;
+        _fileSize = 0;
+        Rotation = 0;
+        FlipHorizontal = false;
+        FlipVertical = false;
+        LoadErrorMessage = null;
+        DecoderUsed = null;
+        RenameStatus = RenameStatusKind.Idle;
+        SyncRenameEditorFromDisk();
+        Raise(nameof(FileSizeText));
+        Raise(nameof(DimensionsText));
+        CommandManager.InvalidateRequerySuggested();
+    }
 
     private static string FormatSize(long bytes)
     {
