@@ -37,6 +37,10 @@ public sealed class MainViewModel : ObservableObject
         PrevCommand = new RelayCommand(Prev, () => HasImage);
         FirstCommand = new RelayCommand(First, () => HasImage);
         LastCommand = new RelayCommand(Last, () => HasImage);
+        NextPageCommand = new RelayCommand(NextPage, () => HasNextPage);
+        PrevPageCommand = new RelayCommand(PrevPage, () => HasPreviousPage);
+        FirstPageCommand = new RelayCommand(FirstPage, () => HasPreviousPage);
+        LastPageCommand = new RelayCommand(LastPage, () => HasNextPage);
         DeleteCommand = new RelayCommand(DeleteCurrent, () => HasImage);
         RotateCwCommand = new RelayCommand(() => Rotate(90), () => HasDisplayImage);
         RotateCcwCommand = new RelayCommand(() => Rotate(-90), () => HasDisplayImage);
@@ -76,7 +80,7 @@ public sealed class MainViewModel : ObservableObject
         if (CurrentPath is not null && !File.Exists(CurrentPath))
         {
             // Current file was deleted externally — pick whatever slot the navigator landed on.
-            if (_nav.CurrentPath is not null) LoadCurrent();
+            if (_nav.CurrentPath is not null) { ResetPageState(); LoadCurrent(); }
             else ClearCurrentState();
         }
     }
@@ -139,6 +143,59 @@ public sealed class MainViewModel : ObservableObject
                 : $"plays {CurrentAnimation.LoopCount}\u00D7";
             return $"{frames} \u00B7 {loop}";
         }
+    }
+
+    private int _pageIndex;
+    public int PageIndex
+    {
+        get => _pageIndex;
+        private set
+        {
+            if (Set(ref _pageIndex, value))
+            {
+                RaisePageState();
+            }
+        }
+    }
+
+    private int _pageCount = 1;
+    public int PageCount
+    {
+        get => _pageCount;
+        private set
+        {
+            if (Set(ref _pageCount, Math.Max(1, value)))
+            {
+                RaisePageState();
+            }
+        }
+    }
+
+    private string _pageLabel = "Page";
+    public string PageLabel
+    {
+        get => _pageLabel;
+        private set
+        {
+            if (Set(ref _pageLabel, string.IsNullOrWhiteSpace(value) ? "Page" : value))
+            {
+                Raise(nameof(PagePositionText));
+            }
+        }
+    }
+
+    public bool HasMultiplePages => PageCount > 1;
+    public bool HasPreviousPage => HasMultiplePages && PageIndex > 0;
+    public bool HasNextPage => HasMultiplePages && PageIndex < PageCount - 1;
+    public string PagePositionText => HasMultiplePages ? $"{PageLabel} {PageIndex + 1} / {PageCount}" : "";
+
+    private void RaisePageState()
+    {
+        Raise(nameof(HasMultiplePages));
+        Raise(nameof(HasPreviousPage));
+        Raise(nameof(HasNextPage));
+        Raise(nameof(PagePositionText));
+        CommandManager.InvalidateRequerySuggested();
     }
 
     private string? _currentPath;
@@ -504,6 +561,10 @@ public sealed class MainViewModel : ObservableObject
     public ICommand PrevCommand { get; }
     public ICommand FirstCommand { get; }
     public ICommand LastCommand { get; }
+    public ICommand NextPageCommand { get; }
+    public ICommand PrevPageCommand { get; }
+    public ICommand FirstPageCommand { get; }
+    public ICommand LastPageCommand { get; }
     public ICommand DeleteCommand { get; }
     public ICommand RotateCwCommand { get; }
     public ICommand RotateCcwCommand { get; }
@@ -532,6 +593,7 @@ public sealed class MainViewModel : ObservableObject
     {
         FlushPendingRename();
         _nav.Open(path);
+        ResetPageState();
         LoadCurrent();
 
         // V20-02: persist containing folder to recent-folders MRU. Silent on any failure —
@@ -587,10 +649,42 @@ public sealed class MainViewModel : ObservableObject
         if (dlg.ShowDialog() == true) OpenFile(dlg.FileName);
     }
 
-    private void Next() { FlushPendingRename(); if (_nav.MoveNext()) LoadCurrent(); }
-    private void Prev() { FlushPendingRename(); if (_nav.MovePrevious()) LoadCurrent(); }
-    private void First() { FlushPendingRename(); if (_nav.MoveFirst()) LoadCurrent(); }
-    private void Last() { FlushPendingRename(); if (_nav.MoveLast()) LoadCurrent(); }
+    private void Next() { FlushPendingRename(); if (_nav.MoveNext()) { ResetPageState(); LoadCurrent(); } }
+    private void Prev() { FlushPendingRename(); if (_nav.MovePrevious()) { ResetPageState(); LoadCurrent(); } }
+    private void First() { FlushPendingRename(); if (_nav.MoveFirst()) { ResetPageState(); LoadCurrent(); } }
+    private void Last() { FlushPendingRename(); if (_nav.MoveLast()) { ResetPageState(); LoadCurrent(); } }
+
+    private void NextPage()
+    {
+        if (!HasNextPage) return;
+        FlushPendingRename();
+        PageIndex++;
+        LoadCurrent();
+    }
+
+    private void PrevPage()
+    {
+        if (!HasPreviousPage) return;
+        FlushPendingRename();
+        PageIndex--;
+        LoadCurrent();
+    }
+
+    private void FirstPage()
+    {
+        if (!HasPreviousPage) return;
+        FlushPendingRename();
+        PageIndex = 0;
+        LoadCurrent();
+    }
+
+    private void LastPage()
+    {
+        if (!HasNextPage) return;
+        FlushPendingRename();
+        PageIndex = PageCount - 1;
+        LoadCurrent();
+    }
 
     private void LoadCurrent()
     {
@@ -605,7 +699,9 @@ public sealed class MainViewModel : ObservableObject
         {
             // V20-03: try the preload ring first — a hit is instant, a miss falls through to
             // the direct load. Either way we re-enqueue the new neighbors.
-            var res = _preload.TryGet(path) ?? ImageLoader.Load(path);
+            var res = PageIndex == 0
+                ? _preload.TryGet(path) ?? ImageLoader.Load(path, PageIndex)
+                : ImageLoader.Load(path, PageIndex);
             // Order matters: CurrentImage first so ZoomPanImage.OnSourceChanged runs and clears
             // any animation from the previous file; then CurrentAnimation, which either applies
             // new keyframes or stays null for a static image.
@@ -614,6 +710,7 @@ public sealed class MainViewModel : ObservableObject
             PixelWidth = res.PixelWidth;
             PixelHeight = res.PixelHeight;
             DecoderUsed = res.DecoderUsed;
+            ApplyPageSequence(res.Pages);
             Rotation = 0;
             FlipHorizontal = false;
             FlipVertical = false;
@@ -634,6 +731,7 @@ public sealed class MainViewModel : ObservableObject
             CurrentAnimation = null;
             PixelWidth = PixelHeight = 0;
             DecoderUsed = "Unavailable";
+            ResetPageState();
             LoadErrorMessage = $"This file could not be decoded. {ex.Message}";
             Toast(ex.Message.Contains("requires Ghostscript", StringComparison.OrdinalIgnoreCase)
                 ? "Document preview needs Ghostscript"
@@ -649,6 +747,26 @@ public sealed class MainViewModel : ObservableObject
         // V20-03: after loading, enqueue neighbours so the next arrow-press is instant.
         // The preload itself runs off the UI thread.
         EnqueueNeighbours();
+    }
+
+    private void ApplyPageSequence(PageSequence? pages)
+    {
+        if (pages is null)
+        {
+            ResetPageState();
+            return;
+        }
+
+        PageLabel = pages.Label;
+        PageCount = pages.PageCount;
+        PageIndex = pages.PageIndex;
+    }
+
+    private void ResetPageState()
+    {
+        PageLabel = "Page";
+        PageCount = 1;
+        PageIndex = 0;
     }
 
     private void EnqueueNeighbours()
@@ -769,6 +887,7 @@ public sealed class MainViewModel : ObservableObject
             _nav.RemoveCurrent();
             Toast($"Sent to Recycle Bin: {Path.GetFileName(toDelete)}");
             if (_nav.CurrentPath is null) { ClearCurrentState(); return; }
+            ResetPageState();
             LoadCurrent();
         }
         catch (Exception ex)
@@ -990,6 +1109,7 @@ public sealed class MainViewModel : ObservableObject
         FlipVertical = false;
         LoadErrorMessage = null;
         DecoderUsed = null;
+        ResetPageState();
         RenameStatus = RenameStatusKind.Idle;
         SyncRenameEditorFromDisk();
         Raise(nameof(FileSizeText));
