@@ -51,7 +51,7 @@ public sealed class MainViewModel : ObservableObject
         SaveAsCopyCommand = new RelayCommand(SaveAsCopy, () => HasImage);
         CheckForUpdatesCommand = new RelayCommand(async () => await CheckForUpdatesAsync(userInitiated: true), () => true);
         OpenLatestUpdateCommand = new RelayCommand(OpenLatestUpdate, () => HasUpdateAvailable);
-        RefreshCommand = new RelayCommand(() => { _nav.Refresh(); RefreshFromNav(); });
+        RefreshCommand = new RelayCommand(RefreshFolder, () => HasImage);
         CommitRenameCommand = new RelayCommand(() => { _renameTimer.Stop(); FlushPendingRename(); });
         CancelRenameCommand = new RelayCommand(CancelRenameEdit);
         UnlockExtensionCommand = new RelayCommand(() => IsExtensionUnlocked = !IsExtensionUnlocked);
@@ -916,6 +916,13 @@ public sealed class MainViewModel : ObservableObject
             Owner = Application.Current?.MainWindow
         };
         about.ShowDialog();
+    }
+
+    private void RefreshFolder()
+    {
+        _nav.Refresh();
+        RefreshFromNav();
+        Toast("Folder refreshed");
     }
 
     private void RefreshFromNav() => LoadCurrent();
