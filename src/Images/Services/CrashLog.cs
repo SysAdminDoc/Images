@@ -1,4 +1,5 @@
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Images.Services;
@@ -73,4 +74,49 @@ public static class CrashLog
             // Intentionally swallow — we're already in a fatal-error handler; can't surface.
         }
     }
+
+    /// <summary>
+    /// V02-07: write a minidump to <c>%LOCALAPPDATA%\Images\Logs\crash-<timestamp>.dmp</c>.
+    /// Returns the path on success, null on any failure. Uses
+    /// <c>MiniDumpWithDataSegs | MiniDumpWithUnloadedModules</c> — a "just enough to triage"
+    /// dump. <c>MiniDumpWithFullMemory</c> would be overkill for a viewer.
+    /// </summary>
+    public static string? TryWriteMiniDump()
+    {
+        try
+        {
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var dir = Path.Combine(localAppData, "Images", "Logs");
+            Directory.CreateDirectory(dir);
+            var dumpPath = Path.Combine(dir, $"crash-{DateTime.Now:yyyyMMdd-HHmmss}.dmp");
+
+            using var fs = new FileStream(dumpPath, FileMode.Create, FileAccess.Write, FileShare.None);
+            var proc = System.Diagnostics.Process.GetCurrentProcess();
+
+            // Flags constants pulled from minidumpapiset.h.
+            const uint MiniDumpNormal = 0x00000000;
+            const uint MiniDumpWithDataSegs = 0x00000001;
+            const uint MiniDumpWithUnloadedModules = 0x00000020;
+            const uint MiniDumpWithThreadInfo = 0x00001000;
+            const uint flags = MiniDumpNormal | MiniDumpWithDataSegs | MiniDumpWithUnloadedModules | MiniDumpWithThreadInfo;
+
+            var ok = MiniDumpWriteDump(
+                proc.Handle,
+                (uint)proc.Id,
+                fs.SafeFileHandle.DangerousGetHandle(),
+                flags,
+                IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+            return ok ? dumpPath : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    [DllImport("dbghelp.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool MiniDumpWriteDump(
+        IntPtr hProcess, uint ProcessId, IntPtr hFile, uint DumpType,
+        IntPtr ExceptionParam, IntPtr UserStreamParam, IntPtr CallbackParam);
 }

@@ -1,43 +1,55 @@
 using System.Windows;
 using System.Windows.Threading;
 using Images.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Images;
 
 public partial class App : Application
 {
+    private readonly Microsoft.Extensions.Logging.ILogger _log = Log.For<App>();
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
-        // V15-09: route all three fatal-exception channels through CrashLog so we capture
-        // whatever killed the app regardless of where it fired. Dispatcher handler also
-        // sets Handled=true so the user sees a dialog instead of the app disappearing.
+        var info = AppInfo.Current;
+        _log.LogInformation("Images {Version} starting — {Runtime} on {Os}",
+            info.DisplayVersion, info.RuntimeDescription, info.OsDescription);
+
+        // V15-09 + V02-06 + V02-07: fatal-exception channels go through both the structured
+        // logger (for day-to-day diagnostics via Serilog rolling file) AND CrashLog (for the
+        // plain-text dump + minidump + user-facing "Copy details" dialog). CrashLog is the
+        // user-actionable surface; Log.For<App>() is the forensic surface.
         DispatcherUnhandledException += (_, args) =>
         {
+            _log.LogError(args.Exception, "DispatcherUnhandledException");
             CrashLog.Append("DispatcherUnhandledException", args.Exception);
-            MessageBox.Show(
-                $"{args.Exception.Message}\n\nDetails written to:\n{CrashLog.LogPath}",
-                "Images — unexpected error",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+            var dumpPath = CrashLog.TryWriteMiniDump();
+            CrashDialog.Show(args.Exception, dumpPath);
             args.Handled = true;
         };
 
-        // Non-UI thread exceptions — can't Handle these, but we can at least log before the
-        // runtime terminates us.
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
-            CrashLog.Append("AppDomain.UnhandledException",
-                args.ExceptionObject as Exception,
-                $"IsTerminating={args.IsTerminating}");
+        {
+            var ex = args.ExceptionObject as Exception;
+            _log.LogCritical(ex, "AppDomain.UnhandledException (IsTerminating={IsTerminating})", args.IsTerminating);
+            CrashLog.Append("AppDomain.UnhandledException", ex, $"IsTerminating={args.IsTerminating}");
+            if (args.IsTerminating)
+            {
+                CrashLog.TryWriteMiniDump();
+                Log.Shutdown(); // flush Serilog buffers before the runtime tears us down
+            }
+        };
 
-        // Background Task faults that were never awaited. Setting Observed=true prevents the
-        // process from being torn down by the TaskScheduler finalizer.
         TaskScheduler.UnobservedTaskException += (_, args) =>
         {
+            _log.LogError(args.Exception, "TaskScheduler.UnobservedTaskException");
             CrashLog.Append("TaskScheduler.UnobservedTaskException", args.Exception);
             args.SetObserved();
         };
+
+        Exit += (_, _) => Log.Shutdown();
 
         var window = new MainWindow();
         window.Show();

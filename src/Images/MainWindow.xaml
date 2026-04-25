@@ -47,6 +47,8 @@
                     <ContextMenu Style="{StaticResource ViewportContextMenu}">
                         <MenuItem Header="Open…"             Command="{Binding OpenCommand}"           InputGestureText="Ctrl+O" />
                         <MenuItem Header="Reload"            Command="{Binding ReloadCommand}"         InputGestureText="Ctrl+Shift+R" />
+                        <MenuItem Header="Save a copy…"      Command="{Binding SaveAsCopyCommand}"     InputGestureText="Ctrl+Shift+S" />
+                        <MenuItem Header="Print…"            Command="{Binding PrintCommand}"          InputGestureText="Ctrl+P" />
                         <Separator />
                         <MenuItem Header="Reveal in Explorer" Command="{Binding RevealCommand}" />
                         <MenuItem Header="Copy path"          Command="{Binding CopyPathCommand}" />

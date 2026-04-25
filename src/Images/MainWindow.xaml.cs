@@ -19,7 +19,18 @@ public partial class MainWindow : Window
 
         Viewport.MouseEnter += (_, _) => FadeArrows(1.0);
         Viewport.MouseLeave += (_, _) => FadeArrows(0.0);
-        Loaded += (_, _) => Focus();
+        Loaded += (_, _) =>
+        {
+            Focus();
+            // P-04: kick off a throttled update check 3 seconds after UI is interactive so the
+            // first image load isn't competing with HTTPS handshake. Fire-and-forget; any
+            // failure is swallowed inside CheckForUpdatesAsync.
+            _ = System.Threading.Tasks.Task.Run(async () =>
+            {
+                await System.Threading.Tasks.Task.Delay(3000).ConfigureAwait(false);
+                await Dispatcher.InvokeAsync(async () => await Vm.CheckForUpdatesAsync(userInitiated: false));
+            });
+        };
         SourceInitialized += OnSourceInitialized;
     }
 
@@ -46,6 +57,22 @@ public partial class MainWindow : Window
         };
         PrevArrow.BeginAnimation(OpacityProperty, anim);
         NextArrow.BeginAnimation(OpacityProperty, anim);
+    }
+
+    // V20-20: advance the zoom-mode wheel Fit → 1:1 → FitWidth → FitHeight → Fill → Fit.
+    private Images.Controls.ZoomPanImage.ZoomMode _zoomMode = Images.Controls.ZoomPanImage.ZoomMode.Fit;
+    private Images.Controls.ZoomPanImage.ZoomMode NextZoomMode()
+    {
+        _zoomMode = _zoomMode switch
+        {
+            Images.Controls.ZoomPanImage.ZoomMode.Fit       => Images.Controls.ZoomPanImage.ZoomMode.OneToOne,
+            Images.Controls.ZoomPanImage.ZoomMode.OneToOne  => Images.Controls.ZoomPanImage.ZoomMode.FitWidth,
+            Images.Controls.ZoomPanImage.ZoomMode.FitWidth  => Images.Controls.ZoomPanImage.ZoomMode.FitHeight,
+            Images.Controls.ZoomPanImage.ZoomMode.FitHeight => Images.Controls.ZoomPanImage.ZoomMode.Fill,
+            _                                                => Images.Controls.ZoomPanImage.ZoomMode.Fit,
+        };
+        Vm.ShowToast($"Zoom: {_zoomMode}");
+        return _zoomMode;
     }
 
     // V15-07: F11 toggles fullscreen. Borderless maximized, side panel collapses via the
@@ -155,6 +182,21 @@ public partial class MainWindow : Window
             case Key.R when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
                 // V15-04: Ctrl+Shift+R reload current image.
                 Vm.ReloadCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.P when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
+                // V15-10: Ctrl+P print.
+                Vm.PrintCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.S when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
+                // E6: Ctrl+Shift+S save-as-copy.
+                Vm.SaveAsCopyCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.F when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
+                // V20-20: Ctrl+F cycles zoom modes Fit → 1:1 → FitWidth → FitHeight → Fill → Fit.
+                Canvas.SetZoomMode(NextZoomMode());
                 e.Handled = true;
                 break;
             case Key.Left:

@@ -51,4 +51,45 @@ public partial class AboutWindow : Window
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
+
+    private async void CheckUpdatesButton_Click(object sender, RoutedEventArgs e)
+    {
+        // Manual check bypasses the 24-h throttle. Gate the button against concurrent clicks.
+        if (sender is not System.Windows.Controls.Button btn) return;
+        btn.IsEnabled = false;
+        try
+        {
+            var result = await UpdateCheckService.CheckAsync();
+            UpdateCheckService.LastCheckedUtc = DateTime.UtcNow;
+            if (result.Error is not null)
+            {
+                System.Windows.MessageBox.Show(this, $"Update check failed: {result.Error}",
+                    "Images", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            }
+            else if (result.NewerAvailable && result.LatestHtmlUrl is not null)
+            {
+                var r = System.Windows.MessageBox.Show(this,
+                    $"A newer version is available: {result.LatestTag}\n\nOpen the release page?",
+                    "Images — update available",
+                    System.Windows.MessageBoxButton.YesNo,
+                    System.Windows.MessageBoxImage.Information);
+                if (r == System.Windows.MessageBoxResult.Yes)
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = result.LatestHtmlUrl, UseShellExecute = true
+                    });
+                }
+            }
+            else
+            {
+                System.Windows.MessageBox.Show(this, "You're on the latest version.",
+                    "Images", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            }
+        }
+        finally
+        {
+            btn.IsEnabled = true;
+        }
+    }
 }

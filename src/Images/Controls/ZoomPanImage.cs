@@ -165,6 +165,35 @@ public sealed class ZoomPanImage : ContentControl
         _translate.X = _translate.Y = 0;
     }
 
+    // V20-20: four zoom modes. All compute against the source image's pixel size in the
+    // control's current available size. Stretch.Uniform on the inner Image handles the baseline
+    // fit; our ScaleTransform multiplies on top. Fit = 1.0x (baseline Uniform is already fit);
+    // 1:1 = inverse of Uniform's baseline fit so each source pixel maps to one device pixel;
+    // FitWidth / FitHeight = force the chosen axis to exactly fill the viewport.
+    public enum ZoomMode { Fit, OneToOne, FitWidth, FitHeight, Fill }
+
+    public void SetZoomMode(ZoomMode mode)
+    {
+        if (_image.Source is not BitmapSource bs) return;
+        var w = ActualWidth;
+        var h = ActualHeight;
+        if (w <= 0 || h <= 0) return;
+        var baselineFit = Math.Min(w / bs.PixelWidth, h / bs.PixelHeight);
+        if (baselineFit <= 0) return;
+
+        double s = mode switch
+        {
+            ZoomMode.Fit       => 1.0,
+            ZoomMode.OneToOne  => 1.0 / baselineFit,
+            ZoomMode.FitWidth  => (w / bs.PixelWidth) / baselineFit,
+            ZoomMode.FitHeight => (h / bs.PixelHeight) / baselineFit,
+            ZoomMode.Fill      => Math.Max(w / bs.PixelWidth, h / bs.PixelHeight) / baselineFit,
+            _ => 1.0,
+        };
+        _scale.ScaleX = _scale.ScaleY = s;
+        _translate.X = _translate.Y = 0;
+    }
+
     public void OneToOne()
     {
         if (_image.Source is not BitmapSource bs) return;
