@@ -116,7 +116,7 @@ public sealed class ThumbnailCache
             image.Strip(); // drop EXIF + XMP — thumbs don't need it, reduces bytes
             image.Quality = 80;
             image.Format = MagickFormat.WebP;
-            image.Write(cachePath);
+            cachePath = WriteAtomically(image, cachePath);
 
             _log.LogDebug("thumb cached: {Cache} ({Bytes} bytes) from {Src}", cachePath, new FileInfo(cachePath).Length, sourcePath);
             ScheduleEvictionSweep();
@@ -126,6 +126,36 @@ public sealed class ThumbnailCache
         {
             _log.LogDebug(ex, "GenerateAndCache failed for {Path}", sourcePath);
             return null;
+        }
+    }
+
+    private static string WriteAtomically(MagickImage image, string cachePath)
+    {
+        var dir = Path.GetDirectoryName(cachePath) ?? throw new IOException("Thumbnail cache path has no directory.");
+        Directory.CreateDirectory(dir);
+
+        var nameWithoutExtension = Path.GetFileNameWithoutExtension(cachePath);
+        var tempPath = Path.Combine(dir, $"{nameWithoutExtension}.tmp-{Guid.NewGuid():N}.webp");
+
+        try
+        {
+            image.Write(tempPath);
+
+            try
+            {
+                File.Move(tempPath, cachePath);
+                return cachePath;
+            }
+            catch (IOException) when (File.Exists(cachePath))
+            {
+                // Another navigation task or app instance completed the same thumbnail first.
+                // Keep the complete winner and discard our duplicate temp file.
+                return cachePath;
+            }
+        }
+        finally
+        {
+            TryDeleteFile(tempPath);
         }
     }
 
@@ -207,7 +237,10 @@ public sealed class ThumbnailCache
         try
         {
             if (!Directory.Exists(_root)) return;
+            DeleteStaleTempFiles();
+
             var files = Directory.EnumerateFiles(_root, "*.webp", SearchOption.AllDirectories)
+                                 .Where(p => !Path.GetFileName(p).Contains(".tmp-", StringComparison.OrdinalIgnoreCase))
                                  .Select(p => new FileInfo(p))
                                  .OrderBy(fi => fi.LastAccessTimeUtc)
                                  .ToList();
@@ -226,6 +259,44 @@ public sealed class ThumbnailCache
         catch (Exception ex)
         {
             _log.LogWarning(ex, "EvictIfOverCap failed");
+        }
+    }
+
+    private void DeleteStaleTempFiles()
+    {
+        try
+        {
+            var cutoff = DateTime.UtcNow - TimeSpan.FromHours(1);
+            foreach (var path in Directory.EnumerateFiles(_root, "*.tmp-*.webp", SearchOption.AllDirectories))
+            {
+                try
+                {
+                    var fi = new FileInfo(path);
+                    if (fi.LastWriteTimeUtc < cutoff)
+                        fi.Delete();
+                }
+                catch
+                {
+                    // Best-effort cleanup; temp files are disposable cache artifacts.
+                }
+            }
+        }
+        catch
+        {
+            // Best-effort cleanup; eviction itself can still continue.
+        }
+    }
+
+    private static void TryDeleteFile(string path)
+    {
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
+                File.Delete(path);
+        }
+        catch
+        {
+            // Disposable temp file; a later eviction sweep removes stale leftovers.
         }
     }
 
