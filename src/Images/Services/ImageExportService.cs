@@ -7,36 +7,56 @@ namespace Images.Services;
 
 public static class ImageExportService
 {
-    public const string ExportFilter =
-        "JPEG|*.jpg;*.jpeg;*.jfif|" +
-        "PNG|*.png|" +
-        "WebP|*.webp|" +
-        "AVIF|*.avif|" +
-        "JPEG XL|*.jxl|" +
-        "HEIC|*.heic;*.heif;*.hif|" +
-        "TIFF|*.tif;*.tiff|" +
-        "BMP|*.bmp|" +
-        "GIF|*.gif|" +
-        "TGA|*.tga;*.targa|" +
-        "DDS|*.dds|" +
-        "QOI|*.qoi|" +
-        "OpenEXR|*.exr|" +
-        "Radiance HDR|*.hdr|" +
-        "JPEG 2000|*.jp2;*.j2k|" +
-        "Portable bitmap|*.ppm;*.pgm;*.pbm;*.pfm|" +
-        "All files|*.*";
+    public static readonly string[] ExportExtensions =
+    [
+        ".jpg", ".jpeg", ".jpe", ".jfif", ".jif", ".png", ".webp", ".avif", ".jxl",
+        ".tif", ".tiff", ".bmp", ".dib", ".gif", ".apng",
+        ".psd", ".psb", ".pdf", ".pdfa", ".eps", ".svg", ".tga", ".targa", ".dds",
+        ".qoi", ".exr", ".hdr", ".jp2", ".j2k", ".j2c", ".jpc", ".jpm", ".jpt",
+        ".jps", ".ppm", ".pgm", ".pbm", ".pnm", ".pam", ".pfm", ".xpm", ".xbm",
+        ".miff", ".mng", ".jng", ".wbmp", ".farbfeld", ".ff", ".dcx", ".pcx",
+        ".pcd", ".pcds", ".pgx", ".six", ".sixel", ".vicar", ".viff", ".vips"
+    ];
+
+    public static readonly string ExportFilter = string.Join("|",
+    [
+        "JPEG|*.jpg;*.jpeg;*.jpe;*.jfif;*.jif",
+        "PNG|*.png",
+        "WebP|*.webp",
+        "AVIF|*.avif",
+        "JPEG XL|*.jxl",
+        "TIFF|*.tif;*.tiff",
+        "BMP|*.bmp;*.dib",
+        "GIF / APNG|*.gif;*.apng",
+        "Photoshop|*.psd;*.psb",
+        "PDF / EPS / SVG|*.pdf;*.pdfa;*.eps;*.svg",
+        "TGA|*.tga;*.targa",
+        "DDS|*.dds",
+        "QOI|*.qoi",
+        "OpenEXR|*.exr",
+        "Radiance HDR|*.hdr",
+        "JPEG 2000|*.jp2;*.j2k;*.j2c;*.jpc;*.jpm;*.jpt;*.jps",
+        "Portable bitmap|*.ppm;*.pgm;*.pbm;*.pnm;*.pam;*.pfm",
+        "X11 / Magick|*.xpm;*.xbm;*.miff;*.mng;*.jng;*.wbmp;*.farbfeld;*.ff",
+        "Production and scientific|*.dcx;*.pcx;*.pcd;*.pcds;*.pgx;*.six;*.sixel;*.vicar;*.viff;*.vips",
+        "All files|*.*"
+    ]);
 
     public static string NormalizeExportExtension(string currentExtension)
     {
         var ext = currentExtension.ToLowerInvariant();
-        return ResolveMagickFormat(ext) is null ? ".png" : ext;
+        var format = ResolveMagickFormat(ext);
+        return format is not null && CanWrite(format.Value) ? ext : ".png";
     }
+
+    public static MagickFormat? TryResolveFormat(string extension)
+        => ResolveMagickFormat(extension.ToLowerInvariant());
 
     public static string Save(BitmapSource source, string path)
     {
         var ext = Path.GetExtension(path).ToLowerInvariant();
         var format = ResolveMagickFormat(ext);
-        if (format is null)
+        if (format is null || !CanWrite(format.Value))
         {
             path = Path.ChangeExtension(path, ".png");
             format = MagickFormat.Png;
@@ -79,6 +99,7 @@ public static class ImageExportService
     private static MagickFormat? ResolveMagickFormat(string ext) => ext switch
     {
         ".jpg" or ".jpeg" or ".jpe" or ".jfif" => MagickFormat.Jpeg,
+        ".jif" => MagickFormat.Jpeg,
         ".png" => MagickFormat.Png,
         ".webp" => MagickFormat.WebP,
         ".avif" => MagickFormat.Avif,
@@ -86,18 +107,50 @@ public static class ImageExportService
         ".heic" or ".heif" or ".hif" => MagickFormat.Heic,
         ".tif" or ".tiff" => MagickFormat.Tiff,
         ".bmp" => MagickFormat.Bmp,
+        ".dib" => MagickFormat.Dib,
         ".gif" => MagickFormat.Gif,
+        ".apng" => MagickFormat.APng,
+        ".psd" => MagickFormat.Psd,
+        ".psb" => MagickFormat.Psb,
+        ".pdf" => MagickFormat.Pdf,
+        ".pdfa" => MagickFormat.Pdfa,
+        ".eps" => MagickFormat.Eps,
+        ".svg" => MagickFormat.Svg,
         ".tga" or ".targa" => MagickFormat.Tga,
         ".qoi" => MagickFormat.Qoi,
         ".exr" => MagickFormat.Exr,
         ".hdr" => MagickFormat.Hdr,
         ".jp2" => MagickFormat.Jp2,
         ".j2k" => MagickFormat.J2k,
+        ".j2c" => MagickFormat.J2c,
+        ".jpc" => MagickFormat.Jpc,
+        ".jpm" => MagickFormat.Jpm,
+        ".jpt" => MagickFormat.Jpt,
+        ".jps" => MagickFormat.Jps,
         ".dds" => MagickFormat.Dds,
         ".ppm" => MagickFormat.Ppm,
         ".pgm" => MagickFormat.Pgm,
         ".pbm" => MagickFormat.Pbm,
+        ".pnm" => MagickFormat.Pnm,
+        ".pam" => MagickFormat.Pam,
         ".pfm" => MagickFormat.Pfm,
+        ".xpm" => MagickFormat.Xpm,
+        ".xbm" => MagickFormat.Xbm,
+        ".miff" => MagickFormat.Miff,
+        ".mng" => MagickFormat.Mng,
+        ".jng" => MagickFormat.Jng,
+        ".wbmp" => MagickFormat.Wbmp,
+        ".farbfeld" or ".ff" => MagickFormat.Farbfeld,
+        ".dcx" => MagickFormat.Dcx,
+        ".pcx" => MagickFormat.Pcx,
+        ".pcd" => MagickFormat.Pcd,
+        ".pcds" => MagickFormat.Pcds,
+        ".pgx" => MagickFormat.Pgx,
+        ".six" => MagickFormat.Six,
+        ".sixel" => MagickFormat.Sixel,
+        ".vicar" => MagickFormat.Vicar,
+        ".viff" => MagickFormat.Viff,
+        ".vips" => MagickFormat.Vips,
         _ => null
     };
 
@@ -107,4 +160,7 @@ public static class ImageExportService
         MagickFormat.Ppm or
         MagickFormat.Pgm or
         MagickFormat.Pbm;
+
+    private static bool CanWrite(MagickFormat format)
+        => MagickFormatInfo.Create(format)?.SupportsWriting == true;
 }
