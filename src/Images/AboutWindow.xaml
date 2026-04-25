@@ -118,24 +118,63 @@
                        Margin="0,14,0,0" />
 
             <UniformGrid Columns="2" Rows="2" Margin="0,18,0,0">
-                <Button Content="Check for updates"
-                        Style="{StaticResource ChromeButton}"
+                <Button Style="{StaticResource ChromeButton}"
                         Click="CheckUpdatesButton_Click"
-                        Margin="0,0,6,6" />
-                <Button Content="GitHub"
-                        Style="{StaticResource ChromeButton}"
+                        Margin="0,0,6,6"
+                        AutomationProperties.Name="Check for updates">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xE72C;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="12"
+                                   Margin="0,0,8,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="Check updates" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource ChromeButton}"
                         Click="GitHubButton_Click"
-                        Margin="6,0,0,6" />
-                <Button Content="Logs"
-                        Style="{StaticResource ChromeButton}"
+                        Margin="6,0,0,6"
+                        AutomationProperties.Name="Open GitHub project page">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xE71B;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="12"
+                                   Margin="0,0,8,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="GitHub project" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource ChromeButton}"
                         Click="CrashLogButton_Click"
-                        Margin="0,6,6,0" />
-                <Button Content="Close"
-                        Style="{StaticResource PrimaryButton}"
+                        Margin="0,6,6,0"
+                        AutomationProperties.Name="Open crash log folder">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xE838;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="12"
+                                   Margin="0,0,8,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="Crash logs" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource PrimaryButton}"
                         Click="CloseButton_Click"
                         Margin="6,6,0,0"
                         IsDefault="True"
-                        IsCancel="True" />
+                        IsCancel="True"
+                        AutomationProperties.Name="Close About window">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xE711;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="12"
+                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                   Margin="0,0,8,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="Close"
+                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
             </UniformGrid>
             </StackPanel>
         </ScrollViewer>
