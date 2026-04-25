@@ -4,7 +4,7 @@
 
 # Images
 
-[![Version](https://img.shields.io/badge/version-0.1.5-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
+[![Version](https://img.shields.io/badge/version-0.1.6-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
 [![License](https://img.shields.io/badge/license-MIT-a6e3a1?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-cba6f7?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-9.0-f38ba8?style=flat-square)](#)

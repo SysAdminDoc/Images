@@ -7,7 +7,7 @@ Effort tags: **S** ≤ 2 days · **M** ≤ 1 week · **L** > 1 week · **XL** mu
 
 > **Vision**: One Windows app that replaces Photos, IrfanView, XnConvert, Upscayl, and a light Lightroom — by cannibalising the best ideas from a dozen OSS/freeware projects. Local-first, fast, dark-mode, no cloud, no subscription. The killer features are **CLIP semantic search** on a local library, **live inline rename** (already shipped), **Squoosh-style visual-diff converter**, and — differentiator nobody else ships — **network-egress transparency**: the viewer never touches the network silently, and you can see every call it makes.
 
-## Current state (v0.1.5 — shipped 2026-04-24)
+## Current state (v0.1.6 — shipped 2026-04-24)
 
 Core viewer. Natural-sort folder nav. Zoom/pan/rotate. Live inline rename with 600 ms debounce, conflict resolution, 10-deep undo stack. Drag-drop. FSW. Catppuccin Mocha dark theme. ~100 formats via WIC + Magick.NET 14.13.0. **Animated GIFs play inline** (V20-15 core shipped). **>256 MB files decode via MemoryMappedFile view** (V20-06). Framework-dependent win-x64 portable zip **and Inno Setup installer** ship on every release (D-01b). Branded (icon.ico multi-res + banner + logo.png WPF Resource). Toolbar + nav-arrow glyphs render on Win11 IoT / enterprise images that previously showed tofu blocks (icon-font fallback fix). No persistence, no editor, no organizer, no batch.
 
@@ -27,8 +27,8 @@ Companion research:
 - [x] **V02-03** *P1* — `<ApplicationIcon>` wired. 7-frame multi-res `icon.ico` + PNG-embedded `icon.svg` + bundled `logo.png` resource.
 - [ ] **V02-04** *P2* — Recapture main screenshot (DPI-aware, `PrintWindow(hwnd, hdc, 2)` per `screenshots.md`). Requires Windows GUI session.
 - [ ] **V02-05** *P2* — Human runtime smoke: prev/next/wrap, rename+undo, drag-drop, Del-to-recycle, external add/delete 250 ms roundtrip.
-- [ ] **V02-06** *P2* — Serilog + `%LOCALAPPDATA%\Images\Logs\` rolling file behind `ILogger<T>`. Replaces the ad-hoc `crash.log` file. [O-01]
-- [ ] **V02-07** *P2* — "Copy crash details + open GitHub Issue" dialog on unhandled exception. No network call. [O-04]
+- [x] **V02-06** *P2* — Serilog + `%LOCALAPPDATA%\Images\Logs\` rolling file behind `ILogger<T>`. Replaces the ad-hoc `crash.log` file. [O-01] *(shipped v0.1.6 — `Services/Log.cs` bridges Serilog 4.2 → Microsoft.Extensions.Logging 9.0 so call-sites use the abstract `ILogger<T>`; rolling file `images-yyyyMMdd.log`, 14-day retention.)*
+- [x] **V02-07** *P2* — "Copy crash details + open GitHub Issue" dialog on unhandled exception. No network call. [O-04] *(shipped v0.1.6 — `CrashLog.TryWriteMiniDump` P/Invokes `dbghelp!MiniDumpWriteDump`; new `CrashDialog.xaml` replaces the MessageBox with Copy-details / Open-log-folder / Open-GitHub-issue (pre-filled URL) / Close buttons.)*
 
 Promote `Unreleased` → `v0.1.2 — <date>` once V02-04 and V02-05 are complete.
 
@@ -47,7 +47,7 @@ Replenishes ROADMAP from Phase 3 scoring at `docs/research/iter-1-scored.md`. Al
 - [x] **V15-07** *P1* — **F11 toggles fullscreen**. *(shipped v0.1.5 — `MainWindow.ToggleFullscreen` saves WindowState/Style, flips to None + Maximized, collapses the side panel via `IsFullscreen` VM flag; Escape also exits fullscreen.)*
 - [x] **V15-08** *P1* — **Flip horizontal / vertical**. *(shipped v0.1.5 — `FlipHorizontal` / `FlipVertical` DPs on ZoomPanImage; flip ScaleTransform sits before rotate in the TransformGroup so flip H flips in image frame, not post-rotation frame.)*
 - [x] **V15-09** *P1* — **Unhandled-exception → text crash log** at `%LOCALAPPDATA%\Images\crash.log`. *(shipped v0.1.5 — new `CrashLog` service captures AppDomain + Dispatcher + TaskScheduler exceptions with version + runtime + OS + full inner-exception chain; thread-safe Append method reusable for non-fatal diagnostics.)*
-- [ ] **V15-10** *P2* — **Print current image**. `PrintDialog` → `FixedDocument` with one page scaled to fit paper dimensions (portrait if image is portrait, landscape otherwise). No layout options this version. Composite: 24. [B22 / NOW-10] *(deferred from this iteration — candidate for v0.1.6 polish run.)*
+- [x] **V15-10** *P2* — **Print current image**. *(shipped v0.1.6 — `Services/PrintService.Print` on a `FixedDocument` single page; 0.5in margins, fit-to-page with 1:1 ceiling. Ctrl+P + menu entry.)*
 
 Deferred from Phase 3 NOW tier to iter-2: **NOW-05 window-state + recent-folders JSON persistence** — pushed into V20-02 settings work so the persistence layer lands in one place.
 
@@ -79,7 +79,7 @@ No competitor in the OSS viewer space makes network egress auditable. That's the
 - [ ] **P-01** *P0* — **One-click "Strip location"** in the toolbar + right-click menu. Strips `GPSInfo`, `XMP-exif:GPS*`, IPTC location; preserves camera/date/copyright. Diff toast ("removed: GPS, IPTC-LocationCreated"). Effort: S. [ExifRemover pattern]
 - [ ] **P-02** *P0* — **Default-off opt-in telemetry**. First-run banner, toggle in Settings, local JSON preview of what would be sent before enabling. No IP, no MAC, no hostname. VS Code is the reference pattern. Effort: S. [VS Code telemetry docs; TelemetryDeck privacy FAQ]
 - [ ] **P-03** *P1* — **Network-egress log panel**. Every call (update check, C2PA fetch, extension-install deep-link, crash-report upload if enabled) logs `{url, purpose, bytes, ms}` to a visible pane. No competitor ships this. Effort: M.
-- [ ] **P-04** *P0* — **Update check is pull-only** to GitHub Releases API, no PII, opt-out switch. Store `last_checked` locally, no server-side record. Effort: S.
+- [x] **P-04** *P0* — **Update check is pull-only** to GitHub Releases API, no PII, opt-out switch. Store `last_checked` locally, no server-side record. Effort: S. *(shipped v0.1.6 — `UpdateCheckService` does a read-only GET against `/releases/latest`, 24-h throttle for silent startup check, manual "Check for updates" button in About dialog bypasses throttle. Every call logged with URL + bytes + duration. Last-checked persisted to `%LOCALAPPDATA%\Images\update-check.json`.)*
 - [ ] **P-05** *P1* — **C2PA read/verify** via `c2patool` CLI shellout (no .NET SDK exists as of April 2026). Toolbar badge: green (signed + verified + Trust List), amber (signed but cert unlisted), red (invalid/tampered). Effort: M. [contentauth/c2pa-rs; C2PA v2.3 whitepaper Oct 2025; AttestTrail camera tracker]
 - [ ] **P-06** *P2* — **C2PA P/Invoke spike** — bind directly to `c2pa-rs` C API for in-process verify instead of shelling out to `c2patool`. Eliminates ~30 ms per-file process spawn. Effort: L. [c2pa-rs README]
 - [ ] **P-07** *P2* — **C2PA write-on-export** — stamp "edited with Images v0.x" + operation list on every export from v0.3/v0.5. Requires signing identity (Azure Trusted Signing works). Defers until P-05 is stable. Effort: M.
@@ -184,7 +184,7 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [ ] **V20-18** *P2* — **Store-extension detect + prompt** (F-01): on unknown-format open, probe `Windows.ApplicationModel.Store.CurrentApp`-free registry for HEIF / AV1 / WebP / JPEG XL / Raw extensions; if missing, toast with one-click `ms-windows-store://pdp/?productid=...` deep-link. Effort: S.
 
 ### Viewer UX
-- [ ] **V20-20** *P0* — **Six zoom modes** (ImageGlass): Auto, Lock-to-%, Fit-to-Width, Fit-to-Height, Fit (uniform), Fill.
+- [~] **V20-20** *P0* — **Six zoom modes** (ImageGlass): Auto, Lock-to-%, Fit-to-Width, Fit-to-Height, Fit (uniform), Fill. *(four of six shipped v0.1.6 — `ZoomPanImage.ZoomMode` enum exposes Fit / OneToOne / FitWidth / FitHeight / Fill; Ctrl+F cycles with toast. Auto + Lock-to-% deferred until V20-02 settings lands so the mode persists across sessions.)*
 - [ ] **V20-21** *P0* — **Filmstrip** at bottom (togglable), virtualised, synced to current index. Honor A-03 (focus ring).
 - [ ] **V20-22** *P1* — **EXIF overlay** (togglable HUD) — camera/lens/ISO/shutter/aperture/date/GPS. Tap-to-expand for full panel. Date via I-04 (`DateTimeOffset`).
 - [ ] **V20-23** *P1* — **GPS coordinates overlay** with click-to-open-in-map (Honeyview). P-01 "Strip location" one click away.
