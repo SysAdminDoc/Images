@@ -141,9 +141,19 @@ public static class UpdateCheckService
 
     public static bool IsDueForBackgroundCheck()
     {
+        // Respect user opt-out first — a disabled setting silently skips the network call.
+        if (!SettingsService.Instance.GetBool(Keys.UpdateCheckEnabled, defaultValue: true))
+            return false;
+
         var last = LastCheckedUtc;
         if (last is null) return true;
         return (DateTime.UtcNow - last.Value) >= TimeSpan.FromHours(24);
+    }
+
+    public static bool OptedIn
+    {
+        get => SettingsService.Instance.GetBool(Keys.UpdateCheckEnabled, defaultValue: true);
+        set => SettingsService.Instance.SetBool(Keys.UpdateCheckEnabled, value);
     }
 }
 

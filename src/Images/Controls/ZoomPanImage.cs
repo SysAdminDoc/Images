@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -267,4 +268,8 @@ public sealed class ZoomPanImage : ContentControl
         var n = Math.Clamp(_scale.ScaleX * factor, 0.1, 20);
         _scale.ScaleX = _scale.ScaleY = n;
     }
+
+    // A-01: surface custom UIA peer so screen readers announce "Image, W by H pixels" on focus
+    // instead of the generic ContentControl label.
+    protected override AutomationPeer OnCreateAutomationPeer() => new ImageCanvasAutomationPeer(this);
 }
