@@ -400,8 +400,12 @@
                 </Grid>
             </Grid>
 
-            <!-- Bottom toolbar — premium horizontal chrome bar with 1-px top highlight -->
-            <Grid Grid.Row="1">
+            <!-- Bottom toolbar — premium horizontal chrome bar with 1-px top highlight.
+                 V20-32: peek-mode hides the entire toolbar so the image fills the window with
+                 zero chrome. The Width="Auto" outer column on the side panel + IsFullscreen=true
+                 binding handles the right-side panel; this Visibility handles the toolbar row. -->
+            <Grid Grid.Row="1"
+                  Visibility="{Binding IsPeekMode, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1" />
                     <RowDefinition Height="Auto" />

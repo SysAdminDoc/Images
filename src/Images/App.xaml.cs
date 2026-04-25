@@ -52,10 +52,35 @@ public partial class App : Application
         Exit += (_, _) => Log.Shutdown();
 
         var window = new MainWindow();
+
+        // V20-32: `--peek <path>` enters chromeless preview mode (PowerToys Peek invocation
+        // contract). Two-token form is the canonical PowerToys shape. Any non-peek single-path
+        // argv falls through to the regular OpenPath flow below. Show() is deferred until after
+        // EnterPeekMode rewires WindowStyle so the very first paint is borderless.
+        if (TryResolvePeekArgs(e.Args, out var peekPath))
+        {
+            window.EnterPeekMode(peekPath);
+            window.Show();
+            return;
+        }
+
         window.Show();
 
         if (e.Args.Length > 0 && TryResolveArgPath(e.Args[0], out var resolved))
             window.OpenPath(resolved);
+    }
+
+    /// <summary>
+    /// V20-32: matches `--peek &lt;path&gt;` exactly (two argv tokens, exact-match flag,
+    /// case-insensitive). Resolves the path through the same canonicalizer the regular open
+    /// path uses so device-namespace shapes are rejected before downstream consumption.
+    /// </summary>
+    private static bool TryResolvePeekArgs(string[] args, out string resolved)
+    {
+        resolved = string.Empty;
+        if (args.Length < 2) return false;
+        if (!string.Equals(args[0], "--peek", StringComparison.OrdinalIgnoreCase)) return false;
+        return TryResolveArgPath(args[1], out resolved);
     }
 
     private static bool TryResolveArgPath(string raw, out string resolved)

@@ -162,6 +162,17 @@ public sealed class MainViewModel : ObservableObject
         get => _isFullscreen;
         set => Set(ref _isFullscreen, value);
     }
+
+    // V20-32: peek-mode flag — true when launched via `Images.exe --peek <path>` for chromeless,
+    // topmost preview integrations (PowerToys Peek-style external-tool callout). Set ONCE at
+    // construction by MainWindow.EnterPeekMode; never toggled at runtime. Drives toolbar +
+    // bottom-status-row Visibility via the inverse converter so peek windows render image-only.
+    private bool _isPeekMode;
+    public bool IsPeekMode
+    {
+        get => _isPeekMode;
+        set => Set(ref _isPeekMode, value);
+    }
     public string CurrentFileName => CurrentPath is null ? "" : Path.GetFileName(CurrentPath);
     public string CurrentFolder => CurrentPath is null ? "" : Path.GetDirectoryName(CurrentPath) ?? "";
 

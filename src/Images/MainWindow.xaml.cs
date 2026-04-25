@@ -49,6 +49,23 @@ public partial class MainWindow : Window
 
     public void OpenPath(string path) => Vm.OpenFile(path);
 
+    /// <summary>
+    /// V20-32: enter chromeless preview mode (PowerToys-Peek-style invocation). The window
+    /// becomes a borderless, topmost, maximized overlay with the side panel + bottom toolbar
+    /// hidden — only the image and floating navigation arrows remain. Escape closes the window.
+    /// Called by App.xaml.cs when the launch argv matches `--peek &lt;path&gt;`.
+    /// </summary>
+    public void EnterPeekMode(string path)
+    {
+        Vm.IsPeekMode = true;
+        Vm.IsFullscreen = true;          // collapses the side-panel column to 0 width
+        WindowStyle = WindowStyle.None;  // borderless
+        ResizeMode = ResizeMode.NoResize;
+        WindowState = WindowState.Maximized;
+        Topmost = true;                  // floats over whatever invoked us
+        Vm.OpenFile(path);
+    }
+
     private static readonly CubicEase _easeOut = new() { EasingMode = EasingMode.EaseOut };
 
     private void FadeArrows(double target)
@@ -187,6 +204,17 @@ public partial class MainWindow : Window
         if (Vm.ShowCheatsheet && e.Key != Key.OemQuestion)
         {
             Vm.ShowCheatsheet = false;
+            e.Handled = true;
+            return;
+        }
+
+        // V20-32: in peek mode, Escape closes the window outright — there is no chrome to
+        // dismiss and no fullscreen to toggle off, so the natural action is exit. Gated BEFORE
+        // the regular Escape handler so the normal-mode behavior (clear overlays, return focus)
+        // never fires under peek-mode keys.
+        if (Vm.IsPeekMode && e.Key == Key.Escape)
+        {
+            Close();
             e.Handled = true;
             return;
         }
