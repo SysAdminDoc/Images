@@ -17,6 +17,11 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
+        // V20-02: window-state persistence. Restore BEFORE Show so WPF positions first-paint
+        // correctly; save on Closing.
+        RestoreWindowState();
+        Closing += SaveWindowState;
+
         Viewport.MouseEnter += (_, _) => FadeArrows(1.0);
         Viewport.MouseLeave += (_, _) => FadeArrows(0.0);
         Loaded += (_, _) =>
@@ -73,6 +78,51 @@ public partial class MainWindow : Window
         };
         Vm.ShowToast($"Zoom: {_zoomMode}");
         return _zoomMode;
+    }
+
+    // V20-02: restore saved window geometry; clamp to current working area so a window that
+    // was last on a now-disconnected second monitor doesn't land offscreen.
+    private void RestoreWindowState()
+    {
+        var settings = SettingsService.Instance;
+        var w = settings.GetDouble(Keys.WindowWidth, Width);
+        var h = settings.GetDouble(Keys.WindowHeight, Height);
+        var l = settings.GetDouble(Keys.WindowLeft, double.NaN);
+        var t = settings.GetDouble(Keys.WindowTop, double.NaN);
+        var maximized = settings.GetBool(Keys.WindowMaximized, false);
+
+        // Sanity clamp: width/height must be at least MinWidth/MinHeight; position must be
+        // at least partially on-screen (≥ 120 px of the window visible on any work area).
+        var wa = System.Windows.SystemParameters.WorkArea;
+        if (w >= MinWidth && h >= MinHeight && w <= wa.Width * 4 && h <= wa.Height * 4)
+        {
+            Width = w; Height = h;
+        }
+
+        if (!double.IsNaN(l) && !double.IsNaN(t))
+        {
+            // 120-px visibility check against the primary work area (multi-monitor check is
+            // possible but involves P/Invoke into User32; primary is good enough).
+            var visibleL = Math.Max(wa.Left, Math.Min(l, wa.Right - 120));
+            var visibleT = Math.Max(wa.Top, Math.Min(t, wa.Bottom - 120));
+            Left = visibleL; Top = visibleT;
+            WindowStartupLocation = System.Windows.WindowStartupLocation.Manual;
+        }
+
+        if (maximized) WindowState = System.Windows.WindowState.Maximized;
+    }
+
+    private void SaveWindowState(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        var settings = SettingsService.Instance;
+        // Only record non-maximized geometry; if the user's maximized, the RestoreBounds holds
+        // what they'd get back after unmaximize, so that's what we want to persist.
+        var bounds = WindowState == System.Windows.WindowState.Maximized ? RestoreBounds : new Rect(Left, Top, Width, Height);
+        settings.SetDouble(Keys.WindowLeft, bounds.Left);
+        settings.SetDouble(Keys.WindowTop, bounds.Top);
+        settings.SetDouble(Keys.WindowWidth, bounds.Width);
+        settings.SetDouble(Keys.WindowHeight, bounds.Height);
+        settings.SetBool(Keys.WindowMaximized, WindowState == System.Windows.WindowState.Maximized);
     }
 
     // V15-07: F11 toggles fullscreen. Borderless maximized, side panel collapses via the

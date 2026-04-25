@@ -12,6 +12,7 @@ public sealed class MainViewModel : ObservableObject
 {
     private readonly DirectoryNavigator _nav = new();
     private readonly RenameService _rename = new();
+    private readonly PreloadService _preload = new();
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
 
@@ -420,6 +421,12 @@ public sealed class MainViewModel : ObservableObject
         FlushPendingRename();
         _nav.Open(path);
         LoadCurrent();
+
+        // V20-02: persist containing folder to recent-folders MRU. Silent on any failure —
+        // recent-folders is a convenience, not critical.
+        var folder = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(folder))
+            SettingsService.Instance.TouchRecentFolder(folder);
     }
 
     private void OpenFileDialog()
@@ -456,7 +463,9 @@ public sealed class MainViewModel : ObservableObject
 
         try
         {
-            var res = ImageLoader.Load(path);
+            // V20-03: try the preload ring first — a hit is instant, a miss falls through to
+            // the direct load. Either way we re-enqueue the new neighbors.
+            var res = _preload.TryGet(path) ?? ImageLoader.Load(path);
             // Order matters: CurrentImage first so ZoomPanImage.OnSourceChanged runs and clears
             // any animation from the previous file; then CurrentAnimation, which either applies
             // new keyframes or stays null for a static image.
@@ -494,6 +503,22 @@ public sealed class MainViewModel : ObservableObject
         Raise(nameof(FileSizeText));
 
         SyncRenameEditorFromDisk();
+
+        // V20-03: after loading, enqueue neighbours so the next arrow-press is instant.
+        // The preload itself runs off the UI thread.
+        EnqueueNeighbours();
+    }
+
+    private void EnqueueNeighbours()
+    {
+        if (_nav.Count < 2) return;
+        var idx = _nav.CurrentIndex;
+        var n = _nav.Count;
+        // Wrap-aware: folder nav wraps at ends, so we want N+1 and N-1 to wrap too.
+        var next = _nav.Files[(idx + 1) % n];
+        var prev = _nav.Files[(idx - 1 + n) % n];
+        _preload.Enqueue(next);
+        if (prev != next) _preload.Enqueue(prev);
     }
 
     private void SyncRenameEditorFromDisk()
