@@ -74,7 +74,7 @@ Images also detects `IMAGES_GHOSTSCRIPT_DIR` and normal system installs under `%
 
 Release builders can use `scripts/Prepare-GhostscriptBundle.ps1`; see `docs/codec-bundling.md`.
 
-To build the installer locally, install [Inno Setup 6](https://jrsoftware.org/isdl.php), run `dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish`, then `iscc /DMyAppVersion=0.1.4 installer\Images.iss`. Output lands at `installer\output\Images-vX.Y.Z-setup-win-x64.exe`.
+To build the installer locally, install [Inno Setup 6](https://jrsoftware.org/isdl.php), run `dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish`, then `iscc /DMyAppVersion=0.1.7 installer\Images.iss`. Output lands at `installer\output\Images-vX.Y.Z-setup-win-x64.exe`.
 
 ## Keyboard
 
@@ -109,7 +109,9 @@ src/Images/
 │   ├── CodecCapabilityService.cs # About-window codec summary and copyable diagnostics
 │   ├── SupportedImageFormats.cs # Central extension catalog for discovery/dialogs
 │   ├── CodecRuntime.cs         # Optional app-local Ghostscript runtime discovery
+│   ├── AppStorage.cs           # LocalAppData/Temp storage fallback for caches and logs
 │   ├── DirectoryNavigator.cs   # Natural-sort folder scan, prev/next/wrap, FileSystemWatcher
+│   ├── ThumbnailCache.cs       # Disposable WebP thumbnail cache for the folder preview strip
 │   └── RenameService.cs        # Debounced File.Move, conflict resolution, undo history
 ├── Controls/
 │   └── ZoomPanImage.cs         # Wheel-zoom + drag-pan image host

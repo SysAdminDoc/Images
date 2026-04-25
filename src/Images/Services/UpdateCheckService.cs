@@ -135,6 +135,7 @@ public static class UpdateCheckService
             try
             {
                 var path = StateFilePath();
+                if (path is null) return null;
                 if (!File.Exists(path)) return null;
                 var state = JsonSerializer.Deserialize(File.ReadAllText(path), UpdateStateJsonContext.Default.UpdateState);
                 return state?.LastCheckedUtc;
@@ -146,7 +147,7 @@ public static class UpdateCheckService
             try
             {
                 var path = StateFilePath();
-                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                if (path is null) return;
                 var state = new UpdateState(value);
                 File.WriteAllText(path, JsonSerializer.Serialize(state, UpdateStateJsonContext.Default.UpdateState));
             }
@@ -154,9 +155,11 @@ public static class UpdateCheckService
         }
     }
 
-    private static string StateFilePath() => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Images", "update-check.json");
+    private static string? StateFilePath()
+    {
+        var dir = AppStorage.TryGetAppDirectory();
+        return dir is null ? null : Path.Combine(dir, "update-check.json");
+    }
 
     public static bool IsDueForBackgroundCheck()
     {

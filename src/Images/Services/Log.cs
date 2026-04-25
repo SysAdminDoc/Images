@@ -19,21 +19,23 @@ public static class Log
 
     private static ILoggerFactory Build()
     {
-        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        var logDir = Path.Combine(localAppData, "Images", "Logs");
-        Directory.CreateDirectory(logDir);
-        var logPath = Path.Combine(logDir, "images-.log"); // "-" lets RollingInterval.Day append yyyyMMdd
-
-        var serilog = new LoggerConfiguration()
+        var config = new LoggerConfiguration()
             .MinimumLevel.Information()
-            .Enrich.FromLogContext()
-            .WriteTo.File(
+            .Enrich.FromLogContext();
+
+        var logDir = AppStorage.TryGetAppDirectory("Logs");
+        if (logDir is not null)
+        {
+            var logPath = Path.Combine(logDir, "images-.log"); // "-" lets RollingInterval.Day append yyyyMMdd
+            config = config.WriteTo.File(
                 path: logPath,
                 rollingInterval: RollingInterval.Day,
                 retainedFileCountLimit: 14,
                 shared: true, // multiple instances (rare for a viewer, but safe default)
-                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext} — {Message:lj}{NewLine}{Exception}")
-            .CreateLogger();
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext} — {Message:lj}{NewLine}{Exception}");
+        }
+
+        var serilog = config.CreateLogger();
 
         // Bridge Serilog into Microsoft.Extensions.Logging so call-sites use the abstract
         // ILogger<T> instead of pinning on Serilog's API. If we ever swap sinks later, no

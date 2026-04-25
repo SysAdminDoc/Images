@@ -28,26 +28,32 @@ public sealed class ThumbnailCache
     private readonly string _root;
     private readonly int _thumbSize;
     private readonly long _capBytes;
+    private readonly bool _isAvailable;
     private readonly ILogger _log = Log.For<ThumbnailCache>();
     private readonly object _evictionSync = new();
     private DateTime _lastEvictionSweepUtc = DateTime.MinValue;
 
-    public static readonly ThumbnailCache Instance = new(DefaultRoot(), DefaultThumbSize, DefaultDiskCapBytes);
+    public static readonly ThumbnailCache Instance = CreateDefault();
 
-    private static string DefaultRoot()
+    private static ThumbnailCache CreateDefault()
     {
-        var dir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Images", "thumbs");
-        Directory.CreateDirectory(dir);
-        return dir;
+        var root = AppStorage.TryGetAppDirectory("thumbs");
+        return root is null
+            ? new ThumbnailCache(string.Empty, DefaultThumbSize, DefaultDiskCapBytes, isAvailable: false)
+            : new ThumbnailCache(root, DefaultThumbSize, DefaultDiskCapBytes);
     }
 
     public ThumbnailCache(string root, int thumbSize, long diskCapBytes)
+        : this(root, thumbSize, diskCapBytes, isAvailable: true)
+    {
+    }
+
+    private ThumbnailCache(string root, int thumbSize, long diskCapBytes, bool isAvailable)
     {
         _root = root;
         _thumbSize = thumbSize;
         _capBytes = diskCapBytes;
+        _isAvailable = isAvailable;
     }
 
     /// <summary>
@@ -57,6 +63,9 @@ public sealed class ThumbnailCache
     /// </summary>
     public string GetCachePath(string sourcePath, long mtimeTicks, long sizeBytes)
     {
+        if (!_isAvailable)
+            throw new InvalidOperationException("Thumbnail cache storage is not available.");
+
         var key = ComputeKey(sourcePath, mtimeTicks, sizeBytes);
         var partition = key[..2];
         var dir = Path.Combine(_root, partition);
@@ -69,6 +78,8 @@ public sealed class ThumbnailCache
     /// </summary>
     public byte[]? TryGet(string sourcePath)
     {
+        if (!_isAvailable) return null;
+
         try
         {
             var fi = new FileInfo(sourcePath);
@@ -90,6 +101,8 @@ public sealed class ThumbnailCache
     /// </summary>
     public string? GenerateAndCache(string sourcePath)
     {
+        if (!_isAvailable) return null;
+
         try
         {
             var fi = new FileInfo(sourcePath);
@@ -161,6 +174,8 @@ public sealed class ThumbnailCache
     /// </summary>
     public ImageSource? GetOrCreateImageSource(string sourcePath)
     {
+        if (!_isAvailable) return null;
+
         try
         {
             var fi = new FileInfo(sourcePath);
@@ -187,6 +202,8 @@ public sealed class ThumbnailCache
     /// </summary>
     public void EvictIfOverCap()
     {
+        if (!_isAvailable) return;
+
         try
         {
             if (!Directory.Exists(_root)) return;
