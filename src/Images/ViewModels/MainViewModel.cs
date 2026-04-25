@@ -71,6 +71,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         AboutCommand = new RelayCommand(ShowAboutWindow);
         OpenRecentFolderCommand = new RelayCommand(p => OpenRecentFolder(p as string), p => p is string);
         OpenPreviewItemCommand = new RelayCommand(p => OpenPreviewItem(p as FolderPreviewItem), p => p is FolderPreviewItem);
+        RevealPreviewItemCommand = new RelayCommand(p => RevealPreviewItem(p as FolderPreviewItem), p => p is FolderPreviewItem);
+        CopyPreviewPathCommand = new RelayCommand(p => CopyPreviewPath(p as FolderPreviewItem), p => p is FolderPreviewItem);
         ToggleFilmstripCommand = new RelayCommand(ToggleFilmstrip, () => CanToggleFilmstrip);
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
@@ -658,6 +660,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenFile(item.Path);
     }
 
+    private void RevealPreviewItem(FolderPreviewItem? item)
+    {
+        RevealPathInExplorer(item?.Path);
+    }
+
+    private void CopyPreviewPath(FolderPreviewItem? item)
+    {
+        CopyPath(item?.Path);
+    }
+
     private void ToggleFilmstrip()
     {
         if (!CanToggleFilmstrip) return;
@@ -802,6 +814,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand AboutCommand { get; }
     public ICommand OpenRecentFolderCommand { get; }
     public ICommand OpenPreviewItemCommand { get; }
+    public ICommand RevealPreviewItemCommand { get; }
+    public ICommand CopyPreviewPathCommand { get; }
     public ICommand ToggleFilmstripCommand { get; }
 
     // -------------------- Navigation --------------------
@@ -1225,12 +1239,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private void RevealInExplorer()
+    private void RevealInExplorer() => RevealPathInExplorer(CurrentPath);
+
+    private void RevealPathInExplorer(string? path)
     {
-        if (CurrentPath is null) return;
+        if (path is null) return;
         string full;
-        try { full = System.IO.Path.GetFullPath(CurrentPath); }
+        try { full = System.IO.Path.GetFullPath(path); }
         catch (Exception ex) { Toast($"Could not open Explorer: {ex.Message}"); return; }
+
+        if (!File.Exists(full))
+        {
+            Toast("File no longer exists");
+            return;
+        }
 
         try
         {
@@ -1248,10 +1270,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         catch (Exception ex) { Toast($"Could not open Explorer: {ex.Message}"); }
     }
 
-    private void CopyPath()
+    private void CopyPath() => CopyPath(CurrentPath);
+
+    private void CopyPath(string? path)
     {
-        if (CurrentPath is null) return;
-        try { Clipboard.SetText(CurrentPath); Toast("Copied path"); }
+        if (path is null) return;
+        try { Clipboard.SetText(path); Toast("Copied path"); }
         catch (Exception ex) { Toast($"Copy failed: {ex.Message}"); }
     }
 

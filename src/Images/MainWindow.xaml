@@ -661,9 +661,35 @@
                                                     HorizontalContentAlignment="Stretch"
                                                     VerticalContentAlignment="Stretch"
                                                     ToolTip="{Binding Path}"
+                                                    Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}"
                                                     AutomationProperties.Name="{Binding FileName}"
                                                     AutomationProperties.HelpText="{Binding PositionText}"
                                                     AutomationProperties.ItemStatus="{Binding PositionText}">
+                                                <Button.ContextMenu>
+                                                    <ContextMenu Style="{StaticResource ViewportContextMenu}">
+                                                        <MenuItem Header="Open"
+                                                                  Command="{Binding PlacementTarget.Tag.OpenPreviewItemCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                  CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                            <MenuItem.Icon>
+                                                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
+                                                            </MenuItem.Icon>
+                                                        </MenuItem>
+                                                        <MenuItem Header="Reveal in Explorer"
+                                                                  Command="{Binding PlacementTarget.Tag.RevealPreviewItemCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                  CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                            <MenuItem.Icon>
+                                                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE838;" />
+                                                            </MenuItem.Icon>
+                                                        </MenuItem>
+                                                        <MenuItem Header="Copy path"
+                                                                  Command="{Binding PlacementTarget.Tag.CopyPreviewPathCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                  CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                            <MenuItem.Icon>
+                                                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
+                                                            </MenuItem.Icon>
+                                                        </MenuItem>
+                                                    </ContextMenu>
+                                                </Button.ContextMenu>
                                                 <Button.Style>
                                                     <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                                         <Setter Property="Background" Value="{StaticResource Surface0Brush}" />
@@ -990,9 +1016,35 @@
                                                 HorizontalContentAlignment="Stretch"
                                                 VerticalContentAlignment="Stretch"
                                                 ToolTip="{Binding Path}"
+                                                Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}"
                                                 AutomationProperties.Name="{Binding FileName}"
                                                 AutomationProperties.HelpText="{Binding PositionText}"
                                                 AutomationProperties.ItemStatus="{Binding PositionText}">
+                                            <Button.ContextMenu>
+                                                <ContextMenu Style="{StaticResource ViewportContextMenu}">
+                                                    <MenuItem Header="Open"
+                                                              Command="{Binding PlacementTarget.Tag.OpenPreviewItemCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                        <MenuItem.Icon>
+                                                            <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                    <MenuItem Header="Reveal in Explorer"
+                                                              Command="{Binding PlacementTarget.Tag.RevealPreviewItemCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                        <MenuItem.Icon>
+                                                            <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE838;" />
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                    <MenuItem Header="Copy path"
+                                                              Command="{Binding PlacementTarget.Tag.CopyPreviewPathCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                        <MenuItem.Icon>
+                                                            <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                </ContextMenu>
+                                            </Button.ContextMenu>
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                                     <Setter Property="Background" Value="{StaticResource Surface0Brush}" />

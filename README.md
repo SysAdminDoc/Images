@@ -30,7 +30,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Conflict-safe** — if a target name already exists in the folder, the rename preview shows exactly what it will become (`name (2).jpg`) before it commits.
 - **Recent Renames panel** — the last 10 renames are stacked on the side with **Undo** buttons.
 - **Full directory navigation** — open one photo, scroll through the whole folder with ← / → keys or the hover arrows. Wraps at the ends. Natural-sorted so `IMG_2.jpg` comes before `IMG_10.jpg`.
-- **Togglable folder filmstrip** — a compact, cached thumbnail rail sits in the bottom chrome for nearby files in the current folder, keeps the current item centered, and falls back to the side panel when hidden.
+- **Togglable folder filmstrip** — a compact, cached thumbnail rail sits in the bottom chrome for nearby files in the current folder, keeps the current item centered, supports right-click Open/Reveal/Copy actions, and falls back to the side panel when hidden.
 - **Photo metadata at a glance** — the Details panel surfaces embedded EXIF date, camera, lens, exposure, focal length, and GPS coordinates when present, without opening a separate info window or sending location data anywhere.
 - **Zoom + pan** — mouse wheel to zoom in/out about the cursor, drag to pan, double-click to toggle fit/1:1.
 - **Export a copy** to JPEG, PNG, WebP, AVIF, JXL, TIFF, BMP, GIF/APNG, PSD/PSB, PDF/EPS/SVG, TGA, DDS, QOI, EXR, HDR, JPEG 2000, X11/Magick, production/scientific, and portable bitmap formats.
