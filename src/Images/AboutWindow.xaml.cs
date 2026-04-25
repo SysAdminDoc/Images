@@ -7,6 +7,8 @@ namespace Images;
 
 public partial class AboutWindow : Window
 {
+    private string? _latestReleaseUrl;
+
     public AboutWindow()
     {
         InitializeComponent();
@@ -65,39 +67,77 @@ public partial class AboutWindow : Window
         // Manual check bypasses the 24-h throttle. Gate the button against concurrent clicks.
         if (sender is not System.Windows.Controls.Button btn) return;
         btn.IsEnabled = false;
+        btn.Content = "Checking...";
+        _latestReleaseUrl = null;
+        UpdateReleaseButton.Visibility = Visibility.Collapsed;
+        ShowUpdateStatus("Checking GitHub Releases...", "Info");
         try
         {
             var result = await UpdateCheckService.CheckAsync();
             UpdateCheckService.LastCheckedUtc = DateTime.UtcNow;
             if (result.Error is not null)
             {
-                System.Windows.MessageBox.Show(this, $"Update check failed: {result.Error}",
-                    "Images", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                ShowUpdateStatus($"Update check failed: {result.Error}", "Warning");
             }
             else if (result.NewerAvailable && result.LatestHtmlUrl is not null)
             {
-                var r = System.Windows.MessageBox.Show(this,
-                    $"A newer version is available: {result.LatestTag}\n\nOpen the release page?",
-                    "Images — update available",
-                    System.Windows.MessageBoxButton.YesNo,
-                    System.Windows.MessageBoxImage.Information);
-                if (r == System.Windows.MessageBoxResult.Yes)
-                {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = result.LatestHtmlUrl, UseShellExecute = true
-                    });
-                }
+                _latestReleaseUrl = result.LatestHtmlUrl;
+                UpdateReleaseButton.Visibility = Visibility.Visible;
+                ShowUpdateStatus($"A newer version is available: {result.LatestTag}.", "Update");
             }
             else
             {
-                System.Windows.MessageBox.Show(this, "You're on the latest version.",
-                    "Images", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                ShowUpdateStatus("You're on the latest version.", "Success");
             }
         }
         finally
         {
             btn.IsEnabled = true;
+            btn.Content = "Check for updates";
+        }
+    }
+
+    private void UpdateReleaseButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_latestReleaseUrl)) return;
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = _latestReleaseUrl,
+            UseShellExecute = true,
+        });
+    }
+
+    private void ShowUpdateStatus(string message, string tone)
+    {
+        UpdateStatusCard.Visibility = Visibility.Visible;
+        UpdateStatusText.Text = message;
+
+        switch (tone)
+        {
+            case "Warning":
+                UpdateStatusIcon.Text = "\uE783";
+                UpdateStatusIcon.Foreground = (System.Windows.Media.Brush)FindResource("YellowBrush");
+                UpdateStatusCard.BorderBrush = (System.Windows.Media.Brush)FindResource("YellowBrush");
+                UpdateStatusCard.Background = (System.Windows.Media.Brush)FindResource("WarningPanelBrush");
+                break;
+            case "Success":
+                UpdateStatusIcon.Text = "\uE73E";
+                UpdateStatusIcon.Foreground = (System.Windows.Media.Brush)FindResource("GreenBrush");
+                UpdateStatusCard.BorderBrush = (System.Windows.Media.Brush)FindResource("GreenBrush");
+                UpdateStatusCard.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x1F, 0xA6, 0xE3, 0xA1));
+                break;
+            case "Update":
+                UpdateStatusIcon.Text = "\uE895";
+                UpdateStatusIcon.Foreground = (System.Windows.Media.Brush)FindResource("AccentBrush");
+                UpdateStatusCard.BorderBrush = (System.Windows.Media.Brush)FindResource("AccentBrush");
+                UpdateStatusCard.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x1F, 0x89, 0xB4, 0xFA));
+                break;
+            default:
+                UpdateStatusIcon.Text = "\uE930";
+                UpdateStatusIcon.Foreground = (System.Windows.Media.Brush)FindResource("AccentBrush");
+                UpdateStatusCard.BorderBrush = (System.Windows.Media.Brush)FindResource("HairlineBrush");
+                UpdateStatusCard.Background = (System.Windows.Media.Brush)FindResource("SurfacePanelBrush");
+                break;
         }
     }
 }

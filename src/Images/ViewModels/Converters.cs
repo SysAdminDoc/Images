@@ -43,6 +43,21 @@ public sealed class PathToFileNameConverter : IValueConverter
         => throw new NotSupportedException();
 }
 
+public sealed class PathToParentConverter : IValueConverter
+{
+    public static readonly PathToParentConverter Instance = new();
+
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is not string s || string.IsNullOrWhiteSpace(s)) return "";
+        var parent = Directory.GetParent(s)?.FullName;
+        return string.IsNullOrWhiteSpace(parent) ? s : parent;
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
 public sealed class DropAcceptedIconConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
