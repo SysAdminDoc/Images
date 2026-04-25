@@ -36,11 +36,18 @@ public partial class AboutWindow : Window
     {
         // UseShellExecute=true is required for http: — and safe here because the URL is a
         // compile-time constant, not user input.
-        Process.Start(new ProcessStartInfo
+        try
         {
-            FileName = "https://github.com/SysAdminDoc/Images",
-            UseShellExecute = true,
-        });
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "https://github.com/SysAdminDoc/Images",
+                UseShellExecute = true,
+            });
+        }
+        catch (Exception ex)
+        {
+            ShowUpdateStatus($"Could not open GitHub: {ex.Message}", "Warning");
+        }
     }
 
     private void CrashLogButton_Click(object sender, RoutedEventArgs e)
@@ -48,13 +55,20 @@ public partial class AboutWindow : Window
         var dir = Path.GetDirectoryName(CrashLog.LogPath);
         if (dir is null || !Directory.Exists(dir)) return;
 
-        // /select, to pre-highlight the log file when it exists; fall back to opening the folder.
-        var psi = new ProcessStartInfo { FileName = "explorer.exe", UseShellExecute = false };
-        if (File.Exists(CrashLog.LogPath))
-            psi.ArgumentList.Add("/select," + CrashLog.LogPath);
-        else
-            psi.ArgumentList.Add(dir);
-        Process.Start(psi);
+        try
+        {
+            // /select, to pre-highlight the log file when it exists; fall back to opening the folder.
+            var psi = new ProcessStartInfo { FileName = "explorer.exe", UseShellExecute = false };
+            if (File.Exists(CrashLog.LogPath))
+                psi.ArgumentList.Add("/select," + CrashLog.LogPath);
+            else
+                psi.ArgumentList.Add(dir);
+            Process.Start(psi);
+        }
+        catch (Exception ex)
+        {
+            ShowUpdateStatus($"Could not open crash logs: {ex.Message}", "Warning");
+        }
     }
 
     private void CopyCodecReportButton_Click(object sender, RoutedEventArgs e)
@@ -116,11 +130,18 @@ public partial class AboutWindow : Window
     private void UpdateReleaseButton_Click(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(_latestReleaseUrl)) return;
-        Process.Start(new ProcessStartInfo
+        try
         {
-            FileName = _latestReleaseUrl,
-            UseShellExecute = true,
-        });
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = _latestReleaseUrl,
+                UseShellExecute = true,
+            });
+        }
+        catch (Exception ex)
+        {
+            ShowUpdateStatus($"Could not open release page: {ex.Message}", "Warning");
+        }
     }
 
     private void ShowUpdateStatus(string message, string tone)
