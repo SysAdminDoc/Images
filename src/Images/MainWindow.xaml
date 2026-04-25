@@ -425,7 +425,10 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Left: current file info -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}">
                         <TextBlock Text="{Binding CurrentFileName}"
                                    Foreground="{StaticResource TextBrush}"
                                    FontWeight="SemiBold"
@@ -472,6 +475,23 @@
                                            VerticalAlignment="Center" />
                             </StackPanel>
                         </Border>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
+                        <TextBlock Text="Ready"
+                                   Foreground="{StaticResource TextBrush}"
+                                   FontWeight="SemiBold"
+                                   FontSize="13"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="  ·  "
+                                   Foreground="{StaticResource OverlayBrush}"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="Open or drop an image to start reviewing."
+                                   Foreground="{StaticResource SubtextBrush}"
+                                   VerticalAlignment="Center" />
                     </StackPanel>
 
                     <!-- Center: primary nav + rotate + delete cluster -->
@@ -530,6 +550,45 @@
                                 VerticalAlignment="Top"
                                 Margin="8,0,0,0" />
                     </Grid>
+
+                    <Border Style="{StaticResource Card}"
+                            Background="#1F89B4FA"
+                            BorderBrush="{StaticResource AccentBrush}"
+                            Margin="0,0,0,20"
+                            Visibility="{Binding HasUpdateAvailable, Converter={StaticResource BoolToVis}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="&#xE895;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="14"
+                                       Foreground="{StaticResource AccentBrush}"
+                                       Margin="0,1,10,0"
+                                       VerticalAlignment="Top" />
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{Binding LatestUpdateTag, StringFormat=Update {0} is available}"
+                                           FontSize="12.5"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}" />
+                                <TextBlock Text="Open the release page when you are ready to install it."
+                                           Style="{StaticResource Text.Hint}"
+                                           Margin="0,3,0,0" />
+                            </StackPanel>
+                            <Button Grid.Column="2"
+                                    Content="View"
+                                    Command="{Binding OpenLatestUpdateCommand}"
+                                    Style="{StaticResource ChromeButton}"
+                                    Padding="12,4"
+                                    MinHeight="28"
+                                    Margin="12,0,0,0"
+                                    VerticalAlignment="Center"
+                                    AutomationProperties.Name="View available update" />
+                        </Grid>
+                    </Border>
 
                     <!-- RENAME section -->
                     <TextBlock Text="Rename" Style="{StaticResource SectionLabel}" />
@@ -616,7 +675,7 @@
                     </Border>
 
                     <!-- Live status card — preview + colored status dot -->
-                    <Border Style="{StaticResource Card}" Margin="0,14,0,0">
+                    <Border Style="{StaticResource StatusCard}" Margin="0,14,0,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -766,26 +825,36 @@
                                     <Button Style="{StaticResource ChromeButton}"
                                             HorizontalAlignment="Stretch"
                                             HorizontalContentAlignment="Stretch"
-                                            Padding="13,9"
+                                            Padding="13,10"
                                             Margin="0,0,0,8"
                                             Command="{Binding DataContext.OpenRecentFolderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                             CommandParameter="{Binding}"
                                             ToolTip="{Binding}"
                                             AutomationProperties.Name="{Binding}">
-                                        <StackPanel Orientation="Horizontal">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
                                             <TextBlock Text="&#xE8B7;"
                                                        FontFamily="{StaticResource IconFontFamily}"
                                                        FontSize="13"
                                                        Foreground="{StaticResource SubtextBrush}"
                                                        VerticalAlignment="Center"
                                                        Margin="0,0,10,0" />
-                                            <TextBlock Text="{Binding Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}"
-                                                       FontSize="12.5"
-                                                       FontWeight="SemiBold"
-                                                       TextTrimming="CharacterEllipsis"
-                                                       Foreground="{StaticResource TextBrush}"
-                                                       VerticalAlignment="Center" />
-                                        </StackPanel>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}"
+                                                           FontSize="12.5"
+                                                           FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Foreground="{StaticResource TextBrush}" />
+                                                <TextBlock Text="{Binding Converter={x:Static vm:PathToParentConverter.Instance}, Mode=OneWay}"
+                                                           FontSize="11.5"
+                                                           Margin="0,2,0,0"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Foreground="{StaticResource OverlayBrush}" />
+                                            </StackPanel>
+                                        </Grid>
                                     </Button>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
