@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using Images.Services;
 using Images.ViewModels;
@@ -67,29 +68,33 @@ public partial class MainWindow : Window
 
     private void CenterCurrentPreviewItems()
     {
-        CenterCurrentPreviewItem(FilmstripItems, FilmstripScroll);
-        CenterCurrentPreviewItem(SidePreviewItems, SidePreviewScroll);
+        CenterCurrentPreviewItem(FilmstripItems);
+        CenterCurrentPreviewItem(SidePreviewItems);
     }
 
-    private static void CenterCurrentPreviewItem(ItemsControl items, ScrollViewer scroll)
+    private static void CenterCurrentPreviewItem(ListBox items)
     {
-        if (!scroll.IsVisible || items.Items.Count == 0) return;
+        if (!items.IsVisible || items.Items.Count == 0) return;
 
-        items.UpdateLayout();
-        scroll.UpdateLayout();
-        if (scroll.ViewportWidth <= 0) return;
-
-        object? current = null;
+        FolderPreviewItem? current = null;
         foreach (var item in items.Items)
         {
-            if (item is FolderPreviewItem { IsCurrent: true })
+            if (item is FolderPreviewItem previewItem && previewItem.IsCurrent)
             {
-                current = item;
+                current = previewItem;
                 break;
             }
         }
 
         if (current is null) return;
+        items.ScrollIntoView(current);
+        items.UpdateLayout();
+
+        var scroll = FindVisualChild<ScrollViewer>(items);
+        if (scroll is null) return;
+
+        scroll.UpdateLayout();
+        if (scroll.ViewportWidth <= 0) return;
         if (items.ItemContainerGenerator.ContainerFromItem(current) is not FrameworkElement container) return;
         if (container.RenderSize.Width <= 0) return;
 
@@ -108,6 +113,28 @@ public partial class MainWindow : Window
         if (double.IsNaN(target) || double.IsInfinity(target)) return;
 
         scroll.ScrollToHorizontalOffset(Math.Clamp(target, 0, scroll.ScrollableWidth));
+    }
+
+    private static T? FindVisualChild<T>(DependencyObject parent)
+        where T : DependencyObject
+    {
+        var childCount = VisualTreeHelper.GetChildrenCount(parent);
+        for (var i = 0; i < childCount; i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T match) return match;
+
+            var descendant = FindVisualChild<T>(child);
+            if (descendant is not null) return descendant;
+        }
+
+        return null;
+    }
+
+    private void PreviewThumbnail_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: FolderPreviewItem item })
+            Vm.EnsurePreviewThumbnailCommand.Execute(item);
     }
 
     private void OnSourceInitialized(object? sender, EventArgs e)

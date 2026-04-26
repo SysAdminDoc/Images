@@ -634,26 +634,46 @@
                         <Border Grid.Row="0"
                                 Margin="0,0,0,10"
                                 Visibility="{Binding ShowFilmstrip, Converter={StaticResource BoolToVis}}">
-                            <ScrollViewer x:Name="FilmstripScroll"
-                                          HorizontalScrollBarVisibility="Auto"
-                                          VerticalScrollBarVisibility="Disabled"
-                                          Padding="0,0,0,4"
-                                          CanContentScroll="False"
-                                          MaxHeight="110">
-                                <ItemsControl x:Name="FilmstripItems"
-                                              ItemsSource="{Binding FolderPreviewItems}"
-                                              KeyboardNavigation.DirectionalNavigation="Cycle"
-                                              KeyboardNavigation.TabNavigation="Continue"
-                                              AutomationProperties.Name="Bottom folder filmstrip">
-                                    <ItemsControl.ItemsPanel>
+                            <ListBox x:Name="FilmstripItems"
+                                     ItemsSource="{Binding FolderPreviewItems}"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Padding="0,0,0,4"
+                                     MaxHeight="110"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                     ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                     ScrollViewer.CanContentScroll="True"
+                                     VirtualizingPanel.IsVirtualizing="True"
+                                     VirtualizingPanel.VirtualizationMode="Recycling"
+                                     VirtualizingPanel.CacheLength="2,2"
+                                     VirtualizingPanel.CacheLengthUnit="Item"
+                                     KeyboardNavigation.DirectionalNavigation="Cycle"
+                                     KeyboardNavigation.TabNavigation="Continue"
+                                     AutomationProperties.Name="Bottom folder filmstrip">
+                                    <ListBox.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal" />
+                                            <VirtualizingStackPanel Orientation="Horizontal" />
                                         </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
+                                    </ListBox.ItemsPanel>
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Padding" Value="0" />
+                                            <Setter Property="Margin" Value="0" />
+                                            <Setter Property="Focusable" Value="False" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                        <ContentPresenter />
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Button Command="{Binding DataContext.OpenPreviewItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                     CommandParameter="{Binding}"
+                                                    Loaded="PreviewThumbnail_Loaded"
                                                     Width="78"
                                                     MinHeight="88"
                                                     Margin="0,0,7,0"
@@ -740,9 +760,8 @@
                                                 </StackPanel>
                                             </Button>
                                         </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
                         </Border>
 
                         <!-- Current file info gets its own row so command clusters never collide on narrow widths. -->
@@ -989,26 +1008,46 @@
                          filmstrip is hidden so thumbnail jumping is never lost. -->
                     <StackPanel Visibility="{Binding ShowSideFolderPreview, Converter={StaticResource BoolToVis}}">
                         <TextBlock Text="Folder preview" Style="{StaticResource SectionLabel}" />
-                        <ScrollViewer x:Name="SidePreviewScroll"
-                                      HorizontalScrollBarVisibility="Auto"
-                                      VerticalScrollBarVisibility="Disabled"
-                                      Padding="0,0,0,6"
-                                      Margin="0,0,0,16"
-                                      CanContentScroll="False">
-                            <ItemsControl x:Name="SidePreviewItems"
-                                          ItemsSource="{Binding FolderPreviewItems}"
-                                          KeyboardNavigation.DirectionalNavigation="Cycle"
-                                          KeyboardNavigation.TabNavigation="Continue"
-                                          AutomationProperties.Name="Folder preview thumbnails">
-                                <ItemsControl.ItemsPanel>
+                        <ListBox x:Name="SidePreviewItems"
+                                 ItemsSource="{Binding FolderPreviewItems}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Padding="0,0,0,6"
+                                 Margin="0,0,0,16"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                 ScrollViewer.CanContentScroll="True"
+                                 VirtualizingPanel.IsVirtualizing="True"
+                                 VirtualizingPanel.VirtualizationMode="Recycling"
+                                 VirtualizingPanel.CacheLength="2,2"
+                                 VirtualizingPanel.CacheLengthUnit="Item"
+                                 KeyboardNavigation.DirectionalNavigation="Cycle"
+                                 KeyboardNavigation.TabNavigation="Continue"
+                                 AutomationProperties.Name="Folder preview thumbnails">
+                                <ListBox.ItemsPanel>
                                     <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" />
+                                        <VirtualizingStackPanel Orientation="Horizontal" />
                                     </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Padding" Value="0" />
+                                        <Setter Property="Margin" Value="0" />
+                                        <Setter Property="Focusable" Value="False" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <ContentPresenter />
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <Button Command="{Binding DataContext.OpenPreviewItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                 CommandParameter="{Binding}"
+                                                Loaded="PreviewThumbnail_Loaded"
                                                 Width="88"
                                                 MinHeight="104"
                                                 Margin="0,0,8,0"
@@ -1095,9 +1134,8 @@
                                             </StackPanel>
                                         </Button>
                                     </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                     </StackPanel>
 
                     <!-- RENAME section -->

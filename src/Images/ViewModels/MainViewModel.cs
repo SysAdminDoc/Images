@@ -73,6 +73,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenPreviewItemCommand = new RelayCommand(p => OpenPreviewItem(p as FolderPreviewItem), p => p is FolderPreviewItem);
         RevealPreviewItemCommand = new RelayCommand(p => RevealPreviewItem(p as FolderPreviewItem), p => p is FolderPreviewItem);
         CopyPreviewPathCommand = new RelayCommand(p => CopyPreviewPath(p as FolderPreviewItem), p => p is FolderPreviewItem);
+        EnsurePreviewThumbnailCommand = new RelayCommand(p => EnsurePreviewThumbnail(p as FolderPreviewItem), p => p is FolderPreviewItem);
         ToggleFilmstripCommand = new RelayCommand(ToggleFilmstrip, () => CanToggleFilmstrip);
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
@@ -585,9 +586,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var token = _folderPreviewCts.Token;
         var files = _nav.Files;
         var count = files.Count;
-        var indices = BuildPreviewIndices(count, _nav.CurrentIndex);
 
-        foreach (var index in indices)
+        for (var index = 0; index < count; index++)
         {
             var item = new FolderPreviewItem(
                 files[index],
@@ -596,28 +596,27 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 index == _nav.CurrentIndex);
 
             FolderPreviewItems.Add(item);
-            QueueThumbnailLoad(item, _folderPreviewGeneration, token);
+            if (ShouldPreloadPreviewThumbnail(count, _nav.CurrentIndex, index))
+                QueueThumbnailLoad(item, _folderPreviewGeneration, token);
         }
 
         RaiseFolderPreviewState();
     }
 
-    private static IReadOnlyList<int> BuildPreviewIndices(int count, int currentIndex)
+    private static bool ShouldPreloadPreviewThumbnail(int count, int currentIndex, int index)
     {
         if (count <= 9)
-            return Enumerable.Range(0, count).ToArray();
+            return true;
 
-        var indices = new List<int>(9);
-        for (var offset = -4; offset <= 4; offset++)
-        {
-            var index = (currentIndex + offset + count) % count;
-            indices.Add(index);
-        }
-        return indices;
+        var forward = (index - currentIndex + count) % count;
+        var backward = (currentIndex - index + count) % count;
+        return Math.Min(forward, backward) <= 4;
     }
 
     private void QueueThumbnailLoad(FolderPreviewItem item, int generation, CancellationToken token)
     {
+        if (!item.TryMarkThumbnailRequested()) return;
+
         _ = Task.Run(async () =>
         {
             try
@@ -652,6 +651,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 // Folder preview is opportunistic; decode failures are already logged by the cache.
             }
         });
+    }
+
+    private void EnsurePreviewThumbnail(FolderPreviewItem? item)
+    {
+        if (item is null || !FolderPreviewItems.Contains(item)) return;
+        QueueThumbnailLoad(item, _folderPreviewGeneration, _folderPreviewCts.Token);
     }
 
     private void OpenPreviewItem(FolderPreviewItem? item)
@@ -816,6 +821,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenPreviewItemCommand { get; }
     public ICommand RevealPreviewItemCommand { get; }
     public ICommand CopyPreviewPathCommand { get; }
+    public ICommand EnsurePreviewThumbnailCommand { get; }
     public ICommand ToggleFilmstripCommand { get; }
 
     // -------------------- Navigation --------------------
@@ -1492,6 +1498,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 public sealed class FolderPreviewItem : ObservableObject
 {
     private ImageSource? _thumbnail;
+    private bool _thumbnailRequested;
 
     public FolderPreviewItem(string path, string fileName, string positionText, bool isCurrent)
     {
@@ -1517,4 +1524,11 @@ public sealed class FolderPreviewItem : ObservableObject
     }
 
     public bool HasThumbnail => Thumbnail is not null;
+
+    public bool TryMarkThumbnailRequested()
+    {
+        if (_thumbnailRequested || HasThumbnail) return false;
+        _thumbnailRequested = true;
+        return true;
+    }
 }
