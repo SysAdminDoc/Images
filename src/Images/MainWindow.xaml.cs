@@ -361,6 +361,10 @@ public partial class MainWindow : Window
                 Vm.OpenCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.V when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
+                Vm.PasteFromClipboardCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.R when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
                 // V15-04: Ctrl+Shift+R reload current image.
                 Vm.ReloadCommand.Execute(null);

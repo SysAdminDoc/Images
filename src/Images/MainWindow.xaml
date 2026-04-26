@@ -50,6 +50,11 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Paste from clipboard" Command="{Binding PasteFromClipboardCommand}" InputGestureText="Ctrl+V">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE77F;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="Reload" Command="{Binding ReloadCommand}" InputGestureText="Ctrl+Shift+R">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE72C;" />
@@ -84,6 +89,11 @@
                         <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Open with default app" Command="{Binding OpenInDefaultAppCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B5;" />
                             </MenuItem.Icon>
                         </MenuItem>
                         <MenuItem Header="Metadata HUD"
@@ -617,22 +627,24 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+O" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open image" />
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+S" />
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Save a copy" />
-                                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+P" />
-                                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Print current image" />
-                                        <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Del" />
-                                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Send to Recycle Bin" />
-                                        <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+R" />
-                                        <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Reload current image" />
-                                        <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
-                                        <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
-                                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
-                                        <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+V" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Paste image from clipboard" />
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+S" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Save a copy" />
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+P" />
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Print current image" />
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Del" />
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Send to Recycle Bin" />
+                                        <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+R" />
+                                        <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Reload current image" />
+                                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
+                                        <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
+                                        <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
+                                        <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
                                     </Grid>
                                 </StackPanel>
                             </ScrollViewer>
