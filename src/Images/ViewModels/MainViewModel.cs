@@ -24,6 +24,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool _isDisposed;
     private int _metadataGeneration;
     private bool _isFilmstripVisible;
+    private bool _isMetadataHudVisible;
 
     private readonly DispatcherTimer _hintTimer;
 
@@ -39,6 +40,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _hintTimer.Tick += (_, _) => { _hintTimer.Stop(); ShowGestureHint = false; };
 
         _isFilmstripVisible = SettingsService.Instance.GetBool(Keys.FilmstripVisible, true);
+        _isMetadataHudVisible = SettingsService.Instance.GetBool(Keys.MetadataHudVisible, false);
 
         OpenCommand = new RelayCommand(OpenFileDialog);
         NextCommand = new RelayCommand(Next, () => HasImage);
@@ -75,6 +77,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         CopyPreviewPathCommand = new RelayCommand(p => CopyPreviewPath(p as FolderPreviewItem), p => p is FolderPreviewItem);
         EnsurePreviewThumbnailCommand = new RelayCommand(p => EnsurePreviewThumbnail(p as FolderPreviewItem), p => p is FolderPreviewItem);
         ToggleFilmstripCommand = new RelayCommand(ToggleFilmstrip, () => CanToggleFilmstrip);
+        ToggleMetadataHudCommand = new RelayCommand(ToggleMetadataHud, () => CanToggleMetadataHud);
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
         // panel renders prior-session folders before the user opens anything.
@@ -115,6 +118,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (Set(ref _currentImage, value))
             {
                 Raise(nameof(HasDisplayImage));
+                Raise(nameof(CanToggleMetadataHud));
+                Raise(nameof(ShowMetadataHud));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -275,7 +280,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool IsPeekMode
     {
         get => _isPeekMode;
-        set => Set(ref _isPeekMode, value);
+        set
+        {
+            if (Set(ref _isPeekMode, value))
+            {
+                Raise(nameof(CanToggleMetadataHud));
+                Raise(nameof(ShowMetadataHud));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
     }
     public string CurrentFileName => CurrentPath is null ? "" : Path.GetFileName(CurrentPath);
     public string CurrentFolder => CurrentPath is null ? "" : Path.GetDirectoryName(CurrentPath) ?? "";
@@ -498,6 +511,36 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         get => _metadataStatusText;
         private set => Set(ref _metadataStatusText, value);
+    }
+
+    public bool CanToggleMetadataHud => HasDisplayImage && !IsPeekMode;
+
+    public bool IsMetadataHudVisible
+    {
+        get => _isMetadataHudVisible;
+        private set
+        {
+            if (Set(ref _isMetadataHudVisible, value))
+            {
+                SettingsService.Instance.SetBool(Keys.MetadataHudVisible, value);
+                Raise(nameof(ShowMetadataHud));
+                Raise(nameof(MetadataHudToggleTooltip));
+            }
+        }
+    }
+
+    public bool ShowMetadataHud => CanToggleMetadataHud && IsMetadataHudVisible;
+
+    public string MetadataHudToggleTooltip => IsMetadataHudVisible
+        ? "Hide metadata HUD (I)"
+        : "Show metadata HUD (I)";
+
+    private void ToggleMetadataHud()
+    {
+        if (!CanToggleMetadataHud) return;
+
+        IsMetadataHudVisible = !IsMetadataHudVisible;
+        Toast(IsMetadataHudVisible ? "Metadata HUD on" : "Metadata HUD off");
     }
 
     private void RefreshPhotoMetadata(string path)
@@ -823,6 +866,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand CopyPreviewPathCommand { get; }
     public ICommand EnsurePreviewThumbnailCommand { get; }
     public ICommand ToggleFilmstripCommand { get; }
+    public ICommand ToggleMetadataHudCommand { get; }
 
     // -------------------- Navigation --------------------
 
