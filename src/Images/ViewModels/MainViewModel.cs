@@ -78,6 +78,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         EnsurePreviewThumbnailCommand = new RelayCommand(p => EnsurePreviewThumbnail(p as FolderPreviewItem), p => p is FolderPreviewItem);
         ToggleFilmstripCommand = new RelayCommand(ToggleFilmstrip, () => CanToggleFilmstrip);
         ToggleMetadataHudCommand = new RelayCommand(ToggleMetadataHud, () => CanToggleMetadataHud);
+        PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard);
+        OpenInDefaultAppCommand = new RelayCommand(OpenInDefaultApp, () => HasImage);
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
         // panel renders prior-session folders before the user opens anything.
@@ -867,6 +869,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand EnsurePreviewThumbnailCommand { get; }
     public ICommand ToggleFilmstripCommand { get; }
     public ICommand ToggleMetadataHudCommand { get; }
+    public ICommand PasteFromClipboardCommand { get; }
+    public ICommand OpenInDefaultAppCommand { get; }
 
     // -------------------- Navigation --------------------
 
@@ -940,6 +944,74 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
         {
             Toast("Folder unreachable");
+        }
+    }
+
+    private void PasteFromClipboard()
+    {
+        // File list (Explorer copy/cut) — open the first supported item.
+        if (System.Windows.Clipboard.ContainsFileDropList())
+        {
+            var files = System.Windows.Clipboard.GetFileDropList();
+            foreach (string? f in files)
+            {
+                if (f is not null && SupportedImageFormats.IsSupported(f) && File.Exists(f))
+                {
+                    OpenFile(f);
+                    return;
+                }
+            }
+            Toast("No supported image in the clipboard file list");
+            return;
+        }
+
+        // Pixel data (screenshot, web image, etc.) — save to a clipboard-specific temp folder
+        // so the folder scanner never mixes these with other files in %TEMP%.
+        if (System.Windows.Clipboard.ContainsImage())
+        {
+            var bmp = System.Windows.Clipboard.GetImage();
+            if (bmp is null) { Toast("Could not read clipboard image data"); return; }
+
+            var clipDir = AppStorage.TryGetAppDirectory("clipboard");
+            if (clipDir is null) { Toast("Paste failed: could not create temp folder"); return; }
+
+            try
+            {
+                var stamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var tempPath = Path.Combine(clipDir, $"clipboard-{stamp}.png");
+
+                var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+                encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bmp));
+                using (var stream = File.Create(tempPath))
+                    encoder.Save(stream);
+
+                OpenFile(tempPath);
+                Toast("Pasted from clipboard");
+            }
+            catch (Exception ex)
+            {
+                Toast($"Paste failed: {ex.Message}");
+            }
+            return;
+        }
+
+        Toast("Nothing image-like in the clipboard");
+    }
+
+    private void OpenInDefaultApp()
+    {
+        if (CurrentPath is null) return;
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = CurrentPath,
+                UseShellExecute = true,
+            });
+        }
+        catch (Exception ex)
+        {
+            Toast($"Could not open: {ex.Message}");
         }
     }
 
@@ -1058,14 +1130,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void SetLoadError(Exception ex)
     {
-        var needsGhostscript = ex.Message.Contains("requires Ghostscript", StringComparison.OrdinalIgnoreCase);
         var path = _nav.CurrentPath;
         var ext = path is null ? "" : Path.GetExtension(path);
-        var suggestion = string.IsNullOrEmpty(ext)
-            ? null
-            : SupportedImageFormats.SuggestionForUnsupported(ext);
 
-        if (needsGhostscript)
+        // Ghostscript dependency — special case with codec-details link.
+        if (ex.Message.Contains("requires Ghostscript", StringComparison.OrdinalIgnoreCase))
         {
             LoadErrorTitle = "Document preview needs Ghostscript";
             LoadErrorMessage = "This file type depends on Ghostscript for document and Adobe Illustrator previews. Images can use a bundled runtime, IMAGES_GHOSTSCRIPT_DIR, or an installed Ghostscript copy.";
@@ -1075,11 +1144,45 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return;
         }
 
-        // Item 86: surface a recognized format-family hint when one applies — gives the user a
-        // concrete next step (e.g. "open in VLC", "extract the archive") instead of "decode failed".
+        // Specific exception types carry their own actionable message.
+        if (ex is FileNotFoundException)
+        {
+            LoadErrorTitle = "File not found";
+            LoadErrorMessage = "This file no longer exists. It may have been moved, renamed, or deleted.";
+            LoadErrorHelpText = "Navigate to another image or open a new file.";
+            LoadErrorShowsCodecDetails = false;
+            Toast("File not found");
+            return;
+        }
+
+        if (ex is UnauthorizedAccessException)
+        {
+            LoadErrorTitle = "Access denied";
+            LoadErrorMessage = "You do not have permission to read this file.";
+            LoadErrorHelpText = "Check the file's security properties in Explorer, or try running Images as Administrator.";
+            LoadErrorShowsCodecDetails = false;
+            Toast("Access denied");
+            return;
+        }
+
+        if (ex is OutOfMemoryException)
+        {
+            LoadErrorTitle = "Image too large";
+            LoadErrorMessage = "This image is too large to fit in available memory.";
+            LoadErrorHelpText = "Close other applications to free memory, or try reopening the file.";
+            LoadErrorShowsCodecDetails = false;
+            Toast("Image too large for available memory");
+            return;
+        }
+
+        // Item 86 enhancement: format-specific decode hints for supported-but-failing types.
+        var decodeHint = string.IsNullOrEmpty(ext)
+            ? null
+            : SupportedImageFormats.SuggestionForDecodeFailure(ext);
+
         LoadErrorTitle = "This image couldn't be displayed";
         LoadErrorMessage = $"This file could not be decoded. {ex.Message}";
-        LoadErrorHelpText = suggestion
+        LoadErrorHelpText = decodeHint
             ?? "Try another file, reveal the file in Explorer, or reload after another app finishes writing it.";
         LoadErrorShowsCodecDetails = false;
         Toast("Could not decode this file");
