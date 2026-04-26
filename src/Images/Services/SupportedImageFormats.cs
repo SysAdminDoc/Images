@@ -176,6 +176,58 @@ public static class SupportedImageFormats
         };
     }
 
+    /// <summary>
+    /// Returns a user-facing decode hint for a <em>supported</em> extension that failed to load,
+    /// giving the user a concrete next step instead of a bare decode error.
+    /// Returns null when no format-specific advice applies (the generic fallback handles it).
+    /// </summary>
+    public static string? SuggestionForDecodeFailure(string extension)
+    {
+        var ext = extension.TrimStart('.').ToLowerInvariant();
+        return ext switch
+        {
+            "heic" or "heif" or "hif" or "avif"
+                => "HEIC/AVIF files need a codec from the Microsoft Store. " +
+                   "Search for \"HEVC Video Extensions\" in the Microsoft Store and install it, then reload.",
+
+            "jxl"
+                => "JPEG XL decoding requires Windows 11 24H2 or later. " +
+                   "Update Windows or convert the file to PNG/WebP first.",
+
+            "cr2" or "cr3" or "nef" or "nrw" or "arw" or "rw2" or "orf" or "raf"
+                or "dng" or "raw" or "rwz" or "erf" or "3fr" or "mef" or "pef"
+                or "srw" or "x3f" or "srf" or "mrw"
+                => "Camera RAW files with unusual sensor profiles sometimes fail. " +
+                   "Try converting to DNG with Adobe DNG Converter, then reload.",
+
+            "psd" or "psb"
+                => "Photoshop files with 32-bit channels or newer adjustment-layer types may not decode. " +
+                   "Export as PNG or TIFF from Photoshop and open the export.",
+
+            "tif" or "tiff"
+                => "This TIFF uses a compression scheme or channel layout that couldn't be decoded. " +
+                   "Re-save as a standard (LZW or uncompressed) TIFF from another editor and reload.",
+
+            "svg" or "svgz"
+                => "SVG files with embedded scripts, advanced filters, or external references may fail to render. " +
+                   "Open in a browser to preview, or export as PNG.",
+
+            "xcf"
+                => "GIMP XCF files with newer blend modes may not decode. " +
+                   "Flatten and export as PNG or TIFF from GIMP, then open the export.",
+
+            "exr"
+                => "This OpenEXR file uses a channel layout that couldn't be decoded. " +
+                   "Convert to PNG or TIFF using ImageMagick or another EXR-capable viewer.",
+
+            "pdf" or "ps" or "ps2" or "ps3" or "eps" or "epsf" or "epsi" or "ai"
+                => "Document previews require Ghostscript. " +
+                   "Install Ghostscript or place an approved runtime in the app's Codecs\\Ghostscript folder.",
+
+            _ => null
+        };
+    }
+
     private static string Normalize(string extension)
     {
         if (string.IsNullOrEmpty(extension)) return string.Empty;
