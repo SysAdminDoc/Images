@@ -365,6 +365,10 @@ public partial class MainWindow : Window
                 Vm.PasteFromClipboardCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.OemComma when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
+                Vm.SettingsCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.R when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
                 // V15-04: Ctrl+Shift+R reload current image.
                 Vm.ReloadCommand.Execute(null);

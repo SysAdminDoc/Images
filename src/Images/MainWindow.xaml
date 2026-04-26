@@ -96,6 +96,11 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B5;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Strip GPS location" Command="{Binding StripLocationCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE707;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="Metadata HUD"
                                   Command="{Binding ToggleMetadataHudCommand}"
                                   InputGestureText="I"
@@ -161,6 +166,12 @@
                         <MenuItem Header="Move to Recycle Bin…" Command="{Binding DeleteCommand}" InputGestureText="Del">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE74D;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <Separator />
+                        <MenuItem Header="Settings…" Command="{Binding SettingsCommand}" InputGestureText="Ctrl+,">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE713;" />
                             </MenuItem.Icon>
                         </MenuItem>
                     </ContextMenu>
@@ -627,7 +638,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+O" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open image" />
@@ -641,10 +652,12 @@
                                         <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Send to Recycle Bin" />
                                         <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+R" />
                                         <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Reload current image" />
-                                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
-                                        <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
-                                        <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
-                                        <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
+                                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+," />
+                                        <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Settings" />
+                                        <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
+                                        <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
+                                        <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
+                                        <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
                                     </Grid>
                                 </StackPanel>
                             </ScrollViewer>
@@ -1048,6 +1061,7 @@
                             <Border Width="1" Height="22" Background="{StaticResource HairlineBrush}" Margin="12,6" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}" Content="&#xE838;" ToolTip="Reveal in Explorer" AutomationProperties.Name="Reveal image in Explorer" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="Copy path" Margin="4,0,0,0" AutomationProperties.Name="Copy file path" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding StripLocationCommand}" Content="&#xE707;" ToolTip="Strip GPS location from file" Margin="4,0,0,0" AutomationProperties.Name="Strip GPS location" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding RefreshCommand}" Content="&#xE72C;" ToolTip="Refresh folder (F5)" Margin="4,0,0,0" AutomationProperties.Name="Refresh folder" />
                         </WrapPanel>
                     </Grid>
@@ -1080,14 +1094,19 @@
                         </StackPanel>
                         <!-- V15-06: click the info icon for the About dialog. Keeps the header
                              visually clean — no visible button chrome, just an accent on hover. -->
-                        <Button Grid.Column="1"
-                                Command="{Binding AboutCommand}"
-                                Style="{StaticResource ToolbarButton}"
-                                Content="&#xE946;"
-                                ToolTip="About Images"
-                                AutomationProperties.Name="About Images"
-                                VerticalAlignment="Top"
-                                Margin="8,0,0,0" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" Margin="8,0,0,0">
+                            <Button Command="{Binding SettingsCommand}"
+                                    Style="{StaticResource ToolbarButton}"
+                                    Content="&#xE713;"
+                                    ToolTip="Settings (Ctrl+,)"
+                                    AutomationProperties.Name="Settings" />
+                            <Button Command="{Binding AboutCommand}"
+                                    Style="{StaticResource ToolbarButton}"
+                                    Content="&#xE946;"
+                                    ToolTip="About Images"
+                                    AutomationProperties.Name="About Images"
+                                    Margin="4,0,0,0" />
+                        </StackPanel>
                     </Grid>
 
                     <Border Style="{StaticResource Card}"

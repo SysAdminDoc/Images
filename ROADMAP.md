@@ -85,7 +85,7 @@ Scoring shorthand: `F/I/E/R` = Fit, Impact, Effort, Risk on 1-5 where higher fit
 | # | Candidate | Category | Prevalence | F/I/E/R | Dependencies | Novelty | Tier |
 |---:|---|---|---|---|---|---|---|
 | 1 | Capability matrix UI for open/animate/pages/metadata/export/sandbox/runtime limits [[S-PICVIEW-ORG]](https://picview.org/) [[S-BIOFORMATS]](https://www.openmicroscopy.org/bio-formats/) | UX, docs, codecs | table-stakes for broad-codec apps | 5/5/3/2 | codec report service | parity plus trust moat | **Now** |
-| 2 | Full settings window: General, Appearance, Privacy, Advanced, Hotkeys | UX, accessibility | table-stakes | 5/5/3/2 | SQLite settings | parity | **Now** |
+| 2 | Full settings window: General, Appearance, Privacy, Advanced, Hotkeys | UX, accessibility | table-stakes | 5/5/3/2 | SQLite settings | parity | **Now** ✓ *partial — Viewer (filmstrip, metadata HUD) + Privacy (update check) shipped v0.1.9* |
 | 3 | High-contrast theme using `SystemColors` and reduced-motion toggle | accessibility | table-stakes | 5/4/2/1 | settings UI | parity | **Now** |
 | 4 | Localization resource extraction and BCP-47 language setting | i18n/l10n | common in mature viewers | 4/3/4/2 | string inventory | parity | **Next** |
 | 5 | Keyboard shortcut editor with conflict detection | UX, accessibility | common in power tools | 5/3/3/2 | hotkey table | parity | **Next** |
@@ -144,7 +144,7 @@ Scoring shorthand: `F/I/E/R` = Fit, Impact, Effort, Risk on 1-5 where higher fit
 | 58 | Macro recorder/action runner as JSON [[S-PHOTODEMON]](https://photodemon.org/) | automation, dev-experience | rare | 4/4/5/4 | batch processor | leapfrog | **Later** |
 | 59 | Squoosh-style visual-diff converter | UX, batch | rare desktop | 5/5/4/3 | export service + compare view | leapfrog | **Next** |
 | 60 | Lossless JPEG transforms and optimizer | performance, batch | common | 4/4/3/3 | codec-specific operations | parity | **Later** |
-| 61 | External editor handoff with watched reload | integrations, UX | common | 5/3/2/2 | reload watcher | parity | **Now** |
+| 61 | External editor handoff with watched reload | integrations, UX | common | 5/3/2/2 | reload watcher | parity | **Now** ✓ *file-watch auto-reload shipped v0.1.9 — `FileSystemWatcher` per open file, 800 ms debounce, toast on reload* |
 | 62 | Scanner acquire/import flow [[S-FASTSTONE]](https://www.faststone.org/FSViewerDetail.htm) | platform/OS | common in older viewers | 2/2/4/3 | WIA/TWAIN research | parity | **Later** |
 | 63 | Contact sheet generator [[S-XNVIEW-HOME]](https://www.xnview.com/en/) [[S-FASTSTONE]](https://www.faststone.org/FSViewerDetail.htm) | docs/export | common | 3/3/3/2 | batch/layout engine | parity | **Later** |
 | 64 | Slideshow builder | UX/export | common but low-fit | 2/2/4/2 | media timeline | parity | **UC** |
@@ -321,7 +321,7 @@ The current codebase inherits the full WIC + Magick.NET + (eventually) libheif/l
 
 No competitor in the OSS viewer space makes network egress auditable. That's the specific moat.
 
-- [ ] **P-01** *P0* — **One-click "Strip location"** in the toolbar + right-click menu. Strips `GPSInfo`, `XMP-exif:GPS*`, IPTC location; preserves camera/date/copyright. Diff toast ("removed: GPS, IPTC-LocationCreated"). Effort: S. [ExifRemover pattern]
+- [x] **P-01** *P0* — **One-click "Strip location"** in the toolbar + right-click menu. Strips `GPSInfo`, `XMP-exif:GPS*`, IPTC location; preserves camera/date/copyright. Diff toast ("removed: GPS, IPTC-LocationCreated"). Effort: S. [ExifRemover pattern] *(shipped v0.1.9 — `MetadataEditService.StripGpsMetadata()` removes all Gps* EXIF tags using Magick.NET, writes atomically via temp-file swap, toasts "Removed N GPS fields" or "No GPS data found", reloads image + HUD after strip)*
 - [ ] **P-02** *P0* — **Default-off opt-in telemetry**. First-run banner, toggle in Settings, local JSON preview of what would be sent before enabling. No IP, no MAC, no hostname. VS Code is the reference pattern. Effort: S. [VS Code telemetry docs; TelemetryDeck privacy FAQ]
 - [ ] **P-03** *P1* — **Network-egress log panel**. Every call (update check, C2PA fetch, extension-install deep-link, crash-report upload if enabled) logs `{url, purpose, bytes, ms}` to a visible pane. No competitor ships this. Effort: M.
 - [x] **P-04** *P0* — **Update check is pull-only** to GitHub Releases API, no PII, opt-out switch. Store `last_checked` locally, no server-side record. Effort: S. *(shipped v0.1.6 — `UpdateCheckService` does a read-only GET against `/releases/latest`, 24-h throttle for silent startup check, manual "Check for updates" button in About dialog bypasses throttle. Every call logged with URL + bytes + duration. Last-checked persisted to `%LOCALAPPDATA%\Images\update-check.json`.)*
