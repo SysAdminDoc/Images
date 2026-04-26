@@ -385,6 +385,10 @@ public partial class MainWindow : Window
                 Vm.ToggleFilmstripCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.I:
+                Vm.ToggleMetadataHudCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.Left:
             case Key.Back:
                 Vm.PrevCommand.Execute(null); e.Handled = true; break;

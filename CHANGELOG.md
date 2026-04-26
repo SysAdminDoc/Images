@@ -23,6 +23,7 @@ All notable changes to **Images** are documented here.
 - **V20-21 follow-up — thumbnail actions** — right-clicking a thumbnail in the bottom filmstrip or side-panel fallback now offers Open, Reveal in Explorer, and Copy path without changing the current image unless Open is chosen.
 - **V20-21 complete — virtualized full-folder rail** — the filmstrip and side fallback now enumerate the full current folder through recycling WPF virtualization instead of the previous nine-item window. Thumbnails still decode lazily for visible and near-current items so large folders remain responsive.
 - **V20-22 first slice — photo metadata summary** — new `Services/ImageMetadataService.cs` reads EXIF via Magick.NET `Ping()` on a background task and fills the side-panel Details area with captured date (via `MetadataDate` / `DateTimeOffset`), camera, lens, shutter/aperture/ISO, focal length, and GPS coordinates when present. Empty and loading states are explicit, the read is local-only, and GPS remains text-only so no map/network egress is introduced.
+- **V20-22 follow-up — viewport metadata HUD** — press `I`, use the viewport context menu, or click the toolbar info button to toggle a persisted floating EXIF HUD. It reuses the same local metadata rows as the side panel, carries loading/empty states, and can be dismissed in place without changing the current image.
 
 ### Trust + provenance
 

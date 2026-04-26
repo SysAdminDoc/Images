@@ -86,6 +86,15 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Metadata HUD"
+                                  Command="{Binding ToggleMetadataHudCommand}"
+                                  InputGestureText="I"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding IsMetadataHudVisible, Mode=OneWay}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE946;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <Separator />
                         <MenuItem Header="Rotate left" Command="{Binding RotateCcwCommand}">
                             <MenuItem.Icon>
@@ -398,6 +407,98 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- V20-22: optional EXIF HUD. Reads from the same local metadata rows as the side panel. -->
+                    <Border Style="{StaticResource FloatingPill}"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Margin="22,22,0,0"
+                            MaxWidth="560"
+                            Visibility="{Binding ShowMetadataHud, Converter={StaticResource BoolToVis}}"
+                            AutomationProperties.Name="Metadata HUD"
+                            AutomationProperties.LiveSetting="Polite">
+                        <StackPanel>
+                            <DockPanel LastChildFill="False">
+                                <StackPanel Orientation="Horizontal"
+                                            DockPanel.Dock="Left"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE946;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="12"
+                                               Foreground="{StaticResource AccentBrush}"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,8,0" />
+                                    <TextBlock Text="Photo metadata"
+                                               Foreground="{StaticResource FloatingChromeTextBrush}"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                                <Button Command="{Binding ToggleMetadataHudCommand}"
+                                        Content="&#xE711;"
+                                        ToolTip="Hide metadata HUD"
+                                        DockPanel.Dock="Right"
+                                        Margin="16,-3,-7,-3"
+                                        AutomationProperties.Name="Hide metadata HUD">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
+                                            <Setter Property="Width" Value="28" />
+                                            <Setter Property="Height" Value="26" />
+                                            <Setter Property="FontSize" Value="10" />
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </DockPanel>
+
+                            <ItemsControl ItemsSource="{Binding PhotoMetadataRows}"
+                                          Margin="0,10,-6,-6"
+                                          Visibility="{Binding PhotoMetadataRows.Count, Converter={StaticResource BoolToVis}}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource Badge}"
+                                                Margin="0,0,6,6"
+                                                MaxWidth="250">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Label}"
+                                                           FontSize="10"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{StaticResource OverlayBrush}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="0,0,6,0" />
+                                                <TextBlock Text="{Binding Value}"
+                                                           FontSize="11"
+                                                           Foreground="{StaticResource FloatingChromeTextBrush}"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           MaxWidth="170"
+                                                           ToolTip="{Binding Value}"
+                                                           VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0,10,0,0"
+                                        Visibility="{Binding MetadataStatusText, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="&#xE946;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="11"
+                                           Foreground="{StaticResource OverlayBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0" />
+                                <TextBlock Text="{Binding MetadataStatusText}"
+                                           Style="{StaticResource Text.Hint}"
+                                           Foreground="{StaticResource FloatingChromeTextBrush}"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
                     <!-- First-run gesture hint — fades in + slides up, auto-dismisses after 2.4s -->
                     <Border HorizontalAlignment="Center"
                             VerticalAlignment="Bottom"
@@ -491,7 +592,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Wheel" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom about cursor" />
@@ -505,6 +606,8 @@
                                         <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle fullscreen" />
                                         <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="T" />
                                         <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle filmstrip" />
+                                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="I" />
+                                        <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle metadata HUD" />
                                     </Grid>
 
                                     <TextBlock Text="File" Style="{StaticResource SectionLabel}" />
@@ -881,6 +984,24 @@
                                     <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsFilmstripVisible}" Value="True">
+                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button Command="{Binding ToggleMetadataHudCommand}"
+                                    Content="&#xE946;"
+                                    ToolTip="{Binding MetadataHudToggleTooltip}"
+                                    Margin="4,0,0,0"
+                                    Visibility="{Binding CanToggleMetadataHud, Converter={StaticResource BoolToVis}}"
+                                    AutomationProperties.Name="Toggle metadata HUD">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsMetadataHudVisible}" Value="True">
                                                 <Setter Property="Background" Value="#1F89B4FA" />
                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                 <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
