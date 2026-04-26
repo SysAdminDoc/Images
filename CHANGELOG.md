@@ -2,7 +2,15 @@
 
 All notable changes to **Images** are documented here.
 
-## Unreleased
+## v0.1.8 — 2026-06-02
+
+UI surface release. Promotes the foundation work from v0.1.7 into user-visible features: clipboard paste, open-with-default-app, richer decode error messages, and the recent-folders side panel. Eight ROADMAP items closed or advanced.
+
+### Features
+
+- **Clipboard paste (Ctrl+V)** — `Paste from clipboard` context-menu item and `Ctrl+V` shortcut. Accepts a clipboard file-drop list (file copied in Explorer — opens the first supported image directly) or raw pixel data (screenshot, web image) saved to `%LOCALAPPDATA%\Images\clipboard\clipboard-<ts>.png` and loaded immediately. Toast confirms the paste. Ctrl+V added to the keyboard cheatsheet.
+- **Open with default app** — `Open with default app` context-menu item opens the current image in whatever app Windows has registered as the default for that file type (`UseShellExecute = true`). Errors surface as a toast. Gated on `HasImage`.
+- **Richer decode error messages (item 86 enhancement)** — `SetLoadError` now detects `FileNotFoundException` (file not found title + navigate-away hint), `UnauthorizedAccessException` (access-denied title + check-permissions hint), and `OutOfMemoryException` (image-too-large title + free-memory hint) before falling back to the generic path. New `SupportedImageFormats.SuggestionForDecodeFailure(ext)` returns format-specific hints for supported-but-failing types: HEIC/AVIF (Microsoft Store codec), JXL (Windows 11 24H2+), camera RAW (DNG Converter), PSD/PSB (32-bit export workaround), TIFF (re-save as standard), SVG/SVGZ (browser preview), XCF (flatten + export from GIMP), EXR (convert with ImageMagick), and PDF/PS/EPS/AI (Ghostscript). Generic fallback unchanged when no hint applies.
 
 ### Trust
 
@@ -13,7 +21,7 @@ All notable changes to **Images** are documented here.
   - [`codec-support-policy.md`](docs/codec-support-policy.md) — bundled-vs-optional tiers; what ships in the bundle; opt-in Ghostscript discovery contract; the five-point checklist that gates any new optional decoder (license / CVE / cadence / provenance / process isolation); decoder-removal policy.
   - [`privacy-policy.md`](docs/privacy-policy.md) — every network call (one — update check), how to turn it off, every file persisted to disk, what does **not** happen (no telemetry, cloud sync, OCR, face/object detection, ad SDKs, file-path egress), and a four-step verification recipe (toggle off + log inspect + `--system-info` + `grep HttpClient`).
 
-### Features
+### Features (cont.)
 
 - **V20-37 `--system-info` / `--codec-report` / `--version` / `--help` CLI** — new `Services/CliReport.cs` resolves a single-token CLI flag in `App.OnStartup` BEFORE the codec runtime is configured and BEFORE any window is shown, then exits with a normal process exit code. Output is sent to the parent terminal via `AttachConsole(ATTACH_PARENT_PROCESS)` so `Images.exe --system-info` actually prints into the launching shell instead of vanishing into a detached console. `--system-info` reports application version + binary path, .NET runtime + OS + process arch + 64-bit flag + processor count + working set, decoder runtime (Magick.NET version + assembly path; Ghostscript availability/source/version/DLL path/SHA-256), open + export extension counts, and every writable storage path Images uses (app data root, Logs, thumbs, wallpaper, crash log). `--codec-report` prints the per-format capability matrix and the full extension catalog. The CLI surface and the About dialog read from the same `CodecCapabilityService.BuildProvenance()` call so they cannot disagree about what's loaded.
 - **X-02 capability matrix in About** — About dialog now surfaces a per-format-family matrix (Common images, Design and production, Portable and scientific, Vector previews, Document previews, Camera RAW) with open/export counts, ternary animation/multi-page/metadata flags, the active runtime label, and a notes line describing concrete limitations (PSD layer flatten, RAW read-only, document DPI, etc.). Replaces the single "Codecs" line with an auditable surface so "broad codec support" is verifiable instead of asserted.
