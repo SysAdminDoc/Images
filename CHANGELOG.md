@@ -2,6 +2,16 @@
 
 All notable changes to **Images** are documented here.
 
+## v0.1.9 — 2026-06-02
+
+Settings window, GPS-location strip, and automatic external-edit reload. Three ROADMAP items closed.
+
+### Features
+
+- **Settings window (Ctrl+,)** — dedicated Settings window (Item 2) with Viewer and Privacy sections. Viewer: filmstrip-visible-at-startup and metadata-HUD-visible-at-startup toggles. Privacy: update-check opt-in/out. Accessible via `Ctrl+,`, the gear icon in the right-panel header, and "Settings…" in the context menu. Settings apply immediately (no OK/Apply step) and are persisted to `settings.db`. After the window closes, the main viewer reflects any changes to filmstrip and HUD state without requiring a restart.
+- **Strip GPS location (P-01)** — "Strip GPS location" toolbar button and context-menu item removes all GPS EXIF values from the current file using Magick.NET and writes the result atomically (temp-file swap — crash-safe). Reports the number of GPS fields removed via toast. Returns "No GPS data found" when the file is clean. Reloads the image and metadata HUD after stripping so the overlay updates in place.
+- **Auto-reload on external edit (Item 61)** — when an image is opened, a `FileSystemWatcher` monitors it for `LastWrite` / `Size` changes. Rapid writes are coalesced via an 800 ms debounce timer so incremental saves from Photoshop / Paint.NET / etc. produce a single reload. Toast: "Reloaded — file changed externally". Degrades silently on network drives or locked volumes. Preload cache is cleared before reload so stale decoded frames are not reused.
+
 ## v0.1.8 — 2026-06-02
 
 UI surface release. Promotes the foundation work from v0.1.7 into user-visible features: clipboard paste, open-with-default-app, richer decode error messages, and the recent-folders side panel. Eight ROADMAP items closed or advanced.

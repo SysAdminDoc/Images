@@ -27,6 +27,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool _isMetadataHudVisible;
 
     private readonly DispatcherTimer _hintTimer;
+    private System.IO.FileSystemWatcher? _externalEditWatcher;
+    private readonly DispatcherTimer _externalEditDebounce;
 
     public MainViewModel()
     {
@@ -38,6 +40,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         _hintTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(2400) };
         _hintTimer.Tick += (_, _) => { _hintTimer.Stop(); ShowGestureHint = false; };
+
+        // Item 61: debounce timer for external-edit reload — fires 800 ms after the last
+        // FileSystemWatcher.Changed event so rapid saves (e.g. from Photoshop's incremental
+        // writes) don't trigger multiple reloads.
+        _externalEditDebounce = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(800) };
+        _externalEditDebounce.Tick += (_, _) =>
+        {
+            _externalEditDebounce.Stop();
+            ReloadCurrentSilent();
+            Toast("Reloaded — file changed externally");
+        };
 
         _isFilmstripVisible = SettingsService.Instance.GetBool(Keys.FilmstripVisible, true);
         _isMetadataHudVisible = SettingsService.Instance.GetBool(Keys.MetadataHudVisible, false);
@@ -80,6 +93,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ToggleMetadataHudCommand = new RelayCommand(ToggleMetadataHud, () => CanToggleMetadataHud);
         PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard);
         OpenInDefaultAppCommand = new RelayCommand(OpenInDefaultApp, () => HasImage);
+        StripLocationCommand = new RelayCommand(async () => await StripLocationAsync(), () => HasImage);
+        SettingsCommand = new RelayCommand(ShowSettingsWindow);
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
         // panel renders prior-session folders before the user opens anything.
@@ -871,6 +886,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand ToggleMetadataHudCommand { get; }
     public ICommand PasteFromClipboardCommand { get; }
     public ICommand OpenInDefaultAppCommand { get; }
+    public ICommand StripLocationCommand { get; }
+    public ICommand SettingsCommand { get; }
 
     // -------------------- Navigation --------------------
 
@@ -904,6 +921,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         ResetPageState();
         LoadCurrent();
+        ArmFileWatcher(path);
 
         // V20-02: persist containing folder to recent-folders MRU. Silent on any failure —
         // recent-folders is a convenience, not critical.
@@ -1574,6 +1592,124 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         about.ShowDialog();
     }
 
+    // Item 2: Settings window — opens modal, then re-reads persistent prefs so the viewer
+    // immediately reflects any toggle the user flipped (e.g. filmstrip, metadata HUD).
+    private void ShowSettingsWindow()
+    {
+        var settings = new Images.SettingsWindow
+        {
+            Owner = Application.Current?.MainWindow
+        };
+        settings.ShowDialog();
+        RefreshSettingsFromStore();
+    }
+
+    private void RefreshSettingsFromStore()
+    {
+        var filmstrip = SettingsService.Instance.GetBool(Keys.FilmstripVisible, true);
+        if (_isFilmstripVisible != filmstrip)
+        {
+            _isFilmstripVisible = filmstrip;
+            Raise(nameof(IsFilmstripVisible));
+            Raise(nameof(ShowFilmstrip));
+        }
+
+        var hud = SettingsService.Instance.GetBool(Keys.MetadataHudVisible, false);
+        if (_isMetadataHudVisible != hud)
+        {
+            _isMetadataHudVisible = hud;
+            Raise(nameof(IsMetadataHudVisible));
+            Raise(nameof(ShowMetadataHud));
+        }
+    }
+
+    // P-01: Strip GPS location data from the current file using Magick.NET.
+    // Writes atomically (temp-file swap) and reloads so the metadata HUD updates.
+    private async Task StripLocationAsync()
+    {
+        if (CurrentPath is null) return;
+        var path = CurrentPath;
+
+        try
+        {
+            var removed = await Task.Run(() => MetadataEditService.StripGpsMetadata(path));
+            if (removed == 0)
+            {
+                Toast("No GPS data found in this file");
+            }
+            else
+            {
+                _preload.Reset();
+                LoadCurrent();
+                Toast($"GPS location removed ({removed} {(removed == 1 ? "field" : "fields")})");
+            }
+        }
+        catch (Exception ex)
+        {
+            Toast($"Could not strip GPS data: {ex.Message}");
+        }
+    }
+
+    // Item 61: silent reload used by the external-edit debounce so the position/rotation state
+    // is preserved but no "Reloaded" toast is emitted — the debounce timer emits its own toast.
+    private void ReloadCurrentSilent()
+    {
+        var savedRotation = Rotation;
+        var savedFlipH = FlipHorizontal;
+        var savedFlipV = FlipVertical;
+        _preload.Reset();
+        LoadCurrent();
+        Rotation = savedRotation;
+        FlipHorizontal = savedFlipH;
+        FlipVertical = savedFlipV;
+    }
+
+    // Item 61: arm a FileSystemWatcher on the specific file so external edits (Photoshop,
+    // Paint.NET, etc.) trigger an automatic reload after an 800 ms quiet period.
+    private void ArmFileWatcher(string path)
+    {
+        DisarmFileWatcher();
+
+        var dir = Path.GetDirectoryName(path);
+        if (string.IsNullOrEmpty(dir) || !Directory.Exists(dir)) return;
+
+        try
+        {
+            _externalEditWatcher = new System.IO.FileSystemWatcher(dir, Path.GetFileName(path))
+            {
+                NotifyFilter = System.IO.NotifyFilters.LastWrite | System.IO.NotifyFilters.Size,
+                EnableRaisingEvents = true
+            };
+            _externalEditWatcher.Changed += OnExternalEdit;
+        }
+        catch
+        {
+            // FSW can fail on network drives, locked volumes, etc. — degrade silently.
+            _externalEditWatcher = null;
+        }
+    }
+
+    private void DisarmFileWatcher()
+    {
+        if (_externalEditWatcher is null) return;
+        _externalEditWatcher.EnableRaisingEvents = false;
+        _externalEditWatcher.Changed -= OnExternalEdit;
+        _externalEditWatcher.Dispose();
+        _externalEditWatcher = null;
+    }
+
+    private void OnExternalEdit(object sender, System.IO.FileSystemEventArgs e)
+    {
+        // Marshal to the UI thread; reset the debounce on every write event so rapid saves
+        // (incremental writes from editors) coalesce into a single reload.
+        _uiDispatcher.BeginInvoke(() =>
+        {
+            if (_isDisposed) return;
+            _externalEditDebounce.Stop();
+            _externalEditDebounce.Start();
+        });
+    }
+
     private void RefreshFolder()
     {
         _nav.Refresh();
@@ -1586,6 +1722,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void ClearCurrentState()
     {
         _renameTimer.Stop();
+        _externalEditDebounce.Stop();
+        DisarmFileWatcher();
         CurrentImage = null;
         CurrentAnimation = null;
         CurrentPath = null;
@@ -1628,6 +1766,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _renameTimer.Stop();
         _toastTimer.Stop();
         _hintTimer.Stop();
+        _externalEditDebounce.Stop();
+        DisarmFileWatcher();
 
         _nav.ListChanged -= OnDirectoryListChanged;
         _metadataGeneration++;

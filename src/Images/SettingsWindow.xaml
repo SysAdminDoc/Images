@@ -1,0 +1,135 @@
+<Window x:Class="Images.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Settings"
+        Width="440"
+        SizeToContent="Height"
+        MinWidth="400"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        Background="{StaticResource BaseBrush}"
+        TextOptions.TextFormattingMode="Display"
+        UseLayoutRounding="True">
+
+    <Border Padding="28,24,28,28">
+        <StackPanel>
+
+            <!-- Window header -->
+            <Grid Margin="0,0,0,22">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Style="{StaticResource Text.Display}" Text="Settings" />
+                    <TextBlock Style="{StaticResource Text.Subtitle}"
+                               Text="Customize viewer defaults and privacy preferences."
+                               Margin="0,5,0,0" />
+                </StackPanel>
+                <!-- Gear icon — decorative, reinforces context -->
+                <TextBlock Grid.Column="1"
+                           Text="&#xE713;"
+                           FontFamily="{StaticResource IconFontFamily}"
+                           FontSize="24"
+                           Foreground="{StaticResource OverlayBrush}"
+                           VerticalAlignment="Top"
+                           Margin="12,4,0,0" />
+            </Grid>
+
+            <!-- ── Viewer ── -->
+            <TextBlock Style="{StaticResource SectionLabel}" Text="Viewer" Margin="1,0,0,10" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
+                <StackPanel>
+
+                    <!-- Filmstrip row -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Show filmstrip at startup"
+                                       Style="{StaticResource Text.Body}"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Displays folder thumbnails below the viewer when a folder is opened."
+                                       Style="{StaticResource Text.Hint}"
+                                       Margin="0,3,0,0"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  VerticalAlignment="Center"
+                                  IsChecked="{Binding FilmstripVisibleOnStartup}"
+                                  AutomationProperties.Name="Show filmstrip at startup" />
+                    </Grid>
+
+                    <Border Height="1"
+                            Background="{StaticResource HairlineBrush}"
+                            Margin="0,14" />
+
+                    <!-- Metadata HUD row -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Show metadata overlay at startup"
+                                       Style="{StaticResource Text.Body}"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Floats camera, exposure, and location data over the image."
+                                       Style="{StaticResource Text.Hint}"
+                                       Margin="0,3,0,0"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  VerticalAlignment="Center"
+                                  IsChecked="{Binding MetadataHudVisibleOnStartup}"
+                                  AutomationProperties.Name="Show metadata overlay at startup" />
+                    </Grid>
+
+                </StackPanel>
+            </Border>
+
+            <!-- ── Privacy ── -->
+            <TextBlock Style="{StaticResource SectionLabel}" Text="Privacy" Margin="1,0,0,10" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,0">
+                <StackPanel>
+
+                    <!-- Update check row -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Check for updates automatically"
+                                       Style="{StaticResource Text.Body}"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Pings github.com/SysAdminDoc/Images at startup. No usage data is sent."
+                                       Style="{StaticResource Text.Hint}"
+                                       Margin="0,3,0,0"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  VerticalAlignment="Center"
+                                  IsChecked="{Binding UpdateCheckEnabled}"
+                                  AutomationProperties.Name="Check for updates automatically" />
+                    </Grid>
+
+                </StackPanel>
+            </Border>
+
+            <!-- Close -->
+            <Button Content="Close"
+                    Style="{StaticResource ChromeButton}"
+                    HorizontalAlignment="Right"
+                    Padding="20,7"
+                    Margin="0,22,0,0"
+                    IsCancel="True"
+                    Click="CloseButton_Click"
+                    AutomationProperties.Name="Close settings" />
+
+        </StackPanel>
+    </Border>
+</Window>
