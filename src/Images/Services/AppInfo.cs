@@ -17,7 +17,9 @@ public static class AppInfo
     private static AppInfoSnapshot Build()
     {
         var asm = Assembly.GetExecutingAssembly();
-        var asmPath = asm.Location;
+        var asmPath = string.IsNullOrWhiteSpace(asm.Location)
+            ? Environment.ProcessPath ?? string.Empty
+            : asm.Location;
 
         // ProductVersion includes the `+<commit sha>` suffix when SourceLink is active (i.e.
         // the build pipeline injected it). FileVersion is the plain 4-digit assembly version.
