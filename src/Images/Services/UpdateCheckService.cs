@@ -18,6 +18,7 @@ public static class UpdateCheckService
     private const string ReleasesApiUrl = "https://api.github.com/repos/SysAdminDoc/Images/releases/latest";
     private const string ReleasesHtmlUrl = "https://github.com/SysAdminDoc/Images/releases/latest";
     private const int MaxReleaseResponseBytes = 64 * 1024;
+    private const int MaxStateFileBytes = 16 * 1024;
 
     private static readonly HttpClient _http = CreateHttpClient();
     private static readonly Microsoft.Extensions.Logging.ILogger _log = Log.Get("Images.Updates");
@@ -166,10 +167,21 @@ public static class UpdateCheckService
                 var path = StateFilePath();
                 if (path is null) return null;
                 if (!File.Exists(path)) return null;
+                var info = new FileInfo(path);
+                if (info.Length > MaxStateFileBytes)
+                {
+                    _log.LogWarning("update-check: ignoring oversized state file {Path} ({Bytes} bytes)", path, info.Length);
+                    return null;
+                }
+
                 var state = JsonSerializer.Deserialize(File.ReadAllText(path), UpdateStateJsonContext.Default.UpdateState);
                 return state?.LastCheckedUtc;
             }
-            catch { return null; }
+            catch (Exception ex)
+            {
+                _log.LogWarning(ex, "update-check: could not read state file");
+                return null;
+            }
         }
         set
         {
@@ -178,9 +190,39 @@ public static class UpdateCheckService
                 var path = StateFilePath();
                 if (path is null) return;
                 var state = new UpdateState(value);
-                File.WriteAllText(path, JsonSerializer.Serialize(state, UpdateStateJsonContext.Default.UpdateState));
+                WriteStateAtomically(path, JsonSerializer.Serialize(state, UpdateStateJsonContext.Default.UpdateState));
             }
-            catch { /* non-fatal */ }
+            catch (Exception ex)
+            {
+                _log.LogWarning(ex, "update-check: could not write state file");
+            }
+        }
+    }
+
+    private static void WriteStateAtomically(string path, string json)
+    {
+        var directory = Path.GetDirectoryName(path)
+            ?? throw new IOException("Update-check state path has no directory.");
+        Directory.CreateDirectory(directory);
+        var tempPath = Path.Combine(directory, $".update-check-{Guid.NewGuid():N}.json.tmp");
+        try
+        {
+            File.WriteAllText(tempPath, json);
+            if (File.Exists(path))
+                File.Replace(tempPath, path, null);
+            else
+                File.Move(tempPath, path);
+        }
+        finally
+        {
+            try
+            {
+                if (File.Exists(tempPath)) File.Delete(tempPath);
+            }
+            catch (Exception ex)
+            {
+                _log.LogDebug(ex, "update-check: could not delete temp state file {Path}", tempPath);
+            }
         }
     }
 
@@ -198,7 +240,14 @@ public static class UpdateCheckService
 
         var last = LastCheckedUtc;
         if (last is null) return true;
-        return (DateTime.UtcNow - last.Value) >= TimeSpan.FromHours(24);
+        var now = DateTime.UtcNow;
+        if (last.Value > now + TimeSpan.FromMinutes(5))
+        {
+            _log.LogWarning("update-check: ignoring future last-checked timestamp {LastCheckedUtc}", last.Value);
+            return true;
+        }
+
+        return (now - last.Value) >= TimeSpan.FromHours(24);
     }
 
     public static bool OptedIn

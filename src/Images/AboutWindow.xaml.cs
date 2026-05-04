@@ -100,8 +100,9 @@ public partial class AboutWindow : Window
     {
         try
         {
-            var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
-            var path = Path.Combine(Path.GetTempPath(), $"images-system-info-{stamp}.txt");
+            var dir = AppStorage.TryGetAppDirectory("diagnostics") ?? Path.GetTempPath();
+            var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmssfff", System.Globalization.CultureInfo.InvariantCulture);
+            var path = Path.Combine(dir, $"images-system-info-{stamp}-{Guid.NewGuid():N}.txt");
             File.WriteAllText(path, CliReport.BuildSystemInfo(), new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
 
             // /select, highlights the file in a new Explorer window. We use ArgumentList so a

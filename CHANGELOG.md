@@ -2,6 +2,17 @@
 
 All notable changes to **Images** are documented here.
 
+## v0.2.4 — 2026-05-04
+
+Fourth hardening pass for local state files, diagnostics exports, clipboard paste storage, and single-file runtime metadata.
+
+### Fixed
+
+- **Update-check state safety** — `update-check.json` now rejects oversized local state, logs read/write failures, writes through a temp file, and ignores future timestamps instead of suppressing checks indefinitely.
+- **Diagnostics export safety** — About-window system-info exports now use a per-file GUID in the app diagnostics folder instead of a collision-prone timestamp in the shared temp root.
+- **Clipboard paste hygiene** — pasted bitmap files now use collision-resistant names, `CreateNew` writes, and background pruning for old or excessive clipboard images.
+- **Single-file metadata** — app version diagnostics now fall back to the process path when assembly location is empty in bundled deployments.
+
 ## v0.2.3 — 2026-05-04
 
 Third hardening pass for runtime utilities, recent-folder persistence, workflow gates, wallpaper safety, and diagnostics wording.
