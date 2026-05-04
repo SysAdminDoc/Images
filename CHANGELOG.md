@@ -2,6 +2,15 @@
 
 All notable changes to **Images** are documented here.
 
+## v0.2.7 — 2026-05-04
+
+Hotfix for OCR extraction reliability and diagnostics.
+
+### Fixed
+
+- **OCR stream lifetime** — image streams copied for Windows.Media.Ocr now keep the WinRT write adapter alive until decoding completes, fixing `ObjectDisposedException` failures when pressing the OCR button.
+- **OCR failure messaging** — true OCR extraction failures now surface as extraction failures instead of being collapsed into the misleading "no language packs installed" path.
+
 ## v0.2.6 — 2026-05-04
 
 Sixth hardening pass for release integrity and packaging gates.
@@ -84,7 +93,7 @@ Text extraction (OCR) using Windows.Media.Ocr API. Local processing, privacy-fir
 
 ### Features
 
-- **Text extraction (E key)** — press `E`, click the Extract Text toolbar button, or right-click and choose "Extract text" to overlay semi-transparent blue bounding boxes on detected text regions. Click any box to copy its text to the clipboard. Windows.Media.Ocr API provides local, offline text recognition with English guaranteed; additional languages available when Windows language packs are installed (Settings → Time & language → Add language → enable "Handwriting" feature). Overlay toggles on/off with the same `E` key. Toast notifications confirm extraction status (number of regions found, no text found, OCR unavailable).
+- **Text extraction (E key)** — press `E`, click the Extract Text toolbar button, or right-click and choose "Extract text" to overlay semi-transparent blue bounding boxes on detected text regions. Windows.Media.Ocr API provides local, offline text recognition through installed Windows OCR language capabilities. Overlay toggles on/off with the same `E` key. Toast notifications confirm extraction status (number of regions found, no text found, OCR unavailable).
 - **Phase 1 implementation** — uses native Windows.Media.Ocr for feature parity with Windows Photos. No additional dependencies or deployment bloat. Accuracy: ~85-90% on clean printed documents, ~75-80% on complex layouts. Speed: ~1 second per image on CPU-only processing. Phase 2 (v0.3.0+) will add optional PaddleOCRSharp "Advanced Mode" with ~92-95% accuracy and GPU acceleration for power users.
 
 ### Technical
