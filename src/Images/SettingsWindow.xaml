@@ -106,8 +106,8 @@
                             <TextBlock Text="Check for updates automatically"
                                        Style="{StaticResource Text.Body}"
                                        FontWeight="SemiBold" />
-                            <TextBlock Text="Pings github.com/SysAdminDoc/Images at startup. No usage data is sent."
-                                       Style="{StaticResource Text.Hint}"
+                             <TextBlock Text="{Binding UpdateCheckDescription}"
+                                        Style="{StaticResource Text.Hint}"
                                        Margin="0,3,0,0"
                                        TextWrapping="Wrap" />
                         </StackPanel>

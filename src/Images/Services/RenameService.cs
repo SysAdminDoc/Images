@@ -54,9 +54,16 @@ public sealed class RenameService
     /// </summary>
     public static string ResolveTargetPath(string folder, string desiredStem, string extension, string? currentPath)
     {
+        if (string.IsNullOrWhiteSpace(folder))
+            throw new ArgumentException("Target folder is required.", nameof(folder));
+
+        folder = Path.GetFullPath(folder);
         var ext = NormalizeExtension(extension);
 
-        var baseName = desiredStem;
+        var baseName = Sanitize(desiredStem);
+        if (string.IsNullOrEmpty(baseName))
+            throw new ArgumentException("Filename must contain at least one valid character.", nameof(desiredStem));
+
         var candidate = Path.Combine(folder, baseName + ext);
 
         if (IsSame(candidate, currentPath)) return candidate;
@@ -76,21 +83,41 @@ public sealed class RenameService
     /// <summary>
     /// Move the file from <paramref name="currentPath"/> to the resolved target.
     /// Returns the final path (which may differ from <paramref name="desiredStem"/>+ext if a collision
-    /// forced a " (2)" suffix). Returns <paramref name="currentPath"/> unchanged on no-op or bad input.
+    /// forced a " (2)" suffix). Returns <paramref name="currentPath"/> unchanged on no-op.
+    /// Throws for invalid filename input so the UI can surface a clear validation error.
     /// </summary>
     public string Commit(string currentPath, string desiredStem, string extension)
     {
         if (!File.Exists(currentPath)) return currentPath;
 
         var clean = Sanitize(desiredStem);
-        if (string.IsNullOrEmpty(clean)) return currentPath;
+        if (string.IsNullOrEmpty(clean))
+            throw new ArgumentException("Filename must contain at least one valid character.", nameof(desiredStem));
 
         var folder = Path.GetDirectoryName(currentPath)!;
-        var target = ResolveTargetPath(folder, clean, extension, currentPath);
+        string target = currentPath;
+        var moved = false;
 
-        if (IsSame(target, currentPath)) return currentPath;
+        for (var attempt = 0; attempt < 100; attempt++)
+        {
+            target = ResolveTargetPath(folder, clean, extension, currentPath);
 
-        File.Move(currentPath, target);
+            if (IsSame(target, currentPath)) return currentPath;
+
+            try
+            {
+                File.Move(currentPath, target);
+                moved = true;
+                break;
+            }
+            catch (IOException) when (File.Exists(target) && !IsSame(target, currentPath))
+            {
+                clean = $"{Sanitize(desiredStem)} ({attempt + 2})";
+            }
+        }
+
+        if (!moved || !File.Exists(target))
+            throw new IOException("Rename did not produce the expected target file.");
 
         var entry = new UndoEntry(currentPath, target, DateTime.Now);
         _undo.AddFirst(entry);
@@ -112,8 +139,25 @@ public sealed class RenameService
         var originalStem = Path.GetFileNameWithoutExtension(entry.FromPath);
         var originalExt = Path.GetExtension(entry.FromPath);
 
-        var restoreTo = ResolveTargetPath(folder, originalStem, originalExt, entry.ToPath);
-        File.Move(entry.ToPath, restoreTo);
+        string restoreTo = entry.ToPath;
+        var moved = false;
+        for (var attempt = 0; attempt < 100; attempt++)
+        {
+            restoreTo = ResolveTargetPath(folder, originalStem, originalExt, entry.ToPath);
+            try
+            {
+                File.Move(entry.ToPath, restoreTo);
+                moved = true;
+                break;
+            }
+            catch (IOException) when (File.Exists(restoreTo) && !IsSame(restoreTo, entry.ToPath))
+            {
+                originalStem = $"{Path.GetFileNameWithoutExtension(entry.FromPath)} ({attempt + 2})";
+            }
+        }
+
+        if (!moved || !File.Exists(restoreTo))
+            throw new IOException("Undo did not produce the expected target file.");
 
         _undo.Remove(entry);
         var reverted = entry with { FromPath = entry.ToPath, ToPath = restoreTo, At = DateTime.Now };

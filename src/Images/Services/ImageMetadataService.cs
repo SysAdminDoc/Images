@@ -108,7 +108,10 @@ public static class ImageMetadataService
         if (string.IsNullOrWhiteSpace(value))
             return null;
 
-        var cleaned = value.Replace('\0', ' ').Trim();
+        var cleaned = new string(value
+            .Select(c => char.IsControl(c) ? ' ' : c)
+            .ToArray())
+            .Trim();
         return string.IsNullOrWhiteSpace(cleaned) ? null : cleaned;
     }
 
@@ -188,6 +191,9 @@ public static class ImageMetadataService
         var lat = ToDecimalDegrees(latitude, latitudeRef);
         var lon = ToDecimalDegrees(longitude, longitudeRef);
 
+        if (lat is < -90 or > 90 || lon is < -180 or > 180)
+            return null;
+
         return lat.HasValue && lon.HasValue
             ? $"{lat.Value:0.000000}, {lon.Value:0.000000}"
             : null;
@@ -201,6 +207,9 @@ public static class ImageMetadataService
         var degrees = dms[0].ToDouble();
         var minutes = dms[1].ToDouble();
         var seconds = dms[2].ToDouble();
+        if (degrees < 0 || minutes < 0 || seconds < 0 || minutes >= 60 || seconds >= 60)
+            return null;
+
         var value = degrees + (minutes / 60d) + (seconds / 3600d);
 
         if (double.IsNaN(value) || double.IsInfinity(value))

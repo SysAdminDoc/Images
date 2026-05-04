@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Images.Services;
 using Microsoft.Extensions.Logging;
+using System.Threading;
 
 namespace Images.ViewModels;
 
@@ -30,6 +31,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool _isMetadataHudVisible;
     private bool _isOcrMode;
     private ObservableCollection<OcrTextLine>? _ocrOverlayLines;
+    private CancellationTokenSource? _ocrCts;
+    private int _ocrGeneration;
 
     private readonly DispatcherTimer _hintTimer;
     private System.IO.FileSystemWatcher? _externalEditWatcher;
@@ -901,7 +904,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool IsOcrMode
     {
         get => _isOcrMode;
-        set => Set(ref _isOcrMode, value);
+        set
+        {
+            if (Set(ref _isOcrMode, value))
+                Raise(nameof(OcrModeTooltip));
+        }
     }
 
     public string OcrModeTooltip => IsOcrMode ? "Hide text (E)" : "Extract text (E)";
@@ -1113,6 +1120,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return;
         }
 
+        ClearOcrOverlay(cancelExtraction: true);
+
         try
         {
             // V20-03: try the preload ring first — a hit is instant, a miss falls through to
@@ -1309,6 +1318,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         try
         {
+            if (string.IsNullOrEmpty(RenameService.Sanitize(EditableStem)))
+            {
+                RenameStatus = RenameStatusKind.Error;
+                Toast("Filename needs at least one valid character");
+                return;
+            }
+
             var newPath = _rename.Commit(CurrentPath, EditableStem, Extension);
             if (string.Equals(newPath, CurrentPath, StringComparison.OrdinalIgnoreCase))
             {
@@ -1683,20 +1699,27 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return;
         }
 
-        // Toggle off if already in OCR mode
-        if (IsOcrMode)
+        // Toggle off if already in OCR mode or cancel an extraction in progress.
+        if (IsOcrMode || _ocrCts is not null)
         {
-            IsOcrMode = false;
-            OcrOverlayLines = null;
+            ClearOcrOverlay(cancelExtraction: true);
+            Toast("Text overlay hidden");
             return;
         }
 
         Toast("Extracting text...");
+        var path = CurrentPath;
+        var generation = ++_ocrGeneration;
+        var cts = new CancellationTokenSource();
+        _ocrCts = cts;
 
         try
         {
-            using var fileStream = File.OpenRead(CurrentPath);
-            var result = await _ocr.ExtractTextAsync(fileStream);
+            using var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            var result = await _ocr.ExtractTextAsync(fileStream, cts.Token);
+            if (cts.IsCancellationRequested || generation != _ocrGeneration ||
+                !string.Equals(path, CurrentPath, StringComparison.OrdinalIgnoreCase))
+                return;
 
             if (result == null)
             {
@@ -1716,6 +1739,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             var lines = new ObservableCollection<OcrTextLine>();
             foreach (var line in result.Lines)
             {
+                if (line.Words.Count == 0 || string.IsNullOrWhiteSpace(line.Text))
+                    continue;
+
                 // Calculate bounding box from first to last word
                 var firstWord = line.Words[0].BoundingRect;
                 var lastWord = line.Words[^1].BoundingRect;
@@ -1731,9 +1757,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 });
             }
 
+            if (lines.Count == 0)
+            {
+                Toast("No text found");
+                IsOcrMode = false;
+                return;
+            }
+
             OcrOverlayLines = lines;
             IsOcrMode = true;
             Toast($"{lines.Count} text region{(lines.Count == 1 ? "" : "s")} found");
+        }
+        catch (OperationCanceledException)
+        {
+            IsOcrMode = false;
         }
         catch (Exception ex)
         {
@@ -1741,6 +1778,28 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Toast("Text extraction failed");
             IsOcrMode = false;
         }
+        finally
+        {
+            if (ReferenceEquals(_ocrCts, cts))
+            {
+                _ocrCts = null;
+                cts.Dispose();
+            }
+        }
+    }
+
+    private void ClearOcrOverlay(bool cancelExtraction)
+    {
+        if (cancelExtraction)
+        {
+            _ocrGeneration++;
+            _ocrCts?.Cancel();
+            _ocrCts?.Dispose();
+            _ocrCts = null;
+        }
+
+        OcrOverlayLines = null;
+        IsOcrMode = false;
     }
 
     // Item 61: silent reload used by the external-edit debounce so the position/rotation state
@@ -1863,6 +1922,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         DisarmFileWatcher();
 
         _nav.ListChanged -= OnDirectoryListChanged;
+        ClearOcrOverlay(cancelExtraction: true);
         _metadataGeneration++;
         _folderPreviewGeneration++;
         _folderPreviewCts.Cancel();
@@ -1879,11 +1939,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 /// Represents one line of OCR text with bounding box for overlay rendering.
 /// Click handler in OcrOverlay.xaml.cs copies the Text to clipboard.
 /// </summary>
-public class OcrTextLine
+public class OcrTextLine : ObservableObject
 {
+    private bool _isSelected;
+
     public string Text { get; set; } = string.Empty;
     public Windows.Foundation.Rect BoundingBox { get; set; }
-    public bool IsSelected { get; set; }
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => Set(ref _isSelected, value);
+    }
 }
 
 public sealed class FolderPreviewItem : ObservableObject

@@ -10,6 +10,10 @@ on:
         description: "Optional URL to an approved Ghostscript runtime zip to bundle"
         required: false
         default: ""
+      ghostscript_bundle_sha256:
+        description: "Required SHA-256 for ghostscript_bundle_url"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -52,9 +56,24 @@ jobs:
         shell: pwsh
         run: |
           $url = "${{ github.event.inputs.ghostscript_bundle_url }}"
+          $expectedHash = "${{ github.event.inputs.ghostscript_bundle_sha256 }}".Trim()
+          $uri = [System.Uri]::new($url)
+          if ($uri.Scheme -ne "https") {
+            throw "ghostscript_bundle_url must use HTTPS."
+          }
+          if ([string]::IsNullOrWhiteSpace($expectedHash)) {
+            throw "ghostscript_bundle_sha256 is required when ghostscript_bundle_url is provided."
+          }
+          if ($expectedHash -notmatch '^[A-Fa-f0-9]{64}$') {
+            throw "ghostscript_bundle_sha256 must be a 64-character SHA-256 hex digest."
+          }
           New-Item -ItemType Directory -Path codec-artifacts -Force | Out-Null
           $archive = "codec-artifacts\ghostscript.zip"
           Invoke-WebRequest -Uri $url -OutFile $archive
+          $actualHash = (Get-FileHash -Path $archive -Algorithm SHA256).Hash
+          if ($actualHash -ine $expectedHash) {
+            throw "Ghostscript archive SHA-256 mismatch. Expected $expectedHash, got $actualHash."
+          }
           Expand-Archive -Path $archive -DestinationPath "codec-artifacts\ghostscript" -Force
 
           $dll = Get-ChildItem -Path "codec-artifacts\ghostscript" -Recurse -Include gsdll64.dll,gsdll32.dll |
@@ -67,7 +86,7 @@ jobs:
             $source = $parent.FullName
           }
 
-          powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Prepare-GhostscriptBundle.ps1 -Source $source -Force
+          pwsh -NoProfile -ExecutionPolicy RemoteSigned -File scripts\Prepare-GhostscriptBundle.ps1 -Source $source -Force
 
       - name: Publish (self-contained, win-x64)
         run: >
@@ -83,6 +102,7 @@ jobs:
         shell: pwsh
         run: |
           $zip = "Images-v${{ github.event.inputs.version }}-win-x64.zip"
+          Get-ChildItem -Path publish -Filter *.pdb -Recurse | Remove-Item -Force
           Compress-Archive -Path publish\* -DestinationPath $zip -Force
           "ZIP=$zip" | Out-File -FilePath $env:GITHUB_ENV -Append
 
@@ -103,6 +123,15 @@ jobs:
           if (-not (Test-Path $setup)) { throw "Installer not produced at $setup" }
           "SETUP=$setup" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+      - name: Generate checksums
+        shell: pwsh
+        run: |
+          $checksum = "Images-v${{ github.event.inputs.version }}-checksums.txt"
+          Get-FileHash -Path $env:ZIP, $env:SETUP -Algorithm SHA256 |
+            ForEach-Object { "{0}  {1}" -f $_.Hash.ToLowerInvariant(), (Split-Path $_.Path -Leaf) } |
+            Set-Content -Path $checksum -Encoding ascii
+          "CHECKSUM=$checksum" | Out-File -FilePath $env:GITHUB_ENV -Append
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -115,3 +144,4 @@ jobs:
           }
           gh release upload $tag $env:ZIP --clobber
           gh release upload $tag $env:SETUP --clobber
+          gh release upload $tag $env:CHECKSUM --clobber

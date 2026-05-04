@@ -37,7 +37,7 @@ public static class MetadataEditService
 
         // Write to a sibling temp file then atomically replace — crash-safe.
         var dir = Path.GetDirectoryName(path) ?? Path.GetTempPath();
-        var tmp = Path.Combine(dir, $"~{Path.GetRandomFileName()}_{Path.GetFileName(path)}");
+        var tmp = Path.Combine(dir, $".images-{Guid.NewGuid():N}{Path.GetExtension(path)}.tmp");
         try
         {
             image.Write(tmp);

@@ -46,11 +46,12 @@ public sealed class SettingsService
     public SettingsService(string dbPath)
     {
         _connectionString = new SqliteConnectionStringBuilder
-        {
-            DataSource = dbPath,
-            Mode = SqliteOpenMode.ReadWriteCreate,
-            Cache = SqliteCacheMode.Shared,
-        }.ToString();
+            {
+                DataSource = dbPath,
+                Mode = SqliteOpenMode.ReadWriteCreate,
+                Cache = SqliteCacheMode.Shared,
+                DefaultTimeout = 5,
+            }.ToString();
 
         _isAvailable = TryEnsureSchema(dbPath);
     }
@@ -119,6 +120,12 @@ public sealed class SettingsService
     {
         using var conn = Open();
         using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            PRAGMA busy_timeout = 5000;
+            PRAGMA journal_mode = WAL;
+            """;
+        cmd.ExecuteNonQuery();
+
         cmd.CommandText = "PRAGMA user_version;";
         var current = Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
 
@@ -158,6 +165,9 @@ public sealed class SettingsService
     {
         var conn = new SqliteConnection(_connectionString);
         conn.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "PRAGMA busy_timeout = 5000;";
+        cmd.ExecuteNonQuery();
         return conn;
     }
 

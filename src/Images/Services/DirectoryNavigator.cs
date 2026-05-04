@@ -122,7 +122,11 @@ public sealed class DirectoryNavigator : IDisposable
         if (keep is not null)
         {
             var idx = _files.FindIndex(f => string.Equals(f, keep, StringComparison.OrdinalIgnoreCase));
-            CurrentIndex = idx >= 0 ? idx : Math.Min(CurrentIndex, _files.Count - 1);
+            CurrentIndex = idx >= 0 ? idx : ClampIndex(CurrentIndex);
+        }
+        else
+        {
+            CurrentIndex = ClampIndex(CurrentIndex);
         }
     }
 
@@ -157,7 +161,19 @@ public sealed class DirectoryNavigator : IDisposable
     public void UpdateCurrentPath(string newPath)
     {
         if (CurrentIndex < 0) return;
-        _files[CurrentIndex] = newPath;
+        if (CurrentIndex >= _files.Count)
+        {
+            CurrentIndex = ClampIndex(CurrentIndex);
+            if (CurrentIndex < 0) return;
+        }
+
+        var fullPath = Path.GetFullPath(newPath);
+        if (!File.Exists(fullPath))
+            throw new FileNotFoundException("The renamed file no longer exists.", fullPath);
+        if (!SupportedExtensions.Contains(Path.GetExtension(fullPath)))
+            throw new InvalidOperationException("The renamed file extension is not supported by Images.");
+
+        _files[CurrentIndex] = fullPath;
     }
 
     public void RemoveCurrent()
@@ -198,8 +214,15 @@ public sealed class DirectoryNavigator : IDisposable
 
         found.Sort(NaturalCompare);
         _files = found;
+        CurrentIndex = ClampIndex(CurrentIndex);
         ListChanged?.Invoke(this, EventArgs.Empty);
         return true;
+    }
+
+    private int ClampIndex(int index)
+    {
+        if (_files.Count == 0) return -1;
+        return Math.Clamp(index, 0, _files.Count - 1);
     }
 
     private void AttachWatcher(string folder)

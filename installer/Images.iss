@@ -7,7 +7,7 @@
 ; PrivilegesRequiredOverridesAllowed.
 ;
 ; Compile:
-;   "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=0.1.4 installer\Images.iss
+;   "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=0.2.1 installer\Images.iss
 ;
 ; The workflow passes the version on the command line. Default below matches
 ; src/Images/Images.csproj so a local test compile without /D still produces a
@@ -15,7 +15,7 @@
 ; =============================================================================
 
 #ifndef MyAppVersion
-  #define MyAppVersion "0.1.9"
+  #define MyAppVersion "0.2.1"
 #endif
 
 #define MyAppName        "Images"
@@ -27,7 +27,8 @@
 
 [Setup]
 ; A stable AppId lets future installers auto-upgrade this one rather than
-; installing a second copy side-by-side. Generate once and never change.
+; installing a second copy side-by-side. Generated once with [guid]::NewGuid()
+; for the first installer release and must never change.
 AppId={{C6B0A2A4-4F3E-4F6B-8F9A-1A2B3C4D5E6F}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}

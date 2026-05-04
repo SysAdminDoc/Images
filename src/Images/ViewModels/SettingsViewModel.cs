@@ -36,4 +36,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         get => UpdateCheckService.OptedIn;
         set { UpdateCheckService.OptedIn = value; Raise(nameof(UpdateCheckEnabled)); }
     }
+
+    public string UpdateCheckDescription =>
+        "Off by default. When enabled, Images pings github.com/SysAdminDoc/Images at startup. No usage data is sent.";
 }
