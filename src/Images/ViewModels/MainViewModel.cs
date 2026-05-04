@@ -33,6 +33,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private ObservableCollection<OcrTextLine>? _ocrOverlayLines;
     private CancellationTokenSource? _ocrCts;
     private int _ocrGeneration;
+    private const int MetadataTimeoutSeconds = 5;
 
     private readonly DispatcherTimer _hintTimer;
     private System.IO.FileSystemWatcher? _externalEditWatcher;
@@ -539,6 +540,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         private set => Set(ref _metadataStatusText, value);
     }
 
+    private bool _isMetadataLoading;
+    public bool IsMetadataLoading
+    {
+        get => _isMetadataLoading;
+        private set => Set(ref _isMetadataLoading, value);
+    }
+
     public bool CanToggleMetadataHud => HasDisplayImage && !IsPeekMode;
 
     public bool IsMetadataHudVisible
@@ -573,6 +581,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var generation = ++_metadataGeneration;
         PhotoMetadataRows.Clear();
+        IsMetadataLoading = true;
         MetadataStatusText = "Reading photo metadata...";
 
         _ = LoadPhotoMetadataAsync(path, generation);
@@ -581,9 +590,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private async Task LoadPhotoMetadataAsync(string path, int generation)
     {
         PhotoMetadata metadata;
+        string? statusOverride = null;
         try
         {
-            metadata = await Task.Run(() => ImageMetadataService.Read(path)).ConfigureAwait(false);
+            metadata = await Task.Run(() => ImageMetadataService.Read(path))
+                .WaitAsync(TimeSpan.FromSeconds(MetadataTimeoutSeconds))
+                .ConfigureAwait(false);
+        }
+        catch (TimeoutException)
+        {
+            metadata = PhotoMetadata.Empty;
+            statusOverride = "Metadata read timed out.";
         }
         catch
         {
@@ -602,9 +619,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             foreach (var row in metadata.Rows)
                 PhotoMetadataRows.Add(row);
 
-            MetadataStatusText = PhotoMetadataRows.Count == 0
+            IsMetadataLoading = false;
+            MetadataStatusText = statusOverride ?? (PhotoMetadataRows.Count == 0
                 ? "No embedded camera metadata."
-                : "";
+                : "");
         });
     }
 
@@ -612,6 +630,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         _metadataGeneration++;
         PhotoMetadataRows.Clear();
+        IsMetadataLoading = false;
         MetadataStatusText = "";
     }
 
@@ -642,9 +661,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void RefreshFolderPreview()
     {
-        _folderPreviewGeneration++;
-        _folderPreviewCts.Cancel();
-        _folderPreviewCts.Dispose();
+        var generation = ++_folderPreviewGeneration;
+        var previousCts = _folderPreviewCts;
+        previousCts.Cancel();
+        _ = DisposeFolderPreviewSourceLaterAsync(previousCts);
         _folderPreviewCts = new CancellationTokenSource();
         FolderPreviewItems.Clear();
         RaiseFolderPreviewState();
@@ -666,7 +686,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
             FolderPreviewItems.Add(item);
             if (ShouldPreloadPreviewThumbnail(count, _nav.CurrentIndex, index))
-                QueueThumbnailLoad(item, _folderPreviewGeneration, token);
+                QueueThumbnailLoad(item, generation, token);
         }
 
         RaiseFolderPreviewState();
@@ -695,7 +715,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 {
                     if (token.IsCancellationRequested) return;
 
-                    var thumbnail = ThumbnailCache.Instance.GetOrCreateImageSource(item.Path);
+                    var thumbnail = ThumbnailCache.Instance.GetOrCreateImageSource(item.Path, token);
                     if (thumbnail is null || token.IsCancellationRequested) return;
 
                     _ = _uiDispatcher.InvokeAsync(() =>
@@ -726,6 +746,18 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         if (item is null || !FolderPreviewItems.Contains(item)) return;
         QueueThumbnailLoad(item, _folderPreviewGeneration, _folderPreviewCts.Token);
+    }
+
+    private static async Task DisposeFolderPreviewSourceLaterAsync(CancellationTokenSource source)
+    {
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        }
+        finally
+        {
+            source.Dispose();
+        }
     }
 
     private void OpenPreviewItem(FolderPreviewItem? item)
@@ -1926,7 +1958,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _metadataGeneration++;
         _folderPreviewGeneration++;
         _folderPreviewCts.Cancel();
-        _folderPreviewCts.Dispose();
+        _ = DisposeFolderPreviewSourceLaterAsync(_folderPreviewCts);
         _thumbnailDecodeGate.Dispose();
         _preload.Dispose();
         _nav.Dispose();
