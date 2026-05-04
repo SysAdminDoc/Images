@@ -5,14 +5,17 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Images.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Images.ViewModels;
 
 public sealed class MainViewModel : ObservableObject, IDisposable
 {
+    private static readonly ILogger _log = Log.For<MainViewModel>();
     private readonly DirectoryNavigator _nav = new();
     private readonly RenameService _rename = new();
     private readonly PreloadService _preload = new();
+    private readonly OcrService _ocr = new();
     private readonly Dispatcher _uiDispatcher = Dispatcher.CurrentDispatcher;
     private readonly SemaphoreSlim _thumbnailDecodeGate = new(2);
     private readonly DispatcherTimer _renameTimer;
@@ -25,6 +28,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private int _metadataGeneration;
     private bool _isFilmstripVisible;
     private bool _isMetadataHudVisible;
+    private bool _isOcrMode;
+    private ObservableCollection<OcrTextLine>? _ocrOverlayLines;
 
     private readonly DispatcherTimer _hintTimer;
     private System.IO.FileSystemWatcher? _externalEditWatcher;
@@ -95,6 +100,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenInDefaultAppCommand = new RelayCommand(OpenInDefaultApp, () => HasImage);
         StripLocationCommand = new RelayCommand(async () => await StripLocationAsync(), () => HasImage);
         SettingsCommand = new RelayCommand(ShowSettingsWindow);
+        ExtractTextCommand = new RelayCommand(async () => await ExtractTextAsync(), () => HasImage);
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
         // panel renders prior-session folders before the user opens anything.
@@ -888,6 +894,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenInDefaultAppCommand { get; }
     public ICommand StripLocationCommand { get; }
     public ICommand SettingsCommand { get; }
+    public ICommand ExtractTextCommand { get; }
+
+    // -------------------- OCR --------------------
+
+    public bool IsOcrMode
+    {
+        get => _isOcrMode;
+        set => Set(ref _isOcrMode, value);
+    }
+
+    public string OcrModeTooltip => IsOcrMode ? "Hide text (E)" : "Extract text (E)";
+
+    public ObservableCollection<OcrTextLine>? OcrOverlayLines
+    {
+        get => _ocrOverlayLines;
+        set => Set(ref _ocrOverlayLines, value);
+    }
 
     // -------------------- Navigation --------------------
 
@@ -1650,6 +1673,76 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    // OCR text extraction using Windows.Media.Ocr API. Toggles overlay display on success;
+    // if already in OCR mode, toggles off. Handles all error cases with user-facing toasts.
+    private async Task ExtractTextAsync()
+    {
+        if (CurrentPath == null || !HasImage)
+        {
+            Toast("No image loaded");
+            return;
+        }
+
+        // Toggle off if already in OCR mode
+        if (IsOcrMode)
+        {
+            IsOcrMode = false;
+            OcrOverlayLines = null;
+            return;
+        }
+
+        Toast("Extracting text...");
+
+        try
+        {
+            using var fileStream = File.OpenRead(CurrentPath);
+            var result = await _ocr.ExtractTextAsync(fileStream);
+
+            if (result == null)
+            {
+                Toast("OCR unavailable — no language packs installed");
+                IsOcrMode = false;
+                return;
+            }
+
+            if (result.Lines.Count == 0)
+            {
+                Toast("No text found");
+                IsOcrMode = false;
+                return;
+            }
+
+            // Convert OcrResult to overlay-renderable lines
+            var lines = new ObservableCollection<OcrTextLine>();
+            foreach (var line in result.Lines)
+            {
+                // Calculate bounding box from first to last word
+                var firstWord = line.Words[0].BoundingRect;
+                var lastWord = line.Words[^1].BoundingRect;
+                lines.Add(new OcrTextLine
+                {
+                    Text = line.Text,
+                    BoundingBox = new Windows.Foundation.Rect(
+                        firstWord.X,
+                        firstWord.Y,
+                        lastWord.Right - firstWord.X,
+                        Math.Max(firstWord.Height, lastWord.Height)
+                    )
+                });
+            }
+
+            OcrOverlayLines = lines;
+            IsOcrMode = true;
+            Toast($"{lines.Count} text region{(lines.Count == 1 ? "" : "s")} found");
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, "OCR extraction failed: {Message}", ex.Message);
+            Toast("Text extraction failed");
+            IsOcrMode = false;
+        }
+    }
+
     // Item 61: silent reload used by the external-edit debounce so the position/rotation state
     // is preserved but no "Reloaded" toast is emitted — the debounce timer emits its own toast.
     private void ReloadCurrentSilent()
@@ -1780,6 +1873,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         GC.SuppressFinalize(this);
     }
+}
+
+/// <summary>
+/// Represents one line of OCR text with bounding box for overlay rendering.
+/// Click handler in OcrOverlay.xaml.cs copies the Text to clipboard.
+/// </summary>
+public class OcrTextLine
+{
+    public string Text { get; set; } = string.Empty;
+    public Windows.Foundation.Rect BoundingBox { get; set; }
+    public bool IsSelected { get; set; }
 }
 
 public sealed class FolderPreviewItem : ObservableObject

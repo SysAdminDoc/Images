@@ -1,0 +1,39 @@
+<UserControl x:Class="Images.Controls.OcrOverlay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Images.ViewModels"
+             IsHitTestVisible="True"
+             Background="Transparent">
+    <ItemsControl ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.OcrOverlayLines}">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <Canvas />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type vm:OcrTextLine}">
+                <Border Background="#4D89B4FA"
+                        BorderBrush="#89B4FA"
+                        BorderThickness="1"
+                        CornerRadius="2"
+                        Canvas.Left="{Binding BoundingBox.X}"
+                        Canvas.Top="{Binding BoundingBox.Y}"
+                        Width="{Binding BoundingBox.Width}"
+                        Height="{Binding BoundingBox.Height}"
+                        Cursor="Hand"
+                        ToolTip="{Binding Text}"
+                        MouseDown="TextRegion_MouseDown">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Background" Value="#9989B4FA" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+</UserControl>
