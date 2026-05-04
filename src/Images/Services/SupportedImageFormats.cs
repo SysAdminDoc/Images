@@ -164,7 +164,7 @@ public static class SupportedImageFormats
                 => "Native design-suite documents aren't supported. Export the artboards to PSD, PDF, PNG, or TIFF and open the export.",
 
             ".xcf"
-                => "GIMP's native XCF should usually open. If this file fails, save a flattened PNG/TIFF copy from GIPM and open that.",
+                => "GIMP's native XCF should usually open. If this file fails, save a flattened PNG/TIFF copy from GIMP and open that.",
 
             ".heif" or ".heic" or ".hif"
                 => "HEIC/HEIF should open through Magick.NET. If this file fails, install the Microsoft HEIF Image Extension or convert to PNG/JPG first.",

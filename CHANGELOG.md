@@ -2,6 +2,18 @@
 
 All notable changes to **Images** are documented here.
 
+## v0.2.3 — 2026-05-04
+
+Third hardening pass for runtime utilities, recent-folder persistence, workflow gates, wallpaper safety, and diagnostics wording.
+
+### Fixed
+
+- **Recent folders** — MRU entries are now normalized to full paths and only persisted when the folder still exists, avoiding duplicate relative/canonical entries.
+- **Wallpaper safety** — Set-as-wallpaper now copies through a temporary file and atomically swaps the stable app-data wallpaper slot.
+- **Workflow coverage** — release and security vulnerability gates now scan the whole solution, including test-project dependencies, instead of only the app project.
+- **Diagnostics polish** — codec capability wording no longer claims vector editing is unavailable forever, and XCF fallback guidance correctly refers to GIMP.
+- **Settings cleanup** — removed the unused telemetry settings key so the local settings surface matches the documented no-telemetry product behavior.
+
 ## v0.2.2 — 2026-05-04
 
 Second production-hardening pass for thumbnail cancellation, export writes, metadata status, crash logs, and accessibility.

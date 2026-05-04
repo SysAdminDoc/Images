@@ -248,16 +248,23 @@ public sealed class SettingsService
 
         try
         {
+            var normalizedPath = NormalizeRecentFolderPath(path);
+            if (!Directory.Exists(normalizedPath)) return;
+
             using var conn = Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
+                DELETE FROM recent_folders
+                WHERE lower(path) = lower($p) AND path <> $p;
+
                 INSERT INTO recent_folders (path, last_opened) VALUES ($p, $t)
                 ON CONFLICT(path) DO UPDATE SET last_opened = excluded.last_opened;
+
                 DELETE FROM recent_folders WHERE path NOT IN (
                     SELECT path FROM recent_folders ORDER BY last_opened DESC LIMIT 10
                 );
                 """;
-            cmd.Parameters.AddWithValue("$p", path);
+            cmd.Parameters.AddWithValue("$p", normalizedPath);
             cmd.Parameters.AddWithValue("$t", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
             cmd.ExecuteNonQuery();
         }
@@ -271,6 +278,8 @@ public sealed class SettingsService
     {
         var result = new List<string>();
         if (!_isAvailable) return result;
+        if (max <= 0) return result;
+        max = Math.Min(max, 100);
 
         try
         {
@@ -293,6 +302,12 @@ public sealed class SettingsService
         return result;
     }
 
+    private static string NormalizeRecentFolderPath(string path)
+    {
+        var fullPath = Path.GetFullPath(path);
+        return Path.TrimEndingDirectorySeparator(fullPath);
+    }
+
     private static bool IsRecoverableStorageFailure(Exception ex)
         => ex is SqliteException or IOException or UnauthorizedAccessException or InvalidOperationException;
 }
@@ -304,7 +319,6 @@ public sealed class SettingsService
 public static class Keys
 {
     public const string UpdateCheckEnabled = "update-check.enabled";
-    public const string TelemetryEnabled   = "telemetry.enabled";
 
     // Window state
     public const string WindowLeft   = "window.left";

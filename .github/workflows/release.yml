@@ -37,7 +37,7 @@ jobs:
       - name: Vulnerable package gate
         shell: pwsh
         run: |
-          $output = dotnet list src/Images/Images.csproj package --vulnerable --include-transitive 2>&1 | Out-String
+          $output = dotnet list Images.sln package --vulnerable --include-transitive 2>&1 | Out-String
           Write-Host $output
           if ($output -match "has the following vulnerable packages") {
               Write-Error "Vulnerable packages detected — refusing to publish."
