@@ -184,6 +184,12 @@
                                    FlipHorizontal="{Binding FlipHorizontal}"
                                    FlipVertical="{Binding FlipVertical}" />
 
+                <!-- OCR text extraction overlay — semi-transparent blue boxes with click-to-copy.
+                     Phase 1: Only visible at 1.0 zoom so image/viewport coordinates match. -->
+                <ctl:OcrOverlay Visibility="{Binding IsOcrMode, Converter={StaticResource BoolToVis}}"
+                                IsHitTestVisible="{Binding IsOcrMode}"
+                                Opacity="0.95" />
+
                 <!-- Empty state — centered invitational card -->
                 <Border Style="{StaticResource ElevatedCard}"
                         HorizontalAlignment="Center"
@@ -734,9 +740,6 @@
                     </Border>
                 </Grid>
 
-                <!-- OCR text extraction overlay — semi-transparent blue boxes with click-to-copy -->
-                <ctl:OcrOverlay Visibility="{Binding IsOcrMode, Converter={StaticResource BoolToVis}}"
-                                IsHitTestVisible="{Binding IsOcrMode}" />
             </Grid>
 
             <!-- Bottom toolbar — premium horizontal chrome bar with 1-px top highlight.
@@ -1040,7 +1043,7 @@
                                 </Button.Style>
                             </Button>
                             <Button Command="{Binding ExtractTextCommand}"
-                                    Content="&#xF03B;"
+                                    Content="&#xE8EA;"
                                     ToolTip="{Binding OcrModeTooltip}"
                                     Margin="4,0,0,0"
                                     Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}"
