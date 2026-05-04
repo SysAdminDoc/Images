@@ -2,6 +2,15 @@
 
 All notable changes to **Images** are documented here.
 
+## v0.2.8 — 2026-05-04
+
+Installer hotfix for OCR readiness.
+
+### Fixed
+
+- **Installer OCR provisioning** — the Inno installer now runs an elevated Windows optional-capability provisioning step for the current UI language OCR pack plus `en-US` fallback, logging details to `Images-OCR-capability.log` in the install folder.
+- **Upgrade cleanup** — the installer now removes existing Images installs before copying the new build, cleans stale per-user registry shadows that could point file opens at `%LOCALAPPDATA%`, and carries existing file-association registration forward.
+
 ## v0.2.7 — 2026-05-04
 
 Hotfix for OCR extraction reliability and diagnostics.
