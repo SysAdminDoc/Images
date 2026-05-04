@@ -2,6 +2,15 @@
 
 All notable changes to **Images** are documented here.
 
+## v0.2.6 — 2026-05-04
+
+Sixth hardening pass for release integrity and packaging gates.
+
+### Fixed
+
+- **Release version integrity** — the release workflow now rejects malformed version inputs and refuses to publish unless `Images.csproj`, `app.manifest`, installer defaults, and README release commands are all synced to the dispatched version.
+- **Solution build consistency** — release restore/build steps now target `Images.sln` explicitly so the artifact gate exercises the same project graph as local validation.
+
 ## v0.2.5 — 2026-05-04
 
 Fifth hardening pass for OCR overlay coordinate correctness.
