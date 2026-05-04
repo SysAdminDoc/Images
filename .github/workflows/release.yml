@@ -29,7 +29,50 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore Images.sln
+
+      - name: Validate release version sync
+        shell: pwsh
+        run: |
+          $version = "${{ github.event.inputs.version }}".Trim()
+          if ($version -notmatch '^\d+\.\d+\.\d+$') {
+              throw "Release version must be plain SemVer X.Y.Z, got '$version'."
+          }
+
+          [xml]$project = Get-Content -Raw -LiteralPath "src\Images\Images.csproj"
+          $propertyGroup = @($project.Project.PropertyGroup) | Where-Object { $_.Version } | Select-Object -First 1
+          if (-not $propertyGroup) { throw "Could not read version metadata from Images.csproj." }
+
+          $expectedAssemblyVersion = "$version.0"
+          if ($propertyGroup.Version -ne $version) {
+              throw "Images.csproj <Version> is '$($propertyGroup.Version)', expected '$version'."
+          }
+          if ($propertyGroup.FileVersion -ne $expectedAssemblyVersion) {
+              throw "Images.csproj <FileVersion> is '$($propertyGroup.FileVersion)', expected '$expectedAssemblyVersion'."
+          }
+          if ($propertyGroup.AssemblyVersion -ne $expectedAssemblyVersion) {
+              throw "Images.csproj <AssemblyVersion> is '$($propertyGroup.AssemblyVersion)', expected '$expectedAssemblyVersion'."
+          }
+
+          [xml]$manifest = Get-Content -Raw -LiteralPath "src\Images\app.manifest"
+          $ns = [System.Xml.XmlNamespaceManager]::new($manifest.NameTable)
+          $ns.AddNamespace("asmv1", "urn:schemas-microsoft-com:asm.v1")
+          $identity = $manifest.SelectSingleNode("/asmv1:assembly/asmv1:assemblyIdentity", $ns)
+          if ($identity.version -ne $expectedAssemblyVersion) {
+              throw "app.manifest assemblyIdentity version is '$($identity.version)', expected '$expectedAssemblyVersion'."
+          }
+
+          $installer = Get-Content -Raw -LiteralPath "installer\Images.iss"
+          if ($installer -notmatch [regex]::Escape("#define MyAppVersion `"$version`"")) {
+              throw "installer\Images.iss default MyAppVersion is not '$version'."
+          }
+
+          $readme = Get-Content -Raw -LiteralPath "README.md"
+          if ($readme -notmatch [regex]::Escape("version-$version-") -or
+              $readme -notmatch [regex]::Escape("MyAppVersion=$version")) {
+              throw "README version badge or installer command is not synced to '$version'."
+          }
+          Write-Host "Release version sync validated for $version."
 
       # ROADMAP item 34: refuse to ship a release that depends on a NuGet
       # package with a known CVE. Mirrors the standalone Security workflow but
@@ -49,7 +92,7 @@ jobs:
           }
 
       - name: Build
-        run: dotnet build -c Release --no-restore
+        run: dotnet build Images.sln -c Release --no-restore
 
       - name: Bundle Ghostscript runtime (optional)
         if: ${{ github.event.inputs.ghostscript_bundle_url != '' }}
