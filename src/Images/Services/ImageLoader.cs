@@ -49,6 +49,7 @@ public static class ImageLoader
     private const int DocumentPreviewDpi = 144;
     private const int StableReadRetryCount = 3;
     private const int StableReadRetryDelayMs = 80;
+    private const int MaxRenderableDimension = 30000;
 
     public static LoadResult Load(string path, int pageIndex = 0)
     {
@@ -431,15 +432,25 @@ public static class ImageLoader
         image.Format = MagickFormat.Bgra;
         image.Alpha(AlphaOption.Set);
 
-        if (image.Width <= 0 || image.Height <= 0 || image.Width > int.MaxValue || image.Height > int.MaxValue)
+        if (image.Width <= 0 || image.Height <= 0 ||
+            image.Width > MaxRenderableDimension || image.Height > MaxRenderableDimension)
             throw new InvalidOperationException("Decoded image dimensions are not supported.");
 
         var w = (int)image.Width;
         var h = (int)image.Height;
-        if (w > int.MaxValue / 4)
+        int stride;
+        try
+        {
+            stride = checked(w * 4);
+        }
+        catch (OverflowException ex)
+        {
+            throw new InvalidOperationException("Decoded image is too large to render.", ex);
+        }
+
+        if (stride <= 0)
             throw new InvalidOperationException("Decoded image is too large to render.");
 
-        var stride = w * 4;
         var expectedLength = (long)stride * h;
         if (expectedLength > int.MaxValue)
             throw new InvalidOperationException("Decoded image is too large to render.");

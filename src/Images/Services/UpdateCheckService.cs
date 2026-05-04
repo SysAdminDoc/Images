@@ -1,6 +1,6 @@
 using System.IO;
+using System.Buffers;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
@@ -17,6 +17,7 @@ public static class UpdateCheckService
 {
     private const string ReleasesApiUrl = "https://api.github.com/repos/SysAdminDoc/Images/releases/latest";
     private const string ReleasesHtmlUrl = "https://github.com/SysAdminDoc/Images/releases/latest";
+    private const int MaxReleaseResponseBytes = 64 * 1024;
 
     private static readonly HttpClient _http = CreateHttpClient();
     private static readonly Microsoft.Extensions.Logging.ILogger _log = Log.Get("Images.Updates");
@@ -50,7 +51,7 @@ public static class UpdateCheckService
         try
         {
             _log.LogInformation("update-check: GET {Url}", ReleasesApiUrl);
-            using var resp = await _http.GetAsync(ReleasesApiUrl, ct).ConfigureAwait(false);
+            using var resp = await _http.GetAsync(ReleasesApiUrl, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
             var bytes = resp.Content.Headers.ContentLength ?? -1;
             var ms = (int)(DateTime.UtcNow - startedAt).TotalMilliseconds;
             _log.LogInformation("update-check: {Status} {Bytes} bytes in {Ms} ms", (int)resp.StatusCode, bytes, ms);
@@ -58,7 +59,7 @@ public static class UpdateCheckService
             if (!resp.IsSuccessStatusCode)
                 return new CheckResult(false, null, null, $"HTTP {(int)resp.StatusCode}");
 
-            var release = await resp.Content.ReadFromJsonAsync(ReleaseJsonContext.Default.GitHubRelease, ct).ConfigureAwait(false);
+            var release = await ReadReleaseJsonAsync(resp.Content, ct).ConfigureAwait(false);
             if (release?.TagName is null)
                 return new CheckResult(false, null, null, "no tag in response");
 
@@ -83,6 +84,34 @@ public static class UpdateCheckService
             _log.LogError(ex, "update-check unexpected failure");
             return new CheckResult(false, null, null, $"unexpected: {ex.Message}");
         }
+    }
+
+    private static async Task<GitHubRelease?> ReadReleaseJsonAsync(HttpContent content, CancellationToken ct)
+    {
+        if (content.Headers.ContentLength is > MaxReleaseResponseBytes)
+            throw new InvalidOperationException("update response too large");
+
+        await using var input = await content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+        using var bounded = new MemoryStream(capacity: Math.Min(MaxReleaseResponseBytes, 4096));
+        var buffer = ArrayPool<byte>.Shared.Rent(8192);
+        try
+        {
+            while (true)
+            {
+                var read = await input.ReadAsync(buffer.AsMemory(0, buffer.Length), ct).ConfigureAwait(false);
+                if (read == 0) break;
+                if (bounded.Length + read > MaxReleaseResponseBytes)
+                    throw new InvalidOperationException("update response too large");
+                bounded.Write(buffer, 0, read);
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
+
+        bounded.Position = 0;
+        return await JsonSerializer.DeserializeAsync(bounded, ReleaseJsonContext.Default.GitHubRelease, ct).ConfigureAwait(false);
     }
 
     private static (int major, int minor, int patch)? ParseVersionTag(string tag)
@@ -164,7 +193,7 @@ public static class UpdateCheckService
     public static bool IsDueForBackgroundCheck()
     {
         // Respect user opt-out first — a disabled setting silently skips the network call.
-        if (!SettingsService.Instance.GetBool(Keys.UpdateCheckEnabled, defaultValue: true))
+        if (!SettingsService.Instance.GetBool(Keys.UpdateCheckEnabled, defaultValue: false))
             return false;
 
         var last = LastCheckedUtc;
@@ -174,7 +203,7 @@ public static class UpdateCheckService
 
     public static bool OptedIn
     {
-        get => SettingsService.Instance.GetBool(Keys.UpdateCheckEnabled, defaultValue: true);
+        get => SettingsService.Instance.GetBool(Keys.UpdateCheckEnabled, defaultValue: false);
         set => SettingsService.Instance.SetBool(Keys.UpdateCheckEnabled, value);
     }
 }
