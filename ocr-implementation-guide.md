@@ -118,7 +118,7 @@ private async Task ExtractTextAsync()
 
         if (result == null)
         {
-            Toast("OCR unavailable — no language packs installed");
+            Toast("OCR unavailable — no Windows OCR language pack installed");
             IsOcrMode = false;
             return;
         }
@@ -359,7 +359,7 @@ xmlns:ctl="clr-namespace:Images.Controls"
 ### README.md
 Add new feature section after "Photo metadata at a glance":
 ```markdown
-- **Text extraction** — Press `T` or click "Extract Text" to recognize text in the image using Windows OCR. Semi-transparent overlays highlight detected text regions. Click any region to copy its text to the clipboard. Works offline with Windows language packs (English guaranteed, additional languages via Settings → Language).
+- **Text extraction** — Press `E` or click "Extract Text" to recognize text in the image using Windows OCR. Semi-transparent overlays highlight detected text regions. Click any region to copy its text to the clipboard. Works offline with installed Windows OCR language packs.
 ```
 
 ### CHANGELOG.md

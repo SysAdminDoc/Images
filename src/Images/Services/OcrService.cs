@@ -25,10 +25,13 @@ public class OcrService
             if (imageStream is null || !imageStream.CanRead)
                 throw new InvalidOperationException("OCR input stream is not readable.");
 
-            // Convert Stream to IRandomAccessStream (WinRT requirement)
+            // Convert Stream to IRandomAccessStream (WinRT requirement).
+            // Keep the write adapter alive until after WinRT has decoded the stream;
+            // disposing it closes the underlying InMemoryRandomAccessStream.
             using var memStream = new InMemoryRandomAccessStream();
-            await using (var writer = memStream.AsStreamForWrite())
-                await imageStream.CopyToAsync(writer, ct).ConfigureAwait(false);
+            using var writer = memStream.AsStreamForWrite();
+            await imageStream.CopyToAsync(writer, ct).ConfigureAwait(false);
+            await writer.FlushAsync(ct).ConfigureAwait(false);
             memStream.Seek(0);
 
             // Decode image to SoftwareBitmap
@@ -50,7 +53,7 @@ public class OcrService
                 _cachedEngine ??= OcrEngine.TryCreateFromUserProfileLanguages();
                 if (_cachedEngine == null)
                 {
-                    _log.LogError("OCR engine unavailable — no language packs installed");
+                    _log.LogError("OCR engine unavailable — no Windows OCR language pack installed");
                     return null;
                 }
 
@@ -70,13 +73,13 @@ public class OcrService
         catch (Exception ex)
         {
             _log.LogError(ex, "OCR extraction failed: {Message}", ex.Message);
-            return null;
+            throw;
         }
     }
 
     /// <summary>
     /// Get list of languages available for OCR on this system.
-    /// English is guaranteed; others require Windows language packs.
+    /// Languages come from installed Windows OCR optional capabilities.
     /// </summary>
     public IReadOnlyList<Windows.Globalization.Language> GetAvailableLanguages()
     {
