@@ -7,7 +7,7 @@
 ; PrivilegesRequiredOverridesAllowed.
 ;
 ; Compile:
-;   "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=0.2.3 installer\Images.iss
+;   "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=0.2.4 installer\Images.iss
 ;
 ; The workflow passes the version on the command line. Default below matches
 ; src/Images/Images.csproj so a local test compile without /D still produces a
@@ -15,7 +15,7 @@
 ; =============================================================================
 
 #ifndef MyAppVersion
-  #define MyAppVersion "0.2.3"
+  #define MyAppVersion "0.2.4"
 #endif
 
 #define MyAppName        "Images"
