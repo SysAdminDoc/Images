@@ -1833,17 +1833,18 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 if (line.Words.Count == 0 || string.IsNullOrWhiteSpace(line.Text))
                     continue;
 
-                // Calculate bounding box from first to last word
-                var firstWord = line.Words[0].BoundingRect;
-                var lastWord = line.Words[^1].BoundingRect;
+                var left = line.Words.Min(word => word.BoundingRect.Left);
+                var top = line.Words.Min(word => word.BoundingRect.Top);
+                var right = line.Words.Max(word => word.BoundingRect.Right);
+                var bottom = line.Words.Max(word => word.BoundingRect.Bottom);
                 lines.Add(new OcrTextLine
                 {
                     Text = line.Text,
                     BoundingBox = new Windows.Foundation.Rect(
-                        firstWord.X,
-                        firstWord.Y,
-                        lastWord.Right - firstWord.X,
-                        Math.Max(firstWord.Height, lastWord.Height)
+                        left,
+                        top,
+                        Math.Max(1, right - left),
+                        Math.Max(1, bottom - top)
                     )
                 });
             }
@@ -2027,20 +2028,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 }
 
 /// <summary>
-/// Represents one line of OCR text with bounding box for overlay rendering.
-/// Click handler in OcrOverlay.xaml.cs copies the Text to clipboard.
+/// Represents one line of OCR text with an image-pixel bounding box for overlay rendering.
 /// </summary>
 public class OcrTextLine : ObservableObject
 {
-    private bool _isSelected;
-
     public string Text { get; set; } = string.Empty;
     public Windows.Foundation.Rect BoundingBox { get; set; }
-    public bool IsSelected
-    {
-        get => _isSelected;
-        set => Set(ref _isSelected, value);
-    }
 }
 
 public sealed class FolderPreviewItem : ObservableObject
