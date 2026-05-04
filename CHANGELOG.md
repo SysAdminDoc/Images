@@ -2,6 +2,15 @@
 
 All notable changes to **Images** are documented here.
 
+## v0.2.5 — 2026-05-04
+
+Fifth hardening pass for OCR overlay coordinate correctness.
+
+### Fixed
+
+- **OCR overlay alignment** — OCR text boxes now share the viewer's image-pixel-to-viewport transform, keeping regions aligned across fit letterboxing, zoom, pan, rotation, and flip states instead of drawing raw pixels on the viewport.
+- **Transform regression coverage** — added focused matrix tests for fit-centering, zoom/pan, rotation, and flip coordinate mapping.
+
 ## v0.2.4 — 2026-05-04
 
 Fourth hardening pass for local state files, diagnostics exports, clipboard paste storage, and single-file runtime metadata.
