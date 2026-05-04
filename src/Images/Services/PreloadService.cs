@@ -27,6 +27,8 @@ public sealed class PreloadService : IDisposable
     private readonly ConcurrentDictionary<string, DateTime> _lastAccess =
         new(StringComparer.OrdinalIgnoreCase);
     private CancellationTokenSource _cts = new();
+    private readonly object _ctsGate = new();
+    private bool _isDisposed;
     private readonly ILogger _log = Log.For<PreloadService>();
 
     /// <summary>
@@ -35,6 +37,7 @@ public sealed class PreloadService : IDisposable
     /// </summary>
     public void Enqueue(string? path)
     {
+        if (_isDisposed) return;
         if (string.IsNullOrEmpty(path)) return;
         if (!DirectoryNavigator.SupportedExtensions.Contains(Path.GetExtension(path))) return;
         if (SupportedImageFormats.RequiresGhostscript(path)) return;
@@ -62,7 +65,12 @@ public sealed class PreloadService : IDisposable
         }
         catch { /* quick dims is best-effort */ }
 
-        var token = _cts.Token;
+        CancellationToken token;
+        lock (_ctsGate)
+        {
+            if (_isDisposed) return;
+            token = _cts.Token;
+        }
         var lazy = new Lazy<Task<ImageLoader.LoadResult?>>(() => Task.Run(() =>
         {
             try
@@ -105,9 +113,16 @@ public sealed class PreloadService : IDisposable
     /// </summary>
     public void Reset()
     {
-        _cts.Cancel();
-        _cts.Dispose();
-        _cts = new CancellationTokenSource();
+        CancellationTokenSource old;
+        lock (_ctsGate)
+        {
+            if (_isDisposed) return;
+            old = _cts;
+            _cts = new CancellationTokenSource();
+        }
+
+        old.Cancel();
+        _ = DisposeCanceledSourceLaterAsync(old);
         _cache.Clear();
         _lastAccess.Clear();
     }
@@ -127,9 +142,29 @@ public sealed class PreloadService : IDisposable
 
     public void Dispose()
     {
-        _cts.Cancel();
-        _cts.Dispose();
+        CancellationTokenSource old;
+        lock (_ctsGate)
+        {
+            if (_isDisposed) return;
+            _isDisposed = true;
+            old = _cts;
+        }
+
+        old.Cancel();
+        old.Dispose();
         _cache.Clear();
         _lastAccess.Clear();
+    }
+
+    private static async Task DisposeCanceledSourceLaterAsync(CancellationTokenSource source)
+    {
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        }
+        finally
+        {
+            source.Dispose();
+        }
     }
 }
