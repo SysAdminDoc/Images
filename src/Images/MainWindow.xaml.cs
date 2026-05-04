@@ -397,6 +397,11 @@ public partial class MainWindow : Window
                 Vm.ToggleMetadataHudCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.E:
+                // OCR text extraction toggle
+                Vm.ExtractTextCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.Left:
             case Key.Back:
                 Vm.PrevCommand.Execute(null); e.Handled = true; break;

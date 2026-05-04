@@ -3,6 +3,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Graphics.Imaging;
 using Windows.Media.Ocr;
 using Windows.Storage.Streams;
+using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
 
@@ -11,6 +12,7 @@ namespace Images.Services;
 /// </summary>
 public class OcrService
 {
+    private static readonly ILogger _log = Log.For<OcrService>();
     private OcrEngine? _cachedEngine;
 
     /// <summary>
@@ -40,7 +42,7 @@ public class OcrService
             _cachedEngine ??= OcrEngine.TryCreateFromUserProfileLanguages();
             if (_cachedEngine == null)
             {
-                Log.Error("OCR engine unavailable — no language packs installed");
+                _log.LogError("OCR engine unavailable — no language packs installed");
                 return null;
             }
 
@@ -50,7 +52,7 @@ public class OcrService
         }
         catch (Exception ex)
         {
-            Log.Error($"OCR extraction failed: {ex.Message}");
+            _log.LogError(ex, "OCR extraction failed: {Message}", ex.Message);
             return null;
         }
     }
