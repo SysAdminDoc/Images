@@ -2,6 +2,16 @@
 
 All notable changes to **Images** are documented here.
 
+## v0.2.9 — 2026-05-04
+
+OCR overlay usability hotfix.
+
+### Fixed
+
+- **OCR overlay placement** — OCR regions now place their Canvas item containers at the recognized image coordinates instead of setting Canvas offsets inside the data template, fixing boxes that were stacked along the top edge.
+- **Selectable OCR text** — OCR regions now render read-only selectable text boxes so recognized text can be highlighted and copied manually with Ctrl+C or the context menu.
+- **OCR line bounds** — line overlays now use the union of all recognized word boxes instead of only the first and last word, improving placement on uneven lines.
+
 ## v0.2.8 — 2026-05-04
 
 Installer hotfix for OCR readiness.

@@ -6,40 +6,62 @@
              Background="Transparent">
     <Grid x:Name="Root">
         <ItemsControl x:Name="OverlayItems"
-                      ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.OcrOverlayLines}"
-                      AutomationProperties.Name="OCR text regions"
-                      AutomationProperties.HelpText="Click or press Enter on a region to copy its text">
+                       ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.OcrOverlayLines}"
+                       AutomationProperties.Name="OCR text regions"
+                       AutomationProperties.HelpText="Select text inside a region, then copy it with Ctrl+C or the text box context menu">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Canvas />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemContainerStyle>
+                <Style TargetType="{x:Type ContentPresenter}">
+                    <Setter Property="Canvas.Left" Value="{Binding BoundingBox.X}" />
+                    <Setter Property="Canvas.Top" Value="{Binding BoundingBox.Y}" />
+                </Style>
+            </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type vm:OcrTextLine}">
-                    <Border Background="#4D89B4FA"
-                            BorderBrush="#89B4FA"
+                    <Border BorderBrush="#89B4FA"
                             BorderThickness="1"
                             CornerRadius="2"
-                            Canvas.Left="{Binding BoundingBox.X}"
-                            Canvas.Top="{Binding BoundingBox.Y}"
                             Width="{Binding BoundingBox.Width}"
                             Height="{Binding BoundingBox.Height}"
-                            Focusable="True"
-                            Cursor="Hand"
-                            ToolTip="{Binding Text, StringFormat=Copy: {0}}"
+                            Focusable="False"
+                            ToolTip="{Binding Text, StringFormat=OCR text: {0}}"
                             AutomationProperties.Name="{Binding Text}"
-                            AutomationProperties.HelpText="Copy OCR text region"
-                            KeyDown="TextRegion_KeyDown"
-                            MouseDown="TextRegion_MouseDown">
+                            AutomationProperties.HelpText="Selectable OCR text region">
                         <Border.Style>
                             <Style TargetType="Border">
+                                <Setter Property="Background" Value="#4D89B4FA" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <Trigger Property="IsKeyboardFocusWithin" Value="True">
                                         <Setter Property="Background" Value="#9989B4FA" />
-                                    </DataTrigger>
+                                    </Trigger>
                                 </Style.Triggers>
                             </Style>
                         </Border.Style>
+                        <TextBox Text="{Binding Text, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 IsReadOnlyCaretVisible="True"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 Foreground="#CDD6F4"
+                                 SelectionBrush="#89B4FA"
+                                 SelectionOpacity="0.5"
+                                 Padding="2,0"
+                                 MinWidth="0"
+                                 MinHeight="0"
+                                 FontSize="12"
+                                 FontWeight="SemiBold"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 VerticalContentAlignment="Center"
+                                 HorizontalContentAlignment="Left"
+                                 Cursor="IBeam"
+                                 ToolTip="{Binding Text, StringFormat=Select and copy: {0}}"
+                                 AutomationProperties.Name="{Binding Text}"
+                                 AutomationProperties.HelpText="Selectable OCR text. Drag to highlight text, then press Ctrl+C or use the context menu to copy." />
                     </Border>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
