@@ -184,8 +184,8 @@
                                    FlipHorizontal="{Binding FlipHorizontal}"
                                    FlipVertical="{Binding FlipVertical}" />
 
-                <!-- OCR text extraction overlay — semi-transparent boxes with click-to-copy.
-                     Target binding keeps OCR pixel coordinates aligned with image zoom/pan transforms. -->
+                <!-- OCR text extraction overlay — selectable recognized text regions.
+                      Target binding keeps OCR pixel coordinates aligned with image zoom/pan transforms. -->
                 <ctl:OcrOverlay Visibility="{Binding IsOcrMode, Converter={StaticResource BoolToVis}}"
                                 Target="{Binding ElementName=Canvas}"
                                 IsHitTestVisible="{Binding IsOcrMode}"

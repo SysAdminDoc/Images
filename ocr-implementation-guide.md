@@ -371,7 +371,7 @@ OCR text extraction, feature parity with Windows Photos.
 
 ### Features
 
-- **Text extraction (E key)** — Extract text from images using Windows OCR (local, privacy-first). Press `E` or click "Extract Text" in the toolbar. Semi-transparent blue overlays highlight detected text regions. Click any region to copy its text to the clipboard. The installer provisions Windows OCR language capabilities for the current UI language plus `en-US` fallback when needed. Powered by Windows.Media.Ocr — the same API used by Windows Photos.
+- **Text extraction (E key)** — Extract text from images using Windows OCR (local, privacy-first). Press `E` or click "Extract Text" in the toolbar. Selectable overlay text boxes sit over detected text regions so recognized text can be highlighted and copied manually. The installer provisions Windows OCR language capabilities for the current UI language plus `en-US` fallback when needed. Powered by Windows.Media.Ocr — the same API used by Windows Photos.
 ```
 
 ### ROADMAP.md
