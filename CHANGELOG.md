@@ -2,6 +2,27 @@
 
 All notable changes to **Images** are documented here.
 
+## v0.2.1 — 2026-05-04
+
+Production hardening release for OCR, file operations, release packaging, and privacy defaults.
+
+### Fixed
+
+- **OCR stability** — removed the leaked reflection-based 60 FPS overlay timer, made click-to-copy selection feedback observable, ignored empty OCR word lines, and cancel stale OCR runs when the overlay is hidden or the image changes.
+- **Rename safety** — invalid filenames now surface a clear toast instead of silently no-oping, and rename/undo paths retry deterministic conflict targets when another process creates a competing filename mid-operation.
+- **Folder navigation resilience** — directory refresh now clamps stale indexes after external file changes, and renamed paths are normalized and validated before the navigator follows them.
+- **Metadata edit safety** — GPS-stripping writes use a short GUID sibling temp file to avoid long-path temp-name failures and keep cleanup reliable.
+- **Decode guards** — Magick.NET bitmap conversion now rejects oversized dimensions before stride/pixel-buffer allocation.
+- **Metadata sanitation** — embedded string metadata drops control characters and GPS display rejects malformed coordinates outside valid latitude/longitude ranges.
+- **Update-check safety** — release JSON downloads are bounded to 64 KB before deserialization.
+- **Settings reliability** — SQLite settings open with a busy timeout and WAL mode to reduce multi-process lock failures.
+
+### Trust and release
+
+- **Network quiet by default** — automatic update checks now default off; users can enable startup checks in Settings, and manual checks still work from About.
+- **Release workflow hardening** — optional Ghostscript bundles require a matching SHA-256, the workflow avoids ExecutionPolicy Bypass, PDBs are stripped from portable packages, and release checksums are uploaded.
+- **Version sync** — manifest, installer defaults, README badge, and assembly metadata now agree on v0.2.1.
+
 ## v0.2.0 — 2026-05-04
 
 Text extraction (OCR) using Windows.Media.Ocr API. Local processing, privacy-first.

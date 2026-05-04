@@ -10,10 +10,10 @@ There is exactly **one** network call surface in the shipped product:
 
 - **Endpoint**: `https://api.github.com/repos/SysAdminDoc/Images/releases/latest`
 - **Why**: detects whether a newer release is available.
-- **When**: once at startup, throttled to one call per 24 hours (last-checked timestamp persisted to `update-check.json`). Manual "Check updates" in About bypasses the throttle.
+- **When**: never by default. If you enable automatic checks in Settings, Images checks once at startup and throttles to one call per 24 hours (last-checked timestamp persisted to `update-check.json`). Manual "Check updates" in About bypasses the throttle.
 - **What is sent**: a `User-Agent` of the form `Images/<version> (+https://github.com/SysAdminDoc/Images)`, plus the standard HTTP headers GitHub requires. **No** account, telemetry, or analytics token. **No** identifying client ID. **No** image, file, or folder metadata leaves the machine.
 - **What is logged locally**: every call writes its URL, response status, byte count, and duration to the structured log so you can audit it. Logs land at `%LOCALAPPDATA%\Images\Logs\images-<yyyy-MM-dd>.log`.
-- **How to turn it off**: About → "Automatically check for updates" checkbox. With the box cleared, `IsDueForBackgroundCheck` short-circuits and the network call is never made.
+- **How to control it**: Settings → Privacy → "Check for updates automatically". The default is off. With the box cleared, `IsDueForBackgroundCheck` short-circuits and the network call is never made.
 
 That is the entire network surface. No image opens, RAW decodes, codec discoveries, or filename operations contact the network — at all, ever.
 
@@ -48,7 +48,7 @@ You can delete any entry above without losing data the app actually owns. Origin
 
 You can audit the network behavior end-to-end:
 
-1. Open **About** → "Automatically check for updates" — uncheck it. Every silent call stops.
+1. Open **Settings** → Privacy → "Check for updates automatically" — leave it unchecked. Every silent call stops. The About window exposes the same setting for convenience.
 2. Watch `%LOCALAPPDATA%\Images\Logs\images-<date>.log`. Every update-check call writes a line there. There are no other network call sites in the codebase.
 3. Run `Images.exe --system-info` to see the local files Images uses.
 4. Search the source: `grep -r "HttpClient\|WebClient\|HttpRequestMessage" src/Images/` — should return only `Services/UpdateCheckService.cs`.

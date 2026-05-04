@@ -18,37 +18,54 @@ public class OcrService
     /// <summary>
     /// Extract text from an image stream using Windows OCR.
     /// </summary>
-    public async Task<OcrResult?> ExtractTextAsync(Stream imageStream)
+    public async Task<OcrResult?> ExtractTextAsync(Stream imageStream, CancellationToken ct = default)
     {
         try
         {
+            if (imageStream is null || !imageStream.CanRead)
+                throw new InvalidOperationException("OCR input stream is not readable.");
+
             // Convert Stream to IRandomAccessStream (WinRT requirement)
             using var memStream = new InMemoryRandomAccessStream();
-            await imageStream.CopyToAsync(memStream.AsStreamForWrite());
+            await using (var writer = memStream.AsStreamForWrite())
+                await imageStream.CopyToAsync(writer, ct).ConfigureAwait(false);
             memStream.Seek(0);
 
             // Decode image to SoftwareBitmap
-            var decoder = await BitmapDecoder.CreateAsync(memStream);
-            var softwareBitmap = await decoder.GetSoftwareBitmapAsync();
+            var decoder = await BitmapDecoder.CreateAsync(memStream).AsTask(ct).ConfigureAwait(false);
+            var softwareBitmap = await decoder.GetSoftwareBitmapAsync().AsTask(ct).ConfigureAwait(false);
 
-            // Convert to compatible pixel format if needed (OCR requires Bgra8 or Gray8)
-            if (softwareBitmap.BitmapPixelFormat != BitmapPixelFormat.Bgra8 &&
-                softwareBitmap.BitmapPixelFormat != BitmapPixelFormat.Gray8)
+            try
             {
-                softwareBitmap = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8);
-            }
+                // Convert to compatible pixel format if needed (OCR requires Bgra8 or Gray8)
+                if (softwareBitmap.BitmapPixelFormat != BitmapPixelFormat.Bgra8 &&
+                    softwareBitmap.BitmapPixelFormat != BitmapPixelFormat.Gray8)
+                {
+                    var converted = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8);
+                    softwareBitmap.Dispose();
+                    softwareBitmap = converted;
+                }
 
-            // Get or create OCR engine
-            _cachedEngine ??= OcrEngine.TryCreateFromUserProfileLanguages();
-            if (_cachedEngine == null)
+                // Get or create OCR engine
+                _cachedEngine ??= OcrEngine.TryCreateFromUserProfileLanguages();
+                if (_cachedEngine == null)
+                {
+                    _log.LogError("OCR engine unavailable — no language packs installed");
+                    return null;
+                }
+
+                // Recognize text
+                var result = await _cachedEngine.RecognizeAsync(softwareBitmap).AsTask(ct).ConfigureAwait(false);
+                return result;
+            }
+            finally
             {
-                _log.LogError("OCR engine unavailable — no language packs installed");
-                return null;
+                softwareBitmap.Dispose();
             }
-
-            // Recognize text
-            var result = await _cachedEngine.RecognizeAsync(softwareBitmap);
-            return result;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
