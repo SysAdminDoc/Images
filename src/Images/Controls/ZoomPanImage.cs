@@ -28,6 +28,7 @@ public sealed class ZoomPanImage : ContentControl
     private readonly Grid _root = new();
     private Point? _dragStart;
     private Point _dragOrigin;
+    public event EventHandler? ViewChanged;
 
     public static readonly DependencyProperty SourceProperty = DependencyProperty.Register(
         nameof(Source), typeof(ImageSource), typeof(ZoomPanImage),
@@ -111,6 +112,10 @@ public sealed class ZoomPanImage : ContentControl
         _image.RenderTransformOrigin = new Point(0.5, 0.5);
         _image.RenderTransform = group;
         RenderOptions.SetBitmapScalingMode(_image, BitmapScalingMode.HighQuality);
+        _flip.Changed += (_, _) => RaiseViewChanged();
+        _rotate.Changed += (_, _) => RaiseViewChanged();
+        _scale.Changed += (_, _) => RaiseViewChanged();
+        _translate.Changed += (_, _) => RaiseViewChanged();
 
         _root.ClipToBounds = true;
         _root.Children.Add(_image);
@@ -121,7 +126,11 @@ public sealed class ZoomPanImage : ContentControl
         MouseMove += OnMove;
         MouseLeftButtonUp += OnUp;
         MouseDoubleClick += OnDouble;
-        SizeChanged += (_, _) => ResetView();
+        SizeChanged += (_, _) =>
+        {
+            ResetView();
+            RaiseViewChanged();
+        };
     }
 
     private void OnSourceChanged(ImageSource? src)
@@ -133,6 +142,8 @@ public sealed class ZoomPanImage : ContentControl
         _image.BeginAnimation(Image.SourceProperty, null);
         _image.Source = src;
         ResetView();
+        RaiseViewChanged();
+        Dispatcher.BeginInvoke(new Action(RaiseViewChanged), System.Windows.Threading.DispatcherPriority.Loaded);
     }
 
     private void OnAnimationChanged(AnimationSequence? seq)
@@ -166,6 +177,24 @@ public sealed class ZoomPanImage : ContentControl
         _translate.X = _translate.Y = 0;
     }
 
+    public Matrix GetImageToViewportMatrix()
+    {
+        if (_image.Source is not BitmapSource bs)
+            return Matrix.Identity;
+
+        return ImageViewportTransform.Calculate(
+            bs.PixelWidth,
+            bs.PixelHeight,
+            ActualWidth,
+            ActualHeight,
+            _scale.ScaleX,
+            _translate.X,
+            _translate.Y,
+            _rotate.Angle,
+            FlipHorizontal,
+            FlipVertical);
+    }
+
     // V20-20: four zoom modes. All compute against the source image's pixel size in the
     // control's current available size. Stretch.Uniform on the inner Image handles the baseline
     // fit; our ScaleTransform multiplies on top. Fit = 1.0x (baseline Uniform is already fit);
@@ -193,6 +222,7 @@ public sealed class ZoomPanImage : ContentControl
         };
         _scale.ScaleX = _scale.ScaleY = s;
         _translate.X = _translate.Y = 0;
+        RaiseViewChanged();
     }
 
     public void OneToOne()
@@ -205,6 +235,7 @@ public sealed class ZoomPanImage : ContentControl
         if (fitScale <= 0) return;
         _scale.ScaleX = _scale.ScaleY = 1.0 / fitScale;
         _translate.X = _translate.Y = 0;
+        RaiseViewChanged();
     }
 
     private void OnWheel(object sender, MouseWheelEventArgs e)
@@ -216,6 +247,7 @@ public sealed class ZoomPanImage : ContentControl
         if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
         {
             _translate.X += e.Delta > 0 ? 80 : -80;
+            RaiseViewChanged();
             e.Handled = true;
             return;
         }
@@ -230,6 +262,7 @@ public sealed class ZoomPanImage : ContentControl
         _translate.X -= dx;
         _translate.Y -= dy;
         _scale.ScaleX = _scale.ScaleY = newScale;
+        RaiseViewChanged();
         e.Handled = true;
     }
 
@@ -248,6 +281,7 @@ public sealed class ZoomPanImage : ContentControl
         var p = e.GetPosition(this);
         _translate.X = _dragOrigin.X + (p.X - _dragStart.Value.X);
         _translate.Y = _dragOrigin.Y + (p.Y - _dragStart.Value.Y);
+        RaiseViewChanged();
     }
 
     private void OnUp(object sender, MouseButtonEventArgs e)
@@ -267,7 +301,10 @@ public sealed class ZoomPanImage : ContentControl
     {
         var n = Math.Clamp(_scale.ScaleX * factor, 0.1, 20);
         _scale.ScaleX = _scale.ScaleY = n;
+        RaiseViewChanged();
     }
+
+    private void RaiseViewChanged() => ViewChanged?.Invoke(this, EventArgs.Empty);
 
     // A-01: surface custom UIA peer so screen readers announce "Image, W by H pixels" on focus
     // instead of the generic ContentControl label.
