@@ -1814,7 +1814,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
             if (result == null)
             {
-                Toast("OCR unavailable — no language packs installed");
+                Toast("OCR unavailable — no Windows OCR language pack installed");
                 IsOcrMode = false;
                 return;
             }
