@@ -64,7 +64,9 @@ public static class CrashLog
 
             lock (_gate)
             {
-                File.AppendAllText(LogPath, sb.ToString(), Encoding.UTF8);
+                using var stream = new FileStream(LogPath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+                using var writer = new StreamWriter(stream, Encoding.UTF8);
+                writer.Write(sb.ToString());
             }
         }
         catch
