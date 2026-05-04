@@ -733,6 +733,10 @@
                         </StackPanel>
                     </Border>
                 </Grid>
+
+                <!-- OCR text extraction overlay — semi-transparent blue boxes with click-to-copy -->
+                <ctl:OcrOverlay Visibility="{Binding IsOcrMode, Converter={StaticResource BoolToVis}}"
+                                IsHitTestVisible="{Binding IsOcrMode}" />
             </Grid>
 
             <!-- Bottom toolbar — premium horizontal chrome bar with 1-px top highlight.
@@ -1027,6 +1031,24 @@
                                     <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsMetadataHudVisible}" Value="True">
+                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button Command="{Binding ExtractTextCommand}"
+                                    Content="&#xF03B;"
+                                    ToolTip="{Binding OcrModeTooltip}"
+                                    Margin="4,0,0,0"
+                                    Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}"
+                                    AutomationProperties.Name="Extract text">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsOcrMode}" Value="True">
                                                 <Setter Property="Background" Value="#1F89B4FA" />
                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                 <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
