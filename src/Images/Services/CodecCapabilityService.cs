@@ -147,7 +147,7 @@ public static class CodecCapabilityService
                 MultiPage: false,
                 Metadata: true,
                 Runtime: "Magick.NET",
-                Notes: "SVG/EMF/WMF rasterize at viewer DPI; round-trip vector editing is out of scope."),
+                Notes: "SVG/EMF/WMF rasterize at viewer DPI; round-trip vector editing is a future editor feature."),
 
             new(
                 Family: "Document previews",

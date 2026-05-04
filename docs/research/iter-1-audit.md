@@ -22,7 +22,7 @@ Claimed 13-track coverage: security, a11y, i18n, observability, testing, docs, d
 - Docs: **covered** (iter artifacts write docs/research/*)
 - Distribution: **covered** (A12 SHA256SUMS, A13 Authenticode, D14/D15 winget/Scoop)
 - Plugin: **deferred** (F8 chaiNNer investigation — research spike only, no ROADMAP commitment yet)
-- Mobile: **N/A** (Windows-only charter — explicitly out of scope)
+- Mobile: **N/A** (Windows-only charter — intentionally not a current target)
 - Offline: **inherent** (zero-telemetry charter)
 - Multi-user: **N/A** (single-user viewer, no accounts)
 - Migration: **covered** (M-01 through M-06 already in v2)
