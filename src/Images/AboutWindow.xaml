@@ -247,9 +247,12 @@
 
             <!-- V20-02: update-check opt-out surface. Persisted to settings.db. -->
             <CheckBox x:Name="UpdateCheckCheckBox"
-                      Content="Automatically check for updates"
+                      Content="Check for updates automatically"
                       HorizontalAlignment="Center"
                       Margin="0,16,0,0"
+                      ToolTip="Off by default. When enabled, Images checks GitHub Releases at startup."
+                      AutomationProperties.Name="Check for updates automatically"
+                      AutomationProperties.HelpText="Off by default. When enabled, Images checks GitHub Releases at startup. No image, file, or folder metadata is sent."
                       Checked="UpdateCheckOptIn_Changed"
                       Unchecked="UpdateCheckOptIn_Changed" />
 

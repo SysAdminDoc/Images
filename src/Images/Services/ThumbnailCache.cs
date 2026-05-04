@@ -99,23 +99,27 @@ public sealed class ThumbnailCache
     /// aspect ratio preserved (longest edge = <see cref="_thumbSize"/>), re-encode as WebP, write
     /// to the cache path. Returns the cache path on success, null on any failure.
     /// </summary>
-    public string? GenerateAndCache(string sourcePath)
+    public string? GenerateAndCache(string sourcePath, CancellationToken ct = default)
     {
         if (!_isAvailable) return null;
 
         try
         {
+            ct.ThrowIfCancellationRequested();
             var fi = new FileInfo(sourcePath);
             if (!fi.Exists) return null;
             var cachePath = GetCachePath(sourcePath, fi.LastWriteTimeUtc.Ticks, fi.Length);
             if (File.Exists(cachePath)) return cachePath;
 
             CodecRuntime.Configure();
+            ct.ThrowIfCancellationRequested();
             using var image = ReadFirstFrameForThumbnail(sourcePath);
+            ct.ThrowIfCancellationRequested();
             image.Resize(new MagickGeometry((uint)_thumbSize, (uint)_thumbSize) { Greater = true });
             image.Strip(); // drop EXIF + XMP — thumbs don't need it, reduces bytes
             image.Quality = 80;
             image.Format = MagickFormat.WebP;
+            ct.ThrowIfCancellationRequested();
             cachePath = WriteAtomically(image, cachePath);
 
             _log.LogDebug("thumb cached: {Cache} ({Bytes} bytes) from {Src}", cachePath, new FileInfo(cachePath).Length, sourcePath);
@@ -202,22 +206,28 @@ public sealed class ThumbnailCache
     /// <summary>
     /// Gets a frozen WPF thumbnail image, generating the cache entry first when needed.
     /// </summary>
-    public ImageSource? GetOrCreateImageSource(string sourcePath)
+    public ImageSource? GetOrCreateImageSource(string sourcePath, CancellationToken ct = default)
     {
         if (!_isAvailable) return null;
 
         try
         {
+            ct.ThrowIfCancellationRequested();
             var fi = new FileInfo(sourcePath);
             if (!fi.Exists) return null;
 
             var cachePath = GetCachePath(sourcePath, fi.LastWriteTimeUtc.Ticks, fi.Length);
             if (!File.Exists(cachePath))
-                cachePath = GenerateAndCache(sourcePath);
+                cachePath = GenerateAndCache(sourcePath, ct);
 
+            ct.ThrowIfCancellationRequested();
             if (cachePath is null || !File.Exists(cachePath)) return null;
 
             return ImageLoader.Load(cachePath).Image;
+        }
+        catch (OperationCanceledException)
+        {
+            return null;
         }
         catch (Exception ex)
         {

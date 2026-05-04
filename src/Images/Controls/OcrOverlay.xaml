@@ -5,7 +5,9 @@
              IsHitTestVisible="True"
              Background="Transparent">
     <Grid x:Name="Root">
-        <ItemsControl ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.OcrOverlayLines}">
+        <ItemsControl ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.OcrOverlayLines}"
+                      AutomationProperties.Name="OCR text regions"
+                      AutomationProperties.HelpText="Click or press Enter on a region to copy its text">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Canvas />
@@ -20,10 +22,14 @@
                             Canvas.Left="{Binding BoundingBox.X}"
                             Canvas.Top="{Binding BoundingBox.Y}"
                             Width="{Binding BoundingBox.Width}"
-                            Height="{Binding BoundingBox.Height}"
-                            Cursor="Hand"
-                            ToolTip="{Binding Text}"
-                            MouseDown="TextRegion_MouseDown">
+                             Height="{Binding BoundingBox.Height}"
+                             Focusable="True"
+                             Cursor="Hand"
+                             ToolTip="{Binding Text, StringFormat=Copy: {0}}"
+                             AutomationProperties.Name="{Binding Text}"
+                             AutomationProperties.HelpText="Copy OCR text region"
+                             KeyDown="TextRegion_KeyDown"
+                             MouseDown="TextRegion_MouseDown">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Style.Triggers>

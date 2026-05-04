@@ -70,7 +70,7 @@ public static class ImageExportService
             image.Alpha(AlphaOption.Remove);
         }
 
-        image.Write(target.Path);
+        WriteAtomically(image, target.Path);
         return target.Path;
     }
 
@@ -79,11 +79,46 @@ public static class ImageExportService
         if (string.IsNullOrWhiteSpace(requestedPath))
             throw new ArgumentException("A destination path is required.", nameof(requestedPath));
 
-        var ext = Path.GetExtension(requestedPath).ToLowerInvariant();
+        var normalizedPath = Path.GetFullPath(requestedPath);
+        var ext = Path.GetExtension(normalizedPath).ToLowerInvariant();
         var format = ResolveMagickFormat(ext);
         return format is not null && CanWrite(format.Value)
-            ? (requestedPath, format.Value)
-            : (Path.ChangeExtension(requestedPath, ".png"), MagickFormat.Png);
+            ? (normalizedPath, format.Value)
+            : (Path.ChangeExtension(normalizedPath, ".png"), MagickFormat.Png);
+    }
+
+    private static void WriteAtomically(MagickImage image, string targetPath)
+    {
+        var directory = Path.GetDirectoryName(targetPath);
+        if (string.IsNullOrWhiteSpace(directory))
+            throw new IOException("Export destination has no directory.");
+        Directory.CreateDirectory(directory);
+
+        var tempPath = Path.Combine(directory, $".images-export-{Guid.NewGuid():N}{Path.GetExtension(targetPath)}.tmp");
+        try
+        {
+            image.Write(tempPath);
+            if (File.Exists(targetPath))
+                File.Replace(tempPath, targetPath, null);
+            else
+                File.Move(tempPath, targetPath);
+        }
+        finally
+        {
+            TryDeleteFile(tempPath);
+        }
+    }
+
+    private static void TryDeleteFile(string path)
+    {
+        try
+        {
+            if (File.Exists(path)) File.Delete(path);
+        }
+        catch
+        {
+            // Best-effort cleanup; failed temp deletes are harmless and rare.
+        }
     }
 
     private static MagickImage ToMagickImage(BitmapSource source)

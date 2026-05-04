@@ -2,6 +2,20 @@
 
 All notable changes to **Images** are documented here.
 
+## v0.2.2 — 2026-05-04
+
+Second production-hardening pass for thumbnail cancellation, export writes, metadata status, crash logs, and accessibility.
+
+### Fixed
+
+- **Thumbnail responsiveness** — folder-preview thumbnail generation now accepts cancellation tokens so rapid navigation stops updating superseded preview state earlier.
+- **Preload cleanup** — preload cancellation sources rotate under a lock and dispose after in-flight tasks have had time to observe cancellation, reducing rare reset/dispose races.
+- **Export safety** — save-a-copy paths are normalized and written through same-folder temp files before atomic replace/move so partial exports do not clobber an existing destination.
+- **Crash diagnostics** — crash log appends now use `FileShare.ReadWrite`, allowing About-window diagnostics or external editors to read logs while a crash record is being written.
+- **Metadata UX** — metadata reads time out with a visible status instead of leaving the HUD in a perpetual loading state.
+- **OCR accessibility** — OCR regions now expose screen-reader names/help text and support keyboard copy with Enter/Space.
+- **Settings clarity** — update-check copy now consistently says automatic checks are off by default.
+
 ## v0.2.1 — 2026-05-04
 
 Production hardening release for OCR, file operations, release packaging, and privacy defaults.
