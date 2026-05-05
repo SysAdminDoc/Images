@@ -1639,7 +1639,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return;
 
         var result = await UpdateCheckService.CheckAsync().ConfigureAwait(true);
-        UpdateCheckService.LastCheckedUtc = DateTime.UtcNow;
+        UpdateCheckService.RecordLastCheckedIfAppropriate(result);
 
         if (result.Error is not null)
         {

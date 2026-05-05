@@ -175,7 +175,7 @@ public partial class AboutWindow : Window
         try
         {
             var result = await UpdateCheckService.CheckAsync();
-            UpdateCheckService.LastCheckedUtc = DateTime.UtcNow;
+            UpdateCheckService.RecordLastCheckedIfAppropriate(result);
             if (result.Error is not null)
             {
                 ShowUpdateStatus($"Update check failed: {result.Error}", "Warning");
