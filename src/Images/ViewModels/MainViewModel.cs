@@ -21,6 +21,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly SettingsService _settings;
     private readonly ClipboardImportService _clipboardImport;
     private readonly FolderPreviewController _folderPreview;
+    private readonly PhotoMetadataController _photoMetadata;
     private readonly RecycleBinDeleteService _recycleBinDelete;
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
@@ -28,7 +29,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool _suppressStemChange;
     private string _committedStemOnDisk = string.Empty;
     private bool _isDisposed;
-    private int _metadataGeneration;
     private bool _isFilmstripVisible;
     private bool _isMetadataHudVisible;
     private bool _isOcrMode;
@@ -36,7 +36,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private ObservableCollection<OcrTextLine>? _ocrOverlayLines;
     private CancellationTokenSource? _ocrCts;
     private int _ocrGeneration;
-    private const int MetadataTimeoutSeconds = 5;
     private readonly DispatcherTimer _hintTimer;
     private System.IO.FileSystemWatcher? _externalEditWatcher;
     private readonly DispatcherTimer _externalEditDebounce;
@@ -58,6 +57,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _recycleBinDelete = recycleBinDelete ?? new RecycleBinDeleteService(_settings);
         _folderPreview = new FolderPreviewController(_uiDispatcher, () => _isDisposed);
         _folderPreview.StateChanged += (_, _) => RaiseFolderPreviewState();
+        _photoMetadata = new PhotoMetadataController(_uiDispatcher, () => _isDisposed, () => CurrentPath);
+        _photoMetadata.StateChanged += (_, _) => RaisePhotoMetadataState();
 
         _renameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(600) };
         _renameTimer.Tick += (_, _) => { _renameTimer.Stop(); FlushPendingRename(); };
@@ -554,21 +555,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     // -------------------- Photo metadata --------------------
 
-    public ObservableCollection<MetadataFact> PhotoMetadataRows { get; } = new();
+    public ObservableCollection<MetadataFact> PhotoMetadataRows => _photoMetadata.Rows;
 
-    private string _metadataStatusText = "";
-    public string MetadataStatusText
-    {
-        get => _metadataStatusText;
-        private set => Set(ref _metadataStatusText, value);
-    }
+    public string MetadataStatusText => _photoMetadata.StatusText;
 
-    private bool _isMetadataLoading;
-    public bool IsMetadataLoading
-    {
-        get => _isMetadataLoading;
-        private set => Set(ref _isMetadataLoading, value);
-    }
+    public bool IsMetadataLoading => _photoMetadata.IsLoading;
 
     public bool CanToggleMetadataHud => HasDisplayImage && !IsPeekMode;
 
@@ -602,59 +593,18 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void RefreshPhotoMetadata(string path)
     {
-        var generation = ++_metadataGeneration;
-        PhotoMetadataRows.Clear();
-        IsMetadataLoading = true;
-        MetadataStatusText = "Reading photo metadata...";
-
-        _ = LoadPhotoMetadataAsync(path, generation);
-    }
-
-    private async Task LoadPhotoMetadataAsync(string path, int generation)
-    {
-        PhotoMetadata metadata;
-        string? statusOverride = null;
-        try
-        {
-            metadata = await Task.Run(() => ImageMetadataService.Read(path))
-                .WaitAsync(TimeSpan.FromSeconds(MetadataTimeoutSeconds))
-                .ConfigureAwait(false);
-        }
-        catch (TimeoutException)
-        {
-            metadata = PhotoMetadata.Empty;
-            statusOverride = "Metadata read timed out.";
-        }
-        catch
-        {
-            metadata = PhotoMetadata.Empty;
-        }
-
-        await _uiDispatcher.InvokeAsync(() =>
-        {
-            if (_isDisposed || generation != _metadataGeneration ||
-                !string.Equals(path, CurrentPath, StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            PhotoMetadataRows.Clear();
-            foreach (var row in metadata.Rows)
-                PhotoMetadataRows.Add(row);
-
-            IsMetadataLoading = false;
-            MetadataStatusText = statusOverride ?? (PhotoMetadataRows.Count == 0
-                ? "No embedded camera metadata."
-                : "");
-        });
+        _photoMetadata.Refresh(path);
     }
 
     private void ClearPhotoMetadata()
     {
-        _metadataGeneration++;
-        PhotoMetadataRows.Clear();
-        IsMetadataLoading = false;
-        MetadataStatusText = "";
+        _photoMetadata.Clear();
+    }
+
+    private void RaisePhotoMetadataState()
+    {
+        Raise(nameof(IsMetadataLoading));
+        Raise(nameof(MetadataStatusText));
     }
 
     // -------------------- Folder preview strip --------------------
@@ -1918,7 +1868,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         _nav.ListChanged -= OnDirectoryListChanged;
         ClearOcrOverlay(cancelExtraction: true);
-        _metadataGeneration++;
+        _photoMetadata.Dispose();
         _folderPreview.Dispose();
         _preload.Dispose();
         _nav.Dispose();

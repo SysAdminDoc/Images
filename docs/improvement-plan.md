@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-02D` is complete. Rename target validation now lives at the rename service boundary, so unsupported extension-unlocked renames are rejected before any file-system mutation, with service and ViewModel state coverage protecting the previous stale-path failure.
+`IP-02E` is complete. Photo metadata HUD loading now lives behind `PhotoMetadataController`, which owns loading/status state, cancellation, timeout handling, stale-result guards, and dispatcher updates with deterministic regression coverage.
 
 ## Next Focus
 
-The next recommended slice is `IP-02E`: continue extracting the oversized `MainViewModel`, with metadata loading or reload state as the next practical target because both still combine background work, cancellation/refresh state, and user-facing failure copy.
+The next recommended slice is `IP-02F`: continue extracting the oversized `MainViewModel`, with reload/external-edit state as the next practical target because it still combines file watching, debounce timing, reload behavior, and user-facing status.
 
 ## Research Inputs
 
@@ -77,6 +77,7 @@ The next recommended slice is `IP-02E`: continue extracting the oversized `MainV
 - 2026-05-05: Completed `IP-03A` by adding isolated `MainViewModel` state tests for folder-preview sort state, filmstrip persistence, paste-from-clipboard opening, and Recycle Bin confirmation preference behavior.
 - 2026-05-05: Completed `IP-02C` by extracting Recycle Bin confirmation/settings/delete execution into `RecycleBinDeleteService` and covering skip-confirmation, cancel, opt-out persistence, missing-file, and send-failure outcomes with tests.
 - 2026-05-05: Completed `IP-02D` by moving rename target-extension validation into `RenameService`, preventing unsupported extension-unlocked renames from moving files outside the app's navigable format set, and covering the service and ViewModel stale-path regression.
+- 2026-05-05: Completed `IP-02E` by extracting photo metadata HUD loading into `PhotoMetadataController`, adding owned cancellation/status handling, and covering success, superseded-result, and timeout outcomes with dispatcher-backed tests.
 
 ## Verification Standard
 
