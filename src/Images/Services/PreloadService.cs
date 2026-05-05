@@ -114,6 +114,17 @@ public sealed class PreloadService : IDisposable
     }
 
     /// <summary>
+    /// Return an existing preload task, including one still in flight. Foreground navigation can
+    /// await this instead of starting a duplicate decode for the same next/previous image.
+    /// </summary>
+    public Task<ImageLoader.LoadResult?>? TryGetInFlight(string path)
+    {
+        if (!_cache.TryGetValue(path, out var lazy)) return null;
+        _lastAccess[path] = DateTime.UtcNow;
+        return lazy.Value;
+    }
+
+    /// <summary>
     /// Cancel every in-flight decode + clear the cache. Call on large nav jumps where nothing
     /// we preloaded is still relevant (e.g. open-file opens a different folder).
     /// </summary>
