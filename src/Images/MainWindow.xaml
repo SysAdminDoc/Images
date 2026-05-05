@@ -114,6 +114,15 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE790;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="{Binding RedEyeCorrectionModeText}"
+                                  Command="{Binding ToggleRedEyeModeCommand}"
+                                  InputGestureText="Ctrl+Alt+Y"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding IsRedEyeCorrectionMode, Mode=OneWay}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7B3;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="{Binding CropModeText}"
                                   Command="{Binding ToggleCropModeCommand}"
                                   InputGestureText="C"
@@ -293,6 +302,12 @@
                                                Strokes="{Binding ExposureBrushStrokes}"
                                                Opacity="0.92"
                                                AutomationProperties.Name="Local exposure brush overlay" />
+
+                <ctl:RedEyeCorrectionOverlay Visibility="{Binding ShowRedEyeCorrectionOverlay, Converter={StaticResource BoolToVis}}"
+                                             Target="{Binding ElementName=Canvas}"
+                                             Marks="{Binding RedEyeCorrectionMarks}"
+                                             Opacity="0.94"
+                                             AutomationProperties.Name="Red-eye correction overlay" />
 
                 <Border HorizontalAlignment="Center"
                         VerticalAlignment="Top"
@@ -1563,7 +1578,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Wheel" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom about cursor" />
@@ -1583,6 +1598,8 @@
                                         <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle crop mode" />
                                         <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+D" />
                                         <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle exposure brush" />
+                                        <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+Y" />
+                                        <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle red-eye correction" />
                                     </Grid>
 
                                     <TextBlock Text="File" Style="{StaticResource SectionLabel}" />
@@ -3793,6 +3810,131 @@
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
                                         AutomationProperties.Name="Cancel local exposure brush">
+                                    <TextBlock Text="Cancel" />
+                                </Button>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Divider}" />
+
+                    <!-- RED-EYE section -->
+                    <TextBlock Text="Red-eye correction" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource Card}"
+                            Padding="13,12"
+                            IsEnabled="{Binding CanUseRedEyeCorrection}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding RedEyeCorrectionModeText}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrush}" />
+                                    <TextBlock Text="{Binding RedEyeCorrectionModeHelpText}"
+                                               Style="{StaticResource Text.Hint}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,3,0,0" />
+                                </StackPanel>
+                                <Button Grid.Column="1"
+                                        Command="{Binding ToggleRedEyeModeCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        MinWidth="72"
+                                        Margin="12,0,0,0"
+                                        AutomationProperties.Name="Toggle red-eye correction">
+                                    <TextBlock Text="{Binding RedEyeCorrectionModeText}" />
+                                </Button>
+                            </Grid>
+
+                            <Border Background="{StaticResource PanelBrush}"
+                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                    Padding="10"
+                                    Margin="0,12,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding RedEyeCorrectionStatusText}"
+                                               Style="{StaticResource Text.Caption}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding RedEyeCorrectionMarkText}"
+                                               Style="{StaticResource Text.Body}"
+                                               Margin="0,8,0,0" />
+                                </StackPanel>
+                            </Border>
+
+                            <Grid Margin="0,12,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Radius"
+                                           Style="{StaticResource Text.Caption}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding RedEyeCorrectionRadiusText}"
+                                           Style="{StaticResource Text.Caption}" />
+                            </Grid>
+                            <Slider Minimum="4"
+                                    Maximum="180"
+                                    TickFrequency="2"
+                                    IsSnapToTickEnabled="False"
+                                    Value="{Binding RedEyeCorrectionRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    AutomationProperties.Name="Red-eye correction radius" />
+
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Strength"
+                                           Style="{StaticResource Text.Caption}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding RedEyeCorrectionStrengthText}"
+                                           Style="{StaticResource Text.Caption}" />
+                            </Grid>
+                            <Slider Minimum="5"
+                                    Maximum="100"
+                                    TickFrequency="1"
+                                    IsSnapToTickEnabled="False"
+                                    Value="{Binding RedEyeCorrectionStrength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    AutomationProperties.Name="Red-eye correction strength" />
+
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Red threshold"
+                                           Style="{StaticResource Text.Caption}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding RedEyeCorrectionThresholdText}"
+                                           Style="{StaticResource Text.Caption}" />
+                            </Grid>
+                            <Slider Minimum="0"
+                                    Maximum="100"
+                                    TickFrequency="1"
+                                    IsSnapToTickEnabled="False"
+                                    Value="{Binding RedEyeCorrectionThreshold, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    AutomationProperties.Name="Red-eye correction red threshold" />
+
+                            <WrapPanel Margin="0,12,0,0">
+                                <Button Command="{Binding ApplyRedEyeCorrectionCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Apply red-eye correction to edit history">
+                                    <TextBlock Text="Apply red-eye" />
+                                </Button>
+                                <Button Command="{Binding ClearRedEyeCorrectionCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Clear red-eye correction marks">
+                                    <TextBlock Text="Clear" />
+                                </Button>
+                                <Button Command="{Binding CancelRedEyeCorrectionCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,0,8"
+                                        AutomationProperties.Name="Cancel red-eye correction">
                                     <TextBlock Text="Cancel" />
                                 </Button>
                             </WrapPanel>

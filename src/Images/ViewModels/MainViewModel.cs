@@ -156,6 +156,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         CancelExposureBrushCommand = new RelayCommand(CancelExposureBrushMode, () => IsExposureBrushMode || HasExposureBrushStrokes);
         ClearExposureBrushCommand = new RelayCommand(ClearExposureBrushStrokes, () => HasExposureBrushStrokes);
         SetExposureBrushModeCommand = new RelayCommand(SetExposureBrushMode, parameter => parameter is string);
+        ToggleRedEyeModeCommand = new RelayCommand(() => IsRedEyeCorrectionMode = !IsRedEyeCorrectionMode, () => CanUseRedEyeCorrection);
+        ApplyRedEyeCorrectionCommand = new RelayCommand(ApplyRedEyeCorrection, () => CanApplyRedEyeCorrection);
+        CancelRedEyeCorrectionCommand = new RelayCommand(CancelRedEyeCorrectionMode, () => IsRedEyeCorrectionMode || HasRedEyeCorrectionMarks);
+        ClearRedEyeCorrectionCommand = new RelayCommand(ClearRedEyeCorrectionMarks, () => HasRedEyeCorrectionMarks);
         CopyInspectorHexCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hex, "HEX"), () => HasInspectorSample);
         CopyInspectorRgbCommand = new RelayCommand(() => CopyInspectorValue(s => s.Rgb, "RGB"), () => HasInspectorSample);
         CopyInspectorHsvCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hsv, "HSV"), () => HasInspectorSample);
@@ -260,6 +264,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseInspector));
                 Raise(nameof(CanUseCrop));
                 Raise(nameof(CanUseExposureBrush));
+                Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseOverlayMode));
                 Raise(nameof(CanToggleMetadataHud));
                 Raise(nameof(ShowMetadataHud));
@@ -511,6 +516,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(IsArchiveBook));
         Raise(nameof(CanUseCrop));
         Raise(nameof(CanUseExposureBrush));
+        Raise(nameof(CanUseRedEyeCorrection));
         Raise(nameof(CanTurnLeftBookPage));
         Raise(nameof(CanTurnRightBookPage));
         Raise(nameof(CurrentArchiveProgressText));
@@ -538,6 +544,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CurrentArchiveProgressText));
                 Raise(nameof(CanUseCrop));
                 Raise(nameof(CanUseExposureBrush));
+                Raise(nameof(CanUseRedEyeCorrection));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -550,6 +557,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool CanUseResize => CanUseCrop;
     private bool CanUseAdjustments => CanUseCrop;
     public bool CanUseExposureBrush => CanUseCrop;
+    public bool CanUseRedEyeCorrection => CanUseCrop;
     public bool IsViewerEmpty => CurrentPath is null;
     public bool CanRefreshFolder => (CurrentPath is not null || _nav.Count > 0) && !IsOperationBusy;
 
@@ -591,6 +599,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseInspector));
                 Raise(nameof(CanUseCrop));
                 Raise(nameof(CanUseExposureBrush));
+                Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseOverlayMode));
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -697,6 +706,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseOverlayMode));
                 Raise(nameof(CanUseCrop));
                 Raise(nameof(CanUseExposureBrush));
+                Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(ShowMetadataHud));
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -894,7 +904,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 IsCropMode = false;
                 IsExposureBrushMode = false;
+                IsRedEyeCorrectionMode = false;
                 ClearExposureBrushStrokes(showToast: false);
+                ClearRedEyeCorrectionMarks(showToast: false);
                 InspectorStatusText = "Move over the image to sample pixels. Click to hold a sample; Ctrl+click copies it. Shift-drag measures.";
             }
 
@@ -956,7 +968,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 IsInspectorMode = false;
                 IsOcrMode = false;
                 IsExposureBrushMode = false;
+                IsRedEyeCorrectionMode = false;
                 ClearExposureBrushStrokes(showToast: false);
+                ClearRedEyeCorrectionMarks(showToast: false);
                 CropStatusText = "Drag on the image to choose a crop. Enter applies it to edit history.";
             }
             else if (!HasCropSelection)
@@ -1031,7 +1045,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasCropSelection => CropSelection is { Width: > 0, Height: > 0 };
     public bool CanApplyCrop => IsCropMode && HasCropSelection && CanUseCrop;
     public bool ShowCropOverlay => IsCropMode || HasCropSelection;
-    public bool IsCanvasSelectionMode => IsInspectorMode || IsCropMode || IsExposureBrushMode;
+    public bool IsCanvasSelectionMode => IsInspectorMode || IsCropMode || IsExposureBrushMode || IsRedEyeCorrectionMode;
     public string CropModeText => IsCropMode ? "Crop on" : "Crop off";
     public string CropModeHelpText => IsCropMode
         ? "Drag a rectangle on the image. Enter adds the crop to edit history; Esc cancels."
@@ -1055,6 +1069,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 IsInspectorMode = false;
                 IsCropMode = false;
                 IsOcrMode = false;
+                IsRedEyeCorrectionMode = false;
+                ClearRedEyeCorrectionMarks(showToast: false);
                 ClearCropSelection();
                 ExposureBrushStatusText = "Paint on the image. Enter adds strokes to edit history; Esc cancels.";
             }
@@ -1125,6 +1141,95 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool CanApplyExposureBrush => IsExposureBrushMode && HasExposureBrushStrokes && CanUseExposureBrush;
     public bool ShowExposureBrushOverlay => IsExposureBrushMode || HasExposureBrushStrokes;
     private double ExposureBrushSignedStrength => (IsExposureBrushBurn ? -1 : 1) * Math.Clamp(ExposureBrushStrength / 100, 0.01, 1);
+
+    private bool _isRedEyeCorrectionMode;
+    public bool IsRedEyeCorrectionMode
+    {
+        get => _isRedEyeCorrectionMode;
+        set
+        {
+            if (!Set(ref _isRedEyeCorrectionMode, value))
+                return;
+
+            if (value)
+            {
+                IsInspectorMode = false;
+                IsCropMode = false;
+                IsExposureBrushMode = false;
+                IsOcrMode = false;
+                ClearCropSelection();
+                ClearExposureBrushStrokes(showToast: false);
+                RedEyeCorrectionStatusText = "Click or drag over red pupils. Enter adds corrections to edit history; Esc cancels.";
+            }
+            else if (!HasRedEyeCorrectionMarks)
+            {
+                RedEyeCorrectionStatusText = "Turn on red-eye correction, then mark red pupils without changing the source file.";
+            }
+
+            RaiseRedEyeCorrectionModeState();
+        }
+    }
+
+    public ObservableCollection<RedEyeCorrectionMark> RedEyeCorrectionMarks { get; } = [];
+
+    private double _redEyeCorrectionRadius = 24;
+    public double RedEyeCorrectionRadius
+    {
+        get => _redEyeCorrectionRadius;
+        set
+        {
+            var radius = Math.Clamp(double.IsFinite(value) ? value : 24, RedEyeCorrectionService.MinRadius, RedEyeCorrectionService.MaxRadius);
+            if (Set(ref _redEyeCorrectionRadius, radius))
+                RaiseRedEyeCorrectionSettingsState();
+        }
+    }
+
+    private double _redEyeCorrectionStrength = 85;
+    public double RedEyeCorrectionStrength
+    {
+        get => _redEyeCorrectionStrength;
+        set
+        {
+            var strength = Math.Clamp(double.IsFinite(value) ? value : 85, 5, 100);
+            if (Set(ref _redEyeCorrectionStrength, strength))
+                RaiseRedEyeCorrectionSettingsState();
+        }
+    }
+
+    private double _redEyeCorrectionThreshold = 35;
+    public double RedEyeCorrectionThreshold
+    {
+        get => _redEyeCorrectionThreshold;
+        set
+        {
+            var threshold = Math.Clamp(double.IsFinite(value) ? value : 35, 0, 100);
+            if (Set(ref _redEyeCorrectionThreshold, threshold))
+                RaiseRedEyeCorrectionSettingsState();
+        }
+    }
+
+    private string _redEyeCorrectionStatusText = "Turn on red-eye correction, then mark red pupils without changing the source file.";
+    public string RedEyeCorrectionStatusText
+    {
+        get => _redEyeCorrectionStatusText;
+        private set => Set(ref _redEyeCorrectionStatusText, value);
+    }
+
+    public string RedEyeCorrectionModeText => IsRedEyeCorrectionMode ? "Red-eye on" : "Red-eye off";
+    public string RedEyeCorrectionModeHelpText => IsRedEyeCorrectionMode
+        ? "Click or paint over red pupils. Enter applies the correction; Esc cancels."
+        : "Non-destructive red-eye correction for Save a copy exports.";
+    public string RedEyeCorrectionRadiusText => string.Create(CultureInfo.InvariantCulture, $"{RedEyeCorrectionRadius:0} px");
+    public string RedEyeCorrectionStrengthText => string.Create(CultureInfo.InvariantCulture, $"{RedEyeCorrectionStrength:0}%");
+    public string RedEyeCorrectionThresholdText => string.Create(CultureInfo.InvariantCulture, $"{RedEyeCorrectionThreshold:0}%");
+    public string RedEyeCorrectionMarkText => HasRedEyeCorrectionMarks
+        ? RedEyeCorrectionService.CreateSummary(RedEyeCorrectionMarks.ToList())
+        : "No pupils marked";
+    public bool HasRedEyeCorrectionMarks => RedEyeCorrectionMarks.Count > 0;
+    public bool CanApplyRedEyeCorrection => IsRedEyeCorrectionMode && HasRedEyeCorrectionMarks && CanUseRedEyeCorrection;
+    public bool ShowRedEyeCorrectionOverlay => IsRedEyeCorrectionMode || HasRedEyeCorrectionMarks;
+    private double RedEyeCorrectionNormalizedStrength => Math.Clamp(RedEyeCorrectionStrength / 100, RedEyeCorrectionService.MinStrength, RedEyeCorrectionService.MaxStrength);
+    private double RedEyeCorrectionNormalizedThreshold => Math.Clamp(RedEyeCorrectionThreshold / 100, RedEyeCorrectionService.MinThreshold, RedEyeCorrectionService.MaxThreshold);
 
     // -------------------- Rename editor state --------------------
 
@@ -1834,6 +1939,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand CancelExposureBrushCommand { get; }
     public ICommand ClearExposureBrushCommand { get; }
     public ICommand SetExposureBrushModeCommand { get; }
+    public ICommand ToggleRedEyeModeCommand { get; }
+    public ICommand ApplyRedEyeCorrectionCommand { get; }
+    public ICommand CancelRedEyeCorrectionCommand { get; }
+    public ICommand ClearRedEyeCorrectionCommand { get; }
     public ICommand CopyInspectorHexCommand { get; }
     public ICommand CopyInspectorRgbCommand { get; }
     public ICommand CopyInspectorHsvCommand { get; }
@@ -2265,6 +2374,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             ClearCropSelection();
             IsExposureBrushMode = false;
             ClearExposureBrushStrokes(showToast: false);
+            IsRedEyeCorrectionMode = false;
+            ClearRedEyeCorrectionMarks(showToast: false);
             ApplyPageSequence(res.Pages);
             ArchiveReadPositionService.SaveLastPageIndex(_settings, path, PageIndex, PageCount);
             if (isArchiveBookPage)
@@ -2298,6 +2409,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             ClearCropSelection();
             IsExposureBrushMode = false;
             ClearExposureBrushStrokes(showToast: false);
+            IsRedEyeCorrectionMode = false;
+            ClearRedEyeCorrectionMarks(showToast: false);
             ResetPageState();
             SetLoadError(ex);
         }
@@ -2952,6 +3065,36 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RaiseExposureBrushStrokeState();
     }
 
+    public void AddRedEyeCorrectionMark(PixelCoordinate coordinate)
+    {
+        if (!IsRedEyeCorrectionMode || !CanUseRedEyeCorrection || PixelWidth <= 0 || PixelHeight <= 0)
+            return;
+
+        var mark = RedEyeCorrectionService.NormalizeMark(
+            coordinate,
+            RedEyeCorrectionRadius,
+            RedEyeCorrectionNormalizedStrength,
+            RedEyeCorrectionNormalizedThreshold,
+            PixelWidth,
+            PixelHeight);
+
+        if (RedEyeCorrectionMarks.Count > 0)
+        {
+            var previous = RedEyeCorrectionMarks[RedEyeCorrectionMarks.Count - 1];
+            var dx = previous.X - mark.X;
+            var dy = previous.Y - mark.Y;
+            var minimumSpacing = Math.Max(2, mark.Radius * 0.3);
+            if ((dx * dx) + (dy * dy) < minimumSpacing * minimumSpacing)
+                return;
+        }
+
+        RedEyeCorrectionMarks.Add(mark);
+        RedEyeCorrectionStatusText = string.Create(
+            CultureInfo.InvariantCulture,
+            $"Red-eye mark at {mark.X:0}, {mark.Y:0}. Enter applies {RedEyeCorrectionMarks.Count} mark{(RedEyeCorrectionMarks.Count == 1 ? "" : "s")}.");
+        RaiseRedEyeCorrectionMarkState();
+    }
+
     private CropAspectPreset? EffectiveCropAspectPreset
     {
         get
@@ -3135,6 +3278,57 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Toast("Exposure brush strokes cleared");
     }
 
+    private void ApplyRedEyeCorrection()
+    {
+        if (!CanApplyRedEyeCorrection || CurrentPath is null)
+            return;
+
+        var marks = RedEyeCorrectionMarks.ToList();
+        var result = _editStack.AppendOperation(
+            CurrentPath,
+            "red-eye",
+            RedEyeCorrectionService.ToEditParameters(marks),
+            RedEyeCorrectionService.CreateLabel(marks));
+
+        if (result.Success)
+        {
+            IsRedEyeCorrectionMode = false;
+            ClearRedEyeCorrectionMarks(showToast: false);
+            Toast("Red-eye correction added to edit history");
+        }
+        else
+        {
+            RedEyeCorrectionStatusText = "Red-eye correction failed: " + result.Message;
+            Toast("Red-eye correction failed");
+        }
+    }
+
+    private void CancelRedEyeCorrectionMode()
+    {
+        IsRedEyeCorrectionMode = false;
+        ClearRedEyeCorrectionMarks(showToast: false);
+        Toast("Red-eye correction canceled");
+    }
+
+    private void ClearRedEyeCorrectionMarks()
+    {
+        ClearRedEyeCorrectionMarks(showToast: true);
+    }
+
+    private void ClearRedEyeCorrectionMarks(bool showToast)
+    {
+        if (RedEyeCorrectionMarks.Count > 0)
+            RedEyeCorrectionMarks.Clear();
+
+        RedEyeCorrectionStatusText = IsRedEyeCorrectionMode
+            ? "Click or drag over red pupils. Enter adds corrections to edit history; Esc cancels."
+            : "Turn on red-eye correction, then mark red pupils without changing the source file.";
+        RaiseRedEyeCorrectionMarkState();
+
+        if (showToast)
+            Toast("Red-eye correction marks cleared");
+    }
+
     private void CancelCropMode()
     {
         IsCropMode = false;
@@ -3231,6 +3425,34 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(ShowExposureBrushOverlay));
         Raise(nameof(ExposureBrushStrokeText));
         Raise(nameof(CanApplyExposureBrush));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RaiseRedEyeCorrectionModeState()
+    {
+        Raise(nameof(IsRedEyeCorrectionMode));
+        Raise(nameof(ShowRedEyeCorrectionOverlay));
+        Raise(nameof(IsCanvasSelectionMode));
+        Raise(nameof(RedEyeCorrectionModeText));
+        Raise(nameof(RedEyeCorrectionModeHelpText));
+        Raise(nameof(CanApplyRedEyeCorrection));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RaiseRedEyeCorrectionSettingsState()
+    {
+        Raise(nameof(RedEyeCorrectionRadiusText));
+        Raise(nameof(RedEyeCorrectionStrengthText));
+        Raise(nameof(RedEyeCorrectionThresholdText));
+    }
+
+    private void RaiseRedEyeCorrectionMarkState()
+    {
+        Raise(nameof(RedEyeCorrectionMarks));
+        Raise(nameof(HasRedEyeCorrectionMarks));
+        Raise(nameof(ShowRedEyeCorrectionOverlay));
+        Raise(nameof(RedEyeCorrectionMarkText));
+        Raise(nameof(CanApplyRedEyeCorrection));
         CommandManager.InvalidateRequerySuggested();
     }
 
@@ -3715,6 +3937,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClearCropSelection();
         IsExposureBrushMode = false;
         ClearExposureBrushStrokes(showToast: false);
+        IsRedEyeCorrectionMode = false;
+        ClearRedEyeCorrectionMarks(showToast: false);
         ResetPageState();
         ClearPhotoMetadata();
         _folderPreview.Clear();
