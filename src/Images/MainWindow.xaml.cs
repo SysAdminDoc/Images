@@ -511,6 +511,10 @@ public partial class MainWindow : Window
                 Vm.OpenResizeDialogCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.A when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
+                Vm.OpenAdjustmentsCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.OemComma when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
                 Vm.SettingsCommand.Execute(null);
                 e.Handled = true;

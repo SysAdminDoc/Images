@@ -120,6 +120,34 @@ public sealed class NonDestructiveEditServiceTests
     }
 
     [Fact]
+    public void Export_AppliesAdjustmentOperation()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteImage(temp.Path, "source.png", 8, 4);
+        var baseline = ImageExportService.Save(
+            source,
+            Path.Combine(temp.Path, "baseline.png"),
+            []);
+
+        var service = new NonDestructiveEditService();
+        var mutation = service.AppendOperation(
+            source,
+            "adjust",
+            new ImageAdjustmentPlan(8, 94, 1.1, 18, 24, 120, 84).ToEditParameters());
+
+        Assert.True(mutation.Success);
+
+        var result = service.Export(source, Path.Combine(temp.Path, "adjusted.png"));
+
+        Assert.True(result.Success);
+        Assert.Equal(1, result.AppliedOperationCount);
+        Assert.False(File.ReadAllBytes(baseline).SequenceEqual(File.ReadAllBytes(result.OutputPath)));
+
+        var provenance = XDocument.Load(result.ProvenanceSidecarPath).ToString();
+        Assert.Contains("adjust", provenance, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void CreateVirtualCopy_ForksOperationsWithoutDuplicatingPixels()
     {
         using var temp = TestDirectory.Create();
