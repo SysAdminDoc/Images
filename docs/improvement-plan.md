@@ -14,7 +14,7 @@ Roadmap `V81-23` is complete. Animated-image playback now runs through selected-
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the next main `ROADMAP.md` feature backlog item, `V81-24` pinned overlay mode.
+The improvement-plan backlog is complete. Continue with the next main `ROADMAP.md` feature backlog item, `V40-61` bad-extension and broken-file scan.
 
 ## Research Inputs
 
@@ -119,6 +119,7 @@ The improvement-plan backlog is complete. Continue with the next main `ROADMAP.m
 - 2026-05-05: Closed roadmap `V81-22` by adding main-viewer pixel inspection, copyable HEX/RGB/HSV/sample values, alpha and coordinate readouts, Shift-drag measurement, nearest-neighbor preview scaling, board Ctrl-hover/Ctrl-click sampling, and sampling math regression tests.
 - 2026-05-05: Closed roadmap `V81-23` by replacing keyframe-only animated playback with selected-frame workbench state, adding timeline thumbnails, scrubber, frame-step/playback controls, speed control, current-frame copy/export/drag-out, shortcuts, and regression tests.
 - 2026-05-05: Closed roadmap `V81-24` by adding a pinned main-viewer overlay mode with opacity controls, visible overlay status, context-menu exit paths, `Ctrl+Alt+O` global exit handling, click-through guarded on hotkey availability, and regression tests for overlay state plus native style composition.
+- 2026-05-05: Closed roadmap `V40-60` by adding a local duplicate cleanup center with exact SHA-256 grouping, perceptual similarity matching, threshold controls, reference-folder keep preference, side-by-side compare, false-positive dismissal, app-local quarantine moves, Recycle Bin actions, and service coverage for scan/quarantine behavior.
 
 ## Verification Standard
 
