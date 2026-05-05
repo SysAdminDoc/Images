@@ -52,6 +52,35 @@ public sealed class ArchiveBookServiceTests
     }
 
     [Fact]
+    public void LoadSpread_KeepsExplicitCoverSingleThenPairsNaturalPages()
+    {
+        using var temp = TestDirectory.Create();
+        var archivePath = Path.Combine(temp.Path, "book.cbz");
+        WriteArchive(
+            archivePath,
+            ("pages/page1.png", 0xFF, 0x00, 0x00),
+            ("pages/page2.png", 0x00, 0xFF, 0x00),
+            ("cover.png", 0x00, 0x00, 0xFF),
+            ("pages/page3.png", 0xFF, 0xFF, 0x00));
+
+        var cover = ArchiveBookService.LoadSpread(archivePath, requestedPageIndex: 0);
+        var middle = ArchiveBookService.LoadSpread(archivePath, requestedPageIndex: 2);
+        var last = ArchiveBookService.LoadSpread(archivePath, requestedPageIndex: 3);
+
+        Assert.False(cover.IsSpread);
+        Assert.Equal(0, cover.PageIndex);
+        Assert.Equal(["cover.png"], cover.Pages.Select(page => page.EntryName));
+
+        Assert.True(middle.IsSpread);
+        Assert.Equal(1, middle.PageIndex);
+        Assert.Equal(["pages/page1.png", "pages/page2.png"], middle.Pages.Select(page => page.EntryName));
+
+        Assert.False(last.IsSpread);
+        Assert.Equal(3, last.PageIndex);
+        Assert.Equal(["pages/page3.png"], last.Pages.Select(page => page.EntryName));
+    }
+
+    [Fact]
     public void ListPageNames_SkipsUnsafeUnsupportedAndRecursiveEntries()
     {
         using var temp = TestDirectory.Create();
@@ -102,6 +131,7 @@ public sealed class ArchiveBookServiceTests
         Assert.NotNull(first.Pages);
         Assert.Equal(0, first.Pages.PageIndex);
         Assert.Equal(2, first.Pages.PageCount);
+        Assert.Equal(1, first.Pages.PageSpan);
 
         Assert.Equal(6, second.PixelWidth);
         Assert.Equal(4, second.PixelHeight);
@@ -109,6 +139,29 @@ public sealed class ArchiveBookServiceTests
         Assert.Equal(1, second.Pages.PageIndex);
         Assert.Equal(2, second.Pages.PageCount);
         Assert.Contains("archive page 2 of 2", second.DecoderUsed, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ImageLoader_LoadsArchiveSpreadAsCompositePageSequence()
+    {
+        using var temp = TestDirectory.Create();
+        var archivePath = Path.Combine(temp.Path, "book.cbz");
+        WriteArchive(
+            archivePath,
+            ("page1.png", 0xFF, 0x00, 0x00),
+            ("page2.png", 0x00, 0xFF, 0x00),
+            ("page3.png", 0x00, 0x00, 0xFF));
+
+        var spread = ImageLoader.Load(archivePath, archiveSpreadMode: true);
+
+        Assert.Equal(12, spread.PixelWidth);
+        Assert.Equal(4, spread.PixelHeight);
+        Assert.NotNull(spread.Pages);
+        Assert.Equal(0, spread.Pages.PageIndex);
+        Assert.Equal(3, spread.Pages.PageCount);
+        Assert.Equal(2, spread.Pages.PageSpan);
+        Assert.Equal("Pages", spread.Pages.Label);
+        Assert.Contains("archive spread, pages 1-2 of 3", spread.DecoderUsed, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
