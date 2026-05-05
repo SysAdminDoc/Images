@@ -11,8 +11,11 @@ namespace Images.ViewModels;
 /// </summary>
 public sealed class SettingsViewModel : INotifyPropertyChanged
 {
+    public enum SettingsStatusToneKind { Info, Success, Warning }
+
     private OcrCapabilityService.OcrCapabilityStatus _ocrStatus = OcrCapabilityService.GetStatus();
     private string? _settingsStatusText;
+    private SettingsStatusToneKind _settingsStatusTone = SettingsStatusToneKind.Info;
 
     public SettingsViewModel()
     {
@@ -30,13 +33,27 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public bool FilmstripVisibleOnStartup
     {
         get => SettingsService.Instance.GetBool(Keys.FilmstripVisible, true);
-        set { SettingsService.Instance.SetBool(Keys.FilmstripVisible, value); Raise(nameof(FilmstripVisibleOnStartup)); }
+        set
+        {
+            SettingsService.Instance.SetBool(Keys.FilmstripVisible, value);
+            Raise(nameof(FilmstripVisibleOnStartup));
+            SetStatus(
+                value ? "Filmstrip will be shown at startup." : "Filmstrip will stay hidden at startup.",
+                SettingsStatusToneKind.Success);
+        }
     }
 
     public bool MetadataHudVisibleOnStartup
     {
         get => SettingsService.Instance.GetBool(Keys.MetadataHudVisible, false);
-        set { SettingsService.Instance.SetBool(Keys.MetadataHudVisible, value); Raise(nameof(MetadataHudVisibleOnStartup)); }
+        set
+        {
+            SettingsService.Instance.SetBool(Keys.MetadataHudVisible, value);
+            Raise(nameof(MetadataHudVisibleOnStartup));
+            SetStatus(
+                value ? "Metadata overlay will be shown at startup." : "Metadata overlay will stay hidden at startup.",
+                SettingsStatusToneKind.Success);
+        }
     }
 
     // ---- Privacy ----
@@ -44,7 +61,16 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public bool UpdateCheckEnabled
     {
         get => UpdateCheckService.OptedIn;
-        set { UpdateCheckService.OptedIn = value; Raise(nameof(UpdateCheckEnabled)); }
+        set
+        {
+            UpdateCheckService.OptedIn = value;
+            Raise(nameof(UpdateCheckEnabled));
+            SetStatus(
+                value
+                    ? "Automatic update checks enabled. Images only contacts GitHub Releases."
+                    : "Automatic update checks disabled.",
+                SettingsStatusToneKind.Success);
+        }
     }
 
     public string UpdateCheckDescription =>
@@ -77,6 +103,31 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
+    public SettingsStatusToneKind SettingsStatusTone
+    {
+        get => _settingsStatusTone;
+        private set
+        {
+            if (_settingsStatusTone == value) return;
+            _settingsStatusTone = value;
+            Raise(nameof(SettingsStatusTone));
+            Raise(nameof(SettingsStatusIcon));
+        }
+    }
+
+    public string SettingsStatusIcon => SettingsStatusTone switch
+    {
+        SettingsStatusToneKind.Success => "\uE73E",
+        SettingsStatusToneKind.Warning => "\uE783",
+        _ => "\uE930"
+    };
+
+    private void SetStatus(string message, SettingsStatusToneKind tone)
+    {
+        SettingsStatusTone = tone;
+        SettingsStatusText = message;
+    }
+
     private void RefreshOcrStatus()
     {
         _ocrStatus = OcrCapabilityService.GetStatus();
@@ -85,7 +136,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         Raise(nameof(OcrStatusDescription));
         Raise(nameof(OcrLanguageSummary));
         Raise(nameof(OcrStatusBadge));
-        SettingsStatusText = "Text extraction status refreshed.";
+        SetStatus("Text extraction status refreshed.", SettingsStatusToneKind.Success);
     }
 
     private void OpenOcrLanguageSettings()
@@ -93,11 +144,11 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         try
         {
             ShellIntegration.OpenShellTarget("ms-settings:regionlanguage");
-            SettingsStatusText = "Windows language settings opened.";
+            SetStatus("Windows language settings opened.", SettingsStatusToneKind.Success);
         }
         catch (Exception ex)
         {
-            SettingsStatusText = $"Could not open Windows language settings: {ex.Message}";
+            SetStatus($"Could not open Windows language settings: {ex.Message}", SettingsStatusToneKind.Warning);
         }
     }
 }

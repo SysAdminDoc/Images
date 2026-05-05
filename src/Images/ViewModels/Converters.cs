@@ -2,6 +2,7 @@ using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Data;
+using Images.Services;
 
 namespace Images.ViewModels;
 
@@ -62,6 +63,21 @@ public sealed class DropAcceptedIconConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value is true ? "\uE8B7" : "\uE783";
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+public sealed class DirectorySortModeMatchesConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is not DirectorySortMode current)
+            return false;
+
+        return DirectorySortModeInfo.TryParseCommandParameter(parameter, out var expected) &&
+               current == expected;
+    }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => throw new NotSupportedException();
