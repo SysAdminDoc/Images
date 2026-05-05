@@ -159,6 +159,61 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
+            <UniformGrid Columns="2" Margin="0,4,0,0">
+                <Button Style="{StaticResource ChromeButton}"
+                        Click="CopySystemInfoButton_Click"
+                        Margin="0,0,6,8"
+                        AutomationProperties.Name="Copy system information">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xE8C8;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="12"
+                                   Margin="0,0,8,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="Copy system info" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource ChromeButton}"
+                        Click="CopyCodecReportButton_Click"
+                        Margin="6,0,0,8"
+                        AutomationProperties.Name="Copy codec report">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xE8B9;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="12"
+                                   Margin="0,0,8,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="Copy codec report" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource ChromeButton}"
+                        Click="OpenLogsButton_Click"
+                        Margin="0,0,6,0"
+                        AutomationProperties.Name="Open Images logs folder">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xE838;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="12"
+                                   Margin="0,0,8,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="Open logs" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource ChromeButton}"
+                        Click="OpenAppDataButton_Click"
+                        Margin="6,0,0,0"
+                        AutomationProperties.Name="Open Images data folder">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xE8DA;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="12"
+                                   Margin="0,0,8,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="Open data folder" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </UniformGrid>
+
             <TextBlock Style="{StaticResource SectionLabel}"
                        Text="Codec capability"
                        Margin="1,18,0,10" />

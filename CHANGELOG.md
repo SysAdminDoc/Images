@@ -26,6 +26,7 @@ All notable changes to **Images** are documented here.
 - **ViewModel relay coverage** — `MainViewModel` now has an internal controller-injection seam with regression coverage for metadata, OCR, and update-check relay properties.
 - **UI state hardening** — refresh remains available when the current file was removed externally, and regression tests now cover rename debounce, stale-folder recovery, and command enablement states.
 - **Diagnostics status pane** — About now summarizes OCR, Ghostscript, Magick.NET, logs, storage, and update-check state in a compact status section with regression-tested status composition.
+- **Diagnostics actions** — the About diagnostics section now lets users copy system info, copy the codec report, open logs, and open the app data folder directly from the status pane.
 - **OCR workflow polish** — text extraction now has a persistent in-view busy/active status, a cancel-aware toolbar state, OCR readiness in Settings/About, and OCR language-pack status in diagnostics.
 - **Open-source viewer research** — added a May 2026 research scan of ImageGlass, nomacs, PicView, NeeView, QuickLook, Geeqie, gThumb, qView, JPEGView, Tacent View, Minimal Image Viewer, and LightningView, then folded the findings into the improvement plan.
 - **Trust copy** — README destructive-action wording now reflects the Recycle Bin confirmation flow.
