@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V40-61` is complete. File health scan now detects content-signature extension mismatches, corrupt supported images, zero-byte files, and suspicious temporary or partial-download artifacts in selected folders, then offers preview, conflict-safe rename, reviewed dismissal, app-local quarantine, and regression coverage.
+Roadmap `V40-62` is complete. Gallery smart filters now index the current folder for format, folder, sidecar rating/tag data, palette, orientation, dimensions, date, and exact duplicate status, with quick chips, token filters, clear-filter UX, and regression coverage. The predicate service is isolated for later SQLite catalog backing.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the next main `ROADMAP.md` feature backlog item, `V40-62` asset-manager smart filters.
+The improvement-plan backlog is complete. Continue with the next main `ROADMAP.md` feature backlog item, `V40-63` tag namespaces and relationship graph.
 
 ## Research Inputs
 
@@ -121,6 +121,7 @@ The improvement-plan backlog is complete. Continue with the next main `ROADMAP.m
 - 2026-05-05: Closed roadmap `V81-24` by adding a pinned main-viewer overlay mode with opacity controls, visible overlay status, context-menu exit paths, `Ctrl+Alt+O` global exit handling, click-through guarded on hotkey availability, and regression tests for overlay state plus native style composition.
 - 2026-05-05: Closed roadmap `V40-60` by adding a local duplicate cleanup center with exact SHA-256 grouping, perceptual similarity matching, threshold controls, reference-folder keep preference, side-by-side compare, false-positive dismissal, app-local quarantine moves, Recycle Bin actions, and service coverage for scan/quarantine behavior.
 - 2026-05-05: Closed roadmap `V40-61` by adding a local file-health scan for content-signature extension mismatches, corrupt supported images, zero-byte files, and suspicious temporary files, with preview, conflict-safe extension rename, reviewed dismissal, app-local quarantine moves, and regression coverage.
+- 2026-05-05: Closed roadmap `V40-62` by adding current-folder Gallery smart filters backed by `AssetSmartFilterService`, covering format, folder, sidecar rating/tag data, palette, orientation, dimensions, date, and exact duplicate status with quick chips, token filters, clear-filter UX, and regression coverage.
 
 ## Verification Standard
 
