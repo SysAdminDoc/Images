@@ -136,9 +136,12 @@ public static class ImageLoader
     {
         var page = ArchiveBookService.LoadPage(path, requestedPageIndex);
         var loaded = LoadRasterBytes(page.Bytes, page.EntryName, Path.GetExtension(page.EntryName));
+        var pageDescription = page.IsCover
+            ? $"archive cover, page {page.PageIndex + 1} of {page.PageCount}"
+            : $"archive page {page.PageIndex + 1} of {page.PageCount}";
         return loaded with
         {
-            DecoderUsed = $"{loaded.DecoderUsed} (archive page {page.PageIndex + 1} of {page.PageCount})",
+            DecoderUsed = $"{loaded.DecoderUsed} ({pageDescription})",
             Pages = new PageSequence(page.PageIndex, page.PageCount, "Page")
         };
     }
