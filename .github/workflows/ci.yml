@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Build, test, and smoke
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Whitespace diff check
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "pull_request") {
+              $base = "${{ github.event.pull_request.base.sha }}"
+              git diff --check "$base...HEAD"
+              exit $LASTEXITCODE
+          }
+
+          $before = "${{ github.event.before }}"
+          if ([string]::IsNullOrWhiteSpace($before) -or $before -match '^0+$') {
+              git diff --check HEAD~1..HEAD
+          } else {
+              git diff --check "$before..HEAD"
+          }
+          exit $LASTEXITCODE
+
+      - name: Restore
+        run: dotnet restore Images.sln
+
+      - name: Validate version sync
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\Test-VersionSync.ps1
+
+      - name: Vulnerable package gate
+        shell: pwsh
+        run: |
+          $output = dotnet list Images.sln package --vulnerable --include-transitive 2>&1 | Out-String
+          Write-Host $output
+          if ($output -match "has the following vulnerable packages") {
+              Write-Error "Vulnerable packages detected."
+              exit 1
+          }
+          if ($output -notmatch "no vulnerable packages") {
+              Write-Error "Unexpected vulnerable-package scan output."
+              exit 1
+          }
+
+      - name: Build
+        run: dotnet build Images.sln -c Release --no-restore
+
+      - name: Test
+        run: dotnet test Images.sln -c Release --no-build
+
+      - name: CLI smoke
+        shell: pwsh
+        run: |
+          $exe = "src\Images\bin\Release\net9.0-windows10.0.22621.0\Images.exe"
+          if (-not (Test-Path -LiteralPath $exe)) {
+              throw "Expected app executable was not produced at $exe."
+          }
+          & $exe --system-info
+          & $exe --codec-report
