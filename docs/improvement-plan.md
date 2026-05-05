@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-02A` is complete. Folder-preview thumbnail orchestration now lives behind a focused controller, app-owned folder sort modes are available from the viewer, and regression tests cover natural sorting, sort-mode reordering, current-file preservation, extension grouping, and preview preload radius.
+`IP-02B` is complete. Clipboard import now lives behind a focused service with test seams for clipboard contents, storage paths, time, GUID naming, and pruning. Regression tests cover file-list selection, unsupported clipboard data, image temp-file saves, unavailable storage, empty clipboard feedback, and pruning limits.
 
 ## Next Focus
 
-The next recommended slice is `IP-02B`: move clipboard import and clipboard-temp pruning out of `MainViewModel`, then add tests around unsupported clipboard data, file-list selection, temp-file naming, and pruning limits.
+The next recommended slice is `IP-03A`: add state-level tests around the extracted folder-preview and clipboard-import paths, then continue `IP-02` with the next narrow extraction only after those state contracts are stable.
 
 ## Research Inputs
 
@@ -59,8 +59,8 @@ The next recommended slice is `IP-02B`: move clipboard import and clipboard-temp
 
 ## Implementation Order
 
-1. Continue `IP-02` with clipboard import extraction after the completed folder-preview controller slice.
-2. Add UI-state tests for the extracted controllers under `IP-03`.
+1. Add UI-state tests for the extracted folder-preview and clipboard-import controllers under `IP-03`.
+2. Continue `IP-02` with the next narrow extraction after those state contracts are stable.
 3. Build diagnostics/status UX from existing system-info, codec, OCR, and storage services under `IP-06`.
 4. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
 5. Scope `IP-16` design docs once near-term reliability and testability slices are stable.
@@ -73,6 +73,7 @@ The next recommended slice is `IP-02B`: move clipboard import and clipboard-temp
 - 2026-05-05: Completed `IP-15` by adding CI verification, a reusable version-sync script, release-workflow reuse of that script, vulnerability scanning, and CLI smoke checks.
 - 2026-05-05: Added an open-source viewer research scan and converted its findings into explicit future tracks for compare mode, archive/book navigation, metadata culling, peek launch mode, technical image tools, viewer-side adjustments, cache health, shortcut/settings polish, and distribution trust.
 - 2026-05-05: Completed `IP-02A` / started `RS-03` by extracting folder-preview thumbnail orchestration into `FolderPreviewController`, adding app-owned sort modes, adding a visible sort control, and covering sort/preload behavior with tests.
+- 2026-05-05: Completed `IP-02B` by extracting clipboard import and clipboard-temp pruning into `ClipboardImportService`, adding deterministic file-list/image/storage/time/GUID seams, and covering clipboard import and pruning behavior with tests.
 
 ## Verification Standard
 
