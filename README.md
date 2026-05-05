@@ -42,6 +42,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Non-destructive edit history** — press `Ctrl+Shift+E` to inspect XMP-backed edit operations, fork virtual copies without duplicating source pixels, enable or disable individual operations, and export edited copies with provenance sidecars.
 - **Non-destructive crop** — press `C`, choose free/square/3:2/4:3/16:9/custom aspect ratios, drag directly on the image with rule-of-thirds guides, then press Enter or the side-panel Apply button to add a crop operation to edit history without modifying the original file. Save a copy applies the crop and writes provenance sidecars.
 - **Non-destructive resize** — press `Ctrl+Alt+R` to add a resize operation with percent, pixel, long-edge, or short-edge sizing, aspect lock, Lanczos-3/Mitchell/Bicubic filters, and a live output-dimensions preview. Save a copy applies the resize without modifying the source file.
+- **Non-destructive adjustments** — press `Ctrl+Alt+A` for a modeless levels, curve, and HSL workbench with live preview, reset, and Enter-to-apply behavior. Save a copy applies the adjustment stack without modifying the source file.
 - **Reference board mode** — press `Ctrl+B` to open a separate local board seeded from the current image. Drop supported files, arrange image cards, add notes and group frames, pin the board above other windows, zoom the canvas, and export the composed board as PNG.
 - **Duplicate cleanup center** — press `Ctrl+Shift+D` or use the side-panel Cleanup card to scan local folders for exact SHA-256 duplicates and perceptually similar images, prefer keep candidates from reference folders, review pairs side by side, mark false positives, and move extras to app-local quarantine or the Recycle Bin.
 - **File health scan** — press `Ctrl+Shift+H` to find files with mismatched image extensions, corrupt supported images, zero-byte files, and temporary/partial-download artifacts, then rename detected extensions, mark reviewed, or move files to app-local quarantine.
@@ -107,6 +108,7 @@ OCR depends on Microsoft Windows OCR optional capabilities. The installer instal
 | **Delete** | Send current image to Recycle Bin |
 | **C** | Toggle non-destructive crop mode |
 | **Ctrl+Alt+R** | Open resize dialog |
+| **Ctrl+Alt+A** | Open adjustments workbench |
 | **E** | Extract text (OCR) — toggle overlay |
 | **F5** | Rescan current directory |
 | **G** | Toggle gallery workbench |
@@ -154,6 +156,8 @@ src/Images/
 │   ├── OverlayWindowService.cs # Native always-on-top/click-through overlay window helpers
 │   ├── PixelInspectorService.cs # Pixel coordinate mapping, sampling, color formatting, and measurement math
 │   ├── ImageExportService.cs   # Codec-aware Save a copy / conversion output
+│   ├── NonDestructiveEditService.cs # XMP edit-stack persistence and export application
+│   ├── ImageAdjustmentService.cs # Levels, curve, and HSL adjustment planning/rendering
 │   ├── ImageMetadataService.cs # Read-only EXIF summary for the Details panel and HUD
 │   ├── CodecCapabilityService.cs # About-window codec summary and copyable diagnostics
 │   ├── SupportedImageFormats.cs # Central extension catalog for discovery/dialogs
