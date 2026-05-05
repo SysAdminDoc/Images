@@ -11,6 +11,7 @@ All notable changes to **Images** are documented here.
 - **Release metadata gate** — moved version-sync validation into a reusable PowerShell script shared by CI and the release workflow.
 - **Shell and clipboard integration** — About, crash recovery, settings, and viewer actions now use shared helpers for opening files/folders/URLs and copying text, reducing duplicated process and clipboard handling.
 - **Update-check testability** — update checks now have seams for HTTP, clock, retry-state recording, and state-file behavior, plus non-network tests for release parsing and transient failure policy.
+- **Folder preview and sorting** — folder-preview thumbnail orchestration now lives in a focused controller, and the viewer exposes app-owned folder sort modes for natural name, reverse name, modified date, created date, size, and extension grouping.
 - **OCR workflow polish** — text extraction now has a persistent in-view busy/active status, a cancel-aware toolbar state, OCR readiness in Settings/About, and OCR language-pack status in diagnostics.
 - **Open-source viewer research** — added a May 2026 research scan of ImageGlass, nomacs, PicView, NeeView, QuickLook, Geeqie, gThumb, qView, JPEGView, Tacent View, Minimal Image Viewer, and LightningView, then folded the findings into the improvement plan.
 - **Trust copy** — README destructive-action wording now reflects the Recycle Bin confirmation flow.
