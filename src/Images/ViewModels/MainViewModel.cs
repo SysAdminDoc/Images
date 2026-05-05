@@ -324,6 +324,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool IsViewerEmpty => CurrentPath is null;
     public bool CanRefreshFolder => CurrentPath is not null || _nav.Count > 0;
 
+    public string FirstRunPrivacyText => _settings.GetBool(Keys.UpdateCheckEnabled, false)
+        ? "Automatic update checks are enabled. Image files stay local; release checks only contact GitHub."
+        : "No telemetry and no image uploads. Automatic update checks are off until you enable them.";
+
+    public string FirstRunFormatStatusText => CodecCapabilityService.BuildOverviewText();
+    public string FirstRunOcrStatusText => OcrCapabilityService.BuildOverviewText();
+    public string FirstRunDocumentStatusText => CodecCapabilityService.BuildDocumentStatusText();
+    public string FirstRunRecoveryText => "Settings manages privacy and viewer defaults. Diagnostics shows codec, OCR, log, and storage status.";
+
     // First-run gesture hint. Flipped true exactly once — the first time an image successfully
     // lands in the viewport. The view animates the pill in, then fades it out after 2.4 s.
     private bool _hasShownGestureHint;
@@ -1534,6 +1543,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Raise(nameof(IsMetadataHudVisible));
             Raise(nameof(ShowMetadataHud));
         }
+
+        Raise(nameof(FirstRunPrivacyText));
     }
 
     // P-01: Strip GPS location data from the current file using Magick.NET.
