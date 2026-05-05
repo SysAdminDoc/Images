@@ -10,14 +10,19 @@ public sealed class FolderPreviewController : IDisposable
 {
     private readonly Dispatcher _uiDispatcher;
     private readonly Func<bool> _isDisposed;
+    private readonly Func<string, CancellationToken, ImageSource?> _loadThumbnail;
     private readonly SemaphoreSlim _thumbnailDecodeGate = new(2);
     private CancellationTokenSource _previewCts = new();
     private int _generation;
 
-    public FolderPreviewController(Dispatcher uiDispatcher, Func<bool> isDisposed)
+    public FolderPreviewController(
+        Dispatcher uiDispatcher,
+        Func<bool> isDisposed,
+        Func<string, CancellationToken, ImageSource?>? loadThumbnail = null)
     {
         _uiDispatcher = uiDispatcher;
         _isDisposed = isDisposed;
+        _loadThumbnail = loadThumbnail ?? ((path, token) => ThumbnailCache.Instance.GetOrCreateImageSource(path, token));
     }
 
     public ObservableCollection<FolderPreviewItem> Items { get; } = new();
@@ -93,7 +98,7 @@ public sealed class FolderPreviewController : IDisposable
                 {
                     if (token.IsCancellationRequested) return;
 
-                    var thumbnail = ThumbnailCache.Instance.GetOrCreateImageSource(item.Path, token);
+                    var thumbnail = _loadThumbnail(item.Path, token);
                     if (thumbnail is null || token.IsCancellationRequested) return;
 
                     _ = _uiDispatcher.InvokeAsync(() =>
