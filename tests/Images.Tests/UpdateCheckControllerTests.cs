@@ -123,7 +123,27 @@ public sealed class UpdateCheckControllerTests
         await controller.CheckAsync(userInitiated: true);
 
         Assert.Equal(new[] { result }, recorded);
+        Assert.True(controller.HasUpdateCheckIssue);
+        Assert.Equal("Update check failed", controller.UpdateCheckIssueTitle);
+        Assert.Contains("GitHub Releases returned: HTTP 500", controller.UpdateCheckIssueDetail);
         Assert.Equal("Update check failed: HTTP 500", Assert.Single(messages));
+    }
+
+    [Fact]
+    public async Task CheckAsync_WhenManualCheckIsOffline_ExposesActionableIssue()
+    {
+        var messages = new List<string>();
+        var controller = new UpdateCheckController(
+            notify: messages.Add,
+            checkAsync: _ => Task.FromResult(ErrorResult("network: offline", shouldUpdateLastChecked: false)));
+
+        await controller.CheckAsync(userInitiated: true);
+
+        Assert.True(controller.HasUpdateCheckIssue);
+        Assert.Equal("Update check unavailable", controller.UpdateCheckIssueTitle);
+        Assert.Contains("could not reach GitHub Releases", controller.UpdateCheckIssueDetail);
+        Assert.Contains("no image files were uploaded", controller.UpdateCheckIssueDetail);
+        Assert.Equal("Update check failed: network: offline", Assert.Single(messages));
     }
 
     [Fact]
@@ -138,6 +158,8 @@ public sealed class UpdateCheckControllerTests
         await controller.CheckAsync(userInitiated: false);
 
         Assert.Empty(messages);
+        Assert.True(controller.HasUpdateCheckIssue);
+        Assert.Equal("Update check unavailable", controller.UpdateCheckIssueTitle);
     }
 
     [Fact]

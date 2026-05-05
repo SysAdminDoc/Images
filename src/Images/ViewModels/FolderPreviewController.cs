@@ -14,6 +14,7 @@ public sealed class FolderPreviewController : IDisposable
     private readonly SemaphoreSlim _thumbnailDecodeGate = new(2);
     private CancellationTokenSource _previewCts = new();
     private int _generation;
+    private int _thumbnailFailureCount;
 
     public FolderPreviewController(
         Dispatcher uiDispatcher,
@@ -27,6 +28,12 @@ public sealed class FolderPreviewController : IDisposable
 
     public ObservableCollection<FolderPreviewItem> Items { get; } = new();
 
+    public int ThumbnailFailureCount => _thumbnailFailureCount;
+    public bool HasThumbnailFailures => ThumbnailFailureCount > 0;
+    public string ThumbnailFailureStatusText => ThumbnailFailureCount == 1
+        ? "One folder thumbnail could not be generated. The image can still be opened."
+        : $"{ThumbnailFailureCount} folder thumbnails could not be generated. The images can still be opened.";
+
     public event EventHandler? StateChanged;
 
     public void Refresh(IReadOnlyList<string> files, int currentIndex)
@@ -37,6 +44,7 @@ public sealed class FolderPreviewController : IDisposable
         _ = DisposeSourceLaterAsync(previousCts);
         _previewCts = new CancellationTokenSource();
         Items.Clear();
+        ResetThumbnailFailures();
         RaiseStateChanged();
 
         if (files.Count < 2 || currentIndex < 0)
@@ -66,6 +74,7 @@ public sealed class FolderPreviewController : IDisposable
         _generation++;
         _previewCts.Cancel();
         Items.Clear();
+        ResetThumbnailFailures();
         RaiseStateChanged();
     }
 
@@ -118,11 +127,32 @@ public sealed class FolderPreviewController : IDisposable
             {
                 // Superseded navigation state. The next refresh owns the visible thumbnail set.
             }
-            catch
+            catch (Exception)
             {
-                // Folder preview is opportunistic; decode failures are already logged by the cache.
+                RecordThumbnailFailure(item, generation, token);
             }
         });
+    }
+
+    private void RecordThumbnailFailure(
+        FolderPreviewItem item,
+        int generation,
+        CancellationToken token)
+    {
+        _ = _uiDispatcher.InvokeAsync(() =>
+        {
+            if (_isDisposed() || token.IsCancellationRequested || generation != _generation) return;
+            if (!Items.Contains(item)) return;
+
+            item.MarkThumbnailFailed();
+            _thumbnailFailureCount++;
+            RaiseStateChanged();
+        });
+    }
+
+    private void ResetThumbnailFailures()
+    {
+        _thumbnailFailureCount = 0;
     }
 
     private static async Task DisposeSourceLaterAsync(CancellationTokenSource source)
@@ -151,6 +181,7 @@ public sealed class FolderPreviewItem : ObservableObject
 {
     private ImageSource? _thumbnail;
     private bool _thumbnailRequested;
+    private bool _thumbnailFailed;
 
     public FolderPreviewItem(string path, string fileName, string positionText, bool isCurrent)
     {
@@ -177,10 +208,21 @@ public sealed class FolderPreviewItem : ObservableObject
 
     public bool HasThumbnail => Thumbnail is not null;
 
+    public bool ThumbnailFailed
+    {
+        get => _thumbnailFailed;
+        private set => Set(ref _thumbnailFailed, value);
+    }
+
     public bool TryMarkThumbnailRequested()
     {
         if (_thumbnailRequested || HasThumbnail) return false;
         _thumbnailRequested = true;
         return true;
+    }
+
+    public void MarkThumbnailFailed()
+    {
+        ThumbnailFailed = true;
     }
 }

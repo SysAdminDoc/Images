@@ -99,6 +99,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             if (!string.IsNullOrEmpty(e.PropertyName))
                 Raise(e.PropertyName);
+            if (e.PropertyName is nameof(UpdateCheckController.HasUpdateCheckIssue)
+                or nameof(UpdateCheckController.UpdateCheckIssueTitle)
+                or nameof(UpdateCheckController.UpdateCheckIssueDetail))
+            {
+                SyncUpdateCheckSecondaryStatus();
+            }
         };
 
         _renameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(600) };
@@ -369,8 +375,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             || !string.IsNullOrWhiteSpace(OperationStatusDetail));
 
     public enum SecondaryStatusToneKind { Info, Success, Warning, Error }
+    private enum SecondaryStatusSource { None, UserFlow, UpdateCheck, FolderPreview }
 
     private string _secondaryStatusTitle = "";
+    private SecondaryStatusSource _secondaryStatusSource;
     public string SecondaryStatusTitle
     {
         get => _secondaryStatusTitle;
@@ -762,6 +770,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public string FolderSortTooltip => $"Sort folder by {DirectorySortModeInfo.DisplayName(_nav.SortMode)}";
 
+    public int ThumbnailFailureCount => _folderPreview.ThumbnailFailureCount;
+    public bool HasThumbnailFailures => _folderPreview.HasThumbnailFailures;
+    public string ThumbnailFailureStatusText => _folderPreview.ThumbnailFailureStatusText;
+
     private void RefreshFolderPreview()
     {
         _folderPreview.Refresh(_nav.Files, _nav.CurrentIndex);
@@ -815,7 +827,27 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(FolderSortLabel));
         Raise(nameof(FolderSortTooltip));
         Raise(nameof(CanRefreshFolder));
+        Raise(nameof(ThumbnailFailureCount));
+        Raise(nameof(HasThumbnailFailures));
+        Raise(nameof(ThumbnailFailureStatusText));
+        SyncFolderPreviewSecondaryStatus();
         CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void SyncFolderPreviewSecondaryStatus()
+    {
+        if (_folderPreview.HasThumbnailFailures)
+        {
+            ShowSecondaryStatus(
+                "Some thumbnails could not be shown",
+                $"{_folderPreview.ThumbnailFailureStatusText} Refresh the folder or open Diagnostics if this repeats.",
+                SecondaryStatusToneKind.Warning,
+                "\uE783",
+                SecondaryStatusSource.FolderPreview);
+            return;
+        }
+
+        ClearSecondaryStatus(SecondaryStatusSource.FolderPreview);
     }
 
     private void PushUndoEntry(RenameService.UndoEntry entry)
@@ -921,20 +953,26 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         string title,
         string detail,
         SecondaryStatusToneKind tone = SecondaryStatusToneKind.Info,
-        string icon = "\uE946")
+        string icon = "\uE946",
+        SecondaryStatusSource source = SecondaryStatusSource.UserFlow)
     {
         SecondaryStatusTitle = title;
         SecondaryStatusDetail = detail;
         SecondaryStatusTone = tone;
         SecondaryStatusIcon = icon;
+        _secondaryStatusSource = source;
     }
 
-    private void ClearSecondaryStatus()
+    private void ClearSecondaryStatus(SecondaryStatusSource? source = null)
     {
+        if (source is not null && _secondaryStatusSource != source.Value)
+            return;
+
         SecondaryStatusTitle = "";
         SecondaryStatusDetail = "";
         SecondaryStatusTone = SecondaryStatusToneKind.Info;
         SecondaryStatusIcon = "\uE946";
+        _secondaryStatusSource = SecondaryStatusSource.None;
     }
 
     private static string FormatExtensionForMessage(string extension)
@@ -1682,6 +1720,26 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool IsCheckingForUpdates => _updateCheck.IsCheckingForUpdates;
 
     public string UpdateCheckStatusText => _updateCheck.UpdateCheckStatusText;
+
+    public bool HasUpdateCheckIssue => _updateCheck.HasUpdateCheckIssue;
+    public string UpdateCheckIssueTitle => _updateCheck.UpdateCheckIssueTitle;
+    public string UpdateCheckIssueDetail => _updateCheck.UpdateCheckIssueDetail;
+
+    private void SyncUpdateCheckSecondaryStatus()
+    {
+        if (_updateCheck.HasUpdateCheckIssue)
+        {
+            ShowSecondaryStatus(
+                _updateCheck.UpdateCheckIssueTitle,
+                _updateCheck.UpdateCheckIssueDetail,
+                SecondaryStatusToneKind.Warning,
+                "\uE783",
+                SecondaryStatusSource.UpdateCheck);
+            return;
+        }
+
+        ClearSecondaryStatus(SecondaryStatusSource.UpdateCheck);
+    }
 
     private void BeginOperationStatus(string title, string detail)
     {
