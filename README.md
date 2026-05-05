@@ -4,7 +4,7 @@
 
 # Images
 
-[![Version](https://img.shields.io/badge/version-0.2.10-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
+[![Version](https://img.shields.io/badge/version-0.2.11-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
 [![License](https://img.shields.io/badge/license-MIT-a6e3a1?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-cba6f7?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-9.0-f38ba8?style=flat-square)](#)
@@ -66,17 +66,17 @@ Both artifacts ship alongside every release. They're the same build — pick whi
 ### Installer (recommended for most users)
 
 1. Grab `Images-vX.Y.Z-setup-win-x64.exe` from [Releases](https://github.com/SysAdminDoc/Images/releases).
-2. Run it. Installs to `%ProgramFiles%\Images`, removes any older per-user or machine-wide Images install first, and provisions the Windows OCR language capability for the current UI language plus `en-US` fallback. No separate .NET runtime install is required.
+2. Run it. Installs to `%ProgramFiles%\Images`, removes any older per-user or machine-wide Images install first, bundles Ghostscript for PDF/EPS/PS/AI previews, and provisions the Windows OCR language capability for the current UI language plus `en-US` fallback. No separate .NET runtime or Ghostscript install is required.
 3. Optional boxes on the wizard: **Desktop icon**, **Add to "Open with" menu** (non-destructive — adds *Images* to the Windows "Open with" list without overriding whatever you currently have set as default for those extensions). If an older install already had Images associations enabled, the installer carries them forward automatically.
 4. Uninstalls cleanly from Settings → Apps → Installed apps.
 
-The installer is self-contained: the .NET Desktop runtime and bundled codecs ship inside the app folder.
+The installer is self-contained: the .NET Desktop runtime, Magick.NET, SharpCompress, and bundled Ghostscript runtime ship inside the app folder.
 
 ### Portable (zero install)
 
 1. Grab `Images-vX.Y.Z-win-x64.zip` from [Releases](https://github.com/SysAdminDoc/Images/releases).
 2. Extract anywhere.
-3. Run `Images.exe`. Leaves no registry writes.
+3. Run `Images.exe`. Leaves no registry writes. The portable folder includes the same bundled Ghostscript runtime as the installer.
 
 To associate file types from a portable install: right-click any image → **Open with** → **Choose another app** → browse to `Images.exe` → tick **Always use this app**.
 
@@ -89,15 +89,15 @@ dotnet build -c Release
 dotnet run --project src/Images
 ```
 
-### Optional bundled Ghostscript
+### Bundled Ghostscript
 
-PDF, EPS, PS, and AI previews require Ghostscript. For a self-contained release experience, place the approved Ghostscript runtime under `src/Images/Codecs/Ghostscript` before publishing; the project copies that folder into the app output automatically. A typical layout is `Codecs/Ghostscript/bin/gsdll64.dll` with the matching Ghostscript support files beside `bin`; `gswin64c.exe` is optional and only used for version display.
+PDF, EPS, PS, and AI previews require Ghostscript. Official release artifacts bundle Ghostscript 10.07.0 app-local under `Codecs\Ghostscript`, so users do not need to install Ghostscript separately. The bundled runtime is the AGPL Ghostscript distribution from Artifex; its license is installed at `Codecs\Ghostscript\doc\COPYING`, and the matching source archive is attached to the GitHub release.
 
-Images also detects `IMAGES_GHOSTSCRIPT_DIR` and normal system installs under `%ProgramFiles%\gs`. Keep third-party binaries out of source control unless redistribution rights for the exact package are already approved.
+Development builds can still detect `IMAGES_GHOSTSCRIPT_DIR` and normal system installs under `%ProgramFiles%\gs`. Keep third-party binaries out of source control unless redistribution rights for the exact package are already approved.
 
 Release builders can use `scripts/Prepare-GhostscriptBundle.ps1`; see `docs/codec-bundling.md`.
 
-To build the installer locally, install [Inno Setup 6](https://jrsoftware.org/isdl.php), run `dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish`, then `iscc /DMyAppVersion=0.2.10 installer\Images.iss`. Output lands at `installer\output\Images-vX.Y.Z-setup-win-x64.exe`.
+To build the installer locally, install [Inno Setup 6](https://jrsoftware.org/isdl.php), stage Ghostscript with `scripts\Prepare-GhostscriptBundle.ps1`, run `dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish`, then `iscc /DMyAppVersion=0.2.11 installer\Images.iss`. Output lands at `installer\output\Images-vX.Y.Z-setup-win-x64.exe`.
 
 OCR depends on Microsoft Windows OCR optional capabilities. The installer installs the current Windows UI language OCR capability plus `en-US` fallback when needed; Images cannot legally bundle those Microsoft language packs inside the app folder.
 
