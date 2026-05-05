@@ -99,6 +99,7 @@ The improvement-plan backlog is complete. Continue with the source-derived works
 - 2026-05-05: Completed `IP-12A` and closed `IP-12` by adding generated decode/export corpus coverage for PNG, JPEG, WebP, multi-page TIFF, animated GIF, SVG vector decode, and APNG export round-trips without binary fixtures.
 - 2026-05-05: Completed `IP-16A` and closed `IP-16` by adding scoped product-differentiator design guidance for semantic search, duplicate cleanup, compare/overlay mode, archive/book navigation, peek launch mode, viewer adjustments, technical pixel tools, and metadata/culling workflows.
 - 2026-05-05: Completed `IP-17A` and closed `IP-17` by adding distribution-trust guidance for WinGet, Scoop, checksum continuity, signing options, SmartScreen expectations, and user verification copy.
+- 2026-05-05: Completed roadmap `X-03` by adding an optional-runtime integration policy covering license, redistribution, CVE tracking, binary provenance, process isolation, network behavior, test corpus, and release gates.
 
 ## Verification Standard
 
