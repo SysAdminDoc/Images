@@ -25,6 +25,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly ExternalEditReloadController _externalEditReload;
     private readonly UpdateCheckController _updateCheck;
     private readonly RecycleBinDeleteService _recycleBinDelete;
+    private readonly NonDestructiveEditService _editStack = new();
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
     private readonly DispatcherTimer _animationTimer;
@@ -181,6 +182,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenImportInboxCommand = new RelayCommand(OpenImportInbox);
         OpenMacroActionsCommand = new RelayCommand(OpenMacroActions);
         OpenBatchProcessorCommand = new RelayCommand(OpenBatchProcessor);
+        OpenEditStackCommand = new RelayCommand(OpenEditStack, () => HasImage);
         OpenRecentFolderCommand = new RelayCommand(p => OpenRecentFolder(p as string), p => p is string);
         OpenRecentArchiveCommand = new RelayCommand(
             async p => await OpenRecentArchiveAsync(p as ArchiveReadPositionService.ArchiveReadHistoryItem),
@@ -1643,6 +1645,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenImportInboxCommand { get; }
     public ICommand OpenMacroActionsCommand { get; }
     public ICommand OpenBatchProcessorCommand { get; }
+    public ICommand OpenEditStackCommand { get; }
     public ICommand OpenRecentFolderCommand { get; }
     public ICommand OpenRecentArchiveCommand { get; }
     public ICommand OpenPreviewItemCommand { get; }
@@ -2810,8 +2813,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OperationStatusDetail = "";
     }
 
-    // E6: save a copy of the decoded first frame to a user-chosen path. Rotation and flip are
-    // not baked in, matching Windows Photos: temporary viewing transforms stay temporary.
+    // E6/V100-01: save a copy of the decoded frame, applying persisted edit-stack operations
+    // when they exist. Temporary viewing transforms stay temporary.
     private async Task SaveAsCopyAsync()
     {
         if (CurrentImage is not System.Windows.Media.Imaging.BitmapSource bs || CurrentPath is null) return;
@@ -2849,8 +2852,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         try
         {
             await YieldForOperationStatusAsync();
-            var savedPath = ImageExportService.Save(bs, targetPath);
-            Toast($"Saved copy → {Path.GetFileName(savedPath)}");
+            if (_editStack.HasEnabledOperations(CurrentPath))
+            {
+                var result = await Task.Run(() => _editStack.Export(CurrentPath, targetPath));
+                if (result.Success)
+                    Toast($"Saved edited copy → {Path.GetFileName(result.OutputPath)}");
+                else
+                    Toast($"Save failed: {result.Message}");
+            }
+            else
+            {
+                var savedPath = ImageExportService.Save(bs, targetPath);
+                Toast($"Saved copy → {Path.GetFileName(savedPath)}");
+            }
         }
         catch (Exception ex)
         {
@@ -2992,6 +3006,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             batch.AddSource(CurrentPath);
 
         batch.Show();
+    }
+
+    private void OpenEditStack()
+    {
+        var edits = new Images.EditStackWindow
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        edits.SetCurrentImage(CurrentPath);
+        edits.Show();
     }
 
     // Item 2: Settings window — opens modal, then re-reads persistent prefs so the viewer
