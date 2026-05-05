@@ -61,14 +61,26 @@ public static class ImageExportService
 
         using var image = ToMagickImage(source);
 
-        image.Format = target.Format;
-        image.Quality = 92;
+        PrepareForWrite(image, target.Format, 92);
 
-        if (RequiresOpaqueBackground(target.Format))
-        {
-            image.BackgroundColor = MagickColors.White;
-            image.Alpha(AlphaOption.Remove);
-        }
+        WriteAtomically(image, target.Path);
+        return target.Path;
+    }
+
+    public static string Save(string sourcePath, string path, IReadOnlyList<EditOperation> operations)
+    {
+        if (string.IsNullOrWhiteSpace(sourcePath))
+            throw new ArgumentException("A source image path is required.", nameof(sourcePath));
+
+        var normalizedSourcePath = Path.GetFullPath(sourcePath);
+        if (!File.Exists(normalizedSourcePath))
+            throw new IOException("Source image does not exist.");
+
+        var target = ResolveWritableTarget(path);
+
+        using var image = new MagickImage(normalizedSourcePath);
+        NonDestructiveEditService.ApplyOperations(image, operations);
+        PrepareForWrite(image, target.Format, 92);
 
         WriteAtomically(image, target.Path);
         return target.Path;
@@ -106,6 +118,18 @@ public static class ImageExportService
         finally
         {
             TryDeleteFile(tempPath);
+        }
+    }
+
+    private static void PrepareForWrite(MagickImage image, MagickFormat format, uint quality)
+    {
+        image.Format = format;
+        image.Quality = quality;
+
+        if (RequiresOpaqueBackground(format))
+        {
+            image.BackgroundColor = MagickColors.White;
+            image.Alpha(AlphaOption.Remove);
         }
     }
 

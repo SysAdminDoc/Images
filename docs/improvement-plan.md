@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `E11` is complete. Images now has a batch processor with source file/folder selection, built-in and JSON-loadable presets, preset JSON saving, output-folder routing, dry-run default, preview rows for output path/format/dimensions/status, overwrite-safe export copies through the macro action engine, and regression coverage for preview math, preset normalization, and dry-run behavior.
+Roadmap `V100-01` is complete. Images now has a non-destructive edit stack that stores JSON edit operations in XMP sidecars, reconstructs master and virtual-copy history, lets users enable or disable individual operations, applies enabled operations during export, and writes edited-copy export provenance sidecars.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the next main `ROADMAP.md` feature backlog item, `E12` selections, crop, and content-aware repair spike.
+The improvement-plan backlog is complete. Continue with `E12` selections, crop, and content-aware repair. The newly shipped edit stack/provenance foundation removes the history prerequisite; the remaining product decisions are the crop/selection interaction contract and the explicit inpaint runtime/model choice.
 
 ## Research Inputs
 
@@ -82,6 +82,7 @@ The improvement-plan backlog is complete. Continue with the next main `ROADMAP.m
 - 2026-05-05: Completed roadmap `V40-64` by adding a local import inbox with duplicate-aware staging, tag/rating sidecars, optional GPS stripping, Recycle Bin cleanup, and copy/move import.
 - 2026-05-05: Completed roadmap `E10` by adding an inspectable JSON macro action runner with dry-run execution, load/save, export/resize/convert copies, GPS stripping, rename patterns, and service coverage.
 - 2026-05-05: Completed roadmap `E11` by adding a preset-based batch processor with previewed output paths/dimensions, dry-run default, JSON presets, and overwrite-safe export execution.
+- 2026-05-05: Completed roadmap `V100-01` by adding XMP-backed non-destructive edit history, virtual copies, apply-on-export support, edited-copy provenance sidecars, an edit-history window, Save-a-copy integration, and regression coverage.
 - 2026-05-05: Completed `IP-02H` and closed `IP-02` by extracting update-check UI state into `UpdateCheckController` and covering background skip, newer-release, current-release, error, and release-link opening outcomes.
 - 2026-05-05: Completed `IP-03B` by adding a deterministic folder-preview thumbnail loader seam and regression tests for clear and superseded-refresh cancellation paths.
 - 2026-05-05: Completed `IP-03C` by adding an internal `MainViewModel` controller-injection seam and tests that relay metadata, OCR, and update-check state through the view model.

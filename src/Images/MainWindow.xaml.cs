@@ -491,6 +491,10 @@ public partial class MainWindow : Window
                 Vm.OpenBatchProcessorCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.E when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
+                Vm.OpenEditStackCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.OemComma when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
                 Vm.SettingsCommand.Execute(null);
                 e.Handled = true;

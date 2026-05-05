@@ -90,6 +90,11 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EF;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Edit history" Command="{Binding OpenEditStackCommand}" InputGestureText="Ctrl+Shift+E">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE81C;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="{Binding OverlayModeText}"
                                   Command="{Binding ToggleOverlayModeCommand}"
                                   IsCheckable="True"
@@ -1543,7 +1548,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+O" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open image" />
@@ -1573,10 +1578,12 @@
                                         <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open macro actions" />
                                         <TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+B" />
                                         <TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open batch processor" />
-                                        <TextBlock Grid.Row="14" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
-                                        <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
-                                        <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
-                                        <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
+                                        <TextBlock Grid.Row="14" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+E" />
+                                        <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open edit history" />
+                                        <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
+                                        <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
+                                        <TextBlock Grid.Row="16" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
+                                        <TextBlock Grid.Row="16" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
                                     </Grid>
                                 </StackPanel>
                             </ScrollViewer>
