@@ -70,6 +70,11 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE946;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Tag relationships" Command="{Binding OpenTagGraphCommand}" InputGestureText="Ctrl+Shift+T">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EC;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="{Binding OverlayModeText}"
                                   Command="{Binding ToggleOverlayModeCommand}"
                                   IsCheckable="True"
@@ -1523,7 +1528,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+O" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open image" />
@@ -1539,10 +1544,18 @@
                                         <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Reload current image" />
                                         <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+," />
                                         <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Settings" />
-                                        <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
-                                        <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
-                                        <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
-                                        <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
+                                        <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+B" />
+                                        <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open reference board" />
+                                        <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+D" />
+                                        <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open duplicate cleanup" />
+                                        <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+H" />
+                                        <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open file health scan" />
+                                        <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+T" />
+                                        <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open tag relationships" />
+                                        <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
+                                        <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
+                                        <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
+                                        <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
                                     </Grid>
                                 </StackPanel>
                             </ScrollViewer>
@@ -3031,6 +3044,38 @@
                                        Foreground="{StaticResource SubtextBrush}" />
                         </Border>
                     </Grid>
+
+                    <Border Style="{StaticResource Divider}" />
+
+                    <!-- ORGANIZATION section -->
+                    <TextBlock Text="Organization" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource Card}"
+                            Padding="13,12"
+                            AutomationProperties.Name="Organization controls">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Tag relationships"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}" />
+                                <TextBlock Text="Manage private local tag namespaces, aliases, parents, and XMP sidecar tag export."
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,3,0,0" />
+                            </StackPanel>
+                            <Button Grid.Column="1"
+                                    Command="{Binding OpenTagGraphCommand}"
+                                    Style="{StaticResource ChromeButton}"
+                                    MinWidth="92"
+                                    Margin="12,0,0,0"
+                                    AutomationProperties.Name="Open tag relationships">
+                                <TextBlock Text="Tags" />
+                            </Button>
+                        </Grid>
+                    </Border>
 
                     <Border Style="{StaticResource Divider}" />
 
