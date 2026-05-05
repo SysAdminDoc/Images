@@ -2208,6 +2208,16 @@
                                                    FontSize="11.5"
                                                    Foreground="{StaticResource OverlayBrush}"
                                                    TextWrapping="Wrap" />
+                                        <CheckBox IsChecked="{Binding ArchiveOldScanFilterEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  Content="{Binding ArchiveOldScanFilterText}"
+                                                  ToolTip="{Binding ArchiveOldScanFilterHint}"
+                                                  Margin="0,12,0,0"
+                                                  AutomationProperties.Name="Clean old archive scans" />
+                                        <TextBlock Text="{Binding ArchiveOldScanFilterHint}"
+                                                   Margin="28,5,0,0"
+                                                   FontSize="11.5"
+                                                   Foreground="{StaticResource OverlayBrush}"
+                                                   TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
