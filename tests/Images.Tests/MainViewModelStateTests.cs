@@ -10,6 +10,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Images.Services;
 using Images.ViewModels;
+using SharpCompress.Common;
+using SharpCompress.Writers;
+using SharpCompress.Writers.SevenZip;
 
 namespace Images.Tests;
 
@@ -210,13 +213,12 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
-    public void PasteFromClipboardCommand_WhenFileListHasGatedArchive_ShowsRuntimeStatus()
+    public void PasteFromClipboardCommand_WhenFileListHasArchiveBook_OpensIt()
     {
         RunOnSta(() =>
         {
             using var temp = TestDirectory.Create();
-            var archive = Path.Combine(temp.Path, "book.cbr");
-            File.WriteAllBytes(archive, [0x52, 0x61, 0x72, 0x21]);
+            var archive = WriteTwoPageSevenZip(temp.Path, "book.cb7");
             var source = new FakeClipboardDataSource { Files = [archive] };
             var clipboardImport = new ClipboardImportService(
                 source,
@@ -227,17 +229,16 @@ public sealed class MainViewModelStateTests
 
             viewModel.PasteFromClipboardCommand.Execute(null);
 
-            Assert.True(viewModel.HasSecondaryStatus);
-            Assert.Equal(SupportedImageFormats.GatedArchiveRuntimeTitle, viewModel.SecondaryStatusTitle);
-            Assert.Contains("ZIP/CBZ", viewModel.SecondaryStatusDetail);
-            Assert.Contains("will not download archive runtimes", viewModel.SecondaryStatusDetail);
-            Assert.Equal(MainViewModel.SecondaryStatusToneKind.Warning, viewModel.SecondaryStatusTone);
-            Assert.Equal(SupportedImageFormats.GatedArchiveRuntimeTitle, viewModel.ToastMessage);
+            Assert.Equal(archive, viewModel.CurrentPath);
+            Assert.True(viewModel.IsArchiveBook);
+            Assert.True(viewModel.HasDisplayImage);
+            Assert.False(viewModel.HasSecondaryStatus);
+            Assert.Null(viewModel.ToastMessage);
         });
     }
 
     [Fact]
-    public void OpenFile_WhenArchiveRuntimeGated_ShowsRecoveryStatus()
+    public void OpenFile_WhenManagedArchiveIsCorrupt_ShowsDecodeRecovery()
     {
         RunOnSta(() =>
         {
@@ -248,14 +249,13 @@ public sealed class MainViewModelStateTests
 
             viewModel.OpenFile(archive);
 
-            Assert.Null(viewModel.CurrentPath);
-            Assert.False(viewModel.HasImage);
-            Assert.True(viewModel.HasSecondaryStatus);
-            Assert.Equal(SupportedImageFormats.GatedArchiveRuntimeTitle, viewModel.SecondaryStatusTitle);
-            Assert.Contains("RAR/CBR and 7z/CB7 support is gated", viewModel.SecondaryStatusDetail);
-            Assert.Contains("convert it to CBZ", viewModel.SecondaryStatusDetail);
-            Assert.Equal(MainViewModel.SecondaryStatusToneKind.Warning, viewModel.SecondaryStatusTone);
-            Assert.Equal(SupportedImageFormats.GatedArchiveRuntimeTitle, viewModel.ToastMessage);
+            Assert.Equal(archive, viewModel.CurrentPath);
+            Assert.False(viewModel.HasDisplayImage);
+            Assert.True(viewModel.HasLoadError);
+            Assert.Equal("This image couldn't be displayed", viewModel.LoadErrorTitle);
+            Assert.Contains("could not be decoded", viewModel.LoadErrorMessage);
+            Assert.Contains("encrypted or damaged archives may need to be extracted first", viewModel.LoadErrorHelpText);
+            Assert.Equal("Could not decode this file", viewModel.ToastMessage);
         });
     }
 
@@ -1047,6 +1047,19 @@ public sealed class MainViewModelStateTests
         return path;
     }
 
+    private static string WriteTwoPageSevenZip(string folder, string fileName)
+    {
+        var path = Path.Combine(folder, fileName);
+        using var output = File.Create(path);
+        using var writer = WriterFactory.OpenWriter(
+            output,
+            ArchiveType.SevenZip,
+            new SevenZipWriterOptions(CompressionType.LZMA));
+        WritePngArchiveEntry(writer, "page1.png");
+        WritePngArchiveEntry(writer, "page2.png");
+        return path;
+    }
+
     private static string WriteCbz(string folder, string fileName, params string[] entryNames)
     {
         var path = Path.Combine(folder, fileName);
@@ -1067,6 +1080,17 @@ public sealed class MainViewModelStateTests
         var entry = archive.CreateEntry(name, CompressionLevel.Fastest);
         using var stream = entry.Open();
         encoded.CopyTo(stream);
+    }
+
+    private static void WritePngArchiveEntry(IWriter writer, string name)
+    {
+        using var encoded = new MemoryStream();
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(CreateBitmap()));
+        encoder.Save(encoded);
+        encoded.Position = 0;
+
+        writer.Write(name, encoded, null);
     }
 
     private static BitmapSource CreateBitmap()

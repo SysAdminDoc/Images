@@ -78,8 +78,9 @@ public static class CliReport
     /// <summary>
     /// Builds the <c>--system-info</c> report. Includes app version, build, .NET runtime, OS
     /// + architecture, decoder runtime provenance (Magick.NET version + assembly path,
-    /// Ghostscript path/version/source/SHA-256), and the writable storage paths Images
-    /// uses at runtime so support requests can pinpoint where logs / settings / caches live.
+    /// SharpCompress version + assembly path, Ghostscript path/version/source/SHA-256),
+    /// and the writable storage paths Images uses at runtime so support requests can
+    /// pinpoint where logs / settings / caches live.
     /// </summary>
     public static string BuildSystemInfo()
     {
@@ -115,6 +116,9 @@ public static class CliReport
         sb.AppendLine($"- Magick.NET:        {provenance.MagickVersion}");
         if (provenance.MagickAssemblyPath is not null)
             sb.AppendLine($"- Magick.NET path:   {provenance.MagickAssemblyPath}");
+        sb.AppendLine($"- SharpCompress:     {provenance.SharpCompressVersion}");
+        if (provenance.SharpCompressAssemblyPath is not null)
+            sb.AppendLine($"- SharpCompress path: {provenance.SharpCompressAssemblyPath}");
         sb.AppendLine($"- Ghostscript:       {(provenance.GhostscriptAvailable ? "available" : "not available")}");
         sb.AppendLine($"- Ghostscript src:   {provenance.GhostscriptDirectory ?? provenance.GhostscriptSource}");
         if (provenance.GhostscriptVersion is not null)
