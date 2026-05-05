@@ -123,6 +123,15 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7B3;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="{Binding RetouchModeText}"
+                                  Command="{Binding ToggleRetouchModeCommand}"
+                                  InputGestureText="Ctrl+Alt+H"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding IsRetouchMode, Mode=OneWay}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE90F;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="{Binding CropModeText}"
                                   Command="{Binding ToggleCropModeCommand}"
                                   InputGestureText="C"
@@ -308,6 +317,12 @@
                                              Marks="{Binding RedEyeCorrectionMarks}"
                                              Opacity="0.94"
                                              AutomationProperties.Name="Red-eye correction overlay" />
+
+                <ctl:RetouchBrushOverlay Visibility="{Binding ShowRetouchOverlay, Converter={StaticResource BoolToVis}}"
+                                         Target="{Binding ElementName=Canvas}"
+                                         Strokes="{Binding RetouchStrokes}"
+                                         Opacity="0.92"
+                                         AutomationProperties.Name="Retouch brush overlay" />
 
                 <Border HorizontalAlignment="Center"
                         VerticalAlignment="Top"
@@ -1578,7 +1593,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Wheel" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom about cursor" />
@@ -1600,6 +1615,8 @@
                                         <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle exposure brush" />
                                         <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+Y" />
                                         <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle red-eye correction" />
+                                        <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+H" />
+                                        <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle clone/heal retouch" />
                                     </Grid>
 
                                     <TextBlock Text="File" Style="{StaticResource SectionLabel}" />
@@ -3935,6 +3952,146 @@
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
                                         AutomationProperties.Name="Cancel red-eye correction">
+                                    <TextBlock Text="Cancel" />
+                                </Button>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Divider}" />
+
+                    <!-- RETOUCH section -->
+                    <TextBlock Text="Clone / heal" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource Card}"
+                            Padding="13,12"
+                            IsEnabled="{Binding CanUseRetouch}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding RetouchModeText}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrush}" />
+                                    <TextBlock Text="{Binding RetouchModeHelpText}"
+                                               Style="{StaticResource Text.Hint}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,3,0,0" />
+                                </StackPanel>
+                                <Button Grid.Column="1"
+                                        Command="{Binding ToggleRetouchModeCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        MinWidth="72"
+                                        Margin="12,0,0,0"
+                                        AutomationProperties.Name="Toggle clone and heal retouch">
+                                    <TextBlock Text="{Binding RetouchModeText}" />
+                                </Button>
+                            </Grid>
+
+                            <Border Background="{StaticResource PanelBrush}"
+                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                    Padding="10"
+                                    Margin="0,12,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding RetouchStatusText}"
+                                               Style="{StaticResource Text.Caption}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding RetouchSourceText}"
+                                               Style="{StaticResource Text.Body}"
+                                               Margin="0,8,0,0" />
+                                    <TextBlock Text="{Binding RetouchStrokeText}"
+                                               Style="{StaticResource Text.Caption}"
+                                               Margin="0,4,0,0" />
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Text="Mode"
+                                       Style="{StaticResource Text.Caption}"
+                                       Margin="0,12,0,6" />
+                            <WrapPanel>
+                                <Button Command="{Binding SetRetouchModeCommand}"
+                                        CommandParameter="clone"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Use clone stamp">
+                                    <TextBlock Text="Clone" />
+                                </Button>
+                                <Button Command="{Binding SetRetouchModeCommand}"
+                                        CommandParameter="heal"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Use healing brush">
+                                    <TextBlock Text="Heal" />
+                                </Button>
+                                <TextBlock Text="{Binding RetouchBrushModeText}"
+                                           Style="{StaticResource Text.Hint}"
+                                           VerticalAlignment="Center"
+                                           Margin="2,0,0,8" />
+                            </WrapPanel>
+
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Radius"
+                                           Style="{StaticResource Text.Caption}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding RetouchRadiusText}"
+                                           Style="{StaticResource Text.Caption}" />
+                            </Grid>
+                            <Slider Minimum="4"
+                                    Maximum="220"
+                                    TickFrequency="2"
+                                    IsSnapToTickEnabled="False"
+                                    Value="{Binding RetouchRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    AutomationProperties.Name="Retouch brush radius" />
+
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Strength"
+                                           Style="{StaticResource Text.Caption}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding RetouchStrengthText}"
+                                           Style="{StaticResource Text.Caption}" />
+                            </Grid>
+                            <Slider Minimum="5"
+                                    Maximum="100"
+                                    TickFrequency="1"
+                                    IsSnapToTickEnabled="False"
+                                    Value="{Binding RetouchStrength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    AutomationProperties.Name="Retouch brush strength" />
+
+                            <WrapPanel Margin="0,12,0,0">
+                                <Button Command="{Binding ApplyRetouchCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Apply retouch to edit history">
+                                    <TextBlock Text="Apply retouch" />
+                                </Button>
+                                <Button Command="{Binding ClearRetouchCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Clear retouch strokes">
+                                    <TextBlock Text="Clear" />
+                                </Button>
+                                <Button Command="{Binding ClearRetouchSourceCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Clear retouch source">
+                                    <TextBlock Text="Source" />
+                                </Button>
+                                <Button Command="{Binding CancelRetouchCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,0,8"
+                                        AutomationProperties.Name="Cancel retouch">
                                     <TextBlock Text="Cancel" />
                                 </Button>
                             </WrapPanel>
