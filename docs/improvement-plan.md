@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V30-05` is complete. Images now has a no-modal non-destructive local exposure brush with dodge/burn modes, soft circular falloff, radius/strength controls, drag-to-paint strokes, edit-stack persistence, and Save-a-copy application.
+Roadmap `V30-06` is complete. Images now has a no-modal non-destructive red-eye correction tool with on-canvas pupil marks, soft circular overlays, radius/strength/red-threshold controls, edit-stack persistence, and Save-a-copy application.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the remaining editor roadmap: approved lossless JPEG writeback runtime integration, red-eye removal, clone/heal tooling, richer selection tools, and the explicit content-aware inpaint runtime/model choice.
+The improvement-plan backlog is complete. Continue with the remaining editor roadmap: approved lossless JPEG writeback runtime integration, clone/heal tooling, richer selection tools, and the explicit content-aware inpaint runtime/model choice.
 
 ## Research Inputs
 
@@ -89,6 +89,7 @@ The improvement-plan backlog is complete. Continue with the remaining editor roa
 - 2026-05-05: Scoped roadmap `V30-02` by adding a lossless JPEG transform policy plus tested MCU-alignment planning for future `jpegtran.exe` crop/rotate trim confirmations; runtime bundling remains blocked on exact binary approval.
 - 2026-05-05: Completed roadmap `V30-03` by adding a resize dialog with percent/pixel/long-edge/short-edge modes, aspect lock, Lanczos-3/Mitchell/Bicubic filters, live output-dimension preview, non-destructive edit-stack persistence, and focused resize planning tests.
 - 2026-05-05: Completed roadmap `V30-05` by adding a no-modal non-destructive dodge/burn brush with soft falloff, side-panel radius/strength/tone controls, paint-to-stroke overlay feedback, XMP edit-stack persistence, Save-a-copy application, and focused brush/export coverage.
+- 2026-05-05: Completed roadmap `V30-06` by adding a no-modal non-destructive red-eye correction tool with pupil marks, soft overlay feedback, radius/strength/red-threshold controls, XMP edit-stack persistence, Save-a-copy application, and focused correction/export coverage.
 - 2026-05-05: Completed `IP-02H` and closed `IP-02` by extracting update-check UI state into `UpdateCheckController` and covering background skip, newer-release, current-release, error, and release-link opening outcomes.
 - 2026-05-05: Completed `IP-03B` by adding a deterministic folder-preview thumbnail loader seam and regression tests for clear and superseded-refresh cancellation paths.
 - 2026-05-05: Completed `IP-03C` by adding an internal `MainViewModel` controller-injection seam and tests that relay metadata, OCR, and update-check state through the view model.
