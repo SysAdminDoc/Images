@@ -30,6 +30,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool _isFilmstripVisible;
     private bool _isMetadataHudVisible;
     private bool _isOcrMode;
+    private bool _isOcrBusy;
     private ObservableCollection<OcrTextLine>? _ocrOverlayLines;
     private CancellationTokenSource? _ocrCts;
     private int _ocrGeneration;
@@ -942,16 +943,67 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         set
         {
             if (Set(ref _isOcrMode, value))
+            {
                 Raise(nameof(OcrModeTooltip));
+                RaiseOcrStatusState();
+            }
         }
     }
 
-    public string OcrModeTooltip => IsOcrMode ? "Hide text (E)" : "Extract text (E)";
+    public bool IsOcrBusy
+    {
+        get => _isOcrBusy;
+        private set
+        {
+            if (Set(ref _isOcrBusy, value))
+            {
+                Raise(nameof(OcrModeTooltip));
+                RaiseOcrStatusState();
+            }
+        }
+    }
+
+    public bool ShowOcrStatusPanel => IsOcrBusy || IsOcrMode;
+
+    public string OcrModeTooltip => IsOcrBusy
+        ? "Cancel text extraction (E)"
+        : IsOcrMode
+            ? "Hide text overlay (E)"
+            : "Extract text locally (E)";
+
+    public string OcrStatusTitle => IsOcrBusy
+        ? "Extracting text locally"
+        : "Text overlay active";
+
+    public string OcrStatusDetail => IsOcrBusy
+        ? "Windows OCR is reading this image on your PC. Press E again to cancel."
+        : $"{OcrRegionCountText}. Select a text box and press Ctrl+C to copy.";
+
+    public string OcrRegionCountText
+    {
+        get
+        {
+            var count = OcrOverlayLines?.Count ?? 0;
+            return count == 1 ? "1 text region found" : $"{count} text regions found";
+        }
+    }
 
     public ObservableCollection<OcrTextLine>? OcrOverlayLines
     {
         get => _ocrOverlayLines;
-        set => Set(ref _ocrOverlayLines, value);
+        set
+        {
+            if (Set(ref _ocrOverlayLines, value))
+                RaiseOcrStatusState();
+        }
+    }
+
+    private void RaiseOcrStatusState()
+    {
+        Raise(nameof(ShowOcrStatusPanel));
+        Raise(nameof(OcrStatusTitle));
+        Raise(nameof(OcrStatusDetail));
+        Raise(nameof(OcrRegionCountText));
     }
 
     // -------------------- Navigation --------------------
@@ -1793,16 +1845,18 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         // Toggle off if already in OCR mode or cancel an extraction in progress.
         if (IsOcrMode || _ocrCts is not null)
         {
+            var wasBusy = IsOcrBusy || _ocrCts is not null;
             ClearOcrOverlay(cancelExtraction: true);
-            Toast("Text overlay hidden");
+            Toast(wasBusy ? "Text extraction canceled" : "Text overlay hidden");
             return;
         }
 
-        Toast("Extracting text...");
         var path = CurrentPath;
         var generation = ++_ocrGeneration;
         var cts = new CancellationTokenSource();
         _ocrCts = cts;
+        IsOcrBusy = true;
+        Toast("Extracting text locally...");
 
         try
         {
@@ -1875,8 +1929,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (ReferenceEquals(_ocrCts, cts))
             {
                 _ocrCts = null;
-                cts.Dispose();
             }
+
+            IsOcrBusy = false;
+            cts.Dispose();
         }
     }
 
@@ -1886,12 +1942,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             _ocrGeneration++;
             _ocrCts?.Cancel();
-            _ocrCts?.Dispose();
             _ocrCts = null;
         }
 
         OcrOverlayLines = null;
         IsOcrMode = false;
+        IsOcrBusy = false;
     }
 
     // Item 61: silent reload used by the external-edit debounce so the position/rotation state

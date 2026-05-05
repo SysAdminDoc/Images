@@ -2,6 +2,13 @@
 
 All notable changes to **Images** are documented here.
 
+## Unreleased
+
+### Changed
+
+- **OCR workflow polish** — text extraction now has a persistent in-view busy/active status, a cancel-aware toolbar state, OCR readiness in Settings/About, and OCR language-pack status in diagnostics.
+- **Trust copy** — README destructive-action wording now reflects the Recycle Bin confirmation flow.
+
 ## v0.2.9 — 2026-05-04
 
 OCR overlay usability hotfix.

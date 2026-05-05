@@ -36,7 +36,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Zoom + pan** — mouse wheel to zoom in/out about the cursor, drag to pan, double-click to toggle fit/1:1.
 - **Export a copy** to JPEG, PNG, WebP, AVIF, JXL, TIFF, BMP, GIF/APNG, PSD/PSB, PDF/EPS/SVG, TGA, DDS, QOI, EXR, HDR, JPEG 2000, X11/Magick, production/scientific, and portable bitmap formats.
 - **Rotate**, **delete-to-Recycle-Bin**, **Reveal in Explorer**, **Copy path**.
-- **No confirmation dialogs** — actions happen immediately with toast feedback.
+- **Calm confirmations and recovery** — destructive file actions confirm before moving anything to Recycle Bin; routine actions complete with toast feedback.
 - **Network-quiet by default** — automatic update checks are disabled until enabled in Settings; manual About checks remain available.
 
 ## Install
