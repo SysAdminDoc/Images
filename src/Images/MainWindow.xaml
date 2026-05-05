@@ -1001,38 +1001,57 @@
                                         MinHeight="26"
                                         Margin="0,0,10,0"
                                         ToolTip="{Binding FolderSortTooltip}"
-                                        AutomationProperties.Name="Folder sort">
+                                        AutomationProperties.Name="Folder sort"
+                                        AutomationProperties.HelpText="{Binding FolderSortTooltip}">
                                     <Button.ContextMenu>
                                         <ContextMenu Style="{StaticResource ViewportContextMenu}">
                                             <MenuItem Header="Name (natural)"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      CommandParameter="NaturalName" />
+                                                      CommandParameter="NaturalName"
+                                                      IsCheckable="True"
+                                                      IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=NaturalName, Mode=OneWay}" />
                                             <MenuItem Header="Name (Z to A)"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      CommandParameter="NameDescending" />
+                                                      CommandParameter="NameDescending"
+                                                      IsCheckable="True"
+                                                      IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=NameDescending, Mode=OneWay}" />
                                             <Separator />
                                             <MenuItem Header="Modified (newest first)"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      CommandParameter="ModifiedNewest" />
+                                                      CommandParameter="ModifiedNewest"
+                                                      IsCheckable="True"
+                                                      IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=ModifiedNewest, Mode=OneWay}" />
                                             <MenuItem Header="Modified (oldest first)"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      CommandParameter="ModifiedOldest" />
+                                                      CommandParameter="ModifiedOldest"
+                                                      IsCheckable="True"
+                                                      IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=ModifiedOldest, Mode=OneWay}" />
                                             <MenuItem Header="Created (newest first)"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      CommandParameter="CreatedNewest" />
+                                                      CommandParameter="CreatedNewest"
+                                                      IsCheckable="True"
+                                                      IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=CreatedNewest, Mode=OneWay}" />
                                             <MenuItem Header="Created (oldest first)"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      CommandParameter="CreatedOldest" />
+                                                      CommandParameter="CreatedOldest"
+                                                      IsCheckable="True"
+                                                      IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=CreatedOldest, Mode=OneWay}" />
                                             <Separator />
                                             <MenuItem Header="Size (largest first)"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      CommandParameter="SizeLargest" />
+                                                      CommandParameter="SizeLargest"
+                                                      IsCheckable="True"
+                                                      IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=SizeLargest, Mode=OneWay}" />
                                             <MenuItem Header="Size (smallest first)"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      CommandParameter="SizeSmallest" />
+                                                      CommandParameter="SizeSmallest"
+                                                      IsCheckable="True"
+                                                      IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=SizeSmallest, Mode=OneWay}" />
                                             <MenuItem Header="Type, then name"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      CommandParameter="ExtensionThenName" />
+                                                      CommandParameter="ExtensionThenName"
+                                                      IsCheckable="True"
+                                                      IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=ExtensionThenName, Mode=OneWay}" />
                                         </ContextMenu>
                                     </Button.ContextMenu>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">

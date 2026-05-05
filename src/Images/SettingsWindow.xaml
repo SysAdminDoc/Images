@@ -246,18 +246,44 @@
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource Card}"
-                    Padding="12,9"
+            <Border Padding="12,9"
                     Margin="0,14,0,0"
                     Visibility="{Binding SettingsStatusText, Converter={StaticResource BoolToVis}}"
                     AutomationProperties.LiveSetting="Polite">
+                <Border.Style>
+                    <Style TargetType="Border" BasedOn="{StaticResource Card}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SettingsStatusTone}" Value="Success">
+                                <Setter Property="Background" Value="#1FA6E3A1" />
+                                <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding SettingsStatusTone}" Value="Warning">
+                                <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
+                                <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="&#xE930;"
+                    <TextBlock Text="{Binding SettingsStatusIcon}"
                                FontFamily="{StaticResource IconFontFamily}"
                                FontSize="12"
-                               Foreground="{StaticResource AccentBrush}"
                                VerticalAlignment="Center"
-                               Margin="0,0,9,0" />
+                               Margin="0,0,9,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SettingsStatusTone}" Value="Success">
+                                        <Setter Property="Foreground" Value="{StaticResource GreenBrush}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SettingsStatusTone}" Value="Warning">
+                                        <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                     <TextBlock Text="{Binding SettingsStatusText}"
                                Style="{StaticResource Text.Caption}"
                                TextWrapping="Wrap"
