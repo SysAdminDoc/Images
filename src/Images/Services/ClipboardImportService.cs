@@ -11,7 +11,6 @@ public enum ClipboardImportStatus
     OpenExistingFile,
     OpenSavedImage,
     NoSupportedFile,
-    ArchiveRuntimeNotEnabled,
     ImageUnavailable,
     StorageUnavailable,
     SaveFailed,
@@ -100,22 +99,10 @@ public sealed class ClipboardImportService
     {
         if (_clipboard.ContainsFileDropList())
         {
-            var hasGatedArchive = false;
             foreach (var file in _clipboard.GetFileDropList())
             {
                 if (SupportedImageFormats.IsSupported(file) && File.Exists(file))
                     return new ClipboardImportResult(ClipboardImportStatus.OpenExistingFile, file, "");
-
-                if (SupportedImageFormats.IsGatedArchiveExtension(Path.GetExtension(file)) && File.Exists(file))
-                    hasGatedArchive = true;
-            }
-
-            if (hasGatedArchive)
-            {
-                return new ClipboardImportResult(
-                    ClipboardImportStatus.ArchiveRuntimeNotEnabled,
-                    null,
-                    SupportedImageFormats.GatedArchiveRuntimeTitle);
             }
 
             return new ClipboardImportResult(

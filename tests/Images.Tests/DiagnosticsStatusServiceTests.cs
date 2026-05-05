@@ -114,6 +114,8 @@ public sealed class DiagnosticsStatusServiceTests
             AppDirectory: @"C:\Images",
             MagickVersion: "14.13.0",
             MagickAssemblyPath: @"C:\Images\Magick.NET-Q16-AnyCPU.dll",
+            SharpCompressVersion: "0.47.4.0",
+            SharpCompressAssemblyPath: @"C:\Images\SharpCompress.dll",
             GhostscriptAvailable: true,
             GhostscriptDirectory: @"C:\Program Files\gs\gs10.04.0\bin",
             GhostscriptSource: "installed Ghostscript",

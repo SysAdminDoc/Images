@@ -46,7 +46,7 @@ public sealed class ClipboardImportServiceTests
     }
 
     [Fact]
-    public void Import_FileDropListWithGatedArchive_ReturnsRuntimeStatus()
+    public void Import_FileDropListWithArchiveBook_OpensExistingFile()
     {
         using var temp = TestDirectory.Create();
         var archive = temp.WriteFile("book.cbr");
@@ -58,9 +58,9 @@ public sealed class ClipboardImportServiceTests
 
         var result = service.Import();
 
-        Assert.Equal(ClipboardImportStatus.ArchiveRuntimeNotEnabled, result.Status);
-        Assert.Null(result.Path);
-        Assert.Equal(SupportedImageFormats.GatedArchiveRuntimeTitle, result.Message);
+        Assert.Equal(ClipboardImportStatus.OpenExistingFile, result.Status);
+        Assert.Equal(archive, result.Path);
+        Assert.Equal("", result.Message);
     }
 
     [Fact]

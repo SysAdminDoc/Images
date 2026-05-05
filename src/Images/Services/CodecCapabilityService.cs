@@ -1,5 +1,6 @@
 using System.Text;
 using ImageMagick;
+using SharpCompress.Archives;
 
 namespace Images.Services;
 
@@ -41,6 +42,8 @@ public static class CodecCapabilityService
         string AppDirectory,
         string MagickVersion,
         string? MagickAssemblyPath,
+        string SharpCompressVersion,
+        string? SharpCompressAssemblyPath,
         bool GhostscriptAvailable,
         string? GhostscriptDirectory,
         string GhostscriptSource,
@@ -49,7 +52,7 @@ public static class CodecCapabilityService
         string? GhostscriptDllSha256);
 
     public static string BuildOverviewText()
-        => $"WIC + bundled Magick.NET; {SupportedImageFormats.Extensions.Count} open extensions; " +
+        => $"WIC + bundled Magick.NET + archive readers; {SupportedImageFormats.Extensions.Count} open extensions; " +
            $"{ImageExportService.ExportExtensions.Length} export extensions";
 
     public static CodecCapabilitySummary BuildSummary()
@@ -62,7 +65,7 @@ public static class CodecCapabilityService
 
         return new CodecCapabilitySummary(
             "Broad open support",
-            $"{SupportedImageFormats.Extensions.Count} extensions across common images, RAW, PSD/PSB, vector, scientific, and document preview formats.",
+            $"{SupportedImageFormats.Extensions.Count} extensions across common images, archive books, RAW, PSD/PSB, vector, scientific, and document preview formats.",
             "Format-aware export",
             $"{writableExports} verified writable targets are available through Save a copy.",
             codec.GhostscriptAvailable ? "Document previews ready" : "Document previews need Ghostscript",
@@ -90,6 +93,8 @@ public static class CodecCapabilityService
             AppDirectory: AppContext.BaseDirectory,
             MagickVersion: CodecRuntime.GetMagickAssemblyVersion(),
             MagickAssemblyPath: CodecRuntime.GetMagickAssemblyPath(),
+            SharpCompressVersion: GetSharpCompressAssemblyVersion(),
+            SharpCompressAssemblyPath: GetSharpCompressAssemblyPath(),
             GhostscriptAvailable: status.GhostscriptAvailable,
             GhostscriptDirectory: status.GhostscriptDirectory,
             GhostscriptSource: status.GhostscriptSource,
@@ -164,6 +169,16 @@ public static class CodecCapabilityService
                     : "Install Ghostscript or place a redistributable runtime under Codecs\\Ghostscript to enable previews."),
 
             new(
+                Family: "Archive books",
+                OpenCount: SupportedImageFormats.ArchiveExtensions.Length,
+                ExportCount: 0,
+                Animation: false,
+                MultiPage: true,
+                Metadata: false,
+                Runtime: "System.IO.Compression + SharpCompress",
+                Notes: "ZIP/CBZ use built-in .NET ZIP; RAR/CBR and 7z/CB7 read through SharpCompress without extracting entries to disk."),
+
+            new(
                 Family: "Camera RAW",
                 OpenCount: SupportedImageFormats.RawExtensions.Length,
                 ExportCount: 0,
@@ -194,6 +209,9 @@ public static class CodecCapabilityService
         sb.AppendLine($"- Magick.NET: {provenance.MagickVersion} — {writableExports} writable export extensions active");
         if (provenance.MagickAssemblyPath is not null)
             sb.AppendLine($"- Magick.NET assembly: {provenance.MagickAssemblyPath}");
+        sb.AppendLine($"- SharpCompress: {provenance.SharpCompressVersion} — archive book reader active");
+        if (provenance.SharpCompressAssemblyPath is not null)
+            sb.AppendLine($"- SharpCompress assembly: {provenance.SharpCompressAssemblyPath}");
         sb.AppendLine($"- Ghostscript: {(status.GhostscriptAvailable ? "available" : "not available")}");
         sb.AppendLine($"- Ghostscript source: {status.GhostscriptDirectory ?? status.GhostscriptSource}");
         if (provenance.GhostscriptVersion is not null)
@@ -218,11 +236,13 @@ public static class CodecCapabilityService
         AppendFamily(sb, "Portable and scientific", SupportedImageFormats.PortableAndScientificExtensions);
         AppendFamily(sb, "Vector previews", SupportedImageFormats.VectorExtensions);
         AppendFamily(sb, "Document previews", SupportedImageFormats.DocumentPreviewExtensions);
+        AppendFamily(sb, "Archive books", SupportedImageFormats.ArchiveExtensions);
         AppendFamily(sb, "Camera RAW", SupportedImageFormats.RawExtensions);
         AppendFamily(sb, "Export targets", ImageExportService.ExportExtensions);
 
         sb.AppendLine("Notes");
         sb.AppendLine("- PSD and PSB are handled in-process by Magick.NET.");
+        sb.AppendLine("- Archive books are read-only; nested archives, document-preview entries, and unsafe paths are ignored.");
         sb.AppendLine("- PDF, EPS, PS, and AI preview rendering requires Ghostscript.");
         sb.AppendLine("- HEIC/HEIF is available as a read format in this Magick.NET build; export to AVIF, JXL, WebP, PNG, or TIFF.");
         sb.AppendLine("- Camera RAW formats are read-only preview formats; export through Save a copy.");
@@ -276,5 +296,17 @@ public static class CodecCapabilityService
         }
 
         return count;
+    }
+
+    private static string GetSharpCompressAssemblyVersion()
+    {
+        var assembly = typeof(ArchiveFactory).Assembly;
+        return assembly.GetName().Version?.ToString() ?? "unknown";
+    }
+
+    private static string? GetSharpCompressAssemblyPath()
+    {
+        var location = typeof(ArchiveFactory).Assembly.Location;
+        return string.IsNullOrWhiteSpace(location) ? null : location;
     }
 }

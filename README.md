@@ -24,7 +24,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Broad format coverage** via WPF's built-in WIC plus [Magick.NET](https://github.com/dlemstra/Magick.NET): JPG, PNG/APNG, GIF, TIFF, WEBP, HEIC, AVIF, JXL, PSD/PSB, TGA, DDS, QOI, EXR, HDR, DPX, JPEG 2000, DICOM, FITS, XCF/ORA, SVG, WMF/EMF, WPG, RAW/DNG/NEF/CR2/CR3/ARW/RW2/RAF/ORF/PEF, legacy production formats, and more.
 - **Document/vector previews** for PDF, EPS, PS, and AI when Ghostscript is bundled app-local or installed on the machine. Images auto-detects `Codecs\Ghostscript`, `IMAGES_GHOSTSCRIPT_DIR`, and standard Ghostscript installs.
 - **Multi-page navigation** for documents and layered/page-based image formats. PDF, TIFF, PSD/PSB, ICO, DICOM, FITS, DCX, and related formats surface page/frame controls only when the current file has more than one page.
-- **Archive book previews** for ZIP and CBZ. Images opens supported image entries as read-only pages, promotes explicit cover/front images, ignores unsafe or nested archive entries, keeps archive navigation inside page controls plus book-specific side-panel and edge-turn controls, supports persisted right-to-left page turns and two-page spreads for manga-style books, adds a preview-only clean-scan filter, remembers the last read page locally, and lists recent books with progress in the side panel. RAR/CBR and 7z/CB7 are not enabled yet; Images tells you to extract or convert to CBZ and never auto-downloads archive runtimes.
+- **Archive book previews** for ZIP/CBZ, RAR/CBR, and 7z/CB7. Images opens supported image entries as read-only pages, promotes explicit cover/front images, ignores unsafe or nested archive entries, keeps archive navigation inside page controls plus book-specific side-panel and edge-turn controls, supports persisted right-to-left page turns and two-page spreads for manga-style books, adds a preview-only clean-scan filter, remembers the last read page locally, and lists recent books with progress in the side panel. ZIP/CBZ use built-in .NET ZIP support; RAR/CBR and 7z/CB7 use the managed SharpCompress reader without extracting entries to disk.
 - **Animated GIFs play inline** — multi-frame GIFs (and animated WebP / APNG when the Magick build supports them) decode via `MagickImageCollection.Coalesce()` and cycle through `ZoomPanImage` with the original per-frame delays + loop count intact. A green "N frames" chip in the bottom toolbar marks animated files.
 - **Classic Windows 7 Photo Viewer layout** — centered image, bottom toolbar, hover-reveal circular arrows on the left and right edges. But in **Catppuccin Mocha** dark.
 - **Peek mode** — `Images.exe --peek "C:\path\to\image.jpg"` opens a chromeless, topmost preview window that closes with Escape and leaves normal window settings alone.
@@ -116,7 +116,7 @@ src/Images/
 │   └── MainViewModel.cs        # All view state + commands
 ├── Services/
 │   ├── ImageLoader.cs          # WIC-first, Magick.NET fallback, cached decoding
-│   ├── ArchiveBookService.cs   # Read-only ZIP/CBZ page discovery for archive books
+│   ├── ArchiveBookService.cs   # Read-only ZIP/CBZ, RAR/CBR, and 7z/CB7 page discovery
 │   ├── ImageExportService.cs   # Codec-aware Save a copy / conversion output
 │   ├── ImageMetadataService.cs # Read-only EXIF summary for the Details panel and HUD
 │   ├── CodecCapabilityService.cs # About-window codec summary and copyable diagnostics
@@ -150,7 +150,7 @@ Images carries its own diagnostics surface — no terminal required for the comm
 - [Privacy policy](docs/privacy-policy.md) — exactly one network call (the opt-out update check), every file persisted to disk, and a four-step verification recipe.
 - [Distribution trust plan](docs/distribution-trust.md) — WinGet/Scoop scope, checksum continuity, signing options, and verification copy.
 - [Optional runtime and integration policy](docs/integration-policy.md) — license, provenance, CVE, process-boundary, and release gates for external runtimes.
-- [Archive runtime review](docs/archive-runtime-review.md) — ZIP/CBZ scope plus RAR/7z dependency gates for licensing, provenance, process isolation, and generated corpus coverage.
+- [Archive runtime review](docs/archive-runtime-review.md) — approved SharpCompress RAR/7z reader path plus native 7-Zip/UnRAR fallback gates.
 - [Peek mode](docs/peek-mode.md) — shell-helper invocation, local startup timing diagnostics, and manual smoke steps.
 
 ## Credits / inspiration
