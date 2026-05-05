@@ -483,6 +483,10 @@ public partial class MainWindow : Window
                 Vm.OpenImportInboxCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.M when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
+                Vm.OpenMacroActionsCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.OemComma when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
                 Vm.SettingsCommand.Execute(null);
                 e.Handled = true;
