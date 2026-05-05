@@ -115,7 +115,10 @@ public sealed class UpdateCheckController : ObservableObject
 
         try
         {
-            var result = await _checkAsync(token).ConfigureAwait(true);
+            var taskName = userInitiated ? "update-check:manual" : "update-check:background";
+            var result = await BackgroundTaskTracker
+                .RunAsync(taskName, () => _checkAsync(token), token)
+                .ConfigureAwait(true);
             _recordLastChecked(result);
 
             if (result.Error is not null)

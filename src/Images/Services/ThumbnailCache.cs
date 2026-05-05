@@ -7,6 +7,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
 
+public sealed record ThumbnailCacheHealth(
+    bool IsAvailable,
+    string? Root,
+    long Bytes,
+    int FileCount,
+    int TempFileCount,
+    long CapBytes,
+    DateTime? LastEvictionSweepUtc,
+    string? Error = null);
+
 /// <summary>
 /// V20-04: on-disk thumbnail cache at <c>%LOCALAPPDATA%\Images\thumbs\<AB>\<full-hash>.webp</c>.
 /// Keyed by SHA1(path.lower() + mtime_ticks + size_bytes) so the key survives path renames
@@ -236,6 +246,79 @@ public sealed class ThumbnailCache
         }
     }
 
+    public ThumbnailCacheHealth GetHealth()
+    {
+        if (!_isAvailable)
+            return new ThumbnailCacheHealth(false, null, 0, 0, 0, _capBytes, null);
+
+        try
+        {
+            if (!Directory.Exists(_root))
+            {
+                return new ThumbnailCacheHealth(
+                    true,
+                    _root,
+                    0,
+                    0,
+                    0,
+                    _capBytes,
+                    LastEvictionSweepForHealth());
+            }
+
+            long bytes = 0;
+            var files = 0;
+            var tempFiles = 0;
+
+            foreach (var path in Directory.EnumerateFiles(_root, "*.webp", SearchOption.AllDirectories))
+            {
+                var name = Path.GetFileName(path);
+                var isTemp = name.Contains(".tmp-", StringComparison.OrdinalIgnoreCase);
+
+                try
+                {
+                    var info = new FileInfo(path);
+                    if (!info.Exists) continue;
+
+                    if (isTemp)
+                    {
+                        tempFiles++;
+                    }
+                    else
+                    {
+                        files++;
+                        bytes += info.Length;
+                    }
+                }
+                catch
+                {
+                    // A thumbnail may be deleted while diagnostics scans the disposable cache.
+                }
+            }
+
+            return new ThumbnailCacheHealth(
+                true,
+                _root,
+                bytes,
+                files,
+                tempFiles,
+                _capBytes,
+                LastEvictionSweepForHealth());
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "Thumbnail cache health scan failed");
+            return new ThumbnailCacheHealth(
+                false,
+                _root,
+                0,
+                0,
+                0,
+                _capBytes,
+                LastEvictionSweepForHealth(),
+                ex.Message);
+        }
+    }
+
     /// <summary>
     /// If the cache is over capacity, remove LRU entries until it's back under. Pure disk
     /// bookkeeping — call from a background thread.
@@ -317,4 +400,7 @@ public sealed class ThumbnailCache
         var hash = SHA1.HashData(bytes);
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
+
+    private DateTime? LastEvictionSweepForHealth()
+        => _lastEvictionSweepUtc == DateTime.MinValue ? null : _lastEvictionSweepUtc;
 }
