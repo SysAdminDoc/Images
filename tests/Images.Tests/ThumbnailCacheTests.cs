@@ -65,4 +65,45 @@ public sealed class ThumbnailCacheTests
         Assert.True(health.IsAvailable);
         Assert.Equal(temp.Path, health.Root);
     }
+
+    [Fact]
+    public void Clear_WhenCacheContainsThumbnails_DeletesDisposableWebpFilesOnly()
+    {
+        using var temp = TestDirectory.Create();
+        var partition = Path.Combine(temp.Path, "aa");
+        Directory.CreateDirectory(partition);
+        var cached = Path.Combine(partition, "cached.webp");
+        var tempCached = Path.Combine(partition, "cached.tmp-001.webp");
+        var ignored = Path.Combine(partition, "notes.txt");
+        File.WriteAllBytes(cached, new byte[1024]);
+        File.WriteAllBytes(tempCached, new byte[512]);
+        File.WriteAllText(ignored, "not cache data");
+        var cache = new ThumbnailCache(temp.Path, ThumbnailCache.DefaultThumbSize, 4096);
+
+        var result = cache.Clear();
+
+        Assert.True(result.IsAvailable);
+        Assert.Equal(2, result.DeletedCount);
+        Assert.Equal(1536, result.DeletedBytes);
+        Assert.Equal(0, result.FailedCount);
+        Assert.False(File.Exists(cached));
+        Assert.False(File.Exists(tempCached));
+        Assert.True(File.Exists(ignored));
+    }
+
+    [Fact]
+    public void Clear_WhenCacheRootIsMissing_ReturnsEmptyAvailableResult()
+    {
+        using var temp = TestDirectory.Create();
+        var missing = Path.Combine(temp.Path, "thumbs");
+        var cache = new ThumbnailCache(missing, ThumbnailCache.DefaultThumbSize, 4096);
+
+        var result = cache.Clear();
+
+        Assert.True(result.IsAvailable);
+        Assert.Equal(missing, result.Root);
+        Assert.Equal(0, result.DeletedCount);
+        Assert.Equal(0, result.DeletedBytes);
+        Assert.Equal(0, result.FailedCount);
+    }
 }
