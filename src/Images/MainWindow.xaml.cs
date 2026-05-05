@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     private PixelCoordinate? _cropSelectionStart;
     private bool _exposureBrushPainting;
     private bool _redEyeCorrectionPainting;
+    private bool _retouchPainting;
     private HwndSource? _hwndSource;
     private bool _overlayExitHotKeyRegistered;
 
@@ -414,6 +415,17 @@ public partial class MainWindow : Window
                 // A-03: Escape closes any active overlay / toast and returns focus to the
                 // window shell. Rename-TextBox Escape is handled inside StemEditor_PreviewKeyDown
                 // and never reaches here because the TextBox owns focus.
+                if (Vm.IsRetouchMode || Vm.HasRetouchStrokes || Vm.HasRetouchSource)
+                {
+                    _retouchPainting = false;
+                    if (Canvas.IsMouseCaptured)
+                        Canvas.ReleaseMouseCapture();
+                    Vm.CancelRetouchCommand.Execute(null);
+                    Keyboard.ClearFocus();
+                    Focus();
+                    e.Handled = true;
+                    break;
+                }
                 if (Vm.IsRedEyeCorrectionMode || Vm.HasRedEyeCorrectionMarks)
                 {
                     _redEyeCorrectionPainting = false;
@@ -547,6 +559,10 @@ public partial class MainWindow : Window
                 Vm.ToggleRedEyeModeCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.H when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
+                Vm.ToggleRetouchModeCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.OemComma when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
                 Vm.SettingsCommand.Execute(null);
                 e.Handled = true;
@@ -593,6 +609,10 @@ public partial class MainWindow : Window
                 break;
             case Key.Enter when Vm.IsRedEyeCorrectionMode:
                 Vm.ApplyRedEyeCorrectionCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.Enter when Vm.IsRetouchMode:
+                Vm.ApplyRetouchCommand.Execute(null);
                 e.Handled = true;
                 break;
             case Key.Enter when Vm.IsGalleryOpen:
@@ -687,6 +707,12 @@ public partial class MainWindow : Window
 
     private void Canvas_MouseMove(object sender, MouseEventArgs e)
     {
+        if (Vm.IsRetouchMode)
+        {
+            HandleRetouchMouseMove(e);
+            return;
+        }
+
         if (Vm.IsRedEyeCorrectionMode)
         {
             HandleRedEyeCorrectionMouseMove(e);
@@ -724,6 +750,12 @@ public partial class MainWindow : Window
 
     private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (Vm.IsRetouchMode)
+        {
+            HandleRetouchMouseDown(e);
+            return;
+        }
+
         if (Vm.IsRedEyeCorrectionMode)
         {
             HandleRedEyeCorrectionMouseDown(e);
@@ -766,6 +798,12 @@ public partial class MainWindow : Window
 
     private void Canvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+        if (_retouchPainting)
+        {
+            HandleRetouchMouseUp(e);
+            return;
+        }
+
         if (_redEyeCorrectionPainting)
         {
             HandleRedEyeCorrectionMouseUp(e);
@@ -797,6 +835,42 @@ public partial class MainWindow : Window
     {
         if (Vm.IsInspectorMode && _inspectorSelectionStart is null)
             Vm.UpdateInspectorSample(null);
+    }
+
+    private void HandleRetouchMouseDown(MouseButtonEventArgs e)
+    {
+        if (!TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
+            return;
+
+        var pickSource = (Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt || !Vm.HasRetouchSource;
+        Vm.BeginRetouchStroke(coordinate, pickSource);
+        _retouchPainting = !pickSource;
+        if (_retouchPainting)
+            Canvas.CaptureMouse();
+        e.Handled = true;
+    }
+
+    private void HandleRetouchMouseMove(MouseEventArgs e)
+    {
+        if (!_retouchPainting || e.LeftButton != MouseButtonState.Pressed)
+            return;
+
+        if (!TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
+            return;
+
+        Vm.UpdateRetouchStroke(coordinate);
+        e.Handled = true;
+    }
+
+    private void HandleRetouchMouseUp(MouseButtonEventArgs e)
+    {
+        if (TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
+            Vm.EndRetouchStroke(coordinate);
+
+        _retouchPainting = false;
+        if (Canvas.IsMouseCaptured)
+            Canvas.ReleaseMouseCapture();
+        e.Handled = true;
     }
 
     private void HandleRedEyeCorrectionMouseDown(MouseButtonEventArgs e)

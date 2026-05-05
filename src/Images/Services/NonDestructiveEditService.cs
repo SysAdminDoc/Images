@@ -264,6 +264,9 @@ public sealed class NonDestructiveEditService
                 case "red-eye":
                     RedEyeCorrectionService.Apply(image, RedEyeCorrectionService.FromParameters(operation.Parameters));
                     break;
+                case "retouch":
+                    RetouchBrushService.Apply(image, RetouchBrushService.FromParameters(operation.Parameters));
+                    break;
                 case "rotate":
                     ApplyRotate(image, operation.Parameters);
                     break;
@@ -681,7 +684,7 @@ public sealed class NonDestructiveEditService
             return false;
         }
 
-        if (normalized is "crop" or "resize" or "adjust" or "local-exposure" or "red-eye" or "rotate" or "flip-horizontal" or "flip-vertical")
+        if (normalized is "crop" or "resize" or "adjust" or "local-exposure" or "red-eye" or "retouch" or "rotate" or "flip-horizontal" or "flip-vertical")
             return true;
 
         error = $"Unsupported edit operation: {kind}.";
@@ -699,6 +702,7 @@ public sealed class NonDestructiveEditService
             "adjust" => "Adjust",
             "local-exposure" => "Local exposure",
             "red-eye" => "Red-eye correction",
+            "retouch" => "Retouch",
             "rotate" => "Rotate",
             "flip-horizontal" => "Flip horizontal",
             "flip-vertical" => "Flip vertical",

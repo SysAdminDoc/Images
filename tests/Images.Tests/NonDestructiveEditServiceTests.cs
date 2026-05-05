@@ -206,6 +206,35 @@ public sealed class NonDestructiveEditServiceTests
     }
 
     [Fact]
+    public void Export_AppliesRetouchOperation()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteRetouchImage(temp.Path, "source.png");
+        var baseline = ImageExportService.Save(
+            source,
+            Path.Combine(temp.Path, "baseline.png"),
+            []);
+
+        var service = new NonDestructiveEditService();
+        var mutation = service.AppendOperation(
+            source,
+            "retouch",
+            RetouchBrushService.ToEditParameters(
+                new[] { new RetouchBrushStroke(2, 2, 6, 6, 4, 1, Heal: false) }));
+
+        Assert.True(mutation.Success);
+
+        var result = service.Export(source, Path.Combine(temp.Path, "retouched.png"));
+
+        Assert.True(result.Success);
+        Assert.Equal(1, result.AppliedOperationCount);
+        Assert.False(File.ReadAllBytes(baseline).SequenceEqual(File.ReadAllBytes(result.OutputPath)));
+
+        var provenance = XDocument.Load(result.ProvenanceSidecarPath).ToString();
+        Assert.Contains("retouch", provenance, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void CreateVirtualCopy_ForksOperationsWithoutDuplicatingPixels()
     {
         using var temp = TestDirectory.Create();
@@ -265,6 +294,32 @@ public sealed class NonDestructiveEditServiceTests
             Format = MagickFormat.Png
         };
         image.ImportPixels(pixels, new PixelImportSettings(5, 5, StorageType.Char, PixelMapping.RGBA));
+        image.Write(path);
+        return path;
+    }
+
+    private static string WriteRetouchImage(string folder, string name)
+    {
+        var path = Path.Combine(folder, name);
+        var pixels = new byte[9 * 9 * 4];
+        for (var index = 0; index < pixels.Length; index += 4)
+        {
+            pixels[index] = 20;
+            pixels[index + 1] = 40;
+            pixels[index + 2] = 180;
+            pixels[index + 3] = 255;
+        }
+
+        var sourceIndex = ((2 * 9) + 2) * 4;
+        pixels[sourceIndex] = 220;
+        pixels[sourceIndex + 1] = 80;
+        pixels[sourceIndex + 2] = 40;
+
+        using var image = new MagickImage(MagickColors.Black, 9, 9)
+        {
+            Format = MagickFormat.Png
+        };
+        image.ImportPixels(pixels, new PixelImportSettings(9, 9, StorageType.Char, PixelMapping.RGBA));
         image.Write(path);
         return path;
     }

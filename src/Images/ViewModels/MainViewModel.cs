@@ -160,6 +160,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ApplyRedEyeCorrectionCommand = new RelayCommand(ApplyRedEyeCorrection, () => CanApplyRedEyeCorrection);
         CancelRedEyeCorrectionCommand = new RelayCommand(CancelRedEyeCorrectionMode, () => IsRedEyeCorrectionMode || HasRedEyeCorrectionMarks);
         ClearRedEyeCorrectionCommand = new RelayCommand(ClearRedEyeCorrectionMarks, () => HasRedEyeCorrectionMarks);
+        ToggleRetouchModeCommand = new RelayCommand(() => IsRetouchMode = !IsRetouchMode, () => CanUseRetouch);
+        ApplyRetouchCommand = new RelayCommand(ApplyRetouch, () => CanApplyRetouch);
+        CancelRetouchCommand = new RelayCommand(CancelRetouchMode, () => IsRetouchMode || HasRetouchStrokes || HasRetouchSource);
+        ClearRetouchCommand = new RelayCommand(ClearRetouchStrokes, () => HasRetouchStrokes);
+        SetRetouchModeCommand = new RelayCommand(SetRetouchMode, parameter => parameter is string);
+        ClearRetouchSourceCommand = new RelayCommand(ClearRetouchSource, () => HasRetouchSource);
         CopyInspectorHexCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hex, "HEX"), () => HasInspectorSample);
         CopyInspectorRgbCommand = new RelayCommand(() => CopyInspectorValue(s => s.Rgb, "RGB"), () => HasInspectorSample);
         CopyInspectorHsvCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hsv, "HSV"), () => HasInspectorSample);
@@ -265,6 +271,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseCrop));
                 Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(CanUseRedEyeCorrection));
+                Raise(nameof(CanUseRetouch));
                 Raise(nameof(CanUseOverlayMode));
                 Raise(nameof(CanToggleMetadataHud));
                 Raise(nameof(ShowMetadataHud));
@@ -517,6 +524,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(CanUseCrop));
         Raise(nameof(CanUseExposureBrush));
         Raise(nameof(CanUseRedEyeCorrection));
+        Raise(nameof(CanUseRetouch));
         Raise(nameof(CanTurnLeftBookPage));
         Raise(nameof(CanTurnRightBookPage));
         Raise(nameof(CurrentArchiveProgressText));
@@ -545,6 +553,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseCrop));
                 Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(CanUseRedEyeCorrection));
+                Raise(nameof(CanUseRetouch));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -558,6 +567,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool CanUseAdjustments => CanUseCrop;
     public bool CanUseExposureBrush => CanUseCrop;
     public bool CanUseRedEyeCorrection => CanUseCrop;
+    public bool CanUseRetouch => CanUseCrop;
     public bool IsViewerEmpty => CurrentPath is null;
     public bool CanRefreshFolder => (CurrentPath is not null || _nav.Count > 0) && !IsOperationBusy;
 
@@ -600,6 +610,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseCrop));
                 Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(CanUseRedEyeCorrection));
+                Raise(nameof(CanUseRetouch));
                 Raise(nameof(CanUseOverlayMode));
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -707,6 +718,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseCrop));
                 Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(CanUseRedEyeCorrection));
+                Raise(nameof(CanUseRetouch));
                 Raise(nameof(ShowMetadataHud));
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -905,8 +917,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 IsCropMode = false;
                 IsExposureBrushMode = false;
                 IsRedEyeCorrectionMode = false;
+                IsRetouchMode = false;
                 ClearExposureBrushStrokes(showToast: false);
                 ClearRedEyeCorrectionMarks(showToast: false);
+                ClearRetouchState(showToast: false);
                 InspectorStatusText = "Move over the image to sample pixels. Click to hold a sample; Ctrl+click copies it. Shift-drag measures.";
             }
 
@@ -969,8 +983,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 IsOcrMode = false;
                 IsExposureBrushMode = false;
                 IsRedEyeCorrectionMode = false;
+                IsRetouchMode = false;
                 ClearExposureBrushStrokes(showToast: false);
                 ClearRedEyeCorrectionMarks(showToast: false);
+                ClearRetouchState(showToast: false);
                 CropStatusText = "Drag on the image to choose a crop. Enter applies it to edit history.";
             }
             else if (!HasCropSelection)
@@ -1045,7 +1061,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasCropSelection => CropSelection is { Width: > 0, Height: > 0 };
     public bool CanApplyCrop => IsCropMode && HasCropSelection && CanUseCrop;
     public bool ShowCropOverlay => IsCropMode || HasCropSelection;
-    public bool IsCanvasSelectionMode => IsInspectorMode || IsCropMode || IsExposureBrushMode || IsRedEyeCorrectionMode;
+    public bool IsCanvasSelectionMode => IsInspectorMode || IsCropMode || IsExposureBrushMode || IsRedEyeCorrectionMode || IsRetouchMode;
     public string CropModeText => IsCropMode ? "Crop on" : "Crop off";
     public string CropModeHelpText => IsCropMode
         ? "Drag a rectangle on the image. Enter adds the crop to edit history; Esc cancels."
@@ -1070,7 +1086,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 IsCropMode = false;
                 IsOcrMode = false;
                 IsRedEyeCorrectionMode = false;
+                IsRetouchMode = false;
                 ClearRedEyeCorrectionMarks(showToast: false);
+                ClearRetouchState(showToast: false);
                 ClearCropSelection();
                 ExposureBrushStatusText = "Paint on the image. Enter adds strokes to edit history; Esc cancels.";
             }
@@ -1156,9 +1174,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 IsInspectorMode = false;
                 IsCropMode = false;
                 IsExposureBrushMode = false;
+                IsRetouchMode = false;
                 IsOcrMode = false;
                 ClearCropSelection();
                 ClearExposureBrushStrokes(showToast: false);
+                ClearRetouchState(showToast: false);
                 RedEyeCorrectionStatusText = "Click or drag over red pupils. Enter adds corrections to edit history; Esc cancels.";
             }
             else if (!HasRedEyeCorrectionMarks)
@@ -1230,6 +1250,105 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool ShowRedEyeCorrectionOverlay => IsRedEyeCorrectionMode || HasRedEyeCorrectionMarks;
     private double RedEyeCorrectionNormalizedStrength => Math.Clamp(RedEyeCorrectionStrength / 100, RedEyeCorrectionService.MinStrength, RedEyeCorrectionService.MaxStrength);
     private double RedEyeCorrectionNormalizedThreshold => Math.Clamp(RedEyeCorrectionThreshold / 100, RedEyeCorrectionService.MinThreshold, RedEyeCorrectionService.MaxThreshold);
+
+    private bool _isRetouchMode;
+    public bool IsRetouchMode
+    {
+        get => _isRetouchMode;
+        set
+        {
+            if (!Set(ref _isRetouchMode, value))
+                return;
+
+            if (value)
+            {
+                IsInspectorMode = false;
+                IsCropMode = false;
+                IsExposureBrushMode = false;
+                IsRedEyeCorrectionMode = false;
+                IsOcrMode = false;
+                ClearCropSelection();
+                ClearExposureBrushStrokes(showToast: false);
+                ClearRedEyeCorrectionMarks(showToast: false);
+                RetouchStatusText = HasRetouchSource
+                    ? "Paint over the target area. Alt-click picks a new source; Enter applies."
+                    : "Alt-click or click once to pick a source, then paint the target area.";
+            }
+            else if (!HasRetouchStrokes)
+            {
+                RetouchStatusText = "Turn on retouch, pick a source, then paint clone or healing strokes.";
+            }
+
+            RaiseRetouchModeState();
+        }
+    }
+
+    public ObservableCollection<RetouchBrushStroke> RetouchStrokes { get; } = [];
+
+    private PixelCoordinate? _retouchSource;
+    private PixelCoordinate? _retouchStrokeSourceAnchor;
+    private PixelCoordinate? _retouchStrokeTargetAnchor;
+    public bool HasRetouchSource => _retouchSource is not null;
+    public string RetouchSourceText => _retouchSource is { } source
+        ? $"Source {source.X}, {source.Y}"
+        : "No source selected";
+
+    private double _retouchRadius = 28;
+    public double RetouchRadius
+    {
+        get => _retouchRadius;
+        set
+        {
+            var radius = Math.Clamp(double.IsFinite(value) ? value : 28, RetouchBrushService.MinRadius, RetouchBrushService.MaxRadius);
+            if (Set(ref _retouchRadius, radius))
+                RaiseRetouchSettingsState();
+        }
+    }
+
+    private double _retouchStrength = 85;
+    public double RetouchStrength
+    {
+        get => _retouchStrength;
+        set
+        {
+            var strength = Math.Clamp(double.IsFinite(value) ? value : 85, 5, 100);
+            if (Set(ref _retouchStrength, strength))
+                RaiseRetouchSettingsState();
+        }
+    }
+
+    private bool _isRetouchHealing;
+    public bool IsRetouchHealing
+    {
+        get => _isRetouchHealing;
+        private set
+        {
+            if (Set(ref _isRetouchHealing, value))
+                RaiseRetouchSettingsState();
+        }
+    }
+
+    private string _retouchStatusText = "Turn on retouch, pick a source, then paint clone or healing strokes.";
+    public string RetouchStatusText
+    {
+        get => _retouchStatusText;
+        private set => Set(ref _retouchStatusText, value);
+    }
+
+    public string RetouchModeText => IsRetouchMode ? "Retouch on" : "Retouch off";
+    public string RetouchModeHelpText => IsRetouchMode
+        ? "Alt-click picks a source. Drag paints clone or healing strokes."
+        : "Non-destructive clone stamp and healing brush for Save a copy exports.";
+    public string RetouchBrushModeText => IsRetouchHealing ? "Healing brush" : "Clone stamp";
+    public string RetouchRadiusText => string.Create(CultureInfo.InvariantCulture, $"{RetouchRadius:0} px");
+    public string RetouchStrengthText => string.Create(CultureInfo.InvariantCulture, $"{RetouchStrength:0}%");
+    public string RetouchStrokeText => HasRetouchStrokes
+        ? RetouchBrushService.CreateSummary(RetouchStrokes.ToList())
+        : "No retouch strokes";
+    public bool HasRetouchStrokes => RetouchStrokes.Count > 0;
+    public bool CanApplyRetouch => IsRetouchMode && HasRetouchStrokes && CanUseRetouch;
+    public bool ShowRetouchOverlay => IsRetouchMode || HasRetouchStrokes;
+    private double RetouchNormalizedStrength => Math.Clamp(RetouchStrength / 100, RetouchBrushService.MinStrength, RetouchBrushService.MaxStrength);
 
     // -------------------- Rename editor state --------------------
 
@@ -1943,6 +2062,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand ApplyRedEyeCorrectionCommand { get; }
     public ICommand CancelRedEyeCorrectionCommand { get; }
     public ICommand ClearRedEyeCorrectionCommand { get; }
+    public ICommand ToggleRetouchModeCommand { get; }
+    public ICommand ApplyRetouchCommand { get; }
+    public ICommand CancelRetouchCommand { get; }
+    public ICommand ClearRetouchCommand { get; }
+    public ICommand SetRetouchModeCommand { get; }
+    public ICommand ClearRetouchSourceCommand { get; }
     public ICommand CopyInspectorHexCommand { get; }
     public ICommand CopyInspectorRgbCommand { get; }
     public ICommand CopyInspectorHsvCommand { get; }
@@ -2376,6 +2501,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             ClearExposureBrushStrokes(showToast: false);
             IsRedEyeCorrectionMode = false;
             ClearRedEyeCorrectionMarks(showToast: false);
+            IsRetouchMode = false;
+            ClearRetouchState(showToast: false);
             ApplyPageSequence(res.Pages);
             ArchiveReadPositionService.SaveLastPageIndex(_settings, path, PageIndex, PageCount);
             if (isArchiveBookPage)
@@ -2411,6 +2538,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             ClearExposureBrushStrokes(showToast: false);
             IsRedEyeCorrectionMode = false;
             ClearRedEyeCorrectionMarks(showToast: false);
+            IsRetouchMode = false;
+            ClearRetouchState(showToast: false);
             ResetPageState();
             SetLoadError(ex);
         }
@@ -3095,6 +3224,75 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RaiseRedEyeCorrectionMarkState();
     }
 
+    public void BeginRetouchStroke(PixelCoordinate coordinate, bool pickSource)
+    {
+        if (!IsRetouchMode || !CanUseRetouch || PixelWidth <= 0 || PixelHeight <= 0)
+            return;
+
+        if (pickSource || _retouchSource is null)
+        {
+            _retouchSource = coordinate;
+            _retouchStrokeSourceAnchor = null;
+            _retouchStrokeTargetAnchor = null;
+            RetouchStatusText = $"Source picked at {coordinate.X}, {coordinate.Y}. Paint the target area.";
+            RaiseRetouchSourceState();
+            return;
+        }
+
+        _retouchStrokeSourceAnchor = _retouchSource;
+        _retouchStrokeTargetAnchor = coordinate;
+        AddRetouchStroke(coordinate);
+    }
+
+    public void UpdateRetouchStroke(PixelCoordinate coordinate)
+    {
+        if (!IsRetouchMode || _retouchStrokeSourceAnchor is null || _retouchStrokeTargetAnchor is null)
+            return;
+
+        AddRetouchStroke(coordinate);
+    }
+
+    public void EndRetouchStroke(PixelCoordinate coordinate)
+    {
+        if (_retouchStrokeSourceAnchor is not null && _retouchStrokeTargetAnchor is not null)
+            AddRetouchStroke(coordinate);
+
+        _retouchStrokeSourceAnchor = null;
+        _retouchStrokeTargetAnchor = null;
+    }
+
+    private void AddRetouchStroke(PixelCoordinate target)
+    {
+        if (_retouchStrokeSourceAnchor is not { } sourceAnchor || _retouchStrokeTargetAnchor is not { } targetAnchor)
+            return;
+
+        var source = new PixelCoordinate(
+            sourceAnchor.X + target.X - targetAnchor.X,
+            sourceAnchor.Y + target.Y - targetAnchor.Y);
+        var stroke = RetouchBrushService.NormalizeStroke(
+            source,
+            target,
+            RetouchRadius,
+            RetouchNormalizedStrength,
+            IsRetouchHealing,
+            PixelWidth,
+            PixelHeight);
+
+        if (RetouchStrokes.Count > 0)
+        {
+            var previous = RetouchStrokes[RetouchStrokes.Count - 1];
+            var dx = previous.TargetX - stroke.TargetX;
+            var dy = previous.TargetY - stroke.TargetY;
+            var minimumSpacing = Math.Max(2, stroke.Radius * 0.28);
+            if ((dx * dx) + (dy * dy) < minimumSpacing * minimumSpacing)
+                return;
+        }
+
+        RetouchStrokes.Add(stroke);
+        RetouchStatusText = $"{stroke.ModeLabel} stroke added. Alt-click picks a new source; Enter applies.";
+        RaiseRetouchStrokeState();
+    }
+
     private CropAspectPreset? EffectiveCropAspectPreset
     {
         get
@@ -3329,6 +3527,99 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Toast("Red-eye correction marks cleared");
     }
 
+    private void SetRetouchMode(object? parameter)
+    {
+        if (parameter is not string mode)
+            return;
+
+        if (mode.Equals("heal", StringComparison.OrdinalIgnoreCase))
+        {
+            IsRetouchHealing = true;
+            RetouchStatusText = IsRetouchMode
+                ? "Healing brush selected. Alt-click a clean source, then paint the target."
+                : "Healing brush selected. Turn on retouch to paint.";
+        }
+        else if (mode.Equals("clone", StringComparison.OrdinalIgnoreCase))
+        {
+            IsRetouchHealing = false;
+            RetouchStatusText = IsRetouchMode
+                ? "Clone stamp selected. Alt-click a source, then paint the target."
+                : "Clone stamp selected. Turn on retouch to paint.";
+        }
+    }
+
+    private void ApplyRetouch()
+    {
+        if (!CanApplyRetouch || CurrentPath is null)
+            return;
+
+        var strokes = RetouchStrokes.ToList();
+        var result = _editStack.AppendOperation(
+            CurrentPath,
+            "retouch",
+            RetouchBrushService.ToEditParameters(strokes),
+            RetouchBrushService.CreateLabel(strokes));
+
+        if (result.Success)
+        {
+            IsRetouchMode = false;
+            ClearRetouchState(showToast: false);
+            Toast("Retouch added to edit history");
+        }
+        else
+        {
+            RetouchStatusText = "Retouch failed: " + result.Message;
+            Toast("Retouch failed");
+        }
+    }
+
+    private void CancelRetouchMode()
+    {
+        IsRetouchMode = false;
+        ClearRetouchState(showToast: false);
+        Toast("Retouch canceled");
+    }
+
+    private void ClearRetouchStrokes()
+    {
+        if (RetouchStrokes.Count > 0)
+            RetouchStrokes.Clear();
+
+        RetouchStatusText = HasRetouchSource
+            ? "Paint over the target area. Alt-click picks a new source; Enter applies."
+            : "Alt-click or click once to pick a source, then paint the target area.";
+        RaiseRetouchStrokeState();
+        Toast("Retouch strokes cleared");
+    }
+
+    private void ClearRetouchSource()
+    {
+        _retouchSource = null;
+        _retouchStrokeSourceAnchor = null;
+        _retouchStrokeTargetAnchor = null;
+        RetouchStatusText = "Source cleared. Alt-click or click once to pick a new source.";
+        RaiseRetouchSourceState();
+        Toast("Retouch source cleared");
+    }
+
+    private void ClearRetouchState(bool showToast)
+    {
+        if (RetouchStrokes.Count > 0)
+            RetouchStrokes.Clear();
+
+        _retouchSource = null;
+        _retouchStrokeSourceAnchor = null;
+        _retouchStrokeTargetAnchor = null;
+        RetouchStatusText = IsRetouchMode
+            ? "Alt-click or click once to pick a source, then paint the target area."
+            : "Turn on retouch, pick a source, then paint clone or healing strokes.";
+        RaiseRetouchSourceState();
+        RaiseRetouchStrokeState();
+
+        if (showToast)
+            Toast("Retouch cleared");
+    }
+
     private void CancelCropMode()
     {
         IsCropMode = false;
@@ -3453,6 +3744,42 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(ShowRedEyeCorrectionOverlay));
         Raise(nameof(RedEyeCorrectionMarkText));
         Raise(nameof(CanApplyRedEyeCorrection));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RaiseRetouchModeState()
+    {
+        Raise(nameof(IsRetouchMode));
+        Raise(nameof(ShowRetouchOverlay));
+        Raise(nameof(IsCanvasSelectionMode));
+        Raise(nameof(RetouchModeText));
+        Raise(nameof(RetouchModeHelpText));
+        Raise(nameof(CanApplyRetouch));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RaiseRetouchSettingsState()
+    {
+        Raise(nameof(IsRetouchHealing));
+        Raise(nameof(RetouchBrushModeText));
+        Raise(nameof(RetouchRadiusText));
+        Raise(nameof(RetouchStrengthText));
+    }
+
+    private void RaiseRetouchSourceState()
+    {
+        Raise(nameof(HasRetouchSource));
+        Raise(nameof(RetouchSourceText));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RaiseRetouchStrokeState()
+    {
+        Raise(nameof(RetouchStrokes));
+        Raise(nameof(HasRetouchStrokes));
+        Raise(nameof(ShowRetouchOverlay));
+        Raise(nameof(RetouchStrokeText));
+        Raise(nameof(CanApplyRetouch));
         CommandManager.InvalidateRequerySuggested();
     }
 
@@ -3939,6 +4266,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClearExposureBrushStrokes(showToast: false);
         IsRedEyeCorrectionMode = false;
         ClearRedEyeCorrectionMarks(showToast: false);
+        IsRetouchMode = false;
+        ClearRetouchState(showToast: false);
         ResetPageState();
         ClearPhotoMetadata();
         _folderPreview.Clear();
