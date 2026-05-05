@@ -1,0 +1,261 @@
+<Window x:Class="Images.MacroActionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Images - Macro actions"
+        Width="1120"
+        Height="760"
+        MinWidth="920"
+        MinHeight="620"
+        WindowStartupLocation="CenterOwner">
+    <Grid Background="{StaticResource BaseBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource HairlineBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="18,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Macro actions" Style="{StaticResource Text.Title}" />
+                    <TextBlock Text="Build inspectable JSON actions, preview them, then run them against local files."
+                               Style="{StaticResource Text.Caption}"
+                               Margin="0,3,0,0" />
+                </StackPanel>
+                <WrapPanel Grid.Column="1" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource ChromeButton}"
+                            Margin="8,0,0,0"
+                            Click="LoadPlanButton_Click"
+                            AutomationProperties.Name="Load macro action JSON">
+                        <TextBlock Text="Load JSON" />
+                    </Button>
+                    <Button Style="{StaticResource ChromeButton}"
+                            Margin="8,0,0,0"
+                            Click="SavePlanButton_Click"
+                            AutomationProperties.Name="Save macro action JSON">
+                        <TextBlock Text="Save JSON" />
+                    </Button>
+                </WrapPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="360" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Background="{StaticResource PanelBrush}"
+                    BorderBrush="{StaticResource HairlineBrush}"
+                    BorderThickness="0,0,1,0"
+                    Padding="16">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Sources" Style="{StaticResource SectionLabel}" />
+                        <Border Style="{StaticResource Card}" Padding="12">
+                            <StackPanel>
+                                <WrapPanel>
+                                    <Button x:Name="AddFilesButton"
+                                            Style="{StaticResource ChromeButton}"
+                                            Margin="0,0,8,0"
+                                            Click="AddFilesButton_Click"
+                                            AutomationProperties.Name="Add files to macro runner">
+                                        <TextBlock Text="Add files" />
+                                    </Button>
+                                    <Button x:Name="AddFolderButton"
+                                            Style="{StaticResource ChromeButton}"
+                                            Click="AddFolderButton_Click"
+                                            AutomationProperties.Name="Add folder to macro runner">
+                                        <TextBlock Text="Add folder" />
+                                    </Button>
+                                </WrapPanel>
+                                <ListBox x:Name="SourceList"
+                                         MinHeight="112"
+                                         Margin="0,10,0,0"
+                                         AutomationProperties.Name="Macro action sources" />
+                                <Button Style="{StaticResource ChromeButton}"
+                                        Margin="0,10,0,0"
+                                        HorizontalAlignment="Left"
+                                        Click="ClearSourcesButton_Click"
+                                        AutomationProperties.Name="Clear macro action sources">
+                                    <TextBlock Text="Clear sources" />
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Divider}" />
+
+                        <TextBlock Text="Output" Style="{StaticResource SectionLabel}" />
+                        <Border Style="{StaticResource Card}" Padding="12">
+                            <StackPanel>
+                                <TextBlock x:Name="OutputFolderText"
+                                           Text="Output folder: alongside source"
+                                           Style="{StaticResource Text.Caption}"
+                                           TextWrapping="Wrap" />
+                                <Button Style="{StaticResource ChromeButton}"
+                                        Margin="0,10,0,0"
+                                        HorizontalAlignment="Left"
+                                        Click="ChooseOutputButton_Click"
+                                        AutomationProperties.Name="Choose macro output folder">
+                                    <TextBlock Text="Choose output" />
+                                </Button>
+                                <CheckBox x:Name="DryRunCheckBox"
+                                          Content="Dry run only"
+                                          IsChecked="True"
+                                          Margin="0,12,0,0"
+                                          AutomationProperties.Name="Run macro as dry run" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Divider}" />
+
+                        <TextBlock Text="Action presets" Style="{StaticResource SectionLabel}" />
+                        <Border Style="{StaticResource Card}" Padding="12">
+                            <StackPanel>
+                                <Button Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,0,8"
+                                        Click="AddStripGpsButton_Click"
+                                        AutomationProperties.Name="Add strip GPS macro action">
+                                    <TextBlock Text="Add strip GPS" />
+                                </Button>
+                                <Button Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,0,8"
+                                        Click="AddExportPngButton_Click"
+                                        AutomationProperties.Name="Add export PNG macro action">
+                                    <TextBlock Text="Add export PNG" />
+                                </Button>
+                                <Button Style="{StaticResource ChromeButton}"
+                                        Click="AddRenamePatternButton_Click"
+                                        AutomationProperties.Name="Add rename pattern macro action">
+                                    <TextBlock Text="Add rename pattern" />
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <GridSplitter Grid.Column="1"
+                          Width="1"
+                          HorizontalAlignment="Stretch"
+                          Background="{StaticResource HairlineBrush}" />
+
+            <Grid Grid.Column="2"
+                  Background="{StaticResource ViewportBrush}"
+                  Margin="18">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="16" />
+                    <RowDefinition Height="220" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0"
+                        Style="{StaticResource Card}"
+                        Padding="14">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Macro JSON" Style="{StaticResource SectionLabel}" />
+                            <Button Grid.Column="1"
+                                    Style="{StaticResource ChromeButton}"
+                                    Click="ValidatePlanButton_Click"
+                                    AutomationProperties.Name="Validate macro JSON">
+                                <TextBlock Text="Validate" />
+                            </Button>
+                        </Grid>
+                        <TextBox x:Name="MacroJsonBox"
+                                 Grid.Row="1"
+                                 Margin="0,10,0,0"
+                                 AcceptsReturn="True"
+                                 AcceptsTab="True"
+                                 FontFamily="Consolas"
+                                 FontSize="12"
+                                 TextWrapping="NoWrap"
+                                 VerticalScrollBarVisibility="Auto"
+                                 HorizontalScrollBarVisibility="Auto"
+                                 AutomationProperties.Name="Macro action JSON" />
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="2"
+                        Style="{StaticResource Card}"
+                        Padding="14">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Run log" Style="{StaticResource SectionLabel}" />
+                        <ListBox x:Name="ResultList"
+                                 Grid.Row="1"
+                                 Margin="0,8,0,0"
+                                 AutomationProperties.Name="Macro run log" />
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="3"
+                        Style="{StaticResource Card}"
+                        Padding="12"
+                        Margin="0,16,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="PlanSummaryText"
+                                   Text="Default macro: export PNG copy."
+                                   Style="{StaticResource Text.Caption}"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center" />
+                        <Button x:Name="RunButton"
+                                Grid.Column="1"
+                                Style="{StaticResource PrimaryButton}"
+                                Margin="14,0,0,0"
+                                Click="RunButton_Click"
+                                AutomationProperties.Name="Run macro actions">
+                            <TextBlock Text="Run macro" />
+                        </Button>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <Border Grid.Row="2"
+                Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource HairlineBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="16,10">
+            <StackPanel Orientation="Horizontal">
+                <Ellipse x:Name="StatusDot"
+                         Width="8"
+                         Height="8"
+                         Fill="{StaticResource GreenBrush}"
+                         Margin="0,0,9,0"
+                         VerticalAlignment="Center" />
+                <TextBlock x:Name="StatusText"
+                           Text="Ready. Inspect the JSON before running actions."
+                           Style="{StaticResource Text.Caption}"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
