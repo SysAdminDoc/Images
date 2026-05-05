@@ -60,6 +60,23 @@ public partial class ConfirmDialog : Window
             confirmed && dialog.DontAskAgainCheckBox.IsChecked == true);
     }
 
+    public static bool ConfirmReferenceBoardClear(Window? owner, int itemCount)
+    {
+        var dialog = new ConfirmDialog(
+            title: "Clear reference board?",
+            message: "This removes the current board layout from this window. Export first if you need to keep a copy.",
+            subject: $"{itemCount} board item{(itemCount == 1 ? string.Empty : "s")}",
+            detail: "Images and notes are removed from the canvas only. Source files are not changed.",
+            footnote: "This action cannot be undone.",
+            confirmText: "Clear board",
+            cancelText: "Cancel")
+        {
+            Owner = owner
+        };
+
+        return dialog.ShowDialog() == true;
+    }
+
     private void ConfirmButton_Click(object sender, RoutedEventArgs e)
     {
         DialogResult = true;
