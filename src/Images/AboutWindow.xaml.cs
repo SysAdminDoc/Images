@@ -24,6 +24,7 @@ public partial class AboutWindow : Window
         CodecText.Text = CodecCapabilityService.BuildOverviewText();
         DocumentCodecText.Text = CodecCapabilityService.BuildDocumentStatusText();
         OcrStatusText.Text = OcrCapabilityService.BuildOverviewText();
+        PopulateDiagnostics();
         ApplyCodecSummary(CodecCapabilityService.BuildSummary());
         PopulateCapabilityMatrix();
         PopulateProvenance();
@@ -141,10 +142,18 @@ public partial class AboutWindow : Window
         DocumentCapabilityCard.Background = ThemeBrush(summary.DocumentReady ? "SurfacePanelBrush" : "WarningPanelBrush");
     }
 
+    private void PopulateDiagnostics()
+    {
+        DiagnosticsItems.ItemsSource = DiagnosticsStatusService.BuildStatusItems();
+    }
+
     private void UpdateCheckOptIn_Changed(object sender, RoutedEventArgs e)
     {
         if (sender is System.Windows.Controls.CheckBox cb)
+        {
             UpdateCheckService.OptedIn = cb.IsChecked == true;
+            PopulateDiagnostics();
+        }
     }
 
     private async void CheckUpdatesButton_Click(object sender, RoutedEventArgs e)
@@ -177,6 +186,7 @@ public partial class AboutWindow : Window
         }
         finally
         {
+            PopulateDiagnostics();
             btn.IsEnabled = true;
             CheckUpdatesButtonText.Text = "Check updates";
         }

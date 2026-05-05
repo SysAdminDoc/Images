@@ -77,6 +77,89 @@
             </Border>
 
             <TextBlock Style="{StaticResource SectionLabel}"
+                       Text="Diagnostics"
+                       Margin="1,18,0,10" />
+
+            <ItemsControl x:Name="DiagnosticsItems"
+                          AutomationProperties.Name="Runtime diagnostics status">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,0,0,8">
+                            <Border.Style>
+                                <Style TargetType="Border" BasedOn="{StaticResource Card}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Tone}" Value="Ready">
+                                            <Setter Property="Background" Value="#1FA6E3A1" />
+                                            <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Tone}" Value="Warning">
+                                            <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
+                                            <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding Icon}"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="14"
+                                           Margin="0,1,12,0"
+                                           VerticalAlignment="Top">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Tone}" Value="Ready">
+                                                    <Setter Property="Foreground" Value="{StaticResource GreenBrush}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Tone}" Value="Warning">
+                                                    <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <StackPanel Grid.Column="1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding Title}"
+                                                   Style="{StaticResource Text.Caption}"
+                                                   FontSize="13"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextBrush}" />
+                                        <Border Grid.Column="1"
+                                                Style="{StaticResource Badge}"
+                                                Padding="7,2"
+                                                Margin="10,0,0,0">
+                                            <TextBlock Text="{Binding Status}"
+                                                       FontSize="10.5"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextBrush}" />
+                                        </Border>
+                                    </Grid>
+                                    <TextBlock Text="{Binding Detail}"
+                                               Style="{StaticResource Text.Hint}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,5,0,0" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Style="{StaticResource SectionLabel}"
                        Text="Codec capability"
                        Margin="1,18,0,10" />
 
