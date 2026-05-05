@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using Images.Services;
@@ -12,6 +13,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        LaunchTiming.Log(_log, "app-startup-entered", $"args={e.Args.Length}");
 
         // V20-37: CLI report modes (--system-info / --codec-report / --version / --help).
         // Resolved BEFORE codec runtime configuration so a missing/broken codec doesn't take
@@ -71,6 +73,7 @@ public partial class App : Application
         Exit += (_, _) => Log.Shutdown();
 
         var window = new MainWindow();
+        LaunchTiming.Log(_log, "main-window-created");
 
         // V20-32: `--peek <path>` enters chromeless preview mode (PowerToys Peek invocation
         // contract). Two-token form is the canonical PowerToys shape. Any non-peek single-path
@@ -79,14 +82,20 @@ public partial class App : Application
         if (TryResolvePeekArgs(e.Args, out var peekPath))
         {
             window.EnterPeekMode(peekPath);
+            LaunchTiming.Log(_log, "peek-window-prepared", Path.GetFileName(peekPath));
             window.Show();
+            LaunchTiming.Log(_log, "peek-window-shown", Path.GetFileName(peekPath));
             return;
         }
 
         window.Show();
+        LaunchTiming.Log(_log, "main-window-shown");
 
         if (e.Args.Length > 0 && TryResolveArgPath(e.Args[0], out var resolved))
+        {
             window.OpenPath(resolved);
+            LaunchTiming.Log(_log, "argv-open-complete", Path.GetFileName(resolved));
+        }
     }
 
     /// <summary>
@@ -94,7 +103,7 @@ public partial class App : Application
     /// case-insensitive). Resolves the path through the same canonicalizer the regular open
     /// path uses so device-namespace shapes are rejected before downstream consumption.
     /// </summary>
-    private static bool TryResolvePeekArgs(string[] args, out string resolved)
+    internal static bool TryResolvePeekArgs(string[] args, out string resolved)
     {
         resolved = string.Empty;
         // Exact two-token contract: `--peek <path>`. Trailing junk (e.g. a third token) means
@@ -105,7 +114,7 @@ public partial class App : Application
         return TryResolveArgPath(args[1], out resolved);
     }
 
-    private static bool TryResolveArgPath(string raw, out string resolved)
+    internal static bool TryResolveArgPath(string raw, out string resolved)
     {
         resolved = string.Empty;
         if (string.IsNullOrWhiteSpace(raw)) return false;

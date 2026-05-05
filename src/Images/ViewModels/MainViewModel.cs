@@ -1374,6 +1374,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 _hintTimer.Stop();
                 _hintTimer.Start();
             }
+
+            LaunchTiming.LogFirstImage(_log, path, IsPeekMode);
         }
         catch (Exception ex)
         {

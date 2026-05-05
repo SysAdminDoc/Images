@@ -50,7 +50,7 @@ The improvement-plan backlog is complete. Continue with the source-derived works
 | RS-02 | P2 | In progress | Archive/book navigation | NeeView book model, PicView archive navigation, Tacent folder continuity | ZIP/CBZ read-only pages and page scrubber shipped; next: history, cover handling, archive-only controls, reader comfort, and dependency review for RAR/7z. |
 | RS-03 | P0 | In progress | Folder sorting and Explorer fidelity | ImageGlass Explorer sort sync, NeeView/Geeqie folder models | App-owned sort modes first, visible sort control, sort-state tests, later Explorer saved-search/sort investigation. |
 | RS-04 | P2 | Planned | Metadata culling workflow | Geeqie XMP keywords/search, gThumb catalogs/comments, Tacent metadata sort | Sidecar decision, rating/reject model, folder filters, keep/reject/move actions, undo and no-original-write defaults. |
-| RS-05 | P1 | In progress | Keyboard-first peek mode | QuickLook Spacebar preview, qView/JPEGView minimal chrome | Existing `--peek` foundation, startup timing logs, close-on-Esc smoke test, shell-helper documentation. |
+| RS-05 | P1 | Done | Keyboard-first peek mode | QuickLook Spacebar preview, qView/JPEGView minimal chrome | `--peek` foundation, startup timing logs, close-on-Esc smoke script, parser regression tests, and shell-helper documentation are complete. |
 | RS-06 | P2 | Planned | Technical pixel tools | ImageGlass color/channel tools, Tacent alpha/HDR tools | Color picker, alpha checkerboard/background toggle, RGB/alpha channel toggles, HDR/EXR exposure preview. |
 | RS-07 | P2 | Planned | Non-destructive viewer adjustments | JPEGView and Minimal Image Viewer processing controls | Preview-only adjustment state, reset affordance, save-copy-with-adjustments path, active-adjustment status. |
 | RS-08 | P1 | Planned | Large-folder and cache confidence | Tacent thumbnail speed, LightningView large-image focus | Cache size/clear UI, first-thumbnail timings, large/volatile folder tests, cache-unavailable fallback. |
@@ -102,6 +102,7 @@ The improvement-plan backlog is complete. Continue with the source-derived works
 - 2026-05-05: Completed roadmap `X-03` by adding an optional-runtime integration policy covering license, redistribution, CVE tracking, binary provenance, process isolation, network behavior, test corpus, and release gates.
 - 2026-05-05: Started `RS-02` / `V20-33` by adding ZIP/CBZ read-only archive page loading through `ImageLoader`, including natural page ordering, unsafe-entry filtering, recursive-archive skipping, folder navigation inclusion, and generated regression tests.
 - 2026-05-05: Continued `RS-02` / `V20-33` by adding a shared multi-page scrubber for archive books and existing multi-page documents, with view-model regression coverage for direct page jumps.
+- 2026-05-05: Completed `RS-05` by adding local startup and first-image timing logs for normal/peek launches, exact `--peek` parser tests, and shell-helper documentation with a close-on-Escape manual smoke script.
 
 ## Verification Standard
 
