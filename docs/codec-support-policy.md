@@ -42,6 +42,8 @@ Required before any new optional decoder/runtime lands (per ROADMAP X-03):
 
 This applies to: Ghostscript, native 7-Zip / UnRAR sidecars, OpenSlide, Bio-Formats, OCR engines, AI models, plugin hosts.
 
+Lossless JPEG writeback is covered by the same gate. The `V30-02` planning scaffold documents the required `jpegtran.exe` review in [`lossless-jpeg-transform-policy.md`](lossless-jpeg-transform-policy.md), but no JPEG transform sidecar ships until the exact binary is approved.
+
 ## Dropping a decoder
 
 A bundled decoder is dropped when:
