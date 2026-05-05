@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Images.Services;
 using Microsoft.Extensions.Logging;
@@ -119,6 +120,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _isFilmstripVisible = _settings.GetBool(Keys.FilmstripVisible, true);
         _isMetadataHudVisible = _settings.GetBool(Keys.MetadataHudVisible, false);
         _archiveRightToLeft = _settings.GetBool(Keys.ArchiveRightToLeft, false);
+        _archiveOldScanFilterEnabled = _settings.GetBool(Keys.ArchiveOldScanFilter, false);
 
         OpenCommand = new RelayCommand(async () => await OpenFileDialogAsync(), () => !IsOperationBusy);
         NextCommand = new RelayCommand(Next, () => CanUseImageCommands);
@@ -311,6 +313,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public string ArchivePageTurnModeHint => ArchiveRightToLeft
         ? "For manga-style books, the left edge and Left Arrow advance; the right edge goes back."
         : "For western books, the right edge and Right Arrow advance; the left edge goes back.";
+    public string ArchiveOldScanFilterText => ArchiveOldScanFilterEnabled ? "Clean old scans on" : "Clean old scans";
+    public string ArchiveOldScanFilterHint => "Preview-only: converts archive pages to high-contrast grayscale. The archive file is not changed.";
     public string CurrentArchiveProgressText => IsArchiveBook
         ? $"Reading {Path.GetFileName(CurrentPath)} · {PagePositionText}"
         : "";
@@ -740,6 +744,26 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Raise(nameof(ArchivePageTurnModeText));
             Raise(nameof(ArchivePageTurnModeHint));
             CommandManager.InvalidateRequerySuggested();
+        }
+    }
+
+    private bool _archiveOldScanFilterEnabled;
+    public bool ArchiveOldScanFilterEnabled
+    {
+        get => _archiveOldScanFilterEnabled;
+        set
+        {
+            if (!Set(ref _archiveOldScanFilterEnabled, value)) return;
+
+            _settings.SetBool(Keys.ArchiveOldScanFilter, value);
+            Raise(nameof(ArchiveOldScanFilterText));
+            Raise(nameof(ArchiveOldScanFilterHint));
+
+            if (IsArchiveBook && HasDisplayImage && !IsOperationBusy)
+            {
+                ReloadCurrentPreservingViewState(resetPreload: false);
+                Toast(value ? "Clean scan preview on" : "Clean scan preview off");
+            }
         }
     }
 
@@ -1449,17 +1473,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             var res = PageIndex == 0
                 ? _preload.TryGet(path) ?? ImageLoader.Load(path, PageIndex)
                 : ImageLoader.Load(path, PageIndex);
+            var isArchiveBookPage = SupportedImageFormats.IsArchive(path);
+            var image = ApplyArchiveDisplayFilters(res.Image, isArchiveBookPage, ArchiveOldScanFilterEnabled);
+            var animation = isArchiveBookPage && ArchiveOldScanFilterEnabled ? null : res.Animation;
+            var decoderUsed = isArchiveBookPage && ArchiveOldScanFilterEnabled
+                ? $"{res.DecoderUsed} + clean scan filter"
+                : res.DecoderUsed;
             // Order matters: CurrentImage first so ZoomPanImage.OnSourceChanged runs and clears
             // any animation from the previous file; then CurrentAnimation, which either applies
             // new keyframes or stays null for a static image.
-            CurrentImage = res.Image;
-            CurrentAnimation = res.Animation;
+            CurrentImage = image;
+            CurrentAnimation = animation;
             PixelWidth = res.PixelWidth;
             PixelHeight = res.PixelHeight;
-            DecoderUsed = res.DecoderUsed;
+            DecoderUsed = decoderUsed;
             ApplyPageSequence(res.Pages);
             ArchiveReadPositionService.SaveLastPageIndex(_settings, path, PageIndex, PageCount);
-            if (SupportedImageFormats.IsArchive(path))
+            if (isArchiveBookPage)
                 RefreshArchiveReadHistory();
             Rotation = 0;
             FlipHorizontal = false;
@@ -1687,6 +1717,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             RenameStatus = RenameStatusKind.Error;
             Toast($"Rename failed: {FirstLine(ex.Message)}");
         }
+    }
+
+    private static ImageSource ApplyArchiveDisplayFilters(ImageSource image, bool isArchiveBookPage, bool oldScanFilterEnabled)
+    {
+        if (!isArchiveBookPage || !oldScanFilterEnabled)
+            return image;
+
+        return image is BitmapSource bitmap
+            ? ScanFilterService.ApplyOldScanFilter(bitmap)
+            : image;
     }
 
     private static string FirstLine(string message)
@@ -2009,6 +2049,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Raise(nameof(ArchivePageTurnModeText));
             Raise(nameof(ArchivePageTurnModeHint));
             CommandManager.InvalidateRequerySuggested();
+        }
+
+        var oldScanFilter = _settings.GetBool(Keys.ArchiveOldScanFilter, false);
+        if (_archiveOldScanFilterEnabled != oldScanFilter)
+        {
+            _archiveOldScanFilterEnabled = oldScanFilter;
+            Raise(nameof(ArchiveOldScanFilterEnabled));
+            Raise(nameof(ArchiveOldScanFilterText));
+            Raise(nameof(ArchiveOldScanFilterHint));
+            if (IsArchiveBook && HasDisplayImage && !IsOperationBusy)
+                ReloadCurrentPreservingViewState(resetPreload: false);
         }
 
         Raise(nameof(FirstRunPrivacyText));
