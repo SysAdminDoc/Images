@@ -44,7 +44,7 @@ All notable changes to **Images** are documented here.
 - **Distribution trust plan** — scoped WinGet and Scoop publishing, checksum continuity, code-signing options, SmartScreen expectations, and user verification copy for the next stable release.
 - **Integration policy** — documented the no-code-copied optional-runtime gate for licenses, redistribution rights, CVE tracking, binary provenance, process isolation, network behavior, and release impact.
 - **Archive/book foundation** — ZIP and CBZ files now open as read-only archive books using built-in .NET ZIP support, with natural page ordering, page-count controls, a page scrubber, unsafe-entry filtering, and recursive-archive guardrails.
-- **Archive read position** — ZIP/CBZ books now remember the last viewed page locally and continue there on reopen without changing normal image-window persistence.
+- **Archive read position and history** — ZIP/CBZ books now remember the last viewed page locally, continue there on reopen, and surface a side-panel book history with page progress.
 - **Peek mode hardening** — `--peek` startup now records local timing milestones and first-image timing, with parser regression tests and shell-helper documentation for chromeless preview integrations.
 - **OCR workflow polish** — text extraction now has a persistent in-view busy/active status, a cancel-aware toolbar state, OCR readiness in Settings/About, and OCR language-pack status in diagnostics.
 - **Open-source viewer research** — added a May 2026 research scan of ImageGlass, nomacs, PicView, NeeView, QuickLook, Geeqie, gThumb, qView, JPEGView, Tacent View, Minimal Image Viewer, and LightningView, then folded the findings into the improvement plan.

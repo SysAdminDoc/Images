@@ -2160,6 +2160,78 @@
                         </ItemsControl>
                     </StackPanel>
 
+                    <StackPanel Visibility="{Binding RecentArchiveBooks.Count, Converter={StaticResource BoolToVis}}">
+                        <Border Style="{StaticResource Divider}" />
+                        <TextBlock Text="Book history" Style="{StaticResource SectionLabel}" />
+                        <ItemsControl ItemsSource="{Binding RecentArchiveBooks}"
+                                      KeyboardNavigation.DirectionalNavigation="Cycle"
+                                      KeyboardNavigation.TabNavigation="Continue"
+                                      AutomationProperties.Name="Archive book history">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Stretch"
+                                            Padding="13,10"
+                                            Margin="0,0,0,8"
+                                            Command="{Binding DataContext.OpenRecentArchiveCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="{Binding Path}"
+                                            AutomationProperties.Name="{Binding Path}"
+                                            AutomationProperties.HelpText="{Binding ProgressText}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Grid.Column="0"
+                                                    Width="28"
+                                                    Height="28"
+                                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                                    BorderThickness="1"
+                                                    Background="#1A89B4FA"
+                                                    BorderBrush="{StaticResource HairlineBrush}"
+                                                    VerticalAlignment="Center"
+                                                    Margin="0,0,10,0">
+                                                <TextBlock Text="&#xE8A5;"
+                                                           FontFamily="{StaticResource IconFontFamily}"
+                                                           FontSize="12"
+                                                           Foreground="{StaticResource AccentBrush}"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center" />
+                                            </Border>
+
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding Path, Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}"
+                                                           FontSize="12.5"
+                                                           FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Foreground="{StaticResource TextBrush}" />
+                                                <TextBlock Text="{Binding Path, Converter={x:Static vm:PathToParentConverter.Instance}, Mode=OneWay}"
+                                                           FontSize="11.5"
+                                                           Margin="0,2,0,0"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Foreground="{StaticResource OverlayBrush}" />
+                                            </StackPanel>
+
+                                            <Border Grid.Column="2"
+                                                    Style="{StaticResource Badge}"
+                                                    Margin="10,0,0,0"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding ProgressText}"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{StaticResource SubtextBrush}" />
+                                            </Border>
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- DETAILS section -->
