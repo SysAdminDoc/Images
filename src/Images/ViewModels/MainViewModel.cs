@@ -175,6 +175,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ToggleOverlayModeCommand = new RelayCommand(() => IsPinnedOverlayMode = !IsPinnedOverlayMode, () => CanUseOverlayMode || IsPinnedOverlayMode);
         ExitOverlayModeCommand = new RelayCommand(ExitOverlayMode, () => IsPinnedOverlayMode);
         OpenReferenceBoardCommand = new RelayCommand(OpenReferenceBoard);
+        OpenDuplicateCleanupCommand = new RelayCommand(OpenDuplicateCleanup);
         OpenRecentFolderCommand = new RelayCommand(p => OpenRecentFolder(p as string), p => p is string);
         OpenRecentArchiveCommand = new RelayCommand(
             async p => await OpenRecentArchiveAsync(p as ArchiveReadPositionService.ArchiveReadHistoryItem),
@@ -1567,6 +1568,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand ToggleOverlayModeCommand { get; }
     public ICommand ExitOverlayModeCommand { get; }
     public ICommand OpenReferenceBoardCommand { get; }
+    public ICommand OpenDuplicateCleanupCommand { get; }
     public ICommand OpenRecentFolderCommand { get; }
     public ICommand OpenRecentArchiveCommand { get; }
     public ICommand OpenPreviewItemCommand { get; }
@@ -2836,6 +2838,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             board.AddFiles([CurrentPath]);
 
         board.Show();
+    }
+
+    private void OpenDuplicateCleanup()
+    {
+        var cleanup = new Images.DuplicateCleanupWindow
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        if (!string.IsNullOrWhiteSpace(CurrentFolder) && Directory.Exists(CurrentFolder))
+            cleanup.AddScanFolder(CurrentFolder);
+
+        cleanup.Show();
     }
 
     // Item 2: Settings window — opens modal, then re-reads persistent prefs so the viewer

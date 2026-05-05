@@ -1,0 +1,496 @@
+<Window x:Class="Images.DuplicateCleanupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Images - Duplicate cleanup"
+        Width="1240"
+        Height="820"
+        MinWidth="980"
+        MinHeight="640"
+        WindowStartupLocation="CenterOwner">
+    <Grid Background="{StaticResource BaseBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource HairlineBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="18,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Duplicate cleanup" Style="{StaticResource Text.Title}" />
+                    <TextBlock Text="Local scan for exact duplicates and visually similar images. Nothing leaves this device."
+                               Style="{StaticResource Text.Caption}"
+                               Margin="0,3,0,0" />
+                </StackPanel>
+
+                <WrapPanel Grid.Column="1"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center">
+                    <Button x:Name="AddFolderButton"
+                            Style="{StaticResource ChromeButton}"
+                            Margin="8,0,0,0"
+                            Click="AddFolderButton_Click"
+                            ToolTip="Add a folder to scan"
+                            AutomationProperties.Name="Add scan folder">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8B7;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="Add folder" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="AddReferenceFolderButton"
+                            Style="{StaticResource ChromeButton}"
+                            Margin="8,0,0,0"
+                            Click="AddReferenceFolderButton_Click"
+                            ToolTip="Add a folder whose files should be preferred as keep candidates"
+                            AutomationProperties.Name="Add reference folder">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE946;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="Reference" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="ScanButton"
+                            Style="{StaticResource PrimaryButton}"
+                            Margin="8,0,0,0"
+                            Click="ScanButton_Click"
+                            ToolTip="Scan selected folders"
+                            AutomationProperties.Name="Scan for duplicates">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE721;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="Scan" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="CancelScanButton"
+                            Style="{StaticResource ChromeButton}"
+                            Margin="8,0,0,0"
+                            Click="CancelScanButton_Click"
+                            IsEnabled="False"
+                            ToolTip="Cancel the current scan"
+                            AutomationProperties.Name="Cancel duplicate scan">
+                        <TextBlock Text="Cancel" />
+                    </Button>
+                </WrapPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="360" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Background="{StaticResource PanelBrush}"
+                    BorderBrush="{StaticResource HairlineBrush}"
+                    BorderThickness="0,0,1,0"
+                    Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <TextBlock Text="Folders to scan" Style="{StaticResource SectionLabel}" />
+                        <ListBox x:Name="ScanFoldersList"
+                                 MinHeight="74"
+                                 MaxHeight="120"
+                                 AutomationProperties.Name="Scan folders">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource Card}" Padding="10,8">
+                                        <TextBlock Text="{Binding}"
+                                                   Style="{StaticResource Text.Caption}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding}" />
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <WrapPanel Margin="0,8,0,0">
+                            <Button Style="{StaticResource ChromeButton}"
+                                    Padding="10,5"
+                                    Margin="0,0,8,0"
+                                    Click="RemoveScanFolderButton_Click"
+                                    AutomationProperties.Name="Remove selected scan folder">
+                                <TextBlock Text="Remove" />
+                            </Button>
+                            <Button Style="{StaticResource ChromeButton}"
+                                    Padding="10,5"
+                                    Click="ClearScanFoldersButton_Click"
+                                    AutomationProperties.Name="Clear scan folders">
+                                <TextBlock Text="Clear" />
+                            </Button>
+                        </WrapPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Margin="0,18,0,0">
+                        <TextBlock Text="Reference folders" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="Files in these folders are sorted first so cleanup actions keep them by default."
+                                   Style="{StaticResource Text.Hint}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,-4,0,8" />
+                        <ListBox x:Name="ReferenceFoldersList"
+                                 MinHeight="52"
+                                 MaxHeight="96"
+                                 AutomationProperties.Name="Reference folders">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource Card}" Padding="10,8">
+                                        <TextBlock Text="{Binding}"
+                                                   Style="{StaticResource Text.Caption}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding}" />
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <WrapPanel Margin="0,8,0,0">
+                            <Button Style="{StaticResource ChromeButton}"
+                                    Padding="10,5"
+                                    Margin="0,0,8,0"
+                                    Click="RemoveReferenceFolderButton_Click"
+                                    AutomationProperties.Name="Remove selected reference folder">
+                                <TextBlock Text="Remove" />
+                            </Button>
+                            <Button Style="{StaticResource ChromeButton}"
+                                    Padding="10,5"
+                                    Click="ClearReferenceFoldersButton_Click"
+                                    AutomationProperties.Name="Clear reference folders">
+                                <TextBlock Text="Clear" />
+                            </Button>
+                        </WrapPanel>
+                    </StackPanel>
+
+                    <Border Grid.Row="2"
+                            Style="{StaticResource Card}"
+                            Padding="12"
+                            Margin="0,18,0,0">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Similarity threshold"
+                                           Style="{StaticResource Text.Body}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock x:Name="ThresholdText"
+                                           Grid.Column="1"
+                                           Text="6"
+                                           Style="{StaticResource Text.Caption}"
+                                           Margin="12,0,0,0" />
+                            </Grid>
+                            <Slider x:Name="ThresholdSlider"
+                                    Minimum="0"
+                                    Maximum="16"
+                                    TickFrequency="1"
+                                    IsSnapToTickEnabled="True"
+                                    Value="6"
+                                    Margin="0,10,0,0"
+                                    ValueChanged="ThresholdSlider_ValueChanged"
+                                    AutomationProperties.Name="Similarity threshold" />
+                            <TextBlock Text="Lower values are stricter. Exact duplicates are always included."
+                                       Style="{StaticResource Text.Hint}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,6,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <Grid Grid.Row="3" Margin="0,18,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Findings" Style="{StaticResource SectionLabel}" />
+                            <TextBlock x:Name="FindingCountText"
+                                       Grid.Column="1"
+                                       Text="0"
+                                       Style="{StaticResource Text.Caption}"
+                                       Margin="12,0,0,0" />
+                        </Grid>
+
+                        <ListBox x:Name="FindingsList"
+                                 Grid.Row="1"
+                                 SelectionChanged="FindingsList_SelectionChanged"
+                                 AutomationProperties.Name="Duplicate cleanup findings">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="12,10">
+                                        <Border.Style>
+                                            <Style TargetType="Border" BasedOn="{StaticResource InteractiveCard}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                        <Setter Property="Background" Value="#2489B4FA" />
+                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Title}"
+                                                       Style="{StaticResource Text.Body}"
+                                                       FontWeight="SemiBold"
+                                                       TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Summary}"
+                                                       Style="{StaticResource Text.Caption}"
+                                                       TextWrapping="Wrap"
+                                                       Margin="0,4,0,0" />
+                                            <TextBlock Text="{Binding ActionSummary}"
+                                                       Style="{StaticResource Text.Hint}"
+                                                       TextWrapping="Wrap"
+                                                       Margin="0,3,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <GridSplitter Grid.Column="1"
+                          Width="1"
+                          HorizontalAlignment="Stretch"
+                          Background="{StaticResource HairlineBrush}"
+                          ShowsPreview="False" />
+
+            <Border Grid.Column="2"
+                    Background="{StaticResource ViewportBrush}"
+                    Padding="18">
+                <Grid>
+                <Border x:Name="EmptyState"
+                        Style="{StaticResource ElevatedCard}"
+                        Width="470"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <StackPanel>
+                        <TextBlock Text="Choose folders, then scan"
+                                   Style="{StaticResource Text.Display}"
+                                   TextAlignment="Center" />
+                        <TextBlock Text="Images will group byte-identical files and visually similar images. Review side by side before moving extras to quarantine or the Recycle Bin."
+                                   Style="{StaticResource Text.Subtitle}"
+                                   TextAlignment="Center"
+                                   Margin="0,10,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <Grid x:Name="DetailPanel" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0"
+                            Style="{StaticResource Card}"
+                            Padding="14"
+                            Margin="0,0,0,14">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock x:Name="DetailTitle"
+                                           Text="Finding"
+                                           Style="{StaticResource Text.Title}" />
+                                <TextBlock x:Name="DetailSummary"
+                                           Text=""
+                                           Style="{StaticResource Text.Caption}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,4,0,0" />
+                            </StackPanel>
+                            <WrapPanel Grid.Column="1"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       Margin="16,0,0,0">
+                                <Button Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,0"
+                                        Click="MarkNotDuplicateButton_Click"
+                                        AutomationProperties.Name="Mark selected finding not duplicate">
+                                    <TextBlock Text="Mark not duplicate" />
+                                </Button>
+                                <Button Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,0"
+                                        Click="QuarantineExtrasButton_Click"
+                                        AutomationProperties.Name="Quarantine extra duplicate candidates">
+                                    <TextBlock Text="Quarantine extra(s)" />
+                                </Button>
+                                <Button Style="{StaticResource DangerButton}"
+                                        Click="RecycleExtrasButton_Click"
+                                        AutomationProperties.Name="Move extra duplicate candidates to Recycle Bin">
+                                    <TextBlock Text="Recycle extra(s)" />
+                                </Button>
+                            </WrapPanel>
+                        </Grid>
+                    </Border>
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="14" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0"
+                                Background="{StaticResource PanelBrush}"
+                                BorderBrush="{StaticResource HairlineBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Md.CR}"
+                                Padding="14">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Border Background="{StaticResource CrustBrush}"
+                                        CornerRadius="{StaticResource Radius.Sm.CR}"
+                                        ClipToBounds="True">
+                                    <Image x:Name="PrimaryPreview"
+                                           Stretch="Uniform"
+                                           RenderOptions.BitmapScalingMode="HighQuality" />
+                                </Border>
+                                <StackPanel Grid.Row="1" Margin="0,12,0,0">
+                                    <WrapPanel>
+                                        <Border x:Name="PrimaryReferenceBadge"
+                                                Style="{StaticResource Badge}"
+                                                Margin="0,0,8,8">
+                                            <TextBlock Text="Keep candidate"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource AccentBrush}" />
+                                        </Border>
+                                        <TextBlock x:Name="PrimarySizeText"
+                                                   Style="{StaticResource Text.Caption}"
+                                                   Margin="0,0,8,8" />
+                                    </WrapPanel>
+                                    <TextBlock x:Name="PrimaryNameText"
+                                               Style="{StaticResource Text.Body}"
+                                               FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock x:Name="PrimaryFolderText"
+                                               Style="{StaticResource Text.Hint}"
+                                               TextTrimming="CharacterEllipsis"
+                                               Margin="0,3,0,0" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="2"
+                                Background="{StaticResource PanelBrush}"
+                                BorderBrush="{StaticResource HairlineBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource Radius.Md.CR}"
+                                Padding="14">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Border Background="{StaticResource CrustBrush}"
+                                        CornerRadius="{StaticResource Radius.Sm.CR}"
+                                        ClipToBounds="True">
+                                    <Image x:Name="SecondaryPreview"
+                                           Stretch="Uniform"
+                                           RenderOptions.BitmapScalingMode="HighQuality" />
+                                </Border>
+                                <StackPanel Grid.Row="1" Margin="0,12,0,0">
+                                    <WrapPanel>
+                                        <Border x:Name="SecondaryReferenceBadge"
+                                                Style="{StaticResource Badge}"
+                                                Margin="0,0,8,8">
+                                            <TextBlock Text="Extra candidate"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource YellowBrush}" />
+                                        </Border>
+                                        <TextBlock x:Name="SecondarySizeText"
+                                                   Style="{StaticResource Text.Caption}"
+                                                   Margin="0,0,8,8" />
+                                    </WrapPanel>
+                                    <TextBlock x:Name="SecondaryNameText"
+                                               Style="{StaticResource Text.Body}"
+                                               FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock x:Name="SecondaryFolderText"
+                                               Style="{StaticResource Text.Hint}"
+                                               TextTrimming="CharacterEllipsis"
+                                               Margin="0,3,0,0" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <Border Grid.Row="2"
+                            Style="{StaticResource Card}"
+                            Padding="12"
+                            Margin="0,14,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE946;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Foreground="{StaticResource AccentBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,9,0" />
+                            <TextBlock x:Name="DetailHelpText"
+                                       Text="Cleanup actions target every candidate after the first one shown here."
+                                       Style="{StaticResource Text.Caption}"
+                                       TextWrapping="Wrap"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2"
+                Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource HairlineBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="16,10">
+            <StackPanel Orientation="Horizontal">
+                <Ellipse x:Name="StatusDot"
+                         Width="8"
+                         Height="8"
+                         Fill="{StaticResource GreenBrush}"
+                         Margin="0,0,9,0"
+                         VerticalAlignment="Center" />
+                <TextBlock x:Name="StatusText"
+                           Text="Ready. Add one or more folders to scan."
+                           Style="{StaticResource Text.Caption}"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
