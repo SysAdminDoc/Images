@@ -22,7 +22,7 @@
             </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type vm:OcrTextLine}">
-                    <Border BorderBrush="#89B4FA"
+                    <Border BorderBrush="{StaticResource AccentBrush}"
                             BorderThickness="1"
                             CornerRadius="2"
                             Width="{Binding BoundingBox.Width}"
@@ -33,10 +33,10 @@
                             AutomationProperties.HelpText="Selectable OCR text region">
                         <Border.Style>
                             <Style TargetType="Border">
-                                <Setter Property="Background" Value="#4D89B4FA" />
+                                <Setter Property="Background" Value="{StaticResource OcrRegionBrush}" />
                                 <Style.Triggers>
                                     <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                        <Setter Property="Background" Value="#9989B4FA" />
+                                        <Setter Property="Background" Value="{StaticResource OcrRegionFocusBrush}" />
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
@@ -46,8 +46,8 @@
                                  IsReadOnlyCaretVisible="True"
                                  BorderThickness="0"
                                  Background="Transparent"
-                                 Foreground="#CDD6F4"
-                                 SelectionBrush="#89B4FA"
+                                 Foreground="{StaticResource TextBrush}"
+                                 SelectionBrush="{StaticResource AccentBrush}"
                                  SelectionOpacity="0.5"
                                  Padding="2,0"
                                  MinWidth="0"
