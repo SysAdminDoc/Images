@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-14A` is complete, closing `IP-14`. Settings corruption recovery now uses collision-resistant quarantine names, with tests for corruption reset, schema migration, unavailable storage, primitive defaults, and existing update-check future-timestamp behavior.
+`IP-11A` is complete, closing `IP-11`. Navigation and folder-preview tests now cover thousands of files, volatile folder rescans, enumeration failure recovery, deleted files, and bounded thumbnail requests.
 
 ## Next Focus
 
-The next recommended slice is `IP-11A`: add large-folder and volatile-folder stress coverage around navigation and thumbnail behavior.
+The next recommended slice is `IP-12A`: add a small decode/export regression corpus that can run without external assets.
 
 ## Research Inputs
 
@@ -34,7 +34,7 @@ The next recommended slice is `IP-11A`: add large-folder and volatile-folder str
 | IP-08 | P1 | Done | Long-running state | Standardize busy/progress/cancel affordances. | OCR, metadata reads, document decode, large exports, and background update checks use consistent status text, disabled states, and cancellation where available. |
 | IP-09 | P1 | Done | Empty/error states | Extend polished failure and empty states across secondary flows. | Empty folder, unsupported clipboard data, missing recent folders, thumbnail-cache failure, and offline update checks have calm, actionable feedback. |
 | IP-10 | P2 | Done | Cache health | Expose thumbnail cache health controls. | Settings/About can show cache size and clear or rebuild the disposable thumbnail cache safely. |
-| IP-11 | P2 | Planned | Stress testing | Add large-folder and volatile-folder stress coverage. | Navigation and thumbnail behavior are validated with thousands of files, deleted files, slow folders, and rapid directory changes. |
+| IP-11 | P2 | Done | Stress testing | Add large-folder and volatile-folder stress coverage. | Navigation and thumbnail behavior are validated with thousands of files, deleted files, slow folders, and rapid directory changes. |
 | IP-12 | P2 | Planned | Decode/export corpus | Add a small format corpus for decode/export regression tests. | Representative PNG, JPEG, WebP, TIFF, GIF/APNG, and document/vector samples protect codec upgrades and export behavior. |
 | IP-13 | P1 | Done | Shell/clipboard integration | Centralize opening URLs/files/folders and copying text. | About, crash dialog, settings, and main viewer use shared helpers with consistent error behavior and safer Explorer argument handling. |
 | IP-14 | P2 | Done | Settings persistence | Strengthen settings schema and corruption tests. | Tests cover corruption quarantine, unavailable storage, defaults, migration behavior, and future timestamp handling. |
@@ -95,6 +95,7 @@ The next recommended slice is `IP-11A`: add large-folder and volatile-folder str
 - 2026-05-05: Completed `IP-01A` and closed `IP-01` by adding deterministic app-storage, settings-default, and thumbnail-cache-default seams plus regression tests for fallback, unavailable storage, and unsafe relative path segments.
 - 2026-05-05: Completed `IP-10A` and closed `IP-10` by adding About diagnostics actions to open and clear the disposable thumbnail cache, backed by a safe cache-clear service and regression tests.
 - 2026-05-05: Completed `IP-14A` and closed `IP-14` by hardening settings corruption quarantine naming and adding coverage for corrupt DB reset, schema migration, unavailable storage, primitive defaults, and existing future timestamp behavior.
+- 2026-05-05: Completed `IP-11A` and closed `IP-11` by adding large-folder navigation coverage, volatile rescan coverage, enumeration-failure recovery coverage, and bounded folder-preview thumbnail request coverage for thousands of files.
 
 ## Verification Standard
 
