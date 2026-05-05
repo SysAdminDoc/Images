@@ -995,6 +995,58 @@
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}">
+                                <Button Style="{StaticResource ChromeButton}"
+                                        Click="FolderSortButton_Click"
+                                        Padding="9,4"
+                                        MinHeight="26"
+                                        Margin="0,0,10,0"
+                                        ToolTip="{Binding FolderSortTooltip}"
+                                        AutomationProperties.Name="Folder sort">
+                                    <Button.ContextMenu>
+                                        <ContextMenu Style="{StaticResource ViewportContextMenu}">
+                                            <MenuItem Header="Name (natural)"
+                                                      Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="NaturalName" />
+                                            <MenuItem Header="Name (Z to A)"
+                                                      Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="NameDescending" />
+                                            <Separator />
+                                            <MenuItem Header="Modified (newest first)"
+                                                      Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="ModifiedNewest" />
+                                            <MenuItem Header="Modified (oldest first)"
+                                                      Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="ModifiedOldest" />
+                                            <MenuItem Header="Created (newest first)"
+                                                      Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="CreatedNewest" />
+                                            <MenuItem Header="Created (oldest first)"
+                                                      Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="CreatedOldest" />
+                                            <Separator />
+                                            <MenuItem Header="Size (largest first)"
+                                                      Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="SizeLargest" />
+                                            <MenuItem Header="Size (smallest first)"
+                                                      Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="SizeSmallest" />
+                                            <MenuItem Header="Type, then name"
+                                                      Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="ExtensionThenName" />
+                                        </ContextMenu>
+                                    </Button.ContextMenu>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#xE8CB;"
+                                                   FontFamily="{StaticResource IconFontFamily}"
+                                                   FontSize="11"
+                                                   Margin="0,0,6,0"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding FolderSortLabel}"
+                                                   FontSize="11.5"
+                                                   FontWeight="SemiBold"
+                                                   VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
                                 <TextBlock Text="{Binding CurrentFileName}"
                                            Foreground="{StaticResource TextBrush}"
                                            FontWeight="SemiBold"
