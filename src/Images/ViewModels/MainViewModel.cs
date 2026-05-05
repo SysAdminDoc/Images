@@ -497,6 +497,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (CurrentPath is null) return "";
             var clean = RenameService.Sanitize(EditableStem);
             if (string.IsNullOrEmpty(clean)) return "";
+            if (!RenameService.IsSupportedTargetExtension(Extension))
+                return "Choose a supported Images extension";
+
             var target = RenameService.ResolveTargetPath(
                 Path.GetDirectoryName(CurrentPath)!, clean, Extension, CurrentPath);
             var targetName = Path.GetFileName(target);
@@ -1350,8 +1353,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         catch (Exception ex)
         {
             RenameStatus = RenameStatusKind.Error;
-            Toast($"Rename failed: {ex.Message}");
+            Toast($"Rename failed: {FirstLine(ex.Message)}");
         }
+    }
+
+    private static string FirstLine(string message)
+    {
+        var line = message
+            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+            .FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(line))
+            return "Unexpected error";
+
+        var parameterSuffix = line.IndexOf(" (Parameter '", StringComparison.Ordinal);
+        return parameterSuffix > 0 ? line[..parameterSuffix] : line;
     }
 
     private void CancelRenameEdit()

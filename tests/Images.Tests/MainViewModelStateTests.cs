@@ -151,6 +151,30 @@ public sealed class MainViewModelStateTests
         });
     }
 
+    [Fact]
+    public void FlushPendingRename_WhenExtensionUnsupported_DoesNotMoveSource()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var source = WritePng(temp.Path, "photo.png");
+            var unsupportedTarget = Path.Combine(temp.Path, "photo.txt");
+            using var viewModel = CreateViewModel(temp);
+
+            viewModel.OpenFile(source);
+            viewModel.IsExtensionUnlocked = true;
+            viewModel.Extension = ".txt";
+            viewModel.FlushPendingRename();
+
+            Assert.Equal(source, viewModel.CurrentPath);
+            Assert.True(File.Exists(source));
+            Assert.False(File.Exists(unsupportedTarget));
+            Assert.Equal(MainViewModel.RenameStatusKind.Error, viewModel.RenameStatus);
+            Assert.Equal("Rename failed: Extension '.txt' is not supported by Images.", viewModel.ToastMessage);
+            Assert.Equal("Choose a supported Images extension", viewModel.RenamePreview);
+        });
+    }
+
     private static MainViewModel CreateViewModel(TestDirectory temp, ClipboardImportService? clipboardImport = null)
         => new(CreateSettings(temp), clipboardImport);
 
