@@ -630,6 +630,53 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void CropAspectPreset_UpdatesConstrainedDragSelectionStatus()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "photo.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(image);
+            viewModel.ToggleCropModeCommand.Execute(null);
+            viewModel.SetCropAspectPresetCommand.Execute("square");
+
+            Assert.Equal("1:1", viewModel.CropAspectText);
+
+            viewModel.UpdateCropSelection(new PixelCoordinate(0, 0), new PixelCoordinate(1, 1));
+
+            Assert.Equal(new PixelSelection(0, 0, 2, 2), viewModel.CropSelection);
+            Assert.Equal("2 x 2 px at 0, 0", viewModel.CropSelectionText);
+            Assert.Contains("Aspect: 1:1", viewModel.CropStatusText);
+        });
+    }
+
+    [Fact]
+    public void CustomCropAspect_RequiresPositiveNumbersBeforeSelection()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "photo.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(image);
+            viewModel.ToggleCropModeCommand.Execute(null);
+            viewModel.SetCropAspectPresetCommand.Execute("custom");
+            viewModel.CustomCropAspectWidth = "0";
+
+            Assert.True(viewModel.ShowCustomCropAspect);
+            Assert.Equal("Custom ratio needed", viewModel.CropAspectText);
+
+            viewModel.UpdateCropSelection(new PixelCoordinate(0, 0), new PixelCoordinate(1, 1));
+
+            Assert.Null(viewModel.CropSelection);
+            Assert.Equal("Enter a positive custom aspect ratio before dragging.", viewModel.CropStatusText);
+        });
+    }
+
+    [Fact]
     public void ReloadCommand_ShowsOperationStatusAndDisablesMutatingCommands()
     {
         RunOnSta(() =>

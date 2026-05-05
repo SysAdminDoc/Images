@@ -147,6 +147,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ToggleCropModeCommand = new RelayCommand(() => IsCropMode = !IsCropMode, () => CanUseCrop);
         ApplyCropCommand = new RelayCommand(ApplyCropSelection, () => CanApplyCrop);
         CancelCropCommand = new RelayCommand(CancelCropMode, () => IsCropMode || HasCropSelection);
+        SetCropAspectPresetCommand = new RelayCommand(SetCropAspectPreset);
         CopyInspectorHexCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hex, "HEX"), () => HasInspectorSample);
         CopyInspectorRgbCommand = new RelayCommand(() => CopyInspectorValue(s => s.Rgb, "RGB"), () => HasInspectorSample);
         CopyInspectorHsvCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hsv, "HSV"), () => HasInspectorSample);
@@ -965,6 +966,48 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         private set => Set(ref _cropStatusText, value);
     }
 
+    public IReadOnlyList<CropAspectPreset> CropAspectPresets { get; } = CropSelectionService.AspectPresets;
+
+    private CropAspectPreset _selectedCropAspectPreset = CropSelectionService.FreeAspectPreset;
+    public CropAspectPreset SelectedCropAspectPreset
+    {
+        get => _selectedCropAspectPreset;
+        private set
+        {
+            if (!Set(ref _selectedCropAspectPreset, value))
+                return;
+
+            if (HasCropSelection)
+                CropStatusText = $"Aspect set to {CropAspectText}. Drag again to update the crop.";
+            else if (IsCropMode)
+                CropStatusText = $"Aspect set to {CropAspectText}. Drag on the image to choose a crop.";
+
+            RaiseCropAspectState();
+        }
+    }
+
+    private string _customCropAspectWidth = "1";
+    public string CustomCropAspectWidth
+    {
+        get => _customCropAspectWidth;
+        set
+        {
+            if (Set(ref _customCropAspectWidth, value))
+                RaiseCropAspectState();
+        }
+    }
+
+    private string _customCropAspectHeight = "1";
+    public string CustomCropAspectHeight
+    {
+        get => _customCropAspectHeight;
+        set
+        {
+            if (Set(ref _customCropAspectHeight, value))
+                RaiseCropAspectState();
+        }
+    }
+
     public bool HasCropSelection => CropSelection is { Width: > 0, Height: > 0 };
     public bool CanApplyCrop => IsCropMode && HasCropSelection && CanUseCrop;
     public bool ShowCropOverlay => IsCropMode || HasCropSelection;
@@ -974,6 +1017,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ? "Drag a rectangle on the image. Enter adds the crop to edit history; Esc cancels."
         : "Create a non-destructive crop for Save a copy exports.";
     public string CropSelectionText => CropSelection?.DisplayText ?? "No crop selected";
+    public string CropAspectText => EffectiveCropAspectPreset?.Label ?? "Custom ratio needed";
+    public string CropAspectHelpText => EffectiveCropAspectPreset?.Description ?? "Enter positive whole numbers for custom width and height.";
+    public bool ShowCustomCropAspect => SelectedCropAspectPreset.Id.Equals(CropSelectionService.CustomAspectPresetId, StringComparison.OrdinalIgnoreCase);
 
     // -------------------- Rename editor state --------------------
 
@@ -1675,6 +1721,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand ToggleCropModeCommand { get; }
     public ICommand ApplyCropCommand { get; }
     public ICommand CancelCropCommand { get; }
+    public ICommand SetCropAspectPresetCommand { get; }
     public ICommand CopyInspectorHexCommand { get; }
     public ICommand CopyInspectorRgbCommand { get; }
     public ICommand CopyInspectorHsvCommand { get; }
@@ -2733,7 +2780,22 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         CropSelection = CropSelectionService.Normalize(selection, PixelWidth, PixelHeight);
         CropStatusText = CropSelection is { } crop
-            ? $"Crop selected: {crop.DisplayText}."
+            ? $"Crop selected: {crop.DisplayText}. Aspect: {CropAspectText}."
+            : "Pointer is outside the image.";
+    }
+
+    public void UpdateCropSelection(PixelCoordinate anchor, PixelCoordinate current)
+    {
+        if (EffectiveCropAspectPreset is not { } aspect)
+        {
+            CropSelection = null;
+            CropStatusText = "Enter a positive custom aspect ratio before dragging.";
+            return;
+        }
+
+        CropSelection = CropSelectionService.CreateSelection(anchor, current, aspect, PixelWidth, PixelHeight);
+        CropStatusText = CropSelection is { } crop
+            ? $"Crop selected: {crop.DisplayText}. Aspect: {CropAspectText}."
             : "Pointer is outside the image.";
     }
 
@@ -2743,6 +2805,43 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         CropStatusText = IsCropMode
             ? "Drag on the image to choose a crop. Enter applies it to edit history."
             : "Turn on crop, drag on the image, then apply without changing the source file.";
+    }
+
+    private CropAspectPreset? EffectiveCropAspectPreset
+    {
+        get
+        {
+            if (!ShowCustomCropAspect)
+                return SelectedCropAspectPreset;
+
+            if (!int.TryParse(CustomCropAspectWidth, out var width) ||
+                !int.TryParse(CustomCropAspectHeight, out var height) ||
+                width <= 0 ||
+                height <= 0)
+            {
+                return null;
+            }
+
+            return new CropAspectPreset(
+                CropSelectionService.CustomAspectPresetId,
+                $"{width}:{height}",
+                $"Custom {width}:{height} crop.",
+                width,
+                height);
+        }
+    }
+
+    private void SetCropAspectPreset(object? parameter)
+    {
+        var id = parameter switch
+        {
+            CropAspectPreset preset => preset.Id,
+            string value => value,
+            _ => null
+        };
+
+        if (CropSelectionService.FindAspectPreset(id) is { } selectedPreset)
+            SelectedCropAspectPreset = selectedPreset;
     }
 
     private void ApplyCropSelection()
@@ -2829,6 +2928,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(CropSelectionText));
         Raise(nameof(CanApplyCrop));
         CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RaiseCropAspectState()
+    {
+        Raise(nameof(SelectedCropAspectPreset));
+        Raise(nameof(CropAspectText));
+        Raise(nameof(CropAspectHelpText));
+        Raise(nameof(ShowCustomCropAspect));
     }
 
     // V15-04: Reload re-enumerates the current file through the loader, re-applying WIC /

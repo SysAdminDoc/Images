@@ -24,6 +24,49 @@ public sealed class CropSelectionServiceTests
     }
 
     [Fact]
+    public void CreateSelection_FreeAspectMatchesRawDrag()
+    {
+        var selection = CropSelectionService.CreateSelection(
+            new PixelCoordinate(1, 1),
+            new PixelCoordinate(5, 3),
+            CropSelectionService.FreeAspectPreset,
+            pixelWidth: 10,
+            pixelHeight: 10);
+
+        Assert.Equal(new PixelSelection(1, 1, 5, 3), selection);
+    }
+
+    [Fact]
+    public void CreateSelection_SquareAspectPreservesDragDirection()
+    {
+        var square = CropSelectionService.FindAspectPreset("square")!;
+
+        var selection = CropSelectionService.CreateSelection(
+            new PixelCoordinate(8, 8),
+            new PixelCoordinate(3, 6),
+            square,
+            pixelWidth: 10,
+            pixelHeight: 10);
+
+        Assert.Equal(new PixelSelection(6, 6, 3, 3), selection);
+    }
+
+    [Fact]
+    public void CreateSelection_WideAspectClampsInsideImageBounds()
+    {
+        var wide = CropSelectionService.FindAspectPreset("16x9")!;
+
+        var selection = CropSelectionService.CreateSelection(
+            new PixelCoordinate(8, 4),
+            new PixelCoordinate(9, 9),
+            wide,
+            pixelWidth: 10,
+            pixelHeight: 10);
+
+        Assert.Equal(new PixelSelection(8, 4, 2, 1), selection);
+    }
+
+    [Fact]
     public void ToEditParameters_UsesInvariantPixelCoordinates()
     {
         var parameters = CropSelectionService.ToEditParameters(new PixelSelection(1, 2, 3, 4));

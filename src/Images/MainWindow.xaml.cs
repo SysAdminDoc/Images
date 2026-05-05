@@ -721,7 +721,7 @@ public partial class MainWindow : Window
             return;
 
         _cropSelectionStart = coordinate;
-        Vm.UpdateCropSelection(PixelInspectorService.CalculateSelection(coordinate, coordinate));
+        Vm.UpdateCropSelection(coordinate, coordinate);
         Canvas.CaptureMouse();
         e.Handled = true;
     }
@@ -734,7 +734,7 @@ public partial class MainWindow : Window
         if (!TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
             return;
 
-        Vm.UpdateCropSelection(PixelInspectorService.CalculateSelection(start, coordinate));
+        Vm.UpdateCropSelection(start, coordinate);
         e.Handled = true;
     }
 
@@ -743,7 +743,7 @@ public partial class MainWindow : Window
         if (_cropSelectionStart is { } start &&
             TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
         {
-            Vm.UpdateCropSelection(PixelInspectorService.CalculateSelection(start, coordinate));
+            Vm.UpdateCropSelection(start, coordinate);
         }
 
         _cropSelectionStart = null;

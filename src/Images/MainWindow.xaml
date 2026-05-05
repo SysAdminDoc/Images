@@ -3547,6 +3547,79 @@
                                 </StackPanel>
                             </Border>
 
+                            <TextBlock Text="Aspect ratio"
+                                       Style="{StaticResource Text.Caption}"
+                                       Margin="0,12,0,6" />
+                            <WrapPanel>
+                                <Button Command="{Binding SetCropAspectPresetCommand}"
+                                        CommandParameter="free"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Free crop aspect">
+                                    <TextBlock Text="Free" />
+                                </Button>
+                                <Button Command="{Binding SetCropAspectPresetCommand}"
+                                        CommandParameter="square"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Square crop aspect">
+                                    <TextBlock Text="1:1" />
+                                </Button>
+                                <Button Command="{Binding SetCropAspectPresetCommand}"
+                                        CommandParameter="3x2"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Three by two crop aspect">
+                                    <TextBlock Text="3:2" />
+                                </Button>
+                                <Button Command="{Binding SetCropAspectPresetCommand}"
+                                        CommandParameter="4x3"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Four by three crop aspect">
+                                    <TextBlock Text="4:3" />
+                                </Button>
+                                <Button Command="{Binding SetCropAspectPresetCommand}"
+                                        CommandParameter="16x9"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Sixteen by nine crop aspect">
+                                    <TextBlock Text="16:9" />
+                                </Button>
+                                <Button Command="{Binding SetCropAspectPresetCommand}"
+                                        CommandParameter="custom"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,0,8"
+                                        AutomationProperties.Name="Custom crop aspect">
+                                    <TextBlock Text="Custom" />
+                                </Button>
+                            </WrapPanel>
+
+                            <Grid Visibility="{Binding ShowCustomCropAspect, Converter={StaticResource BoolToVis}}"
+                                  Margin="0,2,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="68" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="68" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding CustomCropAspectWidth, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Custom crop aspect width" />
+                                <TextBlock Grid.Column="1"
+                                           Text=":"
+                                           Style="{StaticResource Text.Body}"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0" />
+                                <TextBox Grid.Column="2"
+                                         Text="{Binding CustomCropAspectHeight, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Custom crop aspect height" />
+                            </Grid>
+
+                            <TextBlock Text="{Binding CropAspectHelpText}"
+                                       Style="{StaticResource Text.Hint}"
+                                       TextWrapping="Wrap" />
+
                             <WrapPanel Margin="0,12,0,0">
                                 <Button Command="{Binding ApplyCropCommand}"
                                         Style="{StaticResource ChromeButton}"
