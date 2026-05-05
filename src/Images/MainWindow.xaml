@@ -918,6 +918,74 @@
                         </Border>
                     </Grid>
 
+                    <!-- Operation status — short live-region feedback for reload/export/edit work. -->
+                    <Border HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            Margin="0,24,0,0"
+                            MaxWidth="420"
+                            Visibility="{Binding ShowOperationStatus, Converter={StaticResource BoolToVis}}"
+                            AutomationProperties.Name="{Binding OperationStatusTitle}"
+                            AutomationProperties.LiveSetting="Polite"
+                            IsHitTestVisible="False">
+                        <Border.Style>
+                            <Style TargetType="Border" BasedOn="{StaticResource FloatingPill}">
+                                <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                <Setter Property="Opacity" Value="0" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsVisible" Value="True">
+                                        <Trigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                     From="0" To="1"
+                                                                     Duration="{StaticResource Motion.Base}">
+                                                        <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut" /></DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </Trigger.EnterActions>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                    Width="32"
+                                    Height="32"
+                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                    BorderThickness="1"
+                                    Background="{StaticResource WarningPanelBrush}"
+                                    BorderBrush="{StaticResource YellowBrush}"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,12,0">
+                                <TextBlock Text="&#xE895;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="13"
+                                           Foreground="{StaticResource YellowBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding OperationStatusTitle}"
+                                           Foreground="{StaticResource FloatingChromeTextBrush}"
+                                           FontSize="12.5"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding OperationStatusDetail}"
+                                           Foreground="{StaticResource SubtextBrush}"
+                                           FontSize="11.5"
+                                           LineHeight="16"
+                                           TextWrapping="Wrap"
+                                           Margin="0,3,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
                     <!-- Toast notification — elevated pill, fades on show via Opacity trigger -->
                     <Border x:Name="ToastHost"
                             HorizontalAlignment="Center"
