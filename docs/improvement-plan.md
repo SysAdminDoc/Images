@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-05` is complete. Update-check behavior now has non-network tests for success, current-version, HTTP failure, malformed payloads, trusted release URLs, transient network failures, timeout failures, retry-state recording, background due logic, and local state-file handling.
+`IP-15` is complete. CI now runs the same core verification path used locally: whitespace diff check, version-sync gate, vulnerable-package gate, Release build, tests, and CLI smoke commands. The release workflow uses the same reusable version-sync script.
 
 ## Next Focus
 
-The next recommended slice is `IP-15`, CI/release gates. The local verification path is consistent enough to encode in automation: solution build, tests, whitespace check, vulnerability/version gates, and CLI smoke commands.
+The next recommended slice is the first `IP-02` extraction: move clipboard import or folder-preview behavior out of `MainViewModel` behind a focused service/controller, then add tests around the extracted logic.
 
 ## Priority Backlog
 
@@ -34,20 +34,22 @@ The next recommended slice is `IP-15`, CI/release gates. The local verification 
 | IP-12 | P2 | Planned | Decode/export corpus | Add a small format corpus for decode/export regression tests. | Representative PNG, JPEG, WebP, TIFF, GIF/APNG, and document/vector samples protect codec upgrades and export behavior. |
 | IP-13 | P1 | Done | Shell/clipboard integration | Centralize opening URLs/files/folders and copying text. | About, crash dialog, settings, and main viewer use shared helpers with consistent error behavior and safer Explorer argument handling. |
 | IP-14 | P2 | Planned | Settings persistence | Strengthen settings schema and corruption tests. | Tests cover corruption quarantine, unavailable storage, defaults, migration behavior, and future timestamp handling. |
-| IP-15 | P1 | Planned | CI/release gates | Ensure CI exercises the real verification path. | CI runs solution build, tests, whitespace check, vulnerability gate, version sync gate, and CLI smoke commands used by local release validation. |
+| IP-15 | P1 | Done | CI/release gates | Ensure CI exercises the real verification path. | CI runs solution build, tests, whitespace check, vulnerability gate, version sync gate, and CLI smoke commands used by local release validation. |
+| IP-16 | P2 | Planned | Product differentiators | Track large future differentiators without disrupting the hardening sequence. | Local semantic search, duplicate cleanup, Squoosh-style visual comparison/export, and stronger library/metadata workflows have scoped design docs before implementation. |
 
 ## Implementation Order
 
-1. Add CI coverage for the verified local commands in `IP-15`.
-2. Extract clipboard import and folder preview from `MainViewModel` as the first `IP-02` slices.
-3. Add UI-state tests for the extracted controllers under `IP-03`.
-4. Build diagnostics/status UX from existing system-info, codec, OCR, and storage services under `IP-06`.
-5. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
+1. Extract clipboard import and folder preview from `MainViewModel` as the first `IP-02` slices.
+2. Add UI-state tests for the extracted controllers under `IP-03`.
+3. Build diagnostics/status UX from existing system-info, codec, OCR, and storage services under `IP-06`.
+4. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
+5. Scope `IP-16` design docs once near-term reliability and testability slices are stable.
 
 ## Progress Log
 
 - 2026-05-05: Created this improvement tracker and completed `IP-13` by adding shared shell and clipboard helpers used by About, crash dialog, settings, and main viewer actions.
 - 2026-05-05: Completed `IP-05` by adding update-check seams and 10 non-network tests for release parsing, retry-state policy, trusted URLs, due logic, and state-file behavior.
+- 2026-05-05: Completed `IP-15` by adding CI verification, a reusable version-sync script, release-workflow reuse of that script, vulnerability scanning, and CLI smoke checks.
 
 ## Verification Standard
 
