@@ -210,6 +210,56 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void PasteFromClipboardCommand_WhenFileListHasGatedArchive_ShowsRuntimeStatus()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var archive = Path.Combine(temp.Path, "book.cbr");
+            File.WriteAllBytes(archive, [0x52, 0x61, 0x72, 0x21]);
+            var source = new FakeClipboardDataSource { Files = [archive] };
+            var clipboardImport = new ClipboardImportService(
+                source,
+                () => temp.Path,
+                () => DateTimeOffset.UtcNow,
+                () => Guid.NewGuid());
+            using var viewModel = CreateViewModel(temp, clipboardImport);
+
+            viewModel.PasteFromClipboardCommand.Execute(null);
+
+            Assert.True(viewModel.HasSecondaryStatus);
+            Assert.Equal(SupportedImageFormats.GatedArchiveRuntimeTitle, viewModel.SecondaryStatusTitle);
+            Assert.Contains("ZIP/CBZ", viewModel.SecondaryStatusDetail);
+            Assert.Contains("will not download archive runtimes", viewModel.SecondaryStatusDetail);
+            Assert.Equal(MainViewModel.SecondaryStatusToneKind.Warning, viewModel.SecondaryStatusTone);
+            Assert.Equal(SupportedImageFormats.GatedArchiveRuntimeTitle, viewModel.ToastMessage);
+        });
+    }
+
+    [Fact]
+    public void OpenFile_WhenArchiveRuntimeGated_ShowsRecoveryStatus()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var archive = Path.Combine(temp.Path, "book.7z");
+            File.WriteAllBytes(archive, [0x37, 0x7A, 0xBC, 0xAF]);
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(archive);
+
+            Assert.Null(viewModel.CurrentPath);
+            Assert.False(viewModel.HasImage);
+            Assert.True(viewModel.HasSecondaryStatus);
+            Assert.Equal(SupportedImageFormats.GatedArchiveRuntimeTitle, viewModel.SecondaryStatusTitle);
+            Assert.Contains("RAR/CBR and 7z/CB7 support is gated", viewModel.SecondaryStatusDetail);
+            Assert.Contains("convert it to CBZ", viewModel.SecondaryStatusDetail);
+            Assert.Equal(MainViewModel.SecondaryStatusToneKind.Warning, viewModel.SecondaryStatusTone);
+            Assert.Equal(SupportedImageFormats.GatedArchiveRuntimeTitle, viewModel.ToastMessage);
+        });
+    }
+
+    [Fact]
     public void OpenRecentFolderCommand_WhenFolderMissing_ShowsRecoveryStatusAndRefreshesList()
     {
         RunOnSta(() =>
