@@ -531,7 +531,7 @@
 
                     <!-- Archive book page-turn zones. Narrow edge targets keep drag-pan available
                          across the center of the canvas while giving books a natural tap/click turn. -->
-                    <Button Command="{Binding PrevPageCommand}"
+                    <Button Command="{Binding LeftBookPageTurnCommand}"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Stretch"
                             Width="112"
@@ -540,8 +540,8 @@
                             Background="#01000000"
                             Cursor="Hand"
                             Visibility="{Binding IsArchiveBook, Converter={StaticResource BoolToVis}}"
-                            ToolTip="Previous book page"
-                            AutomationProperties.Name="Previous book page zone">
+                            ToolTip="{Binding LeftBookPageTurnTooltip}"
+                            AutomationProperties.Name="{Binding LeftBookPageTurnTooltip}">
                         <Border Width="38"
                                 Height="82"
                                 HorizontalAlignment="Left"
@@ -561,7 +561,7 @@
                         </Border>
                     </Button>
 
-                    <Button Command="{Binding NextPageCommand}"
+                    <Button Command="{Binding RightBookPageTurnCommand}"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Stretch"
                             Width="112"
@@ -570,8 +570,8 @@
                             Background="#01000000"
                             Cursor="Hand"
                             Visibility="{Binding IsArchiveBook, Converter={StaticResource BoolToVis}}"
-                            ToolTip="Next book page"
-                            AutomationProperties.Name="Next book page zone">
+                            ToolTip="{Binding RightBookPageTurnTooltip}"
+                            AutomationProperties.Name="{Binding RightBookPageTurnTooltip}">
                         <Border Width="38"
                                 Height="82"
                                 HorizontalAlignment="Right"
@@ -2191,6 +2191,25 @@
                                                    HorizontalAlignment="Center" />
                                     </Button>
                                 </UniformGrid>
+
+                                <Border Margin="0,12,0,0"
+                                        Padding="10,9"
+                                        CornerRadius="{StaticResource Radius.Sm.CR}"
+                                        Background="#10313244"
+                                        BorderBrush="{StaticResource HairlineBrush}"
+                                        BorderThickness="1">
+                                    <StackPanel>
+                                        <CheckBox IsChecked="{Binding ArchiveRightToLeft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  Content="{Binding ArchivePageTurnModeText}"
+                                                  ToolTip="{Binding ArchivePageTurnModeHint}"
+                                                  AutomationProperties.Name="Right-to-left book page turns" />
+                                        <TextBlock Text="{Binding ArchivePageTurnModeHint}"
+                                                   Margin="28,5,0,0"
+                                                   FontSize="11.5"
+                                                   Foreground="{StaticResource OverlayBrush}"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
                         </Border>
                     </StackPanel>
