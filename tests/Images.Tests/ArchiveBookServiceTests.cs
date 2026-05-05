@@ -26,7 +26,29 @@ public sealed class ArchiveBookServiceTests
         Assert.Equal("page2.png", second.EntryName);
         Assert.Equal(1, second.PageIndex);
         Assert.Equal(3, second.PageCount);
+        Assert.False(second.IsCover);
         Assert.NotEmpty(second.Bytes);
+    }
+
+    [Fact]
+    public void LoadPage_WhenArchiveHasExplicitCover_PromotesCoverBeforeNaturalPages()
+    {
+        using var temp = TestDirectory.Create();
+        var archivePath = Path.Combine(temp.Path, "book.cbz");
+        WriteArchive(
+            archivePath,
+            ("pages/page1.png", 0xFF, 0x00, 0x00),
+            ("bonus/cover.png", 0x00, 0xFF, 0x00),
+            ("pages/page2.png", 0x00, 0x00, 0xFF));
+
+        var names = ArchiveBookService.ListPageNames(archivePath);
+        var cover = ArchiveBookService.LoadPage(archivePath, requestedPageIndex: 0);
+
+        Assert.Equal(["bonus/cover.png", "pages/page1.png", "pages/page2.png"], names);
+        Assert.Equal("bonus/cover.png", cover.EntryName);
+        Assert.True(cover.IsCover);
+        Assert.Equal(0, cover.PageIndex);
+        Assert.Equal(3, cover.PageCount);
     }
 
     [Fact]
@@ -87,6 +109,23 @@ public sealed class ArchiveBookServiceTests
         Assert.Equal(1, second.Pages.PageIndex);
         Assert.Equal(2, second.Pages.PageCount);
         Assert.Contains("archive page 2 of 2", second.DecoderUsed, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ImageLoader_LoadsExplicitArchiveCoverWithDecoderProvenance()
+    {
+        using var temp = TestDirectory.Create();
+        var archivePath = Path.Combine(temp.Path, "book.cbz");
+        WriteArchive(
+            archivePath,
+            ("pages/page1.png", 0xFF, 0x00, 0x00),
+            ("cover.png", 0x00, 0xFF, 0x00));
+
+        var loaded = ImageLoader.Load(archivePath);
+
+        Assert.NotNull(loaded.Pages);
+        Assert.Equal(0, loaded.Pages.PageIndex);
+        Assert.Contains("archive cover, page 1 of 2", loaded.DecoderUsed, StringComparison.OrdinalIgnoreCase);
     }
 
     private static void WriteArchive(string path, params (string Name, byte Red, byte Green, byte Blue)[] entries)

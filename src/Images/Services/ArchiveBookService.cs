@@ -17,7 +17,8 @@ public static class ArchiveBookService
         string EntryName,
         byte[] Bytes,
         int PageIndex,
-        int PageCount);
+        int PageCount,
+        bool IsCover);
 
     public static bool IsSupportedArchive(string path)
         => SupportedImageFormats.IsArchive(path);
@@ -49,7 +50,7 @@ public static class ArchiveBookService
                 ? (int)entry.Length
                 : 0);
             entryStream.CopyTo(bytes);
-            return new ArchivePage(entry.FullName, bytes.ToArray(), pageIndex, entries.Count);
+            return new ArchivePage(entry.FullName, bytes.ToArray(), pageIndex, entries.Count, IsCoverEntry(entry));
         }
         catch (InvalidDataException ex)
         {
@@ -112,10 +113,28 @@ public static class ArchiveBookService
 
     private static int CompareEntries(ZipArchiveEntry a, ZipArchiveEntry b)
     {
+        var coverResult = IsCoverEntry(b).CompareTo(IsCoverEntry(a));
+        if (coverResult != 0)
+            return coverResult;
+
         var result = StrCmpLogicalW(a.FullName.Replace('\\', '/'), b.FullName.Replace('\\', '/'));
         return result != 0
             ? result
             : StringComparer.OrdinalIgnoreCase.Compare(a.FullName, b.FullName);
+    }
+
+    private static bool IsCoverEntry(ZipArchiveEntry entry)
+    {
+        var stem = Path.GetFileNameWithoutExtension(entry.Name);
+        if (string.IsNullOrWhiteSpace(stem))
+            return false;
+
+        var normalized = new string(stem
+            .Where(char.IsLetterOrDigit)
+            .Select(char.ToLowerInvariant)
+            .ToArray());
+
+        return normalized is "cover" or "front" or "frontcover" or "coverfront" or "folder";
     }
 
     [DllImport("shlwapi.dll", CharSet = CharSet.Unicode)]
