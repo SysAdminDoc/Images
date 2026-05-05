@@ -388,6 +388,10 @@ public partial class MainWindow : Window
                 Vm.PasteFromClipboardCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.B when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
+                Vm.OpenReferenceBoardCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.OemComma when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
                 Vm.SettingsCommand.Execute(null);
                 e.Handled = true;

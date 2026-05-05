@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V20-33` is complete. RAR/CBR and 7z/CB7 archive books now open through the managed SharpCompress adapter with the same read-only page model, unsafe-path filtering, nested-archive skipping, per-entry byte cap, diagnostics provenance, and generated archive regression coverage used by the ZIP/CBZ foundation.
+Roadmap `V81-21` is complete. The app now has a non-modal local reference board launched with `Ctrl+B`, seeded from the current image, with supported-file drag/drop, a large local canvas, draggable image cards, editable notes, draggable/resizable group frames, always-on-top pinning, zoom/reset controls, clear confirmation, content-bounds PNG export, and geometry regression coverage.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the next main `ROADMAP.md` feature backlog item after the verified `V20-33` archive expansion commit.
+The improvement-plan backlog is complete. Continue with the next main `ROADMAP.md` feature backlog item, `V81-22` inspector tools.
 
 ## Research Inputs
 
@@ -115,6 +115,7 @@ The improvement-plan backlog is complete. Continue with the next main `ROADMAP.m
 - 2026-05-05: Closed roadmap `V20-34` by adding a current-folder gallery workbench with cached multi-column thumbnails, quick filtering, sort shortcuts, per-thumbnail context actions, current-item selection, Escape-to-close, and Enter-to-load coverage.
 - 2026-05-05: Continued `RS-02` / `V20-33` by adding direct-open and clipboard recovery states for gated RAR/CBR/7z/CB7 archive formats, explicitly steering users to extract or convert to CBZ without automatic runtime downloads.
 - 2026-05-05: Closed `RS-02` / `V20-33` by enabling managed SharpCompress read-only support for RAR/CBR and 7z/CB7 books, preserving unsafe-entry filtering, nested-archive skipping, per-entry byte caps, corrupt-archive recovery copy, diagnostics provenance, vulnerability scanning, and generated ZIP/7z regression coverage.
+- 2026-05-05: Closed roadmap `V81-21` by adding a non-modal local reference board with supported-file drag/drop, draggable image cards, editable notes, draggable/resizable group frames, always-on-top pinning, zoom/reset controls, clear confirmation, content-bounds PNG export, and geometry regression coverage.
 
 ## Verification Standard
 

@@ -154,6 +154,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         UnlockExtensionCommand = new RelayCommand(() => IsExtensionUnlocked = !IsExtensionUnlocked);
         UndoRenameCommand = new RelayCommand(p => UndoOne(p as RenameService.UndoEntry), p => p is RenameService.UndoEntry);
         AboutCommand = new RelayCommand(ShowAboutWindow);
+        OpenReferenceBoardCommand = new RelayCommand(OpenReferenceBoard);
         OpenRecentFolderCommand = new RelayCommand(p => OpenRecentFolder(p as string), p => p is string);
         OpenRecentArchiveCommand = new RelayCommand(
             async p => await OpenRecentArchiveAsync(p as ArchiveReadPositionService.ArchiveReadHistoryItem),
@@ -1288,6 +1289,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand UnlockExtensionCommand { get; }
     public ICommand UndoRenameCommand { get; }
     public ICommand AboutCommand { get; }
+    public ICommand OpenReferenceBoardCommand { get; }
     public ICommand OpenRecentFolderCommand { get; }
     public ICommand OpenRecentArchiveCommand { get; }
     public ICommand OpenPreviewItemCommand { get; }
@@ -2193,6 +2195,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Owner = Application.Current?.MainWindow
         };
         about.ShowDialog();
+    }
+
+    private void OpenReferenceBoard()
+    {
+        var board = new Images.ReferenceBoardWindow
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        if (!string.IsNullOrWhiteSpace(CurrentPath) && File.Exists(CurrentPath))
+            board.AddFiles([CurrentPath]);
+
+        board.Show();
     }
 
     // Item 2: Settings window — opens modal, then re-reads persistent prefs so the viewer
