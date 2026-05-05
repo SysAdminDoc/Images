@@ -200,7 +200,7 @@ public sealed class ThumbnailCache
             _lastEvictionSweepUtc = DateTime.UtcNow;
         }
 
-        _ = Task.Run(EvictIfOverCap);
+        _ = BackgroundTaskTracker.Queue("thumbnail-cache-eviction", EvictIfOverCap);
     }
 
     /// <summary>

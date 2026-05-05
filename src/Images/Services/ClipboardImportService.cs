@@ -75,7 +75,9 @@ public sealed class ClipboardImportService
             () => AppStorage.TryGetAppDirectory("clipboard"),
             () => DateTimeOffset.UtcNow,
             Guid.NewGuid,
-            clipDir => _ = Task.Run(() => PruneClipboardImagesSafely(clipDir)))
+            clipDir => _ = BackgroundTaskTracker.Queue(
+                "clipboard-temp-prune",
+                () => PruneClipboardImagesSafely(clipDir)))
     {
     }
 
