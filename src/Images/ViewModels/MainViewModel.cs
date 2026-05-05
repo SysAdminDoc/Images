@@ -18,10 +18,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly PreloadService _preload = new();
     private readonly OcrService _ocr = new();
     private readonly Dispatcher _uiDispatcher = Dispatcher.CurrentDispatcher;
-    private readonly SemaphoreSlim _thumbnailDecodeGate = new(2);
+    private readonly FolderPreviewController _folderPreview;
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
-    private CancellationTokenSource _folderPreviewCts = new();
 
     private bool _suppressStemChange;
     private string _committedStemOnDisk = string.Empty;
@@ -45,6 +44,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public MainViewModel()
     {
+        _folderPreview = new FolderPreviewController(_uiDispatcher, () => _isDisposed);
+        _folderPreview.StateChanged += (_, _) => RaiseFolderPreviewState();
+
         _renameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(600) };
         _renameTimer.Tick += (_, _) => { _renameTimer.Stop(); FlushPendingRename(); };
 
@@ -103,6 +105,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RevealPreviewItemCommand = new RelayCommand(p => RevealPreviewItem(p as FolderPreviewItem), p => p is FolderPreviewItem);
         CopyPreviewPathCommand = new RelayCommand(p => CopyPreviewPath(p as FolderPreviewItem), p => p is FolderPreviewItem);
         EnsurePreviewThumbnailCommand = new RelayCommand(p => EnsurePreviewThumbnail(p as FolderPreviewItem), p => p is FolderPreviewItem);
+        SetFolderSortCommand = new RelayCommand(SetFolderSort, p => DirectorySortModeInfo.TryParseCommandParameter(p, out _));
         ToggleFilmstripCommand = new RelayCommand(ToggleFilmstrip, () => CanToggleFilmstrip);
         ToggleMetadataHudCommand = new RelayCommand(ToggleMetadataHud, () => CanToggleMetadataHud);
         PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard);
@@ -641,9 +644,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     // -------------------- Folder preview strip --------------------
 
-    public ObservableCollection<FolderPreviewItem> FolderPreviewItems { get; } = new();
-
-    private int _folderPreviewGeneration;
+    public ObservableCollection<FolderPreviewItem> FolderPreviewItems => _folderPreview.Items;
 
     public bool IsFilmstripVisible
     {
@@ -664,105 +665,18 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public string FilmstripToggleTooltip => IsFilmstripVisible ? "Hide filmstrip (T)" : "Show filmstrip (T)";
 
+    public string FolderSortLabel => DirectorySortModeInfo.ShortLabel(_nav.SortMode);
+
+    public string FolderSortTooltip => $"Sort folder by {DirectorySortModeInfo.DisplayName(_nav.SortMode)}";
+
     private void RefreshFolderPreview()
     {
-        var generation = ++_folderPreviewGeneration;
-        var previousCts = _folderPreviewCts;
-        previousCts.Cancel();
-        _ = DisposeFolderPreviewSourceLaterAsync(previousCts);
-        _folderPreviewCts = new CancellationTokenSource();
-        FolderPreviewItems.Clear();
-        RaiseFolderPreviewState();
-
-        if (_nav.Count < 2 || _nav.CurrentIndex < 0)
-            return;
-
-        var token = _folderPreviewCts.Token;
-        var files = _nav.Files;
-        var count = files.Count;
-
-        for (var index = 0; index < count; index++)
-        {
-            var item = new FolderPreviewItem(
-                files[index],
-                Path.GetFileName(files[index]),
-                $"{index + 1} / {count}",
-                index == _nav.CurrentIndex);
-
-            FolderPreviewItems.Add(item);
-            if (ShouldPreloadPreviewThumbnail(count, _nav.CurrentIndex, index))
-                QueueThumbnailLoad(item, generation, token);
-        }
-
-        RaiseFolderPreviewState();
-    }
-
-    private static bool ShouldPreloadPreviewThumbnail(int count, int currentIndex, int index)
-    {
-        if (count <= 9)
-            return true;
-
-        var forward = (index - currentIndex + count) % count;
-        var backward = (currentIndex - index + count) % count;
-        return Math.Min(forward, backward) <= 4;
-    }
-
-    private void QueueThumbnailLoad(FolderPreviewItem item, int generation, CancellationToken token)
-    {
-        if (_isDisposed || !item.TryMarkThumbnailRequested()) return;
-
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await _thumbnailDecodeGate.WaitAsync(token).ConfigureAwait(false);
-                try
-                {
-                    if (token.IsCancellationRequested) return;
-
-                    var thumbnail = ThumbnailCache.Instance.GetOrCreateImageSource(item.Path, token);
-                    if (thumbnail is null || token.IsCancellationRequested) return;
-
-                    _ = _uiDispatcher.InvokeAsync(() =>
-                    {
-                        if (_isDisposed || token.IsCancellationRequested || generation != _folderPreviewGeneration) return;
-                        if (!FolderPreviewItems.Contains(item)) return;
-
-                        item.Thumbnail = thumbnail;
-                    });
-                }
-                finally
-                {
-                    _thumbnailDecodeGate.Release();
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                // Superseded navigation state. The next refresh owns the visible thumbnail set.
-            }
-            catch
-            {
-                // Folder preview is opportunistic; decode failures are already logged by the cache.
-            }
-        });
+        _folderPreview.Refresh(_nav.Files, _nav.CurrentIndex);
     }
 
     private void EnsurePreviewThumbnail(FolderPreviewItem? item)
     {
-        if (_isDisposed || item is null || !FolderPreviewItems.Contains(item)) return;
-        QueueThumbnailLoad(item, _folderPreviewGeneration, _folderPreviewCts.Token);
-    }
-
-    private static async Task DisposeFolderPreviewSourceLaterAsync(CancellationTokenSource source)
-    {
-        try
-        {
-            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
-        }
-        finally
-        {
-            source.Dispose();
-        }
+        _folderPreview.EnsureThumbnail(item);
     }
 
     private void OpenPreviewItem(FolderPreviewItem? item)
@@ -789,12 +703,22 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Toast(IsFilmstripVisible ? "Filmstrip shown" : "Filmstrip hidden");
     }
 
+    private void SetFolderSort(object? parameter)
+    {
+        if (!DirectorySortModeInfo.TryParseCommandParameter(parameter, out var mode)) return;
+        if (!_nav.SetSortMode(mode)) return;
+
+        Toast($"Sorted by {DirectorySortModeInfo.DisplayName(mode)}");
+    }
+
     private void RaiseFolderPreviewState()
     {
         Raise(nameof(CanToggleFilmstrip));
         Raise(nameof(ShowFilmstrip));
         Raise(nameof(ShowSideFolderPreview));
         Raise(nameof(FilmstripToggleTooltip));
+        Raise(nameof(FolderSortLabel));
+        Raise(nameof(FolderSortTooltip));
         CommandManager.InvalidateRequerySuggested();
     }
 
@@ -928,6 +852,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand RevealPreviewItemCommand { get; }
     public ICommand CopyPreviewPathCommand { get; }
     public ICommand EnsurePreviewThumbnailCommand { get; }
+    public ICommand SetFolderSortCommand { get; }
     public ICommand ToggleFilmstripCommand { get; }
     public ICommand ToggleMetadataHudCommand { get; }
     public ICommand PasteFromClipboardCommand { get; }
@@ -1774,7 +1699,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             _isFilmstripVisible = filmstrip;
             Raise(nameof(IsFilmstripVisible));
-            Raise(nameof(ShowFilmstrip));
+            RaiseFolderPreviewState();
         }
 
         var hud = SettingsService.Instance.GetBool(Keys.MetadataHudVisible, false);
@@ -2025,10 +1950,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         DecoderUsed = null;
         ResetPageState();
         ClearPhotoMetadata();
-        _folderPreviewGeneration++;
-        _folderPreviewCts.Cancel();
-        FolderPreviewItems.Clear();
-        RaiseFolderPreviewState();
+        _folderPreview.Clear();
         RenameStatus = RenameStatusKind.Idle;
         SyncRenameEditorFromDisk();
         Raise(nameof(FileSizeText));
@@ -2061,12 +1983,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _nav.ListChanged -= OnDirectoryListChanged;
         ClearOcrOverlay(cancelExtraction: true);
         _metadataGeneration++;
-        _folderPreviewGeneration++;
-        _folderPreviewCts.Cancel();
-        _ = DisposeFolderPreviewSourceLaterAsync(_folderPreviewCts);
-        // SemaphoreSlim.Dispose is unsafe while background thumbnail workers can still be inside
-        // WaitAsync/Release. The gate has no eagerly allocated OS handle here, so cancellation is
-        // the correct shutdown boundary and process cleanup reclaims the lightweight object.
+        _folderPreview.Dispose();
         _preload.Dispose();
         _nav.Dispose();
 
@@ -2081,42 +1998,4 @@ public class OcrTextLine : ObservableObject
 {
     public string Text { get; set; } = string.Empty;
     public Windows.Foundation.Rect BoundingBox { get; set; }
-}
-
-public sealed class FolderPreviewItem : ObservableObject
-{
-    private ImageSource? _thumbnail;
-    private bool _thumbnailRequested;
-
-    public FolderPreviewItem(string path, string fileName, string positionText, bool isCurrent)
-    {
-        Path = path;
-        FileName = fileName;
-        PositionText = positionText;
-        IsCurrent = isCurrent;
-    }
-
-    public string Path { get; }
-    public string FileName { get; }
-    public string PositionText { get; }
-    public bool IsCurrent { get; }
-
-    public ImageSource? Thumbnail
-    {
-        get => _thumbnail;
-        set
-        {
-            if (Set(ref _thumbnail, value))
-                Raise(nameof(HasThumbnail));
-        }
-    }
-
-    public bool HasThumbnail => Thumbnail is not null;
-
-    public bool TryMarkThumbnailRequested()
-    {
-        if (_thumbnailRequested || HasThumbnail) return false;
-        _thumbnailRequested = true;
-        return true;
-    }
 }

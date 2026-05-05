@@ -137,6 +137,16 @@ public partial class MainWindow : Window
             Vm.EnsurePreviewThumbnailCommand.Execute(item);
     }
 
+    private void FolderSortButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { ContextMenu: { } menu } button)
+        {
+            menu.PlacementTarget = button;
+            menu.IsOpen = true;
+            e.Handled = true;
+        }
+    }
+
     private void OnSourceInitialized(object? sender, EventArgs e)
     {
         // Flip the native title bar to dark so the Catppuccin Mocha interior doesn't sit inside a

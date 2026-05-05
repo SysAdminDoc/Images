@@ -1,10 +1,75 @@
 using System.IO;
 using Images.Services;
+using Images.ViewModels;
 
 namespace Images.Tests;
 
 public sealed class DirectoryNavigatorTests
 {
+    [Fact]
+    public void Open_UsesNaturalNameSortByDefault()
+    {
+        using var temp = TestDirectory.Create();
+        var tenth = temp.WriteFile("image10.jpg");
+        var second = temp.WriteFile("image2.jpg");
+        var first = temp.WriteFile("image1.jpg");
+
+        using var nav = new DirectoryNavigator();
+
+        Assert.True(nav.Open(tenth));
+        Assert.Equal(DirectorySortMode.NaturalName, nav.SortMode);
+        Assert.Equal([first, second, tenth], nav.Files);
+    }
+
+    [Fact]
+    public void SetSortMode_ModifiedNewest_PreservesCurrentFileAndReorders()
+    {
+        using var temp = TestDirectory.Create();
+        var old = temp.WriteFile("old.jpg");
+        var current = temp.WriteFile("current.jpg");
+        var newest = temp.WriteFile("newest.jpg");
+
+        File.SetLastWriteTimeUtc(old, new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        File.SetLastWriteTimeUtc(current, new DateTime(2026, 2, 1, 0, 0, 0, DateTimeKind.Utc));
+        File.SetLastWriteTimeUtc(newest, new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc));
+
+        using var nav = new DirectoryNavigator();
+        Assert.True(nav.Open(current));
+
+        Assert.True(nav.SetSortMode(DirectorySortMode.ModifiedNewest));
+
+        Assert.Equal([newest, current, old], nav.Files);
+        Assert.Equal(current, nav.CurrentPath);
+        Assert.Equal(1, nav.CurrentIndex);
+    }
+
+    [Fact]
+    public void SetSortMode_ExtensionThenName_GroupsByExtensionWithNaturalNames()
+    {
+        using var temp = TestDirectory.Create();
+        var png10 = temp.WriteFile("frame10.png");
+        var jpg = temp.WriteFile("photo.jpg");
+        var png2 = temp.WriteFile("frame2.png");
+
+        using var nav = new DirectoryNavigator();
+        Assert.True(nav.Open(png10));
+
+        Assert.True(nav.SetSortMode(DirectorySortMode.ExtensionThenName));
+
+        Assert.Equal([jpg, png2, png10], nav.Files);
+        Assert.Equal(png10, nav.CurrentPath);
+        Assert.Equal(2, nav.CurrentIndex);
+    }
+
+    [Fact]
+    public void FolderPreviewController_ShouldPreloadNearbyItemsOnlyInLargeFolders()
+    {
+        Assert.True(FolderPreviewController.ShouldPreloadThumbnail(count: 9, currentIndex: 4, index: 8));
+        Assert.True(FolderPreviewController.ShouldPreloadThumbnail(count: 20, currentIndex: 10, index: 14));
+        Assert.True(FolderPreviewController.ShouldPreloadThumbnail(count: 20, currentIndex: 10, index: 6));
+        Assert.False(FolderPreviewController.ShouldPreloadThumbnail(count: 20, currentIndex: 10, index: 15));
+    }
+
     [Fact]
     public void Refresh_WhenCurrentFileDisappears_ClampsToValidItem()
     {
