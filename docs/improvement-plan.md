@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `E12` has its first crop slice partially shipped. Images now has an on-canvas non-destructive crop mode that records image-pixel crop bounds into the XMP edit stack and relies on the existing Save-a-copy provenance path for edited exports.
+Roadmap `V30-01` is complete inside the broader `E12` editor spike. Images now has an on-canvas non-destructive crop mode with aspect presets, custom ratios, rule-of-thirds guides, image-pixel crop bounds in the XMP edit stack, and the existing Save-a-copy provenance path for edited exports.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the remaining `E12` work: richer selection tools, crop aspect-ratio presets, rule-of-thirds/composition overlay polish, lossless JPEG writeback policy, and the explicit content-aware inpaint runtime/model choice.
+The improvement-plan backlog is complete. Continue with the remaining `E12` work: richer selection tools, lossless JPEG writeback policy, and the explicit content-aware inpaint runtime/model choice.
 
 ## Research Inputs
 
@@ -84,6 +84,7 @@ The improvement-plan backlog is complete. Continue with the remaining `E12` work
 - 2026-05-05: Completed roadmap `E11` by adding a preset-based batch processor with previewed output paths/dimensions, dry-run default, JSON presets, and overwrite-safe export execution.
 - 2026-05-05: Completed roadmap `V100-01` by adding XMP-backed non-destructive edit history, virtual copies, apply-on-export support, edited-copy provenance sidecars, an edit-history window, Save-a-copy integration, and regression coverage.
 - 2026-05-05: Partially completed roadmap `E12` by adding an on-canvas non-destructive crop mode with image-pixel drag selection, side-panel and keyboard apply/cancel flows, XMP edit-stack crop operations, docs, and regression coverage.
+- 2026-05-05: Completed roadmap `V30-01` within `E12` by adding free/square/3:2/4:3/16:9/custom crop aspect controls, custom ratio validation, rule-of-thirds overlay guides, and focused crop selection regression coverage.
 - 2026-05-05: Completed `IP-02H` and closed `IP-02` by extracting update-check UI state into `UpdateCheckController` and covering background skip, newer-release, current-release, error, and release-link opening outcomes.
 - 2026-05-05: Completed `IP-03B` by adding a deterministic folder-preview thumbnail loader seam and regression tests for clear and superseded-refresh cancellation paths.
 - 2026-05-05: Completed `IP-03C` by adding an internal `MainViewModel` controller-injection seam and tests that relay metadata, OCR, and update-check state through the view model.
