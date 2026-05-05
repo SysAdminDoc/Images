@@ -21,8 +21,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly SettingsService _settings;
     private readonly ClipboardImportService _clipboardImport;
     private readonly FolderPreviewController _folderPreview;
-    private readonly Action<string> _sendToRecycleBin;
-    private readonly Func<Window?, string, ConfirmDialog.ConfirmationResult> _confirmRecycleBinMove;
+    private readonly RecycleBinDeleteService _recycleBinDelete;
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
 
@@ -51,14 +50,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         SettingsService settings,
         ClipboardImportService? clipboardImport = null,
         DirectoryNavigator? navigator = null,
-        Action<string>? sendToRecycleBin = null,
-        Func<Window?, string, ConfirmDialog.ConfirmationResult>? confirmRecycleBinMove = null)
+        RecycleBinDeleteService? recycleBinDelete = null)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _clipboardImport = clipboardImport ?? new ClipboardImportService();
         _nav = navigator ?? new DirectoryNavigator();
-        _sendToRecycleBin = sendToRecycleBin ?? SendToRecycleBin;
-        _confirmRecycleBinMove = confirmRecycleBinMove ?? ConfirmDialog.ConfirmRecycleBinMove;
+        _recycleBinDelete = recycleBinDelete ?? new RecycleBinDeleteService(_settings);
         _folderPreview = new FolderPreviewController(_uiDispatcher, () => _isDisposed);
         _folderPreview.StateChanged += (_, _) => RaiseFolderPreviewState();
 
@@ -1371,54 +1368,36 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void DeleteCurrent()
     {
-        if (CurrentPath is null || !File.Exists(CurrentPath)) return;
+        if (CurrentPath is null) return;
         _renameTimer.Stop();
 
         var toDelete = CurrentPath;
-        if (!ConfirmRecycleBinDelete(toDelete))
+        var result = _recycleBinDelete.Delete(toDelete, Application.Current?.MainWindow);
+        switch (result.Status)
         {
-            Toast("Delete canceled");
-            return;
+            case RecycleBinDeleteStatus.Canceled:
+                Toast("Delete canceled");
+                return;
+            case RecycleBinDeleteStatus.Missing:
+                _nav.RemoveCurrent();
+                Toast($"File no longer exists: {Path.GetFileName(toDelete)}");
+                AdvanceAfterRemovedCurrent();
+                return;
+            case RecycleBinDeleteStatus.Failed:
+                Toast($"Delete failed: {result.ErrorMessage}");
+                return;
         }
 
-        try
-        {
-            _sendToRecycleBin(toDelete);
-
-            _nav.RemoveCurrent();
-            Toast($"Sent to Recycle Bin: {Path.GetFileName(toDelete)}");
-            if (_nav.CurrentPath is null) { ClearCurrentState(); return; }
-            ResetPageState();
-            LoadCurrent();
-        }
-        catch (Exception ex)
-        {
-            Toast($"Delete failed: {ex.Message}");
-        }
+        _nav.RemoveCurrent();
+        Toast($"Sent to Recycle Bin: {result.FileName}");
+        AdvanceAfterRemovedCurrent();
     }
 
-    private bool ConfirmRecycleBinDelete(string path)
+    private void AdvanceAfterRemovedCurrent()
     {
-        if (!_settings.GetBool(Keys.ConfirmRecycleBinDelete, true))
-            return true;
-
-        var result = _confirmRecycleBinMove(Application.Current?.MainWindow, path);
-        if (result.DoNotAskAgain)
-        {
-            _settings.SetBool(Keys.ConfirmRecycleBinDelete, false);
-            Toast("Recycle Bin confirmation disabled");
-        }
-
-        return result.Confirmed;
-    }
-
-    private static void SendToRecycleBin(string path)
-    {
-        Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
-            path,
-            Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
-            Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin,
-            Microsoft.VisualBasic.FileIO.UICancelOption.DoNothing);
+        if (_nav.CurrentPath is null) { ClearCurrentState(); return; }
+        ResetPageState();
+        LoadCurrent();
     }
 
     private void Rotate(double delta)
