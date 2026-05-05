@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Runtime.ExceptionServices;
 using System.Threading;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -483,6 +484,42 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void ArchiveOldScanFilter_CleansDisplayedPageAndCanBeRestored()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var archive = WriteTwoPageCbz(temp.Path, "old-scan.cbz");
+            var settings = CreateSettings(temp);
+            using var viewModel = new MainViewModel(settings);
+
+            viewModel.OpenFile(archive);
+
+            var original = ReadFirstPixel((BitmapSource)viewModel.CurrentImage!);
+            Assert.NotEqual(original.R, original.G);
+            Assert.NotEqual(original.G, original.B);
+
+            viewModel.ArchiveOldScanFilterEnabled = true;
+
+            Assert.True(settings.GetBool(Keys.ArchiveOldScanFilter, false));
+            Assert.Equal("Clean old scans on", viewModel.ArchiveOldScanFilterText);
+            Assert.Contains("not changed", viewModel.ArchiveOldScanFilterHint);
+            Assert.Contains("clean scan filter", viewModel.DecoderUsed);
+            var filtered = ReadFirstPixel((BitmapSource)viewModel.CurrentImage!);
+            Assert.Equal(filtered.R, filtered.G);
+            Assert.Equal(filtered.G, filtered.B);
+            Assert.Equal(original.A, filtered.A);
+
+            viewModel.ArchiveOldScanFilterEnabled = false;
+
+            Assert.False(settings.GetBool(Keys.ArchiveOldScanFilter, true));
+            Assert.DoesNotContain("clean scan filter", viewModel.DecoderUsed);
+            var restored = ReadFirstPixel((BitmapSource)viewModel.CurrentImage!);
+            Assert.Equal(original, restored);
+        });
+    }
+
+    [Fact]
     public void FirstRunGuidance_ExposesCapabilityAndPrivacySummaries()
     {
         RunOnSta(() =>
@@ -857,6 +894,16 @@ public sealed class MainViewModelStateTests
             8);
         bitmap.Freeze();
         return bitmap;
+    }
+
+    private static (byte B, byte G, byte R, byte A) ReadFirstPixel(BitmapSource bitmap)
+    {
+        var source = bitmap.Format == PixelFormats.Bgra32
+            ? bitmap
+            : new FormatConvertedBitmap(bitmap, PixelFormats.Bgra32, null, 0);
+        var pixel = new byte[4];
+        source.CopyPixels(new Int32Rect(0, 0, 1, 1), pixel, 4, 0);
+        return (pixel[0], pixel[1], pixel[2], pixel[3]);
     }
 
     private static PropertyChangedEventHandler RecordChangedProperty(ICollection<string> changed)
