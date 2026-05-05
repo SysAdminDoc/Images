@@ -15,5 +15,14 @@ The runtime detector also accepts a flat Codecs\Ghostscript folder that contains
 gsdll64.dll directly. IMAGES_GHOSTSCRIPT_DIR can point to the same layout for
 development/testing.
 
-Do not commit third-party Ghostscript binaries unless the release owner has
-confirmed redistribution rights for the exact package being shipped.
+Official release artifacts may bundle Ghostscript app-local so users do not
+need to install it separately. The bundled AGPL Ghostscript license file is
+installed at:
+
+  Codecs\Ghostscript\doc\COPYING
+
+The matching Ghostscript source archive and SHA-256 provenance are listed in
+the GitHub release notes.
+
+Do not commit third-party Ghostscript binaries. Stage them only for release
+artifact builds after the exact runtime and license model have been reviewed.

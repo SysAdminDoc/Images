@@ -71,9 +71,20 @@ if ($existing -and -not $Force) {
     throw "Destination '$destinationFull' already contains files. Re-run with -Force to merge/overwrite."
 }
 
-Get-ChildItem -LiteralPath $resolvedSource -Force | ForEach-Object {
-    Copy-Item -LiteralPath $_.FullName -Destination $destinationFull -Recurse -Force
-}
+$ignoredRootNames = @(
+    '$PLUGINSDIR',
+    'examples'
+)
+
+Get-ChildItem -LiteralPath $resolvedSource -Force |
+    Where-Object {
+        $_.Name -notin $ignoredRootNames -and
+        $_.Name -notlike "uninstgs*" -and
+        $_.Name -notlike "vcredist*.exe"
+    } |
+    ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination $destinationFull -Recurse -Force
+    }
 
 if (-not (Test-GhostscriptRuntime $destinationFull)) {
     throw "Copy completed, but '$destinationFull' does not contain a usable Ghostscript DLL."

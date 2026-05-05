@@ -1,6 +1,6 @@
 # Codec bundling
 
-Images ships WIC and Magick.NET support with the app. PDF, EPS, PS, and AI previews also need a Ghostscript runtime available beside the executable.
+Images ships WIC and Magick.NET support with the app. Official release artifacts also ship Ghostscript app-local so PDF, EPS, PS, and AI previews work on clean machines.
 
 ## App-local layout
 
@@ -21,10 +21,28 @@ src/Images/Codecs/Ghostscript/bin/gswin64c.exe
 
 ## Prepare a release bundle
 
-From a machine with the approved Ghostscript runtime available:
+Official releases currently bundle Ghostscript 10.07.0 from Artifex's `gs10070` release.
+
+Approved upstream artifacts:
+
+- Runtime: `gs10070w64.exe`
+- Runtime SHA-256: `8af854e2d62f9a3a674331321b347118a83928a3726631e458194121cf3bbeec`
+- Source: `ghostscript-10.07.0.tar.xz`
+- Source SHA-256: `ddace4e1721f967a55039baff564840225e0baa1d4f5432247ca1ccd1473b7c1`
+
+Extract the runtime installer without installing it globally, then stage the extracted runtime:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/Prepare-GhostscriptBundle.ps1 -Source "C:\Program Files\gs\gs10.05.1" -Force
+gh release download gs10070 --repo ArtifexSoftware/ghostpdl-downloads --pattern gs10070w64.exe --pattern ghostscript-10.07.0.tar.xz --dir .tmp-ghostscript-bundle
+& "C:\Program Files\7-Zip\7z.exe" x .tmp-ghostscript-bundle\gs10070w64.exe -o.tmp-ghostscript-bundle\extracted -y
+powershell -ExecutionPolicy Bypass -File scripts/Prepare-GhostscriptBundle.ps1 -Source ".tmp-ghostscript-bundle\extracted" -Force
+dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish
+```
+
+From a machine with an already-approved Ghostscript runtime available:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/Prepare-GhostscriptBundle.ps1 -Source "C:\Program Files\gs\gs10.07.0" -Force
 dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish
 ```
 
@@ -36,7 +54,9 @@ The GitHub release workflow also has an optional `ghostscript_bundle_url` input.
 
 ## Source-control policy
 
-Runtime binaries are intentionally ignored by `.gitignore`; only the placeholder README is tracked. Do not commit Ghostscript binaries unless the release owner has confirmed redistribution rights for the exact package and license model being shipped.
+Runtime binaries are intentionally ignored by `.gitignore`; only the placeholder README is tracked. Release artifacts may include the runtime after license review, but do not commit Ghostscript binaries to git.
+
+Ghostscript is available under the GNU AGPL or a commercial Artifex license. If the AGPL distribution is bundled, keep `Codecs\Ghostscript\doc\COPYING` in the app output and attach or link the matching source archive in the GitHub release.
 
 ## Verifying provenance at runtime
 

@@ -6,6 +6,15 @@ All notable changes to **Images** are documented here.
 
 No changes yet.
 
+## v0.2.11 — 2026-05-05
+
+Self-contained document-preview runtime release.
+
+### Changed
+
+- **Bundled Ghostscript runtime** — portable and installer artifacts now include app-local Ghostscript 10.07.0 so PDF, EPS, PS, and AI previews work on clean machines without requiring users to find and install Ghostscript separately.
+- **Ghostscript license/provenance notes** — release documentation now identifies the bundled AGPL Ghostscript runtime, the installed license path, the official Artifex source package, and the SHA-256 values used to verify the runtime installer (`8af854e2d62f9a3a674331321b347118a83928a3726631e458194121cf3bbeec`), bundled `gsdll64.dll` (`1dce67538777ab2f312890f9a2f0ffcff6a4c58ef1149dc6a44f8bd97b31030d`), and source archive (`ddace4e1721f967a55039baff564840225e0baa1d4f5432247ca1ccd1473b7c1`).
+
 ## v0.2.10 — 2026-05-05
 
 Performance, reliability, workflow, and product-polish release.
