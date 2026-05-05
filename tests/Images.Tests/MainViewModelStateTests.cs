@@ -100,13 +100,16 @@ public sealed class MainViewModelStateTests
             var settings = CreateSettings(temp);
             settings.SetBool(Keys.ConfirmRecycleBinDelete, false);
             var deleted = new List<string>();
-            using var viewModel = new MainViewModel(
+            var deleteService = new RecycleBinDeleteService(
                 settings,
                 sendToRecycleBin: path =>
                 {
                     deleted.Add(path);
                 },
                 confirmRecycleBinMove: (_, _) => throw new InvalidOperationException("Confirmation dialog should not be shown."));
+            using var viewModel = new MainViewModel(
+                settings,
+                recycleBinDelete: deleteService);
 
             viewModel.OpenFile(first);
             viewModel.DeleteCommand.Execute(null);
@@ -128,7 +131,7 @@ public sealed class MainViewModelStateTests
             WritePng(temp.Path, "b.png");
             var settings = CreateSettings(temp);
             var confirmedPath = "";
-            using var viewModel = new MainViewModel(
+            var deleteService = new RecycleBinDeleteService(
                 settings,
                 sendToRecycleBin: _ => { },
                 confirmRecycleBinMove: (_, path) =>
@@ -136,6 +139,9 @@ public sealed class MainViewModelStateTests
                     confirmedPath = path;
                     return new ConfirmDialog.ConfirmationResult(Confirmed: true, DoNotAskAgain: true);
                 });
+            using var viewModel = new MainViewModel(
+                settings,
+                recycleBinDelete: deleteService);
 
             viewModel.OpenFile(first);
             viewModel.DeleteCommand.Execute(null);
