@@ -13,13 +13,16 @@ namespace Images.ViewModels;
 public sealed class MainViewModel : ObservableObject, IDisposable
 {
     private static readonly ILogger _log = Log.For<MainViewModel>();
-    private readonly DirectoryNavigator _nav = new();
+    private readonly DirectoryNavigator _nav;
     private readonly RenameService _rename = new();
     private readonly PreloadService _preload = new();
     private readonly OcrService _ocr = new();
     private readonly Dispatcher _uiDispatcher = Dispatcher.CurrentDispatcher;
-    private readonly ClipboardImportService _clipboardImport = new();
+    private readonly SettingsService _settings;
+    private readonly ClipboardImportService _clipboardImport;
     private readonly FolderPreviewController _folderPreview;
+    private readonly Action<string> _sendToRecycleBin;
+    private readonly Func<Window?, string, ConfirmDialog.ConfirmationResult> _confirmRecycleBinMove;
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
 
@@ -40,7 +43,22 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly DispatcherTimer _externalEditDebounce;
 
     public MainViewModel()
+        : this(SettingsService.Instance)
     {
+    }
+
+    public MainViewModel(
+        SettingsService settings,
+        ClipboardImportService? clipboardImport = null,
+        DirectoryNavigator? navigator = null,
+        Action<string>? sendToRecycleBin = null,
+        Func<Window?, string, ConfirmDialog.ConfirmationResult>? confirmRecycleBinMove = null)
+    {
+        _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        _clipboardImport = clipboardImport ?? new ClipboardImportService();
+        _nav = navigator ?? new DirectoryNavigator();
+        _sendToRecycleBin = sendToRecycleBin ?? SendToRecycleBin;
+        _confirmRecycleBinMove = confirmRecycleBinMove ?? ConfirmDialog.ConfirmRecycleBinMove;
         _folderPreview = new FolderPreviewController(_uiDispatcher, () => _isDisposed);
         _folderPreview.StateChanged += (_, _) => RaiseFolderPreviewState();
 
@@ -65,8 +83,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Toast("Reloaded after external edit");
         };
 
-        _isFilmstripVisible = SettingsService.Instance.GetBool(Keys.FilmstripVisible, true);
-        _isMetadataHudVisible = SettingsService.Instance.GetBool(Keys.MetadataHudVisible, false);
+        _isFilmstripVisible = _settings.GetBool(Keys.FilmstripVisible, true);
+        _isMetadataHudVisible = _settings.GetBool(Keys.MetadataHudVisible, false);
 
         OpenCommand = new RelayCommand(OpenFileDialog);
         NextCommand = new RelayCommand(Next, () => HasImage);
@@ -525,7 +543,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void RefreshRecentFolders()
     {
-        var fresh = SettingsService.Instance.GetRecentFolders();
+        var fresh = _settings.GetRecentFolders();
         RecentFolders.Clear();
         foreach (var f in fresh) RecentFolders.Add(f);
     }
@@ -561,7 +579,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             if (Set(ref _isMetadataHudVisible, value))
             {
-                SettingsService.Instance.SetBool(Keys.MetadataHudVisible, value);
+                _settings.SetBool(Keys.MetadataHudVisible, value);
                 Raise(nameof(ShowMetadataHud));
                 Raise(nameof(MetadataHudToggleTooltip));
             }
@@ -649,7 +667,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         private set
         {
             if (!Set(ref _isFilmstripVisible, value)) return;
-            SettingsService.Instance.SetBool(Keys.FilmstripVisible, value);
+            _settings.SetBool(Keys.FilmstripVisible, value);
             RaiseFolderPreviewState();
         }
     }
@@ -977,7 +995,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var folder = Path.GetDirectoryName(path);
         if (!string.IsNullOrEmpty(folder))
         {
-            SettingsService.Instance.TouchRecentFolder(folder);
+            _settings.TouchRecentFolder(folder);
             // V20-02 UI consumer: keep the side-panel "Recent folders" list current within the
             // session — TouchRecentFolder reorders the underlying table, this re-pulls the
             // top-N for the UI binding.
@@ -1365,11 +1383,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         try
         {
-            Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
-                toDelete,
-                Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
-                Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin,
-                Microsoft.VisualBasic.FileIO.UICancelOption.DoNothing);
+            _sendToRecycleBin(toDelete);
 
             _nav.RemoveCurrent();
             Toast($"Sent to Recycle Bin: {Path.GetFileName(toDelete)}");
@@ -1385,17 +1399,26 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private bool ConfirmRecycleBinDelete(string path)
     {
-        if (!SettingsService.Instance.GetBool(Keys.ConfirmRecycleBinDelete, true))
+        if (!_settings.GetBool(Keys.ConfirmRecycleBinDelete, true))
             return true;
 
-        var result = ConfirmDialog.ConfirmRecycleBinMove(Application.Current?.MainWindow, path);
+        var result = _confirmRecycleBinMove(Application.Current?.MainWindow, path);
         if (result.DoNotAskAgain)
         {
-            SettingsService.Instance.SetBool(Keys.ConfirmRecycleBinDelete, false);
+            _settings.SetBool(Keys.ConfirmRecycleBinDelete, false);
             Toast("Recycle Bin confirmation disabled");
         }
 
         return result.Confirmed;
+    }
+
+    private static void SendToRecycleBin(string path)
+    {
+        Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
+            path,
+            Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
+            Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin,
+            Microsoft.VisualBasic.FileIO.UICancelOption.DoNothing);
     }
 
     private void Rotate(double delta)
@@ -1613,7 +1636,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void RefreshSettingsFromStore()
     {
-        var filmstrip = SettingsService.Instance.GetBool(Keys.FilmstripVisible, true);
+        var filmstrip = _settings.GetBool(Keys.FilmstripVisible, true);
         if (_isFilmstripVisible != filmstrip)
         {
             _isFilmstripVisible = filmstrip;
@@ -1621,7 +1644,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             RaiseFolderPreviewState();
         }
 
-        var hud = SettingsService.Instance.GetBool(Keys.MetadataHudVisible, false);
+        var hud = _settings.GetBool(Keys.MetadataHudVisible, false);
         if (_isMetadataHudVisible != hud)
         {
             _isMetadataHudVisible = hud;
