@@ -94,7 +94,7 @@ public sealed class SettingsService
         SqliteConnection.ClearAllPools();
 
         if (!File.Exists(dbPath)) return true;
-        var quarantinePath = dbPath + ".corrupt-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
+        var quarantinePath = dbPath + ".corrupt-" + DateTime.Now.ToString("yyyyMMdd-HHmmssfff") + "-" + Guid.NewGuid().ToString("N");
         try
         {
             File.Move(dbPath, quarantinePath);

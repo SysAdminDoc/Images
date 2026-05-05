@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-10A` is complete, closing `IP-10`. About diagnostics now shows thumbnail-cache health and lets users open or clear the disposable cache with confirmation, background execution, progress feedback, and automatic diagnostics refresh.
+`IP-14A` is complete, closing `IP-14`. Settings corruption recovery now uses collision-resistant quarantine names, with tests for corruption reset, schema migration, unavailable storage, primitive defaults, and existing update-check future-timestamp behavior.
 
 ## Next Focus
 
-The next recommended slice is `IP-14A`: strengthen settings persistence and corruption recovery tests.
+The next recommended slice is `IP-11A`: add large-folder and volatile-folder stress coverage around navigation and thumbnail behavior.
 
 ## Research Inputs
 
@@ -37,7 +37,7 @@ The next recommended slice is `IP-14A`: strengthen settings persistence and corr
 | IP-11 | P2 | Planned | Stress testing | Add large-folder and volatile-folder stress coverage. | Navigation and thumbnail behavior are validated with thousands of files, deleted files, slow folders, and rapid directory changes. |
 | IP-12 | P2 | Planned | Decode/export corpus | Add a small format corpus for decode/export regression tests. | Representative PNG, JPEG, WebP, TIFF, GIF/APNG, and document/vector samples protect codec upgrades and export behavior. |
 | IP-13 | P1 | Done | Shell/clipboard integration | Centralize opening URLs/files/folders and copying text. | About, crash dialog, settings, and main viewer use shared helpers with consistent error behavior and safer Explorer argument handling. |
-| IP-14 | P2 | Planned | Settings persistence | Strengthen settings schema and corruption tests. | Tests cover corruption quarantine, unavailable storage, defaults, migration behavior, and future timestamp handling. |
+| IP-14 | P2 | Done | Settings persistence | Strengthen settings schema and corruption tests. | Tests cover corruption quarantine, unavailable storage, defaults, migration behavior, and future timestamp handling. |
 | IP-15 | P1 | Done | CI/release gates | Ensure CI exercises the real verification path. | CI runs solution build, tests, whitespace check, vulnerability gate, version sync gate, and CLI smoke commands used by local release validation. |
 | IP-16 | P2 | Planned | Product differentiators | Track large future differentiators without disrupting the hardening sequence. | Local semantic search, duplicate cleanup, compare/overlay mode, archive/book navigation, peek launch mode, viewer-side adjustments, technical pixel/channel tools, and stronger library/metadata workflows have scoped design docs before implementation. |
 | IP-17 | P2 | Planned | Distribution trust | Reduce Windows install trust friction once the next stable release is ready. | WinGet and Scoop publishing are scoped, checksums remain part of releases, and a code-signing decision doc covers certificate cost, SmartScreen reputation, release cadence, and fallback verification instructions. |
@@ -94,6 +94,7 @@ The next recommended slice is `IP-14A`: strengthen settings persistence and corr
 - 2026-05-05: Completed `IP-04B` and closed `IP-04` by adding async update-check tracking plus thumbnail-cache health diagnostics and focused tests for async task tracking, update-check tracking, and cache health scans.
 - 2026-05-05: Completed `IP-01A` and closed `IP-01` by adding deterministic app-storage, settings-default, and thumbnail-cache-default seams plus regression tests for fallback, unavailable storage, and unsafe relative path segments.
 - 2026-05-05: Completed `IP-10A` and closed `IP-10` by adding About diagnostics actions to open and clear the disposable thumbnail cache, backed by a safe cache-clear service and regression tests.
+- 2026-05-05: Completed `IP-14A` and closed `IP-14` by hardening settings corruption quarantine naming and adding coverage for corrupt DB reset, schema migration, unavailable storage, primitive defaults, and existing future timestamp behavior.
 
 ## Verification Standard
 
