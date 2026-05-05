@@ -144,6 +144,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RotateCcwCommand = new RelayCommand(() => Rotate(-90), () => CanUseDisplayImageCommands);
         Rotate180Command = new RelayCommand(() => Rotate(180), () => CanUseDisplayImageCommands);
         ToggleInspectorCommand = new RelayCommand(() => IsInspectorMode = !IsInspectorMode, () => CanUseInspector);
+        ToggleCropModeCommand = new RelayCommand(() => IsCropMode = !IsCropMode, () => CanUseCrop);
+        ApplyCropCommand = new RelayCommand(ApplyCropSelection, () => CanApplyCrop);
+        CancelCropCommand = new RelayCommand(CancelCropMode, () => IsCropMode || HasCropSelection);
         CopyInspectorHexCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hex, "HEX"), () => HasInspectorSample);
         CopyInspectorRgbCommand = new RelayCommand(() => CopyInspectorValue(s => s.Rgb, "RGB"), () => HasInspectorSample);
         CopyInspectorHsvCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hsv, "HSV"), () => HasInspectorSample);
@@ -246,6 +249,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 Raise(nameof(HasDisplayImage));
                 Raise(nameof(CanUseInspector));
+                Raise(nameof(CanUseCrop));
                 Raise(nameof(CanUseOverlayMode));
                 Raise(nameof(CanToggleMetadataHud));
                 Raise(nameof(ShowMetadataHud));
@@ -491,10 +495,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(HasMultiplePages));
         Raise(nameof(HasPreviousPage));
         Raise(nameof(HasNextPage));
-            Raise(nameof(PagePositionText));
-            Raise(nameof(PageNumber));
-            Raise(nameof(PageSpan));
-            Raise(nameof(IsArchiveBook));
+        Raise(nameof(PagePositionText));
+        Raise(nameof(PageNumber));
+        Raise(nameof(PageSpan));
+        Raise(nameof(IsArchiveBook));
+        Raise(nameof(CanUseCrop));
         Raise(nameof(CanTurnLeftBookPage));
         Raise(nameof(CanTurnRightBookPage));
         Raise(nameof(CurrentArchiveProgressText));
@@ -520,6 +525,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanTurnLeftBookPage));
                 Raise(nameof(CanTurnRightBookPage));
                 Raise(nameof(CurrentArchiveProgressText));
+                Raise(nameof(CanUseCrop));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -528,6 +534,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasImage => !string.IsNullOrEmpty(CurrentPath) && File.Exists(CurrentPath);
     public bool HasDisplayImage => CurrentImage is not null;
     public bool CanUseInspector => HasDisplayImage && !IsOperationBusy;
+    public bool CanUseCrop => HasImage && HasDisplayImage && !IsOperationBusy && !IsArchiveBook && !IsPeekMode;
     public bool IsViewerEmpty => CurrentPath is null;
     public bool CanRefreshFolder => (CurrentPath is not null || _nav.Count > 0) && !IsOperationBusy;
 
@@ -567,6 +574,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(ShowOperationStatus));
                 Raise(nameof(CanRefreshFolder));
                 Raise(nameof(CanUseInspector));
+                Raise(nameof(CanUseCrop));
                 Raise(nameof(CanUseOverlayMode));
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -671,6 +679,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 Raise(nameof(CanToggleMetadataHud));
                 Raise(nameof(CanUseOverlayMode));
+                Raise(nameof(CanUseCrop));
                 Raise(nameof(ShowMetadataHud));
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -865,10 +874,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (!value)
                 ClearInspectorState();
             else
+            {
+                IsCropMode = false;
                 InspectorStatusText = "Move over the image to sample pixels. Click to hold a sample; Ctrl+click copies it. Shift-drag measures.";
+            }
 
             Raise(nameof(InspectorModeText));
             Raise(nameof(InspectorModeHelpText));
+            Raise(nameof(IsCanvasSelectionMode));
             CommandManager.InvalidateRequerySuggested();
         }
     }
@@ -909,6 +922,58 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public string InspectorSelectionText => _inspectorSelection.HasValue
         ? _inspectorSelection.Value.DisplayText
         : "Shift-drag to measure";
+
+    private bool _isCropMode;
+    public bool IsCropMode
+    {
+        get => _isCropMode;
+        set
+        {
+            if (!Set(ref _isCropMode, value))
+                return;
+
+            if (value)
+            {
+                IsInspectorMode = false;
+                IsOcrMode = false;
+                CropStatusText = "Drag on the image to choose a crop. Enter applies it to edit history.";
+            }
+            else if (!HasCropSelection)
+            {
+                CropStatusText = "Turn on crop, drag on the image, then apply without changing the source file.";
+            }
+
+            RaiseCropModeState();
+        }
+    }
+
+    private PixelSelection? _cropSelection;
+    public PixelSelection? CropSelection
+    {
+        get => _cropSelection;
+        private set
+        {
+            if (Set(ref _cropSelection, value))
+                RaiseCropSelectionState();
+        }
+    }
+
+    private string _cropStatusText = "Turn on crop, drag on the image, then apply without changing the source file.";
+    public string CropStatusText
+    {
+        get => _cropStatusText;
+        private set => Set(ref _cropStatusText, value);
+    }
+
+    public bool HasCropSelection => CropSelection is { Width: > 0, Height: > 0 };
+    public bool CanApplyCrop => IsCropMode && HasCropSelection && CanUseCrop;
+    public bool ShowCropOverlay => IsCropMode || HasCropSelection;
+    public bool IsCanvasSelectionMode => IsInspectorMode || IsCropMode;
+    public string CropModeText => IsCropMode ? "Crop on" : "Crop off";
+    public string CropModeHelpText => IsCropMode
+        ? "Drag a rectangle on the image. Enter adds the crop to edit history; Esc cancels."
+        : "Create a non-destructive crop for Save a copy exports.";
+    public string CropSelectionText => CropSelection?.DisplayText ?? "No crop selected";
 
     // -------------------- Rename editor state --------------------
 
@@ -1607,6 +1672,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand RotateCcwCommand { get; }
     public ICommand Rotate180Command { get; }
     public ICommand ToggleInspectorCommand { get; }
+    public ICommand ToggleCropModeCommand { get; }
+    public ICommand ApplyCropCommand { get; }
+    public ICommand CancelCropCommand { get; }
     public ICommand CopyInspectorHexCommand { get; }
     public ICommand CopyInspectorRgbCommand { get; }
     public ICommand CopyInspectorHsvCommand { get; }
@@ -2034,6 +2102,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             PixelHeight = res.PixelHeight;
             DecoderUsed = decoderUsed;
             ClearInspectorState();
+            IsCropMode = false;
+            ClearCropSelection();
             ApplyPageSequence(res.Pages);
             ArchiveReadPositionService.SaveLastPageIndex(_settings, path, PageIndex, PageCount);
             if (isArchiveBookPage)
@@ -2063,6 +2133,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             PixelWidth = PixelHeight = 0;
             DecoderUsed = "Unavailable";
             ClearInspectorState();
+            IsCropMode = false;
+            ClearCropSelection();
             ResetPageState();
             SetLoadError(ex);
         }
@@ -2657,6 +2729,53 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RaiseInspectorSelectionState();
     }
 
+    public void UpdateCropSelection(PixelSelection? selection)
+    {
+        CropSelection = CropSelectionService.Normalize(selection, PixelWidth, PixelHeight);
+        CropStatusText = CropSelection is { } crop
+            ? $"Crop selected: {crop.DisplayText}."
+            : "Pointer is outside the image.";
+    }
+
+    public void ClearCropSelection()
+    {
+        CropSelection = null;
+        CropStatusText = IsCropMode
+            ? "Drag on the image to choose a crop. Enter applies it to edit history."
+            : "Turn on crop, drag on the image, then apply without changing the source file.";
+    }
+
+    private void ApplyCropSelection()
+    {
+        if (!CanApplyCrop || CurrentPath is null || CropSelection is not { } crop)
+            return;
+
+        var result = _editStack.AppendOperation(
+            CurrentPath,
+            "crop",
+            CropSelectionService.ToEditParameters(crop),
+            $"Crop {crop.Width}x{crop.Height} at {crop.X},{crop.Y}");
+
+        if (result.Success)
+        {
+            IsCropMode = false;
+            ClearCropSelection();
+            Toast("Crop added to edit history");
+        }
+        else
+        {
+            CropStatusText = "Crop failed: " + result.Message;
+            Toast("Crop failed");
+        }
+    }
+
+    private void CancelCropMode()
+    {
+        IsCropMode = false;
+        ClearCropSelection();
+        Toast("Crop canceled");
+    }
+
     private void CopyInspectorValue(Func<PixelSample, string> valueSelector, string label)
     {
         if (_inspectorSample is not { } sample)
@@ -2688,6 +2807,27 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         Raise(nameof(HasInspectorSelection));
         Raise(nameof(InspectorSelectionText));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RaiseCropModeState()
+    {
+        Raise(nameof(IsCropMode));
+        Raise(nameof(ShowCropOverlay));
+        Raise(nameof(IsCanvasSelectionMode));
+        Raise(nameof(CropModeText));
+        Raise(nameof(CropModeHelpText));
+        Raise(nameof(CanApplyCrop));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RaiseCropSelectionState()
+    {
+        Raise(nameof(CropSelection));
+        Raise(nameof(HasCropSelection));
+        Raise(nameof(ShowCropOverlay));
+        Raise(nameof(CropSelectionText));
+        Raise(nameof(CanApplyCrop));
         CommandManager.InvalidateRequerySuggested();
     }
 
@@ -3168,6 +3308,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClearLoadError();
         DecoderUsed = null;
         ClearInspectorState();
+        IsCropMode = false;
+        ClearCropSelection();
         ResetPageState();
         ClearPhotoMetadata();
         _folderPreview.Clear();

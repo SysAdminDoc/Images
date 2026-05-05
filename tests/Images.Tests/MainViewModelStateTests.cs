@@ -564,6 +564,72 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void CropMode_AppendsNonDestructiveCropOperationAndClearsSelection()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "photo.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            Assert.False(viewModel.ToggleCropModeCommand.CanExecute(null));
+
+            viewModel.OpenFile(image);
+
+            Assert.True(viewModel.ToggleCropModeCommand.CanExecute(null));
+
+            viewModel.ToggleCropModeCommand.Execute(null);
+
+            Assert.True(viewModel.IsCropMode);
+            Assert.True(viewModel.IsCanvasSelectionMode);
+
+            viewModel.UpdateCropSelection(new PixelSelection(0, 0, 1, 2));
+
+            Assert.True(viewModel.HasCropSelection);
+            Assert.Equal("1 x 2 px at 0, 0", viewModel.CropSelectionText);
+            Assert.True(viewModel.ApplyCropCommand.CanExecute(null));
+
+            viewModel.ApplyCropCommand.Execute(null);
+
+            Assert.False(viewModel.IsCropMode);
+            Assert.False(viewModel.HasCropSelection);
+            Assert.Null(viewModel.CropSelection);
+            Assert.Equal("Crop added to edit history", viewModel.ToastMessage);
+
+            var snapshot = new NonDestructiveEditService().LoadSnapshot(image);
+            var operation = Assert.Single(snapshot.Operations);
+            Assert.Equal("crop", operation.Kind);
+            Assert.Equal("0", operation.Parameters["x"]);
+            Assert.Equal("0", operation.Parameters["y"]);
+            Assert.Equal("1", operation.Parameters["width"]);
+            Assert.Equal("2", operation.Parameters["height"]);
+        });
+    }
+
+    [Fact]
+    public void CropMode_IsMutuallyExclusiveWithInspector()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "photo.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(image);
+            viewModel.ToggleCropModeCommand.Execute(null);
+
+            Assert.True(viewModel.IsCropMode);
+            Assert.False(viewModel.IsInspectorMode);
+
+            viewModel.ToggleInspectorCommand.Execute(null);
+
+            Assert.False(viewModel.IsCropMode);
+            Assert.True(viewModel.IsInspectorMode);
+            Assert.True(viewModel.IsCanvasSelectionMode);
+        });
+    }
+
+    [Fact]
     public void ReloadCommand_ShowsOperationStatusAndDisablesMutatingCommands()
     {
         RunOnSta(() =>

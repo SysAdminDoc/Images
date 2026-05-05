@@ -15,6 +15,7 @@ public partial class MainWindow : Window
 {
     private MainViewModel Vm => (MainViewModel)DataContext;
     private PixelCoordinate? _inspectorSelectionStart;
+    private PixelCoordinate? _cropSelectionStart;
     private HwndSource? _hwndSource;
     private bool _overlayExitHotKeyRegistered;
 
@@ -411,6 +412,17 @@ public partial class MainWindow : Window
                 // A-03: Escape closes any active overlay / toast and returns focus to the
                 // window shell. Rename-TextBox Escape is handled inside StemEditor_PreviewKeyDown
                 // and never reaches here because the TextBox owns focus.
+                if (Vm.IsCropMode || Vm.HasCropSelection)
+                {
+                    _cropSelectionStart = null;
+                    if (Canvas.IsMouseCaptured)
+                        Canvas.ReleaseMouseCapture();
+                    Vm.CancelCropCommand.Execute(null);
+                    Keyboard.ClearFocus();
+                    Focus();
+                    e.Handled = true;
+                    break;
+                }
                 if (Vm.IsGalleryOpen)
                 {
                     Vm.CloseGalleryCommand.Execute(null);
@@ -523,8 +535,16 @@ public partial class MainWindow : Window
                 Vm.ToggleFilmstripCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.C when Keyboard.Modifiers == ModifierKeys.None:
+                Vm.ToggleCropModeCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.G:
                 Vm.ToggleGalleryCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.Enter when Vm.IsCropMode:
+                Vm.ApplyCropCommand.Execute(null);
                 e.Handled = true;
                 break;
             case Key.Enter when Vm.IsGalleryOpen:
@@ -619,6 +639,12 @@ public partial class MainWindow : Window
 
     private void Canvas_MouseMove(object sender, MouseEventArgs e)
     {
+        if (Vm.IsCropMode)
+        {
+            HandleCropMouseMove(e);
+            return;
+        }
+
         if (!Vm.IsInspectorMode)
             return;
 
@@ -638,6 +664,12 @@ public partial class MainWindow : Window
 
     private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (Vm.IsCropMode)
+        {
+            HandleCropMouseDown(e);
+            return;
+        }
+
         if (!Vm.IsInspectorMode)
             return;
 
@@ -662,6 +694,12 @@ public partial class MainWindow : Window
 
     private void Canvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+        if (_cropSelectionStart is not null)
+        {
+            HandleCropMouseUp(e);
+            return;
+        }
+
         if (_inspectorSelectionStart is null)
             return;
 
@@ -677,23 +715,66 @@ public partial class MainWindow : Window
             Vm.UpdateInspectorSample(null);
     }
 
-    private bool TrySampleInspectorPixel(Point viewportPoint, out PixelSample sample)
+    private void HandleCropMouseDown(MouseButtonEventArgs e)
     {
-        sample = default!;
+        if (!TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
+            return;
+
+        _cropSelectionStart = coordinate;
+        Vm.UpdateCropSelection(PixelInspectorService.CalculateSelection(coordinate, coordinate));
+        Canvas.CaptureMouse();
+        e.Handled = true;
+    }
+
+    private void HandleCropMouseMove(MouseEventArgs e)
+    {
+        if (_cropSelectionStart is not { } start)
+            return;
+
+        if (!TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
+            return;
+
+        Vm.UpdateCropSelection(PixelInspectorService.CalculateSelection(start, coordinate));
+        e.Handled = true;
+    }
+
+    private void HandleCropMouseUp(MouseButtonEventArgs e)
+    {
+        if (_cropSelectionStart is { } start &&
+            TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
+        {
+            Vm.UpdateCropSelection(PixelInspectorService.CalculateSelection(start, coordinate));
+        }
+
+        _cropSelectionStart = null;
+        if (Canvas.IsMouseCaptured)
+            Canvas.ReleaseMouseCapture();
+        e.Handled = true;
+    }
+
+    private bool TryMapCanvasPointToPixel(Point viewportPoint, out PixelCoordinate coordinate)
+    {
+        coordinate = default;
 
         if (Vm.CurrentImage is not BitmapSource bitmap)
             return false;
 
         var matrix = Canvas.GetImageToViewportMatrix();
-        if (!PixelInspectorService.TryMapViewportPointToPixel(
-                matrix,
-                viewportPoint,
-                bitmap.PixelWidth,
-                bitmap.PixelHeight,
-                out var coordinate))
-        {
+        return PixelInspectorService.TryMapViewportPointToPixel(
+            matrix,
+            viewportPoint,
+            bitmap.PixelWidth,
+            bitmap.PixelHeight,
+            out coordinate);
+    }
+
+    private bool TrySampleInspectorPixel(Point viewportPoint, out PixelSample sample)
+    {
+        sample = default!;
+
+        if (Vm.CurrentImage is not BitmapSource bitmap ||
+            !TryMapCanvasPointToPixel(viewportPoint, out var coordinate))
             return false;
-        }
 
         sample = PixelInspectorService.SamplePixel(bitmap, coordinate);
         return true;

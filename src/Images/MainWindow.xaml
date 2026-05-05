@@ -95,6 +95,15 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE81C;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="{Binding CropModeText}"
+                                  Command="{Binding ToggleCropModeCommand}"
+                                  InputGestureText="C"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding IsCropMode, Mode=OneWay}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7A8;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="{Binding OverlayModeText}"
                                   Command="{Binding ToggleOverlayModeCommand}"
                                   IsCheckable="True"
@@ -239,7 +248,7 @@
                                    Rotation="{Binding Rotation}"
                                    FlipHorizontal="{Binding FlipHorizontal}"
                                    FlipVertical="{Binding FlipVertical}"
-                                   InspectorMode="{Binding IsInspectorMode}"
+                                   InspectorMode="{Binding IsCanvasSelectionMode}"
                                    UseNearestNeighborScaling="{Binding InspectorNearestNeighborPreview}"
                                    MouseMove="Canvas_MouseMove"
                                    MouseLeave="Canvas_MouseLeave"
@@ -253,6 +262,12 @@
                                 IsHitTestVisible="{Binding IsOcrMode}"
                                 Opacity="0.95"
                                 AutomationProperties.Name="OCR text overlay" />
+
+                <ctl:CropOverlay Visibility="{Binding ShowCropOverlay, Converter={StaticResource BoolToVis}}"
+                                 Target="{Binding ElementName=Canvas}"
+                                 Selection="{Binding CropSelection}"
+                                 Opacity="0.98"
+                                 AutomationProperties.Name="Crop selection overlay" />
 
                 <Border HorizontalAlignment="Center"
                         VerticalAlignment="Top"
@@ -1523,7 +1538,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Wheel" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom about cursor" />
@@ -1539,6 +1554,8 @@
                                         <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle filmstrip" />
                                         <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="I" />
                                         <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle metadata HUD" />
+                                        <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="C" />
+                                        <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle crop mode" />
                                     </Grid>
 
                                     <TextBlock Text="File" Style="{StaticResource SectionLabel}" />
@@ -3481,6 +3498,71 @@
                             </StackPanel>
                         </Border>
                     </StackPanel>
+
+                    <Border Style="{StaticResource Divider}" />
+
+                    <!-- CROP section -->
+                    <TextBlock Text="Crop" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource Card}"
+                            Padding="13,12"
+                            IsEnabled="{Binding CanUseCrop}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding CropModeText}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrush}" />
+                                    <TextBlock Text="{Binding CropModeHelpText}"
+                                               Style="{StaticResource Text.Hint}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,3,0,0" />
+                                </StackPanel>
+                                <Button Grid.Column="1"
+                                        Command="{Binding ToggleCropModeCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        MinWidth="72"
+                                        Margin="12,0,0,0"
+                                        AutomationProperties.Name="Toggle crop mode">
+                                    <TextBlock Text="{Binding CropModeText}" />
+                                </Button>
+                            </Grid>
+
+                            <Border Background="{StaticResource PanelBrush}"
+                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                    Padding="10"
+                                    Margin="0,12,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding CropStatusText}"
+                                               Style="{StaticResource Text.Caption}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding CropSelectionText}"
+                                               Style="{StaticResource Text.Body}"
+                                               Margin="0,8,0,0" />
+                                </StackPanel>
+                            </Border>
+
+                            <WrapPanel Margin="0,12,0,0">
+                                <Button Command="{Binding ApplyCropCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Apply crop to edit history">
+                                    <TextBlock Text="Apply crop" />
+                                </Button>
+                                <Button Command="{Binding CancelCropCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,0,8"
+                                        AutomationProperties.Name="Cancel crop">
+                                    <TextBlock Text="Cancel" />
+                                </Button>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
 
                     <Border Style="{StaticResource Divider}" />
 
