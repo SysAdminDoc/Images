@@ -38,6 +38,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Private tag relationships** — press `Ctrl+Shift+T` to manage local-only tag namespaces such as `person:`, `place:`, and `project:`, resolve aliases/siblings, expand parent tags, and import/export the current image's XMP sidecar tags.
 - **Import inbox** — press `Ctrl+Shift+I` to stage new files before they join a library folder. The inbox detects exact duplicates in the staging set and destination, lets you tag/rate into XMP sidecars, strip GPS from imported JPEG/TIFF copies, recycle unwanted staged files, and copy or move originals with collision-safe naming.
 - **Macro actions** — press `Ctrl+Shift+M` to build and run local JSON actions. Plans stay inspectable before execution, support dry runs, load/save as JSON, and currently cover GPS stripping, export/convert/resize copies with quality settings, and rename patterns with tokens.
+- **Batch processor** — press `Ctrl+Shift+B` to batch resize/convert/export files with built-in JPEG/PNG/WebP presets, load/save preset JSON, output-folder routing, dry-run default, and preview rows for output path and dimensions before writing copies.
 - **Reference board mode** — press `Ctrl+B` to open a separate local board seeded from the current image. Drop supported files, arrange image cards, add notes and group frames, pin the board above other windows, zoom the canvas, and export the composed board as PNG.
 - **Duplicate cleanup center** — press `Ctrl+Shift+D` or use the side-panel Cleanup card to scan local folders for exact SHA-256 duplicates and perceptually similar images, prefer keep candidates from reference folders, review pairs side by side, mark false positives, and move extras to app-local quarantine or the Recycle Bin.
 - **File health scan** — press `Ctrl+Shift+H` to find files with mismatched image extensions, corrupt supported images, zero-byte files, and temporary/partial-download artifacts, then rename detected extensions, mark reviewed, or move files to app-local quarantine.
@@ -110,6 +111,7 @@ OCR depends on Microsoft Windows OCR optional capabilities. The installer instal
 | **Ctrl+Shift+T** | Open tag relationships |
 | **Ctrl+Shift+I** | Open import inbox |
 | **Ctrl+Shift+M** | Open macro actions |
+| **Ctrl+Shift+B** | Open batch processor |
 | **Ctrl+Alt+O** | Exit pinned overlay mode |
 | **Ctrl+Left / Ctrl+Right** | Step animated image frames |
 | **Ctrl+Space** | Play/pause animated image |
