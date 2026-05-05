@@ -441,6 +441,48 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void ArchiveRightToLeft_SwapsPhysicalPageTurnZonesAndPersists()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var archive = WriteTwoPageCbz(temp.Path, "manga.cbz");
+            var settings = CreateSettings(temp);
+            using var viewModel = new MainViewModel(settings);
+
+            viewModel.OpenFile(archive);
+
+            Assert.True(viewModel.IsArchiveBook);
+            Assert.False(viewModel.ArchiveRightToLeft);
+            Assert.False(viewModel.LeftBookPageTurnCommand.CanExecute(null));
+            Assert.True(viewModel.RightBookPageTurnCommand.CanExecute(null));
+            Assert.Equal("Previous book page", viewModel.LeftBookPageTurnTooltip);
+            Assert.Equal("Next book page", viewModel.RightBookPageTurnTooltip);
+
+            viewModel.ArchiveRightToLeft = true;
+
+            Assert.True(settings.GetBool(Keys.ArchiveRightToLeft, false));
+            Assert.Equal("Right-to-left page turns", viewModel.ArchivePageTurnModeText);
+            Assert.Equal("Next book page", viewModel.LeftBookPageTurnTooltip);
+            Assert.Equal("Previous book page", viewModel.RightBookPageTurnTooltip);
+            Assert.True(viewModel.LeftBookPageTurnCommand.CanExecute(null));
+            Assert.False(viewModel.RightBookPageTurnCommand.CanExecute(null));
+
+            viewModel.LeftBookPageTurnCommand.Execute(null);
+            PumpUntil(() => !viewModel.IsOperationBusy);
+
+            Assert.Equal(2, viewModel.PageNumber);
+            Assert.False(viewModel.LeftBookPageTurnCommand.CanExecute(null));
+            Assert.True(viewModel.RightBookPageTurnCommand.CanExecute(null));
+
+            viewModel.RightBookPageTurnCommand.Execute(null);
+            PumpUntil(() => !viewModel.IsOperationBusy);
+
+            Assert.Equal(1, viewModel.PageNumber);
+        });
+    }
+
+    [Fact]
     public void FirstRunGuidance_ExposesCapabilityAndPrivacySummaries()
     {
         RunOnSta(() =>

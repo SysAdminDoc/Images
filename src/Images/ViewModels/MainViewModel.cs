@@ -118,6 +118,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         _isFilmstripVisible = _settings.GetBool(Keys.FilmstripVisible, true);
         _isMetadataHudVisible = _settings.GetBool(Keys.MetadataHudVisible, false);
+        _archiveRightToLeft = _settings.GetBool(Keys.ArchiveRightToLeft, false);
 
         OpenCommand = new RelayCommand(async () => await OpenFileDialogAsync(), () => !IsOperationBusy);
         NextCommand = new RelayCommand(Next, () => CanUseImageCommands);
@@ -128,6 +129,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         PrevPageCommand = new RelayCommand(async () => await PrevPageAsync(), () => HasPreviousPage && !IsOperationBusy);
         FirstPageCommand = new RelayCommand(async () => await FirstPageAsync(), () => HasPreviousPage && !IsOperationBusy);
         LastPageCommand = new RelayCommand(async () => await LastPageAsync(), () => HasNextPage && !IsOperationBusy);
+        LeftBookPageTurnCommand = new RelayCommand(async () => await TurnLeftBookPageAsync(), () => CanTurnLeftBookPage);
+        RightBookPageTurnCommand = new RelayCommand(async () => await TurnRightBookPageAsync(), () => CanTurnRightBookPage);
         DeleteCommand = new RelayCommand(DeleteCurrent, () => CanUseImageCommands);
         RotateCwCommand = new RelayCommand(() => Rotate(90), () => CanUseDisplayImageCommands);
         RotateCcwCommand = new RelayCommand(() => Rotate(-90), () => CanUseDisplayImageCommands);
@@ -300,6 +303,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasNextPage => HasMultiplePages && PageIndex < PageCount - 1;
     public string PagePositionText => HasMultiplePages ? $"{PageLabel} {PageIndex + 1} / {PageCount}" : "";
     public bool IsArchiveBook => CurrentPath is not null && SupportedImageFormats.IsArchive(CurrentPath) && HasMultiplePages;
+    public bool CanTurnLeftBookPage => IsArchiveBook && !IsOperationBusy && (ArchiveRightToLeft ? HasNextPage : HasPreviousPage);
+    public bool CanTurnRightBookPage => IsArchiveBook && !IsOperationBusy && (ArchiveRightToLeft ? HasPreviousPage : HasNextPage);
+    public string LeftBookPageTurnTooltip => ArchiveRightToLeft ? "Next book page" : "Previous book page";
+    public string RightBookPageTurnTooltip => ArchiveRightToLeft ? "Previous book page" : "Next book page";
+    public string ArchivePageTurnModeText => ArchiveRightToLeft ? "Right-to-left page turns" : "Left-to-right page turns";
+    public string ArchivePageTurnModeHint => ArchiveRightToLeft
+        ? "For manga-style books, the left edge and Left Arrow advance; the right edge goes back."
+        : "For western books, the right edge and Right Arrow advance; the left edge goes back.";
     public string CurrentArchiveProgressText => IsArchiveBook
         ? $"Reading {Path.GetFileName(CurrentPath)} · {PagePositionText}"
         : "";
@@ -323,6 +334,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(PagePositionText));
         Raise(nameof(PageNumber));
         Raise(nameof(IsArchiveBook));
+        Raise(nameof(CanTurnLeftBookPage));
+        Raise(nameof(CanTurnRightBookPage));
         Raise(nameof(CurrentArchiveProgressText));
         CommandManager.InvalidateRequerySuggested();
     }
@@ -343,6 +356,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanRefreshFolder));
                 Raise(nameof(WindowTitle));
                 Raise(nameof(IsArchiveBook));
+                Raise(nameof(CanTurnLeftBookPage));
+                Raise(nameof(CanTurnRightBookPage));
                 Raise(nameof(CurrentArchiveProgressText));
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -709,6 +724,25 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public ObservableCollection<ArchiveReadPositionService.ArchiveReadHistoryItem> RecentArchiveBooks { get; } = new();
 
+    private bool _archiveRightToLeft;
+    public bool ArchiveRightToLeft
+    {
+        get => _archiveRightToLeft;
+        set
+        {
+            if (!Set(ref _archiveRightToLeft, value)) return;
+
+            _settings.SetBool(Keys.ArchiveRightToLeft, value);
+            Raise(nameof(CanTurnLeftBookPage));
+            Raise(nameof(CanTurnRightBookPage));
+            Raise(nameof(LeftBookPageTurnTooltip));
+            Raise(nameof(RightBookPageTurnTooltip));
+            Raise(nameof(ArchivePageTurnModeText));
+            Raise(nameof(ArchivePageTurnModeHint));
+            CommandManager.InvalidateRequerySuggested();
+        }
+    }
+
     private void RefreshArchiveReadHistory()
     {
         var fresh = ArchiveReadPositionService.GetRecentArchives(_settings);
@@ -1028,6 +1062,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand PrevPageCommand { get; }
     public ICommand FirstPageCommand { get; }
     public ICommand LastPageCommand { get; }
+    public ICommand LeftBookPageTurnCommand { get; }
+    public ICommand RightBookPageTurnCommand { get; }
     public ICommand DeleteCommand { get; }
     public ICommand RotateCwCommand { get; }
     public ICommand RotateCcwCommand { get; }
@@ -1362,6 +1398,22 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private async Task LastPageAsync()
     {
         await GoToPageAsync(PageCount - 1, "Loading last page");
+    }
+
+    private async Task TurnLeftBookPageAsync()
+    {
+        if (ArchiveRightToLeft)
+            await NextPageAsync();
+        else
+            await PrevPageAsync();
+    }
+
+    private async Task TurnRightBookPageAsync()
+    {
+        if (ArchiveRightToLeft)
+            await PrevPageAsync();
+        else
+            await NextPageAsync();
     }
 
     private async Task GoToPageAsync(int targetPageIndex, string title)
@@ -1943,6 +1995,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _isMetadataHudVisible = hud;
             Raise(nameof(IsMetadataHudVisible));
             Raise(nameof(ShowMetadataHud));
+        }
+
+        var rightToLeft = _settings.GetBool(Keys.ArchiveRightToLeft, false);
+        if (_archiveRightToLeft != rightToLeft)
+        {
+            _archiveRightToLeft = rightToLeft;
+            Raise(nameof(ArchiveRightToLeft));
+            Raise(nameof(CanTurnLeftBookPage));
+            Raise(nameof(CanTurnRightBookPage));
+            Raise(nameof(LeftBookPageTurnTooltip));
+            Raise(nameof(RightBookPageTurnTooltip));
+            Raise(nameof(ArchivePageTurnModeText));
+            Raise(nameof(ArchivePageTurnModeHint));
+            CommandManager.InvalidateRequerySuggested();
         }
 
         Raise(nameof(FirstRunPrivacyText));

@@ -336,4 +336,5 @@ public static class Keys
     public const string FilmstripVisible = "viewer.filmstrip.visible";
     public const string MetadataHudVisible = "viewer.metadata-hud.visible";
     public const string ConfirmRecycleBinDelete = "viewer.delete.confirm-recycle";
+    public const string ArchiveRightToLeft = "viewer.archive.right-to-left";
 }
