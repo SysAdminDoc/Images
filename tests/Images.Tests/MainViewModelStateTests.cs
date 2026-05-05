@@ -600,6 +600,77 @@ public sealed class MainViewModelStateTests
         });
     }
 
+    [Fact]
+    public void UpdateCheckState_WhenOffline_ShowsSecondaryRecoveryStatus()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var update = new UpdateCheckController(
+                notify: _ => { },
+                checkAsync: _ => Task.FromResult(new UpdateCheckService.CheckResult(
+                    NewerAvailable: false,
+                    LatestTag: null,
+                    LatestHtmlUrl: null,
+                    Error: "network: offline",
+                    ShouldUpdateLastChecked: false)));
+            using var viewModel = new MainViewModel(
+                CreateSettings(temp),
+                clipboardImport: null,
+                navigator: null,
+                recycleBinDelete: null,
+                folderPreview: null,
+                photoMetadata: null,
+                ocrWorkflow: null,
+                externalEditReload: null,
+                updateCheck: update);
+
+            viewModel.CheckForUpdatesAsync(userInitiated: true).GetAwaiter().GetResult();
+
+            Assert.True(viewModel.HasUpdateCheckIssue);
+            Assert.Equal("Update check unavailable", viewModel.UpdateCheckIssueTitle);
+            Assert.True(viewModel.HasSecondaryStatus);
+            Assert.Equal("Update check unavailable", viewModel.SecondaryStatusTitle);
+            Assert.Contains("no image files were uploaded", viewModel.SecondaryStatusDetail);
+            Assert.Equal(MainViewModel.SecondaryStatusToneKind.Warning, viewModel.SecondaryStatusTone);
+        });
+    }
+
+    [Fact]
+    public void FolderPreviewState_WhenThumbnailLoadFails_ShowsSecondaryRecoveryStatus()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var first = WritePng(temp.Path, "a.png");
+            WritePng(temp.Path, "b.png");
+            var folderPreview = new FolderPreviewController(
+                Dispatcher.CurrentDispatcher,
+                isDisposed: () => false,
+                loadThumbnail: (_, _) => throw new IOException("cache unavailable"));
+            using var viewModel = new MainViewModel(
+                CreateSettings(temp),
+                clipboardImport: null,
+                navigator: null,
+                recycleBinDelete: null,
+                folderPreview: folderPreview,
+                photoMetadata: null,
+                ocrWorkflow: null,
+                externalEditReload: null,
+                updateCheck: null);
+
+            viewModel.OpenFile(first);
+            PumpUntil(() => viewModel.ThumbnailFailureCount == 2);
+
+            Assert.True(viewModel.HasThumbnailFailures);
+            Assert.Equal(2, viewModel.ThumbnailFailureCount);
+            Assert.True(viewModel.HasSecondaryStatus);
+            Assert.Equal("Some thumbnails could not be shown", viewModel.SecondaryStatusTitle);
+            Assert.Contains("Refresh the folder", viewModel.SecondaryStatusDetail);
+            Assert.Equal(MainViewModel.SecondaryStatusToneKind.Warning, viewModel.SecondaryStatusTone);
+        });
+    }
+
     private static MainViewModel CreateViewModel(TestDirectory temp, ClipboardImportService? clipboardImport = null)
         => new(CreateSettings(temp), clipboardImport);
 
