@@ -330,4 +330,5 @@ public static class Keys
     // Viewer chrome
     public const string FilmstripVisible = "viewer.filmstrip.visible";
     public const string MetadataHudVisible = "viewer.metadata-hud.visible";
+    public const string ConfirmRecycleBinDelete = "viewer.delete.confirm-recycle";
 }

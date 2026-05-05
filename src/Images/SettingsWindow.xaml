@@ -92,6 +92,31 @@
                                   AutomationProperties.Name="Show metadata overlay at startup" />
                     </Grid>
 
+                    <Border Height="1"
+                            Background="{StaticResource HairlineBrush}"
+                            Margin="0,14" />
+
+                    <!-- Recycle Bin confirmation row -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Confirm before moving images to Recycle Bin"
+                                       Style="{StaticResource Text.Body}"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Turn this back on if you used 'don't ask again' on the delete confirmation."
+                                       Style="{StaticResource Text.Hint}"
+                                       Margin="0,3,0,0"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  VerticalAlignment="Center"
+                                  IsChecked="{Binding ConfirmRecycleBinDeletes}"
+                                  AutomationProperties.Name="Confirm before moving images to Recycle Bin" />
+                    </Grid>
+
                 </StackPanel>
             </Border>
 

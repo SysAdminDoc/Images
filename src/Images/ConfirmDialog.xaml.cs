@@ -5,6 +5,8 @@ namespace Images;
 
 public partial class ConfirmDialog : Window
 {
+    public readonly record struct ConfirmationResult(bool Confirmed, bool DoNotAskAgain);
+
     private ConfirmDialog(
         string title,
         string message,
@@ -12,7 +14,8 @@ public partial class ConfirmDialog : Window
         string detail,
         string footnote,
         string confirmText,
-        string cancelText)
+        string cancelText,
+        bool showDoNotAskAgain = false)
     {
         InitializeComponent();
 
@@ -24,6 +27,7 @@ public partial class ConfirmDialog : Window
         FootnoteText.Text = footnote;
         ConfirmButtonText.Text = confirmText;
         CancelButtonText.Text = cancelText;
+        DontAskAgainPanel.Visibility = showDoNotAskAgain ? Visibility.Visible : Visibility.Collapsed;
 
         SourceInitialized += (_, _) =>
         {
@@ -32,7 +36,7 @@ public partial class ConfirmDialog : Window
         };
     }
 
-    public static bool ConfirmRecycleBinMove(Window? owner, string path)
+    public static ConfirmationResult ConfirmRecycleBinMove(Window? owner, string path)
     {
         var fileName = System.IO.Path.GetFileName(path);
         var folder = System.IO.Path.GetDirectoryName(path) ?? "";
@@ -44,12 +48,16 @@ public partial class ConfirmDialog : Window
             detail: folder,
             footnote: "You can restore the file from the Recycle Bin until it is emptied.",
             confirmText: "Move to Recycle Bin",
-            cancelText: "Cancel")
+            cancelText: "Cancel",
+            showDoNotAskAgain: true)
         {
             Owner = owner
         };
 
-        return dialog.ShowDialog() == true;
+        var confirmed = dialog.ShowDialog() == true;
+        return new ConfirmationResult(
+            confirmed,
+            confirmed && dialog.DontAskAgainCheckBox.IsChecked == true);
     }
 
     private void ConfirmButton_Click(object sender, RoutedEventArgs e)

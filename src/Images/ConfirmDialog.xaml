@@ -20,6 +20,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">
@@ -90,7 +91,19 @@
                        Margin="2,14,2,0"
                        TextWrapping="Wrap" />
 
-            <StackPanel Grid.Row="3"
+            <Border x:Name="DontAskAgainPanel"
+                    Grid.Row="3"
+                    Style="{StaticResource Card}"
+                    Padding="12,10"
+                    Margin="0,16,0,0"
+                    Visibility="Collapsed">
+                <CheckBox x:Name="DontAskAgainCheckBox"
+                          Content="Don't ask again for Recycle Bin deletes"
+                          AutomationProperties.Name="Do not ask again for Recycle Bin deletes"
+                          AutomationProperties.HelpText="When checked, future Delete actions move images to the Recycle Bin without this confirmation. You can turn confirmation back on in Settings." />
+            </Border>
+
+            <StackPanel Grid.Row="4"
                         Orientation="Horizontal"
                         HorizontalAlignment="Right"
                         Margin="0,24,0,0">

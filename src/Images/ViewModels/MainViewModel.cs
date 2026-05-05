@@ -1383,9 +1383,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private static bool ConfirmRecycleBinDelete(string path)
+    private bool ConfirmRecycleBinDelete(string path)
     {
-        return ConfirmDialog.ConfirmRecycleBinMove(Application.Current?.MainWindow, path);
+        if (!SettingsService.Instance.GetBool(Keys.ConfirmRecycleBinDelete, true))
+            return true;
+
+        var result = ConfirmDialog.ConfirmRecycleBinMove(Application.Current?.MainWindow, path);
+        if (result.DoNotAskAgain)
+        {
+            SettingsService.Instance.SetBool(Keys.ConfirmRecycleBinDelete, false);
+            Toast("Recycle Bin confirmation disabled");
+        }
+
+        return result.Confirmed;
     }
 
     private void Rotate(double delta)

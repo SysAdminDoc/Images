@@ -44,4 +44,17 @@ public sealed class SettingsServiceTests
         Assert.Empty(service.GetRecentFolders(0));
         Assert.Empty(service.GetRecentFolders(-5));
     }
+
+    [Fact]
+    public void ConfirmRecycleBinDeleteSettingDefaultsOnAndPersistsOptOut()
+    {
+        using var temp = TestDirectory.Create();
+        var service = new SettingsService(System.IO.Path.Combine(temp.Path, "settings.db"));
+
+        Assert.True(service.GetBool(Keys.ConfirmRecycleBinDelete, true));
+
+        service.SetBool(Keys.ConfirmRecycleBinDelete, false);
+
+        Assert.False(service.GetBool(Keys.ConfirmRecycleBinDelete, true));
+    }
 }

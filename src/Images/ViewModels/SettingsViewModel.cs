@@ -56,6 +56,21 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
+    public bool ConfirmRecycleBinDeletes
+    {
+        get => SettingsService.Instance.GetBool(Keys.ConfirmRecycleBinDelete, true);
+        set
+        {
+            SettingsService.Instance.SetBool(Keys.ConfirmRecycleBinDelete, value);
+            Raise(nameof(ConfirmRecycleBinDeletes));
+            SetStatus(
+                value
+                    ? "Recycle Bin confirmation enabled."
+                    : "Recycle Bin confirmation disabled. Delete will move images immediately.",
+                SettingsStatusToneKind.Success);
+        }
+    }
+
     // ---- Privacy ----
 
     public bool UpdateCheckEnabled
