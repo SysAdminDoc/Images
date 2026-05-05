@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Windows.Input;
 using Images.Services;
 
@@ -93,11 +92,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     {
         try
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "ms-settings:regionlanguage",
-                UseShellExecute = true,
-            });
+            ShellIntegration.OpenShellTarget("ms-settings:regionlanguage");
             SettingsStatusText = "Windows language settings opened.";
         }
         catch (Exception ex)

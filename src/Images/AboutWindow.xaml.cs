@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -41,15 +40,9 @@ public partial class AboutWindow : Window
 
     private void GitHubButton_Click(object sender, RoutedEventArgs e)
     {
-        // UseShellExecute=true is required for http: — and safe here because the URL is a
-        // compile-time constant, not user input.
         try
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "https://github.com/SysAdminDoc/Images",
-                UseShellExecute = true,
-            });
+            ShellIntegration.OpenShellTarget("https://github.com/SysAdminDoc/Images");
         }
         catch (Exception ex)
         {
@@ -64,13 +57,10 @@ public partial class AboutWindow : Window
 
         try
         {
-            // /select, to pre-highlight the log file when it exists; fall back to opening the folder.
-            var psi = new ProcessStartInfo { FileName = "explorer.exe", UseShellExecute = false };
             if (File.Exists(CrashLog.LogPath))
-                psi.ArgumentList.Add("/select," + CrashLog.LogPath);
+                ShellIntegration.RevealPathInExplorer(CrashLog.LogPath);
             else
-                psi.ArgumentList.Add(dir);
-            Process.Start(psi);
+                ShellIntegration.OpenFolder(dir);
         }
         catch (Exception ex)
         {
@@ -82,7 +72,7 @@ public partial class AboutWindow : Window
     {
         try
         {
-            Clipboard.SetText(CodecCapabilityService.BuildClipboardReport());
+            ClipboardService.SetText(CodecCapabilityService.BuildClipboardReport());
             ShowUpdateStatus("Codec report copied to clipboard.", "Success");
         }
         catch (Exception ex)
@@ -106,11 +96,7 @@ public partial class AboutWindow : Window
             var path = Path.Combine(dir, $"images-system-info-{stamp}-{Guid.NewGuid():N}.txt");
             File.WriteAllText(path, CliReport.BuildSystemInfo(), new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
 
-            // /select, highlights the file in a new Explorer window. We use ArgumentList so a
-            // path with spaces or commas can't compose against CommandLineToArgvW quoting.
-            var psi = new ProcessStartInfo { FileName = "explorer.exe", UseShellExecute = false };
-            psi.ArgumentList.Add("/select," + path);
-            Process.Start(psi);
+            ShellIntegration.RevealPathInExplorer(path);
 
             ShowUpdateStatus($"Saved to {path}", "Success");
         }
@@ -130,9 +116,7 @@ public partial class AboutWindow : Window
         var dir = AppStorage.TryGetAppDirectory() ?? Path.GetTempPath();
         try
         {
-            var psi = new ProcessStartInfo { FileName = "explorer.exe", UseShellExecute = false };
-            psi.ArgumentList.Add(dir);
-            Process.Start(psi);
+            ShellIntegration.OpenFolder(dir);
         }
         catch (Exception ex)
         {
@@ -203,11 +187,7 @@ public partial class AboutWindow : Window
         if (string.IsNullOrWhiteSpace(_latestReleaseUrl)) return;
         try
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = _latestReleaseUrl,
-                UseShellExecute = true,
-            });
+            ShellIntegration.OpenShellTarget(_latestReleaseUrl);
         }
         catch (Exception ex)
         {

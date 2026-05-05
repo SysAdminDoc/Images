@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -77,7 +76,7 @@ public partial class CrashDialog : Window
     {
         try
         {
-            Clipboard.SetText(_detailsText);
+            ClipboardService.SetText(_detailsText);
             ShowStatus("Copied crash details to the clipboard.", "Success");
         }
         catch
@@ -97,9 +96,7 @@ public partial class CrashDialog : Window
 
         try
         {
-            var psi = new ProcessStartInfo { FileName = "explorer.exe", UseShellExecute = false };
-            psi.ArgumentList.Add(dir);
-            Process.Start(psi);
+            ShellIntegration.OpenFolder(dir);
             ShowStatus("Opened the crash log folder.", "Success");
         }
         catch (Exception ex)
@@ -123,14 +120,14 @@ public partial class CrashDialog : Window
 
         try
         {
-            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+            ShellIntegration.OpenShellTarget(url);
             ShowStatus("Opened a pre-filled GitHub issue.", "Success");
         }
         catch
         {
             try
             {
-                Clipboard.SetText(url);
+                ClipboardService.SetText(url);
                 ShowStatus("Could not open the browser. The issue URL was copied to the clipboard.", "Warning");
             }
             catch
