@@ -46,6 +46,24 @@ public sealed class ClipboardImportServiceTests
     }
 
     [Fact]
+    public void Import_FileDropListWithGatedArchive_ReturnsRuntimeStatus()
+    {
+        using var temp = TestDirectory.Create();
+        var archive = temp.WriteFile("book.cbr");
+        var source = new FakeClipboardDataSource
+        {
+            FileDropList = [archive]
+        };
+        var service = CreateService(source, temp.Path);
+
+        var result = service.Import();
+
+        Assert.Equal(ClipboardImportStatus.ArchiveRuntimeNotEnabled, result.Status);
+        Assert.Null(result.Path);
+        Assert.Equal(SupportedImageFormats.GatedArchiveRuntimeTitle, result.Message);
+    }
+
+    [Fact]
     public void Import_ImageData_SavesCollisionResistantPng()
     {
         using var temp = TestDirectory.Create();
