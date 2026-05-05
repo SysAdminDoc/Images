@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-02H` is complete, closing `IP-02`. Update-check UI state now lives behind `UpdateCheckController`, which owns release-check command behavior, latest-release state, command invalidation, user/background feedback, and release-link opening with direct regression coverage.
+`IP-03B` is complete. Folder-preview thumbnail loading now has a deterministic seam and regression coverage for clear and superseded-refresh cancellation paths, protecting the most volatile remaining async preview state.
 
 ## Next Focus
 
-The next recommended slice is `IP-03B`: extend UI-state coverage around the remaining risky transitions, especially thumbnail cancellation, reload failure paths, and view-model property relays from the extracted controllers.
+The next recommended slice is `IP-03C`: extend UI-state coverage around extracted controller/view-model property relays and remaining reload/state-transition smoke paths.
 
 ## Research Inputs
 
@@ -59,7 +59,7 @@ The next recommended slice is `IP-03B`: extend UI-state coverage around the rema
 
 ## Implementation Order
 
-1. Extend `IP-03` state coverage around thumbnail cancellation, reload failure paths, and extracted controller/view-model relays.
+1. Extend `IP-03` state coverage around extracted controller/view-model relays and any remaining reload/state-transition smoke paths.
 2. Build diagnostics/status UX from existing system-info, codec, OCR, and storage services under `IP-06`.
 3. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
 4. Scope `IP-16` design docs once near-term reliability and testability slices are stable.
@@ -80,6 +80,7 @@ The next recommended slice is `IP-03B`: extend UI-state coverage around the rema
 - 2026-05-05: Completed `IP-02F` by extracting external-edit watcher/debounce/reload feedback into `ExternalEditReloadController` and covering coalesced reloads, failed reload notifications, disarm cancellation, and watcher creation failure.
 - 2026-05-05: Completed `IP-02G` by extracting OCR busy/active overlay workflow into `OcrWorkflowController` and covering no-image, success, no-text, cancellation, and stale-result outcomes.
 - 2026-05-05: Completed `IP-02H` and closed `IP-02` by extracting update-check UI state into `UpdateCheckController` and covering background skip, newer-release, current-release, error, and release-link opening outcomes.
+- 2026-05-05: Completed `IP-03B` by adding a deterministic folder-preview thumbnail loader seam and regression tests for clear and superseded-refresh cancellation paths.
 
 ## Verification Standard
 
