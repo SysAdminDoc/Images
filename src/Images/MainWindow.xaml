@@ -1615,6 +1615,101 @@
                         </Grid>
                     </Border>
 
+                    <Border Margin="0,0,0,20"
+                            Visibility="{Binding HasSecondaryStatus, Converter={StaticResource BoolToVis}}"
+                            AutomationProperties.Name="{Binding SecondaryStatusTitle}"
+                            AutomationProperties.LiveSetting="Polite">
+                        <Border.Style>
+                            <Style TargetType="{x:Type Border}" BasedOn="{StaticResource Card}">
+                                <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Info">
+                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Success">
+                                        <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Warning">
+                                        <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Error">
+                                        <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                    Width="32"
+                                    Height="32"
+                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                    BorderThickness="1"
+                                    VerticalAlignment="Top"
+                                    Margin="0,0,12,0">
+                                <Border.Style>
+                                    <Style TargetType="{x:Type Border}">
+                                        <Setter Property="Background" Value="#1F89B4FA" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Success">
+                                                <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Warning">
+                                                <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Error">
+                                                <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
+                                <TextBlock Text="{Binding SecondaryStatusIcon}"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="13"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}">
+                                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Success">
+                                                    <Setter Property="Foreground" Value="{StaticResource GreenBrush}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Warning">
+                                                    <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Error">
+                                                    <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{Binding SecondaryStatusTitle}"
+                                           Style="{StaticResource Text.Caption}"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}" />
+                                <TextBlock Text="{Binding SecondaryStatusDetail}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,4,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
                     <!-- FOLDER PREVIEW fallback — remains in the side panel when the bottom
                          filmstrip is hidden so thumbnail jumping is never lost. -->
                     <StackPanel Visibility="{Binding ShowSideFolderPreview, Converter={StaticResource BoolToVis}}">

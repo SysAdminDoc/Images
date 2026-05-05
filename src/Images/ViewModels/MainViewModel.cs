@@ -368,6 +368,48 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         && (!string.IsNullOrWhiteSpace(OperationStatusTitle)
             || !string.IsNullOrWhiteSpace(OperationStatusDetail));
 
+    public enum SecondaryStatusToneKind { Info, Success, Warning, Error }
+
+    private string _secondaryStatusTitle = "";
+    public string SecondaryStatusTitle
+    {
+        get => _secondaryStatusTitle;
+        private set
+        {
+            if (Set(ref _secondaryStatusTitle, value))
+                Raise(nameof(HasSecondaryStatus));
+        }
+    }
+
+    private string _secondaryStatusDetail = "";
+    public string SecondaryStatusDetail
+    {
+        get => _secondaryStatusDetail;
+        private set
+        {
+            if (Set(ref _secondaryStatusDetail, value))
+                Raise(nameof(HasSecondaryStatus));
+        }
+    }
+
+    private string _secondaryStatusIcon = "\uE946";
+    public string SecondaryStatusIcon
+    {
+        get => _secondaryStatusIcon;
+        private set => Set(ref _secondaryStatusIcon, value);
+    }
+
+    private SecondaryStatusToneKind _secondaryStatusTone = SecondaryStatusToneKind.Info;
+    public SecondaryStatusToneKind SecondaryStatusTone
+    {
+        get => _secondaryStatusTone;
+        private set => Set(ref _secondaryStatusTone, value);
+    }
+
+    public bool HasSecondaryStatus
+        => !string.IsNullOrWhiteSpace(SecondaryStatusTitle)
+            || !string.IsNullOrWhiteSpace(SecondaryStatusDetail);
+
     public string FirstRunPrivacyText => _settings.GetBool(Keys.UpdateCheckEnabled, false)
         ? "Automatic update checks are enabled. Image files stay local; release checks only contact GitHub."
         : "No telemetry and no image uploads. Automatic update checks are off until you enable them.";
@@ -875,6 +917,35 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     /// <summary>View-facing toast helper so the code-behind doesn't have to reach through Set().</summary>
     public void ShowToast(string message) => Toast(message);
 
+    private void ShowSecondaryStatus(
+        string title,
+        string detail,
+        SecondaryStatusToneKind tone = SecondaryStatusToneKind.Info,
+        string icon = "\uE946")
+    {
+        SecondaryStatusTitle = title;
+        SecondaryStatusDetail = detail;
+        SecondaryStatusTone = tone;
+        SecondaryStatusIcon = icon;
+    }
+
+    private void ClearSecondaryStatus()
+    {
+        SecondaryStatusTitle = "";
+        SecondaryStatusDetail = "";
+        SecondaryStatusTone = SecondaryStatusToneKind.Info;
+        SecondaryStatusIcon = "\uE946";
+    }
+
+    private static string FormatExtensionForMessage(string extension)
+        => string.IsNullOrWhiteSpace(extension) ? "this file" : extension;
+
+    private static string DisplayFolderName(string folder)
+    {
+        var name = Path.GetFileName(Path.TrimEndingDirectorySeparator(folder));
+        return string.IsNullOrWhiteSpace(name) ? folder : name;
+    }
+
     // -------------------- Commands --------------------
 
     public ICommand OpenCommand { get; }
@@ -958,6 +1029,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             // dropped (video, archive, document) so the user understands why nothing happened.
             var ext = Path.GetExtension(path);
             var suggestion = SupportedImageFormats.SuggestionForUnsupported(ext);
+            ShowSecondaryStatus(
+                "File type not supported",
+                suggestion is null
+                    ? $"Images does not recognize {FormatExtensionForMessage(ext)} as a supported image or document preview format."
+                    : suggestion,
+                SecondaryStatusToneKind.Warning,
+                "\uE783");
             Toast(suggestion is null
                 ? $"Unsupported file type: {ext}"
                 : $"Unsupported {ext}. {suggestion}");
@@ -967,6 +1045,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var previousFolder = _nav.Folder;
         if (!_nav.Open(path))
         {
+            ShowSecondaryStatus(
+                File.Exists(path) ? "Could not open file" : "File no longer exists",
+                File.Exists(path)
+                    ? $"{Path.GetFileName(path)} could not be opened from this location."
+                    : "The file may have been moved, renamed, deleted, or disconnected.",
+                SecondaryStatusToneKind.Warning,
+                "\uE783");
             Toast(File.Exists(path)
                 ? $"Could not open {Path.GetFileName(path)}"
                 : "File no longer exists");
@@ -977,6 +1062,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _preload.Reset();
 
         ResetPageState();
+        ClearSecondaryStatus();
         LoadCurrent();
         _externalEditReload.Arm(path);
 
@@ -1044,6 +1130,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (string.IsNullOrWhiteSpace(folder)) return;
         if (!Directory.Exists(folder))
         {
+            ShowSecondaryStatus(
+                "Recent folder removed",
+                "It was removed from the list because the folder no longer exists.",
+                SecondaryStatusToneKind.Warning,
+                "\uE8B7");
             Toast("Folder no longer exists");
             RefreshRecentFolders(); // GetRecentFolders filters missing folders — re-pull.
             return;
@@ -1054,6 +1145,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             var first = DirectoryNavigator.FirstSupportedImageInFolder(folder);
             if (first is null)
             {
+                ShowSecondaryStatus(
+                    "No supported images in this folder",
+                    $"Images did not find supported formats in {DisplayFolderName(folder)}. Choose another folder or paste an image.",
+                    SecondaryStatusToneKind.Info,
+                    "\uE8B7");
                 Toast($"No images in {Path.GetFileName(folder)}");
                 return;
             }
@@ -1061,6 +1157,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
         {
+            ShowSecondaryStatus(
+                "Folder unreachable",
+                "Check permissions or reconnect the drive, then try again.",
+                SecondaryStatusToneKind.Warning,
+                "\uE783");
             Toast("Folder unreachable");
         }
     }
@@ -1070,9 +1171,50 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var result = _clipboardImport.Import();
         if (result.Path is not null)
             OpenFile(result.Path);
+        else
+            ShowClipboardImportStatus(result);
 
         if (!string.IsNullOrWhiteSpace(result.Message))
             Toast(result.Message);
+    }
+
+    private void ShowClipboardImportStatus(ClipboardImportResult result)
+    {
+        switch (result.Status)
+        {
+            case ClipboardImportStatus.NoSupportedFile:
+                ShowSecondaryStatus(
+                    "Clipboard file not supported",
+                    "The clipboard contains files, but none are formats Images can open.",
+                    SecondaryStatusToneKind.Warning,
+                    "\uE783");
+                break;
+            case ClipboardImportStatus.NothingImageLike:
+                ShowSecondaryStatus(
+                    "Clipboard has no image",
+                    "Copy an image, screenshot, or supported image file, then paste again.",
+                    SecondaryStatusToneKind.Info,
+                    "\uE946");
+                break;
+            case ClipboardImportStatus.ImageUnavailable:
+                ShowSecondaryStatus(
+                    "Clipboard image could not be read",
+                    "Try copying the image again from the source app.",
+                    SecondaryStatusToneKind.Warning,
+                    "\uE783");
+                break;
+            case ClipboardImportStatus.StorageUnavailable:
+            case ClipboardImportStatus.SaveFailed:
+                ShowSecondaryStatus(
+                    "Clipboard paste could not be saved",
+                    "Images could not create a temporary local copy. Open Diagnostics to inspect storage.",
+                    SecondaryStatusToneKind.Error,
+                    "\uE783");
+                break;
+            default:
+                ClearSecondaryStatus();
+                break;
+        }
     }
 
     private void OpenInDefaultApp()
