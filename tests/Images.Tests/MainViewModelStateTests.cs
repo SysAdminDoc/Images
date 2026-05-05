@@ -242,6 +242,28 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void FirstRunGuidance_ExposesCapabilityAndPrivacySummaries()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var settings = CreateSettings(temp);
+            using var viewModel = new MainViewModel(settings);
+
+            Assert.Contains("No telemetry", viewModel.FirstRunPrivacyText, StringComparison.Ordinal);
+            Assert.Contains("open extensions", viewModel.FirstRunFormatStatusText, StringComparison.Ordinal);
+            Assert.Contains("export extensions", viewModel.FirstRunFormatStatusText, StringComparison.Ordinal);
+            Assert.False(string.IsNullOrWhiteSpace(viewModel.FirstRunOcrStatusText));
+            Assert.False(string.IsNullOrWhiteSpace(viewModel.FirstRunDocumentStatusText));
+            Assert.Contains("Diagnostics", viewModel.FirstRunRecoveryText, StringComparison.Ordinal);
+
+            settings.SetBool(Keys.UpdateCheckEnabled, true);
+
+            Assert.Contains("Automatic update checks are enabled", viewModel.FirstRunPrivacyText, StringComparison.Ordinal);
+        });
+    }
+
+    [Fact]
     public void RefreshCommand_WhenCurrentFileWasRemovedExternally_LoadsNextAvailableImage()
     {
         RunOnSta(() =>
