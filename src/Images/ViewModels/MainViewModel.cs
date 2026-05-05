@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -150,6 +151,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         SetCropAspectPresetCommand = new RelayCommand(SetCropAspectPreset);
         OpenResizeDialogCommand = new RelayCommand(OpenResizeDialog, () => CanUseResize);
         OpenAdjustmentsCommand = new RelayCommand(OpenAdjustments, () => CanUseAdjustments);
+        ToggleExposureBrushModeCommand = new RelayCommand(() => IsExposureBrushMode = !IsExposureBrushMode, () => CanUseExposureBrush);
+        ApplyExposureBrushCommand = new RelayCommand(ApplyExposureBrush, () => CanApplyExposureBrush);
+        CancelExposureBrushCommand = new RelayCommand(CancelExposureBrushMode, () => IsExposureBrushMode || HasExposureBrushStrokes);
+        ClearExposureBrushCommand = new RelayCommand(ClearExposureBrushStrokes, () => HasExposureBrushStrokes);
+        SetExposureBrushModeCommand = new RelayCommand(SetExposureBrushMode, parameter => parameter is string);
         CopyInspectorHexCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hex, "HEX"), () => HasInspectorSample);
         CopyInspectorRgbCommand = new RelayCommand(() => CopyInspectorValue(s => s.Rgb, "RGB"), () => HasInspectorSample);
         CopyInspectorHsvCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hsv, "HSV"), () => HasInspectorSample);
@@ -253,6 +259,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(HasDisplayImage));
                 Raise(nameof(CanUseInspector));
                 Raise(nameof(CanUseCrop));
+                Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(CanUseOverlayMode));
                 Raise(nameof(CanToggleMetadataHud));
                 Raise(nameof(ShowMetadataHud));
@@ -503,6 +510,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(PageSpan));
         Raise(nameof(IsArchiveBook));
         Raise(nameof(CanUseCrop));
+        Raise(nameof(CanUseExposureBrush));
         Raise(nameof(CanTurnLeftBookPage));
         Raise(nameof(CanTurnRightBookPage));
         Raise(nameof(CurrentArchiveProgressText));
@@ -529,6 +537,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanTurnRightBookPage));
                 Raise(nameof(CurrentArchiveProgressText));
                 Raise(nameof(CanUseCrop));
+                Raise(nameof(CanUseExposureBrush));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -540,6 +549,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool CanUseCrop => HasImage && HasDisplayImage && !IsOperationBusy && !IsArchiveBook && !IsPeekMode;
     private bool CanUseResize => CanUseCrop;
     private bool CanUseAdjustments => CanUseCrop;
+    public bool CanUseExposureBrush => CanUseCrop;
     public bool IsViewerEmpty => CurrentPath is null;
     public bool CanRefreshFolder => (CurrentPath is not null || _nav.Count > 0) && !IsOperationBusy;
 
@@ -580,6 +590,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanRefreshFolder));
                 Raise(nameof(CanUseInspector));
                 Raise(nameof(CanUseCrop));
+                Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(CanUseOverlayMode));
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -685,6 +696,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanToggleMetadataHud));
                 Raise(nameof(CanUseOverlayMode));
                 Raise(nameof(CanUseCrop));
+                Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(ShowMetadataHud));
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -881,6 +893,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             else
             {
                 IsCropMode = false;
+                IsExposureBrushMode = false;
+                ClearExposureBrushStrokes(showToast: false);
                 InspectorStatusText = "Move over the image to sample pixels. Click to hold a sample; Ctrl+click copies it. Shift-drag measures.";
             }
 
@@ -941,6 +955,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 IsInspectorMode = false;
                 IsOcrMode = false;
+                IsExposureBrushMode = false;
+                ClearExposureBrushStrokes(showToast: false);
                 CropStatusText = "Drag on the image to choose a crop. Enter applies it to edit history.";
             }
             else if (!HasCropSelection)
@@ -1015,7 +1031,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasCropSelection => CropSelection is { Width: > 0, Height: > 0 };
     public bool CanApplyCrop => IsCropMode && HasCropSelection && CanUseCrop;
     public bool ShowCropOverlay => IsCropMode || HasCropSelection;
-    public bool IsCanvasSelectionMode => IsInspectorMode || IsCropMode;
+    public bool IsCanvasSelectionMode => IsInspectorMode || IsCropMode || IsExposureBrushMode;
     public string CropModeText => IsCropMode ? "Crop on" : "Crop off";
     public string CropModeHelpText => IsCropMode
         ? "Drag a rectangle on the image. Enter adds the crop to edit history; Esc cancels."
@@ -1024,6 +1040,91 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public string CropAspectText => EffectiveCropAspectPreset?.Label ?? "Custom ratio needed";
     public string CropAspectHelpText => EffectiveCropAspectPreset?.Description ?? "Enter positive whole numbers for custom width and height.";
     public bool ShowCustomCropAspect => SelectedCropAspectPreset.Id.Equals(CropSelectionService.CustomAspectPresetId, StringComparison.OrdinalIgnoreCase);
+
+    private bool _isExposureBrushMode;
+    public bool IsExposureBrushMode
+    {
+        get => _isExposureBrushMode;
+        set
+        {
+            if (!Set(ref _isExposureBrushMode, value))
+                return;
+
+            if (value)
+            {
+                IsInspectorMode = false;
+                IsCropMode = false;
+                IsOcrMode = false;
+                ClearCropSelection();
+                ExposureBrushStatusText = "Paint on the image. Enter adds strokes to edit history; Esc cancels.";
+            }
+            else if (!HasExposureBrushStrokes)
+            {
+                ExposureBrushStatusText = "Turn on exposure brush, then paint dodge or burn strokes without changing the source file.";
+            }
+
+            RaiseExposureBrushModeState();
+        }
+    }
+
+    public ObservableCollection<LocalExposureBrushStroke> ExposureBrushStrokes { get; } = [];
+
+    private double _exposureBrushRadius = 48;
+    public double ExposureBrushRadius
+    {
+        get => _exposureBrushRadius;
+        set
+        {
+            var radius = Math.Clamp(double.IsFinite(value) ? value : 48, LocalExposureBrushService.MinRadius, LocalExposureBrushService.MaxRadius);
+            if (Set(ref _exposureBrushRadius, radius))
+                RaiseExposureBrushSettingsState();
+        }
+    }
+
+    private double _exposureBrushStrength = 28;
+    public double ExposureBrushStrength
+    {
+        get => _exposureBrushStrength;
+        set
+        {
+            var strength = Math.Clamp(double.IsFinite(value) ? value : 28, 1, 100);
+            if (Set(ref _exposureBrushStrength, strength))
+                RaiseExposureBrushSettingsState();
+        }
+    }
+
+    private bool _isExposureBrushBurn;
+    public bool IsExposureBrushBurn
+    {
+        get => _isExposureBrushBurn;
+        private set
+        {
+            if (Set(ref _isExposureBrushBurn, value))
+                RaiseExposureBrushSettingsState();
+        }
+    }
+
+    private string _exposureBrushStatusText = "Turn on exposure brush, then paint dodge or burn strokes without changing the source file.";
+    public string ExposureBrushStatusText
+    {
+        get => _exposureBrushStatusText;
+        private set => Set(ref _exposureBrushStatusText, value);
+    }
+
+    public string ExposureBrushModeText => IsExposureBrushMode ? "Exposure brush on" : "Exposure brush off";
+    public string ExposureBrushModeHelpText => IsExposureBrushMode
+        ? "Paint directly on the image. Enter adds strokes to edit history; Esc cancels."
+        : "Non-destructive dodge and burn strokes for Save a copy exports.";
+    public string ExposureBrushToneText => IsExposureBrushBurn ? "Burn" : "Dodge";
+    public string ExposureBrushRadiusText => string.Create(CultureInfo.InvariantCulture, $"{ExposureBrushRadius:0} px");
+    public string ExposureBrushStrengthText => string.Create(CultureInfo.InvariantCulture, $"{ExposureBrushStrength:0}%");
+    public string ExposureBrushStrokeText => HasExposureBrushStrokes
+        ? LocalExposureBrushService.CreateSummary(ExposureBrushStrokes.ToList())
+        : "No strokes painted";
+    public bool HasExposureBrushStrokes => ExposureBrushStrokes.Count > 0;
+    public bool CanApplyExposureBrush => IsExposureBrushMode && HasExposureBrushStrokes && CanUseExposureBrush;
+    public bool ShowExposureBrushOverlay => IsExposureBrushMode || HasExposureBrushStrokes;
+    private double ExposureBrushSignedStrength => (IsExposureBrushBurn ? -1 : 1) * Math.Clamp(ExposureBrushStrength / 100, 0.01, 1);
 
     // -------------------- Rename editor state --------------------
 
@@ -1728,6 +1829,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand SetCropAspectPresetCommand { get; }
     public ICommand OpenResizeDialogCommand { get; }
     public ICommand OpenAdjustmentsCommand { get; }
+    public ICommand ToggleExposureBrushModeCommand { get; }
+    public ICommand ApplyExposureBrushCommand { get; }
+    public ICommand CancelExposureBrushCommand { get; }
+    public ICommand ClearExposureBrushCommand { get; }
+    public ICommand SetExposureBrushModeCommand { get; }
     public ICommand CopyInspectorHexCommand { get; }
     public ICommand CopyInspectorRgbCommand { get; }
     public ICommand CopyInspectorHsvCommand { get; }
@@ -2157,6 +2263,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             ClearInspectorState();
             IsCropMode = false;
             ClearCropSelection();
+            IsExposureBrushMode = false;
+            ClearExposureBrushStrokes(showToast: false);
             ApplyPageSequence(res.Pages);
             ArchiveReadPositionService.SaveLastPageIndex(_settings, path, PageIndex, PageCount);
             if (isArchiveBookPage)
@@ -2188,6 +2296,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             ClearInspectorState();
             IsCropMode = false;
             ClearCropSelection();
+            IsExposureBrushMode = false;
+            ClearExposureBrushStrokes(showToast: false);
             ResetPageState();
             SetLoadError(ex);
         }
@@ -2813,6 +2923,35 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             : "Turn on crop, drag on the image, then apply without changing the source file.";
     }
 
+    public void AddExposureBrushStroke(PixelCoordinate coordinate)
+    {
+        if (!IsExposureBrushMode || !CanUseExposureBrush || PixelWidth <= 0 || PixelHeight <= 0)
+            return;
+
+        var stroke = LocalExposureBrushService.NormalizeStroke(
+            coordinate,
+            ExposureBrushRadius,
+            ExposureBrushSignedStrength,
+            PixelWidth,
+            PixelHeight);
+
+        if (ExposureBrushStrokes.Count > 0)
+        {
+            var previous = ExposureBrushStrokes[ExposureBrushStrokes.Count - 1];
+            var dx = previous.X - stroke.X;
+            var dy = previous.Y - stroke.Y;
+            var minimumSpacing = Math.Max(2, stroke.Radius * 0.18);
+            if ((dx * dx) + (dy * dy) < minimumSpacing * minimumSpacing)
+                return;
+        }
+
+        ExposureBrushStrokes.Add(stroke);
+        ExposureBrushStatusText = string.Create(
+            CultureInfo.InvariantCulture,
+            $"{stroke.ModeLabel} stroke at {stroke.X:0}, {stroke.Y:0}. Enter applies the brush stack.");
+        RaiseExposureBrushStrokeState();
+    }
+
     private CropAspectPreset? EffectiveCropAspectPreset
     {
         get
@@ -2924,6 +3063,78 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         window.Show();
     }
 
+    private void SetExposureBrushMode(object? parameter)
+    {
+        if (parameter is not string mode)
+            return;
+
+        if (mode.Equals("burn", StringComparison.OrdinalIgnoreCase))
+        {
+            IsExposureBrushBurn = true;
+            ExposureBrushStatusText = IsExposureBrushMode
+                ? "Burn mode selected. Paint to darken local areas."
+                : "Burn mode selected. Turn on exposure brush to paint.";
+        }
+        else if (mode.Equals("dodge", StringComparison.OrdinalIgnoreCase))
+        {
+            IsExposureBrushBurn = false;
+            ExposureBrushStatusText = IsExposureBrushMode
+                ? "Dodge mode selected. Paint to brighten local areas."
+                : "Dodge mode selected. Turn on exposure brush to paint.";
+        }
+    }
+
+    private void ApplyExposureBrush()
+    {
+        if (!CanApplyExposureBrush || CurrentPath is null)
+            return;
+
+        var strokes = ExposureBrushStrokes.ToList();
+        var result = _editStack.AppendOperation(
+            CurrentPath,
+            "local-exposure",
+            LocalExposureBrushService.ToEditParameters(strokes),
+            LocalExposureBrushService.CreateLabel(strokes));
+
+        if (result.Success)
+        {
+            IsExposureBrushMode = false;
+            ClearExposureBrushStrokes(showToast: false);
+            Toast("Exposure brush added to edit history");
+        }
+        else
+        {
+            ExposureBrushStatusText = "Exposure brush failed: " + result.Message;
+            Toast("Exposure brush failed");
+        }
+    }
+
+    private void CancelExposureBrushMode()
+    {
+        IsExposureBrushMode = false;
+        ClearExposureBrushStrokes(showToast: false);
+        Toast("Exposure brush canceled");
+    }
+
+    private void ClearExposureBrushStrokes()
+    {
+        ClearExposureBrushStrokes(showToast: true);
+    }
+
+    private void ClearExposureBrushStrokes(bool showToast)
+    {
+        if (ExposureBrushStrokes.Count > 0)
+            ExposureBrushStrokes.Clear();
+
+        ExposureBrushStatusText = IsExposureBrushMode
+            ? "Paint on the image. Enter adds strokes to edit history; Esc cancels."
+            : "Turn on exposure brush, then paint dodge or burn strokes without changing the source file.";
+        RaiseExposureBrushStrokeState();
+
+        if (showToast)
+            Toast("Exposure brush strokes cleared");
+    }
+
     private void CancelCropMode()
     {
         IsCropMode = false;
@@ -2992,6 +3203,35 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(CropAspectText));
         Raise(nameof(CropAspectHelpText));
         Raise(nameof(ShowCustomCropAspect));
+    }
+
+    private void RaiseExposureBrushModeState()
+    {
+        Raise(nameof(IsExposureBrushMode));
+        Raise(nameof(ShowExposureBrushOverlay));
+        Raise(nameof(IsCanvasSelectionMode));
+        Raise(nameof(ExposureBrushModeText));
+        Raise(nameof(ExposureBrushModeHelpText));
+        Raise(nameof(CanApplyExposureBrush));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RaiseExposureBrushSettingsState()
+    {
+        Raise(nameof(IsExposureBrushBurn));
+        Raise(nameof(ExposureBrushToneText));
+        Raise(nameof(ExposureBrushRadiusText));
+        Raise(nameof(ExposureBrushStrengthText));
+    }
+
+    private void RaiseExposureBrushStrokeState()
+    {
+        Raise(nameof(ExposureBrushStrokes));
+        Raise(nameof(HasExposureBrushStrokes));
+        Raise(nameof(ShowExposureBrushOverlay));
+        Raise(nameof(ExposureBrushStrokeText));
+        Raise(nameof(CanApplyExposureBrush));
+        CommandManager.InvalidateRequerySuggested();
     }
 
     // V15-04: Reload re-enumerates the current file through the loader, re-applying WIC /
@@ -3473,6 +3713,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClearInspectorState();
         IsCropMode = false;
         ClearCropSelection();
+        IsExposureBrushMode = false;
+        ClearExposureBrushStrokes(showToast: false);
         ResetPageState();
         ClearPhotoMetadata();
         _folderPreview.Clear();
