@@ -157,6 +157,91 @@ public partial class AboutWindow : Window
         }
     }
 
+    private void OpenThumbnailCacheButton_Click(object sender, RoutedEventArgs e)
+    {
+        var dir = ThumbnailCache.Instance.GetHealth().Root ?? AppStorage.TryGetAppDirectory("thumbs");
+        if (string.IsNullOrWhiteSpace(dir))
+        {
+            ShowUpdateStatus("Thumbnail cache folder is unavailable.", "Warning");
+            return;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(dir);
+            ShellIntegration.OpenFolder(dir);
+        }
+        catch (Exception ex)
+        {
+            ShowUpdateStatus($"Could not open thumbnail cache: {ex.Message}", "Warning");
+        }
+    }
+
+    private async void ClearThumbnailCacheButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button) return;
+
+        var health = ThumbnailCache.Instance.GetHealth();
+        if (!health.IsAvailable)
+        {
+            ShowUpdateStatus("Thumbnail cache storage is unavailable.", "Warning");
+            return;
+        }
+
+        if (health.FileCount == 0 && health.TempFileCount == 0)
+        {
+            ShowUpdateStatus("Thumbnail cache is already empty.", "Success");
+            return;
+        }
+
+        var prompt = $"Clear {health.FileCount} cached thumbnails and {health.TempFileCount} temporary files? Images will rebuild thumbnails from the original files when folders are viewed again.";
+        var answer = MessageBox.Show(
+            this,
+            prompt,
+            "Clear thumbnail cache",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning,
+            MessageBoxResult.No);
+        if (answer != MessageBoxResult.Yes)
+            return;
+
+        button.IsEnabled = false;
+        ShowUpdateStatus("Clearing thumbnail cache...", "Info");
+
+        try
+        {
+            var result = await BackgroundTaskTracker
+                .Run("thumbnail-cache-clear", ThumbnailCache.Instance.Clear)
+                .ConfigureAwait(true);
+            PopulateDiagnostics();
+
+            if (!result.IsAvailable)
+            {
+                ShowUpdateStatus("Thumbnail cache storage is unavailable.", "Warning");
+            }
+            else if (result.FailedCount > 0)
+            {
+                ShowUpdateStatus(
+                    $"Cleared {result.DeletedCount} files ({FormatBytes(result.DeletedBytes)}). {result.FailedCount} files could not be removed because they may be in use.",
+                    "Warning");
+            }
+            else
+            {
+                ShowUpdateStatus(
+                    $"Cleared {result.DeletedCount} thumbnail files ({FormatBytes(result.DeletedBytes)}). Thumbnails will rebuild automatically.",
+                    "Success");
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowUpdateStatus($"Could not clear thumbnail cache: {ex.Message}", "Warning");
+        }
+        finally
+        {
+            button.IsEnabled = true;
+        }
+    }
+
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
 
     private void ApplyCodecSummary(CodecCapabilityService.CodecCapabilitySummary summary)
@@ -272,6 +357,24 @@ public partial class AboutWindow : Window
     }
 
     private Brush ThemeBrush(string key) => (Brush)FindResource(key);
+
+    private static string FormatBytes(long bytes)
+    {
+        string[] units = ["B", "KiB", "MiB", "GiB", "TiB"];
+        var value = Math.Max(0, bytes);
+        var displayValue = (double)value;
+        var unitIndex = 0;
+
+        while (displayValue >= 1024 && unitIndex < units.Length - 1)
+        {
+            displayValue /= 1024;
+            unitIndex++;
+        }
+
+        return unitIndex == 0
+            ? $"{value} {units[unitIndex]}"
+            : $"{displayValue:0.#} {units[unitIndex]}";
+    }
 
     private void PopulateCapabilityMatrix()
     {

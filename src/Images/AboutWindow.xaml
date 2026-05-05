@@ -201,7 +201,7 @@
                 </Button>
                 <Button Style="{StaticResource ChromeButton}"
                         Click="OpenAppDataButton_Click"
-                        Margin="6,0,0,0"
+                        Margin="6,0,0,8"
                         AutomationProperties.Name="Open Images data folder">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="&#xE8DA;"
@@ -210,6 +210,32 @@
                                    Margin="0,0,8,0"
                                    VerticalAlignment="Center" />
                         <TextBlock Text="Open data folder" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource ChromeButton}"
+                        Click="OpenThumbnailCacheButton_Click"
+                        Margin="0,0,6,0"
+                        AutomationProperties.Name="Open thumbnail cache folder">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xE81E;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="12"
+                                   Margin="0,0,8,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="Open thumbnail cache" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource ChromeButton}"
+                        Click="ClearThumbnailCacheButton_Click"
+                        Margin="6,0,0,0"
+                        AutomationProperties.Name="Clear thumbnail cache">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xE74D;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="12"
+                                   Margin="0,0,8,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="Clear thumbnails" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
             </UniformGrid>

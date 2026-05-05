@@ -17,6 +17,13 @@ public sealed record ThumbnailCacheHealth(
     DateTime? LastEvictionSweepUtc,
     string? Error = null);
 
+public sealed record ThumbnailCacheClearResult(
+    bool IsAvailable,
+    string? Root,
+    int DeletedCount,
+    long DeletedBytes,
+    int FailedCount);
+
 /// <summary>
 /// V20-04: on-disk thumbnail cache at <c>%LOCALAPPDATA%\Images\thumbs\<AB>\<full-hash>.webp</c>.
 /// Keyed by SHA1(path.lower() + mtime_ticks + size_bytes) so the key survives path renames
@@ -324,6 +331,52 @@ public sealed class ThumbnailCache
         }
     }
 
+    public ThumbnailCacheClearResult Clear()
+    {
+        if (!_isAvailable)
+            return new ThumbnailCacheClearResult(false, null, 0, 0, 0);
+
+        if (!Directory.Exists(_root))
+            return new ThumbnailCacheClearResult(true, _root, 0, 0, 0);
+
+        var deleted = 0;
+        long deletedBytes = 0;
+        var failed = 0;
+        List<string> files;
+
+        try
+        {
+            files = Directory.EnumerateFiles(_root, "*.webp", SearchOption.AllDirectories).ToList();
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "Could not enumerate thumbnail cache for clearing");
+            return new ThumbnailCacheClearResult(true, _root, 0, 0, 1);
+        }
+
+        foreach (var path in files)
+        {
+            try
+            {
+                var info = new FileInfo(path);
+                if (!info.Exists) continue;
+
+                var length = info.Length;
+                info.Delete();
+                deleted++;
+                deletedBytes += length;
+            }
+            catch (Exception ex)
+            {
+                failed++;
+                _log.LogDebug(ex, "Could not delete thumbnail cache file {Path}", path);
+            }
+        }
+
+        DeleteEmptyCacheDirectories();
+        return new ThumbnailCacheClearResult(true, _root, deleted, deletedBytes, failed);
+    }
+
     /// <summary>
     /// If the cache is over capacity, remove LRU entries until it's back under. Pure disk
     /// bookkeeping — call from a background thread.
@@ -382,6 +435,32 @@ public sealed class ThumbnailCache
         catch
         {
             // Best-effort cleanup; eviction itself can still continue.
+        }
+    }
+
+    private void DeleteEmptyCacheDirectories()
+    {
+        try
+        {
+            if (!Directory.Exists(_root)) return;
+
+            foreach (var directory in Directory.EnumerateDirectories(_root, "*", SearchOption.AllDirectories)
+                         .OrderByDescending(path => path.Length))
+            {
+                try
+                {
+                    if (!Directory.EnumerateFileSystemEntries(directory).Any())
+                        Directory.Delete(directory);
+                }
+                catch
+                {
+                    // Best-effort cleanup; empty partition folders are harmless.
+                }
+            }
+        }
+        catch
+        {
+            // Best-effort cleanup; the cache files were already handled above.
         }
     }
 
