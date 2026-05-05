@@ -13,7 +13,27 @@
                     Background="#2689B4FA"
                     SnapsToDevicePixels="True">
                 <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.RowSpan="3"
+                            Grid.Column="1"
+                            BorderBrush="#8CF5F5F8"
+                            BorderThickness="1,0,1,0" />
+                    <Border Grid.Row="1"
+                            Grid.ColumnSpan="3"
+                            BorderBrush="#8CF5F5F8"
+                            BorderThickness="0,1,0,1" />
                     <TextBlock x:Name="SelectionLabel"
+                               Grid.RowSpan="3"
+                               Grid.ColumnSpan="3"
                                HorizontalAlignment="Left"
                                VerticalAlignment="Top"
                                Margin="8"
