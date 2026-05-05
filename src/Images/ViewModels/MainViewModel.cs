@@ -177,6 +177,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenReferenceBoardCommand = new RelayCommand(OpenReferenceBoard);
         OpenDuplicateCleanupCommand = new RelayCommand(OpenDuplicateCleanup);
         OpenFileHealthScanCommand = new RelayCommand(OpenFileHealthScan);
+        OpenTagGraphCommand = new RelayCommand(OpenTagGraph);
         OpenRecentFolderCommand = new RelayCommand(p => OpenRecentFolder(p as string), p => p is string);
         OpenRecentArchiveCommand = new RelayCommand(
             async p => await OpenRecentArchiveAsync(p as ArchiveReadPositionService.ArchiveReadHistoryItem),
@@ -1635,6 +1636,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenReferenceBoardCommand { get; }
     public ICommand OpenDuplicateCleanupCommand { get; }
     public ICommand OpenFileHealthScanCommand { get; }
+    public ICommand OpenTagGraphCommand { get; }
     public ICommand OpenRecentFolderCommand { get; }
     public ICommand OpenRecentArchiveCommand { get; }
     public ICommand OpenPreviewItemCommand { get; }
@@ -2932,6 +2934,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             scan.AddScanFolder(CurrentFolder);
 
         scan.Show();
+    }
+
+    private void OpenTagGraph()
+    {
+        var tagGraph = new Images.TagGraphWindow
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        tagGraph.SetCurrentImage(CurrentPath);
+        tagGraph.Show();
     }
 
     // Item 2: Settings window — opens modal, then re-reads persistent prefs so the viewer
