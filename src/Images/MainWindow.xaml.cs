@@ -30,6 +30,10 @@ public partial class MainWindow : Window
             {
                 QueueCenterCurrentPreviewItems();
             }
+            if (e.PropertyName is nameof(MainViewModel.ShowGallery))
+            {
+                QueueCenterCurrentPreviewItems();
+            }
         };
 
         Viewport.MouseEnter += (_, _) => FadeArrows(1.0);
@@ -70,6 +74,7 @@ public partial class MainWindow : Window
     {
         CenterCurrentPreviewItem(FilmstripItems);
         CenterCurrentPreviewItem(SidePreviewItems);
+        CenterCurrentPreviewItem(GalleryItems);
     }
 
     private static void CenterCurrentPreviewItem(ListBox items)
@@ -335,6 +340,14 @@ public partial class MainWindow : Window
                 // A-03: Escape closes any active overlay / toast and returns focus to the
                 // window shell. Rename-TextBox Escape is handled inside StemEditor_PreviewKeyDown
                 // and never reaches here because the TextBox owns focus.
+                if (Vm.IsGalleryOpen)
+                {
+                    Vm.CloseGalleryCommand.Execute(null);
+                    Keyboard.ClearFocus();
+                    Focus();
+                    e.Handled = true;
+                    break;
+                }
                 if (Vm.ShowCheatsheet)
                 {
                     Vm.ShowCheatsheet = false;
@@ -401,6 +414,14 @@ public partial class MainWindow : Window
                 break;
             case Key.T:
                 Vm.ToggleFilmstripCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.G:
+                Vm.ToggleGalleryCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.Enter when Vm.IsGalleryOpen:
+                Vm.OpenSelectedGalleryItemCommand.Execute(null);
                 e.Handled = true;
                 break;
             case Key.I:
