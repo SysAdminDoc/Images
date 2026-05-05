@@ -47,8 +47,52 @@ public sealed class UpdateCheckControllerTests
         Assert.Equal("https://github.com/SysAdminDoc/Images/releases/tag/v99.0.0", controller.LatestUpdateUrl);
         Assert.True(controller.HasUpdateAvailable);
         Assert.Equal(new[] { result }, recorded);
-        Assert.Equal(1, invalidations);
+        Assert.Equal(3, invalidations);
         Assert.Equal("New version v99.0.0 available", Assert.Single(messages));
+    }
+
+    [Fact]
+    public async Task CheckAsync_WhileInFlight_ExposesBusyStatusAndSkipsDuplicateManualCheck()
+    {
+        var calls = 0;
+        var invalidations = 0;
+        var messages = new List<string>();
+        var changed = new List<string>();
+        var gate = new TaskCompletionSource<UpdateCheckService.CheckResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var controller = new UpdateCheckController(
+            notify: messages.Add,
+            checkAsync: _ =>
+            {
+                calls++;
+                return gate.Task;
+            },
+            invalidateCommands: () => invalidations++);
+        controller.PropertyChanged += (_, e) =>
+        {
+            if (!string.IsNullOrWhiteSpace(e.PropertyName))
+                changed.Add(e.PropertyName);
+        };
+
+        var running = controller.CheckAsync(userInitiated: true);
+
+        Assert.True(controller.IsCheckingForUpdates);
+        Assert.Equal("Checking GitHub Releases...", controller.UpdateCheckStatusText);
+        Assert.Contains(nameof(UpdateCheckController.IsCheckingForUpdates), changed);
+        Assert.Contains(nameof(UpdateCheckController.UpdateCheckStatusText), changed);
+        Assert.Equal(1, calls);
+
+        await controller.CheckAsync(userInitiated: true);
+
+        Assert.Equal(1, calls);
+        Assert.Contains("Update check already in progress", messages);
+
+        gate.SetResult(CurrentResult());
+        await running;
+
+        Assert.False(controller.IsCheckingForUpdates);
+        Assert.Equal("", controller.UpdateCheckStatusText);
+        Assert.Contains(UpdateCheckController.LatestVersionMessage, messages);
+        Assert.True(invalidations >= 2);
     }
 
     [Fact]

@@ -14,6 +14,8 @@ public sealed class UpdateCheckController : ObservableObject
     private readonly Action _invalidateCommands;
     private string? _latestUpdateTag;
     private string? _latestUpdateUrl;
+    private bool _isCheckingForUpdates;
+    private string _updateCheckStatusText = "";
 
     public UpdateCheckController(
         Action<string> notify,
@@ -52,30 +54,66 @@ public sealed class UpdateCheckController : ObservableObject
 
     public bool HasUpdateAvailable => !string.IsNullOrEmpty(LatestUpdateTag);
 
+    public bool IsCheckingForUpdates
+    {
+        get => _isCheckingForUpdates;
+        private set
+        {
+            if (Set(ref _isCheckingForUpdates, value))
+                _invalidateCommands();
+        }
+    }
+
+    public string UpdateCheckStatusText
+    {
+        get => _updateCheckStatusText;
+        private set => Set(ref _updateCheckStatusText, value);
+    }
+
     public async Task CheckAsync(bool userInitiated, CancellationToken token = default)
     {
         if (!userInitiated && !_isDueForBackgroundCheck())
             return;
 
-        var result = await _checkAsync(token).ConfigureAwait(true);
-        _recordLastChecked(result);
-
-        if (result.Error is not null)
+        if (IsCheckingForUpdates)
         {
             if (userInitiated)
-                _notify($"Update check failed: {result.Error}");
+                _notify("Update check already in progress");
             return;
         }
 
-        if (result.NewerAvailable)
+        IsCheckingForUpdates = true;
+        UpdateCheckStatusText = userInitiated
+            ? "Checking GitHub Releases..."
+            : "Checking GitHub Releases in the background...";
+
+        try
         {
-            LatestUpdateUrl = result.LatestHtmlUrl;
-            LatestUpdateTag = result.LatestTag;
-            _notify($"New version {result.LatestTag} available");
+            var result = await _checkAsync(token).ConfigureAwait(true);
+            _recordLastChecked(result);
+
+            if (result.Error is not null)
+            {
+                if (userInitiated)
+                    _notify($"Update check failed: {result.Error}");
+                return;
+            }
+
+            if (result.NewerAvailable)
+            {
+                LatestUpdateUrl = result.LatestHtmlUrl;
+                LatestUpdateTag = result.LatestTag;
+                _notify($"New version {result.LatestTag} available");
+            }
+            else if (userInitiated)
+            {
+                _notify(LatestVersionMessage);
+            }
         }
-        else if (userInitiated)
+        finally
         {
-            _notify(LatestVersionMessage);
+            IsCheckingForUpdates = false;
+            UpdateCheckStatusText = "";
         }
     }
 
