@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-12A` is complete, closing `IP-12`. Generated decode/export corpus tests now cover static raster formats, WebP fallback, multi-page TIFF, animated GIF, SVG vector decode, and PNG/JPEG/WebP/TIFF/GIF/APNG export round-trips without checked-in binary assets.
+`IP-16A` is complete, closing `IP-16`. `docs/design-product-differentiators.md` now scopes local semantic search, duplicate cleanup, compare/overlay mode, archive/book navigation, peek launch mode, viewer-side adjustments, technical pixel/channel tools, and library/metadata workflows before implementation starts.
 
 ## Next Focus
 
-The next recommended slice is `IP-16A`: write scoped design docs for the highest-value future product differentiators before implementation starts.
+The next recommended slice is `IP-17A`: scope distribution trust through WinGet/Scoop packaging and a code-signing decision record.
 
 ## Research Inputs
 
@@ -39,7 +39,7 @@ The next recommended slice is `IP-16A`: write scoped design docs for the highest
 | IP-13 | P1 | Done | Shell/clipboard integration | Centralize opening URLs/files/folders and copying text. | About, crash dialog, settings, and main viewer use shared helpers with consistent error behavior and safer Explorer argument handling. |
 | IP-14 | P2 | Done | Settings persistence | Strengthen settings schema and corruption tests. | Tests cover corruption quarantine, unavailable storage, defaults, migration behavior, and future timestamp handling. |
 | IP-15 | P1 | Done | CI/release gates | Ensure CI exercises the real verification path. | CI runs solution build, tests, whitespace check, vulnerability gate, version sync gate, and CLI smoke commands used by local release validation. |
-| IP-16 | P2 | Planned | Product differentiators | Track large future differentiators without disrupting the hardening sequence. | Local semantic search, duplicate cleanup, compare/overlay mode, archive/book navigation, peek launch mode, viewer-side adjustments, technical pixel/channel tools, and stronger library/metadata workflows have scoped design docs before implementation. |
+| IP-16 | P2 | Done | Product differentiators | Track large future differentiators without disrupting the hardening sequence. | Local semantic search, duplicate cleanup, compare/overlay mode, archive/book navigation, peek launch mode, viewer-side adjustments, technical pixel/channel tools, and stronger library/metadata workflows have scoped design docs before implementation. |
 | IP-17 | P2 | Planned | Distribution trust | Reduce Windows install trust friction once the next stable release is ready. | WinGet and Scoop publishing are scoped, checksums remain part of releases, and a code-signing decision doc covers certificate cost, SmartScreen reputation, release cadence, and fallback verification instructions. |
 
 ## Source-Derived Workstream Tracker
@@ -97,6 +97,7 @@ The next recommended slice is `IP-16A`: write scoped design docs for the highest
 - 2026-05-05: Completed `IP-14A` and closed `IP-14` by hardening settings corruption quarantine naming and adding coverage for corrupt DB reset, schema migration, unavailable storage, primitive defaults, and existing future timestamp behavior.
 - 2026-05-05: Completed `IP-11A` and closed `IP-11` by adding large-folder navigation coverage, volatile rescan coverage, enumeration-failure recovery coverage, and bounded folder-preview thumbnail request coverage for thousands of files.
 - 2026-05-05: Completed `IP-12A` and closed `IP-12` by adding generated decode/export corpus coverage for PNG, JPEG, WebP, multi-page TIFF, animated GIF, SVG vector decode, and APNG export round-trips without binary fixtures.
+- 2026-05-05: Completed `IP-16A` and closed `IP-16` by adding scoped product-differentiator design guidance for semantic search, duplicate cleanup, compare/overlay mode, archive/book navigation, peek launch mode, viewer adjustments, technical pixel tools, and metadata/culling workflows.
 
 ## Verification Standard
 
