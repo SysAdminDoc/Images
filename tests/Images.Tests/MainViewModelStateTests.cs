@@ -88,7 +88,79 @@ public sealed class MainViewModelStateTests
             Assert.Equal(expected, viewModel.CurrentPath);
             Assert.True(File.Exists(expected));
             Assert.True(viewModel.HasDisplayImage);
+            Assert.False(viewModel.HasSecondaryStatus);
             Assert.Equal("Pasted from clipboard", viewModel.ToastMessage);
+        });
+    }
+
+    [Fact]
+    public void PasteFromClipboardCommand_WhenFileListUnsupported_ShowsPersistentStatus()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var textFile = Path.Combine(temp.Path, "notes.txt");
+            File.WriteAllText(textFile, "not an image");
+            var source = new FakeClipboardDataSource { Files = [textFile] };
+            var clipboardImport = new ClipboardImportService(
+                source,
+                () => temp.Path,
+                () => DateTimeOffset.UtcNow,
+                () => Guid.NewGuid());
+            using var viewModel = CreateViewModel(temp, clipboardImport);
+
+            viewModel.PasteFromClipboardCommand.Execute(null);
+
+            Assert.True(viewModel.HasSecondaryStatus);
+            Assert.Equal("Clipboard file not supported", viewModel.SecondaryStatusTitle);
+            Assert.Contains("none are formats Images can open", viewModel.SecondaryStatusDetail);
+            Assert.Equal(MainViewModel.SecondaryStatusToneKind.Warning, viewModel.SecondaryStatusTone);
+            Assert.Equal("No supported image in the clipboard file list", viewModel.ToastMessage);
+        });
+    }
+
+    [Fact]
+    public void OpenRecentFolderCommand_WhenFolderMissing_ShowsRecoveryStatusAndRefreshesList()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var staleFolder = Path.Combine(temp.Path, "stale");
+            Directory.CreateDirectory(staleFolder);
+            var settings = CreateSettings(temp);
+            settings.TouchRecentFolder(staleFolder);
+            using var viewModel = new MainViewModel(settings);
+            Assert.Contains(staleFolder, viewModel.RecentFolders);
+            Directory.Delete(staleFolder);
+
+            viewModel.OpenRecentFolderCommand.Execute(staleFolder);
+
+            Assert.True(viewModel.HasSecondaryStatus);
+            Assert.Equal("Recent folder removed", viewModel.SecondaryStatusTitle);
+            Assert.Contains("folder no longer exists", viewModel.SecondaryStatusDetail);
+            Assert.Equal(MainViewModel.SecondaryStatusToneKind.Warning, viewModel.SecondaryStatusTone);
+            Assert.DoesNotContain(staleFolder, viewModel.RecentFolders);
+            Assert.Equal("Folder no longer exists", viewModel.ToastMessage);
+        });
+    }
+
+    [Fact]
+    public void OpenRecentFolderCommand_WhenFolderHasNoImages_ShowsEmptyFolderStatus()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var emptyFolder = Path.Combine(temp.Path, "empty");
+            Directory.CreateDirectory(emptyFolder);
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenRecentFolderCommand.Execute(emptyFolder);
+
+            Assert.True(viewModel.HasSecondaryStatus);
+            Assert.Equal("No supported images in this folder", viewModel.SecondaryStatusTitle);
+            Assert.Contains("Choose another folder or paste an image", viewModel.SecondaryStatusDetail);
+            Assert.Equal(MainViewModel.SecondaryStatusToneKind.Info, viewModel.SecondaryStatusTone);
+            Assert.Equal("No images in empty", viewModel.ToastMessage);
         });
     }
 
@@ -652,10 +724,11 @@ public sealed class MainViewModelStateTests
     private sealed class FakeClipboardDataSource : IClipboardDataSource
     {
         public BitmapSource? Image { get; init; }
+        public IReadOnlyList<string> Files { get; init; } = [];
 
-        public bool ContainsFileDropList() => false;
+        public bool ContainsFileDropList() => Files.Count > 0;
 
-        public IReadOnlyList<string> GetFileDropList() => [];
+        public IReadOnlyList<string> GetFileDropList() => Files;
 
         public bool ContainsImage() => Image is not null;
 

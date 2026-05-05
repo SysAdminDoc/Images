@@ -31,6 +31,7 @@ All notable changes to **Images** are documented here.
 - **Operation status feedback** — manual reload, Save a copy, and GPS metadata stripping now share a visible busy status, with mutating image commands disabled until the operation completes.
 - **Update-check transparency** — manual and background update checks now expose busy status through the main UI, suppress duplicate manual checks, and show when GitHub Releases is being contacted.
 - **Decode/navigation feedback** — file-open dialog decodes and multi-page page turns now use the shared operation-status surface before slower document or page loads begin.
+- **Secondary empty/error states** — unsupported clipboard data, empty recent folders, and stale recent-folder paths now show persistent, actionable side-panel feedback instead of relying only on transient toasts.
 - **OCR workflow polish** — text extraction now has a persistent in-view busy/active status, a cancel-aware toolbar state, OCR readiness in Settings/About, and OCR language-pack status in diagnostics.
 - **Open-source viewer research** — added a May 2026 research scan of ImageGlass, nomacs, PicView, NeeView, QuickLook, Geeqie, gThumb, qView, JPEGView, Tacent View, Minimal Image Viewer, and LightningView, then folded the findings into the improvement plan.
 - **Trust copy** — README destructive-action wording now reflects the Recycle Bin confirmation flow.
