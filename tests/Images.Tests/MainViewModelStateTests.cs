@@ -276,6 +276,37 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void MultiPageNavigation_ShowsOperationStatusAndDisablesPageTurns()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WriteTwoPageTiff(temp.Path, "document.tif");
+            var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(image);
+
+            Assert.True(viewModel.HasMultiplePages);
+            Assert.Equal("Page 1 / 2", viewModel.PagePositionText);
+
+            viewModel.NextPageCommand.Execute(null);
+
+            Assert.True(viewModel.IsOperationBusy);
+            Assert.True(viewModel.ShowOperationStatus);
+            Assert.Equal("Loading next page", viewModel.OperationStatusTitle);
+            Assert.Equal("Page 2 of 2.", viewModel.OperationStatusDetail);
+            Assert.False(viewModel.NextPageCommand.CanExecute(null));
+            Assert.False(viewModel.PrevPageCommand.CanExecute(null));
+
+            PumpUntil(() => !viewModel.IsOperationBusy);
+
+            Assert.Equal("Page 2 / 2", viewModel.PagePositionText);
+            Assert.True(viewModel.HasPreviousPage);
+            Assert.False(viewModel.HasNextPage);
+        });
+    }
+
+    [Fact]
     public void FirstRunGuidance_ExposesCapabilityAndPrivacySummaries()
     {
         RunOnSta(() =>
@@ -524,6 +555,17 @@ public sealed class MainViewModelStateTests
         var bitmap = CreateBitmap();
         var encoder = new PngBitmapEncoder();
         encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        using var stream = File.Create(path);
+        encoder.Save(stream);
+        return path;
+    }
+
+    private static string WriteTwoPageTiff(string folder, string fileName)
+    {
+        var path = Path.Combine(folder, fileName);
+        var encoder = new TiffBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(CreateBitmap()));
+        encoder.Frames.Add(BitmapFrame.Create(CreateBitmap()));
         using var stream = File.Create(path);
         encoder.Save(stream);
         return path;
