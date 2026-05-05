@@ -172,6 +172,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         UnlockExtensionCommand = new RelayCommand(() => IsExtensionUnlocked = !IsExtensionUnlocked);
         UndoRenameCommand = new RelayCommand(p => UndoOne(p as RenameService.UndoEntry), p => p is RenameService.UndoEntry);
         AboutCommand = new RelayCommand(ShowAboutWindow);
+        ToggleOverlayModeCommand = new RelayCommand(() => IsPinnedOverlayMode = !IsPinnedOverlayMode, () => CanUseOverlayMode || IsPinnedOverlayMode);
+        ExitOverlayModeCommand = new RelayCommand(ExitOverlayMode, () => IsPinnedOverlayMode);
         OpenReferenceBoardCommand = new RelayCommand(OpenReferenceBoard);
         OpenRecentFolderCommand = new RelayCommand(p => OpenRecentFolder(p as string), p => p is string);
         OpenRecentArchiveCommand = new RelayCommand(
@@ -234,6 +236,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 Raise(nameof(HasDisplayImage));
                 Raise(nameof(CanUseInspector));
+                Raise(nameof(CanUseOverlayMode));
                 Raise(nameof(CanToggleMetadataHud));
                 Raise(nameof(ShowMetadataHud));
                 CommandManager.InvalidateRequerySuggested();
@@ -242,9 +245,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     // Animated-frame payload. Non-null when the current file is a multi-frame GIF / APNG /
-    // animated WebP. ZoomPanImage consumes this to drive an ObjectAnimationUsingKeyFrames on
-    // the inner Image.SourceProperty. CurrentImage still carries the first frame so dimension
-    // + decoder readouts continue to work even when Magick.NET's animated path is live.
+    // animated WebP. ZoomPanImage renders the selected frame through view-model state so the
+    // side-panel timeline, shortcuts, and copy/export actions share one source of truth.
     private AnimationSequence? _currentAnimation;
     public AnimationSequence? CurrentAnimation
     {
@@ -555,6 +557,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(ShowOperationStatus));
                 Raise(nameof(CanRefreshFolder));
                 Raise(nameof(CanUseInspector));
+                Raise(nameof(CanUseOverlayMode));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -657,11 +660,97 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (Set(ref _isPeekMode, value))
             {
                 Raise(nameof(CanToggleMetadataHud));
+                Raise(nameof(CanUseOverlayMode));
                 Raise(nameof(ShowMetadataHud));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
     }
+
+    private bool _isPinnedOverlayMode;
+    public bool IsPinnedOverlayMode
+    {
+        get => _isPinnedOverlayMode;
+        set
+        {
+            if (value && !CanUseOverlayMode)
+                value = false;
+
+            if (!Set(ref _isPinnedOverlayMode, value))
+                return;
+
+            if (!value && _isOverlayClickThrough)
+            {
+                _isOverlayClickThrough = false;
+                Raise(nameof(IsOverlayClickThrough));
+                Raise(nameof(OverlayClickThroughText));
+            }
+
+            RaiseOverlayState();
+            Toast(value ? "Overlay mode on" : "Overlay mode off");
+        }
+    }
+
+    private bool _isOverlayClickThrough;
+    public bool IsOverlayClickThrough
+    {
+        get => _isOverlayClickThrough;
+        set
+        {
+            if (value && (!IsPinnedOverlayMode || !_overlayExitHotKeyAvailable))
+                value = false;
+
+            if (!Set(ref _isOverlayClickThrough, value))
+                return;
+
+            Raise(nameof(OverlayClickThroughText));
+            Raise(nameof(OverlayStatusText));
+            Toast(value ? "Click-through overlay on" : "Click-through overlay off");
+        }
+    }
+
+    private double _overlayOpacity = 0.68;
+    public double OverlayOpacity
+    {
+        get => _overlayOpacity;
+        set
+        {
+            var clamped = Math.Clamp(double.IsNaN(value) ? 0.68 : value, 0.25, 1.0);
+            if (!Set(ref _overlayOpacity, clamped))
+                return;
+
+            Raise(nameof(OverlayOpacityText));
+            Raise(nameof(OverlayStatusText));
+        }
+    }
+
+    private bool _overlayExitHotKeyAvailable = true;
+    public bool OverlayExitHotKeyAvailable => _overlayExitHotKeyAvailable;
+    public bool CanUseOverlayMode => HasDisplayImage && !IsOperationBusy && !IsPeekMode;
+    public bool ShowOverlayBanner => IsPinnedOverlayMode;
+    public string OverlayModeText => IsPinnedOverlayMode ? "Overlay on" : "Overlay off";
+    public string OverlayToggleText => IsPinnedOverlayMode ? "Turn off" : "Turn on";
+    public string OverlayClickThroughText => IsOverlayClickThrough ? "Click-through on" : "Click-through off";
+    public string OverlayOpacityText => $"{OverlayOpacity:P0}";
+    public string OverlayExitText => OverlayExitHotKeyAvailable
+        ? $"{OverlayWindowService.ExitHotKeyText} exits overlay"
+        : "Use Exit overlay, the context menu, or the taskbar close command.";
+    public string OverlayStatusText
+    {
+        get
+        {
+            if (!IsPinnedOverlayMode)
+                return "Pin the current image above other windows for tracing or visual comparison.";
+
+            if (!OverlayExitHotKeyAvailable)
+                return "Overlay is pinned. Click-through is disabled because the global exit hotkey could not register.";
+
+            return IsOverlayClickThrough
+                ? $"Click-through is active. Use {OverlayWindowService.ExitHotKeyText} or the taskbar close command to exit."
+                : $"Pinned above other windows at {OverlayOpacityText}. Use {OverlayWindowService.ExitHotKeyText}, Exit overlay, or the context menu to exit.";
+        }
+    }
+
     public string CurrentFileName => CurrentPath is null ? "" : Path.GetFileName(CurrentPath);
     public string CurrentFolder => CurrentPath is null ? "" : Path.GetDirectoryName(CurrentPath) ?? "";
 
@@ -1475,6 +1564,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand UnlockExtensionCommand { get; }
     public ICommand UndoRenameCommand { get; }
     public ICommand AboutCommand { get; }
+    public ICommand ToggleOverlayModeCommand { get; }
+    public ICommand ExitOverlayModeCommand { get; }
     public ICommand OpenReferenceBoardCommand { get; }
     public ICommand OpenRecentFolderCommand { get; }
     public ICommand OpenRecentArchiveCommand { get; }
@@ -1885,6 +1976,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
+            IsPinnedOverlayMode = false;
             CurrentImage = null;
             CurrentAnimation = null;
             PixelWidth = PixelHeight = 0;
@@ -2168,6 +2260,41 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void Rotate(double delta)
     {
         Rotation = (Rotation + delta) % 360;
+    }
+
+    public void SetOverlayExitHotKeyAvailable(bool available)
+    {
+        if (!Set(ref _overlayExitHotKeyAvailable, available))
+            return;
+
+        Raise(nameof(OverlayExitText));
+        Raise(nameof(OverlayStatusText));
+        if (!available && IsOverlayClickThrough)
+        {
+            _isOverlayClickThrough = false;
+            Raise(nameof(IsOverlayClickThrough));
+            Raise(nameof(OverlayClickThroughText));
+            Toast("Click-through disabled: exit hotkey unavailable");
+        }
+    }
+
+    private void ExitOverlayMode()
+    {
+        IsPinnedOverlayMode = false;
+    }
+
+    private void RaiseOverlayState()
+    {
+        Raise(nameof(IsPinnedOverlayMode));
+        Raise(nameof(CanUseOverlayMode));
+        Raise(nameof(ShowOverlayBanner));
+        Raise(nameof(OverlayModeText));
+        Raise(nameof(OverlayToggleText));
+        Raise(nameof(OverlayClickThroughText));
+        Raise(nameof(OverlayOpacityText));
+        Raise(nameof(OverlayExitText));
+        Raise(nameof(OverlayStatusText));
+        CommandManager.InvalidateRequerySuggested();
     }
 
     private void RefreshAnimationWorkbench(AnimationSequence? sequence)
@@ -2848,6 +2975,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         _renameTimer.Stop();
         _externalEditReload.Disarm();
+        IsPinnedOverlayMode = false;
         CurrentImage = null;
         CurrentAnimation = null;
         CurrentPath = null;

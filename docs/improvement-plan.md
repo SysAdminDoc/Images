@@ -118,6 +118,7 @@ The improvement-plan backlog is complete. Continue with the next main `ROADMAP.m
 - 2026-05-05: Closed roadmap `V81-21` by adding a non-modal local reference board with supported-file drag/drop, draggable image cards, editable notes, draggable/resizable group frames, always-on-top pinning, zoom/reset controls, clear confirmation, content-bounds PNG export, and geometry regression coverage.
 - 2026-05-05: Closed roadmap `V81-22` by adding main-viewer pixel inspection, copyable HEX/RGB/HSV/sample values, alpha and coordinate readouts, Shift-drag measurement, nearest-neighbor preview scaling, board Ctrl-hover/Ctrl-click sampling, and sampling math regression tests.
 - 2026-05-05: Closed roadmap `V81-23` by replacing keyframe-only animated playback with selected-frame workbench state, adding timeline thumbnails, scrubber, frame-step/playback controls, speed control, current-frame copy/export/drag-out, shortcuts, and regression tests.
+- 2026-05-05: Closed roadmap `V81-24` by adding a pinned main-viewer overlay mode with opacity controls, visible overlay status, context-menu exit paths, `Ctrl+Alt+O` global exit handling, click-through guarded on hotkey availability, and regression tests for overlay state plus native style composition.
 
 ## Verification Standard
 
