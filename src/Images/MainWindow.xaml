@@ -65,6 +65,11 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="File health scan" Command="{Binding OpenFileHealthScanCommand}" InputGestureText="Ctrl+Shift+H">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE946;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="{Binding OverlayModeText}"
                                   Command="{Binding ToggleOverlayModeCommand}"
                                   IsCheckable="True"
@@ -2921,29 +2926,37 @@
                     <TextBlock Text="Cleanup" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
-                            AutomationProperties.Name="Duplicate cleanup controls">
+                            AutomationProperties.Name="Cleanup controls">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <TextBlock Text="Duplicate cleanup"
+                                <TextBlock Text="Cleanup tools"
                                            FontWeight="SemiBold"
                                            Foreground="{StaticResource TextBrush}" />
-                                <TextBlock Text="Find exact duplicates and visually similar images in local folders."
+                                <TextBlock Text="Find duplicate images, bad extensions, broken files, and temporary artifacts in local folders."
                                            Style="{StaticResource Text.Hint}"
                                            TextWrapping="Wrap"
                                            Margin="0,3,0,0" />
                             </StackPanel>
-                            <Button Grid.Column="1"
-                                    Command="{Binding OpenDuplicateCleanupCommand}"
-                                    Style="{StaticResource ChromeButton}"
-                                    MinWidth="72"
-                                    Margin="12,0,0,0"
-                                    AutomationProperties.Name="Open duplicate cleanup">
-                                <TextBlock Text="Open" />
-                            </Button>
+                            <StackPanel Grid.Column="1"
+                                        Margin="12,0,0,0">
+                                <Button Command="{Binding OpenDuplicateCleanupCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        MinWidth="86"
+                                        AutomationProperties.Name="Open duplicate cleanup">
+                                    <TextBlock Text="Duplicates" />
+                                </Button>
+                                <Button Command="{Binding OpenFileHealthScanCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        MinWidth="86"
+                                        Margin="0,8,0,0"
+                                        AutomationProperties.Name="Open file health scan">
+                                    <TextBlock Text="File health" />
+                                </Button>
+                            </StackPanel>
                         </Grid>
                     </Border>
 
