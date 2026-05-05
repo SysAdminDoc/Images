@@ -41,6 +41,7 @@ All notable changes to **Images** are documented here.
 - **Large-folder stress coverage** — navigation and folder-preview tests now cover thousands of files, volatile folder changes, enumeration failure recovery, and bounded thumbnail requests.
 - **Generated codec corpus** — decode/export regression tests now generate PNG, JPEG, WebP, TIFF, GIF/APNG, and SVG samples at runtime, avoiding binary fixtures while protecting codec upgrades.
 - **Product differentiator scopes** — added a design scope for local semantic search, duplicate cleanup, compare/overlay, archive/book navigation, peek launch mode, viewer-side adjustments, technical pixel tools, and metadata/culling workflows.
+- **Distribution trust plan** — scoped WinGet and Scoop publishing, checksum continuity, code-signing options, SmartScreen expectations, and user verification copy for the next stable release.
 - **OCR workflow polish** — text extraction now has a persistent in-view busy/active status, a cancel-aware toolbar state, OCR readiness in Settings/About, and OCR language-pack status in diagnostics.
 - **Open-source viewer research** — added a May 2026 research scan of ImageGlass, nomacs, PicView, NeeView, QuickLook, Geeqie, gThumb, qView, JPEGView, Tacent View, Minimal Image Viewer, and LightningView, then folded the findings into the improvement plan.
 - **Trust copy** — README destructive-action wording now reflects the Recycle Bin confirmation flow.

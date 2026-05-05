@@ -32,3 +32,5 @@ There is no LTS line yet; one will be considered when Images leaves `0.1.x`.
 ## Distribution channels
 
 The official release surface is [GitHub Releases](https://github.com/SysAdminDoc/Images/releases). Both the portable ZIP and the Inno Setup installer are uploaded to the same release; both are byte-for-byte identical builds. Distributions outside that surface (mirrors, package-manager-of-the-week) are unsupported until they appear in this list.
+
+WinGet and Scoop publication are scoped in [Distribution trust plan](distribution-trust.md). Until accepted manifests exist, package-manager installs are not an official support surface.

@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-16A` is complete, closing `IP-16`. `docs/design-product-differentiators.md` now scopes local semantic search, duplicate cleanup, compare/overlay mode, archive/book navigation, peek launch mode, viewer-side adjustments, technical pixel/channel tools, and library/metadata workflows before implementation starts.
+`IP-17A` is complete, closing `IP-17`. `docs/distribution-trust.md` now scopes WinGet and Scoop publishing, preserves checksum continuity, and records the code-signing decision path for post-release trust work.
 
 ## Next Focus
 
-The next recommended slice is `IP-17A`: scope distribution trust through WinGet/Scoop packaging and a code-signing decision record.
+The improvement-plan backlog is complete. Continue with the source-derived workstream tracker or the main `ROADMAP.md` feature backlog.
 
 ## Research Inputs
 
@@ -40,7 +40,7 @@ The next recommended slice is `IP-17A`: scope distribution trust through WinGet/
 | IP-14 | P2 | Done | Settings persistence | Strengthen settings schema and corruption tests. | Tests cover corruption quarantine, unavailable storage, defaults, migration behavior, and future timestamp handling. |
 | IP-15 | P1 | Done | CI/release gates | Ensure CI exercises the real verification path. | CI runs solution build, tests, whitespace check, vulnerability gate, version sync gate, and CLI smoke commands used by local release validation. |
 | IP-16 | P2 | Done | Product differentiators | Track large future differentiators without disrupting the hardening sequence. | Local semantic search, duplicate cleanup, compare/overlay mode, archive/book navigation, peek launch mode, viewer-side adjustments, technical pixel/channel tools, and stronger library/metadata workflows have scoped design docs before implementation. |
-| IP-17 | P2 | Planned | Distribution trust | Reduce Windows install trust friction once the next stable release is ready. | WinGet and Scoop publishing are scoped, checksums remain part of releases, and a code-signing decision doc covers certificate cost, SmartScreen reputation, release cadence, and fallback verification instructions. |
+| IP-17 | P2 | Done | Distribution trust | Reduce Windows install trust friction once the next stable release is ready. | WinGet and Scoop publishing are scoped, checksums remain part of releases, and a code-signing decision doc covers certificate cost, SmartScreen reputation, release cadence, and fallback verification instructions. |
 
 ## Source-Derived Workstream Tracker
 
@@ -98,6 +98,7 @@ The next recommended slice is `IP-17A`: scope distribution trust through WinGet/
 - 2026-05-05: Completed `IP-11A` and closed `IP-11` by adding large-folder navigation coverage, volatile rescan coverage, enumeration-failure recovery coverage, and bounded folder-preview thumbnail request coverage for thousands of files.
 - 2026-05-05: Completed `IP-12A` and closed `IP-12` by adding generated decode/export corpus coverage for PNG, JPEG, WebP, multi-page TIFF, animated GIF, SVG vector decode, and APNG export round-trips without binary fixtures.
 - 2026-05-05: Completed `IP-16A` and closed `IP-16` by adding scoped product-differentiator design guidance for semantic search, duplicate cleanup, compare/overlay mode, archive/book navigation, peek launch mode, viewer adjustments, technical pixel tools, and metadata/culling workflows.
+- 2026-05-05: Completed `IP-17A` and closed `IP-17` by adding distribution-trust guidance for WinGet, Scoop, checksum continuity, signing options, SmartScreen expectations, and user verification copy.
 
 ## Verification Standard
 
