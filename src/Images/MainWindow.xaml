@@ -1552,7 +1552,7 @@
                             CornerRadius="{StaticResource Radius.Sm.CR}"
                             Visibility="{Binding IsExtensionUnlocked, Converter={StaticResource BoolToVis}}">
                         <StackPanel>
-                            <TextBlock Text="Changing the extension renames the file — it won't convert the image."
+                            <TextBlock Text="Changing the extension only renames the file. Use a supported Images format; this will not convert the image."
                                        Foreground="{StaticResource YellowBrush}"
                                        FontSize="12"
                                        LineHeight="17"
