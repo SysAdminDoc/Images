@@ -19,6 +19,7 @@ public sealed class DirectoryNavigator : IDisposable
     private FileSystemWatcher? _watcher;
     private DispatcherTimer? _watchDebounce;
     private readonly Dispatcher _dispatcher;
+    private readonly Func<string, IEnumerable<string>> _enumerateFiles;
 
     public IReadOnlyList<string> Files => _files;
     public int Count => _files.Count;
@@ -30,9 +31,15 @@ public sealed class DirectoryNavigator : IDisposable
     public event EventHandler? ListChanged;
 
     public DirectoryNavigator()
+        : this(null)
+    {
+    }
+
+    internal DirectoryNavigator(Func<string, IEnumerable<string>>? enumerateFiles)
     {
         // Captured so FSW event callbacks (raised on a ThreadPool thread) can marshal back.
         _dispatcher = Dispatcher.CurrentDispatcher;
+        _enumerateFiles = enumerateFiles ?? DefaultEnumerateFiles;
     }
 
     public static string? FirstSupportedImageInFolder(string folder)
@@ -211,8 +218,7 @@ public sealed class DirectoryNavigator : IDisposable
         List<string> found;
         try
         {
-            found = Directory
-                .EnumerateFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
+            found = _enumerateFiles(folder)
                 .Where(f => SupportedExtensions.Contains(Path.GetExtension(f)))
                 .ToList();
         }
@@ -233,6 +239,9 @@ public sealed class DirectoryNavigator : IDisposable
     }
 
     private void SortFiles(List<string> files) => files.Sort(CompareByActiveMode);
+
+    private static IEnumerable<string> DefaultEnumerateFiles(string folder)
+        => Directory.EnumerateFiles(folder, "*.*", SearchOption.TopDirectoryOnly);
 
     private int CompareByActiveMode(string a, string b) => CompareByMode(a, b, SortMode);
 

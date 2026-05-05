@@ -22,6 +22,29 @@ public sealed class DirectoryNavigatorTests
     }
 
     [Fact]
+    public void Open_WithLargeFolder_NaturalSortsAndPreservesTarget()
+    {
+        using var temp = TestDirectory.Create();
+        string? target = null;
+
+        for (var i = 1; i <= 1500; i++)
+        {
+            var path = temp.WriteFile($"image{i}.jpg");
+            if (i == 1000)
+                target = path;
+        }
+
+        using var nav = new DirectoryNavigator();
+
+        Assert.True(nav.Open(target!));
+
+        Assert.Equal(1500, nav.Count);
+        Assert.Equal(target, nav.CurrentPath);
+        Assert.EndsWith("image1.jpg", nav.Files[0], StringComparison.OrdinalIgnoreCase);
+        Assert.EndsWith("image1500.jpg", nav.Files[^1], StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void SetSortMode_ModifiedNewest_PreservesCurrentFileAndReorders()
     {
         using var temp = TestDirectory.Create();
@@ -87,6 +110,55 @@ public sealed class DirectoryNavigatorTests
         Assert.Equal(1, nav.Count);
         Assert.Equal(0, nav.CurrentIndex);
         Assert.Equal(first, nav.CurrentPath);
+    }
+
+    [Fact]
+    public void Refresh_AfterVolatileFolderChanges_RescansSupportedFilesAndClampsCurrent()
+    {
+        using var temp = TestDirectory.Create();
+        var first = temp.WriteFile("a.jpg");
+        var second = temp.WriteFile("b.jpg");
+        var current = temp.WriteFile("c.jpg");
+
+        using var nav = new DirectoryNavigator();
+        Assert.True(nav.Open(current));
+
+        File.Delete(second);
+        File.Delete(current);
+        var added = temp.WriteFile("d.png");
+        temp.WriteFile("notes.txt");
+
+        nav.Refresh();
+
+        Assert.Equal([first, added], nav.Files);
+        Assert.Equal(1, nav.CurrentIndex);
+        Assert.Equal(added, nav.CurrentPath);
+    }
+
+    [Fact]
+    public void Refresh_WhenEnumerationFails_KeepsPriorListAndSignalsChange()
+    {
+        using var temp = TestDirectory.Create();
+        var first = temp.WriteFile("a.jpg");
+        var second = temp.WriteFile("b.jpg");
+        var failEnumeration = false;
+        using var nav = new DirectoryNavigator(folder =>
+        {
+            if (failEnumeration)
+                throw new IOException("folder temporarily unavailable");
+
+            return Directory.EnumerateFiles(folder, "*.*", SearchOption.TopDirectoryOnly);
+        });
+        var changes = 0;
+        nav.ListChanged += (_, _) => changes++;
+        Assert.True(nav.Open(second));
+
+        failEnumeration = true;
+        nav.Refresh();
+
+        Assert.Equal(2, changes);
+        Assert.Equal([first, second], nav.Files);
+        Assert.Equal(second, nav.CurrentPath);
     }
 
     [Fact]
