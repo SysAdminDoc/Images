@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 
 namespace Images.Services;
 
@@ -26,9 +27,27 @@ public sealed class RenameService
     public static string Sanitize(string stem)
     {
         if (string.IsNullOrWhiteSpace(stem)) return string.Empty;
-        var filtered = new string(stem.Where(c => Array.IndexOf(_invalid, c) < 0).ToArray());
-        filtered = filtered.Trim().TrimEnd('.');
-        return filtered;
+        var collapsed = new StringBuilder(stem.Length);
+        var previousWasWhitespace = false;
+
+        foreach (var c in stem.Trim())
+        {
+            if (char.IsWhiteSpace(c))
+            {
+                if (!previousWasWhitespace)
+                    collapsed.Append(' ');
+                previousWasWhitespace = true;
+                continue;
+            }
+
+            if (Array.IndexOf(_invalid, c) >= 0)
+                continue;
+
+            collapsed.Append(c);
+            previousWasWhitespace = false;
+        }
+
+        return collapsed.ToString().TrimEnd('.', ' ');
     }
 
     /// <summary>
