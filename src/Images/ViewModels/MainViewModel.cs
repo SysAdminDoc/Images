@@ -148,6 +148,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ApplyCropCommand = new RelayCommand(ApplyCropSelection, () => CanApplyCrop);
         CancelCropCommand = new RelayCommand(CancelCropMode, () => IsCropMode || HasCropSelection);
         SetCropAspectPresetCommand = new RelayCommand(SetCropAspectPreset);
+        OpenResizeDialogCommand = new RelayCommand(OpenResizeDialog, () => CanUseResize);
         CopyInspectorHexCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hex, "HEX"), () => HasInspectorSample);
         CopyInspectorRgbCommand = new RelayCommand(() => CopyInspectorValue(s => s.Rgb, "RGB"), () => HasInspectorSample);
         CopyInspectorHsvCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hsv, "HSV"), () => HasInspectorSample);
@@ -536,6 +537,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasDisplayImage => CurrentImage is not null;
     public bool CanUseInspector => HasDisplayImage && !IsOperationBusy;
     public bool CanUseCrop => HasImage && HasDisplayImage && !IsOperationBusy && !IsArchiveBook && !IsPeekMode;
+    private bool CanUseResize => CanUseCrop;
     public bool IsViewerEmpty => CurrentPath is null;
     public bool CanRefreshFolder => (CurrentPath is not null || _nav.Count > 0) && !IsOperationBusy;
 
@@ -1722,6 +1724,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand ApplyCropCommand { get; }
     public ICommand CancelCropCommand { get; }
     public ICommand SetCropAspectPresetCommand { get; }
+    public ICommand OpenResizeDialogCommand { get; }
     public ICommand CopyInspectorHexCommand { get; }
     public ICommand CopyInspectorRgbCommand { get; }
     public ICommand CopyInspectorHsvCommand { get; }
@@ -2865,6 +2868,30 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             CropStatusText = "Crop failed: " + result.Message;
             Toast("Crop failed");
+        }
+    }
+
+    private void OpenResizeDialog()
+    {
+        if (!CanUseResize || CurrentPath is null || PixelWidth <= 0 || PixelHeight <= 0)
+            return;
+
+        var dialog = new Images.ResizeDialogWindow(PixelWidth, PixelHeight)
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        if (dialog.ShowDialog() != true || dialog.Result is not { } plan)
+            return;
+
+        var result = _editStack.AppendOperation(CurrentPath, "resize", plan.ToEditParameters(), plan.Label);
+        if (result.Success)
+        {
+            Toast($"Resize added: {plan.OutputWidth}x{plan.OutputHeight}");
+        }
+        else
+        {
+            Toast(result.Message);
         }
     }
 

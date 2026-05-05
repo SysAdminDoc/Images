@@ -314,13 +314,14 @@ public sealed class NonDestructiveEditService
         var height = ParseUInt(parameters, "height", 0);
         var maxWidth = ParseUInt(parameters, "maxWidth", 0);
         var maxHeight = ParseUInt(parameters, "maxHeight", 0);
+        var filter = ParseResizeFilter(parameters);
 
         if (width > 0 || height > 0)
         {
             image.Resize(new MagickGeometry(width == 0 ? image.Width : width, height == 0 ? image.Height : height)
             {
                 IgnoreAspectRatio = ParseBool(parameters, "ignoreAspectRatio", false)
-            });
+            }, filter);
             return;
         }
 
@@ -329,8 +330,22 @@ public sealed class NonDestructiveEditService
             image.Resize(new MagickGeometry(maxWidth == 0 ? image.Width : maxWidth, maxHeight == 0 ? image.Height : maxHeight)
             {
                 IgnoreAspectRatio = false
-            });
+            }, filter);
         }
+    }
+
+    private static FilterType ParseResizeFilter(IReadOnlyDictionary<string, string> parameters)
+    {
+        if (!parameters.TryGetValue("filter", out var filter) || string.IsNullOrWhiteSpace(filter))
+            return FilterType.Lanczos;
+
+        return filter.Trim().ToLowerInvariant() switch
+        {
+            "lanczos" or "lanczos3" => FilterType.Lanczos,
+            "mitchell" => FilterType.Mitchell,
+            "bicubic" or "cubic" => FilterType.Cubic,
+            _ => FilterType.Lanczos
+        };
     }
 
     private static void ApplyRotate(MagickImage image, IReadOnlyDictionary<string, string> parameters)
