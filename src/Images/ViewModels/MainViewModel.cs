@@ -1195,11 +1195,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (CurrentPath is null) return;
         try
         {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = CurrentPath,
-                UseShellExecute = true,
-            });
+            ShellIntegration.OpenShellTarget(CurrentPath);
         }
         catch (Exception ex)
         {
@@ -1607,16 +1603,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         try
         {
-            var psi = new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = "explorer.exe",
-                UseShellExecute = false,
-            };
-            // ArgumentList bypasses CommandLineToArgvW quoting rules entirely — the single token
-            // "/select,C:\path with space.jpg" goes through verbatim as argv[1] so no injection
-            // vector via embedded quotes or commas in the filename.
-            psi.ArgumentList.Add("/select," + full);
-            System.Diagnostics.Process.Start(psi);
+            ShellIntegration.RevealPathInExplorer(full);
         }
         catch (Exception ex) { Toast($"Could not open Explorer: {ex.Message}"); }
     }
@@ -1626,7 +1613,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void CopyPath(string? path)
     {
         if (path is null) return;
-        try { Clipboard.SetText(path); Toast("Copied path"); }
+        try { ClipboardService.SetText(path); Toast("Copied path"); }
         catch (Exception ex) { Toast($"Copy failed: {ex.Message}"); }
     }
 
@@ -1682,11 +1669,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (string.IsNullOrWhiteSpace(LatestUpdateUrl)) return;
         try
         {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = LatestUpdateUrl,
-                UseShellExecute = true,
-            });
+            ShellIntegration.OpenShellTarget(LatestUpdateUrl);
         }
         catch (Exception ex)
         {
