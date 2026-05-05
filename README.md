@@ -24,6 +24,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Broad format coverage** via WPF's built-in WIC plus [Magick.NET](https://github.com/dlemstra/Magick.NET): JPG, PNG/APNG, GIF, TIFF, WEBP, HEIC, AVIF, JXL, PSD/PSB, TGA, DDS, QOI, EXR, HDR, DPX, JPEG 2000, DICOM, FITS, XCF/ORA, SVG, WMF/EMF, WPG, RAW/DNG/NEF/CR2/CR3/ARW/RW2/RAF/ORF/PEF, legacy production formats, and more.
 - **Document/vector previews** for PDF, EPS, PS, and AI when Ghostscript is bundled app-local or installed on the machine. Images auto-detects `Codecs\Ghostscript`, `IMAGES_GHOSTSCRIPT_DIR`, and standard Ghostscript installs.
 - **Multi-page navigation** for documents and layered/page-based image formats. PDF, TIFF, PSD/PSB, ICO, DICOM, FITS, DCX, and related formats surface page/frame controls only when the current file has more than one page.
+- **Archive book previews** for ZIP and CBZ. Images opens supported image entries as read-only pages, ignores unsafe or nested archive entries, and keeps archive navigation inside the existing page controls.
 - **Animated GIFs play inline** — multi-frame GIFs (and animated WebP / APNG when the Magick build supports them) decode via `MagickImageCollection.Coalesce()` and cycle through `ZoomPanImage` with the original per-frame delays + loop count intact. A green "N frames" chip in the bottom toolbar marks animated files.
 - **Classic Windows 7 Photo Viewer layout** — centered image, bottom toolbar, hover-reveal circular arrows on the left and right edges. But in **Catppuccin Mocha** dark.
 - **Live inline rename** — split stem + extension editor on the right. Extension is locked by default (no more accidentally renaming `photo.jpg` → `photo.jp`). Debounced auto-save; no Save button.
@@ -112,6 +113,7 @@ src/Images/
 │   └── MainViewModel.cs        # All view state + commands
 ├── Services/
 │   ├── ImageLoader.cs          # WIC-first, Magick.NET fallback, cached decoding
+│   ├── ArchiveBookService.cs   # Read-only ZIP/CBZ page discovery for archive books
 │   ├── ImageExportService.cs   # Codec-aware Save a copy / conversion output
 │   ├── ImageMetadataService.cs # Read-only EXIF summary for the Details panel and HUD
 │   ├── CodecCapabilityService.cs # About-window codec summary and copyable diagnostics
