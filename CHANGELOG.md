@@ -16,6 +16,7 @@ All notable changes to **Images** are documented here.
 - **Recycle Bin confirmation preference** — the delete confirmation now offers a "don't ask again" checkbox, and Settings can restore confirmation before future Recycle Bin deletes.
 - **Clipboard import testability** — paste-from-clipboard handling now uses a focused import service with deterministic seams for file lists, image data, storage, naming, and clipboard-temp pruning.
 - **Viewer state coverage** — `MainViewModel` now supports isolated settings, clipboard, delete, confirmation, and navigator dependencies for regression tests covering folder-preview sort state, filmstrip persistence, paste opening, and Recycle Bin confirmation preferences.
+- **Recycle Bin delete extraction** — Recycle Bin confirmation, "don't ask again" persistence, missing-file handling, and send-failure reporting now live in a focused delete service with direct regression coverage.
 - **OCR workflow polish** — text extraction now has a persistent in-view busy/active status, a cancel-aware toolbar state, OCR readiness in Settings/About, and OCR language-pack status in diagnostics.
 - **Open-source viewer research** — added a May 2026 research scan of ImageGlass, nomacs, PicView, NeeView, QuickLook, Geeqie, gThumb, qView, JPEGView, Tacent View, Minimal Image Viewer, and LightningView, then folded the findings into the improvement plan.
 - **Trust copy** — README destructive-action wording now reflects the Recycle Bin confirmation flow.
