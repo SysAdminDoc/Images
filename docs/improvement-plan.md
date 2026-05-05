@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-08B` is complete. Manual and background update checks now expose in-flight state through `UpdateCheckController`, relay that state through `MainViewModel`, disable duplicate checks, and show a compact side-panel status while GitHub Releases is being contacted.
+`IP-08C` is complete, closing `IP-08`. File-open dialog loads and multi-page page turns now use the shared operation-status surface, so document previews and page navigation can paint a live status before slower decode work starts.
 
 ## Next Focus
 
-The next recommended slice is `IP-08C`: extend operation-status coverage to document and multi-page decode/navigation so slow page turns and document previews do not feel silent.
+The next recommended slice is `IP-09A`: extend the polished empty/error-state pattern into secondary flows, starting with empty folders, unsupported clipboard data, and stale recent-folder recovery.
 
 ## Research Inputs
 
@@ -31,7 +31,7 @@ The next recommended slice is `IP-08C`: extend operation-status coverage to docu
 | IP-05 | P1 | Done | Update checks | Add focused update-check tests. | Timeout, network failure, HTTP failure, malformed release payload, newer release, current release, and trusted URL normalization are covered. |
 | IP-06 | P1 | Done | Diagnostics UX | Add a compact diagnostics/status pane. | Users can inspect OCR, Ghostscript, Magick.NET, logs, storage paths, and last update-check state from the app without a terminal. |
 | IP-07 | P1 | Done | First run | Improve first-run guidance. | New users can discover supported formats, OCR readiness, document-preview requirements, privacy defaults, and recovery links without reading docs. |
-| IP-08 | P1 | In progress | Long-running state | Standardize busy/progress/cancel affordances. | OCR, metadata reads, document decode, large exports, and background update checks use consistent status text, disabled states, and cancellation where available. |
+| IP-08 | P1 | Done | Long-running state | Standardize busy/progress/cancel affordances. | OCR, metadata reads, document decode, large exports, and background update checks use consistent status text, disabled states, and cancellation where available. |
 | IP-09 | P1 | Planned | Empty/error states | Extend polished failure and empty states across secondary flows. | Empty folder, unsupported clipboard data, missing recent folders, thumbnail-cache failure, and offline update checks have calm, actionable feedback. |
 | IP-10 | P2 | Planned | Cache health | Expose thumbnail cache health controls. | Settings/About can show cache size and clear or rebuild the disposable thumbnail cache safely. |
 | IP-11 | P2 | Planned | Stress testing | Add large-folder and volatile-folder stress coverage. | Navigation and thumbnail behavior are validated with thousands of files, deleted files, slow folders, and rapid directory changes. |
@@ -87,6 +87,7 @@ The next recommended slice is `IP-08C`: extend operation-status coverage to docu
 - 2026-05-05: Completed `IP-07A` and closed `IP-07` by turning the empty first-run card into capability-backed guidance for privacy, format support, OCR readiness, document previews, and Settings/Diagnostics recovery links.
 - 2026-05-05: Completed `IP-08A` by adding shared operation-status feedback for manual reload, Save a copy, and GPS-strip work, with command disabled-state coverage for mutating image actions during active operations.
 - 2026-05-05: Completed `IP-08B` by adding update-check busy/status state to `UpdateCheckController`, relaying it through the main view model, suppressing duplicate manual checks, and showing a side-panel live status while GitHub Releases is contacted.
+- 2026-05-05: Completed `IP-08C` and closed `IP-08` by extending operation-status feedback to file-open dialog decodes and multi-page navigation, with regression coverage for page-turn busy state.
 
 ## Verification Standard
 

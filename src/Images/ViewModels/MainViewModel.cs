@@ -113,15 +113,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _isFilmstripVisible = _settings.GetBool(Keys.FilmstripVisible, true);
         _isMetadataHudVisible = _settings.GetBool(Keys.MetadataHudVisible, false);
 
-        OpenCommand = new RelayCommand(OpenFileDialog, () => !IsOperationBusy);
+        OpenCommand = new RelayCommand(async () => await OpenFileDialogAsync(), () => !IsOperationBusy);
         NextCommand = new RelayCommand(Next, () => CanUseImageCommands);
         PrevCommand = new RelayCommand(Prev, () => CanUseImageCommands);
         FirstCommand = new RelayCommand(First, () => CanUseImageCommands);
         LastCommand = new RelayCommand(Last, () => CanUseImageCommands);
-        NextPageCommand = new RelayCommand(NextPage, () => HasNextPage && !IsOperationBusy);
-        PrevPageCommand = new RelayCommand(PrevPage, () => HasPreviousPage && !IsOperationBusy);
-        FirstPageCommand = new RelayCommand(FirstPage, () => HasPreviousPage && !IsOperationBusy);
-        LastPageCommand = new RelayCommand(LastPage, () => HasNextPage && !IsOperationBusy);
+        NextPageCommand = new RelayCommand(async () => await NextPageAsync(), () => HasNextPage && !IsOperationBusy);
+        PrevPageCommand = new RelayCommand(async () => await PrevPageAsync(), () => HasPreviousPage && !IsOperationBusy);
+        FirstPageCommand = new RelayCommand(async () => await FirstPageAsync(), () => HasPreviousPage && !IsOperationBusy);
+        LastPageCommand = new RelayCommand(async () => await LastPageAsync(), () => HasNextPage && !IsOperationBusy);
         DeleteCommand = new RelayCommand(DeleteCurrent, () => CanUseImageCommands);
         RotateCwCommand = new RelayCommand(() => Rotate(90), () => CanUseDisplayImageCommands);
         RotateCcwCommand = new RelayCommand(() => Rotate(-90), () => CanUseDisplayImageCommands);
@@ -993,6 +993,49 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    private async Task OpenFileWithOperationStatusAsync(string path, string title)
+    {
+        if (IsOperationBusy) return;
+
+        BeginOperationStatus(title, BuildDecodeOperationDetail(path));
+        try
+        {
+            await YieldForOperationStatusAsync();
+            OpenFile(path);
+        }
+        finally
+        {
+            EndOperationStatus();
+        }
+    }
+
+    private async Task LoadCurrentWithOperationStatusAsync(string title, string detail)
+    {
+        if (IsOperationBusy) return;
+
+        BeginOperationStatus(title, detail);
+        try
+        {
+            await YieldForOperationStatusAsync();
+            LoadCurrent();
+        }
+        finally
+        {
+            EndOperationStatus();
+        }
+    }
+
+    private static string BuildDecodeOperationDetail(string path)
+    {
+        var fileName = Path.GetFileName(path);
+        return Path.GetExtension(path).ToLowerInvariant() switch
+        {
+            ".pdf" or ".ps" or ".eps" or ".ai" => $"Rendering document preview for {fileName}.",
+            ".tif" or ".tiff" => $"Loading multi-page image {fileName}.",
+            _ => $"Decoding {fileName}."
+        };
+    }
+
     // V20-02 UI consumer: open the first supported image in <folder>. Click handler for the
     // side-panel "Recent folders" cards. EnumerateFiles avoids materializing a full list when
     // the folder is huge (medium-DAM scenario — we only need the first match).
@@ -1045,7 +1088,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private void OpenFileDialog()
+    private async Task OpenFileDialogAsync()
     {
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
@@ -1053,7 +1096,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Filter = SupportedImageFormats.OpenDialogFilter,
             FilterIndex = 1
         };
-        if (dlg.ShowDialog() == true) OpenFile(dlg.FileName);
+        if (dlg.ShowDialog() == true)
+            await OpenFileWithOperationStatusAsync(dlg.FileName, "Opening file");
     }
 
     private void Next() { FlushPendingRename(); if (_nav.MoveNext()) { ResetPageState(); LoadCurrent(); } }
@@ -1061,36 +1105,38 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void First() { FlushPendingRename(); if (_nav.MoveFirst()) { ResetPageState(); LoadCurrent(); } }
     private void Last() { FlushPendingRename(); if (_nav.MoveLast()) { ResetPageState(); LoadCurrent(); } }
 
-    private void NextPage()
+    private async Task NextPageAsync()
     {
-        if (!HasNextPage) return;
-        FlushPendingRename();
-        PageIndex++;
-        LoadCurrent();
+        await GoToPageAsync(PageIndex + 1, "Loading next page");
     }
 
-    private void PrevPage()
+    private async Task PrevPageAsync()
     {
-        if (!HasPreviousPage) return;
-        FlushPendingRename();
-        PageIndex--;
-        LoadCurrent();
+        await GoToPageAsync(PageIndex - 1, "Loading previous page");
     }
 
-    private void FirstPage()
+    private async Task FirstPageAsync()
     {
-        if (!HasPreviousPage) return;
-        FlushPendingRename();
-        PageIndex = 0;
-        LoadCurrent();
+        await GoToPageAsync(0, "Loading first page");
     }
 
-    private void LastPage()
+    private async Task LastPageAsync()
     {
-        if (!HasNextPage) return;
+        await GoToPageAsync(PageCount - 1, "Loading last page");
+    }
+
+    private async Task GoToPageAsync(int targetPageIndex, string title)
+    {
+        if (IsOperationBusy || !HasMultiplePages)
+            return;
+
+        targetPageIndex = Math.Clamp(targetPageIndex, 0, PageCount - 1);
+        if (targetPageIndex == PageIndex)
+            return;
+
         FlushPendingRename();
-        PageIndex = PageCount - 1;
-        LoadCurrent();
+        PageIndex = targetPageIndex;
+        await LoadCurrentWithOperationStatusAsync(title, $"{PageLabel} {PageIndex + 1} of {PageCount}.");
     }
 
     private bool LoadCurrent()
