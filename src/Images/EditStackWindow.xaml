@@ -1,0 +1,189 @@
+<Window x:Class="Images.EditStackWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Images - Edit history"
+        Width="980"
+        Height="680"
+        MinWidth="820"
+        MinHeight="560"
+        WindowStartupLocation="CenterOwner">
+    <Grid Background="{StaticResource BaseBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource HairlineBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="18,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Edit history" Style="{StaticResource Text.Title}" />
+                    <TextBlock Text="Inspect sidecar edits, fork virtual copies, and export with provenance."
+                               Style="{StaticResource Text.Caption}"
+                               Margin="0,3,0,0" />
+                </StackPanel>
+                <WrapPanel Grid.Column="1" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource ChromeButton}"
+                            Click="ReloadButton_Click"
+                            AutomationProperties.Name="Reload edit history">
+                        <TextBlock Text="Reload" />
+                    </Button>
+                    <Button Style="{StaticResource ChromeButton}"
+                            Margin="8,0,0,0"
+                            Click="CreateVirtualCopyButton_Click"
+                            AutomationProperties.Name="Create virtual edit copy">
+                        <TextBlock Text="New virtual copy" />
+                    </Button>
+                    <Button Style="{StaticResource ChromeButton}"
+                            Margin="8,0,0,0"
+                            Click="ExportButton_Click"
+                            AutomationProperties.Name="Export selected edit copy">
+                        <TextBlock Text="Export copy" />
+                    </Button>
+                </WrapPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Background="{StaticResource PanelBrush}"
+                    BorderBrush="{StaticResource HairlineBrush}"
+                    BorderThickness="0,0,1,0"
+                    Padding="16">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Source" Style="{StaticResource SectionLabel}" />
+                        <Border Style="{StaticResource Card}" Padding="12">
+                            <StackPanel>
+                                <TextBlock x:Name="ImagePathText"
+                                           Style="{StaticResource Text.Caption}"
+                                           TextWrapping="Wrap" />
+                                <TextBlock x:Name="SidecarPathText"
+                                           Style="{StaticResource Text.Caption}"
+                                           Margin="0,8,0,0"
+                                           TextWrapping="Wrap" />
+                                <WrapPanel Margin="0,10,0,0">
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            Click="RevealSidecarButton_Click"
+                                            AutomationProperties.Name="Reveal edit sidecar">
+                                        <TextBlock Text="Reveal sidecar" />
+                                    </Button>
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            Margin="8,0,0,0"
+                                            Click="CopySummaryButton_Click"
+                                            AutomationProperties.Name="Copy edit history summary">
+                                        <TextBlock Text="Copy summary" />
+                                    </Button>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Divider}" />
+
+                        <TextBlock Text="Copies" Style="{StaticResource SectionLabel}" />
+                        <Border Style="{StaticResource Card}" Padding="12">
+                            <ListBox x:Name="CopyList"
+                                     MinHeight="180"
+                                     SelectionChanged="CopyList_SelectionChanged"
+                                     AutomationProperties.Name="Edit copies">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,2">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Detail}"
+                                                       Style="{StaticResource Text.Caption}"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <GridSplitter Grid.Column="1"
+                          Width="1"
+                          HorizontalAlignment="Stretch"
+                          Background="{StaticResource HairlineBrush}" />
+
+            <Grid Grid.Column="2"
+                  Background="{StaticResource ViewportBrush}"
+                  Margin="18">
+                <Border Style="{StaticResource Card}" Padding="14">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock x:Name="OperationTitleText"
+                                           Text="Operations"
+                                           Style="{StaticResource SectionLabel}" />
+                                <TextBlock Text="Disabled operations remain in history but are skipped on export."
+                                           Style="{StaticResource Text.Caption}"
+                                           Margin="0,3,0,0" />
+                            </StackPanel>
+                            <Button Grid.Column="1"
+                                    Style="{StaticResource ChromeButton}"
+                                    Click="ToggleOperationButton_Click"
+                                    AutomationProperties.Name="Enable or disable selected edit operation">
+                                <TextBlock Text="Toggle selected" />
+                            </Button>
+                        </Grid>
+
+                        <ListView x:Name="OperationList"
+                                  Grid.Row="1"
+                                  Margin="0,12,0,0"
+                                  AutomationProperties.Name="Edit operations">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="State" Width="84" DisplayMemberBinding="{Binding State}" />
+                                    <GridViewColumn Header="Operation" Width="180" DisplayMemberBinding="{Binding Label}" />
+                                    <GridViewColumn Header="Parameters" Width="300" DisplayMemberBinding="{Binding Parameters}" />
+                                    <GridViewColumn Header="Created" Width="170" DisplayMemberBinding="{Binding Created}" />
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+
+                        <TextBlock Grid.Row="2"
+                                   x:Name="EmptyHintText"
+                                   Style="{StaticResource Text.Caption}"
+                                   Margin="0,12,0,0"
+                                   TextWrapping="Wrap" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <Border Grid.Row="2"
+                Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource HairlineBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="14,10">
+            <TextBlock x:Name="StatusText"
+                       Style="{StaticResource Text.Caption}"
+                       TextWrapping="Wrap" />
+        </Border>
+    </Grid>
+</Window>
