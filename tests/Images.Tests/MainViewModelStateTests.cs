@@ -418,10 +418,13 @@ public sealed class MainViewModelStateTests
             using (var viewModel = new MainViewModel(settings))
             {
                 viewModel.OpenFile(archive);
+                Assert.True(viewModel.IsArchiveBook);
+                Assert.Equal("Reading book.cbz \u00B7 Page 1 / 2", viewModel.CurrentArchiveProgressText);
                 Assert.Single(viewModel.RecentArchiveBooks);
                 viewModel.PageNumber = 2;
                 PumpUntil(() => !viewModel.IsOperationBusy);
                 Assert.Equal(2, viewModel.PageNumber);
+                Assert.Equal("Reading book.cbz \u00B7 Page 2 / 2", viewModel.CurrentArchiveProgressText);
                 Assert.Equal("Page 2 / 2", Assert.Single(viewModel.RecentArchiveBooks).ProgressText);
             }
 

@@ -2039,6 +2039,100 @@
                                Text="Renames save on pause. Enter commits now · Esc reverts."
                                Margin="1,10,0,0" />
 
+                    <StackPanel Visibility="{Binding IsArchiveBook, Converter={StaticResource BoolToVis}}">
+                        <Border Style="{StaticResource Divider}" />
+                        <TextBlock Text="Book controls" Style="{StaticResource SectionLabel}" />
+
+                        <Border Style="{StaticResource Card}"
+                                AutomationProperties.Name="Archive book controls"
+                                AutomationProperties.LiveSetting="Polite">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0"
+                                            Width="32"
+                                            Height="32"
+                                            CornerRadius="{StaticResource Radius.Sm.CR}"
+                                            BorderThickness="1"
+                                            Background="#1A89B4FA"
+                                            BorderBrush="{StaticResource AccentBrush}"
+                                            VerticalAlignment="Top"
+                                            Margin="0,0,12,0">
+                                        <TextBlock Text="&#xE8A5;"
+                                                   FontFamily="{StaticResource IconFontFamily}"
+                                                   FontSize="13"
+                                                   Foreground="{StaticResource AccentBrush}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="{Binding CurrentArchiveProgressText}"
+                                                   FontSize="12.5"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextBrush}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding DecoderUsed}"
+                                                   FontSize="11.5"
+                                                   Margin="0,3,0,0"
+                                                   Foreground="{StaticResource OverlayBrush}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <UniformGrid Columns="4" Margin="0,12,0,0">
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            MinHeight="32"
+                                            Margin="0,0,6,0"
+                                            Command="{Binding FirstPageCommand}"
+                                            ToolTip="First page"
+                                            AutomationProperties.Name="First book page">
+                                        <TextBlock Text="&#xE892;"
+                                                   FontFamily="{StaticResource IconFontFamily}"
+                                                   FontSize="12"
+                                                   HorizontalAlignment="Center" />
+                                    </Button>
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            MinHeight="32"
+                                            Margin="0,0,6,0"
+                                            Command="{Binding PrevPageCommand}"
+                                            ToolTip="Previous page"
+                                            AutomationProperties.Name="Previous book page">
+                                        <TextBlock Text="&#xE76B;"
+                                                   FontFamily="{StaticResource IconFontFamily}"
+                                                   FontSize="12"
+                                                   HorizontalAlignment="Center" />
+                                    </Button>
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            MinHeight="32"
+                                            Margin="0,0,6,0"
+                                            Command="{Binding NextPageCommand}"
+                                            ToolTip="Next page"
+                                            AutomationProperties.Name="Next book page">
+                                        <TextBlock Text="&#xE76C;"
+                                                   FontFamily="{StaticResource IconFontFamily}"
+                                                   FontSize="12"
+                                                   HorizontalAlignment="Center" />
+                                    </Button>
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            MinHeight="32"
+                                            Command="{Binding LastPageCommand}"
+                                            ToolTip="Last page"
+                                            AutomationProperties.Name="Last book page">
+                                        <TextBlock Text="&#xE893;"
+                                                   FontFamily="{StaticResource IconFontFamily}"
+                                                   FontSize="12"
+                                                   HorizontalAlignment="Center" />
+                                    </Button>
+                                </UniformGrid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- RECENT RENAMES section -->
