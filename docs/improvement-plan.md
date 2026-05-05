@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V81-22` is complete. The main viewer now has a side-panel pixel Inspector with per-image sampling mode, viewport-to-pixel coordinate mapping, live eyedropper readout, copied HEX/RGB/HSV/sample commands, alpha readout, Shift-drag pixel measurement, nearest-neighbor pixel-art preview scaling, and regression-tested sampling math. Reference boards now support Ctrl-hover sampling and Ctrl-click sample copy on image cards.
+Roadmap `V81-23` is complete. Animated-image playback now runs through selected-frame view-model state with a side-panel timeline, scrubber, play/pause, first/previous/next/last frame stepping, Ctrl+Left/Ctrl+Right/Ctrl+Space shortcuts, playback-speed control, copy-current-frame, PNG frame export, drag-out frame files, and regression coverage for timing/export helpers plus workbench state.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the next main `ROADMAP.md` feature backlog item, `V81-23` animation frame workbench.
+The improvement-plan backlog is complete. Continue with the next main `ROADMAP.md` feature backlog item, `V81-24` pinned overlay mode.
 
 ## Research Inputs
 
@@ -117,6 +117,7 @@ The improvement-plan backlog is complete. Continue with the next main `ROADMAP.m
 - 2026-05-05: Closed `RS-02` / `V20-33` by enabling managed SharpCompress read-only support for RAR/CBR and 7z/CB7 books, preserving unsafe-entry filtering, nested-archive skipping, per-entry byte caps, corrupt-archive recovery copy, diagnostics provenance, vulnerability scanning, and generated ZIP/7z regression coverage.
 - 2026-05-05: Closed roadmap `V81-21` by adding a non-modal local reference board with supported-file drag/drop, draggable image cards, editable notes, draggable/resizable group frames, always-on-top pinning, zoom/reset controls, clear confirmation, content-bounds PNG export, and geometry regression coverage.
 - 2026-05-05: Closed roadmap `V81-22` by adding main-viewer pixel inspection, copyable HEX/RGB/HSV/sample values, alpha and coordinate readouts, Shift-drag measurement, nearest-neighbor preview scaling, board Ctrl-hover/Ctrl-click sampling, and sampling math regression tests.
+- 2026-05-05: Closed roadmap `V81-23` by replacing keyframe-only animated playback with selected-frame workbench state, adding timeline thumbnails, scrubber, frame-step/playback controls, speed control, current-frame copy/export/drag-out, shortcuts, and regression tests.
 
 ## Verification Standard
 
