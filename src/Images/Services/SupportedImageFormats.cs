@@ -84,6 +84,9 @@ public static class SupportedImageFormats
     public static bool IsSupported(string path)
         => Extensions.Contains(Path.GetExtension(path));
 
+    public static bool IsSupportedExtension(string extension)
+        => Extensions.Contains(Normalize(extension));
+
     public static bool RequiresGhostscript(string path)
         => GhostscriptExtensions.Contains(Path.GetExtension(path));
 

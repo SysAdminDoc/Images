@@ -67,6 +67,13 @@ public sealed class RenameService
         return filtered.Length == 0 ? string.Empty : "." + filtered;
     }
 
+    public static bool IsSupportedTargetExtension(string extension)
+    {
+        var normalized = NormalizeExtension(extension);
+        return !string.IsNullOrEmpty(normalized) &&
+               SupportedImageFormats.IsSupportedExtension(normalized);
+    }
+
     /// <summary>
     /// Resolve the final on-disk path given a desired stem + extension.
     /// If the target exists (and isn't the same file), append " (2)", " (3)", etc.
@@ -78,6 +85,7 @@ public sealed class RenameService
 
         folder = Path.GetFullPath(folder);
         var ext = NormalizeExtension(extension);
+        ValidateTargetExtension(ext);
 
         var baseName = Sanitize(desiredStem);
         if (string.IsNullOrEmpty(baseName))
@@ -94,6 +102,15 @@ public sealed class RenameService
             counter++;
         }
         return candidate;
+    }
+
+    private static void ValidateTargetExtension(string extension)
+    {
+        if (string.IsNullOrEmpty(extension))
+            throw new ArgumentException("Extension must contain at least one supported format suffix.", nameof(extension));
+
+        if (!SupportedImageFormats.IsSupportedExtension(extension))
+            throw new ArgumentException($"Extension '{extension}' is not supported by Images.", nameof(extension));
     }
 
     private static bool IsSame(string a, string? b)
