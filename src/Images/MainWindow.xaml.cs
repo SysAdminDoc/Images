@@ -413,11 +413,17 @@ public partial class MainWindow : Window
                 e.Handled = true;
                 break;
             case Key.Left:
+                if (Vm.IsArchiveBook) Vm.LeftBookPageTurnCommand.Execute(null);
+                else Vm.PrevCommand.Execute(null);
+                e.Handled = true; break;
+            case Key.Right:
+                if (Vm.IsArchiveBook) Vm.RightBookPageTurnCommand.Execute(null);
+                else Vm.NextCommand.Execute(null);
+                e.Handled = true; break;
             case Key.Back:
                 if (Vm.IsArchiveBook) Vm.PrevPageCommand.Execute(null);
                 else Vm.PrevCommand.Execute(null);
                 e.Handled = true; break;
-            case Key.Right:
             case Key.Space:
                 if (Vm.IsArchiveBook) Vm.NextPageCommand.Execute(null);
                 else Vm.NextCommand.Execute(null);
