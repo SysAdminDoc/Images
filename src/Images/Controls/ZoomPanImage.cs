@@ -102,6 +102,26 @@ public sealed class ZoomPanImage : ContentControl
         set => SetValue(FlipVerticalProperty, value);
     }
 
+    public static readonly DependencyProperty InspectorModeProperty = DependencyProperty.Register(
+        nameof(InspectorMode), typeof(bool), typeof(ZoomPanImage),
+        new PropertyMetadata(false, (d, e) => ((ZoomPanImage)d).OnInspectorModeChanged((bool)e.NewValue)));
+
+    public bool InspectorMode
+    {
+        get => (bool)GetValue(InspectorModeProperty);
+        set => SetValue(InspectorModeProperty, value);
+    }
+
+    public static readonly DependencyProperty UseNearestNeighborScalingProperty = DependencyProperty.Register(
+        nameof(UseNearestNeighborScaling), typeof(bool), typeof(ZoomPanImage),
+        new PropertyMetadata(false, (d, e) => ((ZoomPanImage)d).ApplyScalingMode((bool)e.NewValue)));
+
+    public bool UseNearestNeighborScaling
+    {
+        get => (bool)GetValue(UseNearestNeighborScalingProperty);
+        set => SetValue(UseNearestNeighborScalingProperty, value);
+    }
+
     public ZoomPanImage()
     {
         var group = new TransformGroup();
@@ -111,7 +131,7 @@ public sealed class ZoomPanImage : ContentControl
         group.Children.Add(_translate);
         _image.RenderTransformOrigin = new Point(0.5, 0.5);
         _image.RenderTransform = group;
-        RenderOptions.SetBitmapScalingMode(_image, BitmapScalingMode.HighQuality);
+        ApplyScalingMode(UseNearestNeighborScaling);
         _flip.Changed += (_, _) => RaiseViewChanged();
         _rotate.Changed += (_, _) => RaiseViewChanged();
         _scale.Changed += (_, _) => RaiseViewChanged();
@@ -269,6 +289,12 @@ public sealed class ZoomPanImage : ContentControl
     private void OnDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ClickCount >= 2) return;
+        if (InspectorMode)
+        {
+            Cursor = Cursors.Cross;
+            return;
+        }
+
         _dragStart = e.GetPosition(this);
         _dragOrigin = new Point(_translate.X, _translate.Y);
         CaptureMouse();
@@ -277,6 +303,12 @@ public sealed class ZoomPanImage : ContentControl
 
     private void OnMove(object sender, MouseEventArgs e)
     {
+        if (InspectorMode)
+        {
+            Cursor = Cursors.Cross;
+            return;
+        }
+
         if (_dragStart is null) return;
         var p = e.GetPosition(this);
         _translate.X = _dragOrigin.X + (p.X - _dragStart.Value.X);
@@ -288,11 +320,14 @@ public sealed class ZoomPanImage : ContentControl
     {
         _dragStart = null;
         ReleaseMouseCapture();
-        Cursor = Cursors.Arrow;
+        Cursor = InspectorMode ? Cursors.Cross : Cursors.Arrow;
     }
 
     private void OnDouble(object sender, MouseButtonEventArgs e)
     {
+        if (InspectorMode)
+            return;
+
         if (Math.Abs(_scale.ScaleX - 1) > 0.001) ResetView(); else OneToOne();
         e.Handled = true;
     }
@@ -305,6 +340,21 @@ public sealed class ZoomPanImage : ContentControl
     }
 
     private void RaiseViewChanged() => ViewChanged?.Invoke(this, EventArgs.Empty);
+
+    private void OnInspectorModeChanged(bool enabled)
+    {
+        Cursor = enabled ? Cursors.Cross : Cursors.Arrow;
+        if (enabled && IsMouseCaptured)
+            ReleaseMouseCapture();
+        _dragStart = null;
+    }
+
+    private void ApplyScalingMode(bool nearestNeighbor)
+    {
+        RenderOptions.SetBitmapScalingMode(
+            _image,
+            nearestNeighbor ? BitmapScalingMode.NearestNeighbor : BitmapScalingMode.HighQuality);
+    }
 
     // A-01: surface custom UIA peer so screen readers announce "Image, W by H pixels" on focus
     // instead of the generic ContentControl label.

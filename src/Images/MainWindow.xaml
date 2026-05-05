@@ -187,7 +187,13 @@
                                    Animation="{Binding CurrentAnimation}"
                                    Rotation="{Binding Rotation}"
                                    FlipHorizontal="{Binding FlipHorizontal}"
-                                   FlipVertical="{Binding FlipVertical}" />
+                                   FlipVertical="{Binding FlipVertical}"
+                                   InspectorMode="{Binding IsInspectorMode}"
+                                   UseNearestNeighborScaling="{Binding InspectorNearestNeighborPreview}"
+                                   MouseMove="Canvas_MouseMove"
+                                   MouseLeave="Canvas_MouseLeave"
+                                   MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
+                                   MouseLeftButtonUp="Canvas_MouseLeftButtonUp" />
 
                 <!-- OCR text extraction overlay — selectable recognized text regions.
                       Target binding keeps OCR pixel coordinates aligned with image zoom/pan transforms. -->
@@ -2844,6 +2850,108 @@
                                        Foreground="{StaticResource SubtextBrush}" />
                         </Border>
                     </Grid>
+
+                    <Border Style="{StaticResource Divider}" />
+
+                    <!-- INSPECTOR section -->
+                    <TextBlock Text="Inspector" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource Card}"
+                            Padding="13,12"
+                            IsEnabled="{Binding CanUseInspector}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding InspectorModeText}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrush}" />
+                                    <TextBlock Text="{Binding InspectorModeHelpText}"
+                                               Style="{StaticResource Text.Hint}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,3,0,0" />
+                                </StackPanel>
+                                <Button Grid.Column="1"
+                                        Command="{Binding ToggleInspectorCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        MinWidth="72"
+                                        Margin="12,0,0,0"
+                                        AutomationProperties.Name="Toggle pixel inspector">
+                                    <TextBlock Text="{Binding InspectorModeText}" />
+                                </Button>
+                            </Grid>
+
+                            <CheckBox IsChecked="{Binding InspectorNearestNeighborPreview, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Content="Nearest-neighbor preview"
+                                      Margin="0,12,0,0"
+                                      ToolTip="Use crisp scaling for pixel-art inspection."
+                                      AutomationProperties.Name="Use nearest-neighbor preview scaling" />
+
+                            <Border Background="{StaticResource PanelBrush}"
+                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                    Padding="10"
+                                    Margin="0,12,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding InspectorStatusText}"
+                                               Style="{StaticResource Text.Caption}"
+                                               TextWrapping="Wrap" />
+                                    <UniformGrid Columns="2" Margin="0,10,0,0">
+                                        <StackPanel Margin="0,0,10,8">
+                                            <TextBlock Text="Coordinate" Style="{StaticResource Text.Hint}" />
+                                            <TextBlock Text="{Binding InspectorCoordinateText}" Style="{StaticResource Text.Body}" />
+                                        </StackPanel>
+                                        <StackPanel Margin="0,0,0,8">
+                                            <TextBlock Text="Hex" Style="{StaticResource Text.Hint}" />
+                                            <TextBlock Text="{Binding InspectorHexText}" Style="{StaticResource Text.Body}" />
+                                        </StackPanel>
+                                        <StackPanel Margin="0,0,10,8">
+                                            <TextBlock Text="RGB" Style="{StaticResource Text.Hint}" />
+                                            <TextBlock Text="{Binding InspectorRgbText}" Style="{StaticResource Text.Body}" />
+                                        </StackPanel>
+                                        <StackPanel Margin="0,0,0,8">
+                                            <TextBlock Text="HSV / Alpha" Style="{StaticResource Text.Hint}" />
+                                            <TextBlock Text="{Binding InspectorHsvText}" Style="{StaticResource Text.Body}" />
+                                            <TextBlock Text="{Binding InspectorAlphaText}" Style="{StaticResource Text.Hint}" />
+                                        </StackPanel>
+                                    </UniformGrid>
+                                    <TextBlock Text="{Binding InspectorSelectionText}"
+                                               Style="{StaticResource Text.Caption}"
+                                               Margin="0,2,0,0" />
+                                </StackPanel>
+                            </Border>
+
+                            <WrapPanel Margin="0,12,0,0">
+                                <Button Command="{Binding CopyInspectorHexCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Copy HEX color">
+                                    <TextBlock Text="Copy HEX" />
+                                </Button>
+                                <Button Command="{Binding CopyInspectorRgbCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Copy RGB color">
+                                    <TextBlock Text="Copy RGB" />
+                                </Button>
+                                <Button Command="{Binding CopyInspectorHsvCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Copy HSV color">
+                                    <TextBlock Text="Copy HSV" />
+                                </Button>
+                                <Button Command="{Binding ClearInspectorSelectionCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,0,8"
+                                        AutomationProperties.Name="Clear inspector measurement">
+                                    <TextBlock Text="Clear measure" />
+                                </Button>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
 
                     <StackPanel Visibility="{Binding PhotoMetadataRows.Count, Converter={StaticResource BoolToVis}}">
                         <Border Style="{StaticResource Divider}" />

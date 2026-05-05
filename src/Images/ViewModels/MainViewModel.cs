@@ -138,6 +138,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RotateCwCommand = new RelayCommand(() => Rotate(90), () => CanUseDisplayImageCommands);
         RotateCcwCommand = new RelayCommand(() => Rotate(-90), () => CanUseDisplayImageCommands);
         Rotate180Command = new RelayCommand(() => Rotate(180), () => CanUseDisplayImageCommands);
+        ToggleInspectorCommand = new RelayCommand(() => IsInspectorMode = !IsInspectorMode, () => CanUseInspector);
+        CopyInspectorHexCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hex, "HEX"), () => HasInspectorSample);
+        CopyInspectorRgbCommand = new RelayCommand(() => CopyInspectorValue(s => s.Rgb, "RGB"), () => HasInspectorSample);
+        CopyInspectorHsvCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hsv, "HSV"), () => HasInspectorSample);
+        CopyInspectorSummaryCommand = new RelayCommand(() => CopyInspectorValue(s => s.Summary, "pixel sample"), () => HasInspectorSample);
+        ClearInspectorSelectionCommand = new RelayCommand(ClearInspectorSelection, () => HasInspectorSelection);
         FlipHorizontalCommand = new RelayCommand(() => { FlipHorizontal = !FlipHorizontal; }, () => CanUseDisplayImageCommands);
         FlipVerticalCommand = new RelayCommand(() => { FlipVertical = !FlipVertical; }, () => CanUseDisplayImageCommands);
         RevealCommand = new RelayCommand(RevealInExplorer, () => HasImage);
@@ -215,6 +221,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (Set(ref _currentImage, value))
             {
                 Raise(nameof(HasDisplayImage));
+                Raise(nameof(CanUseInspector));
                 Raise(nameof(CanToggleMetadataHud));
                 Raise(nameof(ShowMetadataHud));
                 CommandManager.InvalidateRequerySuggested();
@@ -402,6 +409,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public bool HasImage => !string.IsNullOrEmpty(CurrentPath) && File.Exists(CurrentPath);
     public bool HasDisplayImage => CurrentImage is not null;
+    public bool CanUseInspector => HasDisplayImage && !IsOperationBusy;
     public bool IsViewerEmpty => CurrentPath is null;
     public bool CanRefreshFolder => (CurrentPath is not null || _nav.Count > 0) && !IsOperationBusy;
 
@@ -440,6 +448,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 Raise(nameof(ShowOperationStatus));
                 Raise(nameof(CanRefreshFolder));
+                Raise(nameof(CanUseInspector));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -638,6 +647,63 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private string? _decoderUsed;
     public string? DecoderUsed { get => _decoderUsed; private set => Set(ref _decoderUsed, value); }
+
+    private bool _isInspectorMode;
+    public bool IsInspectorMode
+    {
+        get => _isInspectorMode;
+        set
+        {
+            if (!Set(ref _isInspectorMode, value))
+                return;
+
+            if (!value)
+                ClearInspectorState();
+            else
+                InspectorStatusText = "Move over the image to sample pixels. Click to hold a sample; Ctrl+click copies it. Shift-drag measures.";
+
+            Raise(nameof(InspectorModeText));
+            Raise(nameof(InspectorModeHelpText));
+            CommandManager.InvalidateRequerySuggested();
+        }
+    }
+
+    public string InspectorModeText => IsInspectorMode ? "Inspector on" : "Inspector off";
+    public string InspectorModeHelpText => IsInspectorMode
+        ? "Sampling is active. Shift-drag measures a rectangle."
+        : "Turn on Inspector to read pixel color and coordinates.";
+
+    private bool _inspectorNearestNeighborPreview;
+    public bool InspectorNearestNeighborPreview
+    {
+        get => _inspectorNearestNeighborPreview;
+        set
+        {
+            if (Set(ref _inspectorNearestNeighborPreview, value))
+                Toast(value ? "Nearest-neighbor preview on" : "High-quality preview on");
+        }
+    }
+
+    private PixelSample? _inspectorSample;
+    private PixelSelection? _inspectorSelection;
+
+    private string _inspectorStatusText = "Turn on Inspector to sample pixel color, coordinates, and dimensions.";
+    public string InspectorStatusText
+    {
+        get => _inspectorStatusText;
+        private set => Set(ref _inspectorStatusText, value);
+    }
+
+    public bool HasInspectorSample => _inspectorSample is not null;
+    public bool HasInspectorSelection => _inspectorSelection is not null;
+    public string InspectorCoordinateText => _inspectorSample?.CoordinateText ?? "No pixel selected";
+    public string InspectorHexText => _inspectorSample?.Hex ?? "#------";
+    public string InspectorRgbText => _inspectorSample?.Rgb ?? "RGB --, --, --";
+    public string InspectorHsvText => _inspectorSample?.Hsv ?? "HSV --, --%, --%";
+    public string InspectorAlphaText => _inspectorSample?.Alpha ?? "A --";
+    public string InspectorSelectionText => _inspectorSelection.HasValue
+        ? _inspectorSelection.Value.DisplayText
+        : "Shift-drag to measure";
 
     // -------------------- Rename editor state --------------------
 
@@ -1273,6 +1339,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand RotateCwCommand { get; }
     public ICommand RotateCcwCommand { get; }
     public ICommand Rotate180Command { get; }
+    public ICommand ToggleInspectorCommand { get; }
+    public ICommand CopyInspectorHexCommand { get; }
+    public ICommand CopyInspectorRgbCommand { get; }
+    public ICommand CopyInspectorHsvCommand { get; }
+    public ICommand CopyInspectorSummaryCommand { get; }
+    public ICommand ClearInspectorSelectionCommand { get; }
     public ICommand FlipHorizontalCommand { get; }
     public ICommand FlipVerticalCommand { get; }
     public ICommand RevealCommand { get; }
@@ -1675,6 +1747,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             PixelWidth = res.PixelWidth;
             PixelHeight = res.PixelHeight;
             DecoderUsed = decoderUsed;
+            ClearInspectorState();
             ApplyPageSequence(res.Pages);
             ArchiveReadPositionService.SaveLastPageIndex(_settings, path, PageIndex, PageCount);
             if (isArchiveBookPage)
@@ -1702,6 +1775,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             CurrentAnimation = null;
             PixelWidth = PixelHeight = 0;
             DecoderUsed = "Unavailable";
+            ClearInspectorState();
             ResetPageState();
             SetLoadError(ex);
         }
@@ -1980,6 +2054,77 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void Rotate(double delta)
     {
         Rotation = (Rotation + delta) % 360;
+    }
+
+    public void UpdateInspectorSample(PixelSample? sample)
+    {
+        _inspectorSample = sample;
+        InspectorStatusText = sample is null
+            ? "Pointer is outside the image."
+            : sample.Summary;
+        RaiseInspectorSampleState();
+    }
+
+    public void UpdateInspectorSelection(PixelSelection? selection)
+    {
+        _inspectorSelection = selection;
+        if (selection.HasValue)
+            InspectorStatusText = $"Measured {selection.Value.DisplayText}.";
+        RaiseInspectorSelectionState();
+    }
+
+    public void ClearInspectorSelection()
+    {
+        _inspectorSelection = null;
+        InspectorStatusText = HasInspectorSample
+            ? _inspectorSample!.Summary
+            : "Move over the image to sample pixels.";
+        RaiseInspectorSelectionState();
+    }
+
+    private void ClearInspectorState()
+    {
+        _inspectorSample = null;
+        _inspectorSelection = null;
+        InspectorStatusText = IsInspectorMode
+            ? "Move over the image to sample pixels. Click to hold a sample; Ctrl+click copies it. Shift-drag measures."
+            : "Turn on Inspector to sample pixel color, coordinates, and dimensions.";
+        RaiseInspectorSampleState();
+        RaiseInspectorSelectionState();
+    }
+
+    private void CopyInspectorValue(Func<PixelSample, string> valueSelector, string label)
+    {
+        if (_inspectorSample is not { } sample)
+            return;
+
+        try
+        {
+            ClipboardService.SetText(valueSelector(sample));
+            Toast($"Copied {label}");
+        }
+        catch (Exception ex)
+        {
+            Toast($"Copy failed: {ex.Message}");
+        }
+    }
+
+    private void RaiseInspectorSampleState()
+    {
+        Raise(nameof(HasInspectorSample));
+        Raise(nameof(InspectorCoordinateText));
+        Raise(nameof(InspectorHexText));
+        Raise(nameof(InspectorRgbText));
+        Raise(nameof(InspectorHsvText));
+        Raise(nameof(InspectorAlphaText));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RaiseInspectorSelectionState()
+    {
+        Raise(nameof(HasInspectorSelection));
+        Raise(nameof(InspectorSelectionText));
+        CommandManager.InvalidateRequerySuggested();
     }
 
     // V15-04: Reload re-enumerates the current file through the loader, re-applying WIC /
@@ -2357,6 +2502,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         FlipVertical = false;
         ClearLoadError();
         DecoderUsed = null;
+        ClearInspectorState();
         ResetPageState();
         ClearPhotoMetadata();
         _folderPreview.Clear();

@@ -235,6 +235,8 @@ public partial class ReferenceBoardWindow : Window
         };
 
         RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.HighQuality);
+        if (loaded.Image is BitmapSource sampleSource)
+            RegisterImageInspector(image, sampleSource, fileName);
 
         var caption = new TextBlock
         {
@@ -572,6 +574,58 @@ public partial class ReferenceBoardWindow : Window
     private void SetStatus(string message)
     {
         StatusText.Text = message;
+    }
+
+    private void RegisterImageInspector(Image image, BitmapSource source, string fileName)
+    {
+        image.MouseMove += (_, e) =>
+        {
+            if ((Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)
+                return;
+
+            if (TrySampleImageElement(image, source, e.GetPosition(image), out var sample))
+                SetStatus($"{fileName}: {sample.Summary}");
+        };
+
+        image.MouseLeftButtonDown += (_, e) =>
+        {
+            if ((Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)
+                return;
+
+            if (!TrySampleImageElement(image, source, e.GetPosition(image), out var sample))
+                return;
+
+            try
+            {
+                ClipboardService.SetText(sample.Summary);
+                SetStatus($"Copied sample from {fileName}: {sample.Summary}");
+            }
+            catch (Exception ex)
+            {
+                SetStatus($"Copy failed: {ex.Message}");
+            }
+
+            e.Handled = true;
+        };
+    }
+
+    private static bool TrySampleImageElement(Image image, BitmapSource source, Point point, out PixelSample sample)
+    {
+        sample = default!;
+
+        if (!PixelInspectorService.TryMapElementPointToPixel(
+                point,
+                image.ActualWidth,
+                image.ActualHeight,
+                source.PixelWidth,
+                source.PixelHeight,
+                out var coordinate))
+        {
+            return false;
+        }
+
+        sample = PixelInspectorService.SamplePixel(source, coordinate);
+        return true;
     }
 
     private Brush Brush(string key) => (Brush)FindResource(key);

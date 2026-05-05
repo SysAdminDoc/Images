@@ -36,6 +36,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Togglable folder filmstrip** — a compact, virtualized, cached thumbnail rail spans the current folder, keeps the current item centered, supports right-click Open/Reveal/Copy actions, and falls back to the side panel when hidden.
 - **Gallery workbench** — press `G` to open a multi-column thumbnail grid for the current folder with quick filtering, sort shortcuts, context actions, selection, and Enter-to-load.
 - **Reference board mode** — press `Ctrl+B` to open a separate local board seeded from the current image. Drop supported files, arrange image cards, add notes and group frames, pin the board above other windows, zoom the canvas, and export the composed board as PNG.
+- **Pixel inspector** — enable Inspector in the side panel to sample coordinates and HEX/RGB/HSV/alpha values, copy color values, Shift-drag pixel measurements, and switch to nearest-neighbor preview scaling for pixel art.
 - **Photo metadata at a glance** — the Details panel and optional `I` metadata HUD surface embedded EXIF date, camera, lens, exposure, focal length, and GPS coordinates when present, without opening a separate info window or sending location data anywhere.
 - **Zoom + pan** — mouse wheel to zoom in/out about the cursor, drag to pan, double-click to toggle fit/1:1.
 - **Export a copy** to JPEG, PNG, WebP, AVIF, JXL, TIFF, BMP, GIF/APNG, PSD/PSB, PDF/EPS/SVG, TGA, DDS, QOI, EXR, HDR, JPEG 2000, X11/Magick, production/scientific, and portable bitmap formats.
@@ -121,6 +122,7 @@ src/Images/
 │   ├── ImageLoader.cs          # WIC-first, Magick.NET fallback, cached decoding
 │   ├── ArchiveBookService.cs   # Read-only ZIP/CBZ, RAR/CBR, and 7z/CB7 page discovery
 │   ├── ReferenceBoardLayoutService.cs # Board placement, clamping, and export bounds
+│   ├── PixelInspectorService.cs # Pixel coordinate mapping, sampling, color formatting, and measurement math
 │   ├── ImageExportService.cs   # Codec-aware Save a copy / conversion output
 │   ├── ImageMetadataService.cs # Read-only EXIF summary for the Details panel and HUD
 │   ├── CodecCapabilityService.cs # About-window codec summary and copyable diagnostics
