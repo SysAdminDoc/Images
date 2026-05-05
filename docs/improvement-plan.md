@@ -47,7 +47,7 @@ The improvement-plan backlog is complete. Continue with the source-derived works
 | ID | Priority | Status | Workstream | Source signal | Planned sequence |
 | --- | --- | --- | --- | --- | --- |
 | RS-01 | P2 | Planned | Local comparison mode | nomacs synchronized views and opacity overlay | Design doc, UI-state tests, local 2-up compare, linked pan/zoom, linked next/previous, overlay opacity. |
-| RS-02 | P2 | In progress | Archive/book navigation | NeeView book model, PicView archive navigation, Tacent folder continuity | ZIP/CBZ read-only pages, page scrubber, archive-only controls, edge page-turn zones, reader-mode keyboard routing, remembered read position, side-panel book history, explicit cover promotion, right-to-left page turns, old-scan filtering, and RAR/7z runtime review shipped; next: spread handling. |
+| RS-02 | P2 | In progress | Archive/book navigation | NeeView book model, PicView archive navigation, Tacent folder continuity | ZIP/CBZ read-only pages, page scrubber, archive-only controls, edge page-turn zones, reader-mode keyboard routing, remembered read position, side-panel book history, explicit cover promotion, right-to-left page turns, old-scan filtering, cover-aware spreads, and RAR/7z runtime review shipped; RAR/7z implementation remains gated by runtime policy. |
 | RS-03 | P0 | In progress | Folder sorting and Explorer fidelity | ImageGlass Explorer sort sync, NeeView/Geeqie folder models | App-owned sort modes first, visible sort control, sort-state tests, later Explorer saved-search/sort investigation. |
 | RS-04 | P2 | Planned | Metadata culling workflow | Geeqie XMP keywords/search, gThumb catalogs/comments, Tacent metadata sort | Sidecar decision, rating/reject model, folder filters, keep/reject/move actions, undo and no-original-write defaults. |
 | RS-05 | P1 | Done | Keyboard-first peek mode | QuickLook Spacebar preview, qView/JPEGView minimal chrome | `--peek` foundation, startup timing logs, close-on-Esc smoke script, parser regression tests, and shell-helper documentation are complete. |
@@ -111,6 +111,7 @@ The improvement-plan backlog is complete. Continue with the source-derived works
 - 2026-05-05: Continued `RS-02` / `V20-33` by documenting the RAR/7z archive-runtime decision in `docs/archive-runtime-review.md`, keeping ZIP/CBZ first-party while gating future runtimes on license, provenance, CVE, isolation, and generated-corpus checks.
 - 2026-05-05: Continued `RS-02` / `V20-36` by adding a persisted right-to-left archive page-turn mode that swaps physical edge zones and Left/Right Arrow routing for manga-style ZIP/CBZ books.
 - 2026-05-05: Continued `RS-02` / `V20-36` by adding a persisted, preview-only old-scan filter for archive books using high-contrast grayscale display transforms with service and view-model coverage.
+- 2026-05-05: Closed `V20-36` for ZIP/CBZ books by adding persisted, cover-aware two-page spreads that pair natural pages, keep explicit covers single, respect right-to-left composition, and advance by spread.
 
 ## Verification Standard
 

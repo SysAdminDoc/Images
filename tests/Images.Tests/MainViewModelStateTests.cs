@@ -520,6 +520,51 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void ArchiveSpreadMode_PairsPagesAndAdvancesBySpread()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var archive = WriteCbz(
+                temp.Path,
+                "reader.cbz",
+                "cover.png",
+                "page1.png",
+                "page2.png",
+                "page3.png");
+            var settings = CreateSettings(temp);
+            using var viewModel = new MainViewModel(settings);
+
+            viewModel.OpenFile(archive);
+            viewModel.ArchiveSpreadModeEnabled = true;
+
+            Assert.True(settings.GetBool(Keys.ArchiveSpreadMode, false));
+            Assert.Equal("Two-page spreads on", viewModel.ArchiveSpreadModeText);
+            Assert.Equal("Page 1 / 4", viewModel.PagePositionText);
+            Assert.Equal(1, viewModel.PageSpan);
+            Assert.True(viewModel.NextPageCommand.CanExecute(null));
+
+            viewModel.NextPageCommand.Execute(null);
+            PumpUntil(() => !viewModel.IsOperationBusy);
+
+            Assert.Equal(2, viewModel.PageNumber);
+            Assert.Equal(2, viewModel.PageSpan);
+            Assert.Equal("Pages 2-3 / 4", viewModel.PagePositionText);
+            Assert.True(viewModel.NextPageCommand.CanExecute(null));
+            Assert.Contains("archive spread, pages 2-3 of 4", viewModel.DecoderUsed);
+
+            viewModel.NextPageCommand.Execute(null);
+            PumpUntil(() => !viewModel.IsOperationBusy);
+
+            Assert.Equal(4, viewModel.PageNumber);
+            Assert.Equal(1, viewModel.PageSpan);
+            Assert.Equal("Page 4 / 4", viewModel.PagePositionText);
+            Assert.False(viewModel.NextPageCommand.CanExecute(null));
+            Assert.True(viewModel.PrevPageCommand.CanExecute(null));
+        });
+    }
+
+    [Fact]
     public void FirstRunGuidance_ExposesCapabilityAndPrivacySummaries()
     {
         RunOnSta(() =>
@@ -861,6 +906,15 @@ public sealed class MainViewModelStateTests
         using var archive = ZipFile.Open(path, ZipArchiveMode.Create);
         WritePngArchiveEntry(archive, "page1.png");
         WritePngArchiveEntry(archive, "page2.png");
+        return path;
+    }
+
+    private static string WriteCbz(string folder, string fileName, params string[] entryNames)
+    {
+        var path = Path.Combine(folder, fileName);
+        using var archive = ZipFile.Open(path, ZipArchiveMode.Create);
+        foreach (var entryName in entryNames)
+            WritePngArchiveEntry(archive, entryName);
         return path;
     }
 
