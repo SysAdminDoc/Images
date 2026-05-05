@@ -47,6 +47,7 @@ All notable changes to **Images** are documented here.
 - **Archive read position and history** — ZIP/CBZ books now remember the last viewed page locally, continue there on reopen, and surface a side-panel book history with page progress.
 - **Archive cover handling** — ZIP/CBZ books now promote explicit cover/front/folder image entries before natural page order and report cover provenance in decoder details.
 - **Archive reader controls** — active ZIP/CBZ books now get a side-panel book-controls card, narrow edge page-turn click zones, and reader-mode arrow/Home/End key routing for page turns.
+- **Archive runtime review** — documented the RAR/7z dependency policy, keeping ZIP/CBZ first-party while gating future runtimes on licensing, provenance, CVE, isolation, and generated-corpus requirements.
 - **Peek mode hardening** — `--peek` startup now records local timing milestones and first-image timing, with parser regression tests and shell-helper documentation for chromeless preview integrations.
 - **OCR workflow polish** — text extraction now has a persistent in-view busy/active status, a cancel-aware toolbar state, OCR readiness in Settings/About, and OCR language-pack status in diagnostics.
 - **Open-source viewer research** — added a May 2026 research scan of ImageGlass, nomacs, PicView, NeeView, QuickLook, Geeqie, gThumb, qView, JPEGView, Tacent View, Minimal Image Viewer, and LightningView, then folded the findings into the improvement plan.
