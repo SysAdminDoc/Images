@@ -95,6 +95,11 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE81C;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Resize..." Command="{Binding OpenResizeDialogCommand}" InputGestureText="Ctrl+Alt+R">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8A1;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="{Binding CropModeText}"
                                   Command="{Binding ToggleCropModeCommand}"
                                   InputGestureText="C"
@@ -1597,10 +1602,12 @@
                                         <TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open batch processor" />
                                         <TextBlock Grid.Row="14" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+E" />
                                         <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open edit history" />
-                                        <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
-                                        <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
-                                        <TextBlock Grid.Row="16" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
-                                        <TextBlock Grid.Row="16" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
+                                        <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+R" />
+                                        <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open resize dialog" />
+                                        <TextBlock Grid.Row="16" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
+                                        <TextBlock Grid.Row="16" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
+                                        <TextBlock Grid.Row="17" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
+                                        <TextBlock Grid.Row="17" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
                                     </Grid>
                                 </StackPanel>
                             </ScrollViewer>
