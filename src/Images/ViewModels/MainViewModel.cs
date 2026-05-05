@@ -662,6 +662,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public string FilmstripToggleTooltip => IsFilmstripVisible ? "Hide filmstrip (T)" : "Show filmstrip (T)";
 
+    public DirectorySortMode CurrentSortMode => _nav.SortMode;
+
     public string FolderSortLabel => DirectorySortModeInfo.ShortLabel(_nav.SortMode);
 
     public string FolderSortTooltip => $"Sort folder by {DirectorySortModeInfo.DisplayName(_nav.SortMode)}";
@@ -705,6 +707,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (!DirectorySortModeInfo.TryParseCommandParameter(parameter, out var mode)) return;
         if (!_nav.SetSortMode(mode)) return;
 
+        RaiseFolderPreviewState();
         Toast($"Sorted by {DirectorySortModeInfo.DisplayName(mode)}");
     }
 
@@ -714,6 +717,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(ShowFilmstrip));
         Raise(nameof(ShowSideFolderPreview));
         Raise(nameof(FilmstripToggleTooltip));
+        Raise(nameof(CurrentSortMode));
         Raise(nameof(FolderSortLabel));
         Raise(nameof(FolderSortTooltip));
         CommandManager.InvalidateRequerySuggested();
@@ -785,6 +789,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return ToastToneKind.Error;
 
         if (m.Contains("no images") ||
+            m.Contains("no text") ||
+            m.Contains("no gps") ||
+            m.Contains("unavailable") ||
+            m.Contains("canceled") ||
+            m.Contains("choose a different") ||
             m.Contains("unsupported") ||
             m.Contains("name taken") ||
             m.Contains("new version"))
