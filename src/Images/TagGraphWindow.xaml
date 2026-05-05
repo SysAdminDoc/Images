@@ -1,0 +1,324 @@
+<Window x:Class="Images.TagGraphWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Images - Tag relationships"
+        Width="1080"
+        Height="760"
+        MinWidth="900"
+        MinHeight="620"
+        WindowStartupLocation="CenterOwner">
+    <Grid Background="{StaticResource BaseBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource HairlineBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="18,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Tag relationships" Style="{StaticResource Text.Title}" />
+                    <TextBlock Text="Private local namespaces, aliases, parents, and XMP sidecar import/export."
+                               Style="{StaticResource Text.Caption}"
+                               Margin="0,3,0,0" />
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Style="{StaticResource ChromeButton}"
+                        Click="RefreshButton_Click"
+                        AutomationProperties.Name="Refresh tag graph">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE72C;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="12"
+                                   Margin="0,0,8,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="Refresh" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="360" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Background="{StaticResource PanelBrush}"
+                    BorderBrush="{StaticResource HairlineBrush}"
+                    BorderThickness="0,0,1,0"
+                    Padding="16">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Current image" Style="{StaticResource SectionLabel}" />
+                        <Border Style="{StaticResource Card}" Padding="13,12">
+                            <StackPanel>
+                                <TextBlock x:Name="CurrentImageText"
+                                           Text="No image selected"
+                                           Style="{StaticResource Text.Body}"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap" />
+                                <TextBlock x:Name="CurrentImagePathText"
+                                           Text="Open an image first to import or export its XMP sidecar tags."
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,4,0,0" />
+                                <TextBox x:Name="TagInputBox"
+                                         MinHeight="118"
+                                         Margin="0,12,0,0"
+                                         AcceptsReturn="True"
+                                         TextWrapping="Wrap"
+                                         VerticalScrollBarVisibility="Auto"
+                                         AutomationProperties.Name="Current sidecar tags" />
+                                <TextBlock Text="One tag per line, or separate tags with commas. Aliases are resolved on export."
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,6,0,0" />
+                                <CheckBox x:Name="IncludeParentsCheckBox"
+                                          IsChecked="True"
+                                          Content="Include parent tags on export"
+                                          Margin="0,10,0,0"
+                                          AutomationProperties.Name="Include parent tags when exporting sidecar" />
+                                <WrapPanel Margin="0,12,0,0">
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            Margin="0,0,8,0"
+                                            Click="ImportSidecarButton_Click"
+                                            AutomationProperties.Name="Import XMP sidecar tags">
+                                        <TextBlock Text="Import sidecar" />
+                                    </Button>
+                                    <Button Style="{StaticResource PrimaryButton}"
+                                            Click="ExportSidecarButton_Click"
+                                            AutomationProperties.Name="Export XMP sidecar tags">
+                                        <TextBlock Text="Export sidecar" />
+                                    </Button>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Divider}" />
+
+                        <TextBlock Text="Namespaces" Style="{StaticResource SectionLabel}" />
+                        <Border Style="{StaticResource Card}" Padding="13,12">
+                            <StackPanel>
+                                <TextBlock Text="Prefixes keep large tag sets readable, such as person:alice or place:seattle."
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap" />
+                                <TextBox x:Name="NamespacePrefixBox"
+                                         Margin="0,10,0,0"
+                                         AutomationProperties.Name="Namespace prefix" />
+                                <TextBox x:Name="NamespaceLabelBox"
+                                         Margin="0,8,0,0"
+                                         AutomationProperties.Name="Namespace label" />
+                                <Button Style="{StaticResource ChromeButton}"
+                                        Margin="0,10,0,0"
+                                        HorizontalAlignment="Left"
+                                        Click="AddNamespaceButton_Click"
+                                        AutomationProperties.Name="Add tag namespace">
+                                    <TextBlock Text="Add namespace" />
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Divider}" />
+
+                        <TextBlock Text="Preview" Style="{StaticResource SectionLabel}" />
+                        <Border Style="{StaticResource Card}" Padding="13,12">
+                            <StackPanel>
+                                <TextBox x:Name="PreviewTagBox"
+                                         AutomationProperties.Name="Preview tag expansion" />
+                                <Button Style="{StaticResource ChromeButton}"
+                                        Margin="0,10,0,0"
+                                        HorizontalAlignment="Left"
+                                        Click="PreviewButton_Click"
+                                        AutomationProperties.Name="Preview tag expansion">
+                                    <TextBlock Text="Preview expansion" />
+                                </Button>
+                                <ListBox x:Name="PreviewList"
+                                         MinHeight="96"
+                                         Margin="0,10,0,0"
+                                         AutomationProperties.Name="Tag expansion preview" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <GridSplitter Grid.Column="1"
+                          Width="1"
+                          HorizontalAlignment="Stretch"
+                          Background="{StaticResource HairlineBrush}" />
+
+            <Grid Grid.Column="2" Background="{StaticResource ViewportBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0"
+                        Background="{StaticResource SurfacePanelBrush}"
+                        BorderBrush="{StaticResource HairlineBrush}"
+                        BorderThickness="0,0,0,1"
+                        Padding="16,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="GraphSummaryText"
+                                   Text="3 namespaces, 0 aliases, 0 parents"
+                                   Style="{StaticResource Text.Caption}"
+                                   VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Border Style="{StaticResource Badge}" Margin="0,0,8,0">
+                                <TextBlock Text="Local only"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource SubtextBrush}" />
+                            </Border>
+                            <Border Style="{StaticResource Badge}">
+                                <TextBlock Text="Offline"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource SubtextBrush}" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1" Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0"
+                            Grid.Column="0"
+                            Style="{StaticResource Card}"
+                            Padding="13,12"
+                            Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="Alias / sibling"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextBrush}" />
+                            <TextBlock Text="Use aliases for equivalent tags. Example: nyc -> place:new-york."
+                                       Style="{StaticResource Text.Hint}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,3,0,0" />
+                            <TextBox x:Name="AliasBox"
+                                     Margin="0,10,0,0"
+                                     AutomationProperties.Name="Alias tag" />
+                            <TextBox x:Name="AliasTargetBox"
+                                     Margin="0,8,0,0"
+                                     AutomationProperties.Name="Alias target tag" />
+                            <Button Style="{StaticResource ChromeButton}"
+                                    Margin="0,10,0,0"
+                                    HorizontalAlignment="Left"
+                                    Click="AddAliasButton_Click"
+                                    AutomationProperties.Name="Add alias relationship">
+                                <TextBlock Text="Add alias" />
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="0"
+                            Grid.Column="2"
+                            Style="{StaticResource Card}"
+                            Padding="13,12"
+                            Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="Parent"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextBrush}" />
+                            <TextBlock Text="Use parents to make searches broader. Example: person:alice -> people."
+                                       Style="{StaticResource Text.Hint}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,3,0,0" />
+                            <TextBox x:Name="ParentTagBox"
+                                     Margin="0,10,0,0"
+                                     AutomationProperties.Name="Child tag" />
+                            <TextBox x:Name="ParentBox"
+                                     Margin="0,8,0,0"
+                                     AutomationProperties.Name="Parent tag" />
+                            <Button Style="{StaticResource ChromeButton}"
+                                    Margin="0,10,0,0"
+                                    HorizontalAlignment="Left"
+                                    Click="AddParentButton_Click"
+                                    AutomationProperties.Name="Add parent relationship">
+                                <TextBlock Text="Add parent" />
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="1"
+                            Grid.Column="0"
+                            Style="{StaticResource Card}"
+                            Padding="13,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Namespaces and aliases" Style="{StaticResource SectionLabel}" />
+                            <ListBox x:Name="AliasList"
+                                     Grid.Row="1"
+                                     Margin="0,8,0,0"
+                                     AutomationProperties.Name="Namespace and alias rules" />
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="1"
+                            Grid.Column="2"
+                            Style="{StaticResource Card}"
+                            Padding="13,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Parent graph" Style="{StaticResource SectionLabel}" />
+                            <ListBox x:Name="ParentList"
+                                     Grid.Row="1"
+                                     Margin="0,8,0,0"
+                                     AutomationProperties.Name="Parent tag relationships" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <Border Grid.Row="2"
+                Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource HairlineBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="16,10">
+            <StackPanel Orientation="Horizontal">
+                <Ellipse x:Name="StatusDot"
+                         Width="8"
+                         Height="8"
+                         Fill="{StaticResource GreenBrush}"
+                         Margin="0,0,9,0"
+                         VerticalAlignment="Center" />
+                <TextBlock x:Name="StatusText"
+                           Text="Ready. Tag relationships stay local on this device."
+                           Style="{StaticResource Text.Caption}"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

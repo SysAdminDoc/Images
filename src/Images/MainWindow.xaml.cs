@@ -475,6 +475,10 @@ public partial class MainWindow : Window
                 Vm.OpenFileHealthScanCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.T when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
+                Vm.OpenTagGraphCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.OemComma when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
                 Vm.SettingsCommand.Execute(null);
                 e.Handled = true;

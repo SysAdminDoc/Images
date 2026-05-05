@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V40-62` is complete. Gallery smart filters now index the current folder for format, folder, sidecar rating/tag data, palette, orientation, dimensions, date, and exact duplicate status, with quick chips, token filters, clear-filter UX, and regression coverage. The predicate service is isolated for later SQLite catalog backing.
+Roadmap `V40-63` is complete. Images now has a private local tag relationship graph with `person:`, `place:`, and `project:` namespace defaults, custom namespaces, alias/sibling canonicalization, parent-tag expansion, cycle guards, XMP sidecar import/export, a reachable `Ctrl+Shift+T` window, and regression coverage for graph behavior plus sidecar round-trips.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the next main `ROADMAP.md` feature backlog item, `V40-63` tag namespaces and relationship graph.
+The improvement-plan backlog is complete. Continue with the next main `ROADMAP.md` feature backlog item, `V40-64` import inbox workflow.
 
 ## Research Inputs
 
@@ -78,6 +78,7 @@ The improvement-plan backlog is complete. Continue with the next main `ROADMAP.m
 - 2026-05-05: Completed `IP-02E` by extracting photo metadata HUD loading into `PhotoMetadataController`, adding owned cancellation/status handling, and covering success, superseded-result, and timeout outcomes with dispatcher-backed tests.
 - 2026-05-05: Completed `IP-02F` by extracting external-edit watcher/debounce/reload feedback into `ExternalEditReloadController` and covering coalesced reloads, failed reload notifications, disarm cancellation, and watcher creation failure.
 - 2026-05-05: Completed `IP-02G` by extracting OCR busy/active overlay workflow into `OcrWorkflowController` and covering no-image, success, no-text, cancellation, and stale-result outcomes.
+- 2026-05-05: Completed roadmap `V40-63` by adding a private offline tag relationship graph with namespace, alias, parent, sidecar import/export, UI entry points, and regression coverage.
 - 2026-05-05: Completed `IP-02H` and closed `IP-02` by extracting update-check UI state into `UpdateCheckController` and covering background skip, newer-release, current-release, error, and release-link opening outcomes.
 - 2026-05-05: Completed `IP-03B` by adding a deterministic folder-preview thumbnail loader seam and regression tests for clear and superseded-refresh cancellation paths.
 - 2026-05-05: Completed `IP-03C` by adding an internal `MainViewModel` controller-injection seam and tests that relay metadata, OCR, and update-check state through the view model.
