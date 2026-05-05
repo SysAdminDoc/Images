@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-02G` is complete. OCR workflow state now lives behind `OcrWorkflowController`, which owns busy/active overlay state, cancellation, stale-result guards, local extraction feedback, and overlay-line conversion with async regression coverage.
+`IP-02H` is complete, closing `IP-02`. Update-check UI state now lives behind `UpdateCheckController`, which owns release-check command behavior, latest-release state, command invalidation, user/background feedback, and release-link opening with direct regression coverage.
 
 ## Next Focus
 
-The next recommended slice is `IP-02H`: continue extracting the oversized `MainViewModel`, with update-check UI state as the next practical target because it still combines async release checks, latest-release state, command availability, toast feedback, and shell navigation.
+The next recommended slice is `IP-03B`: extend UI-state coverage around the remaining risky transitions, especially thumbnail cancellation, reload failure paths, and view-model property relays from the extracted controllers.
 
 ## Research Inputs
 
@@ -25,7 +25,7 @@ The next recommended slice is `IP-02H`: continue extracting the oversized `MainV
 | ID | Priority | Status | Area | Goal | Acceptance criteria |
 | --- | --- | --- | --- | --- | --- |
 | IP-01 | P0 | Planned | Test seams | Add seams around static/global services such as update checks, storage paths, thumbnail cache, shell integration, and clocks. | Unit tests can drive update-check retry policy, storage fallback, and thumbnail/cache behavior without real network or user profile state. |
-| IP-02 | P0 | In progress | MainViewModel structure | Split the oversized main view model into focused controllers/services while preserving current behavior. | OCR, folder preview, clipboard import, reload, rename, metadata, and update-check logic are independently readable and have narrower dependencies. |
+| IP-02 | P0 | Done | MainViewModel structure | Split the oversized main view model into focused controllers/services while preserving current behavior. | OCR, folder preview, clipboard import, reload, rename, metadata, and update-check logic are independently readable and have narrower dependencies. |
 | IP-03 | P0 | In progress | UI state tests | Add regression coverage for risky WPF state transitions. | Tests or smoke harnesses cover reload failure, external file changes, OCR cancellation, thumbnail cancellation, rename debounce, and disabled/busy states. |
 | IP-04 | P1 | Planned | Background tasks | Improve observability and ownership for fire-and-forget work. | Thumbnail generation, metadata reads, preloading, clipboard pruning, cache eviction, and update checks have clear cancellation/ownership and structured logging. |
 | IP-05 | P1 | Done | Update checks | Add focused update-check tests. | Timeout, network failure, HTTP failure, malformed release payload, newer release, current release, and trusted URL normalization are covered. |
@@ -59,12 +59,11 @@ The next recommended slice is `IP-02H`: continue extracting the oversized `MainV
 
 ## Implementation Order
 
-1. Continue `IP-02` with update-check UI state extraction under `IP-02H`.
-2. Extend `IP-03` state coverage around thumbnail cancellation, reload failure paths, and extracted controller/view-model relays.
-3. Build diagnostics/status UX from existing system-info, codec, OCR, and storage services under `IP-06`.
-4. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
-5. Scope `IP-16` design docs once near-term reliability and testability slices are stable.
-6. Scope `IP-17` after the next stable release artifact path is verified.
+1. Extend `IP-03` state coverage around thumbnail cancellation, reload failure paths, and extracted controller/view-model relays.
+2. Build diagnostics/status UX from existing system-info, codec, OCR, and storage services under `IP-06`.
+3. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
+4. Scope `IP-16` design docs once near-term reliability and testability slices are stable.
+5. Scope `IP-17` after the next stable release artifact path is verified.
 
 ## Progress Log
 
@@ -80,6 +79,7 @@ The next recommended slice is `IP-02H`: continue extracting the oversized `MainV
 - 2026-05-05: Completed `IP-02E` by extracting photo metadata HUD loading into `PhotoMetadataController`, adding owned cancellation/status handling, and covering success, superseded-result, and timeout outcomes with dispatcher-backed tests.
 - 2026-05-05: Completed `IP-02F` by extracting external-edit watcher/debounce/reload feedback into `ExternalEditReloadController` and covering coalesced reloads, failed reload notifications, disarm cancellation, and watcher creation failure.
 - 2026-05-05: Completed `IP-02G` by extracting OCR busy/active overlay workflow into `OcrWorkflowController` and covering no-image, success, no-text, cancellation, and stale-result outcomes.
+- 2026-05-05: Completed `IP-02H` and closed `IP-02` by extracting update-check UI state into `UpdateCheckController` and covering background skip, newer-release, current-release, error, and release-link opening outcomes.
 
 ## Verification Standard
 
