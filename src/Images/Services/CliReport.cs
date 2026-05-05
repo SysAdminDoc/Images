@@ -85,6 +85,7 @@ public static class CliReport
     {
         var info = AppInfo.Current;
         var provenance = CodecCapabilityService.BuildProvenance();
+        var ocrStatus = OcrCapabilityService.GetStatus();
         var sb = new StringBuilder();
 
         sb.AppendLine($"Images {info.DisplayVersion} system information");
@@ -106,6 +107,8 @@ public static class CliReport
         sb.AppendLine($"- Processor count:   {Environment.ProcessorCount}");
         sb.AppendLine($"- Working set:       {FormatMegabytes(Environment.WorkingSet)}");
         sb.AppendLine($"- 64-bit process:    {Environment.Is64BitProcess}");
+        sb.AppendLine($"- Windows OCR:       {(ocrStatus.IsAvailable ? "available" : "not available")}");
+        sb.AppendLine($"- OCR languages:     {ocrStatus.LanguageSummary}");
         sb.AppendLine();
 
         sb.AppendLine("Decoder runtime");

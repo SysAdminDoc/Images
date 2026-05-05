@@ -529,6 +529,91 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- OCR status — persistent while extraction is busy or selectable text is active. -->
+                    <Border HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Margin="28,24,0,0"
+                            MaxWidth="360"
+                            Visibility="{Binding ShowOcrStatusPanel, Converter={StaticResource BoolToVis}}"
+                            AutomationProperties.Name="Text extraction status"
+                            AutomationProperties.LiveSetting="Polite">
+                        <Border.Style>
+                            <Style TargetType="Border" BasedOn="{StaticResource FloatingPill}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsOcrBusy}" Value="True">
+                                        <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                    Width="32"
+                                    Height="32"
+                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                    BorderThickness="1"
+                                    VerticalAlignment="Top"
+                                    Margin="0,0,12,0">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#1F89B4FA" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsOcrBusy}" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="&#xE8EA;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="13"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsOcrBusy}" Value="True">
+                                                    <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding OcrStatusTitle}"
+                                           Foreground="{StaticResource FloatingChromeTextBrush}"
+                                           FontSize="12.5"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding OcrStatusDetail}"
+                                           Foreground="{StaticResource SubtextBrush}"
+                                           FontSize="11.5"
+                                           LineHeight="16"
+                                           TextWrapping="Wrap"
+                                           Margin="0,3,0,0" />
+                            </StackPanel>
+
+                            <Button Grid.Column="2"
+                                    Command="{Binding ExtractTextCommand}"
+                                    Content="&#xE711;"
+                                    Style="{StaticResource ToolbarButton}"
+                                    ToolTip="{Binding OcrModeTooltip}"
+                                    Margin="12,0,0,0"
+                                    VerticalAlignment="Top"
+                                    AutomationProperties.Name="{Binding OcrModeTooltip}" />
+                        </Grid>
+                    </Border>
+
                     <!-- First-run gesture hint — fades in + slides up, auto-dismisses after 2.4s -->
                     <Border HorizontalAlignment="Center"
                             VerticalAlignment="Bottom"
@@ -1058,6 +1143,11 @@
                                                 <Setter Property="Background" Value="#1F89B4FA" />
                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                 <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsOcrBusy}" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                                <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
