@@ -535,7 +535,7 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [~] **V30-02** *P0* — **Lossless JPEG transforms** — rotate 90/180/270 + crop MCU-aligned via bundled `jpegtran.exe` (libjpeg-turbo BSD). Policy/scaffold shipped 2026-05-05: `docs/lossless-jpeg-transform-policy.md` plus tested MCU-alignment crop/rotation planning for exact trim confirmations. Remaining blocker: approved `jpegtran.exe` artifact, diagnostics provenance, shell-out writeback path, atomic replacement, and UI confirmation flow. [stack: shell-out] [libjpeg-turbo #233]
 - [x] **V30-03** *P0* — Resize dialog. Shipped 2026-05-05: `Ctrl+Alt+R` opens a non-destructive resize dialog with Lanczos-3, Mitchell, and Bicubic filters; percent, pixel, long-edge, and short-edge modes; aspect lock; live output-dimension preview; XMP edit-stack storage; and Save-a-copy application without modifying the source file.
 - [x] **V30-04** *P0* — Levels + curves + hue/saturation/lightness. Shipped 2026-05-05: `Ctrl+Alt+A` opens a modeless adjustment workbench with live preview, reset, levels/gamma, sigmoidal curve, hue/saturation/lightness sliders, Enter-to-apply behavior, XMP edit-stack storage, and Save-a-copy application without modifying the source file.
-- [ ] **V30-05** *P1* — **Local exposure compensation** — dodge/burn with soft brush, no modal (JPEGView's unique UX).
+- [x] **V30-05** *P1* — **Local exposure compensation**. Shipped 2026-05-05: `Ctrl+Alt+D` toggles an in-view non-destructive dodge/burn brush with soft circular falloff, side-panel radius/strength/tone controls, drag-to-paint strokes, Enter-to-apply behavior, XMP edit-stack storage, and Save-a-copy rendering without modifying the source file.
 - [ ] **V30-06** *P1* — Red-eye removal (FastStone).
 - [ ] **V30-07** *P1* — Clone stamp + healing brush (FastStone).
 - [ ] **V30-08** *P1* — **Annotations overlay** — arrows (Bezier), text, boxes, circles, **numbered step-callouts** (auto-increment), freehand, **blur/pixelate redact**. ~800 LOC SkiaSharp. Avoids ShareX/Greenshot GPL taint.
@@ -776,7 +776,7 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [ ] **CLIP semantic text-to-image search** on local library — Windows Photos can't do this. (V60-02)
 - [ ] **Squoosh-style visual-diff converter** on a Windows batch tool — nothing native offers this. (V50-20)
 - [ ] **Multi-instance LAN pan/zoom sync** — nomacs only, and nomacs is GPL Qt. (V100-07)
-- [ ] **Local exposure compensation with no modal** — JPEGView only. (V30-05)
+- [x] **Local exposure compensation with no modal** — JPEGView only. (V30-05)
 - [ ] **Sketch-based fuzzy search** — digiKam only, and digiKam is GPL. (V40-23)
 - [ ] **File Explorer sort-order sync** — ImageGlass only. (V20-30)
 - [ ] **Images-in-archive browsing** (CBR/CBZ/ZIP/RAR/7Z) — Honeyview only, and discontinued. (V20-17)

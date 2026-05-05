@@ -105,6 +105,15 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE790;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="{Binding ExposureBrushModeText}"
+                                  Command="{Binding ToggleExposureBrushModeCommand}"
+                                  InputGestureText="Ctrl+Alt+D"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding IsExposureBrushMode, Mode=OneWay}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE790;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="{Binding CropModeText}"
                                   Command="{Binding ToggleCropModeCommand}"
                                   InputGestureText="C"
@@ -278,6 +287,12 @@
                                  Selection="{Binding CropSelection}"
                                  Opacity="0.98"
                                  AutomationProperties.Name="Crop selection overlay" />
+
+                <ctl:LocalExposureBrushOverlay Visibility="{Binding ShowExposureBrushOverlay, Converter={StaticResource BoolToVis}}"
+                                               Target="{Binding ElementName=Canvas}"
+                                               Strokes="{Binding ExposureBrushStrokes}"
+                                               Opacity="0.92"
+                                               AutomationProperties.Name="Local exposure brush overlay" />
 
                 <Border HorizontalAlignment="Center"
                         VerticalAlignment="Top"
@@ -1548,7 +1563,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Wheel" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom about cursor" />
@@ -1566,6 +1581,8 @@
                                         <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle metadata HUD" />
                                         <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="C" />
                                         <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle crop mode" />
+                                        <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+D" />
+                                        <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle exposure brush" />
                                     </Grid>
 
                                     <TextBlock Text="File" Style="{StaticResource SectionLabel}" />
@@ -3645,6 +3662,137 @@
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
                                         AutomationProperties.Name="Cancel crop">
+                                    <TextBlock Text="Cancel" />
+                                </Button>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Divider}" />
+
+                    <!-- LOCAL EXPOSURE section -->
+                    <TextBlock Text="Local exposure" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource Card}"
+                            Padding="13,12"
+                            IsEnabled="{Binding CanUseExposureBrush}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding ExposureBrushModeText}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrush}" />
+                                    <TextBlock Text="{Binding ExposureBrushModeHelpText}"
+                                               Style="{StaticResource Text.Hint}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,3,0,0" />
+                                </StackPanel>
+                                <Button Grid.Column="1"
+                                        Command="{Binding ToggleExposureBrushModeCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        MinWidth="72"
+                                        Margin="12,0,0,0"
+                                        AutomationProperties.Name="Toggle local exposure brush">
+                                    <TextBlock Text="{Binding ExposureBrushModeText}" />
+                                </Button>
+                            </Grid>
+
+                            <Border Background="{StaticResource PanelBrush}"
+                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                    Padding="10"
+                                    Margin="0,12,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding ExposureBrushStatusText}"
+                                               Style="{StaticResource Text.Caption}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding ExposureBrushStrokeText}"
+                                               Style="{StaticResource Text.Body}"
+                                               Margin="0,8,0,0" />
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Text="Mode"
+                                       Style="{StaticResource Text.Caption}"
+                                       Margin="0,12,0,6" />
+                            <WrapPanel>
+                                <Button Command="{Binding SetExposureBrushModeCommand}"
+                                        CommandParameter="dodge"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Use dodge brush">
+                                    <TextBlock Text="Dodge" />
+                                </Button>
+                                <Button Command="{Binding SetExposureBrushModeCommand}"
+                                        CommandParameter="burn"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Use burn brush">
+                                    <TextBlock Text="Burn" />
+                                </Button>
+                                <TextBlock Text="{Binding ExposureBrushToneText}"
+                                           Style="{StaticResource Text.Hint}"
+                                           VerticalAlignment="Center"
+                                           Margin="2,0,0,8" />
+                            </WrapPanel>
+
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Radius"
+                                           Style="{StaticResource Text.Caption}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding ExposureBrushRadiusText}"
+                                           Style="{StaticResource Text.Caption}" />
+                            </Grid>
+                            <Slider Minimum="4"
+                                    Maximum="320"
+                                    TickFrequency="4"
+                                    IsSnapToTickEnabled="False"
+                                    Value="{Binding ExposureBrushRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    AutomationProperties.Name="Exposure brush radius" />
+
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Strength"
+                                           Style="{StaticResource Text.Caption}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding ExposureBrushStrengthText}"
+                                           Style="{StaticResource Text.Caption}" />
+                            </Grid>
+                            <Slider Minimum="1"
+                                    Maximum="100"
+                                    TickFrequency="1"
+                                    IsSnapToTickEnabled="False"
+                                    Value="{Binding ExposureBrushStrength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    AutomationProperties.Name="Exposure brush strength" />
+
+                            <WrapPanel Margin="0,12,0,0">
+                                <Button Command="{Binding ApplyExposureBrushCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Apply local exposure brush to edit history">
+                                    <TextBlock Text="Apply brush" />
+                                </Button>
+                                <Button Command="{Binding ClearExposureBrushCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Clear local exposure brush strokes">
+                                    <TextBlock Text="Clear" />
+                                </Button>
+                                <Button Command="{Binding CancelExposureBrushCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,0,8"
+                                        AutomationProperties.Name="Cancel local exposure brush">
                                     <TextBlock Text="Cancel" />
                                 </Button>
                             </WrapPanel>

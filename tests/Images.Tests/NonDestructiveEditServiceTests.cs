@@ -148,6 +148,35 @@ public sealed class NonDestructiveEditServiceTests
     }
 
     [Fact]
+    public void Export_AppliesLocalExposureOperation()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteImage(temp.Path, "source.png", 8, 4);
+        var baseline = ImageExportService.Save(
+            source,
+            Path.Combine(temp.Path, "baseline.png"),
+            []);
+
+        var service = new NonDestructiveEditService();
+        var mutation = service.AppendOperation(
+            source,
+            "local-exposure",
+            LocalExposureBrushService.ToEditParameters(
+                new[] { new LocalExposureBrushStroke(4, 2, 4, 0.65) }));
+
+        Assert.True(mutation.Success);
+
+        var result = service.Export(source, Path.Combine(temp.Path, "dodged.png"));
+
+        Assert.True(result.Success);
+        Assert.Equal(1, result.AppliedOperationCount);
+        Assert.False(File.ReadAllBytes(baseline).SequenceEqual(File.ReadAllBytes(result.OutputPath)));
+
+        var provenance = XDocument.Load(result.ProvenanceSidecarPath).ToString();
+        Assert.Contains("local-exposure", provenance, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void CreateVirtualCopy_ForksOperationsWithoutDuplicatingPixels()
     {
         using var temp = TestDirectory.Create();

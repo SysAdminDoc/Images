@@ -16,6 +16,7 @@ public partial class MainWindow : Window
     private MainViewModel Vm => (MainViewModel)DataContext;
     private PixelCoordinate? _inspectorSelectionStart;
     private PixelCoordinate? _cropSelectionStart;
+    private bool _exposureBrushPainting;
     private HwndSource? _hwndSource;
     private bool _overlayExitHotKeyRegistered;
 
@@ -412,6 +413,17 @@ public partial class MainWindow : Window
                 // A-03: Escape closes any active overlay / toast and returns focus to the
                 // window shell. Rename-TextBox Escape is handled inside StemEditor_PreviewKeyDown
                 // and never reaches here because the TextBox owns focus.
+                if (Vm.IsExposureBrushMode || Vm.HasExposureBrushStrokes)
+                {
+                    _exposureBrushPainting = false;
+                    if (Canvas.IsMouseCaptured)
+                        Canvas.ReleaseMouseCapture();
+                    Vm.CancelExposureBrushCommand.Execute(null);
+                    Keyboard.ClearFocus();
+                    Focus();
+                    e.Handled = true;
+                    break;
+                }
                 if (Vm.IsCropMode || Vm.HasCropSelection)
                 {
                     _cropSelectionStart = null;
@@ -515,6 +527,10 @@ public partial class MainWindow : Window
                 Vm.OpenAdjustmentsCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.D when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
+                Vm.ToggleExposureBrushModeCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.OemComma when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
                 Vm.SettingsCommand.Execute(null);
                 e.Handled = true;
@@ -553,6 +569,10 @@ public partial class MainWindow : Window
                 break;
             case Key.Enter when Vm.IsCropMode:
                 Vm.ApplyCropCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.Enter when Vm.IsExposureBrushMode:
+                Vm.ApplyExposureBrushCommand.Execute(null);
                 e.Handled = true;
                 break;
             case Key.Enter when Vm.IsGalleryOpen:
@@ -647,6 +667,12 @@ public partial class MainWindow : Window
 
     private void Canvas_MouseMove(object sender, MouseEventArgs e)
     {
+        if (Vm.IsExposureBrushMode)
+        {
+            HandleExposureBrushMouseMove(e);
+            return;
+        }
+
         if (Vm.IsCropMode)
         {
             HandleCropMouseMove(e);
@@ -672,6 +698,12 @@ public partial class MainWindow : Window
 
     private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (Vm.IsExposureBrushMode)
+        {
+            HandleExposureBrushMouseDown(e);
+            return;
+        }
+
         if (Vm.IsCropMode)
         {
             HandleCropMouseDown(e);
@@ -702,6 +734,12 @@ public partial class MainWindow : Window
 
     private void Canvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+        if (_exposureBrushPainting)
+        {
+            HandleExposureBrushMouseUp(e);
+            return;
+        }
+
         if (_cropSelectionStart is not null)
         {
             HandleCropMouseUp(e);
@@ -721,6 +759,40 @@ public partial class MainWindow : Window
     {
         if (Vm.IsInspectorMode && _inspectorSelectionStart is null)
             Vm.UpdateInspectorSample(null);
+    }
+
+    private void HandleExposureBrushMouseDown(MouseButtonEventArgs e)
+    {
+        if (!TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
+            return;
+
+        _exposureBrushPainting = true;
+        Vm.AddExposureBrushStroke(coordinate);
+        Canvas.CaptureMouse();
+        e.Handled = true;
+    }
+
+    private void HandleExposureBrushMouseMove(MouseEventArgs e)
+    {
+        if (!_exposureBrushPainting || e.LeftButton != MouseButtonState.Pressed)
+            return;
+
+        if (!TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
+            return;
+
+        Vm.AddExposureBrushStroke(coordinate);
+        e.Handled = true;
+    }
+
+    private void HandleExposureBrushMouseUp(MouseButtonEventArgs e)
+    {
+        if (TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
+            Vm.AddExposureBrushStroke(coordinate);
+
+        _exposureBrushPainting = false;
+        if (Canvas.IsMouseCaptured)
+            Canvas.ReleaseMouseCapture();
+        e.Handled = true;
     }
 
     private void HandleCropMouseDown(MouseButtonEventArgs e)
