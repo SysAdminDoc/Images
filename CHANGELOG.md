@@ -33,6 +33,7 @@ All notable changes to **Images** are documented here.
 - **Decode/navigation feedback** — file-open dialog decodes and multi-page page turns now use the shared operation-status surface before slower document or page loads begin.
 - **Secondary empty/error states** — unsupported clipboard data, empty recent folders, and stale recent-folder paths now show persistent, actionable side-panel feedback instead of relying only on transient toasts.
 - **Secondary recovery feedback** — thumbnail-generation failures and offline update checks now retain actionable status, including failed thumbnail placeholders and no-upload reassurance for network failures.
+- **Background task ownership** — thumbnail generation, metadata reads, preload decodes, clipboard-temp pruning, and thumbnail-cache eviction now run through a shared tracker with diagnostics-visible running/completed/failed/canceled counts.
 - **OCR workflow polish** — text extraction now has a persistent in-view busy/active status, a cancel-aware toolbar state, OCR readiness in Settings/About, and OCR language-pack status in diagnostics.
 - **Open-source viewer research** — added a May 2026 research scan of ImageGlass, nomacs, PicView, NeeView, QuickLook, Geeqie, gThumb, qView, JPEGView, Tacent View, Minimal Image Viewer, and LightningView, then folded the findings into the improvement plan.
 - **Trust copy** — README destructive-action wording now reflects the Recycle Bin confirmation flow.

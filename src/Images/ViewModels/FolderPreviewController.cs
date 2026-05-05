@@ -98,40 +98,42 @@ public sealed class FolderPreviewController : IDisposable
     {
         if (_isDisposed() || !item.TryMarkThumbnailRequested()) return;
 
-        _ = Task.Run(async () =>
+        _ = BackgroundTaskTracker.Queue("folder-preview-thumbnail", async () =>
         {
+            var acquired = false;
             try
             {
                 await _thumbnailDecodeGate.WaitAsync(token).ConfigureAwait(false);
-                try
+                acquired = true;
+
+                token.ThrowIfCancellationRequested();
+                var thumbnail = _loadThumbnail(item.Path, token);
+                token.ThrowIfCancellationRequested();
+                if (thumbnail is null) return;
+
+                _ = _uiDispatcher.InvokeAsync(() =>
                 {
-                    if (token.IsCancellationRequested) return;
+                    if (_isDisposed() || token.IsCancellationRequested || generation != _generation) return;
+                    if (!Items.Contains(item)) return;
 
-                    var thumbnail = _loadThumbnail(item.Path, token);
-                    if (thumbnail is null || token.IsCancellationRequested) return;
-
-                    _ = _uiDispatcher.InvokeAsync(() =>
-                    {
-                        if (_isDisposed() || token.IsCancellationRequested || generation != _generation) return;
-                        if (!Items.Contains(item)) return;
-
-                        item.Thumbnail = thumbnail;
-                    });
-                }
-                finally
-                {
-                    _thumbnailDecodeGate.Release();
-                }
+                    item.Thumbnail = thumbnail;
+                });
             }
             catch (OperationCanceledException)
             {
-                // Superseded navigation state. The next refresh owns the visible thumbnail set.
+                throw;
             }
             catch (Exception)
             {
                 RecordThumbnailFailure(item, generation, token);
+                throw;
             }
-        });
+            finally
+            {
+                if (acquired)
+                    _thumbnailDecodeGate.Release();
+            }
+        }, token);
     }
 
     private void RecordThumbnailFailure(
