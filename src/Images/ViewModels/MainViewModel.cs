@@ -44,16 +44,39 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClipboardImportService? clipboardImport = null,
         DirectoryNavigator? navigator = null,
         RecycleBinDeleteService? recycleBinDelete = null)
+        : this(
+            settings,
+            clipboardImport,
+            navigator,
+            recycleBinDelete,
+            folderPreview: null,
+            photoMetadata: null,
+            ocrWorkflow: null,
+            externalEditReload: null,
+            updateCheck: null)
+    {
+    }
+
+    internal MainViewModel(
+        SettingsService settings,
+        ClipboardImportService? clipboardImport,
+        DirectoryNavigator? navigator,
+        RecycleBinDeleteService? recycleBinDelete,
+        FolderPreviewController? folderPreview,
+        PhotoMetadataController? photoMetadata,
+        OcrWorkflowController? ocrWorkflow,
+        ExternalEditReloadController? externalEditReload,
+        UpdateCheckController? updateCheck)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _clipboardImport = clipboardImport ?? new ClipboardImportService();
         _nav = navigator ?? new DirectoryNavigator();
         _recycleBinDelete = recycleBinDelete ?? new RecycleBinDeleteService(_settings);
-        _folderPreview = new FolderPreviewController(_uiDispatcher, () => _isDisposed);
+        _folderPreview = folderPreview ?? new FolderPreviewController(_uiDispatcher, () => _isDisposed);
         _folderPreview.StateChanged += (_, _) => RaiseFolderPreviewState();
-        _photoMetadata = new PhotoMetadataController(_uiDispatcher, () => _isDisposed, () => CurrentPath);
+        _photoMetadata = photoMetadata ?? new PhotoMetadataController(_uiDispatcher, () => _isDisposed, () => CurrentPath);
         _photoMetadata.StateChanged += (_, _) => RaisePhotoMetadataState();
-        _ocrWorkflow = new OcrWorkflowController(
+        _ocrWorkflow = ocrWorkflow ?? new OcrWorkflowController(
             () => CurrentPath,
             () => HasImage,
             Toast,
@@ -63,12 +86,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (!string.IsNullOrEmpty(e.PropertyName))
                 Raise(e.PropertyName);
         };
-        _externalEditReload = new ExternalEditReloadController(
+        _externalEditReload = externalEditReload ?? new ExternalEditReloadController(
             _uiDispatcher,
             () => _isDisposed,
             ReloadCurrentSilent,
             Toast);
-        _updateCheck = new UpdateCheckController(
+        _updateCheck = updateCheck ?? new UpdateCheckController(
             Toast,
             openTarget: ShellIntegration.OpenShellTarget,
             invalidateCommands: CommandManager.InvalidateRequerySuggested);

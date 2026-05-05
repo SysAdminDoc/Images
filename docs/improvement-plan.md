@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-03B` is complete. Folder-preview thumbnail loading now has a deterministic seam and regression coverage for clear and superseded-refresh cancellation paths, protecting the most volatile remaining async preview state.
+`IP-03C` is complete. `MainViewModel` now has an internal controller-injection seam and regression coverage for metadata, OCR, and update-check relay properties, reducing the risk that extracted controllers update state without notifying the UI.
 
 ## Next Focus
 
-The next recommended slice is `IP-03C`: extend UI-state coverage around extracted controller/view-model property relays and remaining reload/state-transition smoke paths.
+The next recommended slice is `IP-03D`: extend the remaining UI-state coverage around rename debounce, command disabled/busy states, and stale external-change transitions.
 
 ## Research Inputs
 
@@ -59,7 +59,7 @@ The next recommended slice is `IP-03C`: extend UI-state coverage around extracte
 
 ## Implementation Order
 
-1. Extend `IP-03` state coverage around extracted controller/view-model relays and any remaining reload/state-transition smoke paths.
+1. Extend `IP-03` state coverage around rename debounce, command disabled/busy states, and stale external-change transitions.
 2. Build diagnostics/status UX from existing system-info, codec, OCR, and storage services under `IP-06`.
 3. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
 4. Scope `IP-16` design docs once near-term reliability and testability slices are stable.
@@ -81,6 +81,7 @@ The next recommended slice is `IP-03C`: extend UI-state coverage around extracte
 - 2026-05-05: Completed `IP-02G` by extracting OCR busy/active overlay workflow into `OcrWorkflowController` and covering no-image, success, no-text, cancellation, and stale-result outcomes.
 - 2026-05-05: Completed `IP-02H` and closed `IP-02` by extracting update-check UI state into `UpdateCheckController` and covering background skip, newer-release, current-release, error, and release-link opening outcomes.
 - 2026-05-05: Completed `IP-03B` by adding a deterministic folder-preview thumbnail loader seam and regression tests for clear and superseded-refresh cancellation paths.
+- 2026-05-05: Completed `IP-03C` by adding an internal `MainViewModel` controller-injection seam and tests that relay metadata, OCR, and update-check state through the view model.
 
 ## Verification Standard
 

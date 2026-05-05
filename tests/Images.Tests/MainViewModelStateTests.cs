@@ -1,8 +1,11 @@
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Images.Services;
 using Images.ViewModels;
 
@@ -175,6 +178,135 @@ public sealed class MainViewModelStateTests
         });
     }
 
+    [Fact]
+    public void MetadataControllerState_RelaysThroughMainViewModel()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var path = WritePng(temp.Path, "photo.png");
+            var changed = new List<string>();
+            using var metadata = new PhotoMetadataController(
+                Dispatcher.CurrentDispatcher,
+                isDisposed: () => false,
+                currentPath: () => path,
+                readMetadata: _ => new PhotoMetadata([new MetadataFact("Camera", "RelayCam")]),
+                timeout: TimeSpan.FromSeconds(1));
+            using var viewModel = new MainViewModel(
+                CreateSettings(temp),
+                clipboardImport: null,
+                navigator: null,
+                recycleBinDelete: null,
+                folderPreview: null,
+                photoMetadata: metadata,
+                ocrWorkflow: null,
+                externalEditReload: null,
+                updateCheck: null);
+
+            viewModel.PropertyChanged += RecordChangedProperty(changed);
+
+            metadata.Refresh(path);
+            PumpUntil(() => !viewModel.IsMetadataLoading && viewModel.PhotoMetadataRows.Count == 1);
+
+            var row = Assert.Single(viewModel.PhotoMetadataRows);
+            Assert.Equal("Camera", row.Label);
+            Assert.Equal("RelayCam", row.Value);
+            Assert.Equal("", viewModel.MetadataStatusText);
+            Assert.Contains(nameof(MainViewModel.IsMetadataLoading), changed);
+            Assert.Contains(nameof(MainViewModel.MetadataStatusText), changed);
+        });
+    }
+
+    [Fact]
+    public void OcrWorkflowState_RelaysStatusPropertiesThroughMainViewModel()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var changed = new List<string>();
+            using var ocr = new OcrWorkflowController(
+                currentPath: () => @"C:\photos\text.png",
+                hasImage: () => true,
+                notify: _ => { },
+                extractLinesAsync: (_, _) => Task.FromResult<IReadOnlyList<OcrTextLine>?>([]));
+            using var viewModel = new MainViewModel(
+                CreateSettings(temp),
+                clipboardImport: null,
+                navigator: null,
+                recycleBinDelete: null,
+                folderPreview: null,
+                photoMetadata: null,
+                ocrWorkflow: ocr,
+                externalEditReload: null,
+                updateCheck: null);
+
+            viewModel.PropertyChanged += RecordChangedProperty(changed);
+
+            viewModel.OcrOverlayLines = new ObservableCollection<OcrTextLine>
+            {
+                new()
+                {
+                    Text = "Invoice",
+                    BoundingBox = new Windows.Foundation.Rect(4, 8, 80, 24)
+                }
+            };
+            viewModel.IsOcrMode = true;
+
+            Assert.True(viewModel.IsOcrMode);
+            Assert.True(viewModel.ShowOcrStatusPanel);
+            Assert.Equal("Text overlay active", viewModel.OcrStatusTitle);
+            Assert.Equal("1 text region found", viewModel.OcrRegionCountText);
+            Assert.Equal("1 text region found. Select a text box and press Ctrl+C to copy.", viewModel.OcrStatusDetail);
+            Assert.Equal("Hide text overlay (E)", viewModel.OcrModeTooltip);
+            Assert.Contains(nameof(MainViewModel.OcrOverlayLines), changed);
+            Assert.Contains(nameof(MainViewModel.OcrRegionCountText), changed);
+            Assert.Contains(nameof(MainViewModel.ShowOcrStatusPanel), changed);
+            Assert.Contains(nameof(MainViewModel.OcrModeTooltip), changed);
+        });
+    }
+
+    [Fact]
+    public void UpdateCheckState_RelaysAvailableUpdateThroughMainViewModel()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var recorded = new List<UpdateCheckService.CheckResult>();
+            var update = new UpdateCheckController(
+                notify: _ => { },
+                checkAsync: _ => Task.FromResult(new UpdateCheckService.CheckResult(
+                    NewerAvailable: true,
+                    LatestTag: "v9.9.9",
+                    LatestHtmlUrl: "https://example.test/releases/v9.9.9",
+                    Error: null,
+                    ShouldUpdateLastChecked: true)),
+                recordLastChecked: recorded.Add);
+            var changed = new List<string>();
+            using var viewModel = new MainViewModel(
+                CreateSettings(temp),
+                clipboardImport: null,
+                navigator: null,
+                recycleBinDelete: null,
+                folderPreview: null,
+                photoMetadata: null,
+                ocrWorkflow: null,
+                externalEditReload: null,
+                updateCheck: update);
+
+            viewModel.PropertyChanged += RecordChangedProperty(changed);
+
+            viewModel.CheckForUpdatesAsync(userInitiated: true).GetAwaiter().GetResult();
+
+            Assert.Equal("v9.9.9", viewModel.LatestUpdateTag);
+            Assert.Equal("https://example.test/releases/v9.9.9", viewModel.LatestUpdateUrl);
+            Assert.True(viewModel.HasUpdateAvailable);
+            Assert.True(viewModel.OpenLatestUpdateCommand.CanExecute(null));
+            Assert.Single(recorded);
+            Assert.Contains(nameof(MainViewModel.LatestUpdateTag), changed);
+            Assert.Contains(nameof(MainViewModel.HasUpdateAvailable), changed);
+        });
+    }
+
     private static MainViewModel CreateViewModel(TestDirectory temp, ClipboardImportService? clipboardImport = null)
         => new(CreateSettings(temp), clipboardImport);
 
@@ -209,6 +341,43 @@ public sealed class MainViewModelStateTests
             8);
         bitmap.Freeze();
         return bitmap;
+    }
+
+    private static PropertyChangedEventHandler RecordChangedProperty(ICollection<string> changed)
+        => (_, e) =>
+        {
+            if (!string.IsNullOrWhiteSpace(e.PropertyName))
+                changed.Add(e.PropertyName);
+        };
+
+    private static void PumpUntil(Func<bool> condition)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(3);
+        while (!condition())
+        {
+            if (DateTime.UtcNow >= deadline)
+                throw new TimeoutException("Timed out while waiting for dispatcher work.");
+
+            PumpFor(TimeSpan.FromMilliseconds(10));
+        }
+    }
+
+    private static void PumpFor(TimeSpan interval)
+    {
+        var frame = new DispatcherFrame();
+        var timer = new DispatcherTimer(DispatcherPriority.Background)
+        {
+            Interval = interval
+        };
+
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            frame.Continue = false;
+        };
+
+        timer.Start();
+        Dispatcher.PushFrame(frame);
     }
 
     private static void RunOnSta(Action action)
