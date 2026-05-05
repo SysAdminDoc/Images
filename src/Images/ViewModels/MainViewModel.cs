@@ -113,27 +113,27 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _isFilmstripVisible = _settings.GetBool(Keys.FilmstripVisible, true);
         _isMetadataHudVisible = _settings.GetBool(Keys.MetadataHudVisible, false);
 
-        OpenCommand = new RelayCommand(OpenFileDialog);
-        NextCommand = new RelayCommand(Next, () => HasImage);
-        PrevCommand = new RelayCommand(Prev, () => HasImage);
-        FirstCommand = new RelayCommand(First, () => HasImage);
-        LastCommand = new RelayCommand(Last, () => HasImage);
-        NextPageCommand = new RelayCommand(NextPage, () => HasNextPage);
-        PrevPageCommand = new RelayCommand(PrevPage, () => HasPreviousPage);
-        FirstPageCommand = new RelayCommand(FirstPage, () => HasPreviousPage);
-        LastPageCommand = new RelayCommand(LastPage, () => HasNextPage);
-        DeleteCommand = new RelayCommand(DeleteCurrent, () => HasImage);
-        RotateCwCommand = new RelayCommand(() => Rotate(90), () => HasDisplayImage);
-        RotateCcwCommand = new RelayCommand(() => Rotate(-90), () => HasDisplayImage);
-        Rotate180Command = new RelayCommand(() => Rotate(180), () => HasDisplayImage);
-        FlipHorizontalCommand = new RelayCommand(() => { FlipHorizontal = !FlipHorizontal; }, () => HasDisplayImage);
-        FlipVerticalCommand = new RelayCommand(() => { FlipVertical = !FlipVertical; }, () => HasDisplayImage);
+        OpenCommand = new RelayCommand(OpenFileDialog, () => !IsOperationBusy);
+        NextCommand = new RelayCommand(Next, () => CanUseImageCommands);
+        PrevCommand = new RelayCommand(Prev, () => CanUseImageCommands);
+        FirstCommand = new RelayCommand(First, () => CanUseImageCommands);
+        LastCommand = new RelayCommand(Last, () => CanUseImageCommands);
+        NextPageCommand = new RelayCommand(NextPage, () => HasNextPage && !IsOperationBusy);
+        PrevPageCommand = new RelayCommand(PrevPage, () => HasPreviousPage && !IsOperationBusy);
+        FirstPageCommand = new RelayCommand(FirstPage, () => HasPreviousPage && !IsOperationBusy);
+        LastPageCommand = new RelayCommand(LastPage, () => HasNextPage && !IsOperationBusy);
+        DeleteCommand = new RelayCommand(DeleteCurrent, () => CanUseImageCommands);
+        RotateCwCommand = new RelayCommand(() => Rotate(90), () => CanUseDisplayImageCommands);
+        RotateCcwCommand = new RelayCommand(() => Rotate(-90), () => CanUseDisplayImageCommands);
+        Rotate180Command = new RelayCommand(() => Rotate(180), () => CanUseDisplayImageCommands);
+        FlipHorizontalCommand = new RelayCommand(() => { FlipHorizontal = !FlipHorizontal; }, () => CanUseDisplayImageCommands);
+        FlipVerticalCommand = new RelayCommand(() => { FlipVertical = !FlipVertical; }, () => CanUseDisplayImageCommands);
         RevealCommand = new RelayCommand(RevealInExplorer, () => HasImage);
         CopyPathCommand = new RelayCommand(CopyPath, () => HasImage);
-        SetAsWallpaperCommand = new RelayCommand(SetAsWallpaper, () => HasImage);
-        ReloadCommand = new RelayCommand(ReloadCurrent, () => HasImage);
-        PrintCommand = new RelayCommand(PrintCurrent, () => HasDisplayImage);
-        SaveAsCopyCommand = new RelayCommand(SaveAsCopy, () => HasDisplayImage);
+        SetAsWallpaperCommand = new RelayCommand(SetAsWallpaper, () => CanUseImageCommands);
+        ReloadCommand = new RelayCommand(async () => await ReloadCurrentAsync(), () => CanUseImageCommands);
+        PrintCommand = new RelayCommand(PrintCurrent, () => CanUseDisplayImageCommands);
+        SaveAsCopyCommand = new RelayCommand(async () => await SaveAsCopyAsync(), () => CanUseDisplayImageCommands);
         CheckForUpdatesCommand = new RelayCommand(async () => await CheckForUpdatesAsync(userInitiated: true), () => true);
         OpenLatestUpdateCommand = new RelayCommand(_updateCheck.OpenLatestUpdate, () => HasUpdateAvailable);
         RefreshCommand = new RelayCommand(RefreshFolder, () => CanRefreshFolder);
@@ -150,11 +150,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         SetFolderSortCommand = new RelayCommand(SetFolderSort, p => DirectorySortModeInfo.TryParseCommandParameter(p, out _));
         ToggleFilmstripCommand = new RelayCommand(ToggleFilmstrip, () => CanToggleFilmstrip);
         ToggleMetadataHudCommand = new RelayCommand(ToggleMetadataHud, () => CanToggleMetadataHud);
-        PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard);
+        PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard, () => !IsOperationBusy);
         OpenInDefaultAppCommand = new RelayCommand(OpenInDefaultApp, () => HasImage);
-        StripLocationCommand = new RelayCommand(async () => await StripLocationAsync(), () => HasImage);
+        StripLocationCommand = new RelayCommand(async () => await StripLocationAsync(), () => CanUseImageCommands);
         SettingsCommand = new RelayCommand(ShowSettingsWindow);
-        ExtractTextCommand = new RelayCommand(async () => await _ocrWorkflow.ToggleAsync(), () => HasImage);
+        ExtractTextCommand = new RelayCommand(async () => await _ocrWorkflow.ToggleAsync(), () => HasImage && !IsOperationBusy);
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
         // panel renders prior-session folders before the user opens anything.
@@ -322,7 +322,51 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasImage => !string.IsNullOrEmpty(CurrentPath) && File.Exists(CurrentPath);
     public bool HasDisplayImage => CurrentImage is not null;
     public bool IsViewerEmpty => CurrentPath is null;
-    public bool CanRefreshFolder => CurrentPath is not null || _nav.Count > 0;
+    public bool CanRefreshFolder => (CurrentPath is not null || _nav.Count > 0) && !IsOperationBusy;
+
+    private bool CanUseImageCommands => HasImage && !IsOperationBusy;
+    private bool CanUseDisplayImageCommands => HasDisplayImage && !IsOperationBusy;
+
+    private string _operationStatusTitle = "";
+    public string OperationStatusTitle
+    {
+        get => _operationStatusTitle;
+        private set
+        {
+            if (Set(ref _operationStatusTitle, value))
+                Raise(nameof(ShowOperationStatus));
+        }
+    }
+
+    private string _operationStatusDetail = "";
+    public string OperationStatusDetail
+    {
+        get => _operationStatusDetail;
+        private set
+        {
+            if (Set(ref _operationStatusDetail, value))
+                Raise(nameof(ShowOperationStatus));
+        }
+    }
+
+    private bool _isOperationBusy;
+    public bool IsOperationBusy
+    {
+        get => _isOperationBusy;
+        private set
+        {
+            if (Set(ref _isOperationBusy, value))
+            {
+                Raise(nameof(ShowOperationStatus));
+                Raise(nameof(CanRefreshFolder));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public bool ShowOperationStatus => IsOperationBusy
+        && (!string.IsNullOrWhiteSpace(OperationStatusTitle)
+            || !string.IsNullOrWhiteSpace(OperationStatusDetail));
 
     public string FirstRunPrivacyText => _settings.GetBool(Keys.UpdateCheckEnabled, false)
         ? "Automatic update checks are enabled. Image files stay local; release checks only contact GitHub."
@@ -1370,10 +1414,21 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     // Magick / animated-GIF path as appropriate. Useful after external edit (Photoshop,
     // mspaint). View transforms are restored after the decode attempt so reload does not
     // surprise the user by resetting their current orientation.
-    private void ReloadCurrent()
+    private async Task ReloadCurrentAsync()
     {
-        if (ReloadCurrentPreservingViewState(resetPreload: false))
-            Toast("Reloaded");
+        if (!HasImage || IsOperationBusy) return;
+
+        BeginOperationStatus("Reloading image", "Refreshing decoder output and metadata.");
+        try
+        {
+            await YieldForOperationStatusAsync();
+            if (ReloadCurrentPreservingViewState(resetPreload: false))
+                Toast("Reloaded");
+        }
+        finally
+        {
+            EndOperationStatus();
+        }
     }
 
     // V15-02: Set current image as the desktop wallpaper. Delegates to WallpaperService which
@@ -1436,9 +1491,26 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public bool HasUpdateAvailable => _updateCheck.HasUpdateAvailable;
 
+    private void BeginOperationStatus(string title, string detail)
+    {
+        OperationStatusTitle = title;
+        OperationStatusDetail = detail;
+        IsOperationBusy = true;
+    }
+
+    private Task YieldForOperationStatusAsync()
+        => _uiDispatcher.InvokeAsync(static () => { }, DispatcherPriority.ContextIdle).Task;
+
+    private void EndOperationStatus()
+    {
+        IsOperationBusy = false;
+        OperationStatusTitle = "";
+        OperationStatusDetail = "";
+    }
+
     // E6: save a copy of the decoded first frame to a user-chosen path. Rotation and flip are
     // not baked in, matching Windows Photos: temporary viewing transforms stay temporary.
-    private void SaveAsCopy()
+    private async Task SaveAsCopyAsync()
     {
         if (CurrentImage is not System.Windows.Media.Imaging.BitmapSource bs || CurrentPath is null) return;
 
@@ -1455,21 +1527,36 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         };
         if (dlg.ShowDialog() != true) return;
 
+        string targetPath;
         try
         {
-            var targetPath = ImageExportService.ResolveWritablePath(dlg.FileName);
+            targetPath = ImageExportService.ResolveWritablePath(dlg.FileName);
             if (PathsReferToSameFile(targetPath, CurrentPath))
             {
                 Toast("Choose a different filename for the copy");
                 return;
             }
+        }
+        catch (Exception ex)
+        {
+            Toast($"Save failed: {ex.Message}");
+            return;
+        }
 
+        BeginOperationStatus("Saving copy", $"Exporting {Path.GetFileName(targetPath)}.");
+        try
+        {
+            await YieldForOperationStatusAsync();
             var savedPath = ImageExportService.Save(bs, targetPath);
             Toast($"Saved copy → {Path.GetFileName(savedPath)}");
         }
         catch (Exception ex)
         {
             Toast($"Save failed: {ex.Message}");
+        }
+        finally
+        {
+            EndOperationStatus();
         }
     }
 
@@ -1551,9 +1638,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     // Writes atomically (temp-file swap) and reloads so the metadata HUD updates.
     private async Task StripLocationAsync()
     {
-        if (CurrentPath is null) return;
+        if (CurrentPath is null || IsOperationBusy) return;
         var path = CurrentPath;
 
+        BeginOperationStatus("Removing location data", $"Updating {Path.GetFileName(path)}.");
         try
         {
             var removed = await Task.Run(() => MetadataEditService.StripGpsMetadata(path));
@@ -1571,6 +1659,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         catch (Exception ex)
         {
             Toast($"Could not strip GPS data: {ex.Message}");
+        }
+        finally
+        {
+            EndOperationStatus();
         }
     }
 
