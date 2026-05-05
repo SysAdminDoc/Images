@@ -16,6 +16,8 @@ public sealed class UpdateCheckController : ObservableObject
     private string? _latestUpdateUrl;
     private bool _isCheckingForUpdates;
     private string _updateCheckStatusText = "";
+    private string _updateCheckIssueTitle = "";
+    private string _updateCheckIssueDetail = "";
 
     public UpdateCheckController(
         Action<string> notify,
@@ -70,6 +72,30 @@ public sealed class UpdateCheckController : ObservableObject
         private set => Set(ref _updateCheckStatusText, value);
     }
 
+    public string UpdateCheckIssueTitle
+    {
+        get => _updateCheckIssueTitle;
+        private set
+        {
+            if (Set(ref _updateCheckIssueTitle, value))
+                Raise(nameof(HasUpdateCheckIssue));
+        }
+    }
+
+    public string UpdateCheckIssueDetail
+    {
+        get => _updateCheckIssueDetail;
+        private set
+        {
+            if (Set(ref _updateCheckIssueDetail, value))
+                Raise(nameof(HasUpdateCheckIssue));
+        }
+    }
+
+    public bool HasUpdateCheckIssue
+        => !string.IsNullOrWhiteSpace(UpdateCheckIssueTitle)
+            || !string.IsNullOrWhiteSpace(UpdateCheckIssueDetail);
+
     public async Task CheckAsync(bool userInitiated, CancellationToken token = default)
     {
         if (!userInitiated && !_isDueForBackgroundCheck())
@@ -94,11 +120,13 @@ public sealed class UpdateCheckController : ObservableObject
 
             if (result.Error is not null)
             {
+                SetUpdateCheckIssue(result);
                 if (userInitiated)
                     _notify($"Update check failed: {result.Error}");
                 return;
             }
 
+            ClearUpdateCheckIssue();
             if (result.NewerAvailable)
             {
                 LatestUpdateUrl = result.LatestHtmlUrl;
@@ -115,6 +143,27 @@ public sealed class UpdateCheckController : ObservableObject
             IsCheckingForUpdates = false;
             UpdateCheckStatusText = "";
         }
+    }
+
+    private void SetUpdateCheckIssue(UpdateCheckService.CheckResult result)
+    {
+        var error = result.Error ?? "Unknown error";
+        var transient = !result.ShouldUpdateLastChecked
+            || error.StartsWith("network:", StringComparison.OrdinalIgnoreCase)
+            || error.Contains("timed out", StringComparison.OrdinalIgnoreCase);
+
+        UpdateCheckIssueTitle = transient
+            ? "Update check unavailable"
+            : "Update check failed";
+        UpdateCheckIssueDetail = transient
+            ? "Images could not reach GitHub Releases. Check your connection and try again; no image files were uploaded."
+            : $"GitHub Releases returned: {error}. Try again later.";
+    }
+
+    private void ClearUpdateCheckIssue()
+    {
+        UpdateCheckIssueTitle = "";
+        UpdateCheckIssueDetail = "";
     }
 
     public void OpenLatestUpdate()

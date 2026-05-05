@@ -1192,10 +1192,21 @@
                                                             <TextBlock Text="&#xEB9F;"
                                                                        FontFamily="{StaticResource IconFontFamily}"
                                                                        FontSize="16"
-                                                                       Foreground="{StaticResource OverlayBrush}"
                                                                        HorizontalAlignment="Center"
                                                                        VerticalAlignment="Center"
-                                                                       Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}" />
+                                                                       Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="{x:Type TextBlock}">
+                                                                        <Setter Property="Foreground" Value="{StaticResource OverlayBrush}" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding ThumbnailFailed}" Value="True">
+                                                                                <Setter Property="Text" Value="&#xE783;" />
+                                                                                <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
                                                         </Grid>
                                                     </Border>
                                                     <TextBlock Text="{Binding FileName}"
@@ -1821,10 +1832,21 @@
                                                         <TextBlock Text="&#xEB9F;"
                                                                    FontFamily="{StaticResource IconFontFamily}"
                                                                    FontSize="18"
-                                                                   Foreground="{StaticResource OverlayBrush}"
                                                                    HorizontalAlignment="Center"
                                                                    VerticalAlignment="Center"
-                                                                   Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}" />
+                                                                   Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="{x:Type TextBlock}">
+                                                                    <Setter Property="Foreground" Value="{StaticResource OverlayBrush}" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ThumbnailFailed}" Value="True">
+                                                                            <Setter Property="Text" Value="&#xE783;" />
+                                                                            <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
                                                     </Grid>
                                                 </Border>
                                                 <TextBlock Text="{Binding FileName}"

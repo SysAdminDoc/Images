@@ -1,3 +1,4 @@
+using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Windows.Media;
@@ -98,6 +99,27 @@ public sealed class FolderPreviewControllerTests
         });
     }
 
+    [Fact]
+    public void Refresh_WhenThumbnailLoadFails_TracksFailureAndMarksItem()
+    {
+        RunOnSta(() =>
+        {
+            using var controller = new FolderPreviewController(
+                Dispatcher.CurrentDispatcher,
+                isDisposed: () => false,
+                loadThumbnail: (_, _) => throw new IOException("cache unavailable"));
+
+            controller.Refresh(new[] { @"C:\photos\a.png", @"C:\photos\b.png" }, currentIndex: 0);
+
+            PumpUntil(() => controller.ThumbnailFailureCount == 2);
+
+            Assert.Equal(2, controller.ThumbnailFailureCount);
+            Assert.Contains("2 folder thumbnails could not be generated", controller.ThumbnailFailureStatusText);
+            Assert.All(controller.Items, item => Assert.True(item.ThumbnailFailed));
+            Assert.All(controller.Items, item => Assert.False(item.HasThumbnail));
+        });
+    }
+
     private static ImageSource CreateThumbnail()
     {
         var pixels = new byte[] { 0x21, 0x40, 0x5a, 0xff };
@@ -112,6 +134,18 @@ public sealed class FolderPreviewControllerTests
             stride: 4);
         bitmap.Freeze();
         return bitmap;
+    }
+
+    private static void PumpUntil(Func<bool> condition)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(3);
+        while (!condition())
+        {
+            if (DateTime.UtcNow >= deadline)
+                throw new TimeoutException("Timed out while waiting for dispatcher work.");
+
+            PumpFor(TimeSpan.FromMilliseconds(10));
+        }
     }
 
     private static void PumpFor(TimeSpan interval)
