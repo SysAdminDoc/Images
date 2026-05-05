@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-09B` is complete, closing `IP-09`. Thumbnail generation failures and update-check offline/error outcomes now surface durable, actionable status instead of disappearing with the busy indicator or placeholder thumbnail.
+`IP-04A` is complete. Thumbnail generation, metadata reads, preload decodes, clipboard-temp pruning, and thumbnail-cache eviction now run through a shared background-task tracker with diagnostics-visible running/completed/failed/canceled counts.
 
 ## Next Focus
 
-The next recommended slice is `IP-04A`: improve background-task ownership and observability, starting with thumbnail generation, preloading, and clipboard-temp pruning.
+The next recommended slice is `IP-04B`: finish the remaining background-task ownership pass by tightening update-check lifecycle observability and connecting cache-health work to tracked diagnostics.
 
 ## Research Inputs
 
@@ -27,7 +27,7 @@ The next recommended slice is `IP-04A`: improve background-task ownership and ob
 | IP-01 | P0 | Planned | Test seams | Add seams around static/global services such as update checks, storage paths, thumbnail cache, shell integration, and clocks. | Unit tests can drive update-check retry policy, storage fallback, and thumbnail/cache behavior without real network or user profile state. |
 | IP-02 | P0 | Done | MainViewModel structure | Split the oversized main view model into focused controllers/services while preserving current behavior. | OCR, folder preview, clipboard import, reload, rename, metadata, and update-check logic are independently readable and have narrower dependencies. |
 | IP-03 | P0 | Done | UI state tests | Add regression coverage for risky WPF state transitions. | Tests or smoke harnesses cover reload failure, external file changes, OCR cancellation, thumbnail cancellation, rename debounce, and disabled/busy states. |
-| IP-04 | P1 | Planned | Background tasks | Improve observability and ownership for fire-and-forget work. | Thumbnail generation, metadata reads, preloading, clipboard pruning, cache eviction, and update checks have clear cancellation/ownership and structured logging. |
+| IP-04 | P1 | In progress | Background tasks | Improve observability and ownership for fire-and-forget work. | Thumbnail generation, metadata reads, preloading, clipboard pruning, cache eviction, and update checks have clear cancellation/ownership and structured logging. |
 | IP-05 | P1 | Done | Update checks | Add focused update-check tests. | Timeout, network failure, HTTP failure, malformed release payload, newer release, current release, and trusted URL normalization are covered. |
 | IP-06 | P1 | Done | Diagnostics UX | Add a compact diagnostics/status pane. | Users can inspect OCR, Ghostscript, Magick.NET, logs, storage paths, and last update-check state from the app without a terminal. |
 | IP-07 | P1 | Done | First run | Improve first-run guidance. | New users can discover supported formats, OCR readiness, document-preview requirements, privacy defaults, and recovery links without reading docs. |
@@ -90,6 +90,7 @@ The next recommended slice is `IP-04A`: improve background-task ownership and ob
 - 2026-05-05: Completed `IP-08C` and closed `IP-08` by extending operation-status feedback to file-open dialog decodes and multi-page navigation, with regression coverage for page-turn busy state.
 - 2026-05-05: Completed `IP-09A` by adding persistent secondary status feedback for unsupported clipboard data, empty recent folders, and stale recent-folder recovery, with regression coverage for all three flows.
 - 2026-05-05: Completed `IP-09B` and closed `IP-09` by retaining actionable update-check failure status, marking thumbnail placeholder failures, and relaying thumbnail-generation failure counts through the main secondary status surface.
+- 2026-05-05: Completed `IP-04A` by adding a shared `BackgroundTaskTracker`, routing folder thumbnails, metadata reads, preload decodes, clipboard-temp pruning, and thumbnail-cache eviction through it, and exposing session task counts in diagnostics with regression coverage.
 
 ## Verification Standard
 

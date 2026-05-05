@@ -25,7 +25,8 @@ public static class DiagnosticsStatusService
             AppStorage.TryGetAppDirectory(),
             AppStorage.TryGetAppDirectory("Logs"),
             AppStorage.TryGetAppDirectory("thumbs"),
-            CrashLog.LogPath);
+            CrashLog.LogPath,
+            BackgroundTaskTracker.Snapshot);
 
     internal static IReadOnlyList<DiagnosticStatusItem> BuildStatusItems(
         CodecCapabilityService.RuntimeProvenance provenance,
@@ -35,7 +36,8 @@ public static class DiagnosticsStatusService
         string? appDataRoot,
         string? logsPath,
         string? thumbnailsPath,
-        string crashLogPath)
+        string crashLogPath,
+        BackgroundTaskSnapshot? backgroundTasks = null)
     {
         ArgumentNullException.ThrowIfNull(provenance);
         ArgumentNullException.ThrowIfNull(ocrStatus);
@@ -77,7 +79,13 @@ public static class DiagnosticsStatusService
                 updateChecksEnabled ? "Automatic checks enabled" : "Automatic checks off",
                 BuildUpdateCheckDetail(updateChecksEnabled, lastUpdateCheckUtc),
                 updateChecksEnabled ? ReadyTone : InfoTone,
-                "\uE72C")
+                "\uE72C"),
+            new(
+                "Background work",
+                BuildBackgroundWorkStatus(backgroundTasks ?? default),
+                BuildBackgroundWorkDetail(backgroundTasks ?? default),
+                BuildBackgroundWorkTone(backgroundTasks ?? default),
+                "\uE9F5")
         ];
     }
 
@@ -128,5 +136,32 @@ public static class DiagnosticsStatusService
             ? lastUpdateCheckUtc.Value
             : lastUpdateCheckUtc.Value.ToLocalTime();
         return $"Last successful check: {local.ToString("g", CultureInfo.CurrentCulture)}";
+    }
+
+    private static string BuildBackgroundWorkStatus(BackgroundTaskSnapshot snapshot)
+    {
+        if (snapshot.Running > 0)
+            return "Background work active";
+
+        if (snapshot.Faulted > 0)
+            return "Background work needs attention";
+
+        return "Background work idle";
+    }
+
+    private static string BuildBackgroundWorkDetail(BackgroundTaskSnapshot snapshot)
+    {
+        if (snapshot.Started == 0)
+            return "No tracked background work has run in this session.";
+
+        return $"{snapshot.Running} running, {snapshot.Completed} completed, {snapshot.Faulted} failed, {snapshot.Canceled} canceled this session.";
+    }
+
+    private static string BuildBackgroundWorkTone(BackgroundTaskSnapshot snapshot)
+    {
+        if (snapshot.Faulted > 0)
+            return WarningTone;
+
+        return snapshot.Running > 0 ? InfoTone : ReadyTone;
     }
 }

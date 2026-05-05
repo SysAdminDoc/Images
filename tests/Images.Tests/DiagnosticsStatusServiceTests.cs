@@ -29,6 +29,7 @@ public sealed class DiagnosticsStatusServiceTests
         Assert.Contains(items, item => item.Title == "Logs" && item.Tone == DiagnosticsStatusService.ReadyTone);
         Assert.Contains(items, item => item.Title == "Storage" && item.Status == "Writable storage ready");
         Assert.Contains(items, item => item.Title == "Update checks" && item.Detail.StartsWith("Last successful check:", StringComparison.Ordinal));
+        Assert.Contains(items, item => item.Title == "Background work" && item.Status == "Background work idle");
     }
 
     [Fact]
@@ -61,6 +62,38 @@ public sealed class DiagnosticsStatusServiceTests
         Assert.Contains(items, item => item.Title == "Document previews" && item.Tone == DiagnosticsStatusService.WarningTone);
         Assert.Contains(items, item => item.Title == "Storage" && item.Tone == DiagnosticsStatusService.WarningTone);
         Assert.Contains(items, item => item.Title == "Update checks" && item.Tone == DiagnosticsStatusService.InfoTone);
+    }
+
+    [Fact]
+    public void BuildStatusItems_WhenBackgroundWorkHasFailures_FlagsWarning()
+    {
+        var items = DiagnosticsStatusService.BuildStatusItems(
+            ReadyProvenance(),
+            new OcrCapabilityService.OcrCapabilityStatus(
+                IsAvailable: true,
+                LanguageCount: 1,
+                LanguageSummary: "English (United States) (en-US)",
+                StatusTitle: "Text extraction ready",
+                StatusDetail: "OCR runs locally.",
+                BadgeText: "Ready"),
+            updateChecksEnabled: false,
+            lastUpdateCheckUtc: null,
+            appDataRoot: @"C:\Users\test\AppData\Local\Images",
+            logsPath: AppContext.BaseDirectory,
+            thumbnailsPath: @"C:\Users\test\AppData\Local\Images\thumbs",
+            crashLogPath: @"C:\Users\test\AppData\Local\Images\crash.log",
+            backgroundTasks: new BackgroundTaskSnapshot(
+                Started: 3,
+                Running: 0,
+                Completed: 1,
+                Faulted: 2,
+                Canceled: 0));
+
+        Assert.Contains(items, item =>
+            item.Title == "Background work"
+            && item.Status == "Background work needs attention"
+            && item.Tone == DiagnosticsStatusService.WarningTone
+            && item.Detail.Contains("2 failed", StringComparison.Ordinal));
     }
 
     private static CodecCapabilityService.RuntimeProvenance ReadyProvenance()

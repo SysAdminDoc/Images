@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows.Threading;
 using Images.Services;
 
@@ -74,7 +75,14 @@ public sealed class PhotoMetadataController : IDisposable
 
     private async Task LoadAsync(string path, int generation, CancellationToken token)
     {
-        var readTask = Task.Run(() => _readMetadata(path));
+        var taskName = $"metadata-read:{Path.GetFileName(path)}";
+        var readTask = BackgroundTaskTracker.Run(taskName, () =>
+        {
+            token.ThrowIfCancellationRequested();
+            var metadata = _readMetadata(path);
+            token.ThrowIfCancellationRequested();
+            return metadata;
+        }, token);
         PhotoMetadata metadata;
         string? statusOverride = null;
 
