@@ -38,7 +38,8 @@ public static class UpdateCheckService
         bool NewerAvailable,
         string? LatestTag,
         string? LatestHtmlUrl,
-        string? Error);
+        string? Error,
+        bool ShouldUpdateLastChecked);
 
     /// <summary>
     /// Query the latest release tag. Compares semantic-ish strings — returns newer-available if
@@ -58,33 +59,47 @@ public static class UpdateCheckService
             _log.LogInformation("update-check: {Status} {Bytes} bytes in {Ms} ms", (int)resp.StatusCode, bytes, ms);
 
             if (!resp.IsSuccessStatusCode)
-                return new CheckResult(false, null, null, $"HTTP {(int)resp.StatusCode}");
+                return CompletedCheck(false, null, null, $"HTTP {(int)resp.StatusCode}");
 
             var release = await ReadReleaseJsonAsync(resp.Content, ct).ConfigureAwait(false);
             if (release?.TagName is null)
-                return new CheckResult(false, null, null, "no tag in response");
+                return CompletedCheck(false, null, null, "no tag in response");
 
             var latest = ParseVersionTag(release.TagName);
             var current = ParseVersionTag("v" + AppInfo.Current.DisplayVersion);
             if (latest is null || current is null)
-                return new CheckResult(false, release.TagName, release.HtmlUrl, "version parse failed");
+                return CompletedCheck(false, release.TagName, release.HtmlUrl, "version parse failed");
 
             var newer = CompareVersion(latest.Value, current.Value) > 0;
-            return new CheckResult(newer, release.TagName, NormalizeTrustedReleaseUrl(release.HtmlUrl), null);
+            return CompletedCheck(newer, release.TagName, NormalizeTrustedReleaseUrl(release.HtmlUrl), null);
         }
         catch (TaskCanceledException)
         {
-            return new CheckResult(false, null, null, "timed out");
+            return TransientFailure("timed out");
         }
         catch (HttpRequestException ex)
         {
-            return new CheckResult(false, null, null, $"network: {ex.Message}");
+            return TransientFailure($"network: {ex.Message}");
         }
         catch (Exception ex)
         {
             _log.LogError(ex, "update-check unexpected failure");
-            return new CheckResult(false, null, null, $"unexpected: {ex.Message}");
+            return TransientFailure($"unexpected: {ex.Message}");
         }
+    }
+
+    private static CheckResult CompletedCheck(bool newerAvailable, string? latestTag, string? latestHtmlUrl, string? error)
+        => new(newerAvailable, latestTag, latestHtmlUrl, error, ShouldUpdateLastChecked: true);
+
+    private static CheckResult TransientFailure(string error)
+        => new(false, null, null, error, ShouldUpdateLastChecked: false);
+
+    public static void RecordLastCheckedIfAppropriate(CheckResult result)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+
+        if (result.ShouldUpdateLastChecked)
+            LastCheckedUtc = DateTime.UtcNow;
     }
 
     private static async Task<GitHubRelease?> ReadReleaseJsonAsync(HttpContent content, CancellationToken ct)
