@@ -44,14 +44,14 @@ All notable changes to **Images** are documented here.
 - **Distribution trust plan** — scoped WinGet and Scoop publishing, checksum continuity, code-signing options, SmartScreen expectations, and user verification copy for the next stable release.
 - **Integration policy** — documented the no-code-copied optional-runtime gate for licenses, redistribution rights, CVE tracking, binary provenance, process isolation, network behavior, and release impact.
 - **Archive/book foundation** — ZIP and CBZ files now open as read-only archive books using built-in .NET ZIP support, with natural page ordering, page-count controls, a page scrubber, unsafe-entry filtering, and recursive-archive guardrails.
-- **Archive read position and history** — ZIP/CBZ books now remember the last viewed page locally, continue there on reopen, and surface a side-panel book history with page progress.
-- **Archive cover handling** — ZIP/CBZ books now promote explicit cover/front/folder image entries before natural page order and report cover provenance in decoder details.
-- **Archive reader controls** — active ZIP/CBZ books now get a side-panel book-controls card, narrow edge page-turn click zones, and reader-mode arrow/Home/End key routing for page turns.
-- **Archive runtime review** — documented the RAR/7z dependency policy, keeping ZIP/CBZ first-party while gating future runtimes on licensing, provenance, CVE, isolation, and generated-corpus requirements.
-- **Gated archive recovery** — opening or pasting RAR/CBR/7z/CB7 books now shows clear runtime-gated guidance to extract or convert to CBZ, with explicit no-auto-download copy.
+- **Archive read position and history** — archive books now remember the last viewed page locally, continue there on reopen, and surface a side-panel book history with page progress.
+- **Archive cover handling** — archive books now promote explicit cover/front/folder image entries before natural page order and report cover provenance in decoder details.
+- **Archive reader controls** — active archive books now get a side-panel book-controls card, narrow edge page-turn click zones, and reader-mode arrow/Home/End key routing for page turns.
+- **Archive runtime review** — documented the RAR/7z dependency policy and approved SharpCompress 0.47.4 as the managed MIT reader for read-only RAR/CBR and 7z/CB7 archive books.
+- **RAR/7z archive expansion** — RAR/CBR and 7z/CB7 books now open through SharpCompress with the same unsafe-entry filtering, nested-archive skipping, document-entry skipping, per-entry byte cap, corrupt-archive recovery copy, diagnostics provenance, and generated 7z regression coverage as the ZIP/CBZ foundation.
 - **Manga page turns** — archive books now have a persisted right-to-left page-turn mode that swaps physical edge zones and Left/Right Arrow routing without changing semantic next/previous controls.
 - **Clean scan preview** — archive books now offer a persisted, preview-only high-contrast grayscale filter for yellowed or low-contrast scanned pages without modifying source archives.
-- **Two-page archive spreads** — ZIP/CBZ books now have a persisted spread mode that keeps explicit covers single, pairs natural pages, respects right-to-left composition, and advances by spread.
+- **Two-page archive spreads** — archive books now have a persisted spread mode that keeps explicit covers single, pairs natural pages, respects right-to-left composition, and advances by spread.
 - **Gallery workbench** — the viewer now has a keyboard-first `G` gallery overlay for the current folder with multi-column thumbnails, quick filtering, sort shortcuts, per-thumbnail context actions, current-item selection, and Enter-to-open behavior.
 - **Peek mode hardening** — `--peek` startup now records local timing milestones and first-image timing, with parser regression tests and shell-helper documentation for chromeless preview integrations.
 - **OCR workflow polish** — text extraction now has a persistent in-view busy/active status, a cancel-aware toolbar state, OCR readiness in Settings/About, and OCR language-pack status in diagnostics.

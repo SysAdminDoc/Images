@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V20-33` gained the safe remaining UX slice for gated archive formats. RAR/CBR/7z/CB7 inputs now get clear runtime-policy recovery copy for direct opens and clipboard file lists, while actual runtime expansion remains blocked by the archive dependency gates.
+Roadmap `V20-33` is complete. RAR/CBR and 7z/CB7 archive books now open through the managed SharpCompress adapter with the same read-only page model, unsafe-path filtering, nested-archive skipping, per-entry byte cap, diagnostics provenance, and generated archive regression coverage used by the ZIP/CBZ foundation.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. `V20-33` cannot fully close until an archive runtime is approved under `docs/archive-runtime-review.md`; continue with the next main `ROADMAP.md` feature backlog item when that gate is intentionally deferred.
+The improvement-plan backlog is complete. Continue with the next main `ROADMAP.md` feature backlog item after the verified `V20-33` archive expansion commit.
 
 ## Research Inputs
 
@@ -47,7 +47,7 @@ The improvement-plan backlog is complete. `V20-33` cannot fully close until an a
 | ID | Priority | Status | Workstream | Source signal | Planned sequence |
 | --- | --- | --- | --- | --- | --- |
 | RS-01 | P2 | Planned | Local comparison mode | nomacs synchronized views and opacity overlay | Design doc, UI-state tests, local 2-up compare, linked pan/zoom, linked next/previous, overlay opacity. |
-| RS-02 | P2 | In progress | Archive/book navigation | NeeView book model, PicView archive navigation, Tacent folder continuity | ZIP/CBZ read-only pages, page scrubber, archive-only controls, edge page-turn zones, reader-mode keyboard routing, remembered read position, side-panel book history, explicit cover promotion, right-to-left page turns, old-scan filtering, cover-aware spreads, RAR/7z runtime review, and gated-runtime recovery copy shipped; RAR/7z implementation remains gated by runtime policy. |
+| RS-02 | P2 | Done | Archive/book navigation | NeeView book model, PicView archive navigation, Tacent folder continuity | ZIP/CBZ read-only pages, page scrubber, archive-only controls, edge page-turn zones, reader-mode keyboard routing, remembered read position, side-panel book history, explicit cover promotion, right-to-left page turns, old-scan filtering, cover-aware spreads, RAR/7z runtime review, managed RAR/CBR and 7z/CB7 expansion, diagnostics provenance, and generated archive coverage shipped. |
 | RS-03 | P0 | In progress | Folder sorting and Explorer fidelity | ImageGlass Explorer sort sync, NeeView/Geeqie folder models | App-owned sort modes first, visible sort control, sort-state tests, later Explorer saved-search/sort investigation. |
 | RS-04 | P2 | Planned | Metadata culling workflow | Geeqie XMP keywords/search, gThumb catalogs/comments, Tacent metadata sort | Sidecar decision, rating/reject model, folder filters, keep/reject/move actions, undo and no-original-write defaults. |
 | RS-05 | P1 | Done | Keyboard-first peek mode | QuickLook Spacebar preview, qView/JPEGView minimal chrome | `--peek` foundation, startup timing logs, close-on-Esc smoke script, parser regression tests, and shell-helper documentation are complete. |
@@ -114,6 +114,7 @@ The improvement-plan backlog is complete. `V20-33` cannot fully close until an a
 - 2026-05-05: Closed `V20-36` for ZIP/CBZ books by adding persisted, cover-aware two-page spreads that pair natural pages, keep explicit covers single, respect right-to-left composition, and advance by spread.
 - 2026-05-05: Closed roadmap `V20-34` by adding a current-folder gallery workbench with cached multi-column thumbnails, quick filtering, sort shortcuts, per-thumbnail context actions, current-item selection, Escape-to-close, and Enter-to-load coverage.
 - 2026-05-05: Continued `RS-02` / `V20-33` by adding direct-open and clipboard recovery states for gated RAR/CBR/7z/CB7 archive formats, explicitly steering users to extract or convert to CBZ without automatic runtime downloads.
+- 2026-05-05: Closed `RS-02` / `V20-33` by enabling managed SharpCompress read-only support for RAR/CBR and 7z/CB7 books, preserving unsafe-entry filtering, nested-archive skipping, per-entry byte caps, corrupt-archive recovery copy, diagnostics provenance, vulnerability scanning, and generated ZIP/7z regression coverage.
 
 ## Verification Standard
 
