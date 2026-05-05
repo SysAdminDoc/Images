@@ -176,6 +176,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ExitOverlayModeCommand = new RelayCommand(ExitOverlayMode, () => IsPinnedOverlayMode);
         OpenReferenceBoardCommand = new RelayCommand(OpenReferenceBoard);
         OpenDuplicateCleanupCommand = new RelayCommand(OpenDuplicateCleanup);
+        OpenFileHealthScanCommand = new RelayCommand(OpenFileHealthScan);
         OpenRecentFolderCommand = new RelayCommand(p => OpenRecentFolder(p as string), p => p is string);
         OpenRecentArchiveCommand = new RelayCommand(
             async p => await OpenRecentArchiveAsync(p as ArchiveReadPositionService.ArchiveReadHistoryItem),
@@ -1569,6 +1570,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand ExitOverlayModeCommand { get; }
     public ICommand OpenReferenceBoardCommand { get; }
     public ICommand OpenDuplicateCleanupCommand { get; }
+    public ICommand OpenFileHealthScanCommand { get; }
     public ICommand OpenRecentFolderCommand { get; }
     public ICommand OpenRecentArchiveCommand { get; }
     public ICommand OpenPreviewItemCommand { get; }
@@ -2851,6 +2853,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             cleanup.AddScanFolder(CurrentFolder);
 
         cleanup.Show();
+    }
+
+    private void OpenFileHealthScan()
+    {
+        var scan = new Images.FileHealthScanWindow
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        if (!string.IsNullOrWhiteSpace(CurrentFolder) && Directory.Exists(CurrentFolder))
+            scan.AddScanFolder(CurrentFolder);
+
+        scan.Show();
     }
 
     // Item 2: Settings window — opens modal, then re-reads persistent prefs so the viewer
