@@ -120,6 +120,35 @@ public sealed class FolderPreviewControllerTests
         });
     }
 
+    [Fact]
+    public void Refresh_WithThousandsOfFiles_OnlyRequestsNearbyThumbnails()
+    {
+        RunOnSta(() =>
+        {
+            var requested = 0;
+            var files = Enumerable
+                .Range(1, 5000)
+                .Select(i => $@"C:\photos\image{i}.jpg")
+                .ToArray();
+
+            using var controller = new FolderPreviewController(
+                Dispatcher.CurrentDispatcher,
+                isDisposed: () => false,
+                loadThumbnail: (_, _) =>
+                {
+                    Interlocked.Increment(ref requested);
+                    return null;
+                });
+
+            controller.Refresh(files, currentIndex: 2500);
+
+            PumpUntil(() => Volatile.Read(ref requested) == 9);
+
+            Assert.Equal(5000, controller.Items.Count);
+            Assert.Equal(9, Volatile.Read(ref requested));
+        });
+    }
+
     private static ImageSource CreateThumbnail()
     {
         var pixels = new byte[] { 0x21, 0x40, 0x5a, 0xff };
