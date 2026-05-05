@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-02B` is complete. Clipboard import now lives behind a focused service with test seams for clipboard contents, storage paths, time, GUID naming, and pruning. Regression tests cover file-list selection, unsupported clipboard data, image temp-file saves, unavailable storage, empty clipboard feedback, and pruning limits.
+`IP-03A` is complete. MainViewModel now has injectable settings, clipboard, delete, confirmation, and navigator dependencies for tests, and regression coverage protects folder-preview sort state, filmstrip persistence, paste-from-clipboard opening, and Recycle Bin confirmation preference behavior.
 
 ## Next Focus
 
-The next recommended slice is `IP-03A`: add state-level tests around the extracted folder-preview and clipboard-import paths, then continue `IP-02` with the next narrow extraction only after those state contracts are stable.
+The next recommended slice is `IP-02C`: continue extracting the oversized `MainViewModel` now that the first state contracts around folder preview, clipboard import, and delete confirmation are covered.
 
 ## Research Inputs
 
@@ -26,7 +26,7 @@ The next recommended slice is `IP-03A`: add state-level tests around the extract
 | --- | --- | --- | --- | --- | --- |
 | IP-01 | P0 | Planned | Test seams | Add seams around static/global services such as update checks, storage paths, thumbnail cache, shell integration, and clocks. | Unit tests can drive update-check retry policy, storage fallback, and thumbnail/cache behavior without real network or user profile state. |
 | IP-02 | P0 | In progress | MainViewModel structure | Split the oversized main view model into focused controllers/services while preserving current behavior. | OCR, folder preview, clipboard import, reload, rename, metadata, and update-check logic are independently readable and have narrower dependencies. |
-| IP-03 | P0 | Planned | UI state tests | Add regression coverage for risky WPF state transitions. | Tests or smoke harnesses cover reload failure, external file changes, OCR cancellation, thumbnail cancellation, rename debounce, and disabled/busy states. |
+| IP-03 | P0 | In progress | UI state tests | Add regression coverage for risky WPF state transitions. | Tests or smoke harnesses cover reload failure, external file changes, OCR cancellation, thumbnail cancellation, rename debounce, and disabled/busy states. |
 | IP-04 | P1 | Planned | Background tasks | Improve observability and ownership for fire-and-forget work. | Thumbnail generation, metadata reads, preloading, clipboard pruning, cache eviction, and update checks have clear cancellation/ownership and structured logging. |
 | IP-05 | P1 | Done | Update checks | Add focused update-check tests. | Timeout, network failure, HTTP failure, malformed release payload, newer release, current release, and trusted URL normalization are covered. |
 | IP-06 | P1 | Planned | Diagnostics UX | Add a compact diagnostics/status pane. | Users can inspect OCR, Ghostscript, Magick.NET, logs, storage paths, and last update-check state from the app without a terminal. |
@@ -74,6 +74,7 @@ The next recommended slice is `IP-03A`: add state-level tests around the extract
 - 2026-05-05: Added an open-source viewer research scan and converted its findings into explicit future tracks for compare mode, archive/book navigation, metadata culling, peek launch mode, technical image tools, viewer-side adjustments, cache health, shortcut/settings polish, and distribution trust.
 - 2026-05-05: Completed `IP-02A` / started `RS-03` by extracting folder-preview thumbnail orchestration into `FolderPreviewController`, adding app-owned sort modes, adding a visible sort control, and covering sort/preload behavior with tests.
 - 2026-05-05: Completed `IP-02B` by extracting clipboard import and clipboard-temp pruning into `ClipboardImportService`, adding deterministic file-list/image/storage/time/GUID seams, and covering clipboard import and pruning behavior with tests.
+- 2026-05-05: Completed `IP-03A` by adding isolated `MainViewModel` state tests for folder-preview sort state, filmstrip persistence, paste-from-clipboard opening, and Recycle Bin confirmation preference behavior.
 
 ## Verification Standard
 
