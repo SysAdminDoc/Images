@@ -529,6 +529,68 @@
                 <!-- Floating chrome (only when an image is present) -->
                 <Grid Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}">
 
+                    <!-- Archive book page-turn zones. Narrow edge targets keep drag-pan available
+                         across the center of the canvas while giving books a natural tap/click turn. -->
+                    <Button Command="{Binding PrevPageCommand}"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Stretch"
+                            Width="112"
+                            Padding="0"
+                            BorderThickness="0"
+                            Background="#01000000"
+                            Cursor="Hand"
+                            Visibility="{Binding IsArchiveBook, Converter={StaticResource BoolToVis}}"
+                            ToolTip="Previous book page"
+                            AutomationProperties.Name="Previous book page zone">
+                        <Border Width="38"
+                                Height="82"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Margin="18,0,0,0"
+                                CornerRadius="{StaticResource Radius.Lg.CR}"
+                                Background="{StaticResource FloatingChromeBrush}"
+                                BorderBrush="{StaticResource FloatingChromeBorderBrush}"
+                                BorderThickness="1"
+                                Opacity="0.72">
+                            <TextBlock Text="&#xE76B;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="18"
+                                       Foreground="{StaticResource FloatingChromeTextBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                    </Button>
+
+                    <Button Command="{Binding NextPageCommand}"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Stretch"
+                            Width="112"
+                            Padding="0"
+                            BorderThickness="0"
+                            Background="#01000000"
+                            Cursor="Hand"
+                            Visibility="{Binding IsArchiveBook, Converter={StaticResource BoolToVis}}"
+                            ToolTip="Next book page"
+                            AutomationProperties.Name="Next book page zone">
+                        <Border Width="38"
+                                Height="82"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Margin="0,0,18,0"
+                                CornerRadius="{StaticResource Radius.Lg.CR}"
+                                Background="{StaticResource FloatingChromeBrush}"
+                                BorderBrush="{StaticResource FloatingChromeBorderBrush}"
+                                BorderThickness="1"
+                                Opacity="0.72">
+                            <TextBlock Text="&#xE76C;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="18"
+                                       Foreground="{StaticResource FloatingChromeTextBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                    </Button>
+
                     <!-- Hover-reveal nav arrows -->
                     <Button x:Name="PrevArrow"
                             Style="{StaticResource NavArrowButton}"
@@ -863,11 +925,11 @@
                                             <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="← / →" />
-                                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Previous / next image" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Previous / next image or book page" />
                                         <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Home / End" />
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="First / last image" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="First / last image or book page" />
                                         <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Space / Bksp" />
-                                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Next / previous image" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Next / previous image or book page" />
                                         <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Mouse X1 / X2" />
                                         <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Previous / next image (5-button mouse)" />
                                         <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="F5" />

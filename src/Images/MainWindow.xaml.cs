@@ -414,14 +414,22 @@ public partial class MainWindow : Window
                 break;
             case Key.Left:
             case Key.Back:
-                Vm.PrevCommand.Execute(null); e.Handled = true; break;
+                if (Vm.IsArchiveBook) Vm.PrevPageCommand.Execute(null);
+                else Vm.PrevCommand.Execute(null);
+                e.Handled = true; break;
             case Key.Right:
             case Key.Space:
-                Vm.NextCommand.Execute(null); e.Handled = true; break;
+                if (Vm.IsArchiveBook) Vm.NextPageCommand.Execute(null);
+                else Vm.NextCommand.Execute(null);
+                e.Handled = true; break;
             case Key.Home:
-                Vm.FirstCommand.Execute(null); e.Handled = true; break;
+                if (Vm.IsArchiveBook) Vm.FirstPageCommand.Execute(null);
+                else Vm.FirstCommand.Execute(null);
+                e.Handled = true; break;
             case Key.End:
-                Vm.LastCommand.Execute(null); e.Handled = true; break;
+                if (Vm.IsArchiveBook) Vm.LastPageCommand.Execute(null);
+                else Vm.LastCommand.Execute(null);
+                e.Handled = true; break;
             case Key.Delete:
                 Vm.DeleteCommand.Execute(null); e.Handled = true; break;
             case Key.F5:
