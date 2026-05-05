@@ -177,6 +177,35 @@ public sealed class NonDestructiveEditServiceTests
     }
 
     [Fact]
+    public void Export_AppliesRedEyeOperation()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteRedEyeImage(temp.Path, "source.png");
+        var baseline = ImageExportService.Save(
+            source,
+            Path.Combine(temp.Path, "baseline.png"),
+            []);
+
+        var service = new NonDestructiveEditService();
+        var mutation = service.AppendOperation(
+            source,
+            "red-eye",
+            RedEyeCorrectionService.ToEditParameters(
+                new[] { new RedEyeCorrectionMark(2, 2, 3, 1, 0.1) }));
+
+        Assert.True(mutation.Success);
+
+        var result = service.Export(source, Path.Combine(temp.Path, "red-eye-fixed.png"));
+
+        Assert.True(result.Success);
+        Assert.Equal(1, result.AppliedOperationCount);
+        Assert.False(File.ReadAllBytes(baseline).SequenceEqual(File.ReadAllBytes(result.OutputPath)));
+
+        var provenance = XDocument.Load(result.ProvenanceSidecarPath).ToString();
+        Assert.Contains("red-eye", provenance, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void CreateVirtualCopy_ForksOperationsWithoutDuplicatingPixels()
     {
         using var temp = TestDirectory.Create();
@@ -210,6 +239,32 @@ public sealed class NonDestructiveEditServiceTests
         {
             Format = MagickFormat.Png
         };
+        image.Write(path);
+        return path;
+    }
+
+    private static string WriteRedEyeImage(string folder, string name)
+    {
+        var path = Path.Combine(folder, name);
+        var pixels = new byte[5 * 5 * 4];
+        for (var index = 0; index < pixels.Length; index += 4)
+        {
+            pixels[index] = 28;
+            pixels[index + 1] = 28;
+            pixels[index + 2] = 28;
+            pixels[index + 3] = 255;
+        }
+
+        var centerIndex = ((2 * 5) + 2) * 4;
+        pixels[centerIndex] = 240;
+        pixels[centerIndex + 1] = 22;
+        pixels[centerIndex + 2] = 22;
+
+        using var image = new MagickImage(MagickColors.Black, 5, 5)
+        {
+            Format = MagickFormat.Png
+        };
+        image.ImportPixels(pixels, new PixelImportSettings(5, 5, StorageType.Char, PixelMapping.RGBA));
         image.Write(path);
         return path;
     }
