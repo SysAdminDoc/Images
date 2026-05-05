@@ -8,6 +8,7 @@ All notable changes to **Images** are documented here.
 
 - **Improvement tracking** — added a repo-local improvement plan that tracks the 15 engineering, UX, reliability, and CI follow-up items from the May 2026 quality review.
 - **Shell and clipboard integration** — About, crash recovery, settings, and viewer actions now use shared helpers for opening files/folders/URLs and copying text, reducing duplicated process and clipboard handling.
+- **Update-check testability** — update checks now have seams for HTTP, clock, retry-state recording, and state-file behavior, plus non-network tests for release parsing and transient failure policy.
 - **OCR workflow polish** — text extraction now has a persistent in-view busy/active status, a cancel-aware toolbar state, OCR readiness in Settings/About, and OCR language-pack status in diagnostics.
 - **Trust copy** — README destructive-action wording now reflects the Recycle Bin confirmation flow.
 

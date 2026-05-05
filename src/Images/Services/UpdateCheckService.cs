@@ -47,15 +47,21 @@ public static class UpdateCheckService
     /// failure (timeout, network, 404) returns <see cref="CheckResult.Error"/> non-null instead
     /// of throwing; caller toasts the error.
     /// </summary>
-    public static async Task<CheckResult> CheckAsync(CancellationToken ct = default)
+    public static Task<CheckResult> CheckAsync(CancellationToken ct = default)
+        => CheckAsync(_http, () => DateTime.UtcNow, ct);
+
+    internal static async Task<CheckResult> CheckAsync(HttpClient http, Func<DateTime> utcNow, CancellationToken ct = default)
     {
-        var startedAt = DateTime.UtcNow;
+        ArgumentNullException.ThrowIfNull(http);
+        ArgumentNullException.ThrowIfNull(utcNow);
+
+        var startedAt = utcNow();
         try
         {
             _log.LogInformation("update-check: GET {Url}", ReleasesApiUrl);
-            using var resp = await _http.GetAsync(ReleasesApiUrl, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
+            using var resp = await http.GetAsync(ReleasesApiUrl, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
             var bytes = resp.Content.Headers.ContentLength ?? -1;
-            var ms = (int)(DateTime.UtcNow - startedAt).TotalMilliseconds;
+            var ms = (int)(utcNow() - startedAt).TotalMilliseconds;
             _log.LogInformation("update-check: {Status} {Bytes} bytes in {Ms} ms", (int)resp.StatusCode, bytes, ms);
 
             if (!resp.IsSuccessStatusCode)
@@ -95,11 +101,19 @@ public static class UpdateCheckService
         => new(false, null, null, error, ShouldUpdateLastChecked: false);
 
     public static void RecordLastCheckedIfAppropriate(CheckResult result)
+        => RecordLastCheckedIfAppropriate(result, value => LastCheckedUtc = value, () => DateTime.UtcNow);
+
+    internal static void RecordLastCheckedIfAppropriate(
+        CheckResult result,
+        Action<DateTime?> writeLastCheckedUtc,
+        Func<DateTime> utcNow)
     {
         ArgumentNullException.ThrowIfNull(result);
+        ArgumentNullException.ThrowIfNull(writeLastCheckedUtc);
+        ArgumentNullException.ThrowIfNull(utcNow);
 
         if (result.ShouldUpdateLastChecked)
-            LastCheckedUtc = DateTime.UtcNow;
+            writeLastCheckedUtc(utcNow());
     }
 
     private static async Task<GitHubRelease?> ReadReleaseJsonAsync(HttpContent content, CancellationToken ct)
@@ -177,40 +191,48 @@ public static class UpdateCheckService
     {
         get
         {
-            try
-            {
-                var path = StateFilePath();
-                if (path is null) return null;
-                if (!File.Exists(path)) return null;
-                var info = new FileInfo(path);
-                if (info.Length > MaxStateFileBytes)
-                {
-                    _log.LogWarning("update-check: ignoring oversized state file {Path} ({Bytes} bytes)", path, info.Length);
-                    return null;
-                }
-
-                var state = JsonSerializer.Deserialize(File.ReadAllText(path), UpdateStateJsonContext.Default.UpdateState);
-                return state?.LastCheckedUtc;
-            }
-            catch (Exception ex)
-            {
-                _log.LogWarning(ex, "update-check: could not read state file");
-                return null;
-            }
+            return ReadLastCheckedUtcFromFile(StateFilePath());
         }
         set
         {
-            try
+            WriteLastCheckedUtcToFile(StateFilePath(), value);
+        }
+    }
+
+    internal static DateTime? ReadLastCheckedUtcFromFile(string? path)
+    {
+        try
+        {
+            if (path is null) return null;
+            if (!File.Exists(path)) return null;
+            var info = new FileInfo(path);
+            if (info.Length > MaxStateFileBytes)
             {
-                var path = StateFilePath();
-                if (path is null) return;
-                var state = new UpdateState(value);
-                WriteStateAtomically(path, JsonSerializer.Serialize(state, UpdateStateJsonContext.Default.UpdateState));
+                _log.LogWarning("update-check: ignoring oversized state file {Path} ({Bytes} bytes)", path, info.Length);
+                return null;
             }
-            catch (Exception ex)
-            {
-                _log.LogWarning(ex, "update-check: could not write state file");
-            }
+
+            var state = JsonSerializer.Deserialize(File.ReadAllText(path), UpdateStateJsonContext.Default.UpdateState);
+            return state?.LastCheckedUtc;
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "update-check: could not read state file");
+            return null;
+        }
+    }
+
+    internal static void WriteLastCheckedUtcToFile(string? path, DateTime? value)
+    {
+        try
+        {
+            if (path is null) return;
+            var state = new UpdateState(value);
+            WriteStateAtomically(path, JsonSerializer.Serialize(state, UpdateStateJsonContext.Default.UpdateState));
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "update-check: could not write state file");
         }
     }
 
@@ -250,19 +272,25 @@ public static class UpdateCheckService
     public static bool IsDueForBackgroundCheck()
     {
         // Respect user opt-out first — a disabled setting silently skips the network call.
-        if (!SettingsService.Instance.GetBool(Keys.UpdateCheckEnabled, defaultValue: false))
+        return IsDueForBackgroundCheck(
+            SettingsService.Instance.GetBool(Keys.UpdateCheckEnabled, defaultValue: false),
+            LastCheckedUtc,
+            DateTime.UtcNow);
+    }
+
+    internal static bool IsDueForBackgroundCheck(bool optedIn, DateTime? last, DateTime utcNow)
+    {
+        if (!optedIn)
             return false;
 
-        var last = LastCheckedUtc;
         if (last is null) return true;
-        var now = DateTime.UtcNow;
-        if (last.Value > now + TimeSpan.FromMinutes(5))
+        if (last.Value > utcNow + TimeSpan.FromMinutes(5))
         {
             _log.LogWarning("update-check: ignoring future last-checked timestamp {LastCheckedUtc}", last.Value);
             return true;
         }
 
-        return (now - last.Value) >= TimeSpan.FromHours(24);
+        return (utcNow - last.Value) >= TimeSpan.FromHours(24);
     }
 
     public static bool OptedIn
