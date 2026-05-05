@@ -47,7 +47,7 @@ The improvement-plan backlog is complete. Continue with the source-derived works
 | ID | Priority | Status | Workstream | Source signal | Planned sequence |
 | --- | --- | --- | --- | --- | --- |
 | RS-01 | P2 | Planned | Local comparison mode | nomacs synchronized views and opacity overlay | Design doc, UI-state tests, local 2-up compare, linked pan/zoom, linked next/previous, overlay opacity. |
-| RS-02 | P2 | In progress | Archive/book navigation | NeeView book model, PicView archive navigation, Tacent folder continuity | ZIP/CBZ read-only pages, page scrubber, archive-only controls, remembered read position, side-panel book history, and explicit cover promotion shipped; next: additional reader comfort, spread handling, and dependency review for RAR/7z. |
+| RS-02 | P2 | In progress | Archive/book navigation | NeeView book model, PicView archive navigation, Tacent folder continuity | ZIP/CBZ read-only pages, page scrubber, archive-only controls, edge page-turn zones, reader-mode keyboard routing, remembered read position, side-panel book history, and explicit cover promotion shipped; next: additional reader comfort, spread handling, and dependency review for RAR/7z. |
 | RS-03 | P0 | In progress | Folder sorting and Explorer fidelity | ImageGlass Explorer sort sync, NeeView/Geeqie folder models | App-owned sort modes first, visible sort control, sort-state tests, later Explorer saved-search/sort investigation. |
 | RS-04 | P2 | Planned | Metadata culling workflow | Geeqie XMP keywords/search, gThumb catalogs/comments, Tacent metadata sort | Sidecar decision, rating/reject model, folder filters, keep/reject/move actions, undo and no-original-write defaults. |
 | RS-05 | P1 | Done | Keyboard-first peek mode | QuickLook Spacebar preview, qView/JPEGView minimal chrome | `--peek` foundation, startup timing logs, close-on-Esc smoke script, parser regression tests, and shell-helper documentation are complete. |
@@ -107,6 +107,7 @@ The improvement-plan backlog is complete. Continue with the source-derived works
 - 2026-05-05: Continued `RS-02` / `V20-33` by adding a persisted side-panel book history for ZIP/CBZ archives, including page progress, missing-file recovery feedback, and service/view-model coverage.
 - 2026-05-05: Continued `RS-02` / `V20-33` by promoting explicit cover/front/folder entries ahead of natural archive page order, with decoder provenance and archive-service coverage.
 - 2026-05-05: Continued `RS-02` / `V20-36` by adding archive-only side-panel reader controls for current page progress plus first/previous/next/last page actions.
+- 2026-05-05: Continued `RS-02` / `V20-36` by adding archive-only edge page-turn click zones and routing arrow/Home/End keys to book pages while a ZIP/CBZ book is active.
 
 ## Verification Standard
 
