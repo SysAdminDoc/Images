@@ -148,6 +148,7 @@ Images carries its own diagnostics surface — no terminal required for the comm
 - [Privacy policy](docs/privacy-policy.md) — exactly one network call (the opt-out update check), every file persisted to disk, and a four-step verification recipe.
 - [Distribution trust plan](docs/distribution-trust.md) — WinGet/Scoop scope, checksum continuity, signing options, and verification copy.
 - [Optional runtime and integration policy](docs/integration-policy.md) — license, provenance, CVE, process-boundary, and release gates for external runtimes.
+- [Archive runtime review](docs/archive-runtime-review.md) — ZIP/CBZ scope plus RAR/7z dependency gates for licensing, provenance, process isolation, and generated corpus coverage.
 - [Peek mode](docs/peek-mode.md) — shell-helper invocation, local startup timing diagnostics, and manual smoke steps.
 
 ## Credits / inspiration
