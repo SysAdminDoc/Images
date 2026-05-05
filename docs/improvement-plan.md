@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-04B` is complete, closing `IP-04`. Manual/background update checks are now included in tracked background work, and diagnostics includes thumbnail-cache health: size, file count, temp-file count, cap, and last eviction sweep.
+`IP-01A` is complete, closing `IP-01`. App storage roots, default settings construction, and default thumbnail-cache construction now have deterministic seams and tests for fallback/unavailable-storage behavior.
 
 ## Next Focus
 
-The next recommended slice is `IP-01A`: finish the remaining high-priority test-seam work, starting with storage-path and thumbnail-cache seams that still depend on static/default runtime state.
+The next recommended slice is `IP-10A`: add safe thumbnail-cache controls now that diagnostics can report cache health.
 
 ## Research Inputs
 
@@ -24,7 +24,7 @@ The next recommended slice is `IP-01A`: finish the remaining high-priority test-
 
 | ID | Priority | Status | Area | Goal | Acceptance criteria |
 | --- | --- | --- | --- | --- | --- |
-| IP-01 | P0 | Planned | Test seams | Add seams around static/global services such as update checks, storage paths, thumbnail cache, shell integration, and clocks. | Unit tests can drive update-check retry policy, storage fallback, and thumbnail/cache behavior without real network or user profile state. |
+| IP-01 | P0 | Done | Test seams | Add seams around static/global services such as update checks, storage paths, thumbnail cache, shell integration, and clocks. | Unit tests can drive update-check retry policy, storage fallback, and thumbnail/cache behavior without real network or user profile state. |
 | IP-02 | P0 | Done | MainViewModel structure | Split the oversized main view model into focused controllers/services while preserving current behavior. | OCR, folder preview, clipboard import, reload, rename, metadata, and update-check logic are independently readable and have narrower dependencies. |
 | IP-03 | P0 | Done | UI state tests | Add regression coverage for risky WPF state transitions. | Tests or smoke harnesses cover reload failure, external file changes, OCR cancellation, thumbnail cancellation, rename debounce, and disabled/busy states. |
 | IP-04 | P1 | Done | Background tasks | Improve observability and ownership for fire-and-forget work. | Thumbnail generation, metadata reads, preloading, clipboard pruning, cache eviction, and update checks have clear cancellation/ownership and structured logging. |
@@ -92,6 +92,7 @@ The next recommended slice is `IP-01A`: finish the remaining high-priority test-
 - 2026-05-05: Completed `IP-09B` and closed `IP-09` by retaining actionable update-check failure status, marking thumbnail placeholder failures, and relaying thumbnail-generation failure counts through the main secondary status surface.
 - 2026-05-05: Completed `IP-04A` by adding a shared `BackgroundTaskTracker`, routing folder thumbnails, metadata reads, preload decodes, clipboard-temp pruning, and thumbnail-cache eviction through it, and exposing session task counts in diagnostics with regression coverage.
 - 2026-05-05: Completed `IP-04B` and closed `IP-04` by adding async update-check tracking plus thumbnail-cache health diagnostics and focused tests for async task tracking, update-check tracking, and cache health scans.
+- 2026-05-05: Completed `IP-01A` and closed `IP-01` by adding deterministic app-storage, settings-default, and thumbnail-cache-default seams plus regression tests for fallback, unavailable storage, and unsafe relative path segments.
 
 ## Verification Standard
 

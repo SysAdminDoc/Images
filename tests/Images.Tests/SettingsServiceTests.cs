@@ -57,4 +57,15 @@ public sealed class SettingsServiceTests
 
         Assert.False(service.GetBool(Keys.ConfirmRecycleBinDelete, true));
     }
+
+    [Fact]
+    public void CreateDefault_WhenStorageRootIsUnavailable_DisablesPersistenceSafely()
+    {
+        var service = SettingsService.CreateDefault(() => null);
+
+        service.SetBool(Keys.ConfirmRecycleBinDelete, false);
+
+        Assert.True(service.GetBool(Keys.ConfirmRecycleBinDelete, true));
+        Assert.Empty(service.GetRecentFolders());
+    }
 }

@@ -41,4 +41,28 @@ public sealed class ThumbnailCacheTests
         Assert.Equal(0, health.FileCount);
         Assert.Equal(0, health.TempFileCount);
     }
+
+    [Fact]
+    public void CreateDefault_WhenStorageRootIsUnavailable_ReturnsUnavailableCache()
+    {
+        var cache = ThumbnailCache.CreateDefault(() => null);
+
+        var health = cache.GetHealth();
+
+        Assert.False(health.IsAvailable);
+        Assert.Null(health.Root);
+        Assert.Equal(0, health.FileCount);
+    }
+
+    [Fact]
+    public void CreateDefault_WhenStorageRootExists_ReturnsAvailableCache()
+    {
+        using var temp = TestDirectory.Create();
+
+        var cache = ThumbnailCache.CreateDefault(() => temp.Path);
+
+        var health = cache.GetHealth();
+        Assert.True(health.IsAvailable);
+        Assert.Equal(temp.Path, health.Root);
+    }
 }
