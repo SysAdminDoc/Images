@@ -53,6 +53,7 @@
                         <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
+                        <RowDefinition />
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" Text="Build" />
@@ -69,6 +70,9 @@
 
                     <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" Text="Documents" />
                     <TextBlock Grid.Row="4" Grid.Column="1" x:Name="DocumentCodecText" Style="{StaticResource MetaValue}" TextWrapping="Wrap" />
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetaLabel}" Text="Text extraction" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" x:Name="OcrStatusText" Style="{StaticResource MetaValue}" TextWrapping="Wrap" />
                 </Grid>
             </Border>
 

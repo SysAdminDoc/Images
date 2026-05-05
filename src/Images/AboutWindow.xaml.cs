@@ -24,6 +24,7 @@ public partial class AboutWindow : Window
 
         CodecText.Text = CodecCapabilityService.BuildOverviewText();
         DocumentCodecText.Text = CodecCapabilityService.BuildDocumentStatusText();
+        OcrStatusText.Text = OcrCapabilityService.BuildOverviewText();
         ApplyCodecSummary(CodecCapabilityService.BuildSummary());
         PopulateCapabilityMatrix();
         PopulateProvenance();
