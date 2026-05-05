@@ -1,0 +1,50 @@
+<UserControl x:Class="Images.Controls.RetouchBrushOverlay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:svc="clr-namespace:Images.Services"
+             IsHitTestVisible="False"
+             Background="Transparent">
+    <Grid>
+        <Canvas x:Name="OverlayCanvas">
+            <ItemsControl ItemsSource="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=Strokes}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type svc:RetouchBrushStroke}">
+                        <Canvas>
+                            <Line X1="{Binding SourceX}"
+                                  Y1="{Binding SourceY}"
+                                  X2="{Binding TargetX}"
+                                  Y2="{Binding TargetY}"
+                                  Stroke="{StaticResource AccentBrush}"
+                                  StrokeThickness="1"
+                                  StrokeDashArray="4 3"
+                                  Opacity="0.45" />
+                            <Ellipse Canvas.Left="{Binding SourceLeft}"
+                                     Canvas.Top="{Binding SourceTop}"
+                                     Width="{Binding Diameter}"
+                                     Height="{Binding Diameter}"
+                                     Stroke="{StaticResource YellowBrush}"
+                                     StrokeThickness="1.5"
+                                     StrokeDashArray="2 2"
+                                     Fill="#10F9E2AF"
+                                     Opacity="0.78" />
+                            <Ellipse Canvas.Left="{Binding TargetLeft}"
+                                     Canvas.Top="{Binding TargetTop}"
+                                     Width="{Binding Diameter}"
+                                     Height="{Binding Diameter}"
+                                     Stroke="{StaticResource AccentBrush}"
+                                     StrokeThickness="2"
+                                     StrokeDashArray="2 2"
+                                     Fill="#1289B4FA"
+                                     Opacity="0.84" />
+                        </Canvas>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Canvas>
+    </Grid>
+</UserControl>

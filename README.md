@@ -45,6 +45,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Non-destructive adjustments** — press `Ctrl+Alt+A` for a modeless levels, curve, and HSL workbench with live preview, reset, and Enter-to-apply behavior. Save a copy applies the adjustment stack without modifying the source file.
 - **Local exposure brush** — press `Ctrl+Alt+D` to paint non-destructive dodge or burn strokes directly on the image. The side panel exposes tone, radius, and strength controls; Enter adds the soft-brush stroke stack to edit history, and Save a copy renders it without changing the source file.
 - **Red-eye correction** — press `Ctrl+Alt+Y` to mark red pupils directly on the image. The side panel exposes radius, strength, and red-threshold controls; Enter adds the correction marks to edit history, and Save a copy renders them without changing the source file.
+- **Clone/heal retouch** — press `Ctrl+Alt+H`, Alt-click or first-click a clean source, then paint clone-stamp or healing-brush strokes over the target area. The side panel exposes mode, radius, and strength controls; Save a copy renders the retouch stack without changing the source file.
 - **Reference board mode** — press `Ctrl+B` to open a separate local board seeded from the current image. Drop supported files, arrange image cards, add notes and group frames, pin the board above other windows, zoom the canvas, and export the composed board as PNG.
 - **Duplicate cleanup center** — press `Ctrl+Shift+D` or use the side-panel Cleanup card to scan local folders for exact SHA-256 duplicates and perceptually similar images, prefer keep candidates from reference folders, review pairs side by side, mark false positives, and move extras to app-local quarantine or the Recycle Bin.
 - **File health scan** — press `Ctrl+Shift+H` to find files with mismatched image extensions, corrupt supported images, zero-byte files, and temporary/partial-download artifacts, then rename detected extensions, mark reviewed, or move files to app-local quarantine.
@@ -113,6 +114,7 @@ OCR depends on Microsoft Windows OCR optional capabilities. The installer instal
 | **Ctrl+Alt+A** | Open adjustments workbench |
 | **Ctrl+Alt+D** | Toggle local exposure brush |
 | **Ctrl+Alt+Y** | Toggle red-eye correction |
+| **Ctrl+Alt+H** | Toggle clone/heal retouch |
 | **E** | Extract text (OCR) — toggle overlay |
 | **F5** | Rescan current directory |
 | **G** | Toggle gallery workbench |
@@ -164,6 +166,7 @@ src/Images/
 │   ├── ImageAdjustmentService.cs # Levels, curve, and HSL adjustment planning/rendering
 │   ├── LocalExposureBrushService.cs # Soft dodge/burn brush strokes for non-destructive local exposure
 │   ├── RedEyeCorrectionService.cs # Red-dominant pupil correction marks for non-destructive red-eye removal
+│   ├── RetouchBrushService.cs # Clone stamp and healing brush retouch operations
 │   ├── ImageMetadataService.cs # Read-only EXIF summary for the Details panel and HUD
 │   ├── CodecCapabilityService.cs # About-window codec summary and copyable diagnostics
 │   ├── SupportedImageFormats.cs # Central extension catalog for discovery/dialogs
