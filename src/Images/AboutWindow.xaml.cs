@@ -82,6 +82,38 @@ public partial class AboutWindow : Window
         }
     }
 
+    private void CopySystemInfoButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            ClipboardService.SetText(CliReport.BuildSystemInfo());
+            ShowUpdateStatus("System info copied to clipboard.", "Success");
+        }
+        catch (Exception ex)
+        {
+            ShowUpdateStatus($"Could not copy system info: {ex.Message}", "Warning");
+        }
+    }
+
+    private void OpenLogsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var dir = AppStorage.TryGetAppDirectory("Logs") ?? Path.GetDirectoryName(CrashLog.LogPath);
+        if (string.IsNullOrWhiteSpace(dir))
+        {
+            ShowUpdateStatus("Log folder is unavailable.", "Warning");
+            return;
+        }
+
+        try
+        {
+            ShellIntegration.OpenFolder(dir);
+        }
+        catch (Exception ex)
+        {
+            ShowUpdateStatus($"Could not open logs: {ex.Message}", "Warning");
+        }
+    }
+
     /// <summary>
     /// V20-37 / item 33: writes the same content as `Images.exe --system-info` to a temp
     /// file (UTF-8 with BOM so Notepad opens it cleanly) and reveals it in Explorer.

@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-06A` is complete. About now includes a compact diagnostics status section for OCR, Ghostscript, Magick.NET, logs, storage, and update-check state, backed by a regression-tested composition service.
+`IP-06B` is complete, closing `IP-06`. About now includes a compact diagnostics status section for OCR, Ghostscript, Magick.NET, logs, storage, and update-check state, with local actions to copy system info, copy the codec report, open logs, and open the app data folder.
 
 ## Next Focus
 
-The next recommended slice is `IP-06B`: add diagnostics affordances for opening or copying the most relevant paths and reports directly from the status pane.
+The next recommended slice is `IP-07A`: improve first-run guidance so new users can understand local privacy defaults, broad format support, OCR readiness, document-preview requirements, and recovery links without reading docs.
 
 ## Research Inputs
 
@@ -29,7 +29,7 @@ The next recommended slice is `IP-06B`: add diagnostics affordances for opening 
 | IP-03 | P0 | Done | UI state tests | Add regression coverage for risky WPF state transitions. | Tests or smoke harnesses cover reload failure, external file changes, OCR cancellation, thumbnail cancellation, rename debounce, and disabled/busy states. |
 | IP-04 | P1 | Planned | Background tasks | Improve observability and ownership for fire-and-forget work. | Thumbnail generation, metadata reads, preloading, clipboard pruning, cache eviction, and update checks have clear cancellation/ownership and structured logging. |
 | IP-05 | P1 | Done | Update checks | Add focused update-check tests. | Timeout, network failure, HTTP failure, malformed release payload, newer release, current release, and trusted URL normalization are covered. |
-| IP-06 | P1 | In progress | Diagnostics UX | Add a compact diagnostics/status pane. | Users can inspect OCR, Ghostscript, Magick.NET, logs, storage paths, and last update-check state from the app without a terminal. |
+| IP-06 | P1 | Done | Diagnostics UX | Add a compact diagnostics/status pane. | Users can inspect OCR, Ghostscript, Magick.NET, logs, storage paths, and last update-check state from the app without a terminal. |
 | IP-07 | P1 | Planned | First run | Improve first-run guidance. | New users can discover supported formats, OCR readiness, document-preview requirements, privacy defaults, and recovery links without reading docs. |
 | IP-08 | P1 | Planned | Long-running state | Standardize busy/progress/cancel affordances. | OCR, metadata reads, document decode, large exports, and background update checks use consistent status text, disabled states, and cancellation where available. |
 | IP-09 | P1 | Planned | Empty/error states | Extend polished failure and empty states across secondary flows. | Empty folder, unsupported clipboard data, missing recent folders, thumbnail-cache failure, and offline update checks have calm, actionable feedback. |
@@ -59,8 +59,8 @@ The next recommended slice is `IP-06B`: add diagnostics affordances for opening 
 
 ## Implementation Order
 
-1. Add diagnostics affordances for opening or copying the most relevant paths and reports directly from the status pane under `IP-06`.
-2. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
+1. Improve first-run guidance under `IP-07`.
+2. Iterate on long-running and empty/error states once diagnostics surfaces are stable.
 3. Scope `IP-16` design docs once near-term reliability and testability slices are stable.
 4. Scope `IP-17` after the next stable release artifact path is verified.
 
@@ -83,6 +83,7 @@ The next recommended slice is `IP-06B`: add diagnostics affordances for opening 
 - 2026-05-05: Completed `IP-03C` by adding an internal `MainViewModel` controller-injection seam and tests that relay metadata, OCR, and update-check state through the view model.
 - 2026-05-05: Completed `IP-03D` and closed `IP-03` by keeping folder refresh enabled after external current-file removal and covering rename debounce, stale-folder recovery, and command enablement states.
 - 2026-05-05: Completed `IP-06A` by adding a compact About diagnostics status section for OCR, Ghostscript, Magick.NET, logs, storage, and update-check state with regression-tested status composition.
+- 2026-05-05: Completed `IP-06B` and closed `IP-06` by adding diagnostics-local actions for copying system info, copying the codec report, opening logs, and opening the app data folder.
 
 ## Verification Standard
 
