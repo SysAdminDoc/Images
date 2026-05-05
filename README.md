@@ -27,6 +27,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Archive book previews** for ZIP and CBZ. Images opens supported image entries as read-only pages, ignores unsafe or nested archive entries, and keeps archive navigation inside the existing page controls with a scrubber for quick jumps.
 - **Animated GIFs play inline** — multi-frame GIFs (and animated WebP / APNG when the Magick build supports them) decode via `MagickImageCollection.Coalesce()` and cycle through `ZoomPanImage` with the original per-frame delays + loop count intact. A green "N frames" chip in the bottom toolbar marks animated files.
 - **Classic Windows 7 Photo Viewer layout** — centered image, bottom toolbar, hover-reveal circular arrows on the left and right edges. But in **Catppuccin Mocha** dark.
+- **Peek mode** — `Images.exe --peek "C:\path\to\image.jpg"` opens a chromeless, topmost preview window that closes with Escape and leaves normal window settings alone.
 - **Live inline rename** — split stem + extension editor on the right. Extension is locked by default (no more accidentally renaming `photo.jpg` → `photo.jp`). Debounced auto-save; no Save button.
 - **Conflict-safe** — if a target name already exists in the folder, the rename preview shows exactly what it will become (`name (2).jpg`) before it commits.
 - **Recent Renames panel** — the last 10 renames are stacked on the side with **Undo** buttons.
@@ -147,6 +148,7 @@ Images carries its own diagnostics surface — no terminal required for the comm
 - [Privacy policy](docs/privacy-policy.md) — exactly one network call (the opt-out update check), every file persisted to disk, and a four-step verification recipe.
 - [Distribution trust plan](docs/distribution-trust.md) — WinGet/Scoop scope, checksum continuity, signing options, and verification copy.
 - [Optional runtime and integration policy](docs/integration-policy.md) — license, provenance, CVE, process-boundary, and release gates for external runtimes.
+- [Peek mode](docs/peek-mode.md) — shell-helper invocation, local startup timing diagnostics, and manual smoke steps.
 
 ## Credits / inspiration
 
