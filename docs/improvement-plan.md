@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-11A` is complete, closing `IP-11`. Navigation and folder-preview tests now cover thousands of files, volatile folder rescans, enumeration failure recovery, deleted files, and bounded thumbnail requests.
+`IP-12A` is complete, closing `IP-12`. Generated decode/export corpus tests now cover static raster formats, WebP fallback, multi-page TIFF, animated GIF, SVG vector decode, and PNG/JPEG/WebP/TIFF/GIF/APNG export round-trips without checked-in binary assets.
 
 ## Next Focus
 
-The next recommended slice is `IP-12A`: add a small decode/export regression corpus that can run without external assets.
+The next recommended slice is `IP-16A`: write scoped design docs for the highest-value future product differentiators before implementation starts.
 
 ## Research Inputs
 
@@ -35,7 +35,7 @@ The next recommended slice is `IP-12A`: add a small decode/export regression cor
 | IP-09 | P1 | Done | Empty/error states | Extend polished failure and empty states across secondary flows. | Empty folder, unsupported clipboard data, missing recent folders, thumbnail-cache failure, and offline update checks have calm, actionable feedback. |
 | IP-10 | P2 | Done | Cache health | Expose thumbnail cache health controls. | Settings/About can show cache size and clear or rebuild the disposable thumbnail cache safely. |
 | IP-11 | P2 | Done | Stress testing | Add large-folder and volatile-folder stress coverage. | Navigation and thumbnail behavior are validated with thousands of files, deleted files, slow folders, and rapid directory changes. |
-| IP-12 | P2 | Planned | Decode/export corpus | Add a small format corpus for decode/export regression tests. | Representative PNG, JPEG, WebP, TIFF, GIF/APNG, and document/vector samples protect codec upgrades and export behavior. |
+| IP-12 | P2 | Done | Decode/export corpus | Add a small format corpus for decode/export regression tests. | Representative PNG, JPEG, WebP, TIFF, GIF/APNG, and document/vector samples protect codec upgrades and export behavior. |
 | IP-13 | P1 | Done | Shell/clipboard integration | Centralize opening URLs/files/folders and copying text. | About, crash dialog, settings, and main viewer use shared helpers with consistent error behavior and safer Explorer argument handling. |
 | IP-14 | P2 | Done | Settings persistence | Strengthen settings schema and corruption tests. | Tests cover corruption quarantine, unavailable storage, defaults, migration behavior, and future timestamp handling. |
 | IP-15 | P1 | Done | CI/release gates | Ensure CI exercises the real verification path. | CI runs solution build, tests, whitespace check, vulnerability gate, version sync gate, and CLI smoke commands used by local release validation. |
@@ -96,6 +96,7 @@ The next recommended slice is `IP-12A`: add a small decode/export regression cor
 - 2026-05-05: Completed `IP-10A` and closed `IP-10` by adding About diagnostics actions to open and clear the disposable thumbnail cache, backed by a safe cache-clear service and regression tests.
 - 2026-05-05: Completed `IP-14A` and closed `IP-14` by hardening settings corruption quarantine naming and adding coverage for corrupt DB reset, schema migration, unavailable storage, primitive defaults, and existing future timestamp behavior.
 - 2026-05-05: Completed `IP-11A` and closed `IP-11` by adding large-folder navigation coverage, volatile rescan coverage, enumeration-failure recovery coverage, and bounded folder-preview thumbnail request coverage for thousands of files.
+- 2026-05-05: Completed `IP-12A` and closed `IP-12` by adding generated decode/export corpus coverage for PNG, JPEG, WebP, multi-page TIFF, animated GIF, SVG vector decode, and APNG export round-trips without binary fixtures.
 
 ## Verification Standard
 
