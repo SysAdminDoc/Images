@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-01A` is complete, closing `IP-01`. App storage roots, default settings construction, and default thumbnail-cache construction now have deterministic seams and tests for fallback/unavailable-storage behavior.
+`IP-10A` is complete, closing `IP-10`. About diagnostics now shows thumbnail-cache health and lets users open or clear the disposable cache with confirmation, background execution, progress feedback, and automatic diagnostics refresh.
 
 ## Next Focus
 
-The next recommended slice is `IP-10A`: add safe thumbnail-cache controls now that diagnostics can report cache health.
+The next recommended slice is `IP-14A`: strengthen settings persistence and corruption recovery tests.
 
 ## Research Inputs
 
@@ -33,7 +33,7 @@ The next recommended slice is `IP-10A`: add safe thumbnail-cache controls now th
 | IP-07 | P1 | Done | First run | Improve first-run guidance. | New users can discover supported formats, OCR readiness, document-preview requirements, privacy defaults, and recovery links without reading docs. |
 | IP-08 | P1 | Done | Long-running state | Standardize busy/progress/cancel affordances. | OCR, metadata reads, document decode, large exports, and background update checks use consistent status text, disabled states, and cancellation where available. |
 | IP-09 | P1 | Done | Empty/error states | Extend polished failure and empty states across secondary flows. | Empty folder, unsupported clipboard data, missing recent folders, thumbnail-cache failure, and offline update checks have calm, actionable feedback. |
-| IP-10 | P2 | Planned | Cache health | Expose thumbnail cache health controls. | Settings/About can show cache size and clear or rebuild the disposable thumbnail cache safely. |
+| IP-10 | P2 | Done | Cache health | Expose thumbnail cache health controls. | Settings/About can show cache size and clear or rebuild the disposable thumbnail cache safely. |
 | IP-11 | P2 | Planned | Stress testing | Add large-folder and volatile-folder stress coverage. | Navigation and thumbnail behavior are validated with thousands of files, deleted files, slow folders, and rapid directory changes. |
 | IP-12 | P2 | Planned | Decode/export corpus | Add a small format corpus for decode/export regression tests. | Representative PNG, JPEG, WebP, TIFF, GIF/APNG, and document/vector samples protect codec upgrades and export behavior. |
 | IP-13 | P1 | Done | Shell/clipboard integration | Centralize opening URLs/files/folders and copying text. | About, crash dialog, settings, and main viewer use shared helpers with consistent error behavior and safer Explorer argument handling. |
@@ -93,6 +93,7 @@ The next recommended slice is `IP-10A`: add safe thumbnail-cache controls now th
 - 2026-05-05: Completed `IP-04A` by adding a shared `BackgroundTaskTracker`, routing folder thumbnails, metadata reads, preload decodes, clipboard-temp pruning, and thumbnail-cache eviction through it, and exposing session task counts in diagnostics with regression coverage.
 - 2026-05-05: Completed `IP-04B` and closed `IP-04` by adding async update-check tracking plus thumbnail-cache health diagnostics and focused tests for async task tracking, update-check tracking, and cache health scans.
 - 2026-05-05: Completed `IP-01A` and closed `IP-01` by adding deterministic app-storage, settings-default, and thumbnail-cache-default seams plus regression tests for fallback, unavailable storage, and unsafe relative path segments.
+- 2026-05-05: Completed `IP-10A` and closed `IP-10` by adding About diagnostics actions to open and clear the disposable thumbnail cache, backed by a safe cache-clear service and regression tests.
 
 ## Verification Standard
 
