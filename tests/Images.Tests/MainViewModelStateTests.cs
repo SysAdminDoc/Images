@@ -71,6 +71,94 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void GalleryCommand_OpensWithCurrentSelectionAndOpenSelectedLoadsItem()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            WritePng(temp.Path, "a.png");
+            var second = WritePng(temp.Path, "b.png");
+            var third = WritePng(temp.Path, "c.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(second);
+
+            Assert.True(viewModel.CanToggleGallery);
+            Assert.False(viewModel.IsGalleryOpen);
+            Assert.Contains("3 items", viewModel.GalleryStatusText);
+
+            viewModel.ToggleGalleryCommand.Execute(null);
+
+            Assert.True(viewModel.IsGalleryOpen);
+            Assert.True(viewModel.ShowGallery);
+            Assert.Equal(second, viewModel.SelectedGalleryItem?.Path);
+            Assert.Equal("Gallery open", viewModel.ToastMessage);
+
+            viewModel.SelectedGalleryItem = viewModel.FolderPreviewItems.Single(item => item.Path == third);
+            viewModel.OpenSelectedGalleryItemCommand.Execute(null);
+
+            Assert.Equal(third, viewModel.CurrentPath);
+            Assert.False(viewModel.IsGalleryOpen);
+            Assert.Equal("3 / 3", viewModel.PositionText);
+        });
+    }
+
+    [Fact]
+    public void GalleryCommand_ReanchorsSelectionWhenSortChanges()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image10 = WritePng(temp.Path, "image10.png");
+            WritePng(temp.Path, "image2.png");
+            WritePng(temp.Path, "image1.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(image10);
+            viewModel.ToggleGalleryCommand.Execute(null);
+
+            viewModel.SetFolderSortCommand.Execute(DirectorySortMode.NameDescending);
+
+            Assert.True(viewModel.IsGalleryOpen);
+            Assert.True(viewModel.ShowGallery);
+            Assert.Equal(DirectorySortMode.NameDescending, viewModel.CurrentSortMode);
+            Assert.Equal(image10, viewModel.SelectedGalleryItem?.Path);
+            Assert.Equal("3 items · Sort: Z to A", viewModel.GalleryStatusText);
+        });
+    }
+
+    [Fact]
+    public void GalleryFilter_NarrowsItemsAndShowsEmptyFilterState()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image10 = WritePng(temp.Path, "image10.png");
+            var image2 = WritePng(temp.Path, "image2.png");
+            WritePng(temp.Path, "cover.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(image10);
+            viewModel.ToggleGalleryCommand.Execute(null);
+
+            viewModel.GalleryFilterText = "image2";
+
+            Assert.True(viewModel.HasGalleryFilter);
+            Assert.False(viewModel.ShowGalleryFilterEmpty);
+            Assert.Equal([image2], viewModel.GalleryItems.Select(item => item.Path));
+            Assert.Equal(image2, viewModel.SelectedGalleryItem?.Path);
+            Assert.Equal("1 of 3 items · Sort: Name", viewModel.GalleryStatusText);
+
+            viewModel.GalleryFilterText = "missing";
+
+            Assert.Empty(viewModel.GalleryItems);
+            Assert.Null(viewModel.SelectedGalleryItem);
+            Assert.True(viewModel.ShowGalleryFilterEmpty);
+            Assert.Equal("0 of 3 items · Sort: Name", viewModel.GalleryStatusText);
+        });
+    }
+
+    [Fact]
     public void PasteFromClipboardCommand_SavesImageAndOpensIt()
     {
         RunOnSta(() =>

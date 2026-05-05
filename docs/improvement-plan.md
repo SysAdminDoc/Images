@@ -10,7 +10,7 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-17A` is complete, closing `IP-17`. `docs/distribution-trust.md` now scopes WinGet and Scoop publishing, preserves checksum continuity, and records the code-signing decision path for post-release trust work.
+Roadmap `V20-34` is complete. The viewer now has a keyboard-first gallery overlay for the current folder with cached multi-column thumbnails, quick filtering, sort shortcuts, context actions, selection, and Enter-to-load behavior.
 
 ## Next Focus
 
@@ -112,6 +112,7 @@ The improvement-plan backlog is complete. Continue with the source-derived works
 - 2026-05-05: Continued `RS-02` / `V20-36` by adding a persisted right-to-left archive page-turn mode that swaps physical edge zones and Left/Right Arrow routing for manga-style ZIP/CBZ books.
 - 2026-05-05: Continued `RS-02` / `V20-36` by adding a persisted, preview-only old-scan filter for archive books using high-contrast grayscale display transforms with service and view-model coverage.
 - 2026-05-05: Closed `V20-36` for ZIP/CBZ books by adding persisted, cover-aware two-page spreads that pair natural pages, keep explicit covers single, respect right-to-left composition, and advance by spread.
+- 2026-05-05: Closed roadmap `V20-34` by adding a current-folder gallery workbench with cached multi-column thumbnails, quick filtering, sort shortcuts, per-thumbnail context actions, current-item selection, Escape-to-close, and Enter-to-load coverage.
 
 ## Verification Standard
 

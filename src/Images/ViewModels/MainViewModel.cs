@@ -163,6 +163,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         CopyPreviewPathCommand = new RelayCommand(p => CopyPreviewPath(p as FolderPreviewItem), p => p is FolderPreviewItem);
         EnsurePreviewThumbnailCommand = new RelayCommand(p => EnsurePreviewThumbnail(p as FolderPreviewItem), p => p is FolderPreviewItem);
         SetFolderSortCommand = new RelayCommand(SetFolderSort, p => DirectorySortModeInfo.TryParseCommandParameter(p, out _));
+        ToggleGalleryCommand = new RelayCommand(ToggleGallery, () => CanToggleGallery);
+        CloseGalleryCommand = new RelayCommand(() => IsGalleryOpen = false, () => IsGalleryOpen);
+        OpenSelectedGalleryItemCommand = new RelayCommand(OpenSelectedGalleryItem, () => IsGalleryOpen && SelectedGalleryItem is not null);
         ToggleFilmstripCommand = new RelayCommand(ToggleFilmstrip, () => CanToggleFilmstrip);
         ToggleMetadataHudCommand = new RelayCommand(ToggleMetadataHud, () => CanToggleMetadataHud);
         PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard, () => !IsOperationBusy);
@@ -887,6 +890,74 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     // -------------------- Folder preview strip --------------------
 
     public ObservableCollection<FolderPreviewItem> FolderPreviewItems => _folderPreview.Items;
+    public ObservableCollection<FolderPreviewItem> GalleryItems { get; } = [];
+
+    private bool _isGalleryOpen;
+    public bool IsGalleryOpen
+    {
+        get => _isGalleryOpen;
+        set
+        {
+            if (!Set(ref _isGalleryOpen, value)) return;
+
+            if (value)
+                SelectedGalleryItem = CurrentFolderPreviewItem ?? FolderPreviewItems.FirstOrDefault();
+
+            Raise(nameof(CanToggleGallery));
+            Raise(nameof(ShowGallery));
+            Raise(nameof(ShowGalleryFilterEmpty));
+            Raise(nameof(GalleryStatusText));
+            Raise(nameof(GalleryToggleTooltip));
+            CommandManager.InvalidateRequerySuggested();
+        }
+    }
+
+    private FolderPreviewItem? _selectedGalleryItem;
+    public FolderPreviewItem? SelectedGalleryItem
+    {
+        get => _selectedGalleryItem;
+        set
+        {
+            if (Set(ref _selectedGalleryItem, value))
+                CommandManager.InvalidateRequerySuggested();
+        }
+    }
+
+    public bool CanToggleGallery => IsGalleryOpen || (HasImage && !IsPeekMode);
+    public bool ShowGallery => IsGalleryOpen && HasImage && FolderPreviewItems.Count > 0 && !IsPeekMode;
+    public string GalleryToggleTooltip => IsGalleryOpen ? "Close gallery (G)" : "Open gallery (G)";
+    public string GalleryStatusText
+    {
+        get
+        {
+            var total = FolderPreviewItems.Count;
+            if (HasGalleryFilter)
+                return $"{GalleryItems.Count} of {total} {(total == 1 ? "item" : "items")} · {FolderSortLabel}";
+
+            return $"{total} {(total == 1 ? "item" : "items")} · {FolderSortLabel}";
+        }
+    }
+    public bool HasGalleryFilter => !string.IsNullOrWhiteSpace(GalleryFilterText);
+    public bool ShowGalleryFilterEmpty => ShowGallery && HasGalleryFilter && GalleryItems.Count == 0;
+
+    private string _galleryFilterText = "";
+    public string GalleryFilterText
+    {
+        get => _galleryFilterText;
+        set
+        {
+            var normalized = value ?? "";
+            if (!Set(ref _galleryFilterText, normalized)) return;
+
+            RefreshGalleryItems();
+            Raise(nameof(HasGalleryFilter));
+            Raise(nameof(ShowGalleryFilterEmpty));
+            Raise(nameof(GalleryStatusText));
+        }
+    }
+
+    private FolderPreviewItem? CurrentFolderPreviewItem
+        => FolderPreviewItems.FirstOrDefault(item => item.IsCurrent);
 
     public bool IsFilmstripVisible
     {
@@ -930,7 +1001,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void OpenPreviewItem(FolderPreviewItem? item)
     {
         if (item is null || !File.Exists(item.Path)) return;
+        var closeGallery = IsGalleryOpen;
         OpenFile(item.Path);
+        if (closeGallery)
+            IsGalleryOpen = false;
     }
 
     private void RevealPreviewItem(FolderPreviewItem? item)
@@ -960,11 +1034,42 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Toast($"Sorted by {DirectorySortModeInfo.DisplayName(mode)}");
     }
 
+    private void ToggleGallery()
+    {
+        if (IsGalleryOpen)
+        {
+            IsGalleryOpen = false;
+            Toast("Gallery closed");
+            return;
+        }
+
+        if (FolderPreviewItems.Count == 0)
+        {
+            Toast("Open a folder with images to use Gallery");
+            return;
+        }
+
+        IsGalleryOpen = true;
+        Toast("Gallery open");
+    }
+
+    private void OpenSelectedGalleryItem()
+    {
+        OpenPreviewItem(SelectedGalleryItem);
+    }
+
     private void RaiseFolderPreviewState()
     {
+        RefreshGalleryItems();
         Raise(nameof(CanToggleFilmstrip));
         Raise(nameof(ShowFilmstrip));
         Raise(nameof(ShowSideFolderPreview));
+        Raise(nameof(CanToggleGallery));
+        Raise(nameof(ShowGallery));
+        Raise(nameof(HasGalleryFilter));
+        Raise(nameof(ShowGalleryFilterEmpty));
+        Raise(nameof(GalleryStatusText));
+        Raise(nameof(GalleryToggleTooltip));
         Raise(nameof(FilmstripToggleTooltip));
         Raise(nameof(CurrentSortMode));
         Raise(nameof(FolderSortLabel));
@@ -975,6 +1080,29 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(ThumbnailFailureStatusText));
         SyncFolderPreviewSecondaryStatus();
         CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RefreshGalleryItems()
+    {
+        var previousSelectedPath = SelectedGalleryItem?.Path;
+        var filter = GalleryFilterText.Trim();
+        var visible = string.IsNullOrEmpty(filter)
+            ? FolderPreviewItems
+            : FolderPreviewItems.Where(item =>
+                item.FileName.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+                item.Path.Contains(filter, StringComparison.OrdinalIgnoreCase));
+
+        GalleryItems.Clear();
+        foreach (var item in visible)
+            GalleryItems.Add(item);
+
+        var selected =
+            GalleryItems.FirstOrDefault(item => string.Equals(item.Path, previousSelectedPath, StringComparison.OrdinalIgnoreCase)) ??
+            GalleryItems.FirstOrDefault(item => item.IsCurrent) ??
+            GalleryItems.FirstOrDefault();
+
+        if (!ReferenceEquals(SelectedGalleryItem, selected))
+            SelectedGalleryItem = selected;
     }
 
     private void SyncFolderPreviewSecondaryStatus()
@@ -1167,6 +1295,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand CopyPreviewPathCommand { get; }
     public ICommand EnsurePreviewThumbnailCommand { get; }
     public ICommand SetFolderSortCommand { get; }
+    public ICommand ToggleGalleryCommand { get; }
+    public ICommand CloseGalleryCommand { get; }
+    public ICommand OpenSelectedGalleryItemCommand { get; }
     public ICommand ToggleFilmstripCommand { get; }
     public ICommand ToggleMetadataHudCommand { get; }
     public ICommand PasteFromClipboardCommand { get; }

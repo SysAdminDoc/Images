@@ -34,6 +34,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Full directory navigation** — open one photo, scroll through the whole folder with ← / → keys or the hover arrows. Wraps at the ends. Natural-sorted so `IMG_2.jpg` comes before `IMG_10.jpg`.
 - **Text extraction (OCR)** — press `E` to overlay selectable text boxes directly over detected text regions. Highlight any recognized text manually and copy it with Ctrl+C or the context menu. Uses Windows.Media.Ocr for local, offline processing with installed Windows OCR language packs. No cloud, no network, no bloat.
 - **Togglable folder filmstrip** — a compact, virtualized, cached thumbnail rail spans the current folder, keeps the current item centered, supports right-click Open/Reveal/Copy actions, and falls back to the side panel when hidden.
+- **Gallery workbench** — press `G` to open a multi-column thumbnail grid for the current folder with quick filtering, sort shortcuts, context actions, selection, and Enter-to-load.
 - **Photo metadata at a glance** — the Details panel and optional `I` metadata HUD surface embedded EXIF date, camera, lens, exposure, focal length, and GPS coordinates when present, without opening a separate info window or sending location data anywhere.
 - **Zoom + pan** — mouse wheel to zoom in/out about the cursor, drag to pan, double-click to toggle fit/1:1.
 - **Export a copy** to JPEG, PNG, WebP, AVIF, JXL, TIFF, BMP, GIF/APNG, PSD/PSB, PDF/EPS/SVG, TGA, DDS, QOI, EXR, HDR, JPEG 2000, X11/Magick, production/scientific, and portable bitmap formats.
@@ -93,6 +94,7 @@ OCR depends on Microsoft Windows OCR optional capabilities. The installer instal
 | **Delete** | Send current image to Recycle Bin |
 | **E** | Extract text (OCR) — toggle overlay |
 | **F5** | Rescan current directory |
+| **G** | Toggle gallery workbench |
 | **I** | Toggle metadata HUD |
 | **Enter** (in rename box) | Commit rename now (skip debounce) |
 | **Esc** (in rename box) | Cancel edit, revert textbox to disk name |

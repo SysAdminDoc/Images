@@ -526,6 +526,369 @@
                     </Border>
                 </Border>
 
+                <Border Background="{StaticResource BaseBrush}"
+                        Padding="28,24"
+                        Visibility="{Binding ShowGallery, Converter={StaticResource BoolToVis}}"
+                        Panel.ZIndex="18"
+                        AutomationProperties.Name="Gallery workbench"
+                        AutomationProperties.LiveSetting="Polite">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0" Margin="0,0,0,18">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="34"
+                                    Height="34"
+                                    CornerRadius="{StaticResource Radius.Lg.CR}"
+                                    Background="#1F89B4FA"
+                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    BorderThickness="1"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="&#xE8A9;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="15"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Grid.Column="1"
+                                        Margin="12,0,16,0"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="Gallery"
+                                           Style="{StaticResource Text.Title}"
+                                           FontSize="18" />
+                                <TextBlock Text="{Binding GalleryStatusText}"
+                                           Style="{StaticResource Text.Hint}"
+                                           Margin="0,3,0,0" />
+                            </StackPanel>
+                            <Button Grid.Column="2"
+                                    Style="{StaticResource ChromeButton}"
+                                    Command="{Binding CloseGalleryCommand}"
+                                    Width="34"
+                                    Height="34"
+                                    Padding="0"
+                                    ToolTip="Close gallery"
+                                    AutomationProperties.Name="Close gallery">
+                                <TextBlock Text="&#xE8BB;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="12"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Button>
+                        </Grid>
+
+                        <WrapPanel Grid.Row="1"
+                                   Margin="0,0,0,18"
+                                   KeyboardNavigation.TabNavigation="Continue"
+                                   AutomationProperties.Name="Gallery sort controls">
+                            <Border Width="220"
+                                    Height="32"
+                                    Margin="0,0,8,8"
+                                    Padding="10,0"
+                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                    Background="{StaticResource PanelBrush}"
+                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    BorderThickness="1"
+                                    ToolTip="Filter gallery">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="&#xE721;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="11"
+                                               Foreground="{StaticResource OverlayBrush}"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,8,0" />
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding GalleryFilterText, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             Padding="0"
+                                             MinHeight="24"
+                                             VerticalContentAlignment="Center"
+                                             AutomationProperties.Name="Filter gallery" />
+                                </Grid>
+                            </Border>
+                            <Button Command="{Binding SetFolderSortCommand}"
+                                    CommandParameter="NaturalName"
+                                    Padding="12,6"
+                                    MinHeight="30"
+                                    Margin="0,0,8,8"
+                                    AutomationProperties.Name="Sort gallery by name">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CurrentSortMode, Converter={StaticResource SortModeMatches}, ConverterParameter=NaturalName}" Value="True">
+                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8CB;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="11"
+                                               Margin="0,0,7,0"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Text="Name" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding SetFolderSortCommand}"
+                                    CommandParameter="ModifiedNewest"
+                                    Padding="12,6"
+                                    MinHeight="30"
+                                    Margin="0,0,8,8"
+                                    AutomationProperties.Name="Sort gallery by newest modified date">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CurrentSortMode, Converter={StaticResource SortModeMatches}, ConverterParameter=ModifiedNewest}" Value="True">
+                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE823;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="11"
+                                               Margin="0,0,7,0"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Text="Newest" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding SetFolderSortCommand}"
+                                    CommandParameter="ExtensionThenName"
+                                    Padding="12,6"
+                                    MinHeight="30"
+                                    Margin="0,0,8,8"
+                                    AutomationProperties.Name="Sort gallery by type">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CurrentSortMode, Converter={StaticResource SortModeMatches}, ConverterParameter=ExtensionThenName}" Value="True">
+                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8B7;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="11"
+                                               Margin="0,0,7,0"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Text="Type" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding SetFolderSortCommand}"
+                                    CommandParameter="SizeLargest"
+                                    Padding="12,6"
+                                    MinHeight="30"
+                                    Margin="0,0,8,8"
+                                    AutomationProperties.Name="Sort gallery by largest file size">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CurrentSortMode, Converter={StaticResource SortModeMatches}, ConverterParameter=SizeLargest}" Value="True">
+                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8EF;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="11"
+                                               Margin="0,0,7,0"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Text="Size" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </WrapPanel>
+
+                        <ListBox x:Name="GalleryItems"
+                                 Grid.Row="2"
+                                 ItemsSource="{Binding GalleryItems}"
+                                 SelectedItem="{Binding SelectedGalleryItem, Mode=TwoWay}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Padding="0,0,0,10"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ScrollViewer.CanContentScroll="False"
+                                 VirtualizingPanel.IsVirtualizing="False"
+                                 KeyboardNavigation.DirectionalNavigation="Contained"
+                                 KeyboardNavigation.TabNavigation="Cycle"
+                                 AutomationProperties.Name="Gallery thumbnails"
+                                 AutomationProperties.HelpText="{Binding GalleryStatusText}">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="Margin" Value="0" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <ContentPresenter />
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.OpenPreviewItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding}"
+                                            Loaded="PreviewThumbnail_Loaded"
+                                            Width="150"
+                                            MinHeight="172"
+                                            Margin="0,0,12,12"
+                                            Padding="7"
+                                            HorizontalContentAlignment="Stretch"
+                                            VerticalContentAlignment="Stretch"
+                                            ToolTip="{Binding Path}"
+                                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            AutomationProperties.Name="{Binding FileName}"
+                                            AutomationProperties.HelpText="{Binding PositionText}"
+                                            AutomationProperties.ItemStatus="{Binding PositionText}">
+                                        <Button.ContextMenu>
+                                            <ContextMenu Style="{StaticResource ViewportContextMenu}">
+                                                <MenuItem Header="Open"
+                                                          Command="{Binding PlacementTarget.Tag.OpenPreviewItemCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                    <MenuItem.Icon>
+                                                        <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                                <MenuItem Header="Reveal in Explorer"
+                                                          Command="{Binding PlacementTarget.Tag.RevealPreviewItemCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                    <MenuItem.Icon>
+                                                        <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE838;" />
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                                <MenuItem Header="Copy path"
+                                                          Command="{Binding PlacementTarget.Tag.CopyPreviewPathCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                    <MenuItem.Icon>
+                                                        <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                            </ContextMenu>
+                                        </Button.ContextMenu>
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
+                                                <Setter Property="Background" Value="{StaticResource Surface0Brush}" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                        <Setter Property="Background" Value="#1F89B4FA" />
+                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                        <Setter Property="Background" Value="#2689B4FA" />
+                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                    </DataTrigger>
+                                                    <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                                        <Setter Property="Background" Value="#2689B4FA" />
+                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <StackPanel>
+                                            <Border Height="104"
+                                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                                    Background="{StaticResource ViewportBrush}"
+                                                    BorderBrush="{StaticResource HairlineBrush}"
+                                                    BorderThickness="1"
+                                                    ClipToBounds="True">
+                                                <Grid>
+                                                    <Image Source="{Binding Thumbnail}"
+                                                           Stretch="UniformToFill"
+                                                           RenderOptions.BitmapScalingMode="HighQuality"
+                                                           Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVis}}" />
+                                                    <TextBlock Text="&#xEB9F;"
+                                                               FontFamily="{StaticResource IconFontFamily}"
+                                                               FontSize="23"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"
+                                                               Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="{x:Type TextBlock}">
+                                                                <Setter Property="Foreground" Value="{StaticResource OverlayBrush}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ThumbnailFailed}" Value="True">
+                                                                        <Setter Property="Text" Value="&#xE783;" />
+                                                                        <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Grid>
+                                            </Border>
+                                            <TextBlock Text="{Binding FileName}"
+                                                       Foreground="{StaticResource TextBrush}"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Margin="1,8,1,0" />
+                                            <TextBlock Text="{Binding PositionText}"
+                                                       Foreground="{StaticResource OverlayBrush}"
+                                                       FontSize="10.5"
+                                                       Margin="1,2,1,0" />
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <Border Grid.Row="2"
+                                Background="{StaticResource BaseBrush}"
+                                Visibility="{Binding ShowGalleryFilterEmpty, Converter={StaticResource BoolToVis}}"
+                                AutomationProperties.Name="No gallery filter matches">
+                            <StackPanel HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        MaxWidth="340">
+                                <TextBlock Text="&#xE721;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="28"
+                                           Foreground="{StaticResource OverlayBrush}"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock Text="No matching images"
+                                           Style="{StaticResource Text.Title}"
+                                           FontSize="16"
+                                           TextAlignment="Center"
+                                           Margin="0,12,0,0" />
+                                <TextBlock Text="{Binding GalleryStatusText}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextAlignment="Center"
+                                           Margin="0,5,0,0" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+
                 <!-- Floating chrome (only when an image is present) -->
                 <Grid Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}">
 
