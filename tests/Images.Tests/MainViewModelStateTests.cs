@@ -242,6 +242,40 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void ReloadCommand_ShowsOperationStatusAndDisablesMutatingCommands()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "photo.png");
+            var viewModel = CreateViewModelWithFastPreview(temp);
+            var changed = new List<string>();
+
+            viewModel.OpenFile(image);
+            viewModel.PropertyChanged += RecordChangedProperty(changed);
+
+            viewModel.ReloadCommand.Execute(null);
+
+            Assert.True(viewModel.IsOperationBusy);
+            Assert.True(viewModel.ShowOperationStatus);
+            Assert.Equal("Reloading image", viewModel.OperationStatusTitle);
+            Assert.Equal("Refreshing decoder output and metadata.", viewModel.OperationStatusDetail);
+            Assert.False(viewModel.ReloadCommand.CanExecute(null));
+            Assert.False(viewModel.SaveAsCopyCommand.CanExecute(null));
+            Assert.False(viewModel.DeleteCommand.CanExecute(null));
+            Assert.False(viewModel.RefreshCommand.CanExecute(null));
+
+            PumpUntil(() => !viewModel.IsOperationBusy);
+
+            Assert.False(viewModel.ShowOperationStatus);
+            Assert.Equal("", viewModel.OperationStatusTitle);
+            Assert.Equal("", viewModel.OperationStatusDetail);
+            Assert.Contains(nameof(MainViewModel.IsOperationBusy), changed);
+            Assert.Contains(nameof(MainViewModel.ShowOperationStatus), changed);
+        });
+    }
+
+    [Fact]
     public void FirstRunGuidance_ExposesCapabilityAndPrivacySummaries()
     {
         RunOnSta(() =>

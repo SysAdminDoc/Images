@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-07A` is complete, closing `IP-07`. The empty first-run state now explains local privacy defaults, broad format support, OCR readiness, document-preview requirements, and recovery links to Settings and Diagnostics.
+`IP-08A` is complete. Manual reload, Save a copy, and GPS-strip work now share a visible operation status, yield once so the status can paint before synchronous viewer work, and disable mutating image actions while the operation is active.
 
 ## Next Focus
 
-The next recommended slice is `IP-08A`: standardize the most visible long-running state feedback, starting with decode/export/OCR affordances that can leave users uncertain during slower work.
+The next recommended slice is `IP-08B`: extend the same operation-status pattern into remaining decode and background state edges, especially document-page loads, background update-check visibility, and any secondary operations that still only report after completion.
 
 ## Research Inputs
 
@@ -31,7 +31,7 @@ The next recommended slice is `IP-08A`: standardize the most visible long-runnin
 | IP-05 | P1 | Done | Update checks | Add focused update-check tests. | Timeout, network failure, HTTP failure, malformed release payload, newer release, current release, and trusted URL normalization are covered. |
 | IP-06 | P1 | Done | Diagnostics UX | Add a compact diagnostics/status pane. | Users can inspect OCR, Ghostscript, Magick.NET, logs, storage paths, and last update-check state from the app without a terminal. |
 | IP-07 | P1 | Done | First run | Improve first-run guidance. | New users can discover supported formats, OCR readiness, document-preview requirements, privacy defaults, and recovery links without reading docs. |
-| IP-08 | P1 | Planned | Long-running state | Standardize busy/progress/cancel affordances. | OCR, metadata reads, document decode, large exports, and background update checks use consistent status text, disabled states, and cancellation where available. |
+| IP-08 | P1 | In progress | Long-running state | Standardize busy/progress/cancel affordances. | OCR, metadata reads, document decode, large exports, and background update checks use consistent status text, disabled states, and cancellation where available. |
 | IP-09 | P1 | Planned | Empty/error states | Extend polished failure and empty states across secondary flows. | Empty folder, unsupported clipboard data, missing recent folders, thumbnail-cache failure, and offline update checks have calm, actionable feedback. |
 | IP-10 | P2 | Planned | Cache health | Expose thumbnail cache health controls. | Settings/About can show cache size and clear or rebuild the disposable thumbnail cache safely. |
 | IP-11 | P2 | Planned | Stress testing | Add large-folder and volatile-folder stress coverage. | Navigation and thumbnail behavior are validated with thousands of files, deleted files, slow folders, and rapid directory changes. |
@@ -85,6 +85,7 @@ The next recommended slice is `IP-08A`: standardize the most visible long-runnin
 - 2026-05-05: Completed `IP-06A` by adding a compact About diagnostics status section for OCR, Ghostscript, Magick.NET, logs, storage, and update-check state with regression-tested status composition.
 - 2026-05-05: Completed `IP-06B` and closed `IP-06` by adding diagnostics-local actions for copying system info, copying the codec report, opening logs, and opening the app data folder.
 - 2026-05-05: Completed `IP-07A` and closed `IP-07` by turning the empty first-run card into capability-backed guidance for privacy, format support, OCR readiness, document previews, and Settings/Diagnostics recovery links.
+- 2026-05-05: Completed `IP-08A` by adding shared operation-status feedback for manual reload, Save a copy, and GPS-strip work, with command disabled-state coverage for mutating image actions during active operations.
 
 ## Verification Standard
 
