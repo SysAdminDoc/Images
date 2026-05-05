@@ -26,6 +26,7 @@ public static class DiagnosticsStatusService
             AppStorage.TryGetAppDirectory("Logs"),
             AppStorage.TryGetAppDirectory("thumbs"),
             CrashLog.LogPath,
+            ThumbnailCache.Instance.GetHealth(),
             BackgroundTaskTracker.Snapshot);
 
     internal static IReadOnlyList<DiagnosticStatusItem> BuildStatusItems(
@@ -37,6 +38,7 @@ public static class DiagnosticsStatusService
         string? logsPath,
         string? thumbnailsPath,
         string crashLogPath,
+        ThumbnailCacheHealth? thumbnailCache = null,
         BackgroundTaskSnapshot? backgroundTasks = null)
     {
         ArgumentNullException.ThrowIfNull(provenance);
@@ -74,6 +76,12 @@ public static class DiagnosticsStatusService
                 BuildStorageDetail(appDataRoot, thumbnailsPath),
                 appDataRoot is not null && thumbnailsPath is not null ? ReadyTone : WarningTone,
                 "\uE8DA"),
+            new(
+                "Thumbnail cache",
+                BuildThumbnailCacheStatus(thumbnailCache),
+                BuildThumbnailCacheDetail(thumbnailCache, thumbnailsPath),
+                BuildThumbnailCacheTone(thumbnailCache),
+                "\uE81E"),
             new(
                 "Update checks",
                 updateChecksEnabled ? "Automatic checks enabled" : "Automatic checks off",
@@ -124,6 +132,51 @@ public static class DiagnosticsStatusService
             : $"App data root: {appDataRoot}. Thumbnails: {thumbnailsPath}";
     }
 
+    private static string BuildThumbnailCacheStatus(ThumbnailCacheHealth? health)
+    {
+        if (health is null || !health.IsAvailable)
+            return "Thumbnail cache unavailable";
+
+        if (!string.IsNullOrWhiteSpace(health.Error))
+            return "Thumbnail cache needs attention";
+
+        if (health.CapBytes > 0 && health.Bytes >= health.CapBytes * 0.9)
+            return "Thumbnail cache near limit";
+
+        return "Thumbnail cache ready";
+    }
+
+    private static string BuildThumbnailCacheDetail(ThumbnailCacheHealth? health, string? thumbnailsPath)
+    {
+        if (health is null)
+            return string.IsNullOrWhiteSpace(thumbnailsPath)
+                ? "Thumbnail cache storage is not available."
+                : $"Cache path: {thumbnailsPath}. Size could not be measured.";
+
+        if (!string.IsNullOrWhiteSpace(health.Error))
+            return $"Could not scan {health.Root ?? thumbnailsPath ?? "the thumbnail cache"}: {health.Error}";
+
+        if (!health.IsAvailable)
+            return "Thumbnail cache storage is not available.";
+
+        var root = health.Root ?? thumbnailsPath ?? "thumbnail cache";
+        var cap = health.CapBytes > 0 ? FormatBytes(health.CapBytes) : "uncapped";
+        var temp = health.TempFileCount == 0 ? "no temp files" : $"{health.TempFileCount} temp files";
+        var lastSweep = health.LastEvictionSweepUtc is null
+            ? "No eviction sweep has run yet."
+            : $"Last eviction sweep: {health.LastEvictionSweepUtc.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture)}.";
+
+        return $"{health.FileCount} files, {FormatBytes(health.Bytes)} of {cap}, {temp}. {lastSweep} Path: {root}";
+    }
+
+    private static string BuildThumbnailCacheTone(ThumbnailCacheHealth? health)
+    {
+        if (health is null || !health.IsAvailable || !string.IsNullOrWhiteSpace(health.Error))
+            return WarningTone;
+
+        return health.CapBytes > 0 && health.Bytes >= health.CapBytes * 0.9 ? InfoTone : ReadyTone;
+    }
+
     private static string BuildUpdateCheckDetail(bool updateChecksEnabled, DateTime? lastUpdateCheckUtc)
     {
         if (!updateChecksEnabled)
@@ -163,5 +216,23 @@ public static class DiagnosticsStatusService
             return WarningTone;
 
         return snapshot.Running > 0 ? InfoTone : ReadyTone;
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        string[] units = ["B", "KiB", "MiB", "GiB", "TiB"];
+        var value = Math.Max(0, bytes);
+        var unitIndex = 0;
+        var displayValue = (double)value;
+
+        while (displayValue >= 1024 && unitIndex < units.Length - 1)
+        {
+            displayValue /= 1024;
+            unitIndex++;
+        }
+
+        return unitIndex == 0
+            ? $"{value} {units[unitIndex]}"
+            : $"{displayValue:0.#} {units[unitIndex]}";
     }
 }

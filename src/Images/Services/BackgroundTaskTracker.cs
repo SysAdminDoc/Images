@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
@@ -95,6 +95,40 @@ public static class BackgroundTaskTracker
                 _totals.DecrementRunning();
             }
         });
+    }
+
+    public static async Task<T> RunAsync<T>(
+        string name,
+        Func<Task<T>> action,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        var taskName = NormalizeName(name);
+        var counters = MarkStarted(taskName);
+        var sw = Stopwatch.StartNew();
+
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await action().ConfigureAwait(false);
+            MarkCompleted(taskName, counters, sw.Elapsed);
+            return result;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            MarkCanceled(taskName, counters, sw.Elapsed);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            MarkFaulted(taskName, counters, sw.Elapsed, ex);
+            throw;
+        }
+        finally
+        {
+            counters.DecrementRunning();
+            _totals.DecrementRunning();
+        }
     }
 
     internal static void ResetForTests()

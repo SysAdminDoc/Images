@@ -21,13 +21,22 @@ public sealed class DiagnosticsStatusServiceTests
             appDataRoot: @"C:\Users\test\AppData\Local\Images",
             logsPath: AppContext.BaseDirectory,
             thumbnailsPath: @"C:\Users\test\AppData\Local\Images\thumbs",
-            crashLogPath: @"C:\Users\test\AppData\Local\Images\crash.log");
+            crashLogPath: @"C:\Users\test\AppData\Local\Images\crash.log",
+            thumbnailCache: new ThumbnailCacheHealth(
+                IsAvailable: true,
+                Root: @"C:\Users\test\AppData\Local\Images\thumbs",
+                Bytes: 2 * 1024 * 1024,
+                FileCount: 42,
+                TempFileCount: 1,
+                CapBytes: 512L * 1024 * 1024,
+                LastEvictionSweepUtc: new DateTime(2026, 5, 5, 13, 0, 0, DateTimeKind.Utc)));
 
         Assert.Contains(items, item => item.Title == "Text extraction" && item.Tone == DiagnosticsStatusService.ReadyTone);
         Assert.Contains(items, item => item.Title == "Document previews" && item.Status == "Ghostscript ready");
         Assert.Contains(items, item => item.Title == "Image codecs" && item.Detail.Contains("14.13.0", StringComparison.Ordinal));
         Assert.Contains(items, item => item.Title == "Logs" && item.Tone == DiagnosticsStatusService.ReadyTone);
         Assert.Contains(items, item => item.Title == "Storage" && item.Status == "Writable storage ready");
+        Assert.Contains(items, item => item.Title == "Thumbnail cache" && item.Status == "Thumbnail cache ready" && item.Detail.Contains("42 files", StringComparison.Ordinal));
         Assert.Contains(items, item => item.Title == "Update checks" && item.Detail.StartsWith("Last successful check:", StringComparison.Ordinal));
         Assert.Contains(items, item => item.Title == "Background work" && item.Status == "Background work idle");
     }
