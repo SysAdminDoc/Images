@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-13` is complete. About, crash dialog, settings, and main viewer shell/clipboard actions now route through shared helpers.
+`IP-05` is complete. Update-check behavior now has non-network tests for success, current-version, HTTP failure, malformed payloads, trusted release URLs, transient network failures, timeout failures, retry-state recording, background due logic, and local state-file handling.
 
 ## Next Focus
 
-The next recommended slice is `IP-05`, update-check test coverage. The update-check retry policy has already been centralized, so the next step is to add test seams for HTTP, clock, and state persistence without real network or user-profile dependencies.
+The next recommended slice is `IP-15`, CI/release gates. The local verification path is consistent enough to encode in automation: solution build, tests, whitespace check, vulnerability/version gates, and CLI smoke commands.
 
 ## Priority Backlog
 
@@ -24,7 +24,7 @@ The next recommended slice is `IP-05`, update-check test coverage. The update-ch
 | IP-02 | P0 | Planned | MainViewModel structure | Split the oversized main view model into focused controllers/services while preserving current behavior. | OCR, folder preview, clipboard import, reload, rename, metadata, and update-check logic are independently readable and have narrower dependencies. |
 | IP-03 | P0 | Planned | UI state tests | Add regression coverage for risky WPF state transitions. | Tests or smoke harnesses cover reload failure, external file changes, OCR cancellation, thumbnail cancellation, rename debounce, and disabled/busy states. |
 | IP-04 | P1 | Planned | Background tasks | Improve observability and ownership for fire-and-forget work. | Thumbnail generation, metadata reads, preloading, clipboard pruning, cache eviction, and update checks have clear cancellation/ownership and structured logging. |
-| IP-05 | P1 | Planned | Update checks | Add focused update-check tests. | Timeout, network failure, HTTP failure, malformed release payload, newer release, current release, and trusted URL normalization are covered. |
+| IP-05 | P1 | Done | Update checks | Add focused update-check tests. | Timeout, network failure, HTTP failure, malformed release payload, newer release, current release, and trusted URL normalization are covered. |
 | IP-06 | P1 | Planned | Diagnostics UX | Add a compact diagnostics/status pane. | Users can inspect OCR, Ghostscript, Magick.NET, logs, storage paths, and last update-check state from the app without a terminal. |
 | IP-07 | P1 | Planned | First run | Improve first-run guidance. | New users can discover supported formats, OCR readiness, document-preview requirements, privacy defaults, and recovery links without reading docs. |
 | IP-08 | P1 | Planned | Long-running state | Standardize busy/progress/cancel affordances. | OCR, metadata reads, document decode, large exports, and background update checks use consistent status text, disabled states, and cancellation where available. |
@@ -38,16 +38,16 @@ The next recommended slice is `IP-05`, update-check test coverage. The update-ch
 
 ## Implementation Order
 
-1. Add test seams for update checks and clocks, then complete `IP-05`.
-2. Add CI coverage for the verified local commands in `IP-15`.
-3. Extract clipboard import and folder preview from `MainViewModel` as the first `IP-02` slices.
-4. Add UI-state tests for the extracted controllers under `IP-03`.
-5. Build diagnostics/status UX from existing system-info, codec, OCR, and storage services under `IP-06`.
-6. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
+1. Add CI coverage for the verified local commands in `IP-15`.
+2. Extract clipboard import and folder preview from `MainViewModel` as the first `IP-02` slices.
+3. Add UI-state tests for the extracted controllers under `IP-03`.
+4. Build diagnostics/status UX from existing system-info, codec, OCR, and storage services under `IP-06`.
+5. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
 
 ## Progress Log
 
 - 2026-05-05: Created this improvement tracker and completed `IP-13` by adding shared shell and clipboard helpers used by About, crash dialog, settings, and main viewer actions.
+- 2026-05-05: Completed `IP-05` by adding update-check seams and 10 non-network tests for release parsing, retry-state policy, trusted URLs, due logic, and state-file behavior.
 
 ## Verification Standard
 
