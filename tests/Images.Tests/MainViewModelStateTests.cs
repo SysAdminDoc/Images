@@ -22,7 +22,7 @@ public sealed class MainViewModelStateTests
             var image10 = WritePng(temp.Path, "image10.png");
             var image2 = WritePng(temp.Path, "image2.png");
             var image1 = WritePng(temp.Path, "image1.png");
-            using var viewModel = CreateViewModel(temp);
+            using var viewModel = CreateViewModelWithFastPreview(temp);
 
             viewModel.OpenFile(image10);
 
@@ -162,7 +162,7 @@ public sealed class MainViewModelStateTests
             using var temp = TestDirectory.Create();
             var source = WritePng(temp.Path, "photo.png");
             var unsupportedTarget = Path.Combine(temp.Path, "photo.txt");
-            using var viewModel = CreateViewModel(temp);
+            using var viewModel = CreateViewModelWithFastPreview(temp);
 
             viewModel.OpenFile(source);
             viewModel.IsExtensionUnlocked = true;
@@ -175,6 +175,94 @@ public sealed class MainViewModelStateTests
             Assert.Equal(MainViewModel.RenameStatusKind.Error, viewModel.RenameStatus);
             Assert.Equal("Rename failed: Extension '.txt' is not supported by Images.", viewModel.ToastMessage);
             Assert.Equal("Choose a supported Images extension", viewModel.RenamePreview);
+        });
+    }
+
+    [Fact]
+    public void EditableStemChange_CommitsRenameAfterDebounce()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var source = WritePng(temp.Path, "photo.png");
+            var target = Path.Combine(temp.Path, "renamed.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(source);
+            viewModel.EditableStem = "renamed";
+
+            Assert.Equal(MainViewModel.RenameStatusKind.Pending, viewModel.RenameStatus);
+            Assert.Equal("→ renamed.png", viewModel.RenamePreview);
+            Assert.True(File.Exists(source));
+            Assert.False(File.Exists(target));
+
+            PumpUntil(() => string.Equals(viewModel.CurrentPath, target, StringComparison.OrdinalIgnoreCase));
+
+            Assert.False(File.Exists(source));
+            Assert.True(File.Exists(target));
+            Assert.Equal(MainViewModel.RenameStatusKind.Saved, viewModel.RenameStatus);
+            Assert.Equal("", viewModel.RenamePreview);
+            Assert.Equal("renamed.png", viewModel.CurrentFileName);
+        });
+    }
+
+    [Fact]
+    public void ImageCommands_AreDisabledUntilImageIsLoaded()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "photo.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            Assert.False(viewModel.DeleteCommand.CanExecute(null));
+            Assert.False(viewModel.ReloadCommand.CanExecute(null));
+            Assert.False(viewModel.RefreshCommand.CanExecute(null));
+            Assert.False(viewModel.ExtractTextCommand.CanExecute(null));
+            Assert.False(viewModel.SaveAsCopyCommand.CanExecute(null));
+            Assert.False(viewModel.ToggleMetadataHudCommand.CanExecute(null));
+
+            viewModel.OpenFile(image);
+
+            Assert.True(viewModel.HasImage);
+            Assert.True(viewModel.HasDisplayImage);
+            Assert.True(viewModel.DeleteCommand.CanExecute(null));
+            Assert.True(viewModel.ReloadCommand.CanExecute(null));
+            Assert.True(viewModel.RefreshCommand.CanExecute(null));
+            Assert.True(viewModel.ExtractTextCommand.CanExecute(null));
+            Assert.True(viewModel.SaveAsCopyCommand.CanExecute(null));
+            Assert.True(viewModel.ToggleMetadataHudCommand.CanExecute(null));
+
+            File.Delete(image);
+
+            Assert.False(viewModel.HasImage);
+            Assert.True(viewModel.RefreshCommand.CanExecute(null));
+            Assert.False(viewModel.ReloadCommand.CanExecute(null));
+        });
+    }
+
+    [Fact]
+    public void RefreshCommand_WhenCurrentFileWasRemovedExternally_LoadsNextAvailableImage()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var first = WritePng(temp.Path, "a.png");
+            var second = WritePng(temp.Path, "b.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(first);
+            File.Delete(first);
+
+            viewModel.RefreshCommand.Execute(null);
+
+            Assert.Equal(second, viewModel.CurrentPath);
+            Assert.True(viewModel.HasImage);
+            Assert.Equal("b.png", viewModel.CurrentFileName);
+            Assert.Equal("1 / 1", viewModel.PositionText);
+            Assert.Empty(viewModel.FolderPreviewItems);
+            Assert.False(viewModel.ShowFilmstrip);
+            Assert.Equal("Folder refreshed", viewModel.ToastMessage);
         });
     }
 
@@ -309,6 +397,21 @@ public sealed class MainViewModelStateTests
 
     private static MainViewModel CreateViewModel(TestDirectory temp, ClipboardImportService? clipboardImport = null)
         => new(CreateSettings(temp), clipboardImport);
+
+    private static MainViewModel CreateViewModelWithFastPreview(TestDirectory temp, ClipboardImportService? clipboardImport = null)
+        => new(
+            CreateSettings(temp),
+            clipboardImport,
+            navigator: null,
+            recycleBinDelete: null,
+            folderPreview: new FolderPreviewController(
+                Dispatcher.CurrentDispatcher,
+                isDisposed: () => false,
+                loadThumbnail: (_, _) => null),
+            photoMetadata: null,
+            ocrWorkflow: null,
+            externalEditReload: null,
+            updateCheck: null);
 
     private static SettingsService CreateSettings(TestDirectory temp)
         => new(Path.Combine(temp.Path, "settings.db"));
