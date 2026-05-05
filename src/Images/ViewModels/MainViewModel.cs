@@ -189,6 +189,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ToggleGalleryCommand = new RelayCommand(ToggleGallery, () => CanToggleGallery);
         CloseGalleryCommand = new RelayCommand(() => IsGalleryOpen = false, () => IsGalleryOpen);
         OpenSelectedGalleryItemCommand = new RelayCommand(OpenSelectedGalleryItem, () => IsGalleryOpen && SelectedGalleryItem is not null);
+        ApplyGallerySmartFilterCommand = new RelayCommand(ApplyGallerySmartFilter, p => p is string);
+        ClearGalleryFilterCommand = new RelayCommand(() => GalleryFilterText = "", () => HasGalleryFilter);
         ToggleFilmstripCommand = new RelayCommand(ToggleFilmstrip, () => CanToggleFilmstrip);
         ToggleMetadataHudCommand = new RelayCommand(ToggleMetadataHud, () => CanToggleMetadataHud);
         PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard, () => !IsOperationBusy);
@@ -1155,6 +1157,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public ObservableCollection<FolderPreviewItem> FolderPreviewItems => _folderPreview.Items;
     public ObservableCollection<FolderPreviewItem> GalleryItems { get; } = [];
+    private IReadOnlyList<AssetSmartFilterItem> _gallerySmartFilterIndex = [];
+    private string _gallerySmartFilterSignature = "";
+    private string _galleryFilterSummaryText = "";
 
     private bool _isGalleryOpen;
     public bool IsGalleryOpen
@@ -1195,14 +1200,21 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         get
         {
             var total = FolderPreviewItems.Count;
+            var smartSummary = string.IsNullOrWhiteSpace(GalleryFilterSummaryText)
+                ? ""
+                : $" · {GalleryFilterSummaryText}";
+
             if (HasGalleryFilter)
-                return $"{GalleryItems.Count} of {total} {(total == 1 ? "item" : "items")} · {FolderSortLabel}";
+                return $"{GalleryItems.Count} of {total} {(total == 1 ? "item" : "items")} · {FolderSortLabel}{smartSummary}";
 
             return $"{total} {(total == 1 ? "item" : "items")} · {FolderSortLabel}";
         }
     }
     public bool HasGalleryFilter => !string.IsNullOrWhiteSpace(GalleryFilterText);
     public bool ShowGalleryFilterEmpty => ShowGallery && HasGalleryFilter && GalleryItems.Count == 0;
+    public string GalleryFilterSummaryText => _galleryFilterSummaryText;
+    public string GalleryFilterTooltip =>
+        "Filter by name/path or use smart filters such as format:png, orientation:landscape, size:large, date:week, duplicate:yes, rating:5, tag:portrait, or palette:blue.";
 
     private string _galleryFilterText = "";
     public string GalleryFilterText
@@ -1217,6 +1229,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Raise(nameof(HasGalleryFilter));
             Raise(nameof(ShowGalleryFilterEmpty));
             Raise(nameof(GalleryStatusText));
+            Raise(nameof(GalleryFilterSummaryText));
+            CommandManager.InvalidateRequerySuggested();
         }
     }
 
@@ -1322,6 +1336,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenPreviewItem(SelectedGalleryItem);
     }
 
+    private void ApplyGallerySmartFilter(object? parameter)
+    {
+        if (parameter is not string token || string.IsNullOrWhiteSpace(token))
+            return;
+
+        var parts = GalleryFilterText
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+        var existingIndex = parts.FindIndex(part => part.Equals(token, StringComparison.OrdinalIgnoreCase));
+        if (existingIndex >= 0)
+            parts.RemoveAt(existingIndex);
+        else
+            parts.Add(token);
+
+        GalleryFilterText = string.Join(' ', parts);
+    }
+
     private void RaiseFolderPreviewState()
     {
         RefreshGalleryItems();
@@ -1350,11 +1381,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var previousSelectedPath = SelectedGalleryItem?.Path;
         var filter = GalleryFilterText.Trim();
-        var visible = string.IsNullOrEmpty(filter)
-            ? FolderPreviewItems
-            : FolderPreviewItems.Where(item =>
-                item.FileName.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
-                item.Path.Contains(filter, StringComparison.OrdinalIgnoreCase));
+        EnsureGallerySmartFilterIndex();
+
+        IEnumerable<FolderPreviewItem> visible;
+        if (string.IsNullOrEmpty(filter))
+        {
+            visible = FolderPreviewItems;
+            SetGallerySmartFilterSummary("");
+        }
+        else
+        {
+            var result = AssetSmartFilterService.Filter(_gallerySmartFilterIndex, filter);
+            var visiblePaths = result.Items
+                .Select(item => item.Path)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            visible = FolderPreviewItems.Where(item => visiblePaths.Contains(item.Path));
+            SetGallerySmartFilterSummary(result.Summary);
+        }
 
         GalleryItems.Clear();
         foreach (var item in visible)
@@ -1367,6 +1410,27 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         if (!ReferenceEquals(SelectedGalleryItem, selected))
             SelectedGalleryItem = selected;
+    }
+
+    private void EnsureGallerySmartFilterIndex()
+    {
+        var paths = FolderPreviewItems.Select(item => item.Path).ToArray();
+        var signature = string.Join('\u001f', paths);
+        if (signature.Equals(_gallerySmartFilterSignature, StringComparison.Ordinal))
+            return;
+
+        _gallerySmartFilterIndex = AssetSmartFilterService.BuildIndex(paths);
+        _gallerySmartFilterSignature = signature;
+    }
+
+    private void SetGallerySmartFilterSummary(string summary)
+    {
+        if (_galleryFilterSummaryText.Equals(summary, StringComparison.Ordinal))
+            return;
+
+        _galleryFilterSummaryText = summary;
+        Raise(nameof(GalleryFilterSummaryText));
+        Raise(nameof(GalleryStatusText));
     }
 
     private void SyncFolderPreviewSecondaryStatus()
@@ -1581,6 +1645,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand ToggleGalleryCommand { get; }
     public ICommand CloseGalleryCommand { get; }
     public ICommand OpenSelectedGalleryItemCommand { get; }
+    public ICommand ApplyGallerySmartFilterCommand { get; }
+    public ICommand ClearGalleryFilterCommand { get; }
     public ICommand ToggleFilmstripCommand { get; }
     public ICommand ToggleMetadataHudCommand { get; }
     public ICommand PasteFromClipboardCommand { get; }
