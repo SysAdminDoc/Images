@@ -29,10 +29,15 @@ public sealed class SettingsService
     }
 
     private static SettingsService CreateDefault()
+        => CreateDefault(() => AppStorage.TryGetAppDirectory());
+
+    internal static SettingsService CreateDefault(Func<string?> getAppDirectory)
     {
+        ArgumentNullException.ThrowIfNull(getAppDirectory);
+
         try
         {
-            var dir = AppStorage.TryGetAppDirectory();
+            var dir = getAppDirectory();
             return dir is null
                 ? new SettingsService()
                 : new SettingsService(Path.Combine(dir, "settings.db"));

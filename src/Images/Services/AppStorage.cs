@@ -11,8 +11,19 @@ public static class AppStorage
     public static string? TryGetAppDirectory(params string[] relativeSegments)
         => TryCreateUnder(GetCandidateRoot(), relativeSegments);
 
+    internal static string? TryGetAppDirectoryForRoots(
+        IEnumerable<string> candidateRoots,
+        params string[] relativeSegments)
+    {
+        ArgumentNullException.ThrowIfNull(candidateRoots);
+        return TryCreateUnder(candidateRoots, relativeSegments);
+    }
+
     private static string? TryCreateUnder(IEnumerable<string> roots, IReadOnlyList<string> relativeSegments)
     {
+        if (!AreSafeRelativeSegments(relativeSegments))
+            return null;
+
         foreach (var root in roots)
         {
             if (string.IsNullOrWhiteSpace(root)) continue;
@@ -36,6 +47,20 @@ public static class AppStorage
         }
 
         return null;
+    }
+
+    private static bool AreSafeRelativeSegments(IReadOnlyList<string> relativeSegments)
+    {
+        foreach (var segment in relativeSegments)
+        {
+            if (string.IsNullOrWhiteSpace(segment)) return false;
+            if (Path.IsPathRooted(segment)) return false;
+            if (segment.IndexOfAny(Path.GetInvalidPathChars()) >= 0) return false;
+            if (segment.Contains(Path.DirectorySeparatorChar) || segment.Contains(Path.AltDirectorySeparatorChar)) return false;
+            if (segment is "." or "..") return false;
+        }
+
+        return true;
     }
 
     private static IEnumerable<string> GetCandidateRoot()

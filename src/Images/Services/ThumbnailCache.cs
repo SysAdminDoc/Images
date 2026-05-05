@@ -46,8 +46,13 @@ public sealed class ThumbnailCache
     public static readonly ThumbnailCache Instance = CreateDefault();
 
     private static ThumbnailCache CreateDefault()
+        => CreateDefault(() => AppStorage.TryGetAppDirectory("thumbs"));
+
+    internal static ThumbnailCache CreateDefault(Func<string?> getRoot)
     {
-        var root = AppStorage.TryGetAppDirectory("thumbs");
+        ArgumentNullException.ThrowIfNull(getRoot);
+
+        var root = getRoot();
         return root is null
             ? new ThumbnailCache(string.Empty, DefaultThumbSize, DefaultDiskCapBytes, isAvailable: false)
             : new ThumbnailCache(root, DefaultThumbSize, DefaultDiskCapBytes);
