@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using Images.Services;
 using Images.ViewModels;
 
@@ -13,6 +14,7 @@ namespace Images;
 public partial class MainWindow : Window
 {
     private MainViewModel Vm => (MainViewModel)DataContext;
+    private PixelCoordinate? _inspectorSelectionStart;
 
     public MainWindow()
     {
@@ -478,6 +480,88 @@ public partial class MainWindow : Window
             case Key.NumPad1:
                 Canvas.OneToOne(); e.Handled = true; break;
         }
+    }
+
+    private void Canvas_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (!Vm.IsInspectorMode)
+            return;
+
+        if (!TrySampleInspectorPixel(e.GetPosition(Canvas), out var sample))
+        {
+            if (_inspectorSelectionStart is null)
+                Vm.UpdateInspectorSample(null);
+            return;
+        }
+
+        Vm.UpdateInspectorSample(sample);
+        if (_inspectorSelectionStart is { } start)
+            Vm.UpdateInspectorSelection(PixelInspectorService.CalculateSelection(start, sample.Coordinate));
+
+        e.Handled = true;
+    }
+
+    private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (!Vm.IsInspectorMode)
+            return;
+
+        if (!TrySampleInspectorPixel(e.GetPosition(Canvas), out var sample))
+            return;
+
+        Vm.UpdateInspectorSample(sample);
+
+        if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+        {
+            _inspectorSelectionStart = sample.Coordinate;
+            Vm.UpdateInspectorSelection(PixelInspectorService.CalculateSelection(sample.Coordinate, sample.Coordinate));
+            Canvas.CaptureMouse();
+        }
+        else if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+        {
+            Vm.CopyInspectorSummaryCommand.Execute(null);
+        }
+
+        e.Handled = true;
+    }
+
+    private void Canvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_inspectorSelectionStart is null)
+            return;
+
+        _inspectorSelectionStart = null;
+        if (Canvas.IsMouseCaptured)
+            Canvas.ReleaseMouseCapture();
+        e.Handled = true;
+    }
+
+    private void Canvas_MouseLeave(object sender, MouseEventArgs e)
+    {
+        if (Vm.IsInspectorMode && _inspectorSelectionStart is null)
+            Vm.UpdateInspectorSample(null);
+    }
+
+    private bool TrySampleInspectorPixel(Point viewportPoint, out PixelSample sample)
+    {
+        sample = default!;
+
+        if (Vm.CurrentImage is not BitmapSource bitmap)
+            return false;
+
+        var matrix = Canvas.GetImageToViewportMatrix();
+        if (!PixelInspectorService.TryMapViewportPointToPixel(
+                matrix,
+                viewportPoint,
+                bitmap.PixelWidth,
+                bitmap.PixelHeight,
+                out var coordinate))
+        {
+            return false;
+        }
+
+        sample = PixelInspectorService.SamplePixel(bitmap, coordinate);
+        return true;
     }
 
     private void StemEditor_PreviewKeyDown(object sender, KeyEventArgs e)
