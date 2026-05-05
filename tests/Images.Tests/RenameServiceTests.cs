@@ -6,6 +6,22 @@ namespace Images.Tests;
 public sealed class RenameServiceTests
 {
     [Fact]
+    public void Sanitize_CollapsesWhitespaceAndTrimsUnsafeSuffix()
+    {
+        var sanitized = RenameService.Sanitize("  family\t\tphoto  .  ");
+
+        Assert.Equal("family photo", sanitized);
+    }
+
+    [Fact]
+    public void Sanitize_WhenInputHasOnlyInvalidOrWhitespaceCharacters_ReturnsEmpty()
+    {
+        var sanitized = RenameService.Sanitize("  :::   ...  ");
+
+        Assert.Equal(string.Empty, sanitized);
+    }
+
+    [Fact]
     public void Commit_WhenStemHasNoValidCharacters_ThrowsAndLeavesSource()
     {
         using var temp = TestDirectory.Create();

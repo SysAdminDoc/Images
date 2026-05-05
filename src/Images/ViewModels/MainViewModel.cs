@@ -61,8 +61,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _externalEditDebounce.Tick += (_, _) =>
         {
             _externalEditDebounce.Stop();
-            ReloadCurrentSilent();
-            Toast("Reloaded — file changed externally");
+            if (_isDisposed) return;
+            if (ReloadCurrentSilent())
+                Toast("Reloaded after external edit");
         };
 
         _isFilmstripVisible = SettingsService.Instance.GetBool(Keys.FilmstripVisible, true);
@@ -708,7 +709,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void QueueThumbnailLoad(FolderPreviewItem item, int generation, CancellationToken token)
     {
-        if (!item.TryMarkThumbnailRequested()) return;
+        if (_isDisposed || !item.TryMarkThumbnailRequested()) return;
 
         _ = Task.Run(async () =>
         {
@@ -724,7 +725,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
                     _ = _uiDispatcher.InvokeAsync(() =>
                     {
-                        if (token.IsCancellationRequested || generation != _folderPreviewGeneration) return;
+                        if (_isDisposed || token.IsCancellationRequested || generation != _folderPreviewGeneration) return;
                         if (!FolderPreviewItems.Contains(item)) return;
 
                         item.Thumbnail = thumbnail;
@@ -748,7 +749,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void EnsurePreviewThumbnail(FolderPreviewItem? item)
     {
-        if (item is null || !FolderPreviewItems.Contains(item)) return;
+        if (_isDisposed || item is null || !FolderPreviewItems.Contains(item)) return;
         QueueThumbnailLoad(item, _folderPreviewGeneration, _folderPreviewCts.Token);
     }
 
@@ -1254,16 +1255,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         LoadCurrent();
     }
 
-    private void LoadCurrent()
+    private bool LoadCurrent()
     {
         var path = _nav.CurrentPath;
         if (path is null)
         {
             ClearCurrentState();
-            return;
+            return false;
         }
 
         ClearOcrOverlay(cancelExtraction: true);
+        var loaded = false;
 
         try
         {
@@ -1285,6 +1287,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             FlipHorizontal = false;
             FlipVertical = false;
             ClearLoadError();
+            loaded = true;
 
             // First-run only — surface the gesture hint pill the first time an image lands.
             if (!_hasShownGestureHint)
@@ -1319,6 +1322,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         // V20-03: after loading, enqueue neighbours so the next arrow-press is instant.
         // The preload itself runs off the UI thread.
         EnqueueNeighbours();
+        return loaded;
     }
 
     private void SetLoadError(Exception ex)
@@ -1561,18 +1565,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     // V15-04: Reload re-enumerates the current file through the loader, re-applying WIC /
     // Magick / animated-GIF path as appropriate. Useful after external edit (Photoshop,
-    // mspaint). Rotation + flip state survive because LoadCurrent only reassigns them when
-    // a NEW path is loaded; here the path is identical so we keep whatever the user had.
+    // mspaint). View transforms are restored after the decode attempt so reload does not
+    // surprise the user by resetting their current orientation.
     private void ReloadCurrent()
     {
-        var savedRotation = Rotation;
-        var savedFlipH = FlipHorizontal;
-        var savedFlipV = FlipVertical;
-        LoadCurrent();
-        Rotation = savedRotation;
-        FlipHorizontal = savedFlipH;
-        FlipVertical = savedFlipV;
-        Toast("Reloaded");
+        if (ReloadCurrentPreservingViewState(resetPreload: false))
+            Toast("Reloaded");
     }
 
     // V15-02: Set current image as the desktop wallpaper. Delegates to WallpaperService which
@@ -1951,17 +1949,25 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     // Item 61: silent reload used by the external-edit debounce so the position/rotation state
-    // is preserved but no "Reloaded" toast is emitted — the debounce timer emits its own toast.
-    private void ReloadCurrentSilent()
+    // is preserved but no "Reloaded" toast is emitted. The caller decides whether to show a
+    // success message based on the returned decode result.
+    private bool ReloadCurrentSilent()
+    {
+        return ReloadCurrentPreservingViewState(resetPreload: true);
+    }
+
+    private bool ReloadCurrentPreservingViewState(bool resetPreload)
     {
         var savedRotation = Rotation;
         var savedFlipH = FlipHorizontal;
         var savedFlipV = FlipVertical;
-        _preload.Reset();
-        LoadCurrent();
+        if (resetPreload)
+            _preload.Reset();
+        var loaded = LoadCurrent();
         Rotation = savedRotation;
         FlipHorizontal = savedFlipH;
         FlipVertical = savedFlipV;
+        return loaded;
     }
 
     // Item 61: arm a FileSystemWatcher on the specific file so external edits (Photoshop,
@@ -2017,7 +2023,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Toast("Folder refreshed");
     }
 
-    private void RefreshFromNav() => LoadCurrent();
+    private bool RefreshFromNav() => LoadCurrent();
 
     private void ClearCurrentState()
     {
@@ -2075,7 +2081,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _folderPreviewGeneration++;
         _folderPreviewCts.Cancel();
         _ = DisposeFolderPreviewSourceLaterAsync(_folderPreviewCts);
-        _thumbnailDecodeGate.Dispose();
+        // SemaphoreSlim.Dispose is unsafe while background thumbnail workers can still be inside
+        // WaitAsync/Release. The gate has no eagerly allocated OS handle here, so cancellation is
+        // the correct shutdown boundary and process cleanup reclaims the lightweight object.
         _preload.Dispose();
         _nav.Dispose();
 
