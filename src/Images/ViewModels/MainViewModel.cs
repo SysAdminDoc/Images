@@ -6,7 +6,6 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Images.Services;
 using Microsoft.Extensions.Logging;
-using System.Threading;
 
 namespace Images.ViewModels;
 
@@ -16,12 +15,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly DirectoryNavigator _nav;
     private readonly RenameService _rename = new();
     private readonly PreloadService _preload = new();
-    private readonly OcrService _ocr = new();
     private readonly Dispatcher _uiDispatcher = Dispatcher.CurrentDispatcher;
     private readonly SettingsService _settings;
     private readonly ClipboardImportService _clipboardImport;
     private readonly FolderPreviewController _folderPreview;
     private readonly PhotoMetadataController _photoMetadata;
+    private readonly OcrWorkflowController _ocrWorkflow;
     private readonly ExternalEditReloadController _externalEditReload;
     private readonly RecycleBinDeleteService _recycleBinDelete;
     private readonly DispatcherTimer _renameTimer;
@@ -32,11 +31,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool _isDisposed;
     private bool _isFilmstripVisible;
     private bool _isMetadataHudVisible;
-    private bool _isOcrMode;
-    private bool _isOcrBusy;
-    private ObservableCollection<OcrTextLine>? _ocrOverlayLines;
-    private CancellationTokenSource? _ocrCts;
-    private int _ocrGeneration;
     private readonly DispatcherTimer _hintTimer;
 
     public MainViewModel()
@@ -58,6 +52,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _folderPreview.StateChanged += (_, _) => RaiseFolderPreviewState();
         _photoMetadata = new PhotoMetadataController(_uiDispatcher, () => _isDisposed, () => CurrentPath);
         _photoMetadata.StateChanged += (_, _) => RaisePhotoMetadataState();
+        _ocrWorkflow = new OcrWorkflowController(
+            () => CurrentPath,
+            () => HasImage,
+            Toast,
+            logError: ex => _log.LogError(ex, "OCR extraction failed: {Message}", ex.Message));
+        _ocrWorkflow.PropertyChanged += (_, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.PropertyName))
+                Raise(e.PropertyName);
+        };
         _externalEditReload = new ExternalEditReloadController(
             _uiDispatcher,
             () => _isDisposed,
@@ -117,7 +121,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenInDefaultAppCommand = new RelayCommand(OpenInDefaultApp, () => HasImage);
         StripLocationCommand = new RelayCommand(async () => await StripLocationAsync(), () => HasImage);
         SettingsCommand = new RelayCommand(ShowSettingsWindow);
-        ExtractTextCommand = new RelayCommand(async () => await ExtractTextAsync(), () => HasImage);
+        ExtractTextCommand = new RelayCommand(async () => await _ocrWorkflow.ToggleAsync(), () => HasImage);
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
         // panel renders prior-session folders before the user opens anything.
@@ -831,71 +835,26 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public bool IsOcrMode
     {
-        get => _isOcrMode;
-        set
-        {
-            if (Set(ref _isOcrMode, value))
-            {
-                Raise(nameof(OcrModeTooltip));
-                RaiseOcrStatusState();
-            }
-        }
+        get => _ocrWorkflow.IsOcrMode;
+        set => _ocrWorkflow.IsOcrMode = value;
     }
 
-    public bool IsOcrBusy
-    {
-        get => _isOcrBusy;
-        private set
-        {
-            if (Set(ref _isOcrBusy, value))
-            {
-                Raise(nameof(OcrModeTooltip));
-                RaiseOcrStatusState();
-            }
-        }
-    }
+    public bool IsOcrBusy => _ocrWorkflow.IsOcrBusy;
 
-    public bool ShowOcrStatusPanel => IsOcrBusy || IsOcrMode;
+    public bool ShowOcrStatusPanel => _ocrWorkflow.ShowOcrStatusPanel;
 
-    public string OcrModeTooltip => IsOcrBusy
-        ? "Cancel text extraction (E)"
-        : IsOcrMode
-            ? "Hide text overlay (E)"
-            : "Extract text locally (E)";
+    public string OcrModeTooltip => _ocrWorkflow.OcrModeTooltip;
 
-    public string OcrStatusTitle => IsOcrBusy
-        ? "Extracting text locally"
-        : "Text overlay active";
+    public string OcrStatusTitle => _ocrWorkflow.OcrStatusTitle;
 
-    public string OcrStatusDetail => IsOcrBusy
-        ? "Windows OCR is reading this image on your PC. Press E again to cancel."
-        : $"{OcrRegionCountText}. Select a text box and press Ctrl+C to copy.";
+    public string OcrStatusDetail => _ocrWorkflow.OcrStatusDetail;
 
-    public string OcrRegionCountText
-    {
-        get
-        {
-            var count = OcrOverlayLines?.Count ?? 0;
-            return count == 1 ? "1 text region found" : $"{count} text regions found";
-        }
-    }
+    public string OcrRegionCountText => _ocrWorkflow.OcrRegionCountText;
 
     public ObservableCollection<OcrTextLine>? OcrOverlayLines
     {
-        get => _ocrOverlayLines;
-        set
-        {
-            if (Set(ref _ocrOverlayLines, value))
-                RaiseOcrStatusState();
-        }
-    }
-
-    private void RaiseOcrStatusState()
-    {
-        Raise(nameof(ShowOcrStatusPanel));
-        Raise(nameof(OcrStatusTitle));
-        Raise(nameof(OcrStatusDetail));
-        Raise(nameof(OcrRegionCountText));
+        get => _ocrWorkflow.OcrOverlayLines;
+        set => _ocrWorkflow.OcrOverlayLines = value;
     }
 
     // -------------------- Navigation --------------------
@@ -1054,7 +1013,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return false;
         }
 
-        ClearOcrOverlay(cancelExtraction: true);
+        _ocrWorkflow.Clear(cancelExtraction: true);
         var loaded = false;
 
         try
@@ -1616,124 +1575,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    // OCR text extraction using Windows.Media.Ocr API. Toggles overlay display on success;
-    // if already in OCR mode, toggles off. Handles all error cases with user-facing toasts.
-    private async Task ExtractTextAsync()
-    {
-        if (CurrentPath == null || !HasImage)
-        {
-            Toast("No image loaded");
-            return;
-        }
-
-        // Toggle off if already in OCR mode or cancel an extraction in progress.
-        if (IsOcrMode || _ocrCts is not null)
-        {
-            var wasBusy = IsOcrBusy || _ocrCts is not null;
-            ClearOcrOverlay(cancelExtraction: true);
-            Toast(wasBusy ? "Text extraction canceled" : "Text overlay hidden");
-            return;
-        }
-
-        var path = CurrentPath;
-        var generation = ++_ocrGeneration;
-        var cts = new CancellationTokenSource();
-        _ocrCts = cts;
-        IsOcrBusy = true;
-        Toast("Extracting text locally...");
-
-        try
-        {
-            using var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-            var result = await _ocr.ExtractTextAsync(fileStream, cts.Token);
-            if (cts.IsCancellationRequested || generation != _ocrGeneration ||
-                !string.Equals(path, CurrentPath, StringComparison.OrdinalIgnoreCase))
-                return;
-
-            if (result == null)
-            {
-                Toast("OCR unavailable — no Windows OCR language pack installed");
-                IsOcrMode = false;
-                return;
-            }
-
-            if (result.Lines.Count == 0)
-            {
-                Toast("No text found");
-                IsOcrMode = false;
-                return;
-            }
-
-            // Convert OcrResult to overlay-renderable lines
-            var lines = new ObservableCollection<OcrTextLine>();
-            foreach (var line in result.Lines)
-            {
-                if (line.Words.Count == 0 || string.IsNullOrWhiteSpace(line.Text))
-                    continue;
-
-                var left = line.Words.Min(word => word.BoundingRect.Left);
-                var top = line.Words.Min(word => word.BoundingRect.Top);
-                var right = line.Words.Max(word => word.BoundingRect.Right);
-                var bottom = line.Words.Max(word => word.BoundingRect.Bottom);
-                lines.Add(new OcrTextLine
-                {
-                    Text = line.Text,
-                    BoundingBox = new Windows.Foundation.Rect(
-                        left,
-                        top,
-                        Math.Max(1, right - left),
-                        Math.Max(1, bottom - top)
-                    )
-                });
-            }
-
-            if (lines.Count == 0)
-            {
-                Toast("No text found");
-                IsOcrMode = false;
-                return;
-            }
-
-            OcrOverlayLines = lines;
-            IsOcrMode = true;
-            Toast($"{lines.Count} text region{(lines.Count == 1 ? "" : "s")} found");
-        }
-        catch (OperationCanceledException)
-        {
-            IsOcrMode = false;
-        }
-        catch (Exception ex)
-        {
-            _log.LogError(ex, "OCR extraction failed: {Message}", ex.Message);
-            Toast("Text extraction failed");
-            IsOcrMode = false;
-        }
-        finally
-        {
-            if (ReferenceEquals(_ocrCts, cts))
-            {
-                _ocrCts = null;
-            }
-
-            IsOcrBusy = false;
-            cts.Dispose();
-        }
-    }
-
-    private void ClearOcrOverlay(bool cancelExtraction)
-    {
-        if (cancelExtraction)
-        {
-            _ocrGeneration++;
-            _ocrCts?.Cancel();
-            _ocrCts = null;
-        }
-
-        OcrOverlayLines = null;
-        IsOcrMode = false;
-        IsOcrBusy = false;
-    }
-
     // Item 61: silent reload used by the external-edit debounce so the position/rotation state
     // is preserved but no "Reloaded" toast is emitted. The caller decides whether to show a
     // success message based on the returned decode result.
@@ -1811,7 +1652,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _externalEditReload.Dispose();
 
         _nav.ListChanged -= OnDirectoryListChanged;
-        ClearOcrOverlay(cancelExtraction: true);
+        _ocrWorkflow.Dispose();
         _photoMetadata.Dispose();
         _folderPreview.Dispose();
         _preload.Dispose();
@@ -1819,13 +1660,4 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         GC.SuppressFinalize(this);
     }
-}
-
-/// <summary>
-/// Represents one line of OCR text with an image-pixel bounding box for overlay rendering.
-/// </summary>
-public class OcrTextLine : ObservableObject
-{
-    public string Text { get; set; } = string.Empty;
-    public Windows.Foundation.Rect BoundingBox { get; set; }
 }

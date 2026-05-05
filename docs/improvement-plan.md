@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-02F` is complete. External-edit reload state now lives behind `ExternalEditReloadController`, which owns watcher arming, UI-thread debounce coalescing, disarm/cancel behavior, and reload success feedback with dispatcher-backed regression coverage.
+`IP-02G` is complete. OCR workflow state now lives behind `OcrWorkflowController`, which owns busy/active overlay state, cancellation, stale-result guards, local extraction feedback, and overlay-line conversion with async regression coverage.
 
 ## Next Focus
 
-The next recommended slice is `IP-02G`: continue extracting the oversized `MainViewModel`, with OCR workflow state as the next practical target because it still combines busy state, cancellation, WinRT OCR service calls, overlay state, and user-facing status.
+The next recommended slice is `IP-02H`: continue extracting the oversized `MainViewModel`, with update-check UI state as the next practical target because it still combines async release checks, latest-release state, command availability, toast feedback, and shell navigation.
 
 ## Research Inputs
 
@@ -59,8 +59,8 @@ The next recommended slice is `IP-02G`: continue extracting the oversized `MainV
 
 ## Implementation Order
 
-1. Continue `IP-02` with OCR workflow extraction under `IP-02G`.
-2. Extend `IP-03` state coverage around OCR cancellation, thumbnail cancellation, and reload failure paths.
+1. Continue `IP-02` with update-check UI state extraction under `IP-02H`.
+2. Extend `IP-03` state coverage around thumbnail cancellation, reload failure paths, and extracted controller/view-model relays.
 3. Build diagnostics/status UX from existing system-info, codec, OCR, and storage services under `IP-06`.
 4. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
 5. Scope `IP-16` design docs once near-term reliability and testability slices are stable.
@@ -79,6 +79,7 @@ The next recommended slice is `IP-02G`: continue extracting the oversized `MainV
 - 2026-05-05: Completed `IP-02D` by moving rename target-extension validation into `RenameService`, preventing unsupported extension-unlocked renames from moving files outside the app's navigable format set, and covering the service and ViewModel stale-path regression.
 - 2026-05-05: Completed `IP-02E` by extracting photo metadata HUD loading into `PhotoMetadataController`, adding owned cancellation/status handling, and covering success, superseded-result, and timeout outcomes with dispatcher-backed tests.
 - 2026-05-05: Completed `IP-02F` by extracting external-edit watcher/debounce/reload feedback into `ExternalEditReloadController` and covering coalesced reloads, failed reload notifications, disarm cancellation, and watcher creation failure.
+- 2026-05-05: Completed `IP-02G` by extracting OCR busy/active overlay workflow into `OcrWorkflowController` and covering no-image, success, no-text, cancellation, and stale-result outcomes.
 
 ## Verification Standard
 
