@@ -1,0 +1,232 @@
+<Window x:Class="Images.ReferenceBoardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Images - Reference board"
+        Width="1280"
+        Height="820"
+        MinWidth="960"
+        MinHeight="620"
+        WindowStartupLocation="CenterOwner"
+        AllowDrop="True"
+        DragEnter="Board_DragEnter"
+        DragOver="Board_DragOver"
+        Drop="Board_Drop">
+    <Grid Background="{StaticResource BaseBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource HairlineBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="18,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Reference board" Style="{StaticResource Text.Title}" />
+                    <TextBlock Text="Local canvas for arranging references, notes, and exportable groups."
+                               Style="{StaticResource Text.Caption}"
+                               Margin="0,3,0,0" />
+                </StackPanel>
+
+                <WrapPanel Grid.Column="1"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center">
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Margin="8,0,0,0"
+                            Click="AddImagesButton_Click"
+                            ToolTip="Add images to the board"
+                            AutomationProperties.Name="Add images">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8E5;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="Add images" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource ChromeButton}"
+                            Margin="8,0,0,0"
+                            Click="AddNoteButton_Click"
+                            ToolTip="Add a note card"
+                            AutomationProperties.Name="Add note">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE70F;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="Note" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource ChromeButton}"
+                            Margin="8,0,0,0"
+                            Click="AddGroupButton_Click"
+                            ToolTip="Add a visual group frame"
+                            AutomationProperties.Name="Add group frame">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8B7;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="Group" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource ChromeButton}"
+                            Margin="8,0,0,0"
+                            Click="ExportButton_Click"
+                            ToolTip="Export the visible board content as PNG"
+                            AutomationProperties.Name="Export board">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE74E;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="Export" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource ChromeButton}"
+                            Margin="8,0,0,0"
+                            Click="ResetViewButton_Click"
+                            ToolTip="Reset zoom and scroll position"
+                            AutomationProperties.Name="Reset board view">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8B3;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="Reset" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource DangerButton}"
+                            Margin="8,0,0,0"
+                            Click="ClearButton_Click"
+                            ToolTip="Clear the current board"
+                            AutomationProperties.Name="Clear board">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE74D;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="Clear" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </WrapPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1"
+              Background="{StaticResource ViewportBrush}">
+            <ScrollViewer x:Name="BoardScroller"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto"
+                          CanContentScroll="False"
+                          PreviewMouseWheel="BoardScroller_PreviewMouseWheel"
+                          Background="{StaticResource ViewportBrush}">
+                <Grid x:Name="BoardHost"
+                      Width="6400"
+                      Height="4200">
+                    <Grid.LayoutTransform>
+                        <ScaleTransform x:Name="BoardScale"
+                                        ScaleX="1"
+                                        ScaleY="1" />
+                    </Grid.LayoutTransform>
+                    <Canvas x:Name="BoardCanvas"
+                            Width="6400"
+                            Height="4200"
+                            Background="{StaticResource ViewportBrush}"
+                            AllowDrop="True"
+                            DragEnter="Board_DragEnter"
+                            DragOver="Board_DragOver"
+                            Drop="Board_Drop"
+                            MouseLeftButtonDown="BoardCanvas_MouseLeftButtonDown" />
+                </Grid>
+            </ScrollViewer>
+
+            <Border x:Name="EmptyState"
+                    Style="{StaticResource Card}"
+                    Width="430"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    IsHitTestVisible="False"
+                    Padding="22,20">
+                <StackPanel>
+                    <TextBlock Text="Drop references here"
+                               Style="{StaticResource Text.Display}"
+                               TextAlignment="Center" />
+                    <TextBlock Text="Use Add images, drop files from Explorer, add note cards, or draw group frames. Nothing leaves this device."
+                               Style="{StaticResource Text.Subtitle}"
+                               TextAlignment="Center"
+                               Margin="0,10,0,0" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2"
+                Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource HairlineBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="16,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="220" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Ellipse Width="8"
+                             Height="8"
+                             Fill="{StaticResource GreenBrush}"
+                             Margin="0,0,9,0" />
+                    <TextBlock x:Name="StatusText"
+                               Text="Ready. Drop supported files or add board elements."
+                               Style="{StaticResource Text.Caption}"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+
+                <CheckBox Grid.Column="1"
+                          x:Name="PinCheckBox"
+                          Content="Pin on top"
+                          Margin="18,0,16,0"
+                          VerticalAlignment="Center"
+                          Checked="PinCheckBox_Changed"
+                          Unchecked="PinCheckBox_Changed"
+                          AutomationProperties.Name="Pin reference board on top" />
+
+                <Slider Grid.Column="2"
+                        x:Name="ZoomSlider"
+                        Minimum="0.35"
+                        Maximum="2.25"
+                        Value="1"
+                        TickFrequency="0.05"
+                        IsSnapToTickEnabled="False"
+                        VerticalAlignment="Center"
+                        ValueChanged="ZoomSlider_ValueChanged"
+                        AutomationProperties.Name="Reference board zoom" />
+
+                <TextBlock Grid.Column="3"
+                           x:Name="ZoomText"
+                           Text="100%"
+                           Style="{StaticResource Text.Caption}"
+                           Width="48"
+                           Margin="12,0,0,0"
+                           VerticalAlignment="Center"
+                           TextAlignment="Right" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
