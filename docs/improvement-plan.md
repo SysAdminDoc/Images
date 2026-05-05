@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-03A` is complete. MainViewModel now has injectable settings, clipboard, delete, confirmation, and navigator dependencies for tests, and regression coverage protects folder-preview sort state, filmstrip persistence, paste-from-clipboard opening, and Recycle Bin confirmation preference behavior.
+`IP-02C` is complete. Recycle Bin deletion now lives behind a focused service that owns confirmation, "don't ask again" persistence, missing-file handling, and Recycle Bin send failures, with direct service tests plus existing ViewModel state coverage.
 
 ## Next Focus
 
-The next recommended slice is `IP-02C`: continue extracting the oversized `MainViewModel` now that the first state contracts around folder preview, clipboard import, and delete confirmation are covered.
+The next recommended slice is `IP-02D`: continue extracting the oversized `MainViewModel`, with rename or metadata state as the next practical targets because both still combine UI state, background work, and file-system outcomes.
 
 ## Research Inputs
 
@@ -75,6 +75,7 @@ The next recommended slice is `IP-02C`: continue extracting the oversized `MainV
 - 2026-05-05: Completed `IP-02A` / started `RS-03` by extracting folder-preview thumbnail orchestration into `FolderPreviewController`, adding app-owned sort modes, adding a visible sort control, and covering sort/preload behavior with tests.
 - 2026-05-05: Completed `IP-02B` by extracting clipboard import and clipboard-temp pruning into `ClipboardImportService`, adding deterministic file-list/image/storage/time/GUID seams, and covering clipboard import and pruning behavior with tests.
 - 2026-05-05: Completed `IP-03A` by adding isolated `MainViewModel` state tests for folder-preview sort state, filmstrip persistence, paste-from-clipboard opening, and Recycle Bin confirmation preference behavior.
+- 2026-05-05: Completed `IP-02C` by extracting Recycle Bin confirmation/settings/delete execution into `RecycleBinDeleteService` and covering skip-confirmation, cancel, opt-out persistence, missing-file, and send-failure outcomes with tests.
 
 ## Verification Standard
 
