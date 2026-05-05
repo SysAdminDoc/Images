@@ -47,7 +47,7 @@ The improvement-plan backlog is complete. Continue with the source-derived works
 | ID | Priority | Status | Workstream | Source signal | Planned sequence |
 | --- | --- | --- | --- | --- | --- |
 | RS-01 | P2 | Planned | Local comparison mode | nomacs synchronized views and opacity overlay | Design doc, UI-state tests, local 2-up compare, linked pan/zoom, linked next/previous, overlay opacity. |
-| RS-02 | P2 | Planned | Archive/book navigation | NeeView book model, PicView archive navigation, Tacent folder continuity | Dependency review, streaming/temp-safe archive reader, page list/history, archive-only controls, smoke corpus. |
+| RS-02 | P2 | In progress | Archive/book navigation | NeeView book model, PicView archive navigation, Tacent folder continuity | ZIP/CBZ read-only pages shipped; next: page scrubber/history, cover handling, archive-only controls, reader comfort, and dependency review for RAR/7z. |
 | RS-03 | P0 | In progress | Folder sorting and Explorer fidelity | ImageGlass Explorer sort sync, NeeView/Geeqie folder models | App-owned sort modes first, visible sort control, sort-state tests, later Explorer saved-search/sort investigation. |
 | RS-04 | P2 | Planned | Metadata culling workflow | Geeqie XMP keywords/search, gThumb catalogs/comments, Tacent metadata sort | Sidecar decision, rating/reject model, folder filters, keep/reject/move actions, undo and no-original-write defaults. |
 | RS-05 | P1 | In progress | Keyboard-first peek mode | QuickLook Spacebar preview, qView/JPEGView minimal chrome | Existing `--peek` foundation, startup timing logs, close-on-Esc smoke test, shell-helper documentation. |
@@ -100,6 +100,7 @@ The improvement-plan backlog is complete. Continue with the source-derived works
 - 2026-05-05: Completed `IP-16A` and closed `IP-16` by adding scoped product-differentiator design guidance for semantic search, duplicate cleanup, compare/overlay mode, archive/book navigation, peek launch mode, viewer adjustments, technical pixel tools, and metadata/culling workflows.
 - 2026-05-05: Completed `IP-17A` and closed `IP-17` by adding distribution-trust guidance for WinGet, Scoop, checksum continuity, signing options, SmartScreen expectations, and user verification copy.
 - 2026-05-05: Completed roadmap `X-03` by adding an optional-runtime integration policy covering license, redistribution, CVE tracking, binary provenance, process isolation, network behavior, test corpus, and release gates.
+- 2026-05-05: Started `RS-02` / `V20-33` by adding ZIP/CBZ read-only archive page loading through `ImageLoader`, including natural page ordering, unsafe-entry filtering, recursive-archive skipping, folder navigation inclusion, and generated regression tests.
 
 ## Verification Standard
 

@@ -22,6 +22,21 @@ public sealed class DirectoryNavigatorTests
     }
 
     [Fact]
+    public void Open_IncludesZipAndCbzArchiveBooksInFolderNavigation()
+    {
+        using var temp = TestDirectory.Create();
+        var image = temp.WriteFile("image1.jpg");
+        var zip = temp.WriteFile("image2.zip");
+        var cbz = temp.WriteFile("image3.cbz");
+
+        using var nav = new DirectoryNavigator();
+
+        Assert.True(nav.Open(image));
+
+        Assert.Equal([image, zip, cbz], nav.Files);
+    }
+
+    [Fact]
     public void Open_WithLargeFolder_NaturalSortsAndPreservesTarget()
     {
         using var temp = TestDirectory.Create();

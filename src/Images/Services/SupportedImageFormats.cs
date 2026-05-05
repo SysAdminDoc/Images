@@ -44,6 +44,11 @@ public static class SupportedImageFormats
         ".epi", ".ept", ".ept2", ".ept3", ".ai"
     ];
 
+    public static readonly string[] ArchiveExtensions =
+    [
+        ".zip", ".cbz"
+    ];
+
     public static readonly string[] RawExtensions =
     [
         ".cr2", ".cr3", ".crw", ".nef", ".nrw", ".arw", ".srf", ".sr2",
@@ -58,6 +63,7 @@ public static class SupportedImageFormats
             .Concat(PortableAndScientificExtensions)
             .Concat(VectorExtensions)
             .Concat(DocumentPreviewExtensions)
+            .Concat(ArchiveExtensions)
             .Concat(RawExtensions),
         StringComparer.OrdinalIgnoreCase);
 
@@ -69,6 +75,7 @@ public static class SupportedImageFormats
     [
         "Supported files|" + ToFilter(Extensions.OrderBy(e => e, StringComparer.OrdinalIgnoreCase)),
         "Common images|" + ToFilter(CommonExtensions),
+        "Archive books|" + ToFilter(ArchiveExtensions),
         "Design and production|" + ToFilter(DesignExtensions),
         "Camera RAW|" + ToFilter(RawExtensions),
         "Vector and document previews|" + ToFilter(VectorExtensions.Concat(DocumentPreviewExtensions)),
@@ -76,7 +83,7 @@ public static class SupportedImageFormats
     ]);
 
     public static string DropUnsupportedMessage =>
-        "Drop a supported image, RAW, design, vector, or document preview file.";
+        "Drop a supported image, archive book, RAW, design, vector, or document preview file.";
 
     private static string ToFilter(IEnumerable<string> extensions)
         => string.Join(";", extensions.Select(e => "*" + e));
@@ -90,6 +97,15 @@ public static class SupportedImageFormats
     public static bool RequiresGhostscript(string path)
         => GhostscriptExtensions.Contains(Path.GetExtension(path));
 
+    public static bool RequiresGhostscriptExtension(string extension)
+        => GhostscriptExtensions.Contains(Normalize(extension));
+
+    public static bool IsArchive(string path)
+        => ArchiveExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);
+
+    public static bool IsArchiveExtension(string extension)
+        => ArchiveExtensions.Contains(Normalize(extension), StringComparer.OrdinalIgnoreCase);
+
     public static string FormatFamily(string path)
     {
         var ext = Path.GetExtension(path);
@@ -100,6 +116,7 @@ public static class SupportedImageFormats
             ext.Equals(".svgz", StringComparison.OrdinalIgnoreCase) ||
             ext.Equals(".emf", StringComparison.OrdinalIgnoreCase) ||
             ext.Equals(".wmf", StringComparison.OrdinalIgnoreCase)) return "vector";
+        if (ArchiveExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase)) return "archive book";
         return "image";
     }
 
@@ -123,6 +140,8 @@ public static class SupportedImageFormats
             return "Vector previews";
         if (DocumentPreviewExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
             return "Document previews";
+        if (ArchiveExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
+            return "Archive books";
         if (RawExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
             return "Camera RAW";
         return null;
@@ -148,8 +167,8 @@ public static class SupportedImageFormats
             ".mp3" or ".wav" or ".flac" or ".ogg" or ".aac" or ".m4a" or ".opus"
                 => "Audio files aren't viewable. Open them in Groove, foobar2000, or VLC.",
 
-            ".zip" or ".cbz" or ".rar" or ".cbr" or ".7z" or ".cb7"
-                => "Archive/comic-book mode is not built yet (V20-33). Extract the archive or wait for the next milestone.",
+            ".rar" or ".cbr" or ".7z" or ".cb7"
+                => "Archive/book mode supports ZIP and CBZ first. Extract this archive, or convert it to CBZ.",
 
             ".doc" or ".docx" or ".rtf" or ".odt" or ".pages"
                 => "Word-processor documents aren't images. Use Word, LibreOffice, or your default editor.",
@@ -226,6 +245,9 @@ public static class SupportedImageFormats
             "pdf" or "ps" or "ps2" or "ps3" or "eps" or "epsf" or "epsi" or "ai"
                 => "Document previews require Ghostscript. " +
                    "Install Ghostscript or place an approved runtime in the app's Codecs\\Ghostscript folder.",
+
+            "zip" or "cbz"
+                => "This archive did not expose supported image pages. Use a ZIP/CBZ with image files at safe relative paths.",
 
             _ => null
         };

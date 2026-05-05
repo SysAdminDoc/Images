@@ -68,10 +68,20 @@ public sealed class RenameService
     }
 
     public static bool IsSupportedTargetExtension(string extension)
+        => IsSupportedTargetExtension(extension, currentPath: null);
+
+    public static bool IsSupportedTargetExtension(string extension, string? currentPath)
     {
         var normalized = NormalizeExtension(extension);
-        return !string.IsNullOrEmpty(normalized) &&
-               SupportedImageFormats.IsSupportedExtension(normalized);
+        if (string.IsNullOrEmpty(normalized) ||
+            !SupportedImageFormats.IsSupportedExtension(normalized))
+            return false;
+
+        var targetIsArchive = SupportedImageFormats.IsArchiveExtension(normalized);
+        var currentIsArchive = currentPath is not null && SupportedImageFormats.IsArchive(currentPath);
+        return currentIsArchive || targetIsArchive
+            ? currentIsArchive && targetIsArchive
+            : true;
     }
 
     /// <summary>
@@ -85,7 +95,7 @@ public sealed class RenameService
 
         folder = Path.GetFullPath(folder);
         var ext = NormalizeExtension(extension);
-        ValidateTargetExtension(ext);
+        ValidateTargetExtension(ext, currentPath);
 
         var baseName = Sanitize(desiredStem);
         if (string.IsNullOrEmpty(baseName))
@@ -104,12 +114,12 @@ public sealed class RenameService
         return candidate;
     }
 
-    private static void ValidateTargetExtension(string extension)
+    private static void ValidateTargetExtension(string extension, string? currentPath)
     {
         if (string.IsNullOrEmpty(extension))
             throw new ArgumentException("Extension must contain at least one supported format suffix.", nameof(extension));
 
-        if (!SupportedImageFormats.IsSupportedExtension(extension))
+        if (!IsSupportedTargetExtension(extension, currentPath))
             throw new ArgumentException($"Extension '{extension}' is not supported by Images.", nameof(extension));
     }
 

@@ -632,7 +632,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (CurrentPath is null) return "";
             var clean = RenameService.Sanitize(EditableStem);
             if (string.IsNullOrEmpty(clean)) return "";
-            if (!RenameService.IsSupportedTargetExtension(Extension))
+            if (!RenameService.IsSupportedTargetExtension(Extension, CurrentPath))
                 return "Choose a supported Images extension";
 
             var target = RenameService.ResolveTargetPath(
@@ -1156,6 +1156,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             ".pdf" or ".ps" or ".eps" or ".ai" => $"Rendering document preview for {fileName}.",
             ".tif" or ".tiff" => $"Loading multi-page image {fileName}.",
+            ".zip" or ".cbz" => $"Opening archive book {fileName}.",
             _ => $"Decoding {fileName}."
         };
     }
