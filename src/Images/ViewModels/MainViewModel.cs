@@ -27,6 +27,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly RecycleBinDeleteService _recycleBinDelete;
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
+    private readonly DispatcherTimer _animationTimer;
 
     private bool _suppressStemChange;
     private string _committedStemOnDisk = string.Empty;
@@ -114,6 +115,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _toastTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.5) };
         _toastTimer.Tick += (_, _) => { _toastTimer.Stop(); ToastMessage = null; };
 
+        _animationTimer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(100) };
+        _animationTimer.Tick += (_, _) => AdvanceAnimationFromTimer();
+
         _hintTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(2400) };
         _hintTimer.Tick += (_, _) => { _hintTimer.Stop(); ShowGestureHint = false; };
 
@@ -144,6 +148,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         CopyInspectorHsvCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hsv, "HSV"), () => HasInspectorSample);
         CopyInspectorSummaryCommand = new RelayCommand(() => CopyInspectorValue(s => s.Summary, "pixel sample"), () => HasInspectorSample);
         ClearInspectorSelectionCommand = new RelayCommand(ClearInspectorSelection, () => HasInspectorSelection);
+        ToggleAnimationPlaybackCommand = new RelayCommand(ToggleAnimationPlayback, () => IsAnimated);
+        PreviousAnimationFrameCommand = new RelayCommand(() => StepAnimationFrame(-1), () => CanStepAnimationFrame);
+        NextAnimationFrameCommand = new RelayCommand(() => StepAnimationFrame(1), () => CanStepAnimationFrame);
+        FirstAnimationFrameCommand = new RelayCommand(() => SelectAnimationFrame(0, pause: true), () => IsAnimated);
+        LastAnimationFrameCommand = new RelayCommand(() => SelectAnimationFrame((CurrentAnimation?.Frames.Count ?? 1) - 1, pause: true), () => IsAnimated);
+        SetAnimationFrameCommand = new RelayCommand(SetAnimationFrameFromParameter, CanSetAnimationFrameFromParameter);
+        CopyAnimationFrameCommand = new RelayCommand(CopyAnimationFrame, () => IsAnimated);
+        ExportAnimationFrameCommand = new RelayCommand(async () => await ExportAnimationFrameAsync(), () => IsAnimated);
         FlipHorizontalCommand = new RelayCommand(() => { FlipHorizontal = !FlipHorizontal; }, () => CanUseDisplayImageCommands);
         FlipVerticalCommand = new RelayCommand(() => { FlipVertical = !FlipVertical; }, () => CanUseDisplayImageCommands);
         RevealCommand = new RelayCommand(RevealInExplorer, () => HasImage);
@@ -241,8 +253,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             if (Set(ref _currentAnimation, value))
             {
+                RefreshAnimationWorkbench(value);
                 Raise(nameof(IsAnimated));
                 Raise(nameof(AnimationFrameCountText));
+                RaiseAnimationWorkbenchState();
             }
         }
     }
@@ -272,6 +286,98 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return $"{frames} \u00B7 {loop}";
         }
     }
+
+    public ObservableCollection<AnimationFrameItem> AnimationFrames { get; } = new();
+
+    private int _currentAnimationFrameIndex;
+    public int CurrentAnimationFrameIndex
+    {
+        get => _currentAnimationFrameIndex;
+        set => SelectAnimationFrame(value, pause: false);
+    }
+
+    public double AnimationScrubberValue
+    {
+        get => CurrentAnimationFrameIndex;
+        set => SelectAnimationFrame((int)Math.Round(value), pause: true);
+    }
+
+    public double AnimationFrameSliderMaximum
+        => IsAnimated ? Math.Max(0, CurrentAnimation!.Frames.Count - 1) : 0;
+
+    private bool _isAnimationPlaying;
+    public bool IsAnimationPlaying
+    {
+        get => _isAnimationPlaying;
+        set
+        {
+            if (!IsAnimated && value)
+                value = false;
+
+            if (!Set(ref _isAnimationPlaying, value))
+                return;
+
+            if (value)
+            {
+                _animationCompletedLoops = 0;
+                RestartAnimationTimer();
+            }
+            else
+            {
+                _animationTimer.Stop();
+            }
+
+            Raise(nameof(AnimationPlaybackText));
+            Raise(nameof(AnimationWorkbenchStatusText));
+            CommandManager.InvalidateRequerySuggested();
+        }
+    }
+
+    private double _animationPlaybackSpeed = 1.0;
+    public double AnimationPlaybackSpeed
+    {
+        get => _animationPlaybackSpeed;
+        set
+        {
+            var clamped = AnimationWorkbenchService.ClampPlaybackSpeed(value);
+            if (!Set(ref _animationPlaybackSpeed, clamped))
+                return;
+
+            Raise(nameof(AnimationPlaybackSpeedText));
+            Raise(nameof(AnimationWorkbenchStatusText));
+            if (IsAnimationPlaying)
+                RestartAnimationTimer();
+        }
+    }
+
+    private int _animationCompletedLoops;
+
+    public bool CanStepAnimationFrame => IsAnimated;
+    public string AnimationPlaybackText => IsAnimationPlaying ? "Pause" : "Play";
+    public string AnimationPlaybackSpeedText => AnimationWorkbenchService.FormatSpeed(AnimationPlaybackSpeed);
+    public string SelectedAnimationFrameText => AnimationWorkbenchService.FormatFramePosition(
+        CurrentAnimationFrameIndex,
+        CurrentAnimation?.Frames.Count ?? 0);
+    public string SelectedAnimationFrameDelayText => IsAnimated
+        ? AnimationWorkbenchService.FormatDelay(CurrentAnimation!.Delays[CurrentAnimationFrameIndex])
+        : "";
+    public string SelectedAnimationTimestampText => IsAnimated
+        ? AnimationWorkbenchService.FormatTimestamp(CurrentAnimation!.Delays, CurrentAnimationFrameIndex)
+        : "";
+    public string AnimationWorkbenchStatusText
+    {
+        get
+        {
+            if (!IsAnimated)
+                return "Open an animated GIF, APNG, or WebP to inspect frames.";
+
+            var state = IsAnimationPlaying ? "Playing" : "Paused";
+            return $"{state} at {AnimationPlaybackSpeedText} · {SelectedAnimationFrameText} · {SelectedAnimationFrameDelayText}";
+        }
+    }
+
+    public BitmapSource? SelectedAnimationFrame
+        => IsAnimated ? CurrentAnimation!.Frames[CurrentAnimationFrameIndex] : null;
 
     private int _pageIndex;
     public int PageIndex
@@ -1345,6 +1451,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand CopyInspectorHsvCommand { get; }
     public ICommand CopyInspectorSummaryCommand { get; }
     public ICommand ClearInspectorSelectionCommand { get; }
+    public ICommand ToggleAnimationPlaybackCommand { get; }
+    public ICommand PreviousAnimationFrameCommand { get; }
+    public ICommand NextAnimationFrameCommand { get; }
+    public ICommand FirstAnimationFrameCommand { get; }
+    public ICommand LastAnimationFrameCommand { get; }
+    public ICommand SetAnimationFrameCommand { get; }
+    public ICommand CopyAnimationFrameCommand { get; }
+    public ICommand ExportAnimationFrameCommand { get; }
     public ICommand FlipHorizontalCommand { get; }
     public ICommand FlipVerticalCommand { get; }
     public ICommand RevealCommand { get; }
@@ -2056,6 +2170,248 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Rotation = (Rotation + delta) % 360;
     }
 
+    private void RefreshAnimationWorkbench(AnimationSequence? sequence)
+    {
+        _animationTimer.Stop();
+        _animationCompletedLoops = 0;
+        if (_isAnimationPlaying)
+        {
+            _isAnimationPlaying = false;
+            Raise(nameof(IsAnimationPlaying));
+            Raise(nameof(AnimationPlaybackText));
+        }
+
+        AnimationFrames.Clear();
+        _currentAnimationFrameIndex = 0;
+
+        if (sequence is { Frames.Count: >= 2 })
+        {
+            for (var i = 0; i < sequence.Frames.Count; i++)
+            {
+                AnimationFrames.Add(new AnimationFrameItem(
+                    i,
+                    sequence.Frames[i],
+                    AnimationWorkbenchService.FormatDelay(sequence.Delays[i]),
+                    AnimationWorkbenchService.FormatTimestamp(sequence.Delays, i)));
+            }
+        }
+
+        UpdateAnimationTimelineSelection();
+        RaiseAnimationFrameState();
+        IsAnimationPlaying = sequence is { Frames.Count: >= 2 };
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void SelectAnimationFrame(int index, bool pause)
+    {
+        if (!IsAnimated)
+        {
+            if (_currentAnimationFrameIndex != 0)
+            {
+                _currentAnimationFrameIndex = 0;
+                RaiseAnimationFrameState();
+            }
+            return;
+        }
+
+        var clamped = AnimationWorkbenchService.ClampFrameIndex(CurrentAnimation, index);
+        if (pause)
+            IsAnimationPlaying = false;
+
+        if (!Set(ref _currentAnimationFrameIndex, clamped))
+        {
+            UpdateAnimationTimelineSelection();
+            return;
+        }
+
+        _animationCompletedLoops = 0;
+        UpdateAnimationTimelineSelection();
+        RaiseAnimationFrameState();
+        if (IsAnimationPlaying)
+            RestartAnimationTimer();
+    }
+
+    private void ToggleAnimationPlayback()
+    {
+        IsAnimationPlaying = !IsAnimationPlaying;
+    }
+
+    private void StepAnimationFrame(int delta)
+    {
+        if (!IsAnimated)
+            return;
+
+        IsAnimationPlaying = false;
+        var count = CurrentAnimation!.Frames.Count;
+        SelectAnimationFrame((CurrentAnimationFrameIndex + delta + count) % count, pause: false);
+    }
+
+    private void AdvanceAnimationFromTimer()
+    {
+        if (!IsAnimationPlaying || CurrentAnimation is not { Frames.Count: >= 2 } sequence)
+        {
+            IsAnimationPlaying = false;
+            return;
+        }
+
+        var next = CurrentAnimationFrameIndex + 1;
+        if (next >= sequence.Frames.Count)
+        {
+            if (sequence.LoopCount > 0 && _animationCompletedLoops + 1 >= sequence.LoopCount)
+            {
+                SelectAnimationFrame(sequence.Frames.Count - 1, pause: false);
+                IsAnimationPlaying = false;
+                return;
+            }
+
+            _animationCompletedLoops++;
+            next = 0;
+        }
+
+        SelectAnimationFrame(next, pause: false);
+    }
+
+    private void RestartAnimationTimer()
+    {
+        _animationTimer.Stop();
+        if (!IsAnimationPlaying || CurrentAnimation is not { Frames.Count: >= 2 } sequence)
+            return;
+
+        var index = AnimationWorkbenchService.ClampFrameIndex(sequence, CurrentAnimationFrameIndex);
+        _animationTimer.Interval = AnimationWorkbenchService.DelayForSpeed(sequence.Delays[index], AnimationPlaybackSpeed);
+        _animationTimer.Start();
+    }
+
+    private void SetAnimationFrameFromParameter(object? parameter)
+    {
+        if (TryGetAnimationFrameIndex(parameter, out var index))
+            SelectAnimationFrame(index, pause: true);
+    }
+
+    private bool CanSetAnimationFrameFromParameter(object? parameter)
+        => IsAnimated && TryGetAnimationFrameIndex(parameter, out var index)
+           && index >= 0
+           && index < CurrentAnimation!.Frames.Count;
+
+    private static bool TryGetAnimationFrameIndex(object? parameter, out int index)
+    {
+        switch (parameter)
+        {
+            case int i:
+                index = i;
+                return true;
+            case double d:
+                index = (int)Math.Round(d);
+                return true;
+            case AnimationFrameItem item:
+                index = item.Index;
+                return true;
+            case string text when int.TryParse(text, out var parsed):
+                index = parsed;
+                return true;
+            default:
+                index = -1;
+                return false;
+        }
+    }
+
+    private void CopyAnimationFrame()
+    {
+        if (SelectedAnimationFrame is not { } frame)
+            return;
+
+        try
+        {
+            ClipboardService.SetImage(frame);
+            Toast($"Copied {SelectedAnimationFrameText}");
+        }
+        catch (Exception ex)
+        {
+            Toast($"Copy failed: {ex.Message}");
+        }
+    }
+
+    private async Task ExportAnimationFrameAsync()
+    {
+        if (SelectedAnimationFrame is not { } frame || CurrentPath is null)
+            return;
+
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Title = "Export animation frame",
+            FileName = AnimationWorkbenchService.CreateDefaultFrameExportFileName(CurrentPath, CurrentAnimationFrameIndex),
+            Filter = "PNG image|*.png",
+            DefaultExt = "png",
+            AddExtension = true,
+            InitialDirectory = Path.GetDirectoryName(CurrentPath),
+        };
+        if (dialog.ShowDialog() != true)
+            return;
+
+        BeginOperationStatus("Exporting frame", $"{SelectedAnimationFrameText} to {Path.GetFileName(dialog.FileName)}.");
+        try
+        {
+            await YieldForOperationStatusAsync();
+            AnimationWorkbenchService.SaveFramePng(frame, dialog.FileName);
+            Toast($"Exported {SelectedAnimationFrameText}");
+        }
+        catch (Exception ex)
+        {
+            Toast($"Export failed: {ex.Message}");
+        }
+        finally
+        {
+            EndOperationStatus();
+        }
+    }
+
+    public bool TryCreateAnimationFrameDragFile(out string path)
+    {
+        path = "";
+        if (SelectedAnimationFrame is not { } frame)
+            return false;
+
+        try
+        {
+            path = AnimationWorkbenchService.SaveFrameToTemp(frame, CurrentPath, CurrentAnimationFrameIndex);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Toast($"Frame drag failed: {ex.Message}");
+            return false;
+        }
+    }
+
+    private void UpdateAnimationTimelineSelection()
+    {
+        for (var i = 0; i < AnimationFrames.Count; i++)
+            AnimationFrames[i].IsSelected = i == CurrentAnimationFrameIndex;
+    }
+
+    private void RaiseAnimationFrameState()
+    {
+        Raise(nameof(CurrentAnimationFrameIndex));
+        Raise(nameof(AnimationScrubberValue));
+        Raise(nameof(AnimationFrameSliderMaximum));
+        Raise(nameof(CanStepAnimationFrame));
+        Raise(nameof(SelectedAnimationFrame));
+        Raise(nameof(SelectedAnimationFrameText));
+        Raise(nameof(SelectedAnimationFrameDelayText));
+        Raise(nameof(SelectedAnimationTimestampText));
+        Raise(nameof(AnimationWorkbenchStatusText));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RaiseAnimationWorkbenchState()
+    {
+        Raise(nameof(AnimationFrameSliderMaximum));
+        Raise(nameof(CanStepAnimationFrame));
+        Raise(nameof(AnimationPlaybackText));
+        Raise(nameof(AnimationPlaybackSpeedText));
+        Raise(nameof(AnimationWorkbenchStatusText));
+    }
+
     public void UpdateInspectorSample(PixelSample? sample)
     {
         _inspectorSample = sample;
@@ -2531,6 +2887,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         _renameTimer.Stop();
         _toastTimer.Stop();
+        _animationTimer.Stop();
         _hintTimer.Stop();
         _externalEditReload.Dispose();
 

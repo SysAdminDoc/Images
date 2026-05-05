@@ -11,9 +11,8 @@ namespace Images.Controls;
 
 /// <summary>
 /// A content host that draws its image with wheel-zoom, drag-pan, and double-click fit/1:1 toggle.
-/// Used as the photo canvas. When the <see cref="Animation"/> DP is set, the inner Image cycles
-/// through the frames of the supplied <see cref="AnimationSequence"/> via WPF's keyframe animator —
-/// all pan/zoom/rotate transforms stay intact on top of the moving image.
+/// Used as the photo canvas. When the <see cref="Animation"/> DP is set, the view model owns the
+/// selected frame index and this control renders that frame without disturbing pan/zoom/rotate state.
 /// </summary>
 public sealed class ZoomPanImage : ContentControl
 {
@@ -61,6 +60,16 @@ public sealed class ZoomPanImage : ContentControl
     {
         get => (AnimationSequence?)GetValue(AnimationProperty);
         set => SetValue(AnimationProperty, value);
+    }
+
+    public static readonly DependencyProperty AnimationFrameIndexProperty = DependencyProperty.Register(
+        nameof(AnimationFrameIndex), typeof(int), typeof(ZoomPanImage),
+        new PropertyMetadata(0, (d, e) => ((ZoomPanImage)d).OnAnimationFrameIndexChanged((int)e.NewValue)));
+
+    public int AnimationFrameIndex
+    {
+        get => (int)GetValue(AnimationFrameIndexProperty);
+        set => SetValue(AnimationFrameIndexProperty, value);
     }
 
     private static readonly CubicEase _rotateEase = new() { EasingMode = EasingMode.EaseInOut };
@@ -168,27 +177,26 @@ public sealed class ZoomPanImage : ContentControl
 
     private void OnAnimationChanged(AnimationSequence? seq)
     {
-        // Cancel whatever was playing before — either starts a fresh keyframe animation or
-        // reverts the Image.Source to its baseline (which OnSourceChanged set moments ago).
+        ApplyAnimationFrame(seq, AnimationFrameIndex);
+    }
+
+    private void OnAnimationFrameIndexChanged(int index)
+    {
+        ApplyAnimationFrame(Animation, index);
+    }
+
+    private void ApplyAnimationFrame(AnimationSequence? seq, int index)
+    {
+        // Cancel any legacy Source animation and show the explicit frame selected by the
+        // workbench. This keeps scrubbing, step commands, copy, export, and the canvas in sync.
         _image.BeginAnimation(Image.SourceProperty, null);
-        if (seq is null || seq.Frames.Count < 2) return;
-
-        var anim = new ObjectAnimationUsingKeyFrames();
-        var t = TimeSpan.Zero;
-        for (int i = 0; i < seq.Frames.Count; i++)
+        if (seq is null || seq.Frames.Count < 2)
         {
-            anim.KeyFrames.Add(new DiscreteObjectKeyFrame(seq.Frames[i], KeyTime.FromTimeSpan(t)));
-            t += seq.Delays[i];
+            _image.Source = Source;
+            return;
         }
-        anim.Duration = t;
-        anim.RepeatBehavior = seq.LoopCount <= 0
-            ? RepeatBehavior.Forever
-            : new RepeatBehavior(seq.LoopCount);
 
-        // HandoffBehavior.SnapshotAndReplace ensures we don't blend with a lingering previous
-        // animation's interpolator (discrete keyframes wouldn't blend anyway, but it's the
-        // conservative default for source swaps).
-        _image.BeginAnimation(Image.SourceProperty, anim, HandoffBehavior.SnapshotAndReplace);
+        _image.Source = seq.Frames[Math.Clamp(index, 0, seq.Frames.Count - 1)];
     }
 
     public void ResetView()

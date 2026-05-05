@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Media.Imaging;
 
 namespace Images.Services;
 
@@ -14,5 +15,13 @@ public static class ClipboardService
             throw new ArgumentNullException(nameof(text));
 
         Clipboard.SetText(text);
+    }
+
+    public static void SetImage(BitmapSource image)
+    {
+        if (image is null)
+            throw new ArgumentNullException(nameof(image));
+
+        Clipboard.SetImage(image);
     }
 }

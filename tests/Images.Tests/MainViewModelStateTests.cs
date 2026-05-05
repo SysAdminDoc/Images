@@ -162,6 +162,42 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void AnimatedImageWorkbench_LoadsTimelineAndFrameCommands()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var path = WriteTwoFrameGif(temp.Path, "animated.gif");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(path);
+
+            Assert.True(viewModel.IsAnimated);
+            Assert.True(viewModel.IsAnimationPlaying);
+            Assert.Equal(2, viewModel.AnimationFrames.Count);
+            Assert.Equal(0, viewModel.CurrentAnimationFrameIndex);
+            Assert.Equal("Frame 1 of 2", viewModel.SelectedAnimationFrameText);
+            Assert.True(viewModel.AnimationFrames[0].IsSelected);
+
+            viewModel.ToggleAnimationPlaybackCommand.Execute(null);
+            viewModel.NextAnimationFrameCommand.Execute(null);
+
+            Assert.False(viewModel.IsAnimationPlaying);
+            Assert.Equal(1, viewModel.CurrentAnimationFrameIndex);
+            Assert.Equal(1.0, viewModel.AnimationScrubberValue);
+            Assert.True(viewModel.AnimationFrames[1].IsSelected);
+            Assert.Equal("Frame 2 of 2", viewModel.SelectedAnimationFrameText);
+
+            viewModel.PreviousAnimationFrameCommand.Execute(null);
+            viewModel.AnimationPlaybackSpeed = 99;
+
+            Assert.Equal(0, viewModel.CurrentAnimationFrameIndex);
+            Assert.Equal(4.0, viewModel.AnimationPlaybackSpeed);
+            Assert.Equal("4x", viewModel.AnimationPlaybackSpeedText);
+        });
+    }
+
+    [Fact]
     public void PasteFromClipboardCommand_SavesImageAndOpensIt()
     {
         RunOnSta(() =>
@@ -1038,6 +1074,17 @@ public sealed class MainViewModelStateTests
         return path;
     }
 
+    private static string WriteTwoFrameGif(string folder, string fileName)
+    {
+        var path = Path.Combine(folder, fileName);
+        var encoder = new GifBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(CreateColoredBitmap(0xE8, 0x46, 0x46)));
+        encoder.Frames.Add(BitmapFrame.Create(CreateColoredBitmap(0x46, 0x83, 0xE8)));
+        using var stream = File.Create(path);
+        encoder.Save(stream);
+        return path;
+    }
+
     private static string WriteTwoPageCbz(string folder, string fileName)
     {
         var path = Path.Combine(folder, fileName);
@@ -1106,6 +1153,25 @@ public sealed class MainViewModelStateTests
             {
                 0x28, 0xA7, 0x45, 0xFF, 0x28, 0xA7, 0x45, 0xFF,
                 0x28, 0xA7, 0x45, 0xFF, 0x28, 0xA7, 0x45, 0xFF
+            },
+            8);
+        bitmap.Freeze();
+        return bitmap;
+    }
+
+    private static BitmapSource CreateColoredBitmap(byte r, byte g, byte b)
+    {
+        var bitmap = BitmapSource.Create(
+            2,
+            2,
+            96,
+            96,
+            PixelFormats.Bgra32,
+            null,
+            new byte[]
+            {
+                b, g, r, 0xFF, b, g, r, 0xFF,
+                b, g, r, 0xFF, b, g, r, 0xFF
             },
             8);
         bitmap.Freeze();
