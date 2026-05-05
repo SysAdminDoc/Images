@@ -16,6 +16,10 @@ Status values:
 
 The next recommended slice is the first `IP-02` extraction: move clipboard import or folder-preview behavior out of `MainViewModel` behind a focused service/controller, then add tests around the extracted logic.
 
+## Research Inputs
+
+- `docs/research/open-source-viewer-scan-2026-05-05.md`: open-source viewer scan covering ImageGlass, nomacs, PicView, NeeView, QuickLook, Geeqie, gThumb, qView, JPEGView, Tacent View, Minimal Image Viewer, and LightningView. The scan confirms `IP-02` and `IP-03` as the safest next work, then recommends future design docs for local comparison, archive/book navigation, metadata culling, peek launch mode, viewer-side adjustments, technical image tools, cache health, and distribution trust.
+
 ## Priority Backlog
 
 | ID | Priority | Status | Area | Goal | Acceptance criteria |
@@ -35,7 +39,8 @@ The next recommended slice is the first `IP-02` extraction: move clipboard impor
 | IP-13 | P1 | Done | Shell/clipboard integration | Centralize opening URLs/files/folders and copying text. | About, crash dialog, settings, and main viewer use shared helpers with consistent error behavior and safer Explorer argument handling. |
 | IP-14 | P2 | Planned | Settings persistence | Strengthen settings schema and corruption tests. | Tests cover corruption quarantine, unavailable storage, defaults, migration behavior, and future timestamp handling. |
 | IP-15 | P1 | Done | CI/release gates | Ensure CI exercises the real verification path. | CI runs solution build, tests, whitespace check, vulnerability gate, version sync gate, and CLI smoke commands used by local release validation. |
-| IP-16 | P2 | Planned | Product differentiators | Track large future differentiators without disrupting the hardening sequence. | Local semantic search, duplicate cleanup, Squoosh-style visual comparison/export, and stronger library/metadata workflows have scoped design docs before implementation. |
+| IP-16 | P2 | Planned | Product differentiators | Track large future differentiators without disrupting the hardening sequence. | Local semantic search, duplicate cleanup, compare/overlay mode, archive/book navigation, peek launch mode, viewer-side adjustments, technical pixel/channel tools, and stronger library/metadata workflows have scoped design docs before implementation. |
+| IP-17 | P2 | Planned | Distribution trust | Reduce Windows install trust friction once the next stable release is ready. | WinGet and Scoop publishing are scoped, checksums remain part of releases, and a code-signing decision doc covers certificate cost, SmartScreen reputation, release cadence, and fallback verification instructions. |
 
 ## Implementation Order
 
@@ -44,12 +49,14 @@ The next recommended slice is the first `IP-02` extraction: move clipboard impor
 3. Build diagnostics/status UX from existing system-info, codec, OCR, and storage services under `IP-06`.
 4. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
 5. Scope `IP-16` design docs once near-term reliability and testability slices are stable.
+6. Scope `IP-17` after the next stable release artifact path is verified.
 
 ## Progress Log
 
 - 2026-05-05: Created this improvement tracker and completed `IP-13` by adding shared shell and clipboard helpers used by About, crash dialog, settings, and main viewer actions.
 - 2026-05-05: Completed `IP-05` by adding update-check seams and 10 non-network tests for release parsing, retry-state policy, trusted URLs, due logic, and state-file behavior.
 - 2026-05-05: Completed `IP-15` by adding CI verification, a reusable version-sync script, release-workflow reuse of that script, vulnerability scanning, and CLI smoke checks.
+- 2026-05-05: Added an open-source viewer research scan and converted its findings into explicit future tracks for compare mode, archive/book navigation, metadata culling, peek launch mode, technical image tools, viewer-side adjustments, cache health, shortcut/settings polish, and distribution trust.
 
 ## Verification Standard
 
