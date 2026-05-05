@@ -59,6 +59,9 @@ public static class ImageLoader
         if (fi.Length == 0)
             throw new InvalidOperationException($"'{Path.GetFileName(path)}' is empty.");
 
+        if (SupportedImageFormats.IsArchive(path))
+            return LoadArchivePreview(path, pageIndex);
+
         if (SupportedImageFormats.RequiresGhostscript(path))
             return LoadDocumentPreview(path, pageIndex);
 
@@ -77,9 +80,14 @@ public static class ImageLoader
         // Load the file into memory first so we never hold a lock on the original (rename/delete must work).
         var bytes = ReadStableFileBytes(path);
 
+        return LoadRasterBytes(bytes, Path.GetFileName(path), Path.GetExtension(path));
+    }
+
+    private static LoadResult LoadRasterBytes(byte[] bytes, string displayName, string extension)
+    {
         // Animation probe first — only for formats that actually support it. If the file is a
         // multi-frame GIF / animated WebP / APNG, return the full sequence so the canvas can play it.
-        if (AnimatedExtensions.Contains(Path.GetExtension(path)))
+        if (AnimatedExtensions.Contains(extension))
         {
             var animated = TryLoadAnimated(bytes);
             if (animated is not null) return animated;
@@ -120,8 +128,19 @@ public static class ImageLoader
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Could not decode '{Path.GetFileName(path)}': {ex.Message}", ex);
+            throw new InvalidOperationException($"Could not decode '{displayName}': {ex.Message}", ex);
         }
+    }
+
+    private static LoadResult LoadArchivePreview(string path, int requestedPageIndex)
+    {
+        var page = ArchiveBookService.LoadPage(path, requestedPageIndex);
+        var loaded = LoadRasterBytes(page.Bytes, page.EntryName, Path.GetExtension(page.EntryName));
+        return loaded with
+        {
+            DecoderUsed = $"{loaded.DecoderUsed} (archive page {page.PageIndex + 1} of {page.PageCount})",
+            Pages = new PageSequence(page.PageIndex, page.PageCount, "Page")
+        };
     }
 
     /// <summary>
