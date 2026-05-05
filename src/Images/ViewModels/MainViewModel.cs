@@ -295,6 +295,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasPreviousPage => HasMultiplePages && PageIndex > 0;
     public bool HasNextPage => HasMultiplePages && PageIndex < PageCount - 1;
     public string PagePositionText => HasMultiplePages ? $"{PageLabel} {PageIndex + 1} / {PageCount}" : "";
+    public int PageNumber
+    {
+        get => PageIndex + 1;
+        set
+        {
+            if (!HasMultiplePages || IsOperationBusy) return;
+            var target = Math.Clamp(value, 1, PageCount) - 1;
+            if (target == PageIndex) return;
+            _ = GoToPageAsync(target, "Loading page");
+        }
+    }
 
     private void RaisePageState()
     {
@@ -302,6 +313,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(HasPreviousPage));
         Raise(nameof(HasNextPage));
         Raise(nameof(PagePositionText));
+        Raise(nameof(PageNumber));
         CommandManager.InvalidateRequerySuggested();
     }
 

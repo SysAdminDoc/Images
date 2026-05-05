@@ -43,7 +43,7 @@ All notable changes to **Images** are documented here.
 - **Product differentiator scopes** — added a design scope for local semantic search, duplicate cleanup, compare/overlay, archive/book navigation, peek launch mode, viewer-side adjustments, technical pixel tools, and metadata/culling workflows.
 - **Distribution trust plan** — scoped WinGet and Scoop publishing, checksum continuity, code-signing options, SmartScreen expectations, and user verification copy for the next stable release.
 - **Integration policy** — documented the no-code-copied optional-runtime gate for licenses, redistribution rights, CVE tracking, binary provenance, process isolation, network behavior, and release impact.
-- **Archive/book foundation** — ZIP and CBZ files now open as read-only archive books using built-in .NET ZIP support, with natural page ordering, page-count controls, unsafe-entry filtering, and recursive-archive guardrails.
+- **Archive/book foundation** — ZIP and CBZ files now open as read-only archive books using built-in .NET ZIP support, with natural page ordering, page-count controls, a page scrubber, unsafe-entry filtering, and recursive-archive guardrails.
 - **OCR workflow polish** — text extraction now has a persistent in-view busy/active status, a cancel-aware toolbar state, OCR readiness in Settings/About, and OCR language-pack status in diagnostics.
 - **Open-source viewer research** — added a May 2026 research scan of ImageGlass, nomacs, PicView, NeeView, QuickLook, Geeqie, gThumb, qView, JPEGView, Tacent View, Minimal Image Viewer, and LightningView, then folded the findings into the improvement plan.
 - **Trust copy** — README destructive-action wording now reflects the Recycle Bin confirmation flow.

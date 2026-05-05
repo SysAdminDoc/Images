@@ -772,6 +772,72 @@
         </Setter>
     </Style>
 
+    <!-- ============ Slider ============ -->
+    <Style TargetType="Slider">
+        <Setter Property="Height" Value="24" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Slider">
+                    <Grid Background="Transparent"
+                          VerticalAlignment="Center"
+                          SnapsToDevicePixels="True">
+                        <Track x:Name="PART_Track"
+                               VerticalAlignment="Center"
+                               Height="18">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="{x:Static Slider.DecreaseLarge}"
+                                              IsTabStop="False">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border Height="4"
+                                                    CornerRadius="2"
+                                                    Background="{StaticResource AccentBrush}" />
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="{x:Static Slider.IncreaseLarge}"
+                                              IsTabStop="False">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border Height="4"
+                                                    CornerRadius="2"
+                                                    Background="{StaticResource Surface1Brush}" />
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.IncreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Width="14"
+                                       Height="14">
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Border x:Name="ThumbBorder"
+                                                    CornerRadius="7"
+                                                    Background="{StaticResource FloatingChromeTextBrush}"
+                                                    BorderBrush="{StaticResource AccentBrush}"
+                                                    BorderThickness="2" />
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="ThumbBorder" Property="Background" Value="{StaticResource AccentHoverBrush}" />
+                                                </Trigger>
+                                                <Trigger Property="IsDragging" Value="True">
+                                                    <Setter TargetName="ThumbBorder" Property="Background" Value="{StaticResource AccentBrush}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- ============ ScrollBar ============ -->
     <Style TargetType="Thumb" x:Key="ScrollThumb">
         <Setter Property="Template">

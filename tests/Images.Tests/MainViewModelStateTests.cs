@@ -379,6 +379,33 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void PageNumber_WhenSetFromScrubber_LoadsRequestedPage()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WriteTwoPageTiff(temp.Path, "document.tif");
+            var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(image);
+
+            Assert.True(viewModel.HasMultiplePages);
+            Assert.Equal(1, viewModel.PageNumber);
+
+            viewModel.PageNumber = 2;
+
+            Assert.True(viewModel.IsOperationBusy);
+            Assert.Equal("Loading page", viewModel.OperationStatusTitle);
+            Assert.Equal("Page 2 of 2.", viewModel.OperationStatusDetail);
+
+            PumpUntil(() => !viewModel.IsOperationBusy);
+
+            Assert.Equal(2, viewModel.PageNumber);
+            Assert.Equal("Page 2 / 2", viewModel.PagePositionText);
+        });
+    }
+
+    [Fact]
     public void FirstRunGuidance_ExposesCapabilityAndPrivacySummaries()
     {
         RunOnSta(() =>
