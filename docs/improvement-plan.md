@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-15` is complete. CI now runs the same core verification path used locally: whitespace diff check, version-sync gate, vulnerable-package gate, Release build, tests, and CLI smoke commands. The release workflow uses the same reusable version-sync script.
+`IP-02A` is complete. Folder-preview thumbnail orchestration now lives behind a focused controller, app-owned folder sort modes are available from the viewer, and regression tests cover natural sorting, sort-mode reordering, current-file preservation, extension grouping, and preview preload radius.
 
 ## Next Focus
 
-The next recommended slice is the first `IP-02` extraction: move clipboard import or folder-preview behavior out of `MainViewModel` behind a focused service/controller, then add tests around the extracted logic.
+The next recommended slice is `IP-02B`: move clipboard import and clipboard-temp pruning out of `MainViewModel`, then add tests around unsupported clipboard data, file-list selection, temp-file naming, and pruning limits.
 
 ## Research Inputs
 
@@ -25,7 +25,7 @@ The next recommended slice is the first `IP-02` extraction: move clipboard impor
 | ID | Priority | Status | Area | Goal | Acceptance criteria |
 | --- | --- | --- | --- | --- | --- |
 | IP-01 | P0 | Planned | Test seams | Add seams around static/global services such as update checks, storage paths, thumbnail cache, shell integration, and clocks. | Unit tests can drive update-check retry policy, storage fallback, and thumbnail/cache behavior without real network or user profile state. |
-| IP-02 | P0 | Planned | MainViewModel structure | Split the oversized main view model into focused controllers/services while preserving current behavior. | OCR, folder preview, clipboard import, reload, rename, metadata, and update-check logic are independently readable and have narrower dependencies. |
+| IP-02 | P0 | In progress | MainViewModel structure | Split the oversized main view model into focused controllers/services while preserving current behavior. | OCR, folder preview, clipboard import, reload, rename, metadata, and update-check logic are independently readable and have narrower dependencies. |
 | IP-03 | P0 | Planned | UI state tests | Add regression coverage for risky WPF state transitions. | Tests or smoke harnesses cover reload failure, external file changes, OCR cancellation, thumbnail cancellation, rename debounce, and disabled/busy states. |
 | IP-04 | P1 | Planned | Background tasks | Improve observability and ownership for fire-and-forget work. | Thumbnail generation, metadata reads, preloading, clipboard pruning, cache eviction, and update checks have clear cancellation/ownership and structured logging. |
 | IP-05 | P1 | Done | Update checks | Add focused update-check tests. | Timeout, network failure, HTTP failure, malformed release payload, newer release, current release, and trusted URL normalization are covered. |
@@ -42,9 +42,24 @@ The next recommended slice is the first `IP-02` extraction: move clipboard impor
 | IP-16 | P2 | Planned | Product differentiators | Track large future differentiators without disrupting the hardening sequence. | Local semantic search, duplicate cleanup, compare/overlay mode, archive/book navigation, peek launch mode, viewer-side adjustments, technical pixel/channel tools, and stronger library/metadata workflows have scoped design docs before implementation. |
 | IP-17 | P2 | Planned | Distribution trust | Reduce Windows install trust friction once the next stable release is ready. | WinGet and Scoop publishing are scoped, checksums remain part of releases, and a code-signing decision doc covers certificate cost, SmartScreen reputation, release cadence, and fallback verification instructions. |
 
+## Source-Derived Workstream Tracker
+
+| ID | Priority | Status | Workstream | Source signal | Planned sequence |
+| --- | --- | --- | --- | --- | --- |
+| RS-01 | P2 | Planned | Local comparison mode | nomacs synchronized views and opacity overlay | Design doc, UI-state tests, local 2-up compare, linked pan/zoom, linked next/previous, overlay opacity. |
+| RS-02 | P2 | Planned | Archive/book navigation | NeeView book model, PicView archive navigation, Tacent folder continuity | Dependency review, streaming/temp-safe archive reader, page list/history, archive-only controls, smoke corpus. |
+| RS-03 | P0 | In progress | Folder sorting and Explorer fidelity | ImageGlass Explorer sort sync, NeeView/Geeqie folder models | App-owned sort modes first, visible sort control, sort-state tests, later Explorer saved-search/sort investigation. |
+| RS-04 | P2 | Planned | Metadata culling workflow | Geeqie XMP keywords/search, gThumb catalogs/comments, Tacent metadata sort | Sidecar decision, rating/reject model, folder filters, keep/reject/move actions, undo and no-original-write defaults. |
+| RS-05 | P1 | In progress | Keyboard-first peek mode | QuickLook Spacebar preview, qView/JPEGView minimal chrome | Existing `--peek` foundation, startup timing logs, close-on-Esc smoke test, shell-helper documentation. |
+| RS-06 | P2 | Planned | Technical pixel tools | ImageGlass color/channel tools, Tacent alpha/HDR tools | Color picker, alpha checkerboard/background toggle, RGB/alpha channel toggles, HDR/EXR exposure preview. |
+| RS-07 | P2 | Planned | Non-destructive viewer adjustments | JPEGView and Minimal Image Viewer processing controls | Preview-only adjustment state, reset affordance, save-copy-with-adjustments path, active-adjustment status. |
+| RS-08 | P1 | Planned | Large-folder and cache confidence | Tacent thumbnail speed, LightningView large-image focus | Cache size/clear UI, first-thumbnail timings, large/volatile folder tests, cache-unavailable fallback. |
+| RS-09 | P1 | Planned | Settings, shortcuts, themes, localization | ImageGlass language/theme packs, PicView searchable shortcuts, NeeView deep settings | Searchable shortcuts, central command labels/tooltips, light/system/high-contrast themes, localization plan. |
+| RS-10 | P2 | Planned | Distribution trust | ImageGlass signing friction, JPEGView WinGet/Scoop distribution | WinGet/Scoop manifests, release checksum continuity, code-signing decision doc, user verification copy. |
+
 ## Implementation Order
 
-1. Extract clipboard import and folder preview from `MainViewModel` as the first `IP-02` slices.
+1. Continue `IP-02` with clipboard import extraction after the completed folder-preview controller slice.
 2. Add UI-state tests for the extracted controllers under `IP-03`.
 3. Build diagnostics/status UX from existing system-info, codec, OCR, and storage services under `IP-06`.
 4. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
@@ -57,6 +72,7 @@ The next recommended slice is the first `IP-02` extraction: move clipboard impor
 - 2026-05-05: Completed `IP-05` by adding update-check seams and 10 non-network tests for release parsing, retry-state policy, trusted URLs, due logic, and state-file behavior.
 - 2026-05-05: Completed `IP-15` by adding CI verification, a reusable version-sync script, release-workflow reuse of that script, vulnerability scanning, and CLI smoke checks.
 - 2026-05-05: Added an open-source viewer research scan and converted its findings into explicit future tracks for compare mode, archive/book navigation, metadata culling, peek launch mode, technical image tools, viewer-side adjustments, cache health, shortcut/settings polish, and distribution trust.
+- 2026-05-05: Completed `IP-02A` / started `RS-03` by extracting folder-preview thumbnail orchestration into `FolderPreviewController`, adding app-owned sort modes, adding a visible sort control, and covering sort/preload behavior with tests.
 
 ## Verification Standard
 

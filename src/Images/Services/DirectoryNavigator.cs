@@ -5,7 +5,7 @@ using System.Windows.Threading;
 namespace Images.Services;
 
 /// <summary>
-/// Scans a folder for image files, keeps a natural-sorted list, and exposes prev/next with wrap-around.
+/// Scans a folder for image files, keeps a sorted list, and exposes prev/next with wrap-around.
 /// Watches the folder so external file ops (delete, add, rename from elsewhere) stay reflected.
 /// </summary>
 public sealed class DirectoryNavigator : IDisposable
@@ -25,6 +25,7 @@ public sealed class DirectoryNavigator : IDisposable
     public int CurrentIndex { get; private set; } = -1;
     public string? CurrentPath => CurrentIndex >= 0 && CurrentIndex < _files.Count ? _files[CurrentIndex] : null;
     public string? Folder => _folder;
+    public DirectorySortMode SortMode { get; private set; } = DirectorySortMode.NaturalName;
 
     public event EventHandler? ListChanged;
 
@@ -46,7 +47,7 @@ public sealed class DirectoryNavigator : IDisposable
                 .ToList();
             if (files.Count == 0) return null;
 
-            files.Sort(NaturalCompare);
+            files.Sort(CompareNaturalName);
             return files[0];
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or DirectoryNotFoundException or IOException or System.Security.SecurityException)
@@ -158,6 +159,18 @@ public sealed class DirectoryNavigator : IDisposable
         return true;
     }
 
+    public bool SetSortMode(DirectorySortMode mode)
+    {
+        if (SortMode == mode) return false;
+
+        SortMode = mode;
+        var keep = CurrentPath;
+        SortFiles(_files);
+        RestoreCurrentPathOrClamp(keep);
+        ListChanged?.Invoke(this, EventArgs.Empty);
+        return true;
+    }
+
     public void UpdateCurrentPath(string newPath)
     {
         if (CurrentIndex < 0) return;
@@ -212,11 +225,79 @@ public sealed class DirectoryNavigator : IDisposable
             return false;
         }
 
-        found.Sort(NaturalCompare);
+        SortFiles(found);
         _files = found;
         CurrentIndex = ClampIndex(CurrentIndex);
         ListChanged?.Invoke(this, EventArgs.Empty);
         return true;
+    }
+
+    private void SortFiles(List<string> files) => files.Sort(CompareByActiveMode);
+
+    private int CompareByActiveMode(string a, string b) => CompareByMode(a, b, SortMode);
+
+    private static int CompareByMode(string a, string b, DirectorySortMode mode)
+    {
+        return mode switch
+        {
+            DirectorySortMode.NameDescending => -CompareNaturalName(a, b),
+            DirectorySortMode.ModifiedNewest => ThenByName(CompareDescending(GetLastWriteUtc(a), GetLastWriteUtc(b)), a, b),
+            DirectorySortMode.ModifiedOldest => ThenByName(CompareAscending(GetLastWriteUtc(a), GetLastWriteUtc(b)), a, b),
+            DirectorySortMode.CreatedNewest => ThenByName(CompareDescending(GetCreationUtc(a), GetCreationUtc(b)), a, b),
+            DirectorySortMode.CreatedOldest => ThenByName(CompareAscending(GetCreationUtc(a), GetCreationUtc(b)), a, b),
+            DirectorySortMode.SizeLargest => ThenByName(CompareDescending(GetLength(a), GetLength(b)), a, b),
+            DirectorySortMode.SizeSmallest => ThenByName(CompareAscending(GetLength(a), GetLength(b)), a, b),
+            DirectorySortMode.ExtensionThenName => ThenByName(
+                StringComparer.OrdinalIgnoreCase.Compare(Path.GetExtension(a), Path.GetExtension(b)), a, b),
+            _ => CompareNaturalName(a, b)
+        };
+    }
+
+    private static int ThenByName(int primary, string a, string b)
+    {
+        return primary != 0 ? primary : CompareNaturalName(a, b);
+    }
+
+    private static int CompareAscending<T>(T a, T b)
+        where T : IComparable<T>
+    {
+        return a.CompareTo(b);
+    }
+
+    private static int CompareDescending<T>(T a, T b)
+        where T : IComparable<T>
+    {
+        return b.CompareTo(a);
+    }
+
+    private static DateTime GetLastWriteUtc(string path)
+    {
+        try { return File.GetLastWriteTimeUtc(path); }
+        catch { return DateTime.MinValue; }
+    }
+
+    private static DateTime GetCreationUtc(string path)
+    {
+        try { return File.GetCreationTimeUtc(path); }
+        catch { return DateTime.MinValue; }
+    }
+
+    private static long GetLength(string path)
+    {
+        try { return new FileInfo(path).Length; }
+        catch { return -1; }
+    }
+
+    private void RestoreCurrentPathOrClamp(string? keep)
+    {
+        if (keep is not null)
+        {
+            var idx = _files.FindIndex(f => string.Equals(f, keep, StringComparison.OrdinalIgnoreCase));
+            CurrentIndex = idx >= 0 ? idx : ClampIndex(CurrentIndex);
+            return;
+        }
+
+        CurrentIndex = ClampIndex(CurrentIndex);
     }
 
     private int ClampIndex(int index)
@@ -297,7 +378,13 @@ public sealed class DirectoryNavigator : IDisposable
     [DllImport("shlwapi.dll", CharSet = CharSet.Unicode)]
     private static extern int StrCmpLogicalW(string a, string b);
 
-    private static int NaturalCompare(string a, string b) => StrCmpLogicalW(a, b);
+    private static int CompareNaturalName(string a, string b)
+    {
+        var result = StrCmpLogicalW(Path.GetFileName(a), Path.GetFileName(b));
+        return result != 0
+            ? result
+            : StringComparer.OrdinalIgnoreCase.Compare(a, b);
+    }
 
     public void Dispose()
     {
