@@ -463,7 +463,7 @@ public partial class MainWindow : Window
                 Vm.PasteFromClipboardCommand.Execute(null);
                 e.Handled = true;
                 break;
-            case Key.B when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
+            case Key.B when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == ModifierKeys.Control:
                 Vm.OpenReferenceBoardCommand.Execute(null);
                 e.Handled = true;
                 break;
@@ -485,6 +485,10 @@ public partial class MainWindow : Window
                 break;
             case Key.M when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
                 Vm.OpenMacroActionsCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.B when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
+                Vm.OpenBatchProcessorCommand.Execute(null);
                 e.Handled = true;
                 break;
             case Key.OemComma when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:

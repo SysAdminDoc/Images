@@ -85,6 +85,11 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE945;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Batch processor" Command="{Binding OpenBatchProcessorCommand}" InputGestureText="Ctrl+Shift+B">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EF;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="{Binding OverlayModeText}"
                                   Command="{Binding ToggleOverlayModeCommand}"
                                   IsCheckable="True"
@@ -1538,7 +1543,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+O" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open image" />
@@ -1566,10 +1571,12 @@
                                         <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open import inbox" />
                                         <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+M" />
                                         <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open macro actions" />
-                                        <TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
-                                        <TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
-                                        <TextBlock Grid.Row="14" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
-                                        <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
+                                        <TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+B" />
+                                        <TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open batch processor" />
+                                        <TextBlock Grid.Row="14" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
+                                        <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
+                                        <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
+                                        <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
                                     </Grid>
                                 </StackPanel>
                             </ScrollViewer>
@@ -3120,14 +3127,22 @@
                                            TextWrapping="Wrap"
                                            Margin="0,3,0,0" />
                             </StackPanel>
-                            <Button Grid.Column="1"
-                                    Command="{Binding OpenMacroActionsCommand}"
-                                    Style="{StaticResource ChromeButton}"
-                                    MinWidth="92"
-                                    Margin="12,0,0,0"
-                                    AutomationProperties.Name="Open macro actions">
-                                <TextBlock Text="Macros" />
-                            </Button>
+                            <StackPanel Grid.Column="1"
+                                        Margin="12,0,0,0">
+                                <Button Command="{Binding OpenMacroActionsCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        MinWidth="92"
+                                        AutomationProperties.Name="Open macro actions">
+                                    <TextBlock Text="Macros" />
+                                </Button>
+                                <Button Command="{Binding OpenBatchProcessorCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        MinWidth="92"
+                                        Margin="0,8,0,0"
+                                        AutomationProperties.Name="Open batch processor">
+                                    <TextBlock Text="Batch" />
+                                </Button>
+                            </StackPanel>
                         </Grid>
                     </Border>
 

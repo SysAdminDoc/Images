@@ -180,6 +180,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenTagGraphCommand = new RelayCommand(OpenTagGraph);
         OpenImportInboxCommand = new RelayCommand(OpenImportInbox);
         OpenMacroActionsCommand = new RelayCommand(OpenMacroActions);
+        OpenBatchProcessorCommand = new RelayCommand(OpenBatchProcessor);
         OpenRecentFolderCommand = new RelayCommand(p => OpenRecentFolder(p as string), p => p is string);
         OpenRecentArchiveCommand = new RelayCommand(
             async p => await OpenRecentArchiveAsync(p as ArchiveReadPositionService.ArchiveReadHistoryItem),
@@ -1641,6 +1642,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenTagGraphCommand { get; }
     public ICommand OpenImportInboxCommand { get; }
     public ICommand OpenMacroActionsCommand { get; }
+    public ICommand OpenBatchProcessorCommand { get; }
     public ICommand OpenRecentFolderCommand { get; }
     public ICommand OpenRecentArchiveCommand { get; }
     public ICommand OpenPreviewItemCommand { get; }
@@ -2977,6 +2979,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             macros.AddSource(CurrentPath);
 
         macros.Show();
+    }
+
+    private void OpenBatchProcessor()
+    {
+        var batch = new Images.BatchProcessorWindow
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        if (!string.IsNullOrWhiteSpace(CurrentPath) && File.Exists(CurrentPath))
+            batch.AddSource(CurrentPath);
+
+        batch.Show();
     }
 
     // Item 2: Settings window — opens modal, then re-reads persistent prefs so the viewer
