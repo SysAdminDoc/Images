@@ -22,6 +22,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly ClipboardImportService _clipboardImport;
     private readonly FolderPreviewController _folderPreview;
     private readonly PhotoMetadataController _photoMetadata;
+    private readonly ExternalEditReloadController _externalEditReload;
     private readonly RecycleBinDeleteService _recycleBinDelete;
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
@@ -37,8 +38,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private CancellationTokenSource? _ocrCts;
     private int _ocrGeneration;
     private readonly DispatcherTimer _hintTimer;
-    private System.IO.FileSystemWatcher? _externalEditWatcher;
-    private readonly DispatcherTimer _externalEditDebounce;
 
     public MainViewModel()
         : this(SettingsService.Instance)
@@ -59,6 +58,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _folderPreview.StateChanged += (_, _) => RaiseFolderPreviewState();
         _photoMetadata = new PhotoMetadataController(_uiDispatcher, () => _isDisposed, () => CurrentPath);
         _photoMetadata.StateChanged += (_, _) => RaisePhotoMetadataState();
+        _externalEditReload = new ExternalEditReloadController(
+            _uiDispatcher,
+            () => _isDisposed,
+            ReloadCurrentSilent,
+            Toast);
 
         _renameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(600) };
         _renameTimer.Tick += (_, _) => { _renameTimer.Stop(); FlushPendingRename(); };
@@ -68,18 +72,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         _hintTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(2400) };
         _hintTimer.Tick += (_, _) => { _hintTimer.Stop(); ShowGestureHint = false; };
-
-        // Item 61: debounce timer for external-edit reload — fires 800 ms after the last
-        // FileSystemWatcher.Changed event so rapid saves (e.g. from Photoshop's incremental
-        // writes) don't trigger multiple reloads.
-        _externalEditDebounce = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(800) };
-        _externalEditDebounce.Tick += (_, _) =>
-        {
-            _externalEditDebounce.Stop();
-            if (_isDisposed) return;
-            if (ReloadCurrentSilent())
-                Toast("Reloaded after external edit");
-        };
 
         _isFilmstripVisible = _settings.GetBool(Keys.FilmstripVisible, true);
         _isMetadataHudVisible = _settings.GetBool(Keys.MetadataHudVisible, false);
@@ -938,7 +930,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         ResetPageState();
         LoadCurrent();
-        ArmFileWatcher(path);
+        _externalEditReload.Arm(path);
 
         // V20-02: persist containing folder to recent-folders MRU. Silent on any failure —
         // recent-folders is a convenience, not critical.
@@ -1764,52 +1756,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         return loaded;
     }
 
-    // Item 61: arm a FileSystemWatcher on the specific file so external edits (Photoshop,
-    // Paint.NET, etc.) trigger an automatic reload after an 800 ms quiet period.
-    private void ArmFileWatcher(string path)
-    {
-        DisarmFileWatcher();
-
-        var dir = Path.GetDirectoryName(path);
-        if (string.IsNullOrEmpty(dir) || !Directory.Exists(dir)) return;
-
-        try
-        {
-            _externalEditWatcher = new System.IO.FileSystemWatcher(dir, Path.GetFileName(path))
-            {
-                NotifyFilter = System.IO.NotifyFilters.LastWrite | System.IO.NotifyFilters.Size,
-                EnableRaisingEvents = true
-            };
-            _externalEditWatcher.Changed += OnExternalEdit;
-        }
-        catch
-        {
-            // FSW can fail on network drives, locked volumes, etc. — degrade silently.
-            _externalEditWatcher = null;
-        }
-    }
-
-    private void DisarmFileWatcher()
-    {
-        if (_externalEditWatcher is null) return;
-        _externalEditWatcher.EnableRaisingEvents = false;
-        _externalEditWatcher.Changed -= OnExternalEdit;
-        _externalEditWatcher.Dispose();
-        _externalEditWatcher = null;
-    }
-
-    private void OnExternalEdit(object sender, System.IO.FileSystemEventArgs e)
-    {
-        // Marshal to the UI thread; reset the debounce on every write event so rapid saves
-        // (incremental writes from editors) coalesce into a single reload.
-        _uiDispatcher.BeginInvoke(() =>
-        {
-            if (_isDisposed) return;
-            _externalEditDebounce.Stop();
-            _externalEditDebounce.Start();
-        });
-    }
-
     private void RefreshFolder()
     {
         _nav.Refresh();
@@ -1822,8 +1768,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void ClearCurrentState()
     {
         _renameTimer.Stop();
-        _externalEditDebounce.Stop();
-        DisarmFileWatcher();
+        _externalEditReload.Disarm();
         CurrentImage = null;
         CurrentAnimation = null;
         CurrentPath = null;
@@ -1863,8 +1808,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _renameTimer.Stop();
         _toastTimer.Stop();
         _hintTimer.Stop();
-        _externalEditDebounce.Stop();
-        DisarmFileWatcher();
+        _externalEditReload.Dispose();
 
         _nav.ListChanged -= OnDirectoryListChanged;
         ClearOcrOverlay(cancelExtraction: true);
