@@ -6,14 +6,15 @@ What "broad codec support" means for Images, what's bundled vs optional, and how
 
 | Tier | What it means | Examples |
 |---|---|---|
-| **Bundled, in-process** | Always available, ships inside the app's directory. | WIC (via Windows), Magick.NET (Apache 2.0, NuGet) |
+| **Bundled, in-process** | Always available, ships inside the app's directory. | WIC (via Windows), Magick.NET (Apache 2.0, NuGet), SharpCompress (MIT, NuGet), .NET ZIP APIs |
 | **Optional, app-local or system-installed** | Surfaces extra format families when present, never required. Provenance shown in About + `--system-info`. | Ghostscript (PDF/EPS/PS/AI previews) |
-| **Not supported** | Requested, not in scope today. The viewer's unsupported-format hint points at the right tool. | video, audio, archive/comic, native design-suite docs |
+| **Not supported** | Requested, not in scope today. The viewer's unsupported-format hint points at the right tool. | video, audio, native design-suite docs |
 
 ## What ships in the bundle
 
 - **WIC**: handles common Windows codecs. No version pinning needed; tracks the OS.
 - **Magick.NET-Q16-AnyCPU + Magick.NET.Core**: pinned in [`Images.csproj`](../src/Images/Images.csproj). Native codec pack updates with the NuGet release. CVEs are tracked through the `Magick.NET*` Dependabot group and the daily Security workflow.
+- **Archive books**: ZIP/CBZ use `System.IO.Compression`; RAR/CBR and 7z/CB7 use `SharpCompress` pinned in [`Images.csproj`](../src/Images/Images.csproj). Archive support is read-only, never extracts entries to disk, skips nested archives and document-preview entries, rejects unsafe paths, and caps each buffered page.
 
 The current open extension count and writable export count are reported live by About → Capability matrix and `Images.exe --codec-report`.
 
@@ -39,7 +40,7 @@ Required before any new optional decoder/runtime lands (per ROADMAP X-03):
 4. **Binary provenance** — SHA-256 (or signed digest) of the shipped binaries recorded in the release notes; same hash must be reachable through About / `--system-info`.
 5. **Process isolation decision** — in-process is acceptable only for libraries with a strong security record. Larger surfaces (Ghostscript, archive readers, Bio-Formats) get a sidecar/process-isolation plan written before bundling.
 
-This applies to: Ghostscript, 7-Zip / UnRAR, OpenSlide, Bio-Formats, OCR engines, AI models, plugin hosts.
+This applies to: Ghostscript, native 7-Zip / UnRAR sidecars, OpenSlide, Bio-Formats, OCR engines, AI models, plugin hosts.
 
 ## Dropping a decoder
 

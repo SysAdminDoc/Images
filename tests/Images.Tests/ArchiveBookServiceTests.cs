@@ -3,6 +3,9 @@ using System.IO.Compression;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Images.Services;
+using SharpCompress.Common;
+using SharpCompress.Writers;
+using SharpCompress.Writers.SevenZip;
 
 namespace Images.Tests;
 
@@ -28,6 +31,38 @@ public sealed class ArchiveBookServiceTests
         Assert.Equal(3, second.PageCount);
         Assert.False(second.IsCover);
         Assert.NotEmpty(second.Bytes);
+    }
+
+    [Fact]
+    public void LoadPage_WithGeneratedCb7_UsesManagedArchiveAdapterAndNaturalSortsPages()
+    {
+        using var temp = TestDirectory.Create();
+        var archivePath = Path.Combine(temp.Path, "book.cb7");
+        WriteSevenZipArchive(
+            archivePath,
+            ("page10.png", 0xFF, 0x00, 0x00),
+            ("page2.png", 0x00, 0xFF, 0x00),
+            ("page1.png", 0x00, 0x00, 0xFF));
+
+        var names = ArchiveBookService.ListPageNames(archivePath);
+        var second = ArchiveBookService.LoadPage(archivePath, requestedPageIndex: 1);
+
+        Assert.Equal(["page1.png", "page2.png", "page10.png"], names);
+        Assert.Equal("page2.png", second.EntryName);
+        Assert.Equal(1, second.PageIndex);
+        Assert.Equal(3, second.PageCount);
+        Assert.NotEmpty(second.Bytes);
+    }
+
+    [Theory]
+    [InlineData(".rar")]
+    [InlineData(".cbr")]
+    [InlineData(".7z")]
+    [InlineData(".cb7")]
+    public void SupportedArchiveExtensions_IncludeManagedArchiveBooks(string extension)
+    {
+        Assert.True(SupportedImageFormats.IsSupported($"book{extension}"));
+        Assert.True(SupportedImageFormats.IsArchive($"book{extension}"));
     }
 
     [Fact]
@@ -97,6 +132,41 @@ public sealed class ArchiveBookServiceTests
         var names = ArchiveBookService.ListPageNames(archivePath);
 
         Assert.Equal(["safe/page1.png"], names);
+    }
+
+    [Fact]
+    public void ListPageNames_WithGenerated7z_SkipsUnsupportedDocumentsAndRecursiveEntries()
+    {
+        using var temp = TestDirectory.Create();
+        var archivePath = Path.Combine(temp.Path, "mixed.7z");
+
+        using (var output = File.Create(archivePath))
+        using (var writer = WriterFactory.OpenWriter(
+                   output,
+                   ArchiveType.SevenZip,
+                   new SevenZipWriterOptions(CompressionType.LZMA)))
+        {
+            WritePngEntry(writer, "safe/page1.png", 0x00, 0xFF, 0x00);
+            WriteBytesEntry(writer, "safe/inner.cb7", [0x37, 0x7A, 0xBC, 0xAF]);
+            WriteBytesEntry(writer, "preview.pdf", "%PDF-1.7"u8.ToArray());
+            WriteBytesEntry(writer, "notes.txt", "not an image"u8.ToArray());
+        }
+
+        var names = ArchiveBookService.ListPageNames(archivePath);
+
+        Assert.Equal(["safe/page1.png"], names);
+    }
+
+    [Fact]
+    public void ListPageNames_WhenManagedArchiveIsCorrupt_ReturnsEmptyList()
+    {
+        using var temp = TestDirectory.Create();
+        var archivePath = Path.Combine(temp.Path, "broken.7z");
+        File.WriteAllBytes(archivePath, [0x37, 0x7A, 0xBC, 0xAF]);
+
+        var names = ArchiveBookService.ListPageNames(archivePath);
+
+        Assert.Empty(names);
     }
 
     [Fact]
@@ -188,6 +258,17 @@ public sealed class ArchiveBookServiceTests
             WritePngEntry(archive, name, red, green, blue);
     }
 
+    private static void WriteSevenZipArchive(string path, params (string Name, byte Red, byte Green, byte Blue)[] entries)
+    {
+        using var output = File.Create(path);
+        using var writer = WriterFactory.OpenWriter(
+            output,
+            ArchiveType.SevenZip,
+            new SevenZipWriterOptions(CompressionType.LZMA));
+        foreach (var (name, red, green, blue) in entries)
+            WritePngEntry(writer, name, red, green, blue);
+    }
+
     private static void WritePngEntry(ZipArchive archive, string name, byte red, byte green, byte blue)
     {
         using var encoded = new MemoryStream();
@@ -206,6 +287,23 @@ public sealed class ArchiveBookServiceTests
         var entry = archive.CreateEntry(name, CompressionLevel.Fastest);
         using var stream = entry.Open();
         stream.Write(bytes, 0, bytes.Length);
+    }
+
+    private static void WritePngEntry(IWriter writer, string name, byte red, byte green, byte blue)
+    {
+        using var encoded = new MemoryStream();
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(CreateBitmap(red, green, blue)));
+        encoder.Save(encoded);
+        encoded.Position = 0;
+
+        writer.Write(name, encoded, null);
+    }
+
+    private static void WriteBytesEntry(IWriter writer, string name, byte[] bytes)
+    {
+        using var stream = new MemoryStream(bytes);
+        writer.Write(name, stream, null);
     }
 
     private static BitmapSource CreateBitmap(byte red, byte green, byte blue)

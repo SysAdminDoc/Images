@@ -412,6 +412,9 @@ public partial class AboutWindow : Window
         AddProvenanceRow("Magick.NET", p.MagickVersion);
         if (p.MagickAssemblyPath is not null)
             AddProvenanceRow("Magick.NET path", p.MagickAssemblyPath);
+        AddProvenanceRow("SharpCompress", p.SharpCompressVersion);
+        if (p.SharpCompressAssemblyPath is not null)
+            AddProvenanceRow("Archive reader path", p.SharpCompressAssemblyPath);
 
         AddProvenanceRow("Ghostscript", p.GhostscriptAvailable ? "available" : "not available");
         AddProvenanceRow("Ghostscript source", p.GhostscriptDirectory ?? p.GhostscriptSource);

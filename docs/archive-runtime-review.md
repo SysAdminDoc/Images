@@ -6,29 +6,45 @@ Scope: decide whether Images should expand archive/book mode beyond ZIP/CBZ to R
 
 ## Current Decision
 
-Keep shipped archive/book support limited to ZIP and CBZ for now. They are handled by `System.IO.Compression`, require no new native runtime, and fit the current read-only in-memory page model.
+Approved and implemented for a managed in-process adapter:
 
-RAR/CBR and 7z/CB7 remain planned, but not approved for implementation until the project has a small, isolated archive adapter with explicit license, provenance, vulnerability, and failure-mode gates.
+- ZIP/CBZ remain on `System.IO.Compression`.
+- RAR/CBR and 7z/CB7 use `SharpCompress` 0.47.4 from NuGet.
+- The adapter is read-only. It lists candidate page entries, rejects unsafe paths, skips nested archives and document-preview entries, caps every buffered page at 256 MiB, and never extracts entry names or archive contents to disk.
 
-## Candidates
+SharpCompress was accepted because the package is MIT licensed, NuGet-distributed, targets `net9.0`, has no additional dependencies for this target, and keeps Images away from native 7-Zip or UnRAR sidecars for this first expansion.
 
-### SharpCompress
+## Accepted Integration: SharpCompress
 
-SharpCompress is the preferred first spike for 7z and RAR read-only archive listing because it is managed, NuGet-distributed, and the current package advertises `net9.0` support with no additional dependencies for that target. NuGet currently lists SharpCompress 0.47.4 and shows no `net9.0` dependencies.
+Review result:
 
-Gates before use:
+- Version: `SharpCompress` 0.47.4.
+- Source: NuGet package and upstream GitHub repository.
+- License: MIT.
+- Redistribution permission: allowed as a NuGet dependency in the app output.
+- Source-use boundary: linked managed library only; no copied source.
+- Process boundary: in-process, managed parser.
+- File access boundary: reads only the user-selected archive stream and page entry streams; does not write extracted files.
+- Network behavior: none.
+- Failure mode: corrupt, encrypted, unsupported, or empty archives surface decode-recovery copy through the existing load-error surface.
+- Test corpus: generated ZIP/CBZ and 7z/CB7 archives cover valid pages, natural sort, nested archive skipping, document-entry skipping, unsupported-entry skipping, empty archives, and corrupt managed archive recovery. RAR/CBR write fixtures are not generated because the managed package does not create RAR archives and proprietary samples are intentionally not checked in.
+- Release impact: one managed NuGet dependency; runtime provenance is reported in About and `Images.exe --system-info`.
 
-- Add package only in a branch dedicated to archive expansion.
-- Verify MIT/license notices from the package repository and transitive assets.
-- Run `dotnet list package --vulnerable --include-transitive` after adding it.
-- Keep the `ArchiveBookService` contract read-only: list entries, reject unsafe paths, skip nested archives, cap per-entry bytes, and never extract entry names to disk.
-- Add generated tests for `.7z`, `.cb7`, `.rar`, and `.cbr` fixtures only if they can be generated or legally checked in without proprietary samples.
+Validation gates completed:
+
+- Package added as `SharpCompress` 0.47.4.
+- MIT/license and package target reviewed before implementation.
+- `dotnet list package --vulnerable --include-transitive` required after the package add.
+- `ArchiveBookService` kept read-only with unsafe path rejection, nested archive skipping, document-preview entry skipping, and per-entry byte caps.
+- Generated 7z/CB7 regression coverage added without binary fixtures.
+
+## Rejected Or Deferred Candidates
 
 ### 7-Zip Runtime
 
-7-Zip is a viable fallback for 7z if the managed adapter is incomplete. The official FAQ allows commercial use of the EXE/DLL path, but requires documentation that 7-Zip is used, that it is GNU LGPL, and that users can find source at `www.7-zip.org`. Direct source or DLL integration also carries LGPL obligations; a sidecar process boundary is safer than loading native DLL code into the viewer.
+7-Zip remains a fallback only if the managed adapter proves incomplete. The official FAQ allows commercial use of the EXE/DLL path, but requires documentation that 7-Zip is used, that it is GNU LGPL, and that users can find source at `www.7-zip.org`. Direct source or DLL integration also carries LGPL obligations; a sidecar process boundary is safer than loading native DLL code into the viewer.
 
-Gates before use:
+Gates before any future use:
 
 - Prefer an app-local `Codecs\7zip` sidecar over PATH probing.
 - Hash and report the sidecar in diagnostics, matching the Ghostscript provenance model.
@@ -49,23 +65,16 @@ Gates before use:
 
 ## UX Policy
 
-Unsupported archive extensions should stay calm and actionable:
+RAR/CBR and 7z/CB7 are now supported archive-book extensions. They should flow through the same viewer state as ZIP/CBZ:
 
-- `.rar`, `.cbr`, `.7z`, and `.cb7` should explain that archive/book mode currently supports ZIP/CBZ first.
-- Users should be told to extract the archive or convert it to CBZ until runtime support is approved.
-- The app must not prompt to download archive runtimes automatically.
-
-Status: direct opens and clipboard file lists now use this copy for `.rar`, `.cbr`, `.7z`, and `.cb7`; the extensions are still not part of the supported decoder/navigator set.
+- Valid books open as read-only pages.
+- Empty archives explain that no supported image pages were found.
+- Corrupt, encrypted, or damaged archives explain that extraction or repair may be needed.
+- Images must not prompt to download archive runtimes automatically.
 
 ## Implementation Boundary
 
-Future non-ZIP archive work should not change the viewer contract. The adapter boundary should expose only:
-
-- `bool CanOpen(string path)`
-- `IReadOnlyList<ArchiveEntryInfo> ListPages(string path)`
-- `byte[] ReadPage(string path, ArchiveEntryInfo entry, long maxBytes)`
-
-Everything above that boundary stays format-agnostic: natural sorting, cover promotion, page controls, history, read-position persistence, and UI state should not care whether the container is ZIP, 7z, or RAR.
+Non-ZIP archive work should not change the viewer contract. The archive adapter boundary exposes only normalized page candidates and bounded page bytes. Everything above that boundary stays format-agnostic: natural sorting, cover promotion, page controls, history, read-position persistence, and UI state do not care whether the container is ZIP, 7z, or RAR.
 
 ## Release Gates
 
@@ -74,7 +83,7 @@ Before enabling any new archive runtime in a release:
 - License notice added to release docs.
 - Binary/source provenance documented.
 - CVE/update cadence documented.
-- Diagnostics reports active runtime and hash.
+- Diagnostics reports active runtime and package assembly path.
 - Vulnerability scan passes.
-- Generated corpus covers valid archive, empty archive, unsafe path, nested archive, oversized page, corrupt archive, and missing-file cases.
+- Generated corpus covers valid archive, empty archive, unsafe path, nested archive, oversized page, corrupt archive, and missing-file cases where the format can be generated legally.
 - Archive runtime failures produce actionable user-facing copy without crashing the viewer.

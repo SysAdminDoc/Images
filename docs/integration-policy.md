@@ -88,8 +88,9 @@ Copy this block into a new design or decision document before adding the integra
 | --- | --- | --- |
 | Magick.NET | Accepted | Existing NuGet dependency; release workflow vulnerable-package gate covers managed package advisories. |
 | Ghostscript | Conditionally accepted | Optional app-local/system runtime; bundling requires exact approved artifact and SHA-256 continuity. See `docs/codec-bundling.md`. |
+| SharpCompress 0.47.4 | Accepted | Managed MIT NuGet dependency for read-only RAR/CBR and 7z/CB7 archive books. See `docs/archive-runtime-review.md`. |
 | Windows.Media.Ocr | Accepted | In-box Windows API; no bundled runtime. |
-| 7-Zip/UnRAR/archive readers | Not reviewed | Required before RAR/7z archive/book mode. ZIP/CBZ can start with .NET built-in archive APIs. |
+| 7-Zip/UnRAR native archive readers | Not reviewed | Native sidecars remain unapproved; ZIP/CBZ use .NET built-in APIs and RAR/7z use the reviewed managed SharpCompress path. |
 | ExifTool | Not reviewed | Required before sidecar or metadata write workflows. |
 | ONNX models | Not reviewed | Required before semantic search, AI tagging, background removal, upscaling, or face recognition. |
 | OpenSlide/Bio-Formats | Not reviewed | Required before lab/scientific image packs. |
