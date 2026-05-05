@@ -338,4 +338,5 @@ public static class Keys
     public const string ConfirmRecycleBinDelete = "viewer.delete.confirm-recycle";
     public const string ArchiveRightToLeft = "viewer.archive.right-to-left";
     public const string ArchiveOldScanFilter = "viewer.archive.old-scan-filter";
+    public const string ArchiveSpreadMode = "viewer.archive.spread-mode";
 }

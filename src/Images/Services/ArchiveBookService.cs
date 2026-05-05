@@ -20,6 +20,15 @@ public static class ArchiveBookService
         int PageCount,
         bool IsCover);
 
+    public sealed record ArchiveSpread(
+        IReadOnlyList<ArchivePage> Pages,
+        int PageIndex,
+        int PageCount)
+    {
+        public int PageSpan => Pages.Count;
+        public bool IsSpread => Pages.Count > 1;
+    }
+
     public static bool IsSupportedArchive(string path)
         => SupportedImageFormats.IsArchive(path);
 
@@ -41,16 +50,41 @@ public static class ArchiveBookService
             entries.Sort(CompareEntries);
             var pageIndex = Math.Clamp(requestedPageIndex, 0, entries.Count - 1);
             var entry = entries[pageIndex];
-            if (entry.Length > MaxArchivePageBytes)
-                throw new InvalidOperationException(
-                    $"Archive page '{entry.FullName}' is too large to preview safely.");
+            return ReadPage(entry, pageIndex, entries.Count);
+        }
+        catch (InvalidDataException ex)
+        {
+            throw new InvalidOperationException($"Could not read archive '{fileName}': {ex.Message}", ex);
+        }
+    }
 
-            using var entryStream = entry.Open();
-            using var bytes = new MemoryStream(entry.Length > 0 && entry.Length <= int.MaxValue
-                ? (int)entry.Length
-                : 0);
-            entryStream.CopyTo(bytes);
-            return new ArchivePage(entry.FullName, bytes.ToArray(), pageIndex, entries.Count, IsCoverEntry(entry));
+    public static ArchiveSpread LoadSpread(string path, int requestedPageIndex)
+    {
+        if (!IsSupportedArchive(path))
+            throw new InvalidOperationException("This file is not a supported archive book.");
+
+        var fileName = Path.GetFileName(path);
+
+        try
+        {
+            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            using var archive = new ZipArchive(fs, ZipArchiveMode.Read, leaveOpen: false);
+            var entries = GetPageEntries(archive).ToList();
+            if (entries.Count == 0)
+                throw new InvalidOperationException($"'{fileName}' does not contain supported image pages.");
+
+            entries.Sort(CompareEntries);
+            var startIndex = GetSpreadStartIndex(entries, requestedPageIndex);
+            var pageCount = GetSpreadPageCount(entries, startIndex);
+            var pages = new List<ArchivePage>(pageCount);
+
+            for (var i = 0; i < pageCount; i++)
+            {
+                var pageIndex = startIndex + i;
+                pages.Add(ReadPage(entries[pageIndex], pageIndex, entries.Count));
+            }
+
+            return new ArchiveSpread(pages, startIndex, entries.Count);
         }
         catch (InvalidDataException ex)
         {
@@ -109,6 +143,48 @@ public static class ArchiveBookService
         }
 
         return true;
+    }
+
+    private static ArchivePage ReadPage(ZipArchiveEntry entry, int pageIndex, int pageCount)
+    {
+        if (entry.Length > MaxArchivePageBytes)
+            throw new InvalidOperationException(
+                $"Archive page '{entry.FullName}' is too large to preview safely.");
+
+        using var entryStream = entry.Open();
+        using var bytes = new MemoryStream(entry.Length > 0 && entry.Length <= int.MaxValue
+            ? (int)entry.Length
+            : 0);
+        entryStream.CopyTo(bytes);
+        return new ArchivePage(entry.FullName, bytes.ToArray(), pageIndex, pageCount, IsCoverEntry(entry));
+    }
+
+    private static int GetSpreadStartIndex(IReadOnlyList<ZipArchiveEntry> entries, int requestedPageIndex)
+    {
+        var pageIndex = Math.Clamp(requestedPageIndex, 0, entries.Count - 1);
+        if (entries.Count == 0)
+            return 0;
+
+        var hasExplicitCover = IsCoverEntry(entries[0]);
+        if (hasExplicitCover && pageIndex == 0)
+            return 0;
+
+        var spreadBase = hasExplicitCover ? 1 : 0;
+        if (pageIndex < spreadBase)
+            return 0;
+
+        return spreadBase + ((pageIndex - spreadBase) / 2) * 2;
+    }
+
+    private static int GetSpreadPageCount(IReadOnlyList<ZipArchiveEntry> entries, int startIndex)
+    {
+        if (entries.Count == 0 || startIndex >= entries.Count)
+            return 0;
+
+        if (startIndex == 0 && IsCoverEntry(entries[0]))
+            return 1;
+
+        return Math.Min(2, entries.Count - startIndex);
     }
 
     private static int CompareEntries(ZipArchiveEntry a, ZipArchiveEntry b)

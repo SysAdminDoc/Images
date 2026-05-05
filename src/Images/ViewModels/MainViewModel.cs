@@ -121,6 +121,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _isMetadataHudVisible = _settings.GetBool(Keys.MetadataHudVisible, false);
         _archiveRightToLeft = _settings.GetBool(Keys.ArchiveRightToLeft, false);
         _archiveOldScanFilterEnabled = _settings.GetBool(Keys.ArchiveOldScanFilter, false);
+        _archiveSpreadModeEnabled = _settings.GetBool(Keys.ArchiveSpreadMode, false);
 
         OpenCommand = new RelayCommand(async () => await OpenFileDialogAsync(), () => !IsOperationBusy);
         NextCommand = new RelayCommand(Next, () => CanUseImageCommands);
@@ -300,10 +301,32 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    private int _pageSpan = 1;
+    public int PageSpan
+    {
+        get => _pageSpan;
+        private set
+        {
+            if (Set(ref _pageSpan, Math.Max(1, value)))
+            {
+                RaisePageState();
+            }
+        }
+    }
+
     public bool HasMultiplePages => PageCount > 1;
     public bool HasPreviousPage => HasMultiplePages && PageIndex > 0;
-    public bool HasNextPage => HasMultiplePages && PageIndex < PageCount - 1;
-    public string PagePositionText => HasMultiplePages ? $"{PageLabel} {PageIndex + 1} / {PageCount}" : "";
+    public bool HasNextPage => HasMultiplePages && PageIndex + PageSpan < PageCount;
+    public string PagePositionText
+    {
+        get
+        {
+            if (!HasMultiplePages) return "";
+            if (PageSpan <= 1) return $"{PageLabel} {PageIndex + 1} / {PageCount}";
+            var end = Math.Min(PageIndex + PageSpan, PageCount);
+            return $"{PageLabel} {PageIndex + 1}-{end} / {PageCount}";
+        }
+    }
     public bool IsArchiveBook => CurrentPath is not null && SupportedImageFormats.IsArchive(CurrentPath) && HasMultiplePages;
     public bool CanTurnLeftBookPage => IsArchiveBook && !IsOperationBusy && (ArchiveRightToLeft ? HasNextPage : HasPreviousPage);
     public bool CanTurnRightBookPage => IsArchiveBook && !IsOperationBusy && (ArchiveRightToLeft ? HasPreviousPage : HasNextPage);
@@ -315,6 +338,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         : "For western books, the right edge and Right Arrow advance; the left edge goes back.";
     public string ArchiveOldScanFilterText => ArchiveOldScanFilterEnabled ? "Clean old scans on" : "Clean old scans";
     public string ArchiveOldScanFilterHint => "Preview-only: converts archive pages to high-contrast grayscale. The archive file is not changed.";
+    public string ArchiveSpreadModeText => ArchiveSpreadModeEnabled ? "Two-page spreads on" : "Two-page spreads";
+    public string ArchiveSpreadModeHint => ArchiveRightToLeft
+        ? "Pairs pages side by side for reading, with the next page on the left in right-to-left mode."
+        : "Pairs pages side by side for reading, keeping explicit covers as single pages.";
     public string CurrentArchiveProgressText => IsArchiveBook
         ? $"Reading {Path.GetFileName(CurrentPath)} · {PagePositionText}"
         : "";
@@ -335,9 +362,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(HasMultiplePages));
         Raise(nameof(HasPreviousPage));
         Raise(nameof(HasNextPage));
-        Raise(nameof(PagePositionText));
-        Raise(nameof(PageNumber));
-        Raise(nameof(IsArchiveBook));
+            Raise(nameof(PagePositionText));
+            Raise(nameof(PageNumber));
+            Raise(nameof(PageSpan));
+            Raise(nameof(IsArchiveBook));
         Raise(nameof(CanTurnLeftBookPage));
         Raise(nameof(CanTurnRightBookPage));
         Raise(nameof(CurrentArchiveProgressText));
@@ -743,7 +771,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Raise(nameof(RightBookPageTurnTooltip));
             Raise(nameof(ArchivePageTurnModeText));
             Raise(nameof(ArchivePageTurnModeHint));
+            Raise(nameof(ArchiveSpreadModeHint));
             CommandManager.InvalidateRequerySuggested();
+
+            if (ArchiveSpreadModeEnabled && IsArchiveBook && HasDisplayImage && !IsOperationBusy)
+                ReloadCurrentPreservingViewState(resetPreload: false);
         }
     }
 
@@ -763,6 +795,26 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 ReloadCurrentPreservingViewState(resetPreload: false);
                 Toast(value ? "Clean scan preview on" : "Clean scan preview off");
+            }
+        }
+    }
+
+    private bool _archiveSpreadModeEnabled;
+    public bool ArchiveSpreadModeEnabled
+    {
+        get => _archiveSpreadModeEnabled;
+        set
+        {
+            if (!Set(ref _archiveSpreadModeEnabled, value)) return;
+
+            _settings.SetBool(Keys.ArchiveSpreadMode, value);
+            Raise(nameof(ArchiveSpreadModeText));
+            Raise(nameof(ArchiveSpreadModeHint));
+
+            if (IsArchiveBook && HasDisplayImage && !IsOperationBusy)
+            {
+                ReloadCurrentPreservingViewState(resetPreload: false);
+                Toast(value ? "Two-page spreads on" : "Two-page spreads off");
             }
         }
     }
@@ -1404,14 +1456,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void First() { FlushPendingRename(); if (_nav.MoveFirst()) { ResetPageState(); LoadCurrent(); } }
     private void Last() { FlushPendingRename(); if (_nav.MoveLast()) { ResetPageState(); LoadCurrent(); } }
 
+    private int PageStep => ArchiveSpreadModeEnabled && IsArchiveBook ? Math.Max(1, PageSpan) : 1;
+
     private async Task NextPageAsync()
     {
-        await GoToPageAsync(PageIndex + 1, "Loading next page");
+        await GoToPageAsync(PageIndex + PageStep, "Loading next page");
     }
 
     private async Task PrevPageAsync()
     {
-        await GoToPageAsync(PageIndex - 1, "Loading previous page");
+        await GoToPageAsync(PageIndex - PageStep, "Loading previous page");
     }
 
     private async Task FirstPageAsync()
@@ -1470,10 +1524,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             // V20-03: try the preload ring first — a hit is instant, a miss falls through to
             // the direct load. Either way we re-enqueue the new neighbors.
-            var res = PageIndex == 0
-                ? _preload.TryGet(path) ?? ImageLoader.Load(path, PageIndex)
-                : ImageLoader.Load(path, PageIndex);
             var isArchiveBookPage = SupportedImageFormats.IsArchive(path);
+            var usePreload = PageIndex == 0 && !(isArchiveBookPage && ArchiveSpreadModeEnabled);
+            var res = usePreload
+                ? _preload.TryGet(path) ?? ImageLoader.Load(path, PageIndex, ArchiveSpreadModeEnabled, ArchiveRightToLeft)
+                : ImageLoader.Load(path, PageIndex, ArchiveSpreadModeEnabled, ArchiveRightToLeft);
             var image = ApplyArchiveDisplayFilters(res.Image, isArchiveBookPage, ArchiveOldScanFilterEnabled);
             var animation = isArchiveBookPage && ArchiveOldScanFilterEnabled ? null : res.Animation;
             var decoderUsed = isArchiveBookPage && ArchiveOldScanFilterEnabled
@@ -1613,6 +1668,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         PageLabel = pages.Label;
         PageCount = pages.PageCount;
+        PageSpan = pages.PageSpan;
         PageIndex = pages.PageIndex;
     }
 
@@ -1620,6 +1676,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         PageLabel = "Page";
         PageCount = 1;
+        PageSpan = 1;
         PageIndex = 0;
     }
 
@@ -2048,6 +2105,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Raise(nameof(RightBookPageTurnTooltip));
             Raise(nameof(ArchivePageTurnModeText));
             Raise(nameof(ArchivePageTurnModeHint));
+            Raise(nameof(ArchiveSpreadModeHint));
             CommandManager.InvalidateRequerySuggested();
         }
 
@@ -2058,6 +2116,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Raise(nameof(ArchiveOldScanFilterEnabled));
             Raise(nameof(ArchiveOldScanFilterText));
             Raise(nameof(ArchiveOldScanFilterHint));
+            if (IsArchiveBook && HasDisplayImage && !IsOperationBusy)
+                ReloadCurrentPreservingViewState(resetPreload: false);
+        }
+
+        var spreadMode = _settings.GetBool(Keys.ArchiveSpreadMode, false);
+        if (_archiveSpreadModeEnabled != spreadMode)
+        {
+            _archiveSpreadModeEnabled = spreadMode;
+            Raise(nameof(ArchiveSpreadModeEnabled));
+            Raise(nameof(ArchiveSpreadModeText));
+            Raise(nameof(ArchiveSpreadModeHint));
             if (IsArchiveBook && HasDisplayImage && !IsOperationBusy)
                 ReloadCurrentPreservingViewState(resetPreload: false);
         }

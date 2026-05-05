@@ -2218,6 +2218,16 @@
                                                    FontSize="11.5"
                                                    Foreground="{StaticResource OverlayBrush}"
                                                    TextWrapping="Wrap" />
+                                        <CheckBox IsChecked="{Binding ArchiveSpreadModeEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  Content="{Binding ArchiveSpreadModeText}"
+                                                  ToolTip="{Binding ArchiveSpreadModeHint}"
+                                                  Margin="0,12,0,0"
+                                                  AutomationProperties.Name="Two-page archive spreads" />
+                                        <TextBlock Text="{Binding ArchiveSpreadModeHint}"
+                                                   Margin="28,5,0,0"
+                                                   FontSize="11.5"
+                                                   Foreground="{StaticResource OverlayBrush}"
+                                                   TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
