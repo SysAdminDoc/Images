@@ -130,10 +130,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _archiveSpreadModeEnabled = _settings.GetBool(Keys.ArchiveSpreadMode, false);
 
         OpenCommand = new RelayCommand(async () => await OpenFileDialogAsync(), () => !IsOperationBusy);
-        NextCommand = new RelayCommand(Next, () => CanUseImageCommands);
-        PrevCommand = new RelayCommand(Prev, () => CanUseImageCommands);
-        FirstCommand = new RelayCommand(First, () => CanUseImageCommands);
-        LastCommand = new RelayCommand(Last, () => CanUseImageCommands);
+        NextCommand = new RelayCommand(async () => await NextAsync(), () => CanUseImageCommands);
+        PrevCommand = new RelayCommand(async () => await PrevAsync(), () => CanUseImageCommands);
+        FirstCommand = new RelayCommand(async () => await FirstAsync(), () => CanUseImageCommands);
+        LastCommand = new RelayCommand(async () => await LastAsync(), () => CanUseImageCommands);
         NextPageCommand = new RelayCommand(async () => await NextPageAsync(), () => HasNextPage && !IsOperationBusy);
         PrevPageCommand = new RelayCommand(async () => await PrevPageAsync(), () => HasPreviousPage && !IsOperationBusy);
         FirstPageCommand = new RelayCommand(async () => await FirstPageAsync(), () => HasPreviousPage && !IsOperationBusy);
@@ -1616,7 +1616,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (!Set(ref _isGalleryOpen, value)) return;
 
             if (value)
-                SelectedGalleryItem = CurrentFolderPreviewItem ?? FolderPreviewItems.FirstOrDefault();
+            {
+                RefreshGalleryItems();
+                SelectedGalleryItem = CurrentFolderPreviewItem ?? GalleryItems.FirstOrDefault() ?? FolderPreviewItems.FirstOrDefault();
+            }
 
             Raise(nameof(CanToggleGallery));
             Raise(nameof(ShowGallery));
@@ -1801,7 +1804,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void RaiseFolderPreviewState()
     {
-        RefreshGalleryItems();
+        if (IsGalleryOpen || HasGalleryFilter)
+            RefreshGalleryItems();
         Raise(nameof(CanToggleFilmstrip));
         Raise(nameof(ShowFilmstrip));
         Raise(nameof(ShowSideFolderPreview));
@@ -2157,6 +2161,25 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public void OpenFile(string path)
     {
+        if (!TryPrepareOpenFile(path, out var resumedArchivePage))
+            return;
+
+        var loaded = LoadCurrent();
+        CompletePreparedOpenFile(path, resumedArchivePage, loaded);
+    }
+
+    private async Task OpenFileAsync(string path)
+    {
+        if (!TryPrepareOpenFile(path, out var resumedArchivePage))
+            return;
+
+        var loaded = await LoadCurrentAsync();
+        CompletePreparedOpenFile(path, resumedArchivePage, loaded);
+    }
+
+    private bool TryPrepareOpenFile(string path, out int resumedArchivePage)
+    {
+        resumedArchivePage = 0;
         FlushPendingRename();
 
         if (!SupportedImageFormats.IsSupported(path))
@@ -2175,7 +2198,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Toast(suggestion is null
                 ? $"Unsupported file type: {ext}"
                 : $"Unsupported {ext}. {suggestion}");
-            return;
+            return false;
         }
 
         var previousFolder = _nav.Folder;
@@ -2191,18 +2214,22 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Toast(File.Exists(path)
                 ? $"Could not open {Path.GetFileName(path)}"
                 : "File no longer exists");
-            return;
+            return false;
         }
 
         if (!string.Equals(previousFolder, _nav.Folder, StringComparison.OrdinalIgnoreCase))
             _preload.Reset();
 
         ResetPageState();
-        var resumedArchivePage = ArchiveReadPositionService.GetLastPageIndex(_settings, path);
+        resumedArchivePage = ArchiveReadPositionService.GetLastPageIndex(_settings, path);
         if (resumedArchivePage > 0)
             PageIndex = resumedArchivePage;
         ClearSecondaryStatus();
-        var loaded = LoadCurrent();
+        return true;
+    }
+
+    private void CompletePreparedOpenFile(string path, int resumedArchivePage, bool loaded)
+    {
         if (loaded && resumedArchivePage > 0 && PageIndex > 0 && HasMultiplePages)
             Toast($"Continued at {PageLabel.ToLowerInvariant()} {PageIndex + 1}");
         _externalEditReload.Arm(path);
@@ -2228,7 +2255,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         try
         {
             await YieldForOperationStatusAsync();
-            OpenFile(path);
+            await OpenFileAsync(path);
         }
         finally
         {
@@ -2244,7 +2271,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         try
         {
             await YieldForOperationStatusAsync();
-            LoadCurrent();
+            await LoadCurrentAsync();
         }
         finally
         {
@@ -2403,10 +2430,38 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             await OpenFileWithOperationStatusAsync(dlg.FileName, "Opening file");
     }
 
-    private void Next() { FlushPendingRename(); if (_nav.MoveNext()) { ResetPageState(); LoadCurrent(); } }
-    private void Prev() { FlushPendingRename(); if (_nav.MovePrevious()) { ResetPageState(); LoadCurrent(); } }
-    private void First() { FlushPendingRename(); if (_nav.MoveFirst()) { ResetPageState(); LoadCurrent(); } }
-    private void Last() { FlushPendingRename(); if (_nav.MoveLast()) { ResetPageState(); LoadCurrent(); } }
+    private async Task NextAsync()
+    {
+        await NavigateImageAsync(_nav.MoveNext, "Loading next image");
+    }
+
+    private async Task PrevAsync()
+    {
+        await NavigateImageAsync(_nav.MovePrevious, "Loading previous image");
+    }
+
+    private async Task FirstAsync()
+    {
+        await NavigateImageAsync(_nav.MoveFirst, "Loading first image");
+    }
+
+    private async Task LastAsync()
+    {
+        await NavigateImageAsync(_nav.MoveLast, "Loading last image");
+    }
+
+    private async Task NavigateImageAsync(Func<bool> move, string title)
+    {
+        if (IsOperationBusy)
+            return;
+
+        FlushPendingRename();
+        if (!move())
+            return;
+
+        ResetPageState();
+        await LoadCurrentWithOperationStatusAsync(title, BuildDecodeOperationDetail(_nav.CurrentPath ?? ""));
+    }
 
     private int PageStep => ArchiveSpreadModeEnabled && IsArchiveBook ? Math.Max(1, PageSpan) : 1;
 
@@ -2463,6 +2518,44 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool LoadCurrent()
     {
         var path = _nav.CurrentPath;
+        if (!PrepareCurrentLoad(path))
+            return false;
+
+        try
+        {
+            return CompleteCurrentLoad(path!, DecodeCurrentPath(path!));
+        }
+        catch (Exception ex)
+        {
+            return CompleteCurrentLoad(path!, error: ex);
+        }
+    }
+
+    private async Task<bool> LoadCurrentAsync()
+    {
+        var path = _nav.CurrentPath;
+        if (!PrepareCurrentLoad(path))
+            return false;
+
+        try
+        {
+            var result = await DecodeCurrentPathAsync(path!);
+            if (!string.Equals(_nav.CurrentPath, path, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            return CompleteCurrentLoad(path!, result);
+        }
+        catch (Exception ex)
+        {
+            if (!string.Equals(_nav.CurrentPath, path, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            return CompleteCurrentLoad(path!, error: ex);
+        }
+    }
+
+    private bool PrepareCurrentLoad(string? path)
+    {
         if (path is null)
         {
             ClearCurrentState();
@@ -2470,79 +2563,110 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
 
         _ocrWorkflow.Clear(cancelExtraction: true);
+        return true;
+    }
+
+    private ImageLoader.LoadResult DecodeCurrentPath(string path)
+    {
+        var isArchiveBookPage = SupportedImageFormats.IsArchive(path);
+        var usePreload = ShouldUsePreloadForCurrentPage(isArchiveBookPage);
+        return usePreload
+            ? _preload.TryGet(path) ?? ImageLoader.Load(path, PageIndex, ArchiveSpreadModeEnabled, ArchiveRightToLeft)
+            : ImageLoader.Load(path, PageIndex, ArchiveSpreadModeEnabled, ArchiveRightToLeft);
+    }
+
+    private async Task<ImageLoader.LoadResult> DecodeCurrentPathAsync(string path)
+    {
+        var pageIndex = PageIndex;
+        var archiveSpreadMode = ArchiveSpreadModeEnabled;
+        var archiveRightToLeft = ArchiveRightToLeft;
+        var isArchiveBookPage = SupportedImageFormats.IsArchive(path);
+        var usePreload = pageIndex == 0 && !(isArchiveBookPage && archiveSpreadMode);
+        if (usePreload)
+        {
+            if (_preload.TryGet(path) is { } finished)
+                return finished;
+
+            if (_preload.TryGetInFlight(path) is { } inFlight)
+            {
+                var preloaded = await inFlight;
+                if (preloaded is not null)
+                    return preloaded;
+            }
+        }
+
+        var taskName = $"foreground-decode:{Path.GetFileName(path)}";
+        return await BackgroundTaskTracker.Run(
+            taskName,
+            () => ImageLoader.Load(path, pageIndex, archiveSpreadMode, archiveRightToLeft));
+    }
+
+    private bool ShouldUsePreloadForCurrentPage(bool isArchiveBookPage)
+        => PageIndex == 0 && !(isArchiveBookPage && ArchiveSpreadModeEnabled);
+
+    private bool CompleteCurrentLoad(
+        string path,
+        ImageLoader.LoadResult? result = null,
+        Exception? error = null)
+    {
         var loaded = false;
 
-        try
+        if (error is null && result is not null)
         {
-            // V20-03: try the preload ring first — a hit is instant, a miss falls through to
-            // the direct load. Either way we re-enqueue the new neighbors.
-            var isArchiveBookPage = SupportedImageFormats.IsArchive(path);
-            var usePreload = PageIndex == 0 && !(isArchiveBookPage && ArchiveSpreadModeEnabled);
-            var res = usePreload
-                ? _preload.TryGet(path) ?? ImageLoader.Load(path, PageIndex, ArchiveSpreadModeEnabled, ArchiveRightToLeft)
-                : ImageLoader.Load(path, PageIndex, ArchiveSpreadModeEnabled, ArchiveRightToLeft);
-            var image = ApplyArchiveDisplayFilters(res.Image, isArchiveBookPage, ArchiveOldScanFilterEnabled);
-            var animation = isArchiveBookPage && ArchiveOldScanFilterEnabled ? null : res.Animation;
-            var decoderUsed = isArchiveBookPage && ArchiveOldScanFilterEnabled
-                ? $"{res.DecoderUsed} + clean scan filter"
-                : res.DecoderUsed;
-            // Order matters: CurrentImage first so ZoomPanImage.OnSourceChanged runs and clears
-            // any animation from the previous file; then CurrentAnimation, which either applies
-            // new keyframes or stays null for a static image.
-            CurrentImage = image;
-            CurrentAnimation = animation;
-            PixelWidth = res.PixelWidth;
-            PixelHeight = res.PixelHeight;
-            DecoderUsed = decoderUsed;
-            ClearInspectorState();
-            IsCropMode = false;
-            ClearCropSelection();
-            IsExposureBrushMode = false;
-            ClearExposureBrushStrokes(showToast: false);
-            IsRedEyeCorrectionMode = false;
-            ClearRedEyeCorrectionMarks(showToast: false);
-            IsRetouchMode = false;
-            ClearRetouchState(showToast: false);
-            ApplyPageSequence(res.Pages);
-            ArchiveReadPositionService.SaveLastPageIndex(_settings, path, PageIndex, PageCount);
-            if (isArchiveBookPage)
-                RefreshArchiveReadHistory();
-            Rotation = 0;
-            FlipHorizontal = false;
-            FlipVertical = false;
-            ClearLoadError();
-            loaded = true;
-
-            // First-run only — surface the gesture hint pill the first time an image lands.
-            if (!_hasShownGestureHint)
+            try
             {
-                _hasShownGestureHint = true;
-                ShowGestureHint = true;
-                _hintTimer.Stop();
-                _hintTimer.Start();
-            }
+                var isArchiveBookPage = SupportedImageFormats.IsArchive(path);
+                var image = ApplyArchiveDisplayFilters(result.Image, isArchiveBookPage, ArchiveOldScanFilterEnabled);
+                var animation = isArchiveBookPage && ArchiveOldScanFilterEnabled ? null : result.Animation;
+                var decoderUsed = isArchiveBookPage && ArchiveOldScanFilterEnabled
+                    ? $"{result.DecoderUsed} + clean scan filter"
+                    : result.DecoderUsed;
+                // Order matters: CurrentImage first so ZoomPanImage.OnSourceChanged runs and clears
+                // any animation from the previous file; then CurrentAnimation, which either applies
+                // new keyframes or stays null for a static image.
+                CurrentImage = image;
+                CurrentAnimation = animation;
+                PixelWidth = result.PixelWidth;
+                PixelHeight = result.PixelHeight;
+                DecoderUsed = decoderUsed;
+                ClearInspectorState();
+                IsCropMode = false;
+                ClearCropSelection();
+                IsExposureBrushMode = false;
+                ClearExposureBrushStrokes(showToast: false);
+                IsRedEyeCorrectionMode = false;
+                ClearRedEyeCorrectionMarks(showToast: false);
+                IsRetouchMode = false;
+                ClearRetouchState(showToast: false);
+                ApplyPageSequence(result.Pages);
+                ArchiveReadPositionService.SaveLastPageIndex(_settings, path, PageIndex, PageCount);
+                if (isArchiveBookPage)
+                    RefreshArchiveReadHistory();
+                Rotation = 0;
+                FlipHorizontal = false;
+                FlipVertical = false;
+                ClearLoadError();
+                loaded = true;
 
-            LaunchTiming.LogFirstImage(_log, path, IsPeekMode);
+                // First-run only — surface the gesture hint pill the first time an image lands.
+                if (!_hasShownGestureHint)
+                {
+                    _hasShownGestureHint = true;
+                    ShowGestureHint = true;
+                    _hintTimer.Stop();
+                    _hintTimer.Start();
+                }
+
+                LaunchTiming.LogFirstImage(_log, path, IsPeekMode);
+            }
+            catch (Exception ex)
+            {
+                error = ex;
+            }
         }
-        catch (Exception ex)
-        {
-            IsPinnedOverlayMode = false;
-            CurrentImage = null;
-            CurrentAnimation = null;
-            PixelWidth = PixelHeight = 0;
-            DecoderUsed = "Unavailable";
-            ClearInspectorState();
-            IsCropMode = false;
-            ClearCropSelection();
-            IsExposureBrushMode = false;
-            ClearExposureBrushStrokes(showToast: false);
-            IsRedEyeCorrectionMode = false;
-            ClearRedEyeCorrectionMarks(showToast: false);
-            IsRetouchMode = false;
-            ClearRetouchState(showToast: false);
-            ResetPageState();
-            SetLoadError(ex);
-        }
+
+        if (error is not null)
+            ApplyLoadFailure(error);
 
         CurrentPath = path;
         try { _fileSize = new FileInfo(path).Length; } catch { _fileSize = 0; }
@@ -2559,6 +2683,26 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         // The preload itself runs off the UI thread.
         EnqueueNeighbours();
         return loaded;
+    }
+
+    private void ApplyLoadFailure(Exception ex)
+    {
+        IsPinnedOverlayMode = false;
+        CurrentImage = null;
+        CurrentAnimation = null;
+        PixelWidth = PixelHeight = 0;
+        DecoderUsed = "Unavailable";
+        ClearInspectorState();
+        IsCropMode = false;
+        ClearCropSelection();
+        IsExposureBrushMode = false;
+        ClearExposureBrushStrokes(showToast: false);
+        IsRedEyeCorrectionMode = false;
+        ClearRedEyeCorrectionMarks(showToast: false);
+        IsRetouchMode = false;
+        ClearRetouchState(showToast: false);
+        ResetPageState();
+        SetLoadError(ex);
     }
 
     private void SetLoadError(Exception ex)

@@ -149,6 +149,59 @@ public sealed class FolderPreviewControllerTests
         });
     }
 
+    [Fact]
+    public void Refresh_WithSameFiles_UpdatesCurrentItemWithoutRebuildingCollection()
+    {
+        RunOnSta(() =>
+        {
+            var files = Enumerable
+                .Range(1, 1000)
+                .Select(i => $@"C:\photos\image{i}.jpg")
+                .ToArray();
+
+            using var controller = new FolderPreviewController(
+                Dispatcher.CurrentDispatcher,
+                isDisposed: () => false,
+                loadThumbnail: (_, _) => null);
+
+            controller.Refresh(files, currentIndex: 10);
+            var firstItem = controller.Items[10];
+
+            controller.Refresh(files, currentIndex: 11);
+
+            Assert.Same(firstItem, controller.Items[10]);
+            Assert.False(controller.Items[10].IsCurrent);
+            Assert.True(controller.Items[11].IsCurrent);
+            Assert.Equal(1000, controller.Items.Count);
+        });
+    }
+
+    [Fact]
+    public void Refresh_WithReorderedFiles_RebuildsItemsToMatchSortOrder()
+    {
+        RunOnSta(() =>
+        {
+            var files = new List<string>
+            {
+                @"C:\photos\image1.jpg",
+                @"C:\photos\image2.jpg",
+                @"C:\photos\image10.jpg"
+            };
+
+            using var controller = new FolderPreviewController(
+                Dispatcher.CurrentDispatcher,
+                isDisposed: () => false,
+                loadThumbnail: (_, _) => null);
+
+            controller.Refresh(files, currentIndex: 2);
+            files.Reverse();
+            controller.Refresh(files, currentIndex: 0);
+
+            Assert.Equal(files, controller.Items.Select(item => item.Path));
+            Assert.True(controller.Items[0].IsCurrent);
+        });
+    }
+
     private static ImageSource CreateThumbnail()
     {
         var pixels = new byte[] { 0x21, 0x40, 0x5a, 0xff };

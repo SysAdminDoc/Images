@@ -14,6 +14,7 @@ public sealed class FolderPreviewController : IDisposable
     private readonly SemaphoreSlim _thumbnailDecodeGate = new(2);
     private CancellationTokenSource _previewCts = new();
     private int _generation;
+    private int _currentIndex = -1;
     private int _thumbnailFailureCount;
 
     public FolderPreviewController(
@@ -38,12 +39,20 @@ public sealed class FolderPreviewController : IDisposable
 
     public void Refresh(IReadOnlyList<string> files, int currentIndex)
     {
+        if (CanUpdateCurrentItemInPlace(files))
+        {
+            UpdateCurrentItemInPlace(files, currentIndex);
+            RaiseStateChanged();
+            return;
+        }
+
         var generation = ++_generation;
         var previousCts = _previewCts;
         previousCts.Cancel();
         _ = DisposeSourceLaterAsync(previousCts);
         _previewCts = new CancellationTokenSource();
         Items.Clear();
+        _currentIndex = currentIndex;
         ResetThumbnailFailures();
         RaiseStateChanged();
 
@@ -73,6 +82,7 @@ public sealed class FolderPreviewController : IDisposable
     {
         _generation++;
         _previewCts.Cancel();
+        _currentIndex = -1;
         Items.Clear();
         ResetThumbnailFailures();
         RaiseStateChanged();
@@ -92,6 +102,57 @@ public sealed class FolderPreviewController : IDisposable
         var forward = (index - currentIndex + count) % count;
         var backward = (currentIndex - index + count) % count;
         return Math.Min(forward, backward) <= 4;
+    }
+
+    private bool CanUpdateCurrentItemInPlace(IReadOnlyList<string> files)
+    {
+        if (files.Count == 0 || Items.Count != files.Count)
+            return false;
+
+        for (var i = 0; i < files.Count; i++)
+        {
+            if (!string.Equals(Items[i].Path, files[i], StringComparison.OrdinalIgnoreCase))
+                return false;
+        }
+
+        return true;
+    }
+
+    private void UpdateCurrentItemInPlace(IReadOnlyList<string> files, int currentIndex)
+    {
+        var token = _previewCts.Token;
+        var generation = _generation;
+        var count = files.Count;
+
+        if (_currentIndex >= 0 && _currentIndex < Items.Count && _currentIndex != currentIndex)
+            Items[_currentIndex].IsCurrent = false;
+
+        if (currentIndex >= 0 && currentIndex < Items.Count)
+            Items[currentIndex].IsCurrent = true;
+
+        _currentIndex = currentIndex;
+        QueueNearbyThumbnails(count, currentIndex, generation, token);
+    }
+
+    private void QueueNearbyThumbnails(int count, int currentIndex, int generation, CancellationToken token)
+    {
+        if (count <= 0 || currentIndex < 0)
+            return;
+
+        if (count <= 9)
+        {
+            for (var index = 0; index < Items.Count; index++)
+                QueueThumbnailLoad(Items[index], generation, token);
+            return;
+        }
+
+        var queued = new HashSet<int>();
+        for (var offset = -4; offset <= 4; offset++)
+        {
+            var index = (currentIndex + offset + count) % count;
+            if (index >= 0 && index < Items.Count && queued.Add(index))
+                QueueThumbnailLoad(Items[index], generation, token);
+        }
     }
 
     private void QueueThumbnailLoad(FolderPreviewItem item, int generation, CancellationToken token)
@@ -184,19 +245,24 @@ public sealed class FolderPreviewItem : ObservableObject
     private ImageSource? _thumbnail;
     private bool _thumbnailRequested;
     private bool _thumbnailFailed;
+    private bool _isCurrent;
 
     public FolderPreviewItem(string path, string fileName, string positionText, bool isCurrent)
     {
         Path = path;
         FileName = fileName;
         PositionText = positionText;
-        IsCurrent = isCurrent;
+        _isCurrent = isCurrent;
     }
 
     public string Path { get; }
     public string FileName { get; }
     public string PositionText { get; }
-    public bool IsCurrent { get; }
+    public bool IsCurrent
+    {
+        get => _isCurrent;
+        set => Set(ref _isCurrent, value);
+    }
 
     public ImageSource? Thumbnail
     {
