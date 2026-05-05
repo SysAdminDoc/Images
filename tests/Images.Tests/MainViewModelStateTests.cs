@@ -144,13 +144,30 @@ public sealed class MainViewModelStateTests
             viewModel.OpenFile(image10);
             viewModel.ToggleGalleryCommand.Execute(null);
 
-            viewModel.GalleryFilterText = "image2";
+            viewModel.GalleryFilterText = "format:png image2";
 
             Assert.True(viewModel.HasGalleryFilter);
             Assert.False(viewModel.ShowGalleryFilterEmpty);
             Assert.Equal([image2], viewModel.GalleryItems.Select(item => item.Path));
             Assert.Equal(image2, viewModel.SelectedGalleryItem?.Path);
-            Assert.Equal("1 of 3 items · Sort: Name", viewModel.GalleryStatusText);
+            Assert.Contains("format:png", viewModel.GalleryFilterSummaryText);
+            Assert.Equal("1 of 3 items · Sort: Name · format:png", viewModel.GalleryStatusText);
+
+            viewModel.ClearGalleryFilterCommand.Execute(null);
+
+            Assert.False(viewModel.HasGalleryFilter);
+            Assert.Equal(3, viewModel.GalleryItems.Count);
+            Assert.Equal("", viewModel.GalleryFilterSummaryText);
+
+            viewModel.ApplyGallerySmartFilterCommand.Execute("format:png");
+
+            Assert.Equal("format:png", viewModel.GalleryFilterText);
+            Assert.True(viewModel.HasGalleryFilter);
+            Assert.Equal(3, viewModel.GalleryItems.Count);
+
+            viewModel.ApplyGallerySmartFilterCommand.Execute("format:png");
+
+            Assert.Equal("", viewModel.GalleryFilterText);
 
             viewModel.GalleryFilterText = "missing";
 
