@@ -4,6 +4,12 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+No changes yet.
+
+## v0.2.10 — 2026-05-05
+
+Performance, reliability, workflow, and product-polish release.
+
 ### Changed
 
 - **Improvement tracking** — added a repo-local improvement plan that tracks the 15 engineering, UX, reliability, and CI follow-up items from the May 2026 quality review.
