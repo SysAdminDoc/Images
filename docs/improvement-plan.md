@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V40-63` is complete. Images now has a private local tag relationship graph with `person:`, `place:`, and `project:` namespace defaults, custom namespaces, alias/sibling canonicalization, parent-tag expansion, cycle guards, XMP sidecar import/export, a reachable `Ctrl+Shift+T` window, and regression coverage for graph behavior plus sidecar round-trips.
+Roadmap `V40-64` is complete. Images now has a local import inbox with file/folder staging, destination duplicate checks, default duplicate skipping, tag/rating sidecar export, optional GPS stripping for imported JPEG/TIFF copies, Recycle Bin cleanup for staged files, copy/move import modes, collision-safe destination naming, and regression coverage for duplicate detection plus sidecar-writing import commits.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the next main `ROADMAP.md` feature backlog item, `V40-64` import inbox workflow.
+The improvement-plan backlog is complete. Continue with the next main `ROADMAP.md` feature backlog item, `E10` macro recorder and action runner.
 
 ## Research Inputs
 
@@ -79,6 +79,7 @@ The improvement-plan backlog is complete. Continue with the next main `ROADMAP.m
 - 2026-05-05: Completed `IP-02F` by extracting external-edit watcher/debounce/reload feedback into `ExternalEditReloadController` and covering coalesced reloads, failed reload notifications, disarm cancellation, and watcher creation failure.
 - 2026-05-05: Completed `IP-02G` by extracting OCR busy/active overlay workflow into `OcrWorkflowController` and covering no-image, success, no-text, cancellation, and stale-result outcomes.
 - 2026-05-05: Completed roadmap `V40-63` by adding a private offline tag relationship graph with namespace, alias, parent, sidecar import/export, UI entry points, and regression coverage.
+- 2026-05-05: Completed roadmap `V40-64` by adding a local import inbox with duplicate-aware staging, tag/rating sidecars, optional GPS stripping, Recycle Bin cleanup, and copy/move import.
 - 2026-05-05: Completed `IP-02H` and closed `IP-02` by extracting update-check UI state into `UpdateCheckController` and covering background skip, newer-release, current-release, error, and release-link opening outcomes.
 - 2026-05-05: Completed `IP-03B` by adding a deterministic folder-preview thumbnail loader seam and regression tests for clear and superseded-refresh cancellation paths.
 - 2026-05-05: Completed `IP-03C` by adding an internal `MainViewModel` controller-injection seam and tests that relay metadata, OCR, and update-check state through the view model.

@@ -75,6 +75,11 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EC;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Import inbox" Command="{Binding OpenImportInboxCommand}" InputGestureText="Ctrl+Shift+I">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="{Binding OverlayModeText}"
                                   Command="{Binding ToggleOverlayModeCommand}"
                                   IsCheckable="True"
@@ -1528,7 +1533,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+O" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open image" />
@@ -1552,10 +1557,12 @@
                                         <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open file health scan" />
                                         <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+T" />
                                         <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open tag relationships" />
-                                        <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
-                                        <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
-                                        <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
-                                        <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
+                                        <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+I" />
+                                        <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open import inbox" />
+                                        <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
+                                        <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
+                                        <TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
+                                        <TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
                                     </Grid>
                                 </StackPanel>
                             </ScrollViewer>
@@ -3066,14 +3073,22 @@
                                            TextWrapping="Wrap"
                                            Margin="0,3,0,0" />
                             </StackPanel>
-                            <Button Grid.Column="1"
-                                    Command="{Binding OpenTagGraphCommand}"
-                                    Style="{StaticResource ChromeButton}"
-                                    MinWidth="92"
-                                    Margin="12,0,0,0"
-                                    AutomationProperties.Name="Open tag relationships">
-                                <TextBlock Text="Tags" />
-                            </Button>
+                            <StackPanel Grid.Column="1"
+                                        Margin="12,0,0,0">
+                                <Button Command="{Binding OpenTagGraphCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        MinWidth="92"
+                                        AutomationProperties.Name="Open tag relationships">
+                                    <TextBlock Text="Tags" />
+                                </Button>
+                                <Button Command="{Binding OpenImportInboxCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        MinWidth="92"
+                                        Margin="0,8,0,0"
+                                        AutomationProperties.Name="Open import inbox">
+                                    <TextBlock Text="Inbox" />
+                                </Button>
+                            </StackPanel>
                         </Grid>
                     </Border>
 
