@@ -48,6 +48,7 @@ All notable changes to **Images** are documented here.
 - **Archive cover handling** — ZIP/CBZ books now promote explicit cover/front/folder image entries before natural page order and report cover provenance in decoder details.
 - **Archive reader controls** — active ZIP/CBZ books now get a side-panel book-controls card, narrow edge page-turn click zones, and reader-mode arrow/Home/End key routing for page turns.
 - **Archive runtime review** — documented the RAR/7z dependency policy, keeping ZIP/CBZ first-party while gating future runtimes on licensing, provenance, CVE, isolation, and generated-corpus requirements.
+- **Gated archive recovery** — opening or pasting RAR/CBR/7z/CB7 books now shows clear runtime-gated guidance to extract or convert to CBZ, with explicit no-auto-download copy.
 - **Manga page turns** — archive books now have a persisted right-to-left page-turn mode that swaps physical edge zones and Left/Right Arrow routing without changing semantic next/previous controls.
 - **Clean scan preview** — archive books now offer a persisted, preview-only high-contrast grayscale filter for yellowed or low-contrast scanned pages without modifying source archives.
 - **Two-page archive spreads** — ZIP/CBZ books now have a persisted spread mode that keeps explicit covers single, pairs natural pages, respects right-to-left composition, and advances by spread.

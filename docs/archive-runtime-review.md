@@ -55,6 +55,8 @@ Unsupported archive extensions should stay calm and actionable:
 - Users should be told to extract the archive or convert it to CBZ until runtime support is approved.
 - The app must not prompt to download archive runtimes automatically.
 
+Status: direct opens and clipboard file lists now use this copy for `.rar`, `.cbr`, `.7z`, and `.cb7`; the extensions are still not part of the supported decoder/navigator set.
+
 ## Implementation Boundary
 
 Future non-ZIP archive work should not change the viewer contract. The adapter boundary should expose only:

@@ -1343,6 +1343,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             // V20-37 / item 86: human-readable suggestion when a recognized non-image type is
             // dropped (video, archive, document) so the user understands why nothing happened.
             var ext = Path.GetExtension(path);
+            if (SupportedImageFormats.IsGatedArchiveExtension(ext))
+            {
+                ShowSecondaryStatus(
+                    SupportedImageFormats.GatedArchiveRuntimeTitle,
+                    SupportedImageFormats.GatedArchiveRuntimeDetail,
+                    SecondaryStatusToneKind.Warning,
+                    "\uE783");
+                Toast(SupportedImageFormats.GatedArchiveRuntimeTitle);
+                return;
+            }
+
             var suggestion = SupportedImageFormats.SuggestionForUnsupported(ext);
             ShowSecondaryStatus(
                 "File type not supported",
@@ -1526,6 +1537,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 ShowSecondaryStatus(
                     "Clipboard file not supported",
                     "The clipboard contains files, but none are formats Images can open.",
+                    SecondaryStatusToneKind.Warning,
+                    "\uE783");
+                break;
+            case ClipboardImportStatus.ArchiveRuntimeNotEnabled:
+                ShowSecondaryStatus(
+                    SupportedImageFormats.GatedArchiveRuntimeTitle,
+                    SupportedImageFormats.GatedArchiveRuntimeDetail,
                     SecondaryStatusToneKind.Warning,
                     "\uE783");
                 break;

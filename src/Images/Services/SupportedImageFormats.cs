@@ -49,6 +49,11 @@ public static class SupportedImageFormats
         ".zip", ".cbz"
     ];
 
+    public static readonly string[] GatedArchiveExtensions =
+    [
+        ".rar", ".cbr", ".7z", ".cb7"
+    ];
+
     public static readonly string[] RawExtensions =
     [
         ".cr2", ".cr3", ".crw", ".nef", ".nrw", ".arw", ".srf", ".sr2",
@@ -83,7 +88,12 @@ public static class SupportedImageFormats
     ]);
 
     public static string DropUnsupportedMessage =>
-        "Drop a supported image, archive book, RAW, design, vector, or document preview file.";
+        "Drop a supported image, ZIP/CBZ archive book, RAW, design, vector, or document preview file. RAR/7z books must be extracted or converted to CBZ first.";
+
+    public static string GatedArchiveRuntimeTitle => "Archive runtime not enabled";
+
+    public static string GatedArchiveRuntimeDetail =>
+        "Images currently opens archive books as ZIP/CBZ. RAR/CBR and 7z/CB7 support is gated until a safe runtime is approved. Extract the archive or convert it to CBZ for now. Images will not download archive runtimes automatically.";
 
     private static string ToFilter(IEnumerable<string> extensions)
         => string.Join(";", extensions.Select(e => "*" + e));
@@ -105,6 +115,9 @@ public static class SupportedImageFormats
 
     public static bool IsArchiveExtension(string extension)
         => ArchiveExtensions.Contains(Normalize(extension), StringComparer.OrdinalIgnoreCase);
+
+    public static bool IsGatedArchiveExtension(string extension)
+        => GatedArchiveExtensions.Contains(Normalize(extension), StringComparer.OrdinalIgnoreCase);
 
     public static string FormatFamily(string path)
     {
@@ -168,7 +181,7 @@ public static class SupportedImageFormats
                 => "Audio files aren't viewable. Open them in Groove, foobar2000, or VLC.",
 
             ".rar" or ".cbr" or ".7z" or ".cb7"
-                => "Archive/book mode supports ZIP and CBZ first. Extract this archive, or convert it to CBZ.",
+                => GatedArchiveRuntimeDetail,
 
             ".doc" or ".docx" or ".rtf" or ".odt" or ".pages"
                 => "Word-processor documents aren't images. Use Word, LibreOffice, or your default editor.",
