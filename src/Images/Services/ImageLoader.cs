@@ -51,7 +51,11 @@ public static class ImageLoader
     private const int StableReadRetryDelayMs = 80;
     private const int MaxRenderableDimension = 30000;
 
-    public static LoadResult Load(string path, int pageIndex = 0)
+    public static LoadResult Load(
+        string path,
+        int pageIndex = 0,
+        bool archiveSpreadMode = false,
+        bool archiveRightToLeft = false)
     {
         var fi = new FileInfo(path);
         if (!fi.Exists)
@@ -60,7 +64,7 @@ public static class ImageLoader
             throw new InvalidOperationException($"'{Path.GetFileName(path)}' is empty.");
 
         if (SupportedImageFormats.IsArchive(path))
-            return LoadArchivePreview(path, pageIndex);
+            return LoadArchivePreview(path, pageIndex, archiveSpreadMode, archiveRightToLeft);
 
         if (SupportedImageFormats.RequiresGhostscript(path))
             return LoadDocumentPreview(path, pageIndex);
@@ -132,8 +136,15 @@ public static class ImageLoader
         }
     }
 
-    private static LoadResult LoadArchivePreview(string path, int requestedPageIndex)
+    private static LoadResult LoadArchivePreview(
+        string path,
+        int requestedPageIndex,
+        bool spreadMode,
+        bool rightToLeft)
     {
+        if (spreadMode)
+            return LoadArchiveSpreadPreview(path, requestedPageIndex, rightToLeft);
+
         var page = ArchiveBookService.LoadPage(path, requestedPageIndex);
         var loaded = LoadRasterBytes(page.Bytes, page.EntryName, Path.GetExtension(page.EntryName));
         var pageDescription = page.IsCover
@@ -144,6 +155,85 @@ public static class ImageLoader
             DecoderUsed = $"{loaded.DecoderUsed} ({pageDescription})",
             Pages = new PageSequence(page.PageIndex, page.PageCount, "Page")
         };
+    }
+
+    private static LoadResult LoadArchiveSpreadPreview(
+        string path,
+        int requestedPageIndex,
+        bool rightToLeft)
+    {
+        var spread = ArchiveBookService.LoadSpread(path, requestedPageIndex);
+        if (spread.Pages.Count == 0)
+            throw new InvalidOperationException("The archive spread did not produce a preview page.");
+
+        var loadedPages = spread.Pages
+            .Select(page => new
+            {
+                Page = page,
+                Loaded = LoadRasterBytes(page.Bytes, page.EntryName, Path.GetExtension(page.EntryName))
+            })
+            .ToList();
+
+        if (loadedPages.Count == 1)
+        {
+            var page = loadedPages[0].Page;
+            var loaded = loadedPages[0].Loaded;
+            var pageDescription = page.IsCover
+                ? $"archive cover, page {page.PageIndex + 1} of {page.PageCount}"
+                : $"archive page {page.PageIndex + 1} of {page.PageCount}";
+
+            return loaded with
+            {
+                DecoderUsed = $"{loaded.DecoderUsed} ({pageDescription})",
+                Pages = new PageSequence(page.PageIndex, page.PageCount, "Page")
+            };
+        }
+
+        var bitmaps = loadedPages
+            .Select(item => item.Loaded.Image as BitmapSource
+                ?? throw new InvalidOperationException($"Archive page '{item.Page.EntryName}' did not decode to a bitmap."))
+            .ToList();
+        var spreadImage = ComposeArchiveSpread(bitmaps, rightToLeft);
+        var start = spread.PageIndex + 1;
+        var end = Math.Min(spread.PageIndex + spread.PageSpan, spread.PageCount);
+        var decoder = loadedPages[0].Loaded.DecoderUsed;
+
+        return new LoadResult(
+            spreadImage,
+            spreadImage.PixelWidth,
+            spreadImage.PixelHeight,
+            $"{decoder} (archive spread, pages {start}-{end} of {spread.PageCount})",
+            Pages: new PageSequence(spread.PageIndex, spread.PageCount, "Pages", spread.PageSpan));
+    }
+
+    private static BitmapSource ComposeArchiveSpread(IReadOnlyList<BitmapSource> pages, bool rightToLeft)
+    {
+        var ordered = rightToLeft ? pages.Reverse().ToList() : pages.ToList();
+        var height = ordered.Max(page => page.PixelHeight);
+        var widths = ordered
+            .Select(page => page.PixelHeight == height
+                ? page.PixelWidth
+                : (int)Math.Round(page.PixelWidth * (height / (double)Math.Max(1, page.PixelHeight))))
+            .ToList();
+        var width = widths.Sum();
+
+        var visual = new DrawingVisual();
+        using (var drawing = visual.RenderOpen())
+        {
+            var x = 0.0;
+            for (var i = 0; i < ordered.Count; i++)
+            {
+                var page = ordered[i];
+                var renderedWidth = widths[i];
+                drawing.DrawImage(page, new Rect(x, 0, renderedWidth, height));
+                x += renderedWidth;
+            }
+        }
+
+        var spread = new RenderTargetBitmap(width, height, ordered[0].DpiX, ordered[0].DpiY, PixelFormats.Pbgra32);
+        spread.Render(visual);
+        spread.Freeze();
+        return spread;
     }
 
     /// <summary>
@@ -543,7 +633,7 @@ public sealed class AnimationSequence
     }
 }
 
-public sealed record PageSequence(int PageIndex, int PageCount, string Label)
+public sealed record PageSequence(int PageIndex, int PageCount, string Label, int PageSpan = 1)
 {
     public bool HasMultiplePages => PageCount > 1;
 }
