@@ -37,6 +37,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Gallery workbench** — press `G` to open a multi-column thumbnail grid for the current folder with quick filtering, sort shortcuts, context actions, selection, and Enter-to-load.
 - **Reference board mode** — press `Ctrl+B` to open a separate local board seeded from the current image. Drop supported files, arrange image cards, add notes and group frames, pin the board above other windows, zoom the canvas, and export the composed board as PNG.
 - **Pixel inspector** — enable Inspector in the side panel to sample coordinates and HEX/RGB/HSV/alpha values, copy color values, Shift-drag pixel measurements, and switch to nearest-neighbor preview scaling for pixel art.
+- **Animation frame workbench** — animated GIF/APNG/WebP files get a side-panel timeline with a scrubber, frame stepping, playback-speed control, copy-current-frame, PNG frame export, and drag-out selected frames.
 - **Photo metadata at a glance** — the Details panel and optional `I` metadata HUD surface embedded EXIF date, camera, lens, exposure, focal length, and GPS coordinates when present, without opening a separate info window or sending location data anywhere.
 - **Zoom + pan** — mouse wheel to zoom in/out about the cursor, drag to pan, double-click to toggle fit/1:1.
 - **Export a copy** to JPEG, PNG, WebP, AVIF, JXL, TIFF, BMP, GIF/APNG, PSD/PSB, PDF/EPS/SVG, TGA, DDS, QOI, EXR, HDR, JPEG 2000, X11/Magick, production/scientific, and portable bitmap formats.
@@ -98,6 +99,8 @@ OCR depends on Microsoft Windows OCR optional capabilities. The installer instal
 | **F5** | Rescan current directory |
 | **G** | Toggle gallery workbench |
 | **Ctrl+B** | Open reference board |
+| **Ctrl+Left / Ctrl+Right** | Step animated image frames |
+| **Ctrl+Space** | Play/pause animated image |
 | **I** | Toggle metadata HUD |
 | **Enter** (in rename box) | Commit rename now (skip debounce) |
 | **Esc** (in rename box) | Cancel edit, revert textbox to disk name |
@@ -117,10 +120,12 @@ src/Images/
 ├── ViewModels/
 │   ├── ObservableObject.cs     # INotifyPropertyChanged base
 │   ├── RelayCommand.cs         # ICommand impl
+│   ├── AnimationFrameItem.cs    # Timeline item state for animated-image frames
 │   └── MainViewModel.cs        # All view state + commands
 ├── Services/
 │   ├── ImageLoader.cs          # WIC-first, Magick.NET fallback, cached decoding
 │   ├── ArchiveBookService.cs   # Read-only ZIP/CBZ, RAR/CBR, and 7z/CB7 page discovery
+│   ├── AnimationWorkbenchService.cs # Frame timing, labels, PNG export, and drag-file creation
 │   ├── ReferenceBoardLayoutService.cs # Board placement, clamping, and export bounds
 │   ├── PixelInspectorService.cs # Pixel coordinate mapping, sampling, color formatting, and measurement math
 │   ├── ImageExportService.cs   # Codec-aware Save a copy / conversion output

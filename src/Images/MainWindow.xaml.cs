@@ -439,6 +439,18 @@ public partial class MainWindow : Window
                 Vm.ExtractTextCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.Left when Vm.IsAnimated && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
+                Vm.PreviousAnimationFrameCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.Right when Vm.IsAnimated && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
+                Vm.NextAnimationFrameCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.Space when Vm.IsAnimated && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
+                Vm.ToggleAnimationPlaybackCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.Left:
                 if (Vm.IsArchiveBook) Vm.LeftBookPageTurnCommand.Execute(null);
                 else Vm.PrevCommand.Execute(null);
@@ -480,6 +492,28 @@ public partial class MainWindow : Window
             case Key.NumPad1:
                 Canvas.OneToOne(); e.Handled = true; break;
         }
+    }
+
+    private void AnimationFrame_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton != MouseButtonState.Pressed ||
+            sender is not FrameworkElement element ||
+            element.DataContext is not AnimationFrameItem item)
+        {
+            return;
+        }
+
+        if (Vm.SetAnimationFrameCommand.CanExecute(item.Index))
+            Vm.SetAnimationFrameCommand.Execute(item.Index);
+
+        if (!Vm.TryCreateAnimationFrameDragFile(out var path))
+            return;
+
+        var data = new DataObject();
+        data.SetData(DataFormats.FileDrop, new[] { path });
+        data.SetText(path);
+        DragDrop.DoDragDrop(element, data, DragDropEffects.Copy);
+        e.Handled = true;
     }
 
     private void Canvas_MouseMove(object sender, MouseEventArgs e)

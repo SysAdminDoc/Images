@@ -185,6 +185,7 @@
                 <ctl:ZoomPanImage x:Name="Canvas"
                                    Source="{Binding CurrentImage}"
                                    Animation="{Binding CurrentAnimation}"
+                                   AnimationFrameIndex="{Binding CurrentAnimationFrameIndex}"
                                    Rotation="{Binding Rotation}"
                                    FlipHorizontal="{Binding FlipHorizontal}"
                                    FlipVertical="{Binding FlipVertical}"
@@ -2850,6 +2851,196 @@
                                        Foreground="{StaticResource SubtextBrush}" />
                         </Border>
                     </Grid>
+
+                    <StackPanel Visibility="{Binding IsAnimated, Converter={StaticResource BoolToVis}}">
+                        <Border Style="{StaticResource Divider}" />
+
+                        <!-- ANIMATION section -->
+                        <TextBlock Text="Animation" Style="{StaticResource SectionLabel}" />
+                        <Border Style="{StaticResource Card}"
+                                Padding="13,12"
+                                AutomationProperties.Name="Animation frame workbench">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding SelectedAnimationFrameText}"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextBrush}" />
+                                        <TextBlock Text="{Binding AnimationWorkbenchStatusText}"
+                                                   Style="{StaticResource Text.Hint}"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,3,0,0" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1"
+                                            Command="{Binding ToggleAnimationPlaybackCommand}"
+                                            Style="{StaticResource ChromeButton}"
+                                            MinWidth="62"
+                                            Margin="12,0,0,0"
+                                            AutomationProperties.Name="Play or pause animation">
+                                        <TextBlock Text="{Binding AnimationPlaybackText}" />
+                                    </Button>
+                                </Grid>
+
+                                <Grid Margin="0,12,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding SelectedAnimationTimestampText}"
+                                               Style="{StaticResource Text.Caption}"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,10,0" />
+                                    <Slider Grid.Column="1"
+                                            Minimum="0"
+                                            Maximum="{Binding AnimationFrameSliderMaximum}"
+                                            Value="{Binding AnimationScrubberValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            TickFrequency="1"
+                                            IsSnapToTickEnabled="True"
+                                            SmallChange="1"
+                                            LargeChange="5"
+                                            AutomationProperties.Name="Animation frame scrubber" />
+                                    <TextBlock Grid.Column="2"
+                                               Text="{Binding SelectedAnimationFrameDelayText}"
+                                               Style="{StaticResource Text.Caption}"
+                                               VerticalAlignment="Center"
+                                               Margin="10,0,0,0" />
+                                </Grid>
+
+                                <UniformGrid Columns="4" Margin="0,12,0,0">
+                                    <Button Command="{Binding FirstAnimationFrameCommand}"
+                                            Style="{StaticResource ChromeButton}"
+                                            Margin="0,0,6,0"
+                                            ToolTip="First frame"
+                                            AutomationProperties.Name="First animation frame">
+                                        <TextBlock Text="First" />
+                                    </Button>
+                                    <Button Command="{Binding PreviousAnimationFrameCommand}"
+                                            Style="{StaticResource ChromeButton}"
+                                            Margin="0,0,6,0"
+                                            ToolTip="Previous frame"
+                                            AutomationProperties.Name="Previous animation frame">
+                                        <TextBlock Text="Prev" />
+                                    </Button>
+                                    <Button Command="{Binding NextAnimationFrameCommand}"
+                                            Style="{StaticResource ChromeButton}"
+                                            Margin="0,0,6,0"
+                                            ToolTip="Next frame"
+                                            AutomationProperties.Name="Next animation frame">
+                                        <TextBlock Text="Next" />
+                                    </Button>
+                                    <Button Command="{Binding LastAnimationFrameCommand}"
+                                            Style="{StaticResource ChromeButton}"
+                                            ToolTip="Last frame"
+                                            AutomationProperties.Name="Last animation frame">
+                                        <TextBlock Text="Last" />
+                                    </Button>
+                                </UniformGrid>
+
+                                <Grid Margin="0,12,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                               Text="Speed"
+                                               Style="{StaticResource Text.Hint}"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,10,0" />
+                                    <Slider Grid.Column="1"
+                                            Minimum="0.25"
+                                            Maximum="4"
+                                            TickFrequency="0.25"
+                                            IsSnapToTickEnabled="True"
+                                            Value="{Binding AnimationPlaybackSpeed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            AutomationProperties.Name="Animation playback speed" />
+                                    <TextBlock Grid.Column="2"
+                                               Text="{Binding AnimationPlaybackSpeedText}"
+                                               Style="{StaticResource Text.Caption}"
+                                               VerticalAlignment="Center"
+                                               Margin="10,0,0,0" />
+                                </Grid>
+
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                              VerticalScrollBarVisibility="Disabled"
+                                              Margin="0,12,0,0"
+                                              AutomationProperties.Name="Animation frame timeline">
+                                    <ItemsControl ItemsSource="{Binding AnimationFrames}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Command="{Binding DataContext.SetAnimationFrameCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding Index}"
+                                                        PreviewMouseMove="AnimationFrame_PreviewMouseMove"
+                                                        Style="{StaticResource ChromeButton}"
+                                                        Padding="0"
+                                                        Margin="0,0,8,0"
+                                                        ToolTip="{Binding TimestampText}"
+                                                        AutomationProperties.Name="{Binding FrameText}">
+                                                    <Border Width="70"
+                                                            Padding="5"
+                                                            CornerRadius="{StaticResource Radius.Sm.CR}"
+                                                            BorderThickness="1">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+                                                                <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                                        <Setter Property="Background" Value="#1F89B4FA" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <StackPanel>
+                                                            <Image Source="{Binding Preview}"
+                                                                   Width="58"
+                                                                   Height="42"
+                                                                   Stretch="Uniform"
+                                                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                                                            <TextBlock Text="{Binding FrameText}"
+                                                                       Style="{StaticResource Text.Caption}"
+                                                                       TextAlignment="Center"
+                                                                       Margin="0,4,0,0" />
+                                                            <TextBlock Text="{Binding DelayText}"
+                                                                       Style="{StaticResource Text.Hint}"
+                                                                       TextAlignment="Center" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+
+                                <WrapPanel Margin="0,12,0,0">
+                                    <Button Command="{Binding CopyAnimationFrameCommand}"
+                                            Style="{StaticResource ChromeButton}"
+                                            Margin="0,0,8,8"
+                                            AutomationProperties.Name="Copy selected animation frame">
+                                        <TextBlock Text="Copy frame" />
+                                    </Button>
+                                    <Button Command="{Binding ExportAnimationFrameCommand}"
+                                            Style="{StaticResource ChromeButton}"
+                                            Margin="0,0,8,8"
+                                            AutomationProperties.Name="Export selected animation frame">
+                                        <TextBlock Text="Export frame" />
+                                    </Button>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
 
                     <Border Style="{StaticResource Divider}" />
 
