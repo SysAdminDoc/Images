@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-03C` is complete. `MainViewModel` now has an internal controller-injection seam and regression coverage for metadata, OCR, and update-check relay properties, reducing the risk that extracted controllers update state without notifying the UI.
+`IP-03D` is complete, closing `IP-03`. Refresh now remains available for a loaded folder even when the current file was removed externally, and state coverage now includes rename debounce, stale-folder recovery, command enablement, thumbnail cancellation, OCR cancellation, reload failure, and extracted controller/view-model relays.
 
 ## Next Focus
 
-The next recommended slice is `IP-03D`: extend the remaining UI-state coverage around rename debounce, command disabled/busy states, and stale external-change transitions.
+The next recommended slice is `IP-06A`: build the first compact diagnostics/status UX from existing system-info, codec, OCR, and storage services.
 
 ## Research Inputs
 
@@ -26,7 +26,7 @@ The next recommended slice is `IP-03D`: extend the remaining UI-state coverage a
 | --- | --- | --- | --- | --- | --- |
 | IP-01 | P0 | Planned | Test seams | Add seams around static/global services such as update checks, storage paths, thumbnail cache, shell integration, and clocks. | Unit tests can drive update-check retry policy, storage fallback, and thumbnail/cache behavior without real network or user profile state. |
 | IP-02 | P0 | Done | MainViewModel structure | Split the oversized main view model into focused controllers/services while preserving current behavior. | OCR, folder preview, clipboard import, reload, rename, metadata, and update-check logic are independently readable and have narrower dependencies. |
-| IP-03 | P0 | In progress | UI state tests | Add regression coverage for risky WPF state transitions. | Tests or smoke harnesses cover reload failure, external file changes, OCR cancellation, thumbnail cancellation, rename debounce, and disabled/busy states. |
+| IP-03 | P0 | Done | UI state tests | Add regression coverage for risky WPF state transitions. | Tests or smoke harnesses cover reload failure, external file changes, OCR cancellation, thumbnail cancellation, rename debounce, and disabled/busy states. |
 | IP-04 | P1 | Planned | Background tasks | Improve observability and ownership for fire-and-forget work. | Thumbnail generation, metadata reads, preloading, clipboard pruning, cache eviction, and update checks have clear cancellation/ownership and structured logging. |
 | IP-05 | P1 | Done | Update checks | Add focused update-check tests. | Timeout, network failure, HTTP failure, malformed release payload, newer release, current release, and trusted URL normalization are covered. |
 | IP-06 | P1 | Planned | Diagnostics UX | Add a compact diagnostics/status pane. | Users can inspect OCR, Ghostscript, Magick.NET, logs, storage paths, and last update-check state from the app without a terminal. |
@@ -59,11 +59,10 @@ The next recommended slice is `IP-03D`: extend the remaining UI-state coverage a
 
 ## Implementation Order
 
-1. Extend `IP-03` state coverage around rename debounce, command disabled/busy states, and stale external-change transitions.
-2. Build diagnostics/status UX from existing system-info, codec, OCR, and storage services under `IP-06`.
-3. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
-4. Scope `IP-16` design docs once near-term reliability and testability slices are stable.
-5. Scope `IP-17` after the next stable release artifact path is verified.
+1. Build diagnostics/status UX from existing system-info, codec, OCR, and storage services under `IP-06`.
+2. Iterate on first-run, long-running, and empty/error states once diagnostics surfaces are stable.
+3. Scope `IP-16` design docs once near-term reliability and testability slices are stable.
+4. Scope `IP-17` after the next stable release artifact path is verified.
 
 ## Progress Log
 
@@ -82,6 +81,7 @@ The next recommended slice is `IP-03D`: extend the remaining UI-state coverage a
 - 2026-05-05: Completed `IP-02H` and closed `IP-02` by extracting update-check UI state into `UpdateCheckController` and covering background skip, newer-release, current-release, error, and release-link opening outcomes.
 - 2026-05-05: Completed `IP-03B` by adding a deterministic folder-preview thumbnail loader seam and regression tests for clear and superseded-refresh cancellation paths.
 - 2026-05-05: Completed `IP-03C` by adding an internal `MainViewModel` controller-injection seam and tests that relay metadata, OCR, and update-check state through the view model.
+- 2026-05-05: Completed `IP-03D` and closed `IP-03` by keeping folder refresh enabled after external current-file removal and covering rename debounce, stale-folder recovery, and command enablement states.
 
 ## Verification Standard
 

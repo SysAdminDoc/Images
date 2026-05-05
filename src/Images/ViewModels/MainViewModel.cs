@@ -136,7 +136,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         SaveAsCopyCommand = new RelayCommand(SaveAsCopy, () => HasDisplayImage);
         CheckForUpdatesCommand = new RelayCommand(async () => await CheckForUpdatesAsync(userInitiated: true), () => true);
         OpenLatestUpdateCommand = new RelayCommand(_updateCheck.OpenLatestUpdate, () => HasUpdateAvailable);
-        RefreshCommand = new RelayCommand(RefreshFolder, () => HasImage);
+        RefreshCommand = new RelayCommand(RefreshFolder, () => CanRefreshFolder);
         CommitRenameCommand = new RelayCommand(() => { _renameTimer.Stop(); FlushPendingRename(); });
         CancelRenameCommand = new RelayCommand(CancelRenameEdit);
         UnlockExtensionCommand = new RelayCommand(() => IsExtensionUnlocked = !IsExtensionUnlocked);
@@ -312,6 +312,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CurrentFolder));
                 Raise(nameof(PositionText));
                 Raise(nameof(IsViewerEmpty));
+                Raise(nameof(CanRefreshFolder));
                 Raise(nameof(WindowTitle));
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -321,6 +322,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasImage => !string.IsNullOrEmpty(CurrentPath) && File.Exists(CurrentPath);
     public bool HasDisplayImage => CurrentImage is not null;
     public bool IsViewerEmpty => CurrentPath is null;
+    public bool CanRefreshFolder => CurrentPath is not null || _nav.Count > 0;
 
     // First-run gesture hint. Flipped true exactly once — the first time an image successfully
     // lands in the viewport. The view animates the pill in, then fades it out after 2.4 s.
@@ -717,6 +719,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(CurrentSortMode));
         Raise(nameof(FolderSortLabel));
         Raise(nameof(FolderSortTooltip));
+        Raise(nameof(CanRefreshFolder));
         CommandManager.InvalidateRequerySuggested();
     }
 
