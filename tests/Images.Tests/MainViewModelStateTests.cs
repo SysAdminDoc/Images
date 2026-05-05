@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.IO.Compression;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Windows.Media;
@@ -406,6 +407,33 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void OpenFile_WhenArchiveWasPartlyRead_ResumesLastPage()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var archive = WriteTwoPageCbz(temp.Path, "book.cbz");
+            var settings = CreateSettings(temp);
+
+            using (var viewModel = new MainViewModel(settings))
+            {
+                viewModel.OpenFile(archive);
+                viewModel.PageNumber = 2;
+                PumpUntil(() => !viewModel.IsOperationBusy);
+                Assert.Equal(2, viewModel.PageNumber);
+            }
+
+            using var resumed = new MainViewModel(settings);
+
+            resumed.OpenFile(archive);
+
+            Assert.Equal(2, resumed.PageNumber);
+            Assert.Equal("Page 2 / 2", resumed.PagePositionText);
+            Assert.Equal("Continued at page 2", resumed.ToastMessage);
+        });
+    }
+
+    [Fact]
     public void FirstRunGuidance_ExposesCapabilityAndPrivacySummaries()
     {
         RunOnSta(() =>
@@ -739,6 +767,28 @@ public sealed class MainViewModelStateTests
         using var stream = File.Create(path);
         encoder.Save(stream);
         return path;
+    }
+
+    private static string WriteTwoPageCbz(string folder, string fileName)
+    {
+        var path = Path.Combine(folder, fileName);
+        using var archive = ZipFile.Open(path, ZipArchiveMode.Create);
+        WritePngArchiveEntry(archive, "page1.png");
+        WritePngArchiveEntry(archive, "page2.png");
+        return path;
+    }
+
+    private static void WritePngArchiveEntry(ZipArchive archive, string name)
+    {
+        using var encoded = new MemoryStream();
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(CreateBitmap()));
+        encoder.Save(encoded);
+        encoded.Position = 0;
+
+        var entry = archive.CreateEntry(name, CompressionLevel.Fastest);
+        using var stream = entry.Open();
+        encoded.CopyTo(stream);
     }
 
     private static BitmapSource CreateBitmap()

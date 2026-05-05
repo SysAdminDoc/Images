@@ -1112,8 +1112,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _preload.Reset();
 
         ResetPageState();
+        var resumedArchivePage = ArchiveReadPositionService.GetLastPageIndex(_settings, path);
+        if (resumedArchivePage > 0)
+            PageIndex = resumedArchivePage;
         ClearSecondaryStatus();
-        LoadCurrent();
+        var loaded = LoadCurrent();
+        if (loaded && resumedArchivePage > 0 && PageIndex > 0 && HasMultiplePages)
+            Toast($"Continued at {PageLabel.ToLowerInvariant()} {PageIndex + 1}");
         _externalEditReload.Arm(path);
 
         // V20-02: persist containing folder to recent-folders MRU. Silent on any failure —
@@ -1360,6 +1365,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             PixelHeight = res.PixelHeight;
             DecoderUsed = res.DecoderUsed;
             ApplyPageSequence(res.Pages);
+            ArchiveReadPositionService.SaveLastPageIndex(_settings, path, PageIndex, PageCount);
             Rotation = 0;
             FlipHorizontal = false;
             FlipVertical = false;
