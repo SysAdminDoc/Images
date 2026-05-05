@@ -149,6 +149,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         UndoRenameCommand = new RelayCommand(p => UndoOne(p as RenameService.UndoEntry), p => p is RenameService.UndoEntry);
         AboutCommand = new RelayCommand(ShowAboutWindow);
         OpenRecentFolderCommand = new RelayCommand(p => OpenRecentFolder(p as string), p => p is string);
+        OpenRecentArchiveCommand = new RelayCommand(
+            async p => await OpenRecentArchiveAsync(p as ArchiveReadPositionService.ArchiveReadHistoryItem),
+            p => p is ArchiveReadPositionService.ArchiveReadHistoryItem && !IsOperationBusy);
         OpenPreviewItemCommand = new RelayCommand(p => OpenPreviewItem(p as FolderPreviewItem), p => p is FolderPreviewItem);
         RevealPreviewItemCommand = new RelayCommand(p => RevealPreviewItem(p as FolderPreviewItem), p => p is FolderPreviewItem);
         CopyPreviewPathCommand = new RelayCommand(p => CopyPreviewPath(p as FolderPreviewItem), p => p is FolderPreviewItem);
@@ -165,6 +168,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
         // panel renders prior-session folders before the user opens anything.
         RefreshRecentFolders();
+        RefreshArchiveReadHistory();
 
         _rename.Renamed += (_, e) => PushUndoEntry(e);
 
@@ -295,6 +299,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasPreviousPage => HasMultiplePages && PageIndex > 0;
     public bool HasNextPage => HasMultiplePages && PageIndex < PageCount - 1;
     public string PagePositionText => HasMultiplePages ? $"{PageLabel} {PageIndex + 1} / {PageCount}" : "";
+    public bool IsArchiveBook => CurrentPath is not null && SupportedImageFormats.IsArchive(CurrentPath) && HasMultiplePages;
+    public string CurrentArchiveProgressText => IsArchiveBook
+        ? $"Reading {Path.GetFileName(CurrentPath)} · {PagePositionText}"
+        : "";
     public int PageNumber
     {
         get => PageIndex + 1;
@@ -314,6 +322,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(HasNextPage));
         Raise(nameof(PagePositionText));
         Raise(nameof(PageNumber));
+        Raise(nameof(IsArchiveBook));
+        Raise(nameof(CurrentArchiveProgressText));
         CommandManager.InvalidateRequerySuggested();
     }
 
@@ -332,6 +342,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(IsViewerEmpty));
                 Raise(nameof(CanRefreshFolder));
                 Raise(nameof(WindowTitle));
+                Raise(nameof(IsArchiveBook));
+                Raise(nameof(CurrentArchiveProgressText));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -695,6 +707,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         foreach (var f in fresh) RecentFolders.Add(f);
     }
 
+    public ObservableCollection<ArchiveReadPositionService.ArchiveReadHistoryItem> RecentArchiveBooks { get; } = new();
+
+    private void RefreshArchiveReadHistory()
+    {
+        var fresh = ArchiveReadPositionService.GetRecentArchives(_settings);
+        RecentArchiveBooks.Clear();
+        foreach (var item in fresh) RecentArchiveBooks.Add(item);
+    }
+
     // -------------------- Recent renames --------------------
 
     public ObservableCollection<RenameService.UndoEntry> RecentRenames { get; } = new();
@@ -1028,6 +1049,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand UndoRenameCommand { get; }
     public ICommand AboutCommand { get; }
     public ICommand OpenRecentFolderCommand { get; }
+    public ICommand OpenRecentArchiveCommand { get; }
     public ICommand OpenPreviewItemCommand { get; }
     public ICommand RevealPreviewItemCommand { get; }
     public ICommand CopyPreviewPathCommand { get; }
@@ -1222,6 +1244,25 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    private async Task OpenRecentArchiveAsync(ArchiveReadPositionService.ArchiveReadHistoryItem? archive)
+    {
+        if (archive is null) return;
+
+        if (!File.Exists(archive.Path))
+        {
+            ShowSecondaryStatus(
+                "Archive no longer available",
+                "It was removed from book history because the file no longer exists.",
+                SecondaryStatusToneKind.Warning,
+                "\uE783");
+            Toast("Archive no longer exists");
+            RefreshArchiveReadHistory();
+            return;
+        }
+
+        await OpenFileWithOperationStatusAsync(archive.Path, "Opening archive book");
+    }
+
     private void PasteFromClipboard()
     {
         var result = _clipboardImport.Import();
@@ -1366,6 +1407,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             DecoderUsed = res.DecoderUsed;
             ApplyPageSequence(res.Pages);
             ArchiveReadPositionService.SaveLastPageIndex(_settings, path, PageIndex, PageCount);
+            if (SupportedImageFormats.IsArchive(path))
+                RefreshArchiveReadHistory();
             Rotation = 0;
             FlipHorizontal = false;
             FlipVertical = false;

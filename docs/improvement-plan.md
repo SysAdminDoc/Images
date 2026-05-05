@@ -47,7 +47,7 @@ The improvement-plan backlog is complete. Continue with the source-derived works
 | ID | Priority | Status | Workstream | Source signal | Planned sequence |
 | --- | --- | --- | --- | --- | --- |
 | RS-01 | P2 | Planned | Local comparison mode | nomacs synchronized views and opacity overlay | Design doc, UI-state tests, local 2-up compare, linked pan/zoom, linked next/previous, overlay opacity. |
-| RS-02 | P2 | In progress | Archive/book navigation | NeeView book model, PicView archive navigation, Tacent folder continuity | ZIP/CBZ read-only pages, page scrubber, and remembered read position shipped; next: history panel, cover handling, archive-only controls, additional reader comfort, and dependency review for RAR/7z. |
+| RS-02 | P2 | In progress | Archive/book navigation | NeeView book model, PicView archive navigation, Tacent folder continuity | ZIP/CBZ read-only pages, page scrubber, remembered read position, and side-panel book history shipped; next: cover handling, archive-only controls, additional reader comfort, and dependency review for RAR/7z. |
 | RS-03 | P0 | In progress | Folder sorting and Explorer fidelity | ImageGlass Explorer sort sync, NeeView/Geeqie folder models | App-owned sort modes first, visible sort control, sort-state tests, later Explorer saved-search/sort investigation. |
 | RS-04 | P2 | Planned | Metadata culling workflow | Geeqie XMP keywords/search, gThumb catalogs/comments, Tacent metadata sort | Sidecar decision, rating/reject model, folder filters, keep/reject/move actions, undo and no-original-write defaults. |
 | RS-05 | P1 | Done | Keyboard-first peek mode | QuickLook Spacebar preview, qView/JPEGView minimal chrome | `--peek` foundation, startup timing logs, close-on-Esc smoke script, parser regression tests, and shell-helper documentation are complete. |
@@ -104,6 +104,7 @@ The improvement-plan backlog is complete. Continue with the source-derived works
 - 2026-05-05: Continued `RS-02` / `V20-33` by adding a shared multi-page scrubber for archive books and existing multi-page documents, with view-model regression coverage for direct page jumps.
 - 2026-05-05: Completed `RS-05` by adding local startup and first-image timing logs for normal/peek launches, exact `--peek` parser tests, and shell-helper documentation with a close-on-Escape manual smoke script.
 - 2026-05-05: Continued `RS-02` / `V20-36` by adding local remembered read position and continue-reading feedback for ZIP/CBZ archive books, with settings-key and view-model resume coverage.
+- 2026-05-05: Continued `RS-02` / `V20-33` by adding a persisted side-panel book history for ZIP/CBZ archives, including page progress, missing-file recovery feedback, and service/view-model coverage.
 
 ## Verification Standard
 
