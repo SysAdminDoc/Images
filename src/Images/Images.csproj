@@ -9,9 +9,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>Images</AssemblyName>
     <RootNamespace>Images</RootNamespace>
-    <Version>0.2.9</Version>
-    <FileVersion>0.2.9.0</FileVersion>
-    <AssemblyVersion>0.2.9.0</AssemblyVersion>
+    <Version>0.2.10</Version>
+    <FileVersion>0.2.10.0</FileVersion>
+    <AssemblyVersion>0.2.10.0</AssemblyVersion>
     <DebugType>embedded</DebugType>
     <Deterministic>true</Deterministic>
     <Product>Images</Product>
