@@ -22,6 +22,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly PhotoMetadataController _photoMetadata;
     private readonly OcrWorkflowController _ocrWorkflow;
     private readonly ExternalEditReloadController _externalEditReload;
+    private readonly UpdateCheckController _updateCheck;
     private readonly RecycleBinDeleteService _recycleBinDelete;
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
@@ -67,6 +68,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             () => _isDisposed,
             ReloadCurrentSilent,
             Toast);
+        _updateCheck = new UpdateCheckController(
+            Toast,
+            openTarget: ShellIntegration.OpenShellTarget,
+            invalidateCommands: CommandManager.InvalidateRequerySuggested);
+        _updateCheck.PropertyChanged += (_, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.PropertyName))
+                Raise(e.PropertyName);
+        };
 
         _renameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(600) };
         _renameTimer.Tick += (_, _) => { _renameTimer.Stop(); FlushPendingRename(); };
@@ -102,7 +112,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         PrintCommand = new RelayCommand(PrintCurrent, () => HasDisplayImage);
         SaveAsCopyCommand = new RelayCommand(SaveAsCopy, () => HasDisplayImage);
         CheckForUpdatesCommand = new RelayCommand(async () => await CheckForUpdatesAsync(userInitiated: true), () => true);
-        OpenLatestUpdateCommand = new RelayCommand(OpenLatestUpdate, () => HasUpdateAvailable);
+        OpenLatestUpdateCommand = new RelayCommand(_updateCheck.OpenLatestUpdate, () => HasUpdateAvailable);
         RefreshCommand = new RelayCommand(RefreshFolder, () => HasImage);
         CommitRenameCommand = new RelayCommand(() => { _renameTimer.Stop(); FlushPendingRename(); });
         CancelRenameCommand = new RelayCommand(CancelRenameEdit);
@@ -1382,62 +1392,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     // P-04: checks GitHub Releases API for a newer tag. userInitiated=true fires regardless of
     // the 24-h throttle (manual check from the About dialog); userInitiated=false obeys the
     // throttle (silent startup check).
-    public async Task CheckForUpdatesAsync(bool userInitiated)
-    {
-        if (!userInitiated && !UpdateCheckService.IsDueForBackgroundCheck())
-            return;
+    public Task CheckForUpdatesAsync(bool userInitiated)
+        => _updateCheck.CheckAsync(userInitiated);
 
-        var result = await UpdateCheckService.CheckAsync().ConfigureAwait(true);
-        UpdateCheckService.RecordLastCheckedIfAppropriate(result);
+    public string? LatestUpdateTag => _updateCheck.LatestUpdateTag;
 
-        if (result.Error is not null)
-        {
-            if (userInitiated) Toast($"Update check failed: {result.Error}");
-            return;
-        }
+    public string? LatestUpdateUrl => _updateCheck.LatestUpdateUrl;
 
-        if (result.NewerAvailable)
-        {
-            Toast($"New version {result.LatestTag} available");
-            LatestUpdateTag = result.LatestTag;
-            LatestUpdateUrl = result.LatestHtmlUrl;
-        }
-        else if (userInitiated)
-        {
-            Toast("You're on the latest version");
-        }
-    }
-
-    private string? _latestUpdateTag;
-    public string? LatestUpdateTag
-    {
-        get => _latestUpdateTag;
-        private set
-        {
-            if (Set(ref _latestUpdateTag, value))
-            {
-                Raise(nameof(HasUpdateAvailable));
-                CommandManager.InvalidateRequerySuggested();
-            }
-        }
-    }
-
-    public string? LatestUpdateUrl { get; private set; }
-
-    public bool HasUpdateAvailable => !string.IsNullOrEmpty(LatestUpdateTag);
-
-    private void OpenLatestUpdate()
-    {
-        if (string.IsNullOrWhiteSpace(LatestUpdateUrl)) return;
-        try
-        {
-            ShellIntegration.OpenShellTarget(LatestUpdateUrl);
-        }
-        catch (Exception ex)
-        {
-            Toast($"Could not open release page: {ex.Message}");
-        }
-    }
+    public bool HasUpdateAvailable => _updateCheck.HasUpdateAvailable;
 
     // E6: save a copy of the decoded first frame to a user-chosen path. Rotation and flip are
     // not baked in, matching Windows Photos: temporary viewing transforms stay temporary.
