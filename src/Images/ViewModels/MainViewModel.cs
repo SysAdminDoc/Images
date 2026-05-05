@@ -18,6 +18,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly PreloadService _preload = new();
     private readonly OcrService _ocr = new();
     private readonly Dispatcher _uiDispatcher = Dispatcher.CurrentDispatcher;
+    private readonly ClipboardImportService _clipboardImport = new();
     private readonly FolderPreviewController _folderPreview;
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
@@ -34,10 +35,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private CancellationTokenSource? _ocrCts;
     private int _ocrGeneration;
     private const int MetadataTimeoutSeconds = 5;
-    private const int ClipboardImageMaxCount = 200;
-    private const long ClipboardImageMaxBytes = 256L * 1024 * 1024;
-    private static readonly TimeSpan ClipboardImageMaxAge = TimeSpan.FromDays(7);
-
     private readonly DispatcherTimer _hintTimer;
     private System.IO.FileSystemWatcher? _externalEditWatcher;
     private readonly DispatcherTimer _externalEditDebounce;
@@ -1010,109 +1007,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void PasteFromClipboard()
     {
-        // File list (Explorer copy/cut) — open the first supported item.
-        if (System.Windows.Clipboard.ContainsFileDropList())
-        {
-            var files = System.Windows.Clipboard.GetFileDropList();
-            foreach (string? f in files)
-            {
-                if (f is not null && SupportedImageFormats.IsSupported(f) && File.Exists(f))
-                {
-                    OpenFile(f);
-                    return;
-                }
-            }
-            Toast("No supported image in the clipboard file list");
-            return;
-        }
+        var result = _clipboardImport.Import();
+        if (result.Path is not null)
+            OpenFile(result.Path);
 
-        // Pixel data (screenshot, web image, etc.) — save to a clipboard-specific temp folder
-        // so the folder scanner never mixes these with other files in %TEMP%.
-        if (System.Windows.Clipboard.ContainsImage())
-        {
-            var bmp = System.Windows.Clipboard.GetImage();
-            if (bmp is null) { Toast("Could not read clipboard image data"); return; }
-
-            var clipDir = AppStorage.TryGetAppDirectory("clipboard");
-            if (clipDir is null) { Toast("Paste failed: could not create temp folder"); return; }
-
-            try
-            {
-                _ = Task.Run(() => PruneClipboardImages(clipDir));
-
-                var stamp = DateTimeOffset.UtcNow.ToString("yyyyMMdd-HHmmssfff", System.Globalization.CultureInfo.InvariantCulture);
-                var tempPath = Path.Combine(clipDir, $"clipboard-{stamp}-{Guid.NewGuid():N}.png");
-
-                var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
-                encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bmp));
-                using (var stream = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.Read))
-                    encoder.Save(stream);
-
-                OpenFile(tempPath);
-                Toast("Pasted from clipboard");
-            }
-            catch (Exception ex)
-            {
-                Toast($"Paste failed: {ex.Message}");
-            }
-            return;
-        }
-
-        Toast("Nothing image-like in the clipboard");
-    }
-
-    private static void PruneClipboardImages(string clipDir)
-    {
-        try
-        {
-            if (!Directory.Exists(clipDir)) return;
-            var cutoff = DateTime.UtcNow - ClipboardImageMaxAge;
-            var files = Directory.EnumerateFiles(clipDir, "clipboard-*.png", SearchOption.TopDirectoryOnly)
-                .Select(path => new FileInfo(path))
-                .Where(file => file.Exists)
-                .OrderByDescending(file => file.LastWriteTimeUtc)
-                .ToList();
-
-            long totalBytes = 0;
-            for (var i = 0; i < files.Count; i++)
-            {
-                var file = files[i];
-                var length = file.Length;
-                totalBytes += length;
-                if (file.LastWriteTimeUtc < cutoff || i >= ClipboardImageMaxCount)
-                {
-                    if (TryDeleteDisposableFile(file.FullName))
-                        totalBytes -= length;
-                }
-            }
-
-            if (totalBytes <= ClipboardImageMaxBytes) return;
-            foreach (var file in files.OrderBy(file => file.LastWriteTimeUtc))
-            {
-                if (totalBytes <= ClipboardImageMaxBytes) break;
-                var length = file.Length;
-                if (TryDeleteDisposableFile(file.FullName))
-                    totalBytes -= length;
-            }
-        }
-        catch (Exception ex)
-        {
-            _log.LogDebug(ex, "Clipboard image pruning failed for {Directory}", clipDir);
-        }
-    }
-
-    private static bool TryDeleteDisposableFile(string path)
-    {
-        try
-        {
-            if (!File.Exists(path)) return false;
-            File.Delete(path);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        if (!string.IsNullOrWhiteSpace(result.Message))
+            Toast(result.Message);
     }
 
     private void OpenInDefaultApp()
