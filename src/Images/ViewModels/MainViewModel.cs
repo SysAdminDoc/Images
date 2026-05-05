@@ -149,6 +149,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         CancelCropCommand = new RelayCommand(CancelCropMode, () => IsCropMode || HasCropSelection);
         SetCropAspectPresetCommand = new RelayCommand(SetCropAspectPreset);
         OpenResizeDialogCommand = new RelayCommand(OpenResizeDialog, () => CanUseResize);
+        OpenAdjustmentsCommand = new RelayCommand(OpenAdjustments, () => CanUseAdjustments);
         CopyInspectorHexCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hex, "HEX"), () => HasInspectorSample);
         CopyInspectorRgbCommand = new RelayCommand(() => CopyInspectorValue(s => s.Rgb, "RGB"), () => HasInspectorSample);
         CopyInspectorHsvCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hsv, "HSV"), () => HasInspectorSample);
@@ -538,6 +539,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool CanUseInspector => HasDisplayImage && !IsOperationBusy;
     public bool CanUseCrop => HasImage && HasDisplayImage && !IsOperationBusy && !IsArchiveBook && !IsPeekMode;
     private bool CanUseResize => CanUseCrop;
+    private bool CanUseAdjustments => CanUseCrop;
     public bool IsViewerEmpty => CurrentPath is null;
     public bool CanRefreshFolder => (CurrentPath is not null || _nav.Count > 0) && !IsOperationBusy;
 
@@ -1725,6 +1727,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand CancelCropCommand { get; }
     public ICommand SetCropAspectPresetCommand { get; }
     public ICommand OpenResizeDialogCommand { get; }
+    public ICommand OpenAdjustmentsCommand { get; }
     public ICommand CopyInspectorHexCommand { get; }
     public ICommand CopyInspectorRgbCommand { get; }
     public ICommand CopyInspectorHsvCommand { get; }
@@ -2893,6 +2896,32 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             Toast(result.Message);
         }
+    }
+
+    private void OpenAdjustments()
+    {
+        if (!CanUseAdjustments || CurrentPath is null)
+            return;
+
+        var imagePath = CurrentPath;
+        var window = new Images.AdjustmentsWindow(
+            imagePath,
+            plan =>
+            {
+                if (!File.Exists(imagePath))
+                {
+                    Toast("Adjustment failed: image is no longer available");
+                    return;
+                }
+
+                var result = _editStack.AppendOperation(imagePath, "adjust", plan.ToEditParameters(), plan.Label);
+                Toast(result.Success ? "Adjustment added to edit history" : result.Message);
+            })
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        window.Show();
     }
 
     private void CancelCropMode()

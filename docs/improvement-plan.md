@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V30-03` is complete. Images now has a non-destructive resize dialog with percent, pixel, long-edge, and short-edge sizing, aspect lock, Lanczos-3/Mitchell/Bicubic filters, live output-dimension preview, edit-stack persistence, and Save-a-copy application.
+Roadmap `V30-04` is complete. Images now has a modeless non-destructive adjustment workbench with live preview, reset, levels/gamma, sigmoidal curve, hue/saturation/lightness sliders, Enter-to-apply behavior, edit-stack persistence, and Save-a-copy application.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the remaining editor roadmap: approved lossless JPEG writeback runtime integration, richer selection tools, live adjustment contracts, and the explicit content-aware inpaint runtime/model choice.
+The improvement-plan backlog is complete. Continue with the remaining editor roadmap: approved lossless JPEG writeback runtime integration, local exposure brush tooling, richer selection tools, and the explicit content-aware inpaint runtime/model choice.
 
 ## Research Inputs
 
@@ -78,6 +78,7 @@ The improvement-plan backlog is complete. Continue with the remaining editor roa
 - 2026-05-05: Completed `IP-02E` by extracting photo metadata HUD loading into `PhotoMetadataController`, adding owned cancellation/status handling, and covering success, superseded-result, and timeout outcomes with dispatcher-backed tests.
 - 2026-05-05: Completed `IP-02F` by extracting external-edit watcher/debounce/reload feedback into `ExternalEditReloadController` and covering coalesced reloads, failed reload notifications, disarm cancellation, and watcher creation failure.
 - 2026-05-05: Completed `IP-02G` by extracting OCR busy/active overlay workflow into `OcrWorkflowController` and covering no-image, success, no-text, cancellation, and stale-result outcomes.
+- 2026-05-05: Completed roadmap `V30-04` by adding a modeless non-destructive adjustment workbench, live Magick.NET preview rendering, XMP edit-stack persistence, Save-a-copy application, command routing, and regression coverage for adjustment export.
 - 2026-05-05: Completed roadmap `V40-63` by adding a private offline tag relationship graph with namespace, alias, parent, sidecar import/export, UI entry points, and regression coverage.
 - 2026-05-05: Completed roadmap `V40-64` by adding a local import inbox with duplicate-aware staging, tag/rating sidecars, optional GPS stripping, Recycle Bin cleanup, and copy/move import.
 - 2026-05-05: Completed roadmap `E10` by adding an inspectable JSON macro action runner with dry-run execution, load/save, export/resize/convert copies, GPS stripping, rename patterns, and service coverage.
