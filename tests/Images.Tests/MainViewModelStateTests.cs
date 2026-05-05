@@ -198,6 +198,63 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void OverlayMode_RequiresImageAndKeepsClickThroughExitSafe()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var path = WritePng(temp.Path, "trace.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            Assert.False(viewModel.CanUseOverlayMode);
+            Assert.False(viewModel.ToggleOverlayModeCommand.CanExecute(null));
+
+            viewModel.OpenFile(path);
+
+            Assert.True(viewModel.CanUseOverlayMode);
+            Assert.True(viewModel.ToggleOverlayModeCommand.CanExecute(null));
+
+            viewModel.ToggleOverlayModeCommand.Execute(null);
+
+            Assert.True(viewModel.IsPinnedOverlayMode);
+            Assert.True(viewModel.ShowOverlayBanner);
+            Assert.Equal("Overlay on", viewModel.OverlayModeText);
+            Assert.Equal("Turn off", viewModel.OverlayToggleText);
+            Assert.Equal("68%", viewModel.OverlayOpacityText);
+            Assert.Contains("Exit overlay", viewModel.OverlayStatusText);
+
+            viewModel.OverlayOpacity = 2;
+            Assert.Equal(1.0, viewModel.OverlayOpacity);
+            Assert.Equal("100%", viewModel.OverlayOpacityText);
+
+            viewModel.IsOverlayClickThrough = true;
+            Assert.True(viewModel.IsOverlayClickThrough);
+
+            viewModel.SetOverlayExitHotKeyAvailable(false);
+
+            Assert.False(viewModel.OverlayExitHotKeyAvailable);
+            Assert.False(viewModel.IsOverlayClickThrough);
+            Assert.Contains("hotkey", viewModel.OverlayStatusText);
+            Assert.Contains("taskbar", viewModel.OverlayExitText);
+
+            viewModel.IsOverlayClickThrough = true;
+            Assert.False(viewModel.IsOverlayClickThrough);
+
+            viewModel.SetOverlayExitHotKeyAvailable(true);
+            viewModel.IsOverlayClickThrough = true;
+
+            Assert.True(viewModel.IsOverlayClickThrough);
+            Assert.Contains(OverlayWindowService.ExitHotKeyText, viewModel.OverlayStatusText);
+
+            viewModel.ExitOverlayModeCommand.Execute(null);
+
+            Assert.False(viewModel.IsPinnedOverlayMode);
+            Assert.False(viewModel.IsOverlayClickThrough);
+            Assert.False(viewModel.ShowOverlayBanner);
+        });
+    }
+
+    [Fact]
     public void PasteFromClipboardCommand_SavesImageAndOpensIt()
     {
         RunOnSta(() =>

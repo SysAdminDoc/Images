@@ -15,6 +15,8 @@ public partial class MainWindow : Window
 {
     private MainViewModel Vm => (MainViewModel)DataContext;
     private PixelCoordinate? _inspectorSelectionStart;
+    private HwndSource? _hwndSource;
+    private bool _overlayExitHotKeyRegistered;
 
     public MainWindow()
     {
@@ -24,7 +26,12 @@ public partial class MainWindow : Window
         // correctly; save on Closing.
         RestoreWindowState();
         Closing += SaveWindowState;
-        Closed += (_, _) => Vm.Dispose();
+        Closed += (_, _) =>
+        {
+            UnregisterOverlayExitHotKey();
+            _hwndSource?.RemoveHook(WndProc);
+            Vm.Dispose();
+        };
         Vm.FolderPreviewItems.CollectionChanged += (_, _) => QueueCenterCurrentPreviewItems();
         Vm.PropertyChanged += (_, e) =>
         {
@@ -35,6 +42,12 @@ public partial class MainWindow : Window
             if (e.PropertyName is nameof(MainViewModel.ShowGallery))
             {
                 QueueCenterCurrentPreviewItems();
+            }
+            if (e.PropertyName is nameof(MainViewModel.IsPinnedOverlayMode)
+                or nameof(MainViewModel.IsOverlayClickThrough)
+                or nameof(MainViewModel.OverlayOpacity))
+            {
+                ApplyOverlayWindowState();
             }
         };
 
@@ -160,6 +173,62 @@ public partial class MainWindow : Window
         // default light caption. Best-effort — pre-20H1 no-ops cleanly via the service.
         var hwnd = new WindowInteropHelper(this).Handle;
         WindowChrome.ApplyDarkCaption(hwnd);
+        _hwndSource = HwndSource.FromHwnd(hwnd);
+        _hwndSource?.AddHook(WndProc);
+        ApplyOverlayWindowState();
+    }
+
+    private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (msg == OverlayWindowService.WmHotKey && wParam.ToInt32() == OverlayWindowService.ExitHotKeyId)
+        {
+            Vm.ExitOverlayModeCommand.Execute(null);
+            handled = true;
+        }
+
+        return IntPtr.Zero;
+    }
+
+    private void ApplyOverlayWindowState()
+    {
+        if (Vm.IsPeekMode)
+            return;
+
+        Topmost = Vm.IsPinnedOverlayMode;
+        Opacity = Vm.IsPinnedOverlayMode ? Vm.OverlayOpacity : 1.0;
+
+        var hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd == IntPtr.Zero)
+            return;
+
+        var wantsClickThrough = Vm.IsPinnedOverlayMode && Vm.IsOverlayClickThrough;
+        EnsureOverlayExitHotKey(hwnd, Vm.IsPinnedOverlayMode);
+        OverlayWindowService.ApplyClickThrough(hwnd, wantsClickThrough && _overlayExitHotKeyRegistered);
+        Vm.SetOverlayExitHotKeyAvailable(!Vm.IsPinnedOverlayMode || _overlayExitHotKeyRegistered);
+    }
+
+    private void EnsureOverlayExitHotKey(IntPtr hwnd, bool shouldRegister)
+    {
+        if (shouldRegister)
+        {
+            if (_overlayExitHotKeyRegistered)
+                return;
+
+            _overlayExitHotKeyRegistered = OverlayWindowService.RegisterExitHotKey(hwnd);
+            return;
+        }
+
+        UnregisterOverlayExitHotKey();
+    }
+
+    private void UnregisterOverlayExitHotKey()
+    {
+        if (!_overlayExitHotKeyRegistered)
+            return;
+
+        var hwnd = new WindowInteropHelper(this).Handle;
+        OverlayWindowService.UnregisterExitHotKey(hwnd);
+        _overlayExitHotKeyRegistered = false;
     }
 
     public void OpenPath(string path) => Vm.OpenFile(path);
@@ -380,6 +449,10 @@ public partial class MainWindow : Window
                 break;
             case Key.F11:
                 ToggleFullscreen();
+                e.Handled = true;
+                break;
+            case Key.O when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
+                Vm.ExitOverlayModeCommand.Execute(null);
                 e.Handled = true;
                 break;
             case Key.O when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:

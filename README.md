@@ -36,6 +36,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Togglable folder filmstrip** — a compact, virtualized, cached thumbnail rail spans the current folder, keeps the current item centered, supports right-click Open/Reveal/Copy actions, and falls back to the side panel when hidden.
 - **Gallery workbench** — press `G` to open a multi-column thumbnail grid for the current folder with quick filtering, sort shortcuts, context actions, selection, and Enter-to-load.
 - **Reference board mode** — press `Ctrl+B` to open a separate local board seeded from the current image. Drop supported files, arrange image cards, add notes and group frames, pin the board above other windows, zoom the canvas, and export the composed board as PNG.
+- **Pinned overlay mode** — pin the current image above other windows for tracing or design comparison, tune opacity in the side panel, and optionally enable click-through only when the `Ctrl+Alt+O` global exit hotkey is registered.
 - **Pixel inspector** — enable Inspector in the side panel to sample coordinates and HEX/RGB/HSV/alpha values, copy color values, Shift-drag pixel measurements, and switch to nearest-neighbor preview scaling for pixel art.
 - **Animation frame workbench** — animated GIF/APNG/WebP files get a side-panel timeline with a scrubber, frame stepping, playback-speed control, copy-current-frame, PNG frame export, and drag-out selected frames.
 - **Photo metadata at a glance** — the Details panel and optional `I` metadata HUD surface embedded EXIF date, camera, lens, exposure, focal length, and GPS coordinates when present, without opening a separate info window or sending location data anywhere.
@@ -99,6 +100,7 @@ OCR depends on Microsoft Windows OCR optional capabilities. The installer instal
 | **F5** | Rescan current directory |
 | **G** | Toggle gallery workbench |
 | **Ctrl+B** | Open reference board |
+| **Ctrl+Alt+O** | Exit pinned overlay mode |
 | **Ctrl+Left / Ctrl+Right** | Step animated image frames |
 | **Ctrl+Space** | Play/pause animated image |
 | **I** | Toggle metadata HUD |
@@ -127,6 +129,7 @@ src/Images/
 │   ├── ArchiveBookService.cs   # Read-only ZIP/CBZ, RAR/CBR, and 7z/CB7 page discovery
 │   ├── AnimationWorkbenchService.cs # Frame timing, labels, PNG export, and drag-file creation
 │   ├── ReferenceBoardLayoutService.cs # Board placement, clamping, and export bounds
+│   ├── OverlayWindowService.cs # Native always-on-top/click-through overlay window helpers
 │   ├── PixelInspectorService.cs # Pixel coordinate mapping, sampling, color formatting, and measurement math
 │   ├── ImageExportService.cs   # Codec-aware Save a copy / conversion output
 │   ├── ImageMetadataService.cs # Read-only EXIF summary for the Details panel and HUD
