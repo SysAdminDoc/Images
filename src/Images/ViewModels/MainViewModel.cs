@@ -134,8 +134,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ReloadCommand = new RelayCommand(async () => await ReloadCurrentAsync(), () => CanUseImageCommands);
         PrintCommand = new RelayCommand(PrintCurrent, () => CanUseDisplayImageCommands);
         SaveAsCopyCommand = new RelayCommand(async () => await SaveAsCopyAsync(), () => CanUseDisplayImageCommands);
-        CheckForUpdatesCommand = new RelayCommand(async () => await CheckForUpdatesAsync(userInitiated: true), () => true);
-        OpenLatestUpdateCommand = new RelayCommand(_updateCheck.OpenLatestUpdate, () => HasUpdateAvailable);
+        CheckForUpdatesCommand = new RelayCommand(async () => await CheckForUpdatesAsync(userInitiated: true), () => !IsCheckingForUpdates);
+        OpenLatestUpdateCommand = new RelayCommand(_updateCheck.OpenLatestUpdate, () => HasUpdateAvailable && !IsCheckingForUpdates);
         RefreshCommand = new RelayCommand(RefreshFolder, () => CanRefreshFolder);
         CommitRenameCommand = new RelayCommand(() => { _renameTimer.Stop(); FlushPendingRename(); });
         CancelRenameCommand = new RelayCommand(CancelRenameEdit);
@@ -1490,6 +1490,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public string? LatestUpdateUrl => _updateCheck.LatestUpdateUrl;
 
     public bool HasUpdateAvailable => _updateCheck.HasUpdateAvailable;
+
+    public bool IsCheckingForUpdates => _updateCheck.IsCheckingForUpdates;
+
+    public string UpdateCheckStatusText => _updateCheck.UpdateCheckStatusText;
 
     private void BeginOperationStatus(string title, string detail)
     {

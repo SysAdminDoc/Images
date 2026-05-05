@@ -451,6 +451,52 @@ public sealed class MainViewModelStateTests
         });
     }
 
+    [Fact]
+    public void UpdateCheckState_RelaysBusyStatusThroughMainViewModel()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var gate = new TaskCompletionSource<UpdateCheckService.CheckResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var update = new UpdateCheckController(
+                notify: _ => { },
+                checkAsync: _ => gate.Task);
+            var changed = new List<string>();
+            using var viewModel = new MainViewModel(
+                CreateSettings(temp),
+                clipboardImport: null,
+                navigator: null,
+                recycleBinDelete: null,
+                folderPreview: null,
+                photoMetadata: null,
+                ocrWorkflow: null,
+                externalEditReload: null,
+                updateCheck: update);
+
+            viewModel.PropertyChanged += RecordChangedProperty(changed);
+
+            var running = viewModel.CheckForUpdatesAsync(userInitiated: true);
+
+            Assert.True(viewModel.IsCheckingForUpdates);
+            Assert.Equal("Checking GitHub Releases...", viewModel.UpdateCheckStatusText);
+            Assert.False(viewModel.CheckForUpdatesCommand.CanExecute(null));
+            Assert.Contains(nameof(MainViewModel.IsCheckingForUpdates), changed);
+            Assert.Contains(nameof(MainViewModel.UpdateCheckStatusText), changed);
+
+            gate.SetResult(new UpdateCheckService.CheckResult(
+                NewerAvailable: false,
+                LatestTag: "v0.2.9",
+                LatestHtmlUrl: null,
+                Error: null,
+                ShouldUpdateLastChecked: true));
+            running.GetAwaiter().GetResult();
+
+            Assert.False(viewModel.IsCheckingForUpdates);
+            Assert.Equal("", viewModel.UpdateCheckStatusText);
+            Assert.True(viewModel.CheckForUpdatesCommand.CanExecute(null));
+        });
+    }
+
     private static MainViewModel CreateViewModel(TestDirectory temp, ClipboardImportService? clipboardImport = null)
         => new(CreateSettings(temp), clipboardImport);
 

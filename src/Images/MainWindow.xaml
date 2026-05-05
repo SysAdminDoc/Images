@@ -1573,6 +1573,48 @@
                         </Grid>
                     </Border>
 
+                    <Border Style="{StaticResource Card}"
+                            BorderBrush="{StaticResource AccentBrush}"
+                            Margin="0,0,0,20"
+                            Visibility="{Binding IsCheckingForUpdates, Converter={StaticResource BoolToVis}}"
+                            AutomationProperties.Name="Update check status"
+                            AutomationProperties.LiveSetting="Polite">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0"
+                                    Width="32"
+                                    Height="32"
+                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                    BorderThickness="1"
+                                    Background="#1F89B4FA"
+                                    BorderBrush="{StaticResource AccentBrush}"
+                                    VerticalAlignment="Top"
+                                    Margin="0,0,12,0">
+                                <TextBlock Text="&#xE895;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="13"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Checking for updates"
+                                           Style="{StaticResource Text.Caption}"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}" />
+                                <TextBlock Text="{Binding UpdateCheckStatusText}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,4,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
                     <!-- FOLDER PREVIEW fallback — remains in the side panel when the bottom
                          filmstrip is hidden so thumbnail jumping is never lost. -->
                     <StackPanel Visibility="{Binding ShowSideFolderPreview, Converter={StaticResource BoolToVis}}">

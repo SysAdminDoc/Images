@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-`IP-08A` is complete. Manual reload, Save a copy, and GPS-strip work now share a visible operation status, yield once so the status can paint before synchronous viewer work, and disable mutating image actions while the operation is active.
+`IP-08B` is complete. Manual and background update checks now expose in-flight state through `UpdateCheckController`, relay that state through `MainViewModel`, disable duplicate checks, and show a compact side-panel status while GitHub Releases is being contacted.
 
 ## Next Focus
 
-The next recommended slice is `IP-08B`: extend the same operation-status pattern into remaining decode and background state edges, especially document-page loads, background update-check visibility, and any secondary operations that still only report after completion.
+The next recommended slice is `IP-08C`: extend operation-status coverage to document and multi-page decode/navigation so slow page turns and document previews do not feel silent.
 
 ## Research Inputs
 
@@ -86,6 +86,7 @@ The next recommended slice is `IP-08B`: extend the same operation-status pattern
 - 2026-05-05: Completed `IP-06B` and closed `IP-06` by adding diagnostics-local actions for copying system info, copying the codec report, opening logs, and opening the app data folder.
 - 2026-05-05: Completed `IP-07A` and closed `IP-07` by turning the empty first-run card into capability-backed guidance for privacy, format support, OCR readiness, document previews, and Settings/Diagnostics recovery links.
 - 2026-05-05: Completed `IP-08A` by adding shared operation-status feedback for manual reload, Save a copy, and GPS-strip work, with command disabled-state coverage for mutating image actions during active operations.
+- 2026-05-05: Completed `IP-08B` by adding update-check busy/status state to `UpdateCheckController`, relaying it through the main view model, suppressing duplicate manual checks, and showing a side-panel live status while GitHub Releases is contacted.
 
 ## Verification Standard
 
