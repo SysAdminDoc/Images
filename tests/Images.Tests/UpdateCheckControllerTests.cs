@@ -110,6 +110,22 @@ public sealed class UpdateCheckControllerTests
     }
 
     [Fact]
+    public async Task CheckAsync_WhenManualCheckRuns_RecordsTrackedUpdateTask()
+    {
+        var before = SnapshotFor("update-check:manual");
+        var controller = new UpdateCheckController(
+            notify: _ => { },
+            checkAsync: _ => Task.FromResult(CurrentResult()));
+
+        await controller.CheckAsync(userInitiated: true);
+
+        var after = SnapshotFor("update-check:manual");
+        Assert.Equal(before.Started + 1, after.Started);
+        Assert.Equal(before.Completed + 1, after.Completed);
+        Assert.Equal(0, after.Running);
+    }
+
+    [Fact]
     public async Task CheckAsync_WhenManualCheckFails_NotifiesErrorAndRecordsPolicy()
     {
         var recorded = new List<UpdateCheckService.CheckResult>();
@@ -217,4 +233,9 @@ public sealed class UpdateCheckControllerTests
             LatestHtmlUrl: null,
             Error: error,
             ShouldUpdateLastChecked: shouldUpdateLastChecked);
+
+    private static BackgroundTaskSnapshot SnapshotFor(string name)
+        => BackgroundTaskTracker.SnapshotByName.TryGetValue(name, out var snapshot)
+            ? snapshot
+            : default;
 }

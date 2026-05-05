@@ -77,6 +77,42 @@ public sealed class BackgroundTaskTrackerTests
     }
 
     [Fact]
+    public async Task RunAsync_WhenActionCompletes_RecordsCompletionAndReturnsResult()
+    {
+        var name = TestTaskName();
+
+        var result = await BackgroundTaskTracker.RunAsync(
+            name,
+            () => Task.FromResult(42));
+
+        var snapshot = SnapshotFor(name);
+        Assert.Equal(42, result);
+        Assert.Equal(1, snapshot.Started);
+        Assert.Equal(0, snapshot.Running);
+        Assert.Equal(1, snapshot.Completed);
+        Assert.Equal(0, snapshot.Faulted);
+        Assert.Equal(0, snapshot.Canceled);
+    }
+
+    [Fact]
+    public async Task RunAsync_WhenActionThrows_RecordsFaultAndRethrows()
+    {
+        var name = TestTaskName();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            BackgroundTaskTracker.RunAsync<int>(
+                name,
+                () => Task.FromException<int>(new InvalidOperationException("boom"))));
+
+        var snapshot = SnapshotFor(name);
+        Assert.Equal(1, snapshot.Started);
+        Assert.Equal(0, snapshot.Running);
+        Assert.Equal(0, snapshot.Completed);
+        Assert.Equal(1, snapshot.Faulted);
+        Assert.Equal(0, snapshot.Canceled);
+    }
+
+    [Fact]
     public async Task Queue_WhileActionIsRunning_ReportsRunningCount()
     {
         var name = TestTaskName();
