@@ -71,14 +71,20 @@ public sealed class PreloadService : IDisposable
             if (_isDisposed) return;
             token = _cts.Token;
         }
-        var lazy = new Lazy<Task<ImageLoader.LoadResult?>>(() => Task.Run(() =>
+        var taskName = $"preload-decode:{Path.GetFileName(path)}";
+        var lazy = new Lazy<Task<ImageLoader.LoadResult?>>(() => BackgroundTaskTracker.Run(taskName, () =>
         {
             try
             {
-                if (token.IsCancellationRequested) return null;
+                token.ThrowIfCancellationRequested();
                 var res = ImageLoader.Load(path);
+                token.ThrowIfCancellationRequested();
                 _log.LogDebug("preload decoded: {Path} via {Decoder}", path, res.DecoderUsed);
                 return (ImageLoader.LoadResult?)res;
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
+                throw;
             }
             catch (Exception ex)
             {
