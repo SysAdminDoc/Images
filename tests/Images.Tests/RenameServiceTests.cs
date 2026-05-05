@@ -36,6 +36,22 @@ public sealed class RenameServiceTests
     }
 
     [Fact]
+    public void Commit_WhenExtensionIsUnsupported_ThrowsBeforeMovingSource()
+    {
+        using var temp = TestDirectory.Create();
+        var source = temp.WriteFile("photo.jpg", "source");
+        var unsupportedTarget = Path.Combine(temp.Path, "photo.txt");
+        var service = new RenameService();
+
+        var ex = Assert.Throws<ArgumentException>(() => service.Commit(source, "photo", ".txt"));
+
+        Assert.Equal("extension", ex.ParamName);
+        Assert.True(File.Exists(source));
+        Assert.False(File.Exists(unsupportedTarget));
+        Assert.Empty(service.UndoHistory);
+    }
+
+    [Fact]
     public void Commit_WhenTargetExists_UsesDeterministicConflictSuffix()
     {
         using var temp = TestDirectory.Create();
