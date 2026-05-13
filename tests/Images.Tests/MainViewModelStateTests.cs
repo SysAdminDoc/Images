@@ -642,6 +642,26 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void CropMode_DoesNotStartForLayeredDesignFormats()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "design.psd");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(image);
+
+            Assert.True(viewModel.HasDisplayImage);
+            Assert.False(viewModel.CurrentFormatSupportsCrop);
+            Assert.False(viewModel.ToggleCropModeCommand.CanExecute(null));
+            Assert.False(viewModel.ApplyCropCommand.CanExecute(null));
+            Assert.False(viewModel.IsCropMode);
+            Assert.Contains("flat raster image files", viewModel.CropStatusText);
+        });
+    }
+
+    [Fact]
     public void CropMode_IsMutuallyExclusiveWithInspector()
     {
         RunOnSta(() =>

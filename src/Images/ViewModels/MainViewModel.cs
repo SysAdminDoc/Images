@@ -551,6 +551,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanTurnRightBookPage));
                 Raise(nameof(CurrentArchiveProgressText));
                 Raise(nameof(CanUseCrop));
+                Raise(nameof(CurrentFormatSupportsCrop));
                 Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseRetouch));
@@ -562,12 +563,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasImage => !string.IsNullOrEmpty(CurrentPath) && File.Exists(CurrentPath);
     public bool HasDisplayImage => CurrentImage is not null;
     public bool CanUseInspector => HasDisplayImage && !IsOperationBusy;
-    public bool CanUseCrop => HasImage && HasDisplayImage && !IsOperationBusy && !IsArchiveBook && !IsPeekMode;
-    private bool CanUseResize => CanUseCrop;
-    private bool CanUseAdjustments => CanUseCrop;
-    public bool CanUseExposureBrush => CanUseCrop;
-    public bool CanUseRedEyeCorrection => CanUseCrop;
-    public bool CanUseRetouch => CanUseCrop;
+    public bool CurrentFormatSupportsCrop => CurrentPath is not null && SupportedImageFormats.IsCropWritableRaster(CurrentPath);
+    private bool CanUsePixelEditTools => HasImage && HasDisplayImage && !IsOperationBusy && !IsArchiveBook && !IsPeekMode;
+    public bool CanUseCrop => CanUsePixelEditTools && CurrentFormatSupportsCrop;
+    private bool CanUseResize => CanUsePixelEditTools;
+    private bool CanUseAdjustments => CanUsePixelEditTools;
+    public bool CanUseExposureBrush => CanUsePixelEditTools;
+    public bool CanUseRedEyeCorrection => CanUsePixelEditTools;
+    public bool CanUseRetouch => CanUsePixelEditTools;
     public bool IsViewerEmpty => CurrentPath is null;
     public bool CanRefreshFolder => (CurrentPath is not null || _nav.Count > 0) && !IsOperationBusy;
 
@@ -608,6 +611,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanRefreshFolder));
                 Raise(nameof(CanUseInspector));
                 Raise(nameof(CanUseCrop));
+                Raise(nameof(CurrentFormatSupportsCrop));
                 Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseRetouch));
@@ -1015,6 +1019,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         get => _cropStatusText;
         private set => Set(ref _cropStatusText, value);
     }
+
+    private static string CropUnavailableStatusText =>
+        "Crop is available only for flat raster image files like JPEG, PNG, WebP, TIFF, GIF, BMP, HEIC/AVIF/JXL, and similar bitmap formats.";
 
     public IReadOnlyList<CropAspectPreset> CropAspectPresets { get; } = CropSelectionService.AspectPresets;
 
@@ -2686,6 +2693,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         else
             RefreshPhotoMetadata(path);
 
+        if (loaded && !CurrentFormatSupportsCrop)
+            CropStatusText = CropUnavailableStatusText;
+
         if (loaded && startCropMode)
             StartFreehandCropModeForCurrentImage();
 
@@ -2747,10 +2757,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     private bool CanAutoStartCropMode =>
-        HasImage &&
-        HasDisplayImage &&
-        !IsArchiveBook &&
-        !IsPeekMode;
+        CanUseCrop;
 
     private void SetLoadError(Exception ex)
     {
