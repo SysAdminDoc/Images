@@ -3691,7 +3691,7 @@
                                 <Button Command="{Binding ApplyCropCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Apply crop to edit history">
+                                        AutomationProperties.Name="Apply crop to file">
                                     <TextBlock Text="Apply crop" />
                                 </Button>
                                 <Button Command="{Binding CancelCropCommand}"

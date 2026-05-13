@@ -96,6 +96,29 @@ public static class ImageExportService
         return target.Path;
     }
 
+    public static string Overwrite(string sourcePath, IReadOnlyList<EditOperation> operations)
+    {
+        if (string.IsNullOrWhiteSpace(sourcePath))
+            throw new ArgumentException("A source image path is required.", nameof(sourcePath));
+
+        var normalizedSourcePath = Path.GetFullPath(sourcePath);
+        if (!File.Exists(normalizedSourcePath))
+            throw new IOException("Source image does not exist.");
+
+        var extension = Path.GetExtension(normalizedSourcePath).ToLowerInvariant();
+        var format = ResolveMagickFormat(extension);
+        if (format is null || !CanWrite(format.Value))
+            throw new InvalidOperationException("This image format cannot be overwritten. Save a copy as a writable format first.");
+
+        using var image = new MagickImage(normalizedSourcePath);
+        NonDestructiveEditService.ApplyOperations(image, operations);
+        PrepareForWrite(image, format.Value, 92);
+
+        WriteAtomically(image, normalizedSourcePath);
+        File.SetLastWriteTimeUtc(normalizedSourcePath, DateTime.UtcNow);
+        return normalizedSourcePath;
+    }
+
     private static (string Path, MagickFormat Format) ResolveWritableTarget(string requestedPath)
     {
         if (string.IsNullOrWhiteSpace(requestedPath))

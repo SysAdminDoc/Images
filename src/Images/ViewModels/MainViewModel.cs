@@ -987,11 +987,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 ClearExposureBrushStrokes(showToast: false);
                 ClearRedEyeCorrectionMarks(showToast: false);
                 ClearRetouchState(showToast: false);
-                CropStatusText = "Freehand crop is ready. Drag on the image to choose a crop. Enter or Apply adds it to edit history.";
+                CropStatusText = "Freehand crop is ready. Drag on the image to choose a crop. Enter or Apply overwrites the file.";
             }
             else if (!HasCropSelection)
             {
-                CropStatusText = "Crop is paused. Toggle it on to drag a non-destructive crop.";
+                CropStatusText = "Crop is paused. Toggle it on to drag a crop that overwrites the file.";
             }
 
             RaiseCropModeState();
@@ -1064,7 +1064,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool IsCanvasSelectionMode => IsInspectorMode || IsCropMode || IsExposureBrushMode || IsRedEyeCorrectionMode || IsRetouchMode;
     public string CropModeText => IsCropMode ? "Crop on" : "Crop off";
     public string CropModeHelpText => IsCropMode
-        ? "Freehand crop is active. Drag a rectangle on the image. Enter adds the crop to edit history; Esc cancels."
+        ? "Freehand crop is active. Drag a rectangle on the image. Enter overwrites the file; Esc cancels."
         : "Crop starts automatically for normal images; toggle it off when you need canvas pan-only control.";
     public string CropSelectionText => CropSelection?.DisplayText ?? "No crop selected";
     public string CropAspectText => EffectiveCropAspectPreset?.Label ?? "Custom ratio needed";
@@ -3329,7 +3329,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         CropSelection = CropSelectionService.Normalize(selection, PixelWidth, PixelHeight);
         CropStatusText = CropSelection is { } crop
-            ? $"Crop selected: {crop.DisplayText}. Aspect: {CropAspectText}. Press Enter or Apply."
+            ? $"Crop selected: {crop.DisplayText}. Aspect: {CropAspectText}. Press Enter or Apply to overwrite the file."
             : "Pointer is outside the image.";
     }
 
@@ -3344,7 +3344,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         CropSelection = CropSelectionService.CreateSelection(anchor, current, aspect, PixelWidth, PixelHeight);
         CropStatusText = CropSelection is { } crop
-            ? $"Crop selected: {crop.DisplayText}. Aspect: {CropAspectText}. Press Enter or Apply."
+            ? $"Crop selected: {crop.DisplayText}. Aspect: {CropAspectText}. Press Enter or Apply to overwrite the file."
             : "Pointer is outside the image.";
     }
 
@@ -3352,8 +3352,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         CropSelection = null;
         CropStatusText = IsCropMode
-            ? "Freehand crop is ready. Drag on the image to choose a crop. Enter or Apply adds it to edit history."
-            : "Crop is paused. Toggle it on to drag a non-destructive crop.";
+            ? "Freehand crop is ready. Drag on the image to choose a crop. Enter or Apply overwrites the file."
+            : "Crop is paused. Toggle it on to drag a crop that overwrites the file.";
     }
 
     public void AddExposureBrushStroke(PixelCoordinate coordinate)
@@ -3526,27 +3526,48 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (!CanApplyCrop || CurrentPath is null || CropSelection is not { } crop)
             return;
 
-        var result = _editStack.AppendOperation(
-            CurrentPath,
-            "crop",
-            CropSelectionService.ToEditParameters(crop),
-            $"Crop {crop.Width}x{crop.Height} at {crop.X},{crop.Y}");
+        var path = CurrentPath;
+        var existingOperations = GetEnabledDisplayEditOperations(path, isArchiveBookPage: false);
+        var operations = existingOperations
+            .Append(new EditOperation(
+                Guid.NewGuid().ToString("N"),
+                "crop",
+                DateTimeOffset.UtcNow,
+                Enabled: true,
+                CropSelectionService.ToEditParameters(crop),
+                $"Crop {crop.Width}x{crop.Height} at {crop.X},{crop.Y}"))
+            .ToList();
 
-        if (result.Success)
+        BeginOperationStatus("Applying crop", $"Overwriting {Path.GetFileName(path)}.");
+        try
         {
-            var previewUpdated = LoadCurrent(startCropMode: false);
-            if (!previewUpdated)
+            ImageExportService.Overwrite(path, operations);
+            if (existingOperations.Count > 0)
+            {
+                var clearResult = _editStack.ClearMasterOperations(path);
+                if (!clearResult.Success)
+                    throw new IOException(clearResult.Message);
+            }
+
+            _preload.Reset();
+            ShellChangeNotificationService.NotifyFileUpdated(path);
+            var fileUpdated = LoadCurrent(startCropMode: false);
+            if (!fileUpdated)
             {
                 IsCropMode = false;
                 ClearCropSelection();
             }
 
-            Toast(previewUpdated ? "Crop applied to preview" : "Crop added to edit history");
+            Toast(fileUpdated ? "Crop applied to file" : "Crop saved to file");
         }
-        else
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
         {
-            CropStatusText = "Crop failed: " + result.Message;
+            CropStatusText = "Crop failed: " + ex.Message;
             Toast("Crop failed");
+        }
+        finally
+        {
+            EndOperationStatus();
         }
     }
 

@@ -564,7 +564,7 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
-    public void CropMode_StartsAutomaticallyAndAppendsNonDestructiveCropOperation()
+    public void CropMode_StartsAutomaticallyAndOverwritesSourceFile()
     {
         RunOnSta(() =>
         {
@@ -593,21 +593,51 @@ public sealed class MainViewModelStateTests
             Assert.False(viewModel.IsCropMode);
             Assert.False(viewModel.HasCropSelection);
             Assert.Null(viewModel.CropSelection);
-            Assert.Equal("Crop applied to preview", viewModel.ToastMessage);
+            Assert.Equal("Crop applied to file", viewModel.ToastMessage);
             Assert.Equal(1, viewModel.PixelWidth);
             Assert.Equal(2, viewModel.PixelHeight);
             var displayed = Assert.IsAssignableFrom<BitmapSource>(viewModel.CurrentImage);
             Assert.Equal(1, displayed.PixelWidth);
             Assert.Equal(2, displayed.PixelHeight);
-            Assert.Contains("edit preview", viewModel.DecoderUsed);
+            Assert.DoesNotContain("edit preview", viewModel.DecoderUsed);
+            Assert.Equal((1, 2), ReadImageSize(image));
 
             var snapshot = new NonDestructiveEditService().LoadSnapshot(image);
-            var operation = Assert.Single(snapshot.Operations);
-            Assert.Equal("crop", operation.Kind);
-            Assert.Equal("0", operation.Parameters["x"]);
-            Assert.Equal("0", operation.Parameters["y"]);
-            Assert.Equal("1", operation.Parameters["width"]);
-            Assert.Equal("2", operation.Parameters["height"]);
+            Assert.Empty(snapshot.Operations);
+        });
+    }
+
+    [Fact]
+    public void CropMode_BakesExistingCropPreviewIntoSourceAndClearsEditStack()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "photo.png");
+            var editStack = new NonDestructiveEditService();
+            var seedResult = editStack.AppendOperation(
+                image,
+                "crop",
+                CropSelectionService.ToEditParameters(new PixelSelection(0, 0, 1, 2)),
+                "Seed crop");
+            Assert.True(seedResult.Success);
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(image);
+
+            Assert.Equal(1, viewModel.PixelWidth);
+            Assert.Equal(2, viewModel.PixelHeight);
+            Assert.Contains("edit preview", viewModel.DecoderUsed);
+
+            viewModel.UpdateCropSelection(new PixelSelection(0, 0, 1, 1));
+            viewModel.ApplyCropCommand.Execute(null);
+
+            Assert.Equal("Crop applied to file", viewModel.ToastMessage);
+            Assert.Equal(1, viewModel.PixelWidth);
+            Assert.Equal(1, viewModel.PixelHeight);
+            Assert.DoesNotContain("edit preview", viewModel.DecoderUsed);
+            Assert.Equal((1, 1), ReadImageSize(image));
+            Assert.Empty(editStack.LoadSnapshot(image).Operations);
         });
     }
 
@@ -1250,6 +1280,14 @@ public sealed class MainViewModelStateTests
         using var stream = File.Create(path);
         encoder.Save(stream);
         return path;
+    }
+
+    private static (int Width, int Height) ReadImageSize(string path)
+    {
+        using var stream = File.OpenRead(path);
+        var decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+        var frame = decoder.Frames[0];
+        return (frame.PixelWidth, frame.PixelHeight);
     }
 
     private static string WriteTwoPageTiff(string folder, string fileName)
