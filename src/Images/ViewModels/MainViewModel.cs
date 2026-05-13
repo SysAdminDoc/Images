@@ -987,11 +987,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 ClearExposureBrushStrokes(showToast: false);
                 ClearRedEyeCorrectionMarks(showToast: false);
                 ClearRetouchState(showToast: false);
-                CropStatusText = "Drag on the image to choose a crop. Enter applies it to edit history.";
+                CropStatusText = "Freehand crop is ready. Drag on the image to choose a crop. Enter applies it to edit history.";
             }
             else if (!HasCropSelection)
             {
-                CropStatusText = "Turn on crop, drag on the image, then apply without changing the source file.";
+                CropStatusText = "Crop is paused. Toggle it on to drag a non-destructive crop.";
             }
 
             RaiseCropModeState();
@@ -1009,7 +1009,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private string _cropStatusText = "Turn on crop, drag on the image, then apply without changing the source file.";
+    private string _cropStatusText = "Open an image to start freehand crop mode.";
     public string CropStatusText
     {
         get => _cropStatusText;
@@ -1064,8 +1064,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool IsCanvasSelectionMode => IsInspectorMode || IsCropMode || IsExposureBrushMode || IsRedEyeCorrectionMode || IsRetouchMode;
     public string CropModeText => IsCropMode ? "Crop on" : "Crop off";
     public string CropModeHelpText => IsCropMode
-        ? "Drag a rectangle on the image. Enter adds the crop to edit history; Esc cancels."
-        : "Create a non-destructive crop for Save a copy exports.";
+        ? "Freehand crop is active. Drag a rectangle on the image. Enter adds the crop to edit history; Esc cancels."
+        : "Crop starts automatically for normal images; toggle it off when you need canvas pan-only control.";
     public string CropSelectionText => CropSelection?.DisplayText ?? "No crop selected";
     public string CropAspectText => EffectiveCropAspectPreset?.Label ?? "Custom ratio needed";
     public string CropAspectHelpText => EffectiveCropAspectPreset?.Description ?? "Enter positive whole numbers for custom width and height.";
@@ -2677,6 +2677,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         else
             RefreshPhotoMetadata(path);
 
+        if (loaded)
+            StartFreehandCropModeForCurrentImage();
+
         SyncRenameEditorFromDisk();
 
         // V20-03: after loading, enqueue neighbours so the next arrow-press is instant.
@@ -2704,6 +2707,22 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ResetPageState();
         SetLoadError(ex);
     }
+
+    private void StartFreehandCropModeForCurrentImage()
+    {
+        if (!CanAutoStartCropMode)
+            return;
+
+        SelectedCropAspectPreset = CropSelectionService.FreeAspectPreset;
+        ClearCropSelection();
+        IsCropMode = true;
+    }
+
+    private bool CanAutoStartCropMode =>
+        HasImage &&
+        HasDisplayImage &&
+        !IsArchiveBook &&
+        !IsPeekMode;
 
     private void SetLoadError(Exception ex)
     {
@@ -3305,8 +3324,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         CropSelection = null;
         CropStatusText = IsCropMode
-            ? "Drag on the image to choose a crop. Enter applies it to edit history."
-            : "Turn on crop, drag on the image, then apply without changing the source file.";
+            ? "Freehand crop is ready. Drag on the image to choose a crop. Enter applies it to edit history."
+            : "Crop is paused. Toggle it on to drag a non-destructive crop.";
     }
 
     public void AddExposureBrushStroke(PixelCoordinate coordinate)

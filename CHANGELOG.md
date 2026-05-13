@@ -4,7 +4,9 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
-No changes yet.
+### Changed
+
+- **Automatic freehand crop mode** — normal image loads now enter free-aspect crop mode immediately, so dragging on the open image starts a crop without pressing `C`; `C` still toggles crop mode when pan-only canvas control is needed.
 
 ## v0.2.11 — 2026-05-05
 
