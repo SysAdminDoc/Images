@@ -13,6 +13,7 @@
         DragLeave="Window_DragLeave"
         Drop="Window_Drop"
         DragOver="Window_DragOver"
+        PreviewKeyDown="Window_PreviewKeyDown"
         KeyDown="Window_KeyDown"
         PreviewMouseDown="Window_PreviewMouseDown"
         Background="{StaticResource BaseBrush}"
@@ -303,6 +304,7 @@
                 <ctl:CropOverlay Visibility="{Binding ShowCropOverlay, Converter={StaticResource BoolToVis}}"
                                  Target="{Binding ElementName=Canvas}"
                                  Selection="{Binding CropSelection}"
+                                 ApplyCommand="{Binding ApplyCropCommand}"
                                  Opacity="0.98"
                                  AutomationProperties.Name="Crop selection overlay" />
 
@@ -1663,7 +1665,7 @@
                                         <TextBlock Grid.Row="16" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+A" />
                                         <TextBlock Grid.Row="16" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open adjustments" />
                                         <TextBlock Grid.Row="17" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
-                                        <TextBlock Grid.Row="17" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Commit rename (in rename box)" />
+                                        <TextBlock Grid.Row="17" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Apply crop / commit rename" />
                                         <TextBlock Grid.Row="18" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
                                         <TextBlock Grid.Row="18" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
                                     </Grid>

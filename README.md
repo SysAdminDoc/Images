@@ -40,7 +40,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Macro actions** — press `Ctrl+Shift+M` to build and run local JSON actions. Plans stay inspectable before execution, support dry runs, load/save as JSON, and currently cover GPS stripping, export/convert/resize copies with quality settings, and rename patterns with tokens.
 - **Batch processor** — press `Ctrl+Shift+B` to batch resize/convert/export files with built-in JPEG/PNG/WebP presets, load/save preset JSON, output-folder routing, dry-run default, and preview rows for output path and dimensions before writing copies.
 - **Non-destructive edit history** — press `Ctrl+Shift+E` to inspect XMP-backed edit operations, fork virtual copies without duplicating source pixels, enable or disable individual operations, and export edited copies with provenance sidecars.
-- **Non-destructive crop** — normal images open directly in freehand crop mode, so you can drag a crop rectangle immediately. Press `C` to pause/resume crop mode, choose free/square/3:2/4:3/16:9/custom aspect ratios, then press Enter or the side-panel Apply button to add a crop operation to edit history without modifying the original file. Save a copy applies the crop and writes provenance sidecars.
+- **Non-destructive crop** — normal images open directly in freehand crop mode, so you can drag a crop rectangle immediately. Press `C` to pause/resume crop mode, choose free/square/3:2/4:3/16:9/custom aspect ratios, then press Enter, the side-panel Apply button, or the Apply button attached to the crop box to add a crop operation to edit history without modifying the original file. Save a copy applies the crop and writes provenance sidecars.
 - **Non-destructive resize** — press `Ctrl+Alt+R` to add a resize operation with percent, pixel, long-edge, or short-edge sizing, aspect lock, Lanczos-3/Mitchell/Bicubic filters, and a live output-dimensions preview. Save a copy applies the resize without modifying the source file.
 - **Non-destructive adjustments** — press `Ctrl+Alt+A` for a modeless levels, curve, and HSL workbench with live preview, reset, and Enter-to-apply behavior. Save a copy applies the adjustment stack without modifying the source file.
 - **Local exposure brush** — press `Ctrl+Alt+D` to paint non-destructive dodge or burn strokes directly on the image. The side panel exposes tone, radius, and strength controls; Enter adds the soft-brush stroke stack to edit history, and Save a copy renders it without changing the source file.
@@ -130,7 +130,7 @@ OCR depends on Microsoft Windows OCR optional capabilities. The installer instal
 | **Ctrl+Left / Ctrl+Right** | Step animated image frames |
 | **Ctrl+Space** | Play/pause animated image |
 | **I** | Toggle metadata HUD |
-| **Enter** (in rename box) | Commit rename now (skip debounce) |
+| **Enter** | Apply the active crop selection, or commit rename when the rename box is active |
 | **Esc** (in rename box) | Cancel edit, revert textbox to disk name |
 | **+ / -** | Zoom in / out |
 | **0** | Fit to window |

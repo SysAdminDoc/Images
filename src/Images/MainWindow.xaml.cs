@@ -384,6 +384,21 @@ public partial class MainWindow : Window
         }
     }
 
+    private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter ||
+            !Vm.IsCropMode ||
+            !Vm.ApplyCropCommand.CanExecute(null))
+        {
+            return;
+        }
+
+        Vm.ApplyCropCommand.Execute(null);
+        Keyboard.ClearFocus();
+        Focus();
+        e.Handled = true;
+    }
+
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
         // Don't steal keys from the rename editor.
@@ -599,7 +614,7 @@ public partial class MainWindow : Window
                 Vm.ToggleGalleryCommand.Execute(null);
                 e.Handled = true;
                 break;
-            case Key.Enter when Vm.IsCropMode:
+            case Key.Enter when Vm.IsCropMode && Vm.ApplyCropCommand.CanExecute(null):
                 Vm.ApplyCropCommand.Execute(null);
                 e.Handled = true;
                 break;
@@ -946,6 +961,8 @@ public partial class MainWindow : Window
         if (!TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
             return;
 
+        Keyboard.ClearFocus();
+        Focus();
         _cropSelectionStart = coordinate;
         Vm.UpdateCropSelection(coordinate, coordinate);
         Canvas.CaptureMouse();
