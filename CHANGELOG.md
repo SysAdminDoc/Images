@@ -9,6 +9,7 @@ All notable changes to **Images** are documented here.
 - **Automatic freehand crop mode** — normal image loads now enter free-aspect crop mode immediately, so dragging on the open image starts a crop without pressing `C`; `C` still toggles crop mode when pan-only canvas control is needed.
 - **Crop apply affordances** — Enter now applies an active crop selection from the preview key path, and the crop rectangle shows an on-canvas Apply button anchored to its lower-right edge.
 - **Immediate edit preview** — applied crop operations now refresh the displayed image immediately, and the main viewer renders enabled edit-stack operations when loading the current image.
+- **Crop file overwrite** — applying a crop now writes the cropped pixels back to the source file, clears baked edit-stack operations, resets stale preload data, and notifies the Windows shell so Explorer thumbnails refresh.
 
 ## v0.2.11 — 2026-05-05
 

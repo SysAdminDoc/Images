@@ -199,6 +199,30 @@ public sealed class NonDestructiveEditService
         }
     }
 
+    public EditStackMutationResult ClearMasterOperations(string imagePath)
+    {
+        try
+        {
+            var normalizedPath = NormalizeImagePath(imagePath, requireExistingImage: true);
+            var document = LoadDocumentOrDefault(normalizedPath);
+            var removedCount = document.Operations.Count;
+            if (removedCount == 0)
+                return new EditStackMutationResult(true, PrimarySidecarPath(normalizedPath), "No edit operations to clear.");
+
+            document.Operations.Clear();
+            Persist(normalizedPath, document);
+            return new EditStackMutationResult(
+                true,
+                PrimarySidecarPath(normalizedPath),
+                $"Cleared {removedCount} baked edit operation{Plural(removedCount)}.");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException)
+        {
+            Log.LogWarning(ex, "Could not clear edit operations for {Path}", imagePath);
+            return new EditStackMutationResult(false, "", ex.Message);
+        }
+    }
+
     public EditExportResult Export(
         string imagePath,
         string targetPath,

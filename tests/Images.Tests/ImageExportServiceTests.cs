@@ -42,4 +42,52 @@ public sealed class ImageExportServiceTests
         Assert.True(new FileInfo(target).Length > 0);
         Assert.NotEqual(oldBytes, File.ReadAllBytes(target));
     }
+
+    [Fact]
+    public void Overwrite_WithCropOperation_ReplacesSourcePixelsAndTouchesFile()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Path.Combine(temp.Path, "source.png");
+        var bitmap = BitmapSource.Create(
+            2,
+            2,
+            96,
+            96,
+            PixelFormats.Bgra32,
+            null,
+            new byte[]
+            {
+                0xFF, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
+                0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+            },
+            8);
+        bitmap.Freeze();
+        ImageExportService.Save(bitmap, source);
+        var previousWriteTime = DateTime.UtcNow - TimeSpan.FromMinutes(10);
+        File.SetLastWriteTimeUtc(source, previousWriteTime);
+        var operations = new[]
+        {
+            new EditOperation(
+                "crop-test",
+                "crop",
+                DateTimeOffset.UtcNow,
+                Enabled: true,
+                CropSelectionService.ToEditParameters(new PixelSelection(0, 0, 1, 2)),
+                "Crop test")
+        };
+
+        var savedPath = ImageExportService.Overwrite(source, operations);
+
+        Assert.Equal(Path.GetFullPath(source), savedPath);
+        Assert.Equal((1, 2), ReadImageSize(source));
+        Assert.True(File.GetLastWriteTimeUtc(source) > previousWriteTime);
+    }
+
+    private static (int Width, int Height) ReadImageSize(string path)
+    {
+        using var stream = File.OpenRead(path);
+        var decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+        var frame = decoder.Frames[0];
+        return (frame.PixelWidth, frame.PixelHeight);
+    }
 }
