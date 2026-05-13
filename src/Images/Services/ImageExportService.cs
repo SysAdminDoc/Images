@@ -67,6 +67,16 @@ public static class ImageExportService
         return target.Path;
     }
 
+    public static BitmapSource RenderPreview(BitmapSource source, IReadOnlyList<EditOperation> operations)
+    {
+        if (operations.Count == 0)
+            return source;
+
+        using var image = ToMagickImage(source);
+        NonDestructiveEditService.ApplyOperations(image, operations);
+        return ToBitmapSource(image);
+    }
+
     public static string Save(string sourcePath, string path, IReadOnlyList<EditOperation> operations)
     {
         if (string.IsNullOrWhiteSpace(sourcePath))
@@ -162,6 +172,19 @@ public static class ImageExportService
 
         var settings = new PixelReadSettings((uint)width, (uint)height, StorageType.Char, PixelMapping.BGRA);
         return new MagickImage(pixels, settings);
+    }
+
+    private static BitmapSource ToBitmapSource(MagickImage image)
+    {
+        var bytes = image.ToByteArray(MagickFormat.Png);
+        using var stream = new MemoryStream(bytes);
+        var bitmap = new BitmapImage();
+        bitmap.BeginInit();
+        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+        bitmap.StreamSource = stream;
+        bitmap.EndInit();
+        bitmap.Freeze();
+        return bitmap;
     }
 
     private static MagickFormat? ResolveMagickFormat(string ext) => ext switch
