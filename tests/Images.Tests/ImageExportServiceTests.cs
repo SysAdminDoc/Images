@@ -83,6 +83,33 @@ public sealed class ImageExportServiceTests
         Assert.True(File.GetLastWriteTimeUtc(source) > previousWriteTime);
     }
 
+    [Theory]
+    [InlineData(".jpg", true)]
+    [InlineData(".png", true)]
+    [InlineData(".webp", true)]
+    [InlineData(".psd", false)]
+    [InlineData(".pdf", false)]
+    [InlineData(".svg", false)]
+    [InlineData(".ai", false)]
+    [InlineData(".cbz", false)]
+    [InlineData(".dng", false)]
+    public void CropWritableRasterAllowlist_MatchesSourceOverwritePolicy(string extension, bool expected)
+        => Assert.Equal(expected, SupportedImageFormats.IsCropWritableRasterExtension(extension));
+
+    [Theory]
+    [InlineData("source.psd")]
+    [InlineData("source.pdf")]
+    [InlineData("source.svg")]
+    public void Overwrite_WhenSourceFormatIsNotFlatRaster_RejectsBeforeDecode(string fileName)
+    {
+        using var temp = TestDirectory.Create();
+        var source = temp.WriteFile(fileName, "not an image");
+
+        var ex = Assert.Throws<InvalidOperationException>(() => ImageExportService.Overwrite(source, []));
+
+        Assert.Contains("flat raster image files", ex.Message);
+    }
+
     private static (int Width, int Height) ReadImageSize(string path)
     {
         using var stream = File.OpenRead(path);

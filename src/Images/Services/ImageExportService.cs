@@ -107,8 +107,8 @@ public static class ImageExportService
 
         var extension = Path.GetExtension(normalizedSourcePath).ToLowerInvariant();
         var format = ResolveMagickFormat(extension);
-        if (format is null || !CanWrite(format.Value))
-            throw new InvalidOperationException("This image format cannot be overwritten. Save a copy as a writable format first.");
+        if (!SupportedImageFormats.IsCropWritableRasterExtension(extension) || format is null || !CanWrite(format.Value))
+            throw new InvalidOperationException("Crop can overwrite only flat raster image files such as JPEG, PNG, WebP, TIFF, GIF, BMP, HEIC/AVIF/JXL, and similar bitmap formats.");
 
         using var image = new MagickImage(normalizedSourcePath);
         NonDestructiveEditService.ApplyOperations(image, operations);
