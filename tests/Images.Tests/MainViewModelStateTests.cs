@@ -564,7 +564,7 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
-    public void CropMode_AppendsNonDestructiveCropOperationAndClearsSelection()
+    public void CropMode_StartsAutomaticallyAndAppendsNonDestructiveCropOperation()
     {
         RunOnSta(() =>
         {
@@ -577,11 +577,10 @@ public sealed class MainViewModelStateTests
             viewModel.OpenFile(image);
 
             Assert.True(viewModel.ToggleCropModeCommand.CanExecute(null));
-
-            viewModel.ToggleCropModeCommand.Execute(null);
-
             Assert.True(viewModel.IsCropMode);
             Assert.True(viewModel.IsCanvasSelectionMode);
+            Assert.Equal("Free", viewModel.CropAspectText);
+            Assert.Contains("Freehand crop is ready", viewModel.CropStatusText);
 
             viewModel.UpdateCropSelection(new PixelSelection(0, 0, 1, 2));
 
@@ -616,7 +615,6 @@ public sealed class MainViewModelStateTests
             using var viewModel = CreateViewModelWithFastPreview(temp);
 
             viewModel.OpenFile(image);
-            viewModel.ToggleCropModeCommand.Execute(null);
 
             Assert.True(viewModel.IsCropMode);
             Assert.False(viewModel.IsInspectorMode);
@@ -639,7 +637,6 @@ public sealed class MainViewModelStateTests
             using var viewModel = CreateViewModelWithFastPreview(temp);
 
             viewModel.OpenFile(image);
-            viewModel.ToggleCropModeCommand.Execute(null);
             viewModel.SetCropAspectPresetCommand.Execute("square");
 
             Assert.Equal("1:1", viewModel.CropAspectText);
@@ -662,7 +659,6 @@ public sealed class MainViewModelStateTests
             using var viewModel = CreateViewModelWithFastPreview(temp);
 
             viewModel.OpenFile(image);
-            viewModel.ToggleCropModeCommand.Execute(null);
             viewModel.SetCropAspectPresetCommand.Execute("custom");
             viewModel.CustomCropAspectWidth = "0";
 
