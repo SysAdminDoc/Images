@@ -987,7 +987,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 ClearExposureBrushStrokes(showToast: false);
                 ClearRedEyeCorrectionMarks(showToast: false);
                 ClearRetouchState(showToast: false);
-                CropStatusText = "Freehand crop is ready. Drag on the image to choose a crop. Enter applies it to edit history.";
+                CropStatusText = "Freehand crop is ready. Drag on the image to choose a crop. Enter or Apply adds it to edit history.";
             }
             else if (!HasCropSelection)
             {
@@ -3301,7 +3301,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         CropSelection = CropSelectionService.Normalize(selection, PixelWidth, PixelHeight);
         CropStatusText = CropSelection is { } crop
-            ? $"Crop selected: {crop.DisplayText}. Aspect: {CropAspectText}."
+            ? $"Crop selected: {crop.DisplayText}. Aspect: {CropAspectText}. Press Enter or Apply."
             : "Pointer is outside the image.";
     }
 
@@ -3316,7 +3316,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         CropSelection = CropSelectionService.CreateSelection(anchor, current, aspect, PixelWidth, PixelHeight);
         CropStatusText = CropSelection is { } crop
-            ? $"Crop selected: {crop.DisplayText}. Aspect: {CropAspectText}."
+            ? $"Crop selected: {crop.DisplayText}. Aspect: {CropAspectText}. Press Enter or Apply."
             : "Pointer is outside the image.";
     }
 
@@ -3324,7 +3324,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         CropSelection = null;
         CropStatusText = IsCropMode
-            ? "Freehand crop is ready. Drag on the image to choose a crop. Enter applies it to edit history."
+            ? "Freehand crop is ready. Drag on the image to choose a crop. Enter or Apply adds it to edit history."
             : "Crop is paused. Toggle it on to drag a non-destructive crop.";
     }
 
