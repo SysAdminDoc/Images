@@ -57,6 +57,19 @@ public static class SupportedImageFormats
         ".fff", ".gpr", ".bay", ".cap"
     ];
 
+    public static readonly string[] CropWritableRasterExtensions =
+    [
+        ".jpg", ".jpeg", ".jpe", ".jfif", ".jif", ".png", ".apng", ".gif", ".webp",
+        ".heic", ".heif", ".hif", ".avif", ".jxl", ".tif", ".tiff", ".bmp", ".dib",
+        ".ico", ".cur", ".hdp", ".jxr", ".wdp", ".wbmp",
+        ".tga", ".targa", ".pcx", ".dds", ".qoi", ".exr", ".hdr",
+        ".jp2", ".j2k", ".j2c", ".jpc", ".jpf", ".jpx", ".jpm", ".jpt", ".jps",
+        ".pgx", ".dcx", ".pcd", ".pcds", ".vicar", ".viff", ".vips", ".six",
+        ".sixel", ".farbfeld", ".ff", ".xpm", ".xbm", ".pbm", ".pgm", ".ppm",
+        ".pnm", ".pam", ".pfm", ".miff", ".mng", ".jng", ".ras", ".sun",
+        ".fax", ".g3", ".g4"
+    ];
+
     public static readonly HashSet<string> Extensions = new(
         CommonExtensions
             .Concat(DesignExtensions)
@@ -69,6 +82,10 @@ public static class SupportedImageFormats
 
     private static readonly HashSet<string> GhostscriptExtensions = new(
         DocumentPreviewExtensions,
+        StringComparer.OrdinalIgnoreCase);
+
+    private static readonly HashSet<string> CropWritableRasterExtensionSet = new(
+        CropWritableRasterExtensions,
         StringComparer.OrdinalIgnoreCase);
 
     public static string OpenDialogFilter => string.Join("|",
@@ -105,6 +122,12 @@ public static class SupportedImageFormats
 
     public static bool IsArchiveExtension(string extension)
         => ArchiveExtensions.Contains(Normalize(extension), StringComparer.OrdinalIgnoreCase);
+
+    public static bool IsCropWritableRaster(string path)
+        => CropWritableRasterExtensionSet.Contains(Path.GetExtension(path));
+
+    public static bool IsCropWritableRasterExtension(string extension)
+        => CropWritableRasterExtensionSet.Contains(Normalize(extension));
 
     public static string FormatFamily(string path)
     {
