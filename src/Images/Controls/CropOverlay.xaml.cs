@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using Images.Services;
 
@@ -7,6 +8,8 @@ namespace Images.Controls;
 
 public partial class CropOverlay : UserControl
 {
+    private const double ApplyButtonGap = 8.0;
+    private const double ApplyButtonMargin = 8.0;
     private ZoomPanImage? _attachedTarget;
 
     public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(
@@ -21,6 +24,12 @@ public partial class CropOverlay : UserControl
         typeof(CropOverlay),
         new PropertyMetadata(null, OnSelectionChanged));
 
+    public static readonly DependencyProperty ApplyCommandProperty = DependencyProperty.Register(
+        nameof(ApplyCommand),
+        typeof(ICommand),
+        typeof(CropOverlay),
+        new PropertyMetadata(null));
+
     public ZoomPanImage? Target
     {
         get => (ZoomPanImage?)GetValue(TargetProperty);
@@ -31,6 +40,12 @@ public partial class CropOverlay : UserControl
     {
         get => (PixelSelection?)GetValue(SelectionProperty);
         set => SetValue(SelectionProperty, value);
+    }
+
+    public ICommand? ApplyCommand
+    {
+        get => (ICommand?)GetValue(ApplyCommandProperty);
+        set => SetValue(ApplyCommandProperty, value);
     }
 
     public CropOverlay()
@@ -79,13 +94,15 @@ public partial class CropOverlay : UserControl
 
     private void ApplyOverlayState()
     {
-        OverlayCanvas.RenderTransform = Target is null
+        var imageToViewport = Target is null
             ? Transform.Identity
             : new MatrixTransform(Target.GetImageToViewportMatrix());
+        OverlayCanvas.RenderTransform = imageToViewport;
 
         if (Selection is not { } selection || selection.Width <= 0 || selection.Height <= 0)
         {
             SelectionBox.Visibility = Visibility.Collapsed;
+            ApplyButton.Visibility = Visibility.Collapsed;
             return;
         }
 
@@ -95,5 +112,41 @@ public partial class CropOverlay : UserControl
         SelectionBox.Height = selection.Height;
         SelectionLabel.Text = selection.DisplayText;
         SelectionBox.Visibility = Visibility.Visible;
+        ApplyButton.Visibility = Visibility.Visible;
+        PositionApplyButton(selection, imageToViewport.Value);
+    }
+
+    private void PositionApplyButton(PixelSelection selection, Matrix imageToViewport)
+    {
+        ApplyButton.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        var buttonSize = ApplyButton.DesiredSize;
+        if (buttonSize.Width <= 0 || buttonSize.Height <= 0)
+            return;
+
+        var viewportWidth = ActualWidth > 0 ? ActualWidth : Target?.ActualWidth ?? 0;
+        var viewportHeight = ActualHeight > 0 ? ActualHeight : Target?.ActualHeight ?? 0;
+        if (viewportWidth <= 0 || viewportHeight <= 0)
+            return;
+
+        var anchor = imageToViewport.Transform(new Point(
+            selection.X + selection.Width,
+            selection.Y + selection.Height));
+
+        var left = anchor.X - buttonSize.Width;
+        var top = anchor.Y + ApplyButtonGap;
+        if (top + buttonSize.Height > viewportHeight - ApplyButtonMargin)
+            top = anchor.Y - buttonSize.Height - ApplyButtonGap;
+
+        left = Math.Clamp(
+            left,
+            ApplyButtonMargin,
+            Math.Max(ApplyButtonMargin, viewportWidth - buttonSize.Width - ApplyButtonMargin));
+        top = Math.Clamp(
+            top,
+            ApplyButtonMargin,
+            Math.Max(ApplyButtonMargin, viewportHeight - buttonSize.Height - ApplyButtonMargin));
+
+        Canvas.SetLeft(ApplyButton, left);
+        Canvas.SetTop(ApplyButton, top);
     }
 }
