@@ -2515,7 +2515,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         await LoadCurrentWithOperationStatusAsync(title, $"{PageLabel} {PageIndex + 1} of {PageCount}.");
     }
 
-    private bool LoadCurrent()
+    private bool LoadCurrent(bool startCropMode = true)
     {
         var path = _nav.CurrentPath;
         if (!PrepareCurrentLoad(path))
@@ -2523,15 +2523,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         try
         {
-            return CompleteCurrentLoad(path!, DecodeCurrentPath(path!));
+            return CompleteCurrentLoad(path!, DecodeCurrentPath(path!), startCropMode: startCropMode);
         }
         catch (Exception ex)
         {
-            return CompleteCurrentLoad(path!, error: ex);
+            return CompleteCurrentLoad(path!, error: ex, startCropMode: startCropMode);
         }
     }
 
-    private async Task<bool> LoadCurrentAsync()
+    private async Task<bool> LoadCurrentAsync(bool startCropMode = true)
     {
         var path = _nav.CurrentPath;
         if (!PrepareCurrentLoad(path))
@@ -2543,14 +2543,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (!string.Equals(_nav.CurrentPath, path, StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            return CompleteCurrentLoad(path!, result);
+            return CompleteCurrentLoad(path!, result, startCropMode: startCropMode);
         }
         catch (Exception ex)
         {
             if (!string.Equals(_nav.CurrentPath, path, StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            return CompleteCurrentLoad(path!, error: ex);
+            return CompleteCurrentLoad(path!, error: ex, startCropMode: startCropMode);
         }
     }
 
@@ -2607,7 +2607,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool CompleteCurrentLoad(
         string path,
         ImageLoader.LoadResult? result = null,
-        Exception? error = null)
+        Exception? error = null,
+        bool startCropMode = true)
     {
         var loaded = false;
 
@@ -2621,13 +2622,21 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 var decoderUsed = isArchiveBookPage && ArchiveOldScanFilterEnabled
                     ? $"{result.DecoderUsed} + clean scan filter"
                     : result.DecoderUsed;
+                var editOperations = GetEnabledDisplayEditOperations(path, isArchiveBookPage);
+                if (editOperations.Count > 0 && image is BitmapSource bitmap)
+                {
+                    image = ImageExportService.RenderPreview(bitmap, editOperations);
+                    animation = null;
+                    decoderUsed = $"{decoderUsed} + {editOperations.Count} edit preview";
+                }
+
                 // Order matters: CurrentImage first so ZoomPanImage.OnSourceChanged runs and clears
                 // any animation from the previous file; then CurrentAnimation, which either applies
                 // new keyframes or stays null for a static image.
                 CurrentImage = image;
                 CurrentAnimation = animation;
-                PixelWidth = result.PixelWidth;
-                PixelHeight = result.PixelHeight;
+                PixelWidth = image is BitmapSource displayedBitmap ? displayedBitmap.PixelWidth : result.PixelWidth;
+                PixelHeight = image is BitmapSource displayedBitmapHeight ? displayedBitmapHeight.PixelHeight : result.PixelHeight;
                 DecoderUsed = decoderUsed;
                 ClearInspectorState();
                 IsCropMode = false;
@@ -2677,7 +2686,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         else
             RefreshPhotoMetadata(path);
 
-        if (loaded)
+        if (loaded && startCropMode)
             StartFreehandCropModeForCurrentImage();
 
         SyncRenameEditorFromDisk();
@@ -2686,6 +2695,25 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         // The preload itself runs off the UI thread.
         EnqueueNeighbours();
         return loaded;
+    }
+
+    private IReadOnlyList<EditOperation> GetEnabledDisplayEditOperations(string path, bool isArchiveBookPage)
+    {
+        if (isArchiveBookPage)
+            return [];
+
+        try
+        {
+            return NonDestructiveEditService
+                .GetOperations(_editStack.LoadSnapshot(path))
+                .Where(operation => operation.Enabled)
+                .ToList();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException)
+        {
+            _log.LogWarning(ex, "Could not load edit preview operations for {Path}", path);
+            return [];
+        }
     }
 
     private void ApplyLoadFailure(Exception ex)
@@ -3506,9 +3534,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         if (result.Success)
         {
-            IsCropMode = false;
-            ClearCropSelection();
-            Toast("Crop added to edit history");
+            var previewUpdated = LoadCurrent(startCropMode: false);
+            if (!previewUpdated)
+            {
+                IsCropMode = false;
+                ClearCropSelection();
+            }
+
+            Toast(previewUpdated ? "Crop applied to preview" : "Crop added to edit history");
         }
         else
         {
