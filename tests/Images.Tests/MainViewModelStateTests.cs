@@ -593,7 +593,13 @@ public sealed class MainViewModelStateTests
             Assert.False(viewModel.IsCropMode);
             Assert.False(viewModel.HasCropSelection);
             Assert.Null(viewModel.CropSelection);
-            Assert.Equal("Crop added to edit history", viewModel.ToastMessage);
+            Assert.Equal("Crop applied to preview", viewModel.ToastMessage);
+            Assert.Equal(1, viewModel.PixelWidth);
+            Assert.Equal(2, viewModel.PixelHeight);
+            var displayed = Assert.IsAssignableFrom<BitmapSource>(viewModel.CurrentImage);
+            Assert.Equal(1, displayed.PixelWidth);
+            Assert.Equal(2, displayed.PixelHeight);
+            Assert.Contains("edit preview", viewModel.DecoderUsed);
 
             var snapshot = new NonDestructiveEditService().LoadSnapshot(image);
             var operation = Assert.Single(snapshot.Operations);
