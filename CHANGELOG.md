@@ -21,6 +21,7 @@ All notable changes to **Images** are documented here.
 - **Annotations and redaction** — a modeless annotations workbench now supports arrows, boxes, circles, text labels, numbered callouts, freehand pen strokes, blur redaction, and pixelate redaction as non-destructive edit-stack operations rendered on Save a copy.
 - **Perspective correction** — `Ctrl+Alt+P` opens a modeless four-corner perspective workbench with draggable handles, keystone nudges, XMP edit-stack storage, and Magick.NET perspective rendering on Save a copy.
 - **Auto Enhance** — `Ctrl+Alt+E` now adds a one-click balanced enhancement edit with automatic gamma, white balance, contrast curve, and mild sharpening during Save a copy/export rendering.
+- **Copy/Move to folder** — the viewport context menu now copies or moves the current file to a chosen folder, preserves matching XMP sidecars, resolves destination name collisions safely, remembers recent transfer destinations, and refreshes the shell after moves/copies.
 
 ## v0.2.11 — 2026-05-05
 

@@ -415,6 +415,53 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void CopyToFolderCommand_UsesPickerCopiesSidecarAndTracksRecentDestination()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var destination = Path.Combine(temp.Path, "destination");
+            Directory.CreateDirectory(destination);
+            var image = WritePng(temp.Path, "a.png");
+            File.WriteAllText(image + ".xmp", "edit-stack");
+            using var viewModel = CreateViewModelWithFastPreview(temp, pickFolder: _ => destination);
+
+            viewModel.OpenFile(image);
+            viewModel.CopyToFolderCommand.Execute(null);
+
+            var copied = Path.Combine(destination, "a.png");
+            Assert.True(File.Exists(image));
+            Assert.True(File.Exists(copied));
+            Assert.Equal("edit-stack", File.ReadAllText(copied + ".xmp"));
+            Assert.Equal([destination], viewModel.RecentTransferFolders);
+            Assert.Equal("Copied to destination\\a.png", viewModel.ToastMessage);
+        });
+    }
+
+    [Fact]
+    public void MoveToFolderCommand_WithRecentDestinationMovesCurrentImageAndReloadsTarget()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var destination = Path.Combine(temp.Path, "destination");
+            Directory.CreateDirectory(destination);
+            var image = WritePng(temp.Path, "a.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(image);
+            viewModel.MoveToFolderCommand.Execute(destination);
+
+            var moved = Path.Combine(destination, "a.png");
+            Assert.False(File.Exists(image));
+            Assert.True(File.Exists(moved));
+            Assert.Equal(moved, viewModel.CurrentPath);
+            Assert.Equal([destination], viewModel.RecentTransferFolders);
+            Assert.Equal("Moved to destination\\a.png", viewModel.ToastMessage);
+        });
+    }
+
+    [Fact]
     public void DeleteCommand_WhenConfirmationDisabled_SkipsDialogAndAdvances()
     {
         RunOnSta(() =>
@@ -1313,7 +1360,10 @@ public sealed class MainViewModelStateTests
     private static MainViewModel CreateViewModel(TestDirectory temp, ClipboardImportService? clipboardImport = null)
         => new(CreateSettings(temp), clipboardImport);
 
-    private static MainViewModel CreateViewModelWithFastPreview(TestDirectory temp, ClipboardImportService? clipboardImport = null)
+    private static MainViewModel CreateViewModelWithFastPreview(
+        TestDirectory temp,
+        ClipboardImportService? clipboardImport = null,
+        Func<string, string?>? pickFolder = null)
         => new(
             CreateSettings(temp),
             clipboardImport,
@@ -1326,7 +1376,8 @@ public sealed class MainViewModelStateTests
             photoMetadata: null,
             ocrWorkflow: null,
             externalEditReload: null,
-            updateCheck: null);
+            updateCheck: null,
+            pickFolder: pickFolder);
 
     private static SettingsService CreateSettings(TestDirectory temp)
         => new(Path.Combine(temp.Path, "settings.db"));

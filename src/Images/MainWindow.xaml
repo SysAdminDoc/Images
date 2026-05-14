@@ -222,6 +222,46 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Copy to folder..." Command="{Binding CopyToFolderCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Copy to recent folder"
+                                  ItemsSource="{Binding RecentTransferFolders}"
+                                  Visibility="{Binding RecentTransferFolders.Count, Converter={StaticResource BoolToVis}}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
+                            </MenuItem.Icon>
+                            <MenuItem.ItemContainerStyle>
+                                <Style TargetType="{x:Type MenuItem}">
+                                    <Setter Property="Header" Value="{Binding Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}" />
+                                    <Setter Property="ToolTip" Value="{Binding}" />
+                                    <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.CopyToFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                    <Setter Property="CommandParameter" Value="{Binding}" />
+                                </Style>
+                            </MenuItem.ItemContainerStyle>
+                        </MenuItem>
+                        <MenuItem Header="Move to folder..." Command="{Binding MoveToFolderCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Move to recent folder"
+                                  ItemsSource="{Binding RecentTransferFolders}"
+                                  Visibility="{Binding RecentTransferFolders.Count, Converter={StaticResource BoolToVis}}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
+                            </MenuItem.Icon>
+                            <MenuItem.ItemContainerStyle>
+                                <Style TargetType="{x:Type MenuItem}">
+                                    <Setter Property="Header" Value="{Binding Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}" />
+                                    <Setter Property="ToolTip" Value="{Binding}" />
+                                    <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.MoveToFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                    <Setter Property="CommandParameter" Value="{Binding}" />
+                                </Style>
+                            </MenuItem.ItemContainerStyle>
+                        </MenuItem>
                         <MenuItem Header="Open with default app" Command="{Binding OpenInDefaultAppCommand}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B5;" />

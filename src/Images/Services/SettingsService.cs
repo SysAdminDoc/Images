@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text.Json;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 
@@ -313,6 +314,77 @@ public sealed class SettingsService
         return Path.TrimEndingDirectorySeparator(fullPath);
     }
 
+    // ---------------- Recent transfer destinations MRU ----------------
+
+    public void TouchRecentTransferFolder(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return;
+        if (!_isAvailable) return;
+
+        try
+        {
+            var normalizedPath = NormalizeRecentFolderPath(path);
+            if (!Directory.Exists(normalizedPath)) return;
+
+            var fresh = new List<string> { normalizedPath };
+            foreach (var existing in GetRecentTransferFolders(max: 100))
+            {
+                if (!string.Equals(existing, normalizedPath, StringComparison.OrdinalIgnoreCase))
+                    fresh.Add(existing);
+                if (fresh.Count >= 10)
+                    break;
+            }
+
+            SetString(Keys.RecentTransferFolders, JsonSerializer.Serialize(fresh));
+        }
+        catch (Exception ex) when (IsRecoverableStorageFailure(ex) || ex is JsonException)
+        {
+            _log.LogWarning(ex, "TouchRecentTransferFolder failed");
+        }
+    }
+
+    public IReadOnlyList<string> GetRecentTransferFolders(int max = 10)
+        => GetRecentFolderListSetting(Keys.RecentTransferFolders, max);
+
+    private IReadOnlyList<string> GetRecentFolderListSetting(string key, int max)
+    {
+        var result = new List<string>();
+        if (!_isAvailable) return result;
+        if (max <= 0) return result;
+        max = Math.Min(max, 100);
+
+        try
+        {
+            var raw = GetString(key);
+            if (string.IsNullOrWhiteSpace(raw))
+                return result;
+
+            var parsed = JsonSerializer.Deserialize<List<string>>(raw);
+            if (parsed is null)
+                return result;
+
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var folder in parsed)
+            {
+                if (string.IsNullOrWhiteSpace(folder)) continue;
+
+                var normalizedPath = NormalizeRecentFolderPath(folder);
+                if (!seen.Add(normalizedPath)) continue;
+                if (!Directory.Exists(normalizedPath)) continue;
+
+                result.Add(normalizedPath);
+                if (result.Count >= max)
+                    break;
+            }
+        }
+        catch (Exception ex) when (IsRecoverableStorageFailure(ex) || ex is JsonException)
+        {
+            _log.LogWarning(ex, "GetRecentFolderListSetting({Key}) failed", key);
+        }
+
+        return result;
+    }
+
     private static bool IsRecoverableStorageFailure(Exception ex)
         => ex is SqliteException or IOException or UnauthorizedAccessException or InvalidOperationException;
 }
@@ -336,6 +408,7 @@ public static class Keys
     public const string FilmstripVisible = "viewer.filmstrip.visible";
     public const string MetadataHudVisible = "viewer.metadata-hud.visible";
     public const string ConfirmRecycleBinDelete = "viewer.delete.confirm-recycle";
+    public const string RecentTransferFolders = "viewer.transfer.recent-folders";
     public const string ArchiveRightToLeft = "viewer.archive.right-to-left";
     public const string ArchiveOldScanFilter = "viewer.archive.old-scan-filter";
     public const string ArchiveSpreadMode = "viewer.archive.spread-mode";

@@ -27,7 +27,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly UpdateCheckController _updateCheck;
     private readonly RecycleBinDeleteService _recycleBinDelete;
     private readonly NonDestructiveEditService _editStack = new();
+    private readonly ImageFileTransferService _fileTransfer = new();
     private readonly Func<LosslessJpegTrimConfirmation, LosslessJpegTrimChoice> _confirmLosslessJpegTrim;
+    private readonly Func<string, string?> _pickFolder;
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
     private readonly DispatcherTimer _animationTimer;
@@ -72,7 +74,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OcrWorkflowController? ocrWorkflow,
         ExternalEditReloadController? externalEditReload,
         UpdateCheckController? updateCheck,
-        Func<LosslessJpegTrimConfirmation, LosslessJpegTrimChoice>? confirmLosslessJpegTrim = null)
+        Func<LosslessJpegTrimConfirmation, LosslessJpegTrimChoice>? confirmLosslessJpegTrim = null,
+        Func<string, string?>? pickFolder = null)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _clipboardImport = clipboardImport ?? new ClipboardImportService();
@@ -102,6 +105,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             openTarget: ShellIntegration.OpenShellTarget,
             invalidateCommands: CommandManager.InvalidateRequerySuggested);
         _confirmLosslessJpegTrim = confirmLosslessJpegTrim ?? ShowLosslessJpegTrimConfirmation;
+        _pickFolder = pickFolder ?? PickFolder;
         _updateCheck.PropertyChanged += (_, e) =>
         {
             if (!string.IsNullOrEmpty(e.PropertyName))
@@ -195,6 +199,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         FlipVerticalCommand = new RelayCommand(() => { FlipVertical = !FlipVertical; }, () => CanUseDisplayImageCommands);
         RevealCommand = new RelayCommand(RevealInExplorer, () => HasImage);
         CopyPathCommand = new RelayCommand(CopyPath, () => HasImage);
+        CopyToFolderCommand = new RelayCommand(p => TransferCurrentImage(ImageFileTransferMode.Copy, p as string), _ => CanUseImageCommands);
+        MoveToFolderCommand = new RelayCommand(p => TransferCurrentImage(ImageFileTransferMode.Move, p as string), _ => CanUseImageCommands);
         SetAsWallpaperCommand = new RelayCommand(SetAsWallpaper, () => CanUseImageCommands);
         ReloadCommand = new RelayCommand(async () => await ReloadCurrentAsync(), () => CanUseImageCommands);
         PrintCommand = new RelayCommand(PrintCurrent, () => CanUseDisplayImageCommands);
@@ -242,6 +248,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
         // panel renders prior-session folders before the user opens anything.
         RefreshRecentFolders();
+        RefreshRecentTransferFolders();
         RefreshArchiveReadHistory();
 
         _rename.Renamed += (_, e) => PushUndoEntry(e);
@@ -1585,6 +1592,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         foreach (var f in fresh) RecentFolders.Add(f);
     }
 
+    public ObservableCollection<string> RecentTransferFolders { get; } = new();
+
+    private void RefreshRecentTransferFolders()
+    {
+        var fresh = _settings.GetRecentTransferFolders();
+        RecentTransferFolders.Clear();
+        foreach (var f in fresh) RecentTransferFolders.Add(f);
+    }
+
     public ObservableCollection<ArchiveReadPositionService.ArchiveReadHistoryItem> RecentArchiveBooks { get; } = new();
 
     private bool _archiveRightToLeft;
@@ -2214,6 +2230,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand FlipVerticalCommand { get; }
     public ICommand RevealCommand { get; }
     public ICommand CopyPathCommand { get; }
+    public ICommand CopyToFolderCommand { get; }
+    public ICommand MoveToFolderCommand { get; }
     public ICommand SetAsWallpaperCommand { get; }
     public ICommand ReloadCommand { get; }
     public ICommand PrintCommand { get; }
@@ -4487,6 +4505,119 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (path is null) return;
         try { ClipboardService.SetText(path); Toast("Copied path"); }
         catch (Exception ex) { Toast($"Copy failed: {ex.Message}"); }
+    }
+
+    private void TransferCurrentImage(ImageFileTransferMode mode, string? destinationFolder)
+    {
+        if (CurrentPath is null || IsOperationBusy) return;
+
+        var sourcePath = CurrentPath;
+        if (string.IsNullOrWhiteSpace(destinationFolder))
+        {
+            try
+            {
+                destinationFolder = _pickFolder(mode == ImageFileTransferMode.Copy
+                    ? "Copy image to folder"
+                    : "Move image to folder");
+            }
+            catch (Exception ex)
+            {
+                Toast($"Folder picker failed: {ex.Message}");
+                return;
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(destinationFolder))
+            return;
+
+        var verb = mode == ImageFileTransferMode.Copy ? "Copying" : "Moving";
+        BeginOperationStatus($"{verb} image", $"{verb} {Path.GetFileName(sourcePath)} to {DisplayFolderName(destinationFolder)}.");
+        try
+        {
+            var result = _fileTransfer.Transfer(sourcePath, destinationFolder, mode);
+            HandleTransferResult(result, destinationFolder);
+        }
+        finally
+        {
+            EndOperationStatus();
+        }
+    }
+
+    private void HandleTransferResult(ImageFileTransferResult result, string requestedDestinationFolder)
+    {
+        switch (result.Status)
+        {
+            case ImageFileTransferStatus.Succeeded:
+                HandleSuccessfulTransfer(result, requestedDestinationFolder);
+                break;
+            case ImageFileTransferStatus.AlreadyInDestination:
+                Toast($"Already in {DisplayFolderName(requestedDestinationFolder)}");
+                break;
+            case ImageFileTransferStatus.SourceMissing:
+                ShowSecondaryStatus(
+                    "File no longer exists",
+                    "The image could not be copied or moved because it was removed from disk.",
+                    SecondaryStatusToneKind.Warning,
+                    "\uE783");
+                Toast("File no longer exists");
+                break;
+            case ImageFileTransferStatus.DestinationMissing:
+                ShowSecondaryStatus(
+                    "Transfer folder unavailable",
+                    "It was removed from the recent destination list because the folder no longer exists.",
+                    SecondaryStatusToneKind.Warning,
+                    "\uE8B7");
+                RefreshRecentTransferFolders();
+                Toast("Transfer folder no longer exists");
+                break;
+            case ImageFileTransferStatus.UnsupportedSource:
+                ShowSecondaryStatus(
+                    "File type not supported",
+                    "Only files Images can open can be copied or moved from this viewer.",
+                    SecondaryStatusToneKind.Warning,
+                    "\uE783");
+                Toast("Transfer failed: unsupported file type");
+                break;
+            default:
+                ShowSecondaryStatus(
+                    result.Mode == ImageFileTransferMode.Copy ? "Copy failed" : "Move failed",
+                    FirstLine(result.Message),
+                    SecondaryStatusToneKind.Error,
+                    "\uE783");
+                Toast($"{(result.Mode == ImageFileTransferMode.Copy ? "Copy" : "Move")} failed: {FirstLine(result.Message)}");
+                break;
+        }
+    }
+
+    private void HandleSuccessfulTransfer(ImageFileTransferResult result, string requestedDestinationFolder)
+    {
+        var destinationFolder = Path.GetDirectoryName(result.DestinationPath) ?? requestedDestinationFolder;
+        _settings.TouchRecentTransferFolder(destinationFolder);
+        RefreshRecentTransferFolders();
+
+        ShellChangeNotificationService.NotifyFileUpdated(result.DestinationPath);
+        ShellChangeNotificationService.NotifyFileUpdated(result.SourcePath);
+
+        ClearSecondaryStatus();
+        var destinationLabel = $"{DisplayFolderName(destinationFolder)}\\{Path.GetFileName(result.DestinationPath)}";
+        if (result.Mode == ImageFileTransferMode.Move)
+        {
+            OpenFile(result.DestinationPath);
+            Toast($"Moved to {destinationLabel}");
+            return;
+        }
+
+        Toast($"Copied to {destinationLabel}");
+    }
+
+    private static string? PickFolder(string title)
+    {
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = title
+        };
+
+        return dialog.ShowDialog() == true ? dialog.FolderName : null;
     }
 
     // P-04: checks GitHub Releases API for a newer tag. userInitiated=true fires regardless of
