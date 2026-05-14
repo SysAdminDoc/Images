@@ -282,6 +282,9 @@ public sealed class NonDestructiveEditService
                 case "adjust":
                     ImageAdjustmentService.Apply(image, ImageAdjustmentService.FromParameters(operation.Parameters));
                     break;
+                case "effects":
+                    ImageEffectsService.Apply(image, ImageEffectsService.FromParameters(operation.Parameters));
+                    break;
                 case "local-exposure":
                     LocalExposureBrushService.Apply(image, LocalExposureBrushService.FromParameters(operation.Parameters));
                     break;
@@ -708,7 +711,7 @@ public sealed class NonDestructiveEditService
             return false;
         }
 
-        if (normalized is "crop" or "resize" or "adjust" or "local-exposure" or "red-eye" or "retouch" or "rotate" or "flip-horizontal" or "flip-vertical")
+        if (normalized is "crop" or "resize" or "adjust" or "effects" or "local-exposure" or "red-eye" or "retouch" or "rotate" or "flip-horizontal" or "flip-vertical")
             return true;
 
         error = $"Unsupported edit operation: {kind}.";
@@ -724,6 +727,7 @@ public sealed class NonDestructiveEditService
             "crop" => "Crop",
             "resize" => "Resize",
             "adjust" => "Adjust",
+            "effects" => "Effects",
             "local-exposure" => "Local exposure",
             "red-eye" => "Red-eye correction",
             "retouch" => "Retouch",
