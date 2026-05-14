@@ -30,6 +30,7 @@ All under `%LOCALAPPDATA%\Images\` (with a fallback to `%TEMP%\Images\` when Loc
 | `update-check.json` | Last-checked timestamp + latest known tag | The most recent update-check result |
 | `thumbs/<aa>/<sha1>.webp` | Disk thumbnail cache | Resized thumbnails of files you have opened |
 | `wallpaper/current.<ext>` | Stable copy for "Set as wallpaper" | A copy of the image you last set as wallpaper |
+| `email-drafts/images-email-<timestamp>-<guid>.eml` | Temporary unsent email draft opened by "Send to email" | A MIME email draft containing the selected image as an attachment and its source path in the message body |
 
 You can delete any entry above without losing data the app actually owns. Originals on disk are never modified by these caches.
 

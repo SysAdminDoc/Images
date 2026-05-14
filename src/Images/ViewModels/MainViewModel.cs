@@ -31,6 +31,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly Func<LosslessJpegTrimConfirmation, LosslessJpegTrimChoice> _confirmLosslessJpegTrim;
     private readonly Func<string, string?> _pickFolder;
     private readonly Func<string, WallpaperLayout, string> _setWallpaper;
+    private readonly Action<BitmapSource> _copyImageToClipboard;
+    private readonly Action<BitmapSource, string> _copyImageAndPathToClipboard;
+    private readonly Func<string, string> _createEmailDraft;
+    private readonly Action<string> _openShellTarget;
+    private readonly Action<BitmapSource, string> _printDefault;
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
     private readonly DispatcherTimer _animationTimer;
@@ -77,7 +82,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         UpdateCheckController? updateCheck,
         Func<LosslessJpegTrimConfirmation, LosslessJpegTrimChoice>? confirmLosslessJpegTrim = null,
         Func<string, string?>? pickFolder = null,
-        Func<string, WallpaperLayout, string>? setWallpaper = null)
+        Func<string, WallpaperLayout, string>? setWallpaper = null,
+        Action<BitmapSource>? copyImageToClipboard = null,
+        Action<BitmapSource, string>? copyImageAndPathToClipboard = null,
+        Func<string, string>? createEmailDraft = null,
+        Action<string>? openShellTarget = null,
+        Action<BitmapSource, string>? printDefault = null)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _clipboardImport = clipboardImport ?? new ClipboardImportService();
@@ -109,6 +119,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _confirmLosslessJpegTrim = confirmLosslessJpegTrim ?? ShowLosslessJpegTrimConfirmation;
         _pickFolder = pickFolder ?? PickFolder;
         _setWallpaper = setWallpaper ?? WallpaperService.SetFromFile;
+        _copyImageToClipboard = copyImageToClipboard ?? ClipboardService.SetImage;
+        _copyImageAndPathToClipboard = copyImageAndPathToClipboard ?? ClipboardService.SetImageAndPath;
+        _createEmailDraft = createEmailDraft ?? (path => EmailShareService.CreateDraftWithAttachment(path).DraftPath);
+        _openShellTarget = openShellTarget ?? ShellIntegration.OpenShellTarget;
+        _printDefault = printDefault ?? PrintService.PrintDefault;
         _updateCheck.PropertyChanged += (_, e) =>
         {
             if (!string.IsNullOrEmpty(e.PropertyName))
@@ -202,11 +217,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         FlipVerticalCommand = new RelayCommand(() => { FlipVertical = !FlipVertical; }, () => CanUseDisplayImageCommands);
         RevealCommand = new RelayCommand(RevealInExplorer, () => HasImage);
         CopyPathCommand = new RelayCommand(CopyPath, () => HasImage);
+        CopyImageCommand = new RelayCommand(CopyCurrentImage, () => CanUseDisplayImageCommands);
+        CopyImageAndPathCommand = new RelayCommand(CopyCurrentImageAndPath, () => CanUseDisplayImageCommands && HasImage);
         CopyToFolderCommand = new RelayCommand(p => TransferCurrentImage(ImageFileTransferMode.Copy, p as string), _ => CanUseImageCommands);
         MoveToFolderCommand = new RelayCommand(p => TransferCurrentImage(ImageFileTransferMode.Move, p as string), _ => CanUseImageCommands);
         SetAsWallpaperCommand = new RelayCommand(SetAsWallpaper, _ => CanUseImageCommands);
         ReloadCommand = new RelayCommand(async () => await ReloadCurrentAsync(), () => CanUseImageCommands);
         PrintCommand = new RelayCommand(PrintCurrent, () => CanUseDisplayImageCommands);
+        PrintDefaultCommand = new RelayCommand(PrintCurrentToDefault, () => CanUseDisplayImageCommands);
+        SendToEmailCommand = new RelayCommand(SendCurrentToEmail, () => CanUseImageCommands);
         SaveAsCopyCommand = new RelayCommand(async () => await SaveAsCopyAsync(), () => CanUseDisplayImageCommands);
         CheckForUpdatesCommand = new RelayCommand(async () => await CheckForUpdatesAsync(userInitiated: true), () => !IsCheckingForUpdates);
         OpenLatestUpdateCommand = new RelayCommand(_updateCheck.OpenLatestUpdate, () => HasUpdateAvailable && !IsCheckingForUpdates);
@@ -2233,11 +2252,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand FlipVerticalCommand { get; }
     public ICommand RevealCommand { get; }
     public ICommand CopyPathCommand { get; }
+    public ICommand CopyImageCommand { get; }
+    public ICommand CopyImageAndPathCommand { get; }
     public ICommand CopyToFolderCommand { get; }
     public ICommand MoveToFolderCommand { get; }
     public ICommand SetAsWallpaperCommand { get; }
     public ICommand ReloadCommand { get; }
     public ICommand PrintCommand { get; }
+    public ICommand PrintDefaultCommand { get; }
+    public ICommand SendToEmailCommand { get; }
     public ICommand SaveAsCopyCommand { get; }
     public ICommand CheckForUpdatesCommand { get; }
     public ICommand OpenLatestUpdateCommand { get; }
@@ -2561,6 +2584,27 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         catch (Exception ex)
         {
             Toast($"Could not open: {ex.Message}");
+        }
+    }
+
+    private void SendCurrentToEmail()
+    {
+        if (CurrentPath is null) return;
+
+        try
+        {
+            var draftPath = _createEmailDraft(CurrentPath);
+            _openShellTarget(draftPath);
+            Toast("Email draft opened");
+        }
+        catch (Exception ex)
+        {
+            ShowSecondaryStatus(
+                "Email draft failed",
+                FirstLine(ex.Message),
+                SecondaryStatusToneKind.Warning,
+                "\uE783");
+            Toast($"Email failed: {FirstLine(ex.Message)}");
         }
     }
 
@@ -4515,6 +4559,34 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         catch (Exception ex) { Toast($"Copy failed: {ex.Message}"); }
     }
 
+    private void CopyCurrentImage()
+    {
+        if (CurrentImage is not BitmapSource bitmap) return;
+        try
+        {
+            _copyImageToClipboard(bitmap);
+            Toast("Copied image");
+        }
+        catch (Exception ex)
+        {
+            Toast($"Copy failed: {ex.Message}");
+        }
+    }
+
+    private void CopyCurrentImageAndPath()
+    {
+        if (CurrentImage is not BitmapSource bitmap || CurrentPath is null) return;
+        try
+        {
+            _copyImageAndPathToClipboard(bitmap, CurrentPath);
+            Toast("Copied image and path");
+        }
+        catch (Exception ex)
+        {
+            Toast($"Copy failed: {ex.Message}");
+        }
+    }
+
     private void TransferCurrentImage(ImageFileTransferMode mode, string? destinationFolder)
     {
         if (CurrentPath is null || IsOperationBusy) return;
@@ -4771,6 +4843,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         catch (Exception ex)
         {
             Toast($"Print failed: {ex.Message}");
+        }
+    }
+
+    private void PrintCurrentToDefault()
+    {
+        if (CurrentImage is not System.Windows.Media.Imaging.BitmapSource bs || CurrentPath is null) return;
+        try
+        {
+            _printDefault(bs, System.IO.Path.GetFileName(CurrentPath));
+            Toast("Sent to default printer");
+        }
+        catch (Exception ex)
+        {
+            Toast($"Default print failed: {ex.Message}");
         }
     }
 

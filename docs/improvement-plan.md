@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V30-21` is complete. Images now offers explicit Fill, Fit, Span, and Tile wallpaper modes while preserving the stable app-data wallpaper copy behavior.
+Roadmap `V30-22` is complete. Images now has no-dialog default-printer output, local email drafts with the current file attached, and clipboard commands for image-only or combined image/path payloads.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the remaining editor/file roadmap: approved lossless JPEG runtime artifact staging, richer selection/content-aware repair tools, and the remaining V30 file-operation item (`V30-22` send/email/default print/clipboard actions). The content-aware inpaint runtime/model choice is now scoped in `docs/inpaint-runtime-decision.md`.
+The improvement-plan backlog is complete. Continue later with the remaining editor/file roadmap: approved lossless JPEG runtime artifact staging, richer selection/content-aware repair tools, configurable external editors, and scan/TWAIN investigation. The content-aware inpaint runtime/model choice is now scoped in `docs/inpaint-runtime-decision.md`.
 
 ## Research Inputs
 
@@ -144,6 +144,7 @@ The improvement-plan backlog is complete. Continue with the remaining editor/fil
 - 2026-05-05: Closed roadmap `V40-62` by adding current-folder Gallery smart filters backed by `AssetSmartFilterService`, covering format, folder, sidecar rating/tag data, palette, orientation, dimensions, date, and exact duplicate status with quick chips, token filters, clear-filter UX, and regression coverage.
 - 2026-05-14: Closed roadmap `V30-20` by adding copy/move-to-folder actions with recent transfer destinations, collision-safe destination naming, XMP sidecar transfer, moved-file reload, shell refresh notifications, and service/ViewModel/settings regression coverage.
 - 2026-05-14: Closed roadmap `V30-21` by adding Fill, Fit, Span, and Tile wallpaper modes backed by Windows wallpaper registry style values, stable-copy preservation, context-menu mode selection, and service/ViewModel regression coverage.
+- 2026-05-14: Closed roadmap `V30-22` by adding local `.eml` email draft creation with attachment, default-printer output without a dialog, copy-image and copy-image-plus-path clipboard payloads, CLI storage-path reporting, privacy documentation, and regression coverage around all non-deterministic OS seams.
 
 ## Verification Standard
 

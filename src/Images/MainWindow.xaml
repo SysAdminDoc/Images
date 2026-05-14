@@ -211,6 +211,16 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE749;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Print to default printer" Command="{Binding PrintDefaultCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE749;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Send to email" Command="{Binding SendToEmailCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE715;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <Separator />
                         <MenuItem Header="Reveal in Explorer" Command="{Binding RevealCommand}">
                             <MenuItem.Icon>
@@ -218,6 +228,16 @@
                             </MenuItem.Icon>
                         </MenuItem>
                         <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Copy image" Command="{Binding CopyImageCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Copy image and path" Command="{Binding CopyImageAndPathCommand}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
                             </MenuItem.Icon>
