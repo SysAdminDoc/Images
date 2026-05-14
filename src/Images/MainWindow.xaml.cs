@@ -15,6 +15,7 @@ public partial class MainWindow : Window
 {
     private MainViewModel Vm => (MainViewModel)DataContext;
     private PixelCoordinate? _inspectorSelectionStart;
+    private PixelCoordinate? _canvasSelectionStart;
     private PixelCoordinate? _cropSelectionStart;
     private bool _exposureBrushPainting;
     private bool _redEyeCorrectionPainting;
@@ -463,6 +464,17 @@ public partial class MainWindow : Window
                     e.Handled = true;
                     break;
                 }
+                if (Vm.IsSelectionMode || Vm.HasCanvasSelection)
+                {
+                    _canvasSelectionStart = null;
+                    if (Canvas.IsMouseCaptured)
+                        Canvas.ReleaseMouseCapture();
+                    Vm.CancelSelectionCommand.Execute(null);
+                    Keyboard.ClearFocus();
+                    Focus();
+                    e.Handled = true;
+                    break;
+                }
                 if (Vm.IsCropMode || Vm.HasCropSelection)
                 {
                     _cropSelectionStart = null;
@@ -610,6 +622,15 @@ public partial class MainWindow : Window
                 Vm.ToggleCropModeCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.S when Keyboard.Modifiers == ModifierKeys.None:
+                Vm.ToggleSelectionModeCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.C when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control
+                && Vm.CopySelectionCommand.CanExecute(null):
+                Vm.CopySelectionCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.G:
                 Vm.ToggleGalleryCommand.Execute(null);
                 e.Handled = true;
@@ -740,6 +761,12 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (Vm.IsSelectionMode)
+        {
+            HandleSelectionMouseMove(e);
+            return;
+        }
+
         if (Vm.IsCropMode)
         {
             HandleCropMouseMove(e);
@@ -780,6 +807,12 @@ public partial class MainWindow : Window
         if (Vm.IsExposureBrushMode)
         {
             HandleExposureBrushMouseDown(e);
+            return;
+        }
+
+        if (Vm.IsSelectionMode)
+        {
+            HandleSelectionMouseDown(e);
             return;
         }
 
@@ -828,6 +861,12 @@ public partial class MainWindow : Window
         if (_exposureBrushPainting)
         {
             HandleExposureBrushMouseUp(e);
+            return;
+        }
+
+        if (_canvasSelectionStart is not null)
+        {
+            HandleSelectionMouseUp(e);
             return;
         }
 
@@ -951,6 +990,45 @@ public partial class MainWindow : Window
             Vm.AddExposureBrushStroke(coordinate);
 
         _exposureBrushPainting = false;
+        if (Canvas.IsMouseCaptured)
+            Canvas.ReleaseMouseCapture();
+        e.Handled = true;
+    }
+
+    private void HandleSelectionMouseDown(MouseButtonEventArgs e)
+    {
+        if (!TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
+            return;
+
+        Keyboard.ClearFocus();
+        Focus();
+        _canvasSelectionStart = coordinate;
+        Vm.UpdateCanvasSelection(coordinate, coordinate);
+        Canvas.CaptureMouse();
+        e.Handled = true;
+    }
+
+    private void HandleSelectionMouseMove(MouseEventArgs e)
+    {
+        if (_canvasSelectionStart is not { } start)
+            return;
+
+        if (!TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
+            return;
+
+        Vm.UpdateCanvasSelection(start, coordinate);
+        e.Handled = true;
+    }
+
+    private void HandleSelectionMouseUp(MouseButtonEventArgs e)
+    {
+        if (_canvasSelectionStart is { } start &&
+            TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
+        {
+            Vm.UpdateCanvasSelection(start, coordinate);
+        }
+
+        _canvasSelectionStart = null;
         if (Canvas.IsMouseCaptured)
             Canvas.ReleaseMouseCapture();
         e.Handled = true;

@@ -11,6 +11,7 @@ All notable changes to **Images** are documented here.
 - **Immediate edit preview** — applied crop operations now refresh the displayed image immediately, and the main viewer renders enabled edit-stack operations when loading the current image.
 - **Crop file overwrite** — applying a crop now writes the cropped pixels back to the source file, clears baked edit-stack operations, resets stale preload data, and notifies the Windows shell so Explorer thumbnails refresh.
 - **Crop format gate** — crop mode now starts only for flat raster image files such as JPEG, PNG, WebP, TIFF, GIF, BMP, HEIC/AVIF/JXL, and similar bitmap formats; PSD/PSB, vector/document previews, archives, and RAW files remain view-only for crop.
+- **Pixel selection tool** — `S` now toggles a rectangular on-canvas pixel selection mode with copy/clear controls on the selection edge, side-panel controls, and `Ctrl+C` extraction of the selected pixels to the clipboard.
 
 ## v0.2.11 — 2026-05-05
 
