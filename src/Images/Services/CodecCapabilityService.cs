@@ -49,7 +49,13 @@ public static class CodecCapabilityService
         string GhostscriptSource,
         string? GhostscriptVersion,
         string? GhostscriptDllPath,
-        string? GhostscriptDllSha256);
+        string? GhostscriptDllSha256,
+        bool JpegTranAvailable,
+        string? JpegTranExecutablePath,
+        string JpegTranSource,
+        string? JpegTranVersion,
+        string? JpegTranSha256,
+        string JpegTranStatus);
 
     public static string BuildOverviewText()
         => $"WIC + bundled Magick.NET + archive readers; {SupportedImageFormats.Extensions.Count} open extensions; " +
@@ -85,6 +91,7 @@ public static class CodecCapabilityService
     {
         var info = AppInfo.Current;
         var status = CodecRuntime.Status;
+        var jpegTran = JpegTranRuntime.Inspect();
         return new RuntimeProvenance(
             AppVersion: $"Images {info.DisplayVersion} ({info.ProductVersion})",
             Runtime: info.RuntimeDescription,
@@ -100,7 +107,13 @@ public static class CodecCapabilityService
             GhostscriptSource: status.GhostscriptSource,
             GhostscriptVersion: status.GhostscriptAvailable ? CodecRuntime.GetGhostscriptVersion() : null,
             GhostscriptDllPath: CodecRuntime.GetGhostscriptDllPath(),
-            GhostscriptDllSha256: CodecRuntime.GetGhostscriptDllSha256());
+            GhostscriptDllSha256: CodecRuntime.GetGhostscriptDllSha256(),
+            JpegTranAvailable: jpegTran.Available,
+            JpegTranExecutablePath: jpegTran.ExecutablePath,
+            JpegTranSource: jpegTran.Source,
+            JpegTranVersion: jpegTran.Version,
+            JpegTranSha256: jpegTran.Sha256,
+            JpegTranStatus: jpegTran.StatusText);
     }
 
     /// <summary>
@@ -220,6 +233,12 @@ public static class CodecCapabilityService
             sb.AppendLine($"- Ghostscript DLL: {provenance.GhostscriptDllPath}");
         if (provenance.GhostscriptDllSha256 is not null)
             sb.AppendLine($"- Ghostscript DLL SHA-256: {provenance.GhostscriptDllSha256}");
+        sb.AppendLine($"- jpegtran: {(provenance.JpegTranAvailable ? "available" : "not available")}");
+        sb.AppendLine($"- jpegtran source: {provenance.JpegTranExecutablePath ?? provenance.JpegTranSource}");
+        if (provenance.JpegTranVersion is not null)
+            sb.AppendLine($"- jpegtran version: {provenance.JpegTranVersion}");
+        if (provenance.JpegTranSha256 is not null)
+            sb.AppendLine($"- jpegtran SHA-256: {provenance.JpegTranSha256}");
         sb.AppendLine();
 
         sb.AppendLine("Capability matrix");
@@ -244,6 +263,7 @@ public static class CodecCapabilityService
         sb.AppendLine("- PSD and PSB are handled in-process by Magick.NET.");
         sb.AppendLine("- Archive books are read-only; nested archives, document-preview entries, and unsafe paths are ignored.");
         sb.AppendLine("- PDF, EPS, PS, and AI preview rendering requires Ghostscript.");
+        sb.AppendLine("- Lossless JPEG writeback will require an approved libjpeg-turbo jpegtran.exe sidecar.");
         sb.AppendLine("- HEIC/HEIF is available as a read format in this Magick.NET build; export to AVIF, JXL, WebP, PNG, or TIFF.");
         sb.AppendLine("- Camera RAW formats are read-only preview formats; export through Save a copy.");
 

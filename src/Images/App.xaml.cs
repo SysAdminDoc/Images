@@ -37,6 +37,10 @@ public partial class App : Application
             codecStatus.MagickStatus,
             codecStatus.DocumentStatus,
             codecStatus.GhostscriptDirectory ?? "(none)");
+        var jpegTranStatus = JpegTranRuntime.Inspect();
+        _log.LogInformation("JPEG transform runtime: {Status}; Path={Path}",
+            jpegTranStatus.StatusText,
+            jpegTranStatus.ExecutablePath ?? "(none)");
 
         // V15-09 + V02-06 + V02-07: fatal-exception channels go through both the structured
         // logger (for day-to-day diagnostics via Serilog rolling file) AND CrashLog (for the

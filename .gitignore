@@ -46,6 +46,9 @@ installer/*.exe
 src/Images/Codecs/Ghostscript/**
 !src/Images/Codecs/Ghostscript/
 !src/Images/Codecs/Ghostscript/README.txt
+src/Images/Codecs/JpegTran/**
+!src/Images/Codecs/JpegTran/
+!src/Images/Codecs/JpegTran/README.txt
 
 ## OS
 Thumbs.db
