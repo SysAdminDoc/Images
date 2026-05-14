@@ -155,6 +155,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         SetCropAspectPresetCommand = new RelayCommand(SetCropAspectPreset);
         OpenResizeDialogCommand = new RelayCommand(OpenResizeDialog, () => CanUseResize);
         OpenAdjustmentsCommand = new RelayCommand(OpenAdjustments, () => CanUseAdjustments);
+        OpenEffectsCommand = new RelayCommand(OpenEffects, () => CanUseEffects);
         ToggleExposureBrushModeCommand = new RelayCommand(() => IsExposureBrushMode = !IsExposureBrushMode, () => CanUseExposureBrush);
         ApplyExposureBrushCommand = new RelayCommand(ApplyExposureBrush, () => CanApplyExposureBrush);
         CancelExposureBrushCommand = new RelayCommand(CancelExposureBrushMode, () => IsExposureBrushMode || HasExposureBrushStrokes);
@@ -574,6 +575,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool CanUseCrop => CanUsePixelEditTools && CurrentFormatSupportsCrop;
     private bool CanUseResize => CanUsePixelEditTools;
     private bool CanUseAdjustments => CanUsePixelEditTools;
+    private bool CanUseEffects => CanUsePixelEditTools;
     public bool CanUseExposureBrush => CanUsePixelEditTools;
     public bool CanUseRedEyeCorrection => CanUsePixelEditTools;
     public bool CanUseRetouch => CanUsePixelEditTools;
@@ -2144,6 +2146,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand SetCropAspectPresetCommand { get; }
     public ICommand OpenResizeDialogCommand { get; }
     public ICommand OpenAdjustmentsCommand { get; }
+    public ICommand OpenEffectsCommand { get; }
     public ICommand ToggleExposureBrushModeCommand { get; }
     public ICommand ApplyExposureBrushCommand { get; }
     public ICommand CancelExposureBrushCommand { get; }
@@ -3725,6 +3728,32 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
                 var result = _editStack.AppendOperation(imagePath, "adjust", plan.ToEditParameters(), plan.Label);
                 Toast(result.Success ? "Adjustment added to edit history" : result.Message);
+            })
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        window.Show();
+    }
+
+    private void OpenEffects()
+    {
+        if (!CanUseEffects || CurrentPath is null)
+            return;
+
+        var imagePath = CurrentPath;
+        var window = new Images.EffectsWindow(
+            imagePath,
+            plan =>
+            {
+                if (!File.Exists(imagePath))
+                {
+                    Toast("Effects failed: image is no longer available");
+                    return;
+                }
+
+                var result = _editStack.AppendOperation(imagePath, "effects", plan.ToEditParameters(), plan.Label);
+                Toast(result.Success ? "Effects added to edit history" : result.Message);
             })
         {
             Owner = Application.Current?.MainWindow
