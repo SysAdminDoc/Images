@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <None Include="Codecs\Ghostscript\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="Codecs\JpegTran\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

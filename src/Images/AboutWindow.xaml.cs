@@ -399,8 +399,9 @@ public partial class AboutWindow : Window
 
     /// <summary>
     /// Populates the provenance card with the live runtime snapshot — Magick.NET version +
-    /// assembly path, Ghostscript path/source/version/SHA-256 — so the values match exactly
-    /// what <c>--system-info</c> would print.
+    /// assembly path, Ghostscript path/source/version/SHA-256, and jpegtran sidecar
+    /// path/source/version/SHA-256 — so the values match exactly what <c>--system-info</c>
+    /// would print.
     /// </summary>
     private void PopulateProvenance()
     {
@@ -424,6 +425,13 @@ public partial class AboutWindow : Window
             AddProvenanceRow("Ghostscript DLL", p.GhostscriptDllPath);
         if (p.GhostscriptDllSha256 is not null)
             AddProvenanceRow("DLL SHA-256", p.GhostscriptDllSha256);
+
+        AddProvenanceRow("jpegtran", p.JpegTranAvailable ? "available" : "not available");
+        AddProvenanceRow("jpegtran source", p.JpegTranExecutablePath ?? p.JpegTranSource);
+        if (p.JpegTranVersion is not null)
+            AddProvenanceRow("jpegtran ver", p.JpegTranVersion);
+        if (p.JpegTranSha256 is not null)
+            AddProvenanceRow("jpegtran SHA-256", p.JpegTranSha256);
     }
 
     private void AddProvenanceRow(string label, string value)
