@@ -83,6 +83,50 @@ public sealed class ImageExportServiceTests
         Assert.True(File.GetLastWriteTimeUtc(source) > previousWriteTime);
     }
 
+    [Fact]
+    public void Overwrite_WithRotateOperation_ReplacesSourcePixelsAndTouchesFile()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Path.Combine(temp.Path, "source.png");
+        var bitmap = BitmapSource.Create(
+            2,
+            3,
+            96,
+            96,
+            PixelFormats.Bgra32,
+            null,
+            new byte[]
+            {
+                0x10, 0x20, 0x30, 0xFF, 0x40, 0x50, 0x60, 0xFF,
+                0x70, 0x80, 0x90, 0xFF, 0xA0, 0xB0, 0xC0, 0xFF,
+                0xD0, 0xE0, 0xF0, 0xFF, 0x11, 0x22, 0x33, 0xFF
+            },
+            8);
+        bitmap.Freeze();
+        ImageExportService.Save(bitmap, source);
+        var previousWriteTime = DateTime.UtcNow - TimeSpan.FromMinutes(10);
+        File.SetLastWriteTimeUtc(source, previousWriteTime);
+        var operations = new[]
+        {
+            new EditOperation(
+                "rotate-test",
+                "rotate",
+                DateTimeOffset.UtcNow,
+                Enabled: true,
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["degrees"] = "90"
+                },
+                "Rotate test")
+        };
+
+        var savedPath = ImageExportService.Overwrite(source, operations);
+
+        Assert.Equal(Path.GetFullPath(source), savedPath);
+        Assert.Equal((3, 2), ReadImageSize(source));
+        Assert.True(File.GetLastWriteTimeUtc(source) > previousWriteTime);
+    }
+
     [Theory]
     [InlineData(".jpg", true)]
     [InlineData(".png", true)]
