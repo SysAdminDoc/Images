@@ -582,6 +582,10 @@ public partial class MainWindow : Window
                 Vm.OpenEffectsCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.P when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
+                Vm.OpenPerspectiveCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.D when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
                 Vm.ToggleExposureBrushModeCommand.Execute(null);
                 e.Handled = true;

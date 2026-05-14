@@ -161,6 +161,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenAdjustmentsCommand = new RelayCommand(OpenAdjustments, () => CanUseAdjustments);
         OpenEffectsCommand = new RelayCommand(OpenEffects, () => CanUseEffects);
         OpenAnnotationsCommand = new RelayCommand(OpenAnnotations, () => CanUseAnnotations);
+        OpenPerspectiveCommand = new RelayCommand(OpenPerspective, () => CanUsePerspective);
         ToggleExposureBrushModeCommand = new RelayCommand(() => IsExposureBrushMode = !IsExposureBrushMode, () => CanUseExposureBrush);
         ApplyExposureBrushCommand = new RelayCommand(ApplyExposureBrush, () => CanApplyExposureBrush);
         CancelExposureBrushCommand = new RelayCommand(CancelExposureBrushMode, () => IsExposureBrushMode || HasExposureBrushStrokes);
@@ -590,6 +591,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool CanUseAdjustments => CanUsePixelEditTools;
     private bool CanUseEffects => CanUsePixelEditTools;
     private bool CanUseAnnotations => CanUsePixelEditTools;
+    private bool CanUsePerspective => CanUsePixelEditTools;
     public bool CanUseExposureBrush => CanUsePixelEditTools;
     public bool CanUseRedEyeCorrection => CanUsePixelEditTools;
     public bool CanUseRetouch => CanUsePixelEditTools;
@@ -2176,6 +2178,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenAdjustmentsCommand { get; }
     public ICommand OpenEffectsCommand { get; }
     public ICommand OpenAnnotationsCommand { get; }
+    public ICommand OpenPerspectiveCommand { get; }
     public ICommand ToggleExposureBrushModeCommand { get; }
     public ICommand ApplyExposureBrushCommand { get; }
     public ICommand CancelExposureBrushCommand { get; }
@@ -3942,6 +3945,32 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
                 var result = _editStack.AppendOperation(imagePath, "annotation", plan.ToEditParameters(), plan.Label);
                 Toast(result.Success ? "Annotations added to edit history" : result.Message);
+            })
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        window.Show();
+    }
+
+    private void OpenPerspective()
+    {
+        if (!CanUsePerspective || CurrentPath is null)
+            return;
+
+        var imagePath = CurrentPath;
+        var window = new Images.PerspectiveCorrectionWindow(
+            imagePath,
+            plan =>
+            {
+                if (!File.Exists(imagePath))
+                {
+                    Toast("Perspective failed: image is no longer available");
+                    return;
+                }
+
+                var result = _editStack.AppendOperation(imagePath, "perspective", plan.ToEditParameters(), plan.Label);
+                Toast(result.Success ? "Perspective correction added to edit history" : result.Message);
             })
         {
             Owner = Application.Current?.MainWindow
