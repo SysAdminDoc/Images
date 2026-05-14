@@ -30,6 +30,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly ImageFileTransferService _fileTransfer = new();
     private readonly Func<LosslessJpegTrimConfirmation, LosslessJpegTrimChoice> _confirmLosslessJpegTrim;
     private readonly Func<string, string?> _pickFolder;
+    private readonly Func<string, WallpaperLayout, string> _setWallpaper;
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
     private readonly DispatcherTimer _animationTimer;
@@ -75,7 +76,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ExternalEditReloadController? externalEditReload,
         UpdateCheckController? updateCheck,
         Func<LosslessJpegTrimConfirmation, LosslessJpegTrimChoice>? confirmLosslessJpegTrim = null,
-        Func<string, string?>? pickFolder = null)
+        Func<string, string?>? pickFolder = null,
+        Func<string, WallpaperLayout, string>? setWallpaper = null)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _clipboardImport = clipboardImport ?? new ClipboardImportService();
@@ -106,6 +108,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             invalidateCommands: CommandManager.InvalidateRequerySuggested);
         _confirmLosslessJpegTrim = confirmLosslessJpegTrim ?? ShowLosslessJpegTrimConfirmation;
         _pickFolder = pickFolder ?? PickFolder;
+        _setWallpaper = setWallpaper ?? WallpaperService.SetFromFile;
         _updateCheck.PropertyChanged += (_, e) =>
         {
             if (!string.IsNullOrEmpty(e.PropertyName))
@@ -201,7 +204,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         CopyPathCommand = new RelayCommand(CopyPath, () => HasImage);
         CopyToFolderCommand = new RelayCommand(p => TransferCurrentImage(ImageFileTransferMode.Copy, p as string), _ => CanUseImageCommands);
         MoveToFolderCommand = new RelayCommand(p => TransferCurrentImage(ImageFileTransferMode.Move, p as string), _ => CanUseImageCommands);
-        SetAsWallpaperCommand = new RelayCommand(SetAsWallpaper, () => CanUseImageCommands);
+        SetAsWallpaperCommand = new RelayCommand(SetAsWallpaper, _ => CanUseImageCommands);
         ReloadCommand = new RelayCommand(async () => await ReloadCurrentAsync(), () => CanUseImageCommands);
         PrintCommand = new RelayCommand(PrintCurrent, () => CanUseDisplayImageCommands);
         SaveAsCopyCommand = new RelayCommand(async () => await SaveAsCopyAsync(), () => CanUseDisplayImageCommands);
@@ -4459,16 +4462,21 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    // V15-02: Set current image as the desktop wallpaper. Delegates to WallpaperService which
-    // copies to %LOCALAPPDATA%\Images\wallpaper\current.<ext> before calling SystemParametersInfo,
-    // so a later rename / move of the source file doesn't break the desktop.
-    private void SetAsWallpaper()
+    // V15-02 / V30-21: Set current image as the desktop wallpaper. Delegates to
+    // WallpaperService which copies to %LOCALAPPDATA%\Images\wallpaper\current.<ext> before
+    // calling SystemParametersInfo, so a later rename / move of the source file doesn't break
+    // the desktop. V30-21 adds explicit Windows layout modes.
+    private void SetAsWallpaper(object? parameter)
     {
         if (CurrentPath is null) return;
+        var layout = WallpaperService.TryParseLayout(parameter as string, out var parsed)
+            ? parsed
+            : WallpaperLayout.Fill;
+
         try
         {
-            var dest = WallpaperService.SetFromFile(CurrentPath);
-            Toast($"Set as wallpaper: {Path.GetFileName(dest)}");
+            var dest = _setWallpaper(CurrentPath, layout);
+            Toast($"Set as {WallpaperService.DisplayName(layout).ToLowerInvariant()} wallpaper: {Path.GetFileName(dest)}");
         }
         catch (Exception ex)
         {
