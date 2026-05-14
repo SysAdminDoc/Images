@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V30-02` advanced again. Images now has an explicit rotation writeback command that bakes right-angle view rotations into flat raster sources, uses `jpegtran -rotate` for exact aligned JPEGs when an approved runtime is present, and falls back to normal raster overwrite otherwise.
+Roadmap `V30-08` is complete. Images now has a modeless annotations workbench for arrows, boxes, circles, text labels, numbered callouts, freehand pen strokes, blur redaction, and pixelate redaction backed by non-destructive edit-stack operations.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the remaining editor roadmap: approved lossless JPEG runtime artifact staging, trim confirmation, annotations/redaction, and richer selection tools. The content-aware inpaint runtime/model choice is now scoped in `docs/inpaint-runtime-decision.md`.
+The improvement-plan backlog is complete. Continue with the remaining editor roadmap: approved lossless JPEG runtime artifact staging, trim confirmation, perspective correction, Auto Enhance, and richer selection tools. The content-aware inpaint runtime/model choice is now scoped in `docs/inpaint-runtime-decision.md`.
 
 ## Research Inputs
 
@@ -93,6 +93,7 @@ The improvement-plan backlog is complete. Continue with the remaining editor roa
 - 2026-05-05: Completed roadmap `V30-05` by adding a no-modal non-destructive dodge/burn brush with soft falloff, side-panel radius/strength/tone controls, paint-to-stroke overlay feedback, XMP edit-stack persistence, Save-a-copy application, and focused brush/export coverage.
 - 2026-05-05: Completed roadmap `V30-06` by adding a no-modal non-destructive red-eye correction tool with pupil marks, soft overlay feedback, radius/strength/red-threshold controls, XMP edit-stack persistence, Save-a-copy application, and focused correction/export coverage.
 - 2026-05-05: Completed roadmap `V30-07` by adding a no-modal non-destructive clone/heal retouch tool with Alt-click source picking, soft source-to-target overlays, XMP edit-stack persistence, Save-a-copy application, and focused clone/export coverage.
+- 2026-05-14: Completed roadmap `V30-08` by adding a modeless annotations workbench with arrows, boxes, circles, text labels, numbered callouts, freehand pen strokes, blur/pixelate redaction, Magick.NET render support, XMP edit-stack persistence, and focused annotation/export coverage.
 - 2026-05-14: Completed roadmap `V30-09` by adding a modeless Magick.NET effects workbench with live previews, Crisp/Clean/Focus presets, sharpen/noise/vignette sliders, XMP edit-stack persistence, Save-a-copy application, and focused effects/export coverage.
 - 2026-05-05: Completed `IP-02H` and closed `IP-02` by extracting update-check UI state into `UpdateCheckController` and covering background skip, newer-release, current-release, error, and release-link opening outcomes.
 - 2026-05-05: Completed `IP-03B` by adding a deterministic folder-preview thumbnail loader seam and regression tests for clear and superseded-refresh cancellation paths.

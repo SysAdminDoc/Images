@@ -111,6 +111,11 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE945;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Annotations..." Command="{Binding OpenAnnotationsCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xED5C;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="{Binding ExposureBrushModeText}"
                                   Command="{Binding ToggleExposureBrushModeCommand}"
                                   InputGestureText="Ctrl+Alt+D"
