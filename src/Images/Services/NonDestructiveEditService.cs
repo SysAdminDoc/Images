@@ -285,6 +285,9 @@ public sealed class NonDestructiveEditService
                 case "effects":
                     ImageEffectsService.Apply(image, ImageEffectsService.FromParameters(operation.Parameters));
                     break;
+                case "auto-enhance":
+                    ImageAutoEnhanceService.Apply(image, ImageAutoEnhanceService.FromParameters(operation.Parameters));
+                    break;
                 case "annotation":
                     ImageAnnotationService.Apply(image, ImageAnnotationService.FromParameters(operation.Parameters));
                     break;
@@ -719,7 +722,7 @@ public sealed class NonDestructiveEditService
             return false;
         }
 
-        if (normalized is "crop" or "resize" or "adjust" or "effects" or "annotation" or "perspective" or "local-exposure" or "red-eye" or "retouch" or "rotate" or "flip-horizontal" or "flip-vertical")
+        if (normalized is "crop" or "resize" or "adjust" or "effects" or "auto-enhance" or "annotation" or "perspective" or "local-exposure" or "red-eye" or "retouch" or "rotate" or "flip-horizontal" or "flip-vertical")
             return true;
 
         error = $"Unsupported edit operation: {kind}.";
@@ -736,6 +739,7 @@ public sealed class NonDestructiveEditService
             "resize" => "Resize",
             "adjust" => "Adjust",
             "effects" => "Effects",
+            "auto-enhance" => "Auto Enhance",
             "annotation" => "Annotations",
             "perspective" => "Perspective correction",
             "local-exposure" => "Local exposure",

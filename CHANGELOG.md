@@ -20,6 +20,7 @@ All notable changes to **Images** are documented here.
 - **Rotation writeback** — an explicit Apply rotation to file command now bakes the current right-angle view rotation into flat raster sources, clears baked edit-stack operations, refreshes the displayed image and shell thumbnail, and uses `jpegtran -rotate` for exact aligned JPEGs when the optional runtime is present.
 - **Annotations and redaction** — a modeless annotations workbench now supports arrows, boxes, circles, text labels, numbered callouts, freehand pen strokes, blur redaction, and pixelate redaction as non-destructive edit-stack operations rendered on Save a copy.
 - **Perspective correction** — `Ctrl+Alt+P` opens a modeless four-corner perspective workbench with draggable handles, keystone nudges, XMP edit-stack storage, and Magick.NET perspective rendering on Save a copy.
+- **Auto Enhance** — `Ctrl+Alt+E` now adds a one-click balanced enhancement edit with automatic gamma, white balance, contrast curve, and mild sharpening during Save a copy/export rendering.
 
 ## v0.2.11 — 2026-05-05
 

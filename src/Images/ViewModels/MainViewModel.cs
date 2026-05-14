@@ -160,6 +160,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenResizeDialogCommand = new RelayCommand(OpenResizeDialog, () => CanUseResize);
         OpenAdjustmentsCommand = new RelayCommand(OpenAdjustments, () => CanUseAdjustments);
         OpenEffectsCommand = new RelayCommand(OpenEffects, () => CanUseEffects);
+        AutoEnhanceCommand = new RelayCommand(ApplyAutoEnhance, () => CanUseAutoEnhance);
         OpenAnnotationsCommand = new RelayCommand(OpenAnnotations, () => CanUseAnnotations);
         OpenPerspectiveCommand = new RelayCommand(OpenPerspective, () => CanUsePerspective);
         ToggleExposureBrushModeCommand = new RelayCommand(() => IsExposureBrushMode = !IsExposureBrushMode, () => CanUseExposureBrush);
@@ -590,6 +591,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool CanUseResize => CanUsePixelEditTools;
     private bool CanUseAdjustments => CanUsePixelEditTools;
     private bool CanUseEffects => CanUsePixelEditTools;
+    private bool CanUseAutoEnhance => CanUsePixelEditTools;
     private bool CanUseAnnotations => CanUsePixelEditTools;
     private bool CanUsePerspective => CanUsePixelEditTools;
     public bool CanUseExposureBrush => CanUsePixelEditTools;
@@ -2177,6 +2179,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenResizeDialogCommand { get; }
     public ICommand OpenAdjustmentsCommand { get; }
     public ICommand OpenEffectsCommand { get; }
+    public ICommand AutoEnhanceCommand { get; }
     public ICommand OpenAnnotationsCommand { get; }
     public ICommand OpenPerspectiveCommand { get; }
     public ICommand ToggleExposureBrushModeCommand { get; }
@@ -3925,6 +3928,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         };
 
         window.Show();
+    }
+
+    private void ApplyAutoEnhance()
+    {
+        if (!CanUseAutoEnhance || CurrentPath is null)
+            return;
+
+        var result = _editStack.AppendOperation(
+            CurrentPath,
+            "auto-enhance",
+            ImageAutoEnhancePlan.Balanced.ToEditParameters(),
+            ImageAutoEnhancePlan.Balanced.Label);
+
+        Toast(result.Success ? "Auto Enhance added to edit history" : result.Message);
     }
 
     private void OpenAnnotations()
