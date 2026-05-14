@@ -145,6 +145,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RotateCcwCommand = new RelayCommand(() => Rotate(-90), () => CanUseDisplayImageCommands);
         Rotate180Command = new RelayCommand(() => Rotate(180), () => CanUseDisplayImageCommands);
         ToggleInspectorCommand = new RelayCommand(() => IsInspectorMode = !IsInspectorMode, () => CanUseInspector);
+        ToggleSelectionModeCommand = new RelayCommand(() => IsSelectionMode = !IsSelectionMode, () => CanUseSelection);
+        CopySelectionCommand = new RelayCommand(CopyCanvasSelection, () => CanCopySelection);
+        ClearSelectionCommand = new RelayCommand(ClearCanvasSelection, () => HasCanvasSelection);
+        CancelSelectionCommand = new RelayCommand(CancelSelectionMode, () => IsSelectionMode || HasCanvasSelection);
         ToggleCropModeCommand = new RelayCommand(() => IsCropMode = !IsCropMode, () => CanUseCrop);
         ApplyCropCommand = new RelayCommand(ApplyCropSelection, () => CanApplyCrop);
         CancelCropCommand = new RelayCommand(CancelCropMode, () => IsCropMode || HasCropSelection);
@@ -268,6 +272,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 Raise(nameof(HasDisplayImage));
                 Raise(nameof(CanUseInspector));
+                Raise(nameof(CanUseSelection));
                 Raise(nameof(CanUseCrop));
                 Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(CanUseRedEyeCorrection));
@@ -563,6 +568,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasImage => !string.IsNullOrEmpty(CurrentPath) && File.Exists(CurrentPath);
     public bool HasDisplayImage => CurrentImage is not null;
     public bool CanUseInspector => HasDisplayImage && !IsOperationBusy;
+    public bool CanUseSelection => HasDisplayImage && !IsOperationBusy;
     public bool CurrentFormatSupportsCrop => CurrentPath is not null && SupportedImageFormats.IsCropWritableRaster(CurrentPath);
     private bool CanUsePixelEditTools => HasImage && HasDisplayImage && !IsOperationBusy && !IsArchiveBook && !IsPeekMode;
     public bool CanUseCrop => CanUsePixelEditTools && CurrentFormatSupportsCrop;
@@ -610,6 +616,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(ShowOperationStatus));
                 Raise(nameof(CanRefreshFolder));
                 Raise(nameof(CanUseInspector));
+                Raise(nameof(CanUseSelection));
                 Raise(nameof(CanUseCrop));
                 Raise(nameof(CurrentFormatSupportsCrop));
                 Raise(nameof(CanUseExposureBrush));
@@ -918,10 +925,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 ClearInspectorState();
             else
             {
+                IsSelectionMode = false;
                 IsCropMode = false;
                 IsExposureBrushMode = false;
                 IsRedEyeCorrectionMode = false;
                 IsRetouchMode = false;
+                ClearCanvasSelection();
                 ClearExposureBrushStrokes(showToast: false);
                 ClearRedEyeCorrectionMarks(showToast: false);
                 ClearRetouchState(showToast: false);
@@ -972,6 +981,65 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ? _inspectorSelection.Value.DisplayText
         : "Shift-drag to measure";
 
+    private bool _isSelectionMode;
+    public bool IsSelectionMode
+    {
+        get => _isSelectionMode;
+        set
+        {
+            if (!Set(ref _isSelectionMode, value))
+                return;
+
+            if (value)
+            {
+                IsInspectorMode = false;
+                IsCropMode = false;
+                IsOcrMode = false;
+                IsExposureBrushMode = false;
+                IsRedEyeCorrectionMode = false;
+                IsRetouchMode = false;
+                ClearCropSelection();
+                ClearExposureBrushStrokes(showToast: false);
+                ClearRedEyeCorrectionMarks(showToast: false);
+                ClearRetouchState(showToast: false);
+                SelectionStatusText = "Selection mode is ready. Drag on the image to choose pixels to copy.";
+            }
+            else if (!HasCanvasSelection)
+            {
+                SelectionStatusText = "Selection is paused. Toggle it on to drag a pixel selection.";
+            }
+
+            RaiseSelectionModeState();
+        }
+    }
+
+    private PixelSelection? _canvasSelection;
+    public PixelSelection? CanvasSelection
+    {
+        get => _canvasSelection;
+        private set
+        {
+            if (Set(ref _canvasSelection, value))
+                RaiseSelectionState();
+        }
+    }
+
+    private string _selectionStatusText = "Open an image to select pixels.";
+    public string SelectionStatusText
+    {
+        get => _selectionStatusText;
+        private set => Set(ref _selectionStatusText, value);
+    }
+
+    public bool HasCanvasSelection => CanvasSelection is { Width: > 0, Height: > 0 };
+    public bool CanCopySelection => HasCanvasSelection && CurrentImage is BitmapSource && CanUseSelection;
+    public bool ShowSelectionOverlay => IsSelectionMode || HasCanvasSelection;
+    public string SelectionModeText => IsSelectionMode ? "Select on" : "Select off";
+    public string SelectionModeHelpText => IsSelectionMode
+        ? "Drag a rectangle on the image. Copy places the selected pixels on the clipboard; Esc cancels."
+        : "Select pixels without changing the source file.";
+    public string CanvasSelectionText => CanvasSelection?.DisplayText ?? "No selection";
+
     private bool _isCropMode;
     public bool IsCropMode
     {
@@ -984,10 +1052,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (value)
             {
                 IsInspectorMode = false;
+                IsSelectionMode = false;
                 IsOcrMode = false;
                 IsExposureBrushMode = false;
                 IsRedEyeCorrectionMode = false;
                 IsRetouchMode = false;
+                ClearCanvasSelection();
                 ClearExposureBrushStrokes(showToast: false);
                 ClearRedEyeCorrectionMarks(showToast: false);
                 ClearRetouchState(showToast: false);
@@ -1068,7 +1138,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasCropSelection => CropSelection is { Width: > 0, Height: > 0 };
     public bool CanApplyCrop => IsCropMode && HasCropSelection && CanUseCrop;
     public bool ShowCropOverlay => IsCropMode || HasCropSelection;
-    public bool IsCanvasSelectionMode => IsInspectorMode || IsCropMode || IsExposureBrushMode || IsRedEyeCorrectionMode || IsRetouchMode;
+    public bool IsCanvasSelectionMode => IsInspectorMode || IsSelectionMode || IsCropMode || IsExposureBrushMode || IsRedEyeCorrectionMode || IsRetouchMode;
     public string CropModeText => IsCropMode ? "Crop on" : "Crop off";
     public string CropModeHelpText => IsCropMode
         ? "Freehand crop is active. Drag a rectangle on the image. Enter overwrites the file; Esc cancels."
@@ -1090,10 +1160,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (value)
             {
                 IsInspectorMode = false;
+                IsSelectionMode = false;
                 IsCropMode = false;
                 IsOcrMode = false;
                 IsRedEyeCorrectionMode = false;
                 IsRetouchMode = false;
+                ClearCanvasSelection();
                 ClearRedEyeCorrectionMarks(showToast: false);
                 ClearRetouchState(showToast: false);
                 ClearCropSelection();
@@ -1179,10 +1251,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (value)
             {
                 IsInspectorMode = false;
+                IsSelectionMode = false;
                 IsCropMode = false;
                 IsExposureBrushMode = false;
                 IsRetouchMode = false;
                 IsOcrMode = false;
+                ClearCanvasSelection();
                 ClearCropSelection();
                 ClearExposureBrushStrokes(showToast: false);
                 ClearRetouchState(showToast: false);
@@ -1270,10 +1344,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (value)
             {
                 IsInspectorMode = false;
+                IsSelectionMode = false;
                 IsCropMode = false;
                 IsExposureBrushMode = false;
                 IsRedEyeCorrectionMode = false;
                 IsOcrMode = false;
+                ClearCanvasSelection();
                 ClearCropSelection();
                 ClearExposureBrushStrokes(showToast: false);
                 ClearRedEyeCorrectionMarks(showToast: false);
@@ -2058,6 +2134,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand RotateCcwCommand { get; }
     public ICommand Rotate180Command { get; }
     public ICommand ToggleInspectorCommand { get; }
+    public ICommand ToggleSelectionModeCommand { get; }
+    public ICommand CopySelectionCommand { get; }
+    public ICommand ClearSelectionCommand { get; }
+    public ICommand CancelSelectionCommand { get; }
     public ICommand ToggleCropModeCommand { get; }
     public ICommand ApplyCropCommand { get; }
     public ICommand CancelCropCommand { get; }
@@ -2646,6 +2726,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 PixelHeight = image is BitmapSource displayedBitmapHeight ? displayedBitmapHeight.PixelHeight : result.PixelHeight;
                 DecoderUsed = decoderUsed;
                 ClearInspectorState();
+                IsSelectionMode = false;
+                ClearCanvasSelection();
                 IsCropMode = false;
                 ClearCropSelection();
                 IsExposureBrushMode = false;
@@ -2734,6 +2816,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         PixelWidth = PixelHeight = 0;
         DecoderUsed = "Unavailable";
         ClearInspectorState();
+        IsSelectionMode = false;
+        ClearCanvasSelection();
         IsCropMode = false;
         ClearCropSelection();
         IsExposureBrushMode = false;
@@ -3332,6 +3416,30 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RaiseInspectorSelectionState();
     }
 
+    public void UpdateCanvasSelection(PixelSelection? selection)
+    {
+        CanvasSelection = ImageSelectionService.Normalize(selection, PixelWidth, PixelHeight);
+        SelectionStatusText = CanvasSelection is { } value
+            ? $"Selection ready: {value.DisplayText}. Copy places the selected pixels on the clipboard."
+            : "Pointer is outside the image.";
+    }
+
+    public void UpdateCanvasSelection(PixelCoordinate anchor, PixelCoordinate current)
+    {
+        CanvasSelection = ImageSelectionService.CreateSelection(anchor, current, PixelWidth, PixelHeight);
+        SelectionStatusText = CanvasSelection is { } value
+            ? $"Selection ready: {value.DisplayText}. Copy places the selected pixels on the clipboard."
+            : "Pointer is outside the image.";
+    }
+
+    public void ClearCanvasSelection()
+    {
+        CanvasSelection = null;
+        SelectionStatusText = IsSelectionMode
+            ? "Selection mode is ready. Drag on the image to choose pixels to copy."
+            : "Selection is paused. Toggle it on to drag a pixel selection.";
+    }
+
     public void UpdateCropSelection(PixelSelection? selection)
     {
         CropSelection = CropSelectionService.Normalize(selection, PixelWidth, PixelHeight);
@@ -3559,11 +3667,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _preload.Reset();
             ShellChangeNotificationService.NotifyFileUpdated(path);
             var fileUpdated = LoadCurrent(startCropMode: false);
-            if (!fileUpdated)
-            {
-                IsCropMode = false;
-                ClearCropSelection();
-            }
+            IsCropMode = false;
+            ClearCropSelection();
 
             Toast(fileUpdated ? "Crop applied to file" : "Crop saved to file");
         }
@@ -3851,6 +3956,30 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Toast("Crop canceled");
     }
 
+    private void CancelSelectionMode()
+    {
+        IsSelectionMode = false;
+        ClearCanvasSelection();
+        Toast("Selection canceled");
+    }
+
+    private void CopyCanvasSelection()
+    {
+        if (!CanCopySelection || CurrentImage is not BitmapSource bitmap || CanvasSelection is not { } selection)
+            return;
+
+        try
+        {
+            ClipboardService.SetImage(ImageSelectionService.ExtractSelection(bitmap, selection));
+            Toast($"Copied selection {selection.Width}x{selection.Height}");
+        }
+        catch (Exception ex)
+        {
+            SelectionStatusText = "Selection copy failed: " + ex.Message;
+            Toast("Selection copy failed");
+        }
+    }
+
     private void CopyInspectorValue(Func<PixelSample, string> valueSelector, string label)
     {
         if (_inspectorSample is not { } sample)
@@ -3882,6 +4011,27 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         Raise(nameof(HasInspectorSelection));
         Raise(nameof(InspectorSelectionText));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RaiseSelectionModeState()
+    {
+        Raise(nameof(IsSelectionMode));
+        Raise(nameof(ShowSelectionOverlay));
+        Raise(nameof(IsCanvasSelectionMode));
+        Raise(nameof(SelectionModeText));
+        Raise(nameof(SelectionModeHelpText));
+        Raise(nameof(CanCopySelection));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RaiseSelectionState()
+    {
+        Raise(nameof(CanvasSelection));
+        Raise(nameof(HasCanvasSelection));
+        Raise(nameof(ShowSelectionOverlay));
+        Raise(nameof(CanvasSelectionText));
+        Raise(nameof(CanCopySelection));
         CommandManager.InvalidateRequerySuggested();
     }
 
@@ -4484,6 +4634,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClearLoadError();
         DecoderUsed = null;
         ClearInspectorState();
+        IsSelectionMode = false;
+        ClearCanvasSelection();
         IsCropMode = false;
         ClearCropSelection();
         IsExposureBrushMode = false;

@@ -133,6 +133,15 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE90F;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="{Binding SelectionModeText}"
+                                  Command="{Binding ToggleSelectionModeCommand}"
+                                  InputGestureText="S"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding IsSelectionMode, Mode=OneWay}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="{Binding CropModeText}"
                                   Command="{Binding ToggleCropModeCommand}"
                                   InputGestureText="C"
@@ -300,6 +309,14 @@
                                 IsHitTestVisible="{Binding IsOcrMode}"
                                 Opacity="0.95"
                                 AutomationProperties.Name="OCR text overlay" />
+
+                <ctl:SelectionOverlay Visibility="{Binding ShowSelectionOverlay, Converter={StaticResource BoolToVis}}"
+                                      Target="{Binding ElementName=Canvas}"
+                                      Selection="{Binding CanvasSelection}"
+                                      CopyCommand="{Binding CopySelectionCommand}"
+                                      ClearCommand="{Binding ClearSelectionCommand}"
+                                      Opacity="0.98"
+                                      AutomationProperties.Name="Pixel selection overlay" />
 
                 <ctl:CropOverlay Visibility="{Binding ShowCropOverlay, Converter={StaticResource BoolToVis}}"
                                  Target="{Binding ElementName=Canvas}"
@@ -1595,7 +1612,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Wheel" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom about cursor" />
@@ -1613,12 +1630,14 @@
                                         <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle metadata HUD" />
                                         <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="C" />
                                         <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle crop mode" />
-                                        <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+D" />
-                                        <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle exposure brush" />
-                                        <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+Y" />
-                                        <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle red-eye correction" />
-                                        <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+H" />
-                                        <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle clone/heal retouch" />
+                                        <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="S" />
+                                        <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle pixel selection" />
+                                        <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+D" />
+                                        <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle exposure brush" />
+                                        <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+Y" />
+                                        <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle red-eye correction" />
+                                        <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+H" />
+                                        <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle clone/heal retouch" />
                                     </Grid>
 
                                     <TextBlock Text="File" Style="{StaticResource SectionLabel}" />
@@ -3565,6 +3584,77 @@
                             </StackPanel>
                         </Border>
                     </StackPanel>
+
+                    <Border Style="{StaticResource Divider}" />
+
+                    <!-- SELECTION section -->
+                    <TextBlock Text="Selection" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource Card}"
+                            Padding="13,12"
+                            IsEnabled="{Binding CanUseSelection}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding SelectionModeText}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrush}" />
+                                    <TextBlock Text="{Binding SelectionModeHelpText}"
+                                               Style="{StaticResource Text.Hint}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,3,0,0" />
+                                </StackPanel>
+                                <Button Grid.Column="1"
+                                        Command="{Binding ToggleSelectionModeCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        MinWidth="72"
+                                        Margin="12,0,0,0"
+                                        AutomationProperties.Name="Toggle pixel selection mode">
+                                    <TextBlock Text="{Binding SelectionModeText}" />
+                                </Button>
+                            </Grid>
+
+                            <Border Background="{StaticResource PanelBrush}"
+                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                    Padding="10"
+                                    Margin="0,12,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding SelectionStatusText}"
+                                               Style="{StaticResource Text.Caption}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding CanvasSelectionText}"
+                                               Style="{StaticResource Text.Body}"
+                                               Margin="0,8,0,0" />
+                                </StackPanel>
+                            </Border>
+
+                            <WrapPanel Margin="0,12,0,0">
+                                <Button Command="{Binding CopySelectionCommand}"
+                                        Style="{StaticResource AccentButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Copy selected pixels">
+                                    <TextBlock Text="Copy selection" />
+                                </Button>
+                                <Button Command="{Binding ClearSelectionCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Clear selected pixels">
+                                    <TextBlock Text="Clear" />
+                                </Button>
+                                <Button Command="{Binding CancelSelectionCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,0,8"
+                                        AutomationProperties.Name="Cancel pixel selection mode">
+                                    <TextBlock Text="Cancel" />
+                                </Button>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
 
                     <Border Style="{StaticResource Divider}" />
 
