@@ -111,6 +111,11 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE945;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Perspective..." Command="{Binding OpenPerspectiveCommand}" InputGestureText="Ctrl+Alt+P">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7A8;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="Annotations..." Command="{Binding OpenAnnotationsCommand}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xED5C;" />
@@ -1662,7 +1667,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+O" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open image" />
@@ -1700,10 +1705,12 @@
                                         <TextBlock Grid.Row="16" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open adjustments" />
                                         <TextBlock Grid.Row="17" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+F" />
                                         <TextBlock Grid.Row="17" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open effects" />
-                                        <TextBlock Grid.Row="18" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
-                                        <TextBlock Grid.Row="18" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Apply crop / commit rename" />
-                                        <TextBlock Grid.Row="19" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
-                                        <TextBlock Grid.Row="19" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
+                                        <TextBlock Grid.Row="18" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+P" />
+                                        <TextBlock Grid.Row="18" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open perspective correction" />
+                                        <TextBlock Grid.Row="19" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
+                                        <TextBlock Grid.Row="19" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Apply crop / commit rename" />
+                                        <TextBlock Grid.Row="20" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
+                                        <TextBlock Grid.Row="20" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
                                     </Grid>
                                 </StackPanel>
                             </ScrollViewer>

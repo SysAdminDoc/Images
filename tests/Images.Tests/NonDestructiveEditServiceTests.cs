@@ -207,6 +207,37 @@ public sealed class NonDestructiveEditServiceTests
     }
 
     [Fact]
+    public void Export_AppliesPerspectiveOperation()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteImage(temp.Path, "source.png", 32, 32);
+        var service = new NonDestructiveEditService();
+        var mutation = service.AppendOperation(
+            source,
+            "perspective",
+            new PerspectiveCorrectionPlan(
+                new PerspectivePoint(4, 0),
+                new PerspectivePoint(31, 4),
+                new PerspectivePoint(28, 31),
+                new PerspectivePoint(0, 28),
+                OutputWidth: 24,
+                OutputHeight: 26).ToEditParameters());
+
+        Assert.True(mutation.Success);
+
+        var result = service.Export(source, Path.Combine(temp.Path, "perspective.png"));
+
+        Assert.True(result.Success);
+        Assert.Equal(1, result.AppliedOperationCount);
+        using var exported = new MagickImage(result.OutputPath);
+        Assert.Equal((uint)24, exported.Width);
+        Assert.Equal((uint)26, exported.Height);
+
+        var provenance = XDocument.Load(result.ProvenanceSidecarPath).ToString();
+        Assert.Contains("perspective", provenance, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Export_AppliesLocalExposureOperation()
     {
         using var temp = TestDirectory.Create();
