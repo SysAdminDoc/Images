@@ -15,6 +15,7 @@ All notable changes to **Images** are documented here.
 - **jpegtran runtime provenance** — the app now resolves an optional app-local libjpeg-turbo `jpegtran.exe` sidecar or explicit `IMAGES_JPEGTRAN_EXE` override, then surfaces its path, version, and SHA-256 in About, `--system-info`, and `--codec-report` diagnostics.
 - **Lossless JPEG crop writeback** — when an approved local `jpegtran.exe` runtime is available, a single exact MCU-aligned JPEG crop now shells out through a test seam, validates the output, replaces the source atomically with rollback data, and avoids copying stale embedded thumbnails. Missing runtimes, unaligned crops, oriented JPEGs, and multi-operation edit stacks continue through the existing raster overwrite path.
 - **Inpaint runtime decision** — content-aware repair is now scoped as a future opt-in local LaMa ONNX workflow, using Windows ML first and ONNX Runtime DirectML as fallback, with no bundled model or automatic download in the current viewer/editor.
+- **Sharpen, noise reduction, and vignette effects** — `Ctrl+Alt+F` now opens a modeless effects workbench with live Magick.NET previews, Crisp/Clean/Focus presets, Enter-to-apply behavior, XMP edit-stack storage, and Save-a-copy rendering.
 
 ## v0.2.11 — 2026-05-05
 
