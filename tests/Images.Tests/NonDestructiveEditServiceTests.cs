@@ -176,6 +176,34 @@ public sealed class NonDestructiveEditServiceTests
     }
 
     [Fact]
+    public void Export_AppliesAutoEnhanceOperation()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteRedEyeImage(temp.Path, "source.png");
+        var baseline = ImageExportService.Save(
+            source,
+            Path.Combine(temp.Path, "baseline.png"),
+            []);
+
+        var service = new NonDestructiveEditService();
+        var mutation = service.AppendOperation(
+            source,
+            "auto-enhance",
+            ImageAutoEnhancePlan.Balanced.ToEditParameters());
+
+        Assert.True(mutation.Success);
+
+        var result = service.Export(source, Path.Combine(temp.Path, "enhanced.png"));
+
+        Assert.True(result.Success);
+        Assert.Equal(1, result.AppliedOperationCount);
+        Assert.False(File.ReadAllBytes(baseline).SequenceEqual(File.ReadAllBytes(result.OutputPath)));
+
+        var provenance = XDocument.Load(result.ProvenanceSidecarPath).ToString();
+        Assert.Contains("auto-enhance", provenance, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Export_AppliesAnnotationOperation()
     {
         using var temp = TestDirectory.Create();
