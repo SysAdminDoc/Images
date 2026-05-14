@@ -103,8 +103,20 @@ public static class ImageExportService
     internal static string Overwrite(
         string sourcePath,
         IReadOnlyList<EditOperation> operations,
+        bool allowLosslessJpegTrim)
+        => Overwrite(
+            sourcePath,
+            operations,
+            jpegTranRuntime: null,
+            jpegTranProcessRunner: null,
+            allowLosslessJpegTrim);
+
+    internal static string Overwrite(
+        string sourcePath,
+        IReadOnlyList<EditOperation> operations,
         JpegTranRuntimeStatus? jpegTranRuntime,
-        JpegTranProcessRunner? jpegTranProcessRunner)
+        JpegTranProcessRunner? jpegTranProcessRunner,
+        bool allowLosslessJpegTrim = false)
     {
         if (string.IsNullOrWhiteSpace(sourcePath))
             throw new ArgumentException("A source image path is required.", nameof(sourcePath));
@@ -124,7 +136,8 @@ public static class ImageExportService
             operations,
             image,
             jpegTranRuntime ?? JpegTranRuntime.Inspect(),
-            jpegTranProcessRunner);
+            jpegTranProcessRunner,
+            allowLosslessJpegTrim);
         if (losslessJpegTransform.Attempted)
         {
             if (losslessJpegTransform.Applied)
@@ -146,7 +159,8 @@ public static class ImageExportService
         IReadOnlyList<EditOperation> operations,
         MagickImage image,
         JpegTranRuntimeStatus jpegTranRuntime,
-        JpegTranProcessRunner? jpegTranProcessRunner)
+        JpegTranProcessRunner? jpegTranProcessRunner,
+        bool allowLosslessJpegTrim)
     {
         var enabledOperations = operations.Where(operation => operation.Enabled).ToList();
         if (enabledOperations.Count != 1)
@@ -165,7 +179,8 @@ public static class ImageExportService
                     (int)image.Width,
                     (int)image.Height,
                     jpegTranRuntime,
-                    jpegTranProcessRunner),
+                    jpegTranProcessRunner,
+                    allowTrim: allowLosslessJpegTrim),
             "crop" => JpegTranWriteResult.NotAttempted("Crop operation parameters are not valid for lossless JPEG writeback."),
             "rotate" when TryReadLosslessRotation(operation, out var rotation) =>
                 JpegTranTransformService.TryApplyExactRotation(
@@ -174,10 +189,75 @@ public static class ImageExportService
                     (int)image.Width,
                     (int)image.Height,
                     jpegTranRuntime,
-                    jpegTranProcessRunner),
+                    jpegTranProcessRunner,
+                    allowTrim: allowLosslessJpegTrim),
             "rotate" => JpegTranWriteResult.NotAttempted("Rotate operation parameters are not valid for lossless JPEG writeback."),
             _ => JpegTranWriteResult.NotAttempted("Lossless JPEG writeback currently supports crop and right-angle rotate operations only.")
         };
+    }
+
+    internal static LosslessJpegCropPlan? TryPlanLosslessJpegCropTrimConfirmation(
+        string sourcePath,
+        PixelSelection requestedSelection,
+        int imageWidth,
+        int imageHeight,
+        IReadOnlyList<EditOperation> existingOperations,
+        JpegTranRuntimeStatus? jpegTranRuntime = null)
+    {
+        if (existingOperations.Any(operation => operation.Enabled))
+            return null;
+
+        if (!IsJpegExtension(sourcePath))
+            return null;
+
+        var runtime = jpegTranRuntime ?? JpegTranRuntime.Inspect();
+        if (!runtime.Available || string.IsNullOrWhiteSpace(runtime.ExecutablePath))
+            return null;
+
+        if (!TryReadJpegDimensionsAndOrientation(sourcePath, out _, out _, out var orientation) ||
+            !IsDefaultJpegOrientation(orientation))
+            return null;
+
+        var plan = LosslessJpegTransformPolicy.PlanCrop(
+            requestedSelection,
+            imageWidth,
+            imageHeight,
+            JpegMcuSize.Conservative420);
+
+        return plan is { CanApplyLosslessly: true, RequiresTrimConfirmation: true }
+            ? plan
+            : null;
+    }
+
+    internal static LosslessJpegRotationPlan? TryPlanLosslessJpegRotationTrimConfirmation(
+        string sourcePath,
+        LosslessJpegRotation rotation,
+        IReadOnlyList<EditOperation> existingOperations,
+        JpegTranRuntimeStatus? jpegTranRuntime = null)
+    {
+        if (existingOperations.Any(operation => operation.Enabled))
+            return null;
+
+        if (!IsJpegExtension(sourcePath))
+            return null;
+
+        var runtime = jpegTranRuntime ?? JpegTranRuntime.Inspect();
+        if (!runtime.Available || string.IsNullOrWhiteSpace(runtime.ExecutablePath))
+            return null;
+
+        if (!TryReadJpegDimensionsAndOrientation(sourcePath, out var imageWidth, out var imageHeight, out var orientation) ||
+            !IsDefaultJpegOrientation(orientation))
+            return null;
+
+        var plan = LosslessJpegTransformPolicy.PlanRotation(
+            imageWidth,
+            imageHeight,
+            rotation,
+            JpegMcuSize.Conservative420);
+
+        return plan is { CanApplyLosslessly: true, RequiresTrimConfirmation: true }
+            ? plan
+            : null;
     }
 
     private static bool TryReadCropSelection(EditOperation operation, out PixelSelection selection)
@@ -232,6 +312,39 @@ public static class ImageExportService
     private static bool IsDefaultJpegOrientation(string orientation)
         => orientation.Equals("Undefined", StringComparison.OrdinalIgnoreCase) ||
            orientation.Equals("TopLeft", StringComparison.OrdinalIgnoreCase);
+
+    private static bool TryReadJpegDimensionsAndOrientation(
+        string sourcePath,
+        out int width,
+        out int height,
+        out string orientation)
+    {
+        width = 0;
+        height = 0;
+        orientation = "";
+        try
+        {
+            using var image = new MagickImage(sourcePath);
+            width = (int)image.Width;
+            height = (int)image.Height;
+            orientation = image.Orientation.ToString();
+            return true;
+        }
+        catch (Exception ex) when (ex is MagickException or IOException or UnauthorizedAccessException or NotSupportedException)
+        {
+            return false;
+        }
+    }
+
+    private static bool IsJpegExtension(string sourcePath)
+    {
+        var extension = Path.GetExtension(sourcePath);
+        return extension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+               extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+               extension.Equals(".jpe", StringComparison.OrdinalIgnoreCase) ||
+               extension.Equals(".jfif", StringComparison.OrdinalIgnoreCase) ||
+               extension.Equals(".jif", StringComparison.OrdinalIgnoreCase);
+    }
 
     private static (string Path, MagickFormat Format) ResolveWritableTarget(string requestedPath)
     {

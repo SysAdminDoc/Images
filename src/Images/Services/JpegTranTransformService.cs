@@ -41,7 +41,8 @@ internal static class JpegTranTransformService
         int imageWidth,
         int imageHeight,
         JpegTranRuntimeStatus runtime,
-        JpegTranProcessRunner? processRunner = null)
+        JpegTranProcessRunner? processRunner = null,
+        bool allowTrim = false)
     {
         var normalizedSourcePath = Path.GetFullPath(sourcePath);
         if (!JpegExtensions.Contains(Path.GetExtension(normalizedSourcePath)))
@@ -55,7 +56,10 @@ internal static class JpegTranTransformService
             imageWidth,
             imageHeight,
             JpegMcuSize.Conservative420);
-        if (!plan.IsExact || plan.AlignedSelection is not { } crop)
+        if (!plan.CanApplyLosslessly || plan.AlignedSelection is not { } crop)
+            return JpegTranWriteResult.NotAttempted(plan.UserMessage);
+
+        if (plan.RequiresTrimConfirmation && !allowTrim)
             return JpegTranWriteResult.NotAttempted(plan.UserMessage);
 
         var directory = Path.GetDirectoryName(normalizedSourcePath);
@@ -87,7 +91,10 @@ internal static class JpegTranTransformService
                 return JpegTranWriteResult.Failed($"JPEG crop failed: {validationError}");
 
             ReplaceAtomically(outputPath, normalizedSourcePath, backupPath);
-            return JpegTranWriteResult.AppliedResult("JPEG crop applied losslessly with jpegtran.");
+            return JpegTranWriteResult.AppliedResult(
+                plan.RequiresTrimConfirmation
+                    ? "JPEG crop applied losslessly with jpegtran after confirmed MCU trim."
+                    : "JPEG crop applied losslessly with jpegtran.");
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or InvalidOperationException or NotSupportedException)
         {
@@ -121,7 +128,8 @@ internal static class JpegTranTransformService
         int imageWidth,
         int imageHeight,
         JpegTranRuntimeStatus runtime,
-        JpegTranProcessRunner? processRunner = null)
+        JpegTranProcessRunner? processRunner = null,
+        bool allowTrim = false)
     {
         var normalizedSourcePath = Path.GetFullPath(sourcePath);
         if (!JpegExtensions.Contains(Path.GetExtension(normalizedSourcePath)))
@@ -135,7 +143,10 @@ internal static class JpegTranTransformService
             imageHeight,
             rotation,
             JpegMcuSize.Conservative420);
-        if (!plan.IsExact)
+        if (!plan.CanApplyLosslessly || plan.PreservedSourceBounds is not { } preservedSourceBounds)
+            return JpegTranWriteResult.NotAttempted(plan.UserMessage);
+
+        if (plan.RequiresTrimConfirmation && !allowTrim)
             return JpegTranWriteResult.NotAttempted(plan.UserMessage);
 
         var directory = Path.GetDirectoryName(normalizedSourcePath);
@@ -145,11 +156,15 @@ internal static class JpegTranTransformService
         Directory.CreateDirectory(directory);
         var outputPath = Path.Combine(directory, $".images-jpegtran-{Guid.NewGuid():N}.jpg");
         var backupPath = Path.Combine(directory, $".images-jpegtran-backup-{Guid.NewGuid():N}{Path.GetExtension(normalizedSourcePath)}");
-        var expectedSize = ExpectedRotatedSize(imageWidth, imageHeight, rotation);
+        var expectedSize = ExpectedRotatedSize(preservedSourceBounds.Width, preservedSourceBounds.Height, rotation);
 
         try
         {
-            var arguments = BuildRotateArguments(rotation, outputPath, normalizedSourcePath);
+            var arguments = BuildRotateArguments(
+                rotation,
+                outputPath,
+                normalizedSourcePath,
+                trimIncompleteEdgeBlocks: plan.RequiresTrimConfirmation);
             var runner = processRunner ?? RunProcess;
             var result = runner(runtime.ExecutablePath, arguments, TransformTimeoutMilliseconds);
             if (result.TimedOut)
@@ -168,7 +183,10 @@ internal static class JpegTranTransformService
                 return JpegTranWriteResult.Failed($"JPEG rotation failed: {validationError}");
 
             ReplaceAtomically(outputPath, normalizedSourcePath, backupPath);
-            return JpegTranWriteResult.AppliedResult("JPEG rotation applied losslessly with jpegtran.");
+            return JpegTranWriteResult.AppliedResult(
+                plan.RequiresTrimConfirmation
+                    ? "JPEG rotation applied losslessly with jpegtran after confirmed MCU trim."
+                    : "JPEG rotation applied losslessly with jpegtran.");
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or InvalidOperationException or NotSupportedException)
         {
@@ -184,17 +202,29 @@ internal static class JpegTranTransformService
     internal static IReadOnlyList<string> BuildRotateArguments(
         LosslessJpegRotation rotation,
         string outputPath,
-        string sourcePath)
-        =>
-        [
+        string sourcePath,
+        bool trimIncompleteEdgeBlocks = false)
+    {
+        var args = new List<string>
+        {
             "-copy",
-            "icc",
+            "icc"
+        };
+
+        if (trimIncompleteEdgeBlocks)
+            args.Add("-trim");
+
+        args.AddRange(
+        [
             "-rotate",
             ((int)rotation).ToString(CultureInfo.InvariantCulture),
             "-outfile",
             outputPath,
             sourcePath
-        ];
+        ]);
+
+        return args;
+    }
 
     private static JpegTranProcessResult RunProcess(
         string executablePath,
