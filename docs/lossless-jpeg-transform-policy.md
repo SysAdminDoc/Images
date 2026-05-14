@@ -1,22 +1,22 @@
 # Lossless JPEG transform policy
 
-Status: runtime resolver and provenance scaffold shipped; writeback remains blocked until an approved `jpegtran.exe` artifact is staged.
+Status: runtime resolver/provenance and exact aligned crop writeback shipped; bundling, trim confirmation, and rotation writeback remain blocked until an approved `jpegtran.exe` artifact is staged.
 Date: 2026-05-14
 
 ## Decision
 
 Images may support lossless JPEG rotate and crop only through an app-local `jpegtran.exe` sidecar after the exact binary passes the optional-runtime review gate in `docs/integration-policy.md`.
 
-No runtime binary is committed to source control in this slice. The shipped code contains deterministic MCU-alignment planning plus an optional runtime resolver that recognizes only `Codecs\JpegTran\jpegtran.exe` or the explicit `IMAGES_JPEGTRAN_EXE` developer override. About, `--system-info`, and `--codec-report` report path, source, version, and SHA-256 when a runtime is present.
+No runtime binary is committed to source control. The shipped code contains deterministic MCU-alignment planning, an optional runtime resolver that recognizes only `Codecs\JpegTran\jpegtran.exe` or the explicit `IMAGES_JPEGTRAN_EXE` developer override, and a guarded writeback path for a single exact MCU-aligned JPEG crop. About, `--system-info`, and `--codec-report` report path, source, version, and SHA-256 when a runtime is present.
 
 ## User contract
 
 - Lossless JPEG writeback is opt-in and JPEG-only.
 - The app must not overwrite the source file without an explicit confirmation path and rollback/recovery coverage.
-- Crop writeback must preserve the user's requested rectangle when it is MCU-aligned.
+- Crop writeback preserves the user's requested rectangle when it is MCU-aligned. The current runtime path attempts this only for a single enabled crop operation with no EXIF orientation transform and falls back to normal raster overwrite otherwise.
 - When a crop or rotation would require `jpegtran -trim`, Images must show the exact pixel trim before running the command.
 - If the selected crop cannot contain at least one aligned MCU block, Images must direct the user to normal export/re-encode instead of silently changing the image.
-- Metadata preservation must be explicit: EXIF orientation is normalized with the transform result, XMP sidecars remain authoritative for app edits, and any original-file metadata write path needs the same confirmation and backup rules as ExifTool.
+- Metadata preservation must be explicit: XMP sidecars remain authoritative for app edits, ICC color profiles are preserved in the current crop shell-out, and stale embedded JPEG thumbnails are not copied into cropped originals. Any future original-file metadata write path needs the same confirmation and backup rules as ExifTool.
 
 ## Runtime contract
 
@@ -52,7 +52,7 @@ Required before enabling the feature:
 - Failure mode: disabled or explanatory UI when unavailable; calm transform-failed status on non-zero exit, invalid output, missing output, or timeout.
 - Test corpus: generated JPEGs for MCU planning plus future shell-out tests using a fake process seam and at least one present-runtime smoke case.
 - Release impact: app-local sidecar size only when bundled; no startup cost beyond diagnostics probing.
-- Decision: conditionally accepted resolver/provenance scaffold; writeback remains disabled until artifact staging, command execution, rollback, and UI confirmation are implemented.
+- Decision: conditionally accepted resolver/provenance and exact aligned crop shell-out; bundling, trim-confirmation UI, and rotation writeback remain disabled until the reviewed artifact is staged.
 - Owner: Images release maintainer.
 
 ## Shell-out rules
@@ -61,8 +61,9 @@ Required before enabling the feature:
 - If `IMAGES_JPEGTRAN_EXE` is set but invalid, report the override as unavailable instead of silently falling back to an app-local binary.
 - Use a temp output file in the same volume as the target when replacing originals.
 - Pass arguments through `ProcessStartInfo.ArgumentList`; never build a shell string.
+- Current exact-crop command shape is `jpegtran -copy icc -crop WxH+X+Y -outfile <temp.jpg> <source.jpg>`. libjpeg-turbo documents `-copy all` as preserving embedded thumbnails as-is, so Images intentionally copies ICC only to avoid Explorer or other shell views showing stale pre-crop thumbnails from embedded metadata. See libjpeg-turbo `doc/usage.txt`: https://raw.githubusercontent.com/libjpeg-turbo/libjpeg-turbo/main/doc/usage.txt.
 - Time out and kill the process tree if the transform stalls.
-- Treat non-zero exit codes, missing output, empty output, or unchanged temp files as failures.
+- Treat non-zero exit codes, missing output, empty output, invalid JPEG output, or dimension mismatches as failures.
 - Replace originals atomically only after the output validates as JPEG and rollback data exists.
 
 ## MCU planning
@@ -75,6 +76,7 @@ The actual runtime path must replace the conservative default with the MCU size 
 
 - Approved and bundled `jpegtran.exe` artifact with license and SHA-256 provenance.
 - Diagnostics surface for runtime path, version, and hash. Shipped 2026-05-14 for app-local/override detection.
+- Exact MCU-aligned JPEG crop shell-out, output validation, same-volume atomic replacement, rollback cleanup, and fake-process tests. Shipped 2026-05-14.
 - UI commands for rotate 90/180/270 and crop writeback that are disabled or explanatory when the runtime is unavailable.
 - Confirmation dialog for any MCU trim, including the exact edge pixel counts.
-- Tests for command construction, unavailable runtime, trim confirmation, failed process output, atomic replacement, and metadata/sidecar preservation.
+- Remaining tests for trim confirmation, rotation writeback, and final staged-runtime smoke coverage.
