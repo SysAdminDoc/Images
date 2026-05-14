@@ -462,6 +462,31 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void SetAsWallpaperCommand_UsesRequestedLayout()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "a.png");
+            WallpaperLayout? capturedLayout = null;
+            using var viewModel = CreateViewModelWithFastPreview(
+                temp,
+                setWallpaper: (path, layout) =>
+                {
+                    Assert.Equal(image, path);
+                    capturedLayout = layout;
+                    return Path.Combine(temp.Path, "wallpaper", "current.png");
+                });
+
+            viewModel.OpenFile(image);
+            viewModel.SetAsWallpaperCommand.Execute("Tile");
+
+            Assert.Equal(WallpaperLayout.Tile, capturedLayout);
+            Assert.Equal("Set as tile wallpaper: current.png", viewModel.ToastMessage);
+        });
+    }
+
+    [Fact]
     public void DeleteCommand_WhenConfirmationDisabled_SkipsDialogAndAdvances()
     {
         RunOnSta(() =>
@@ -1363,7 +1388,8 @@ public sealed class MainViewModelStateTests
     private static MainViewModel CreateViewModelWithFastPreview(
         TestDirectory temp,
         ClipboardImportService? clipboardImport = null,
-        Func<string, string?>? pickFolder = null)
+        Func<string, string?>? pickFolder = null,
+        Func<string, WallpaperLayout, string>? setWallpaper = null)
         => new(
             CreateSettings(temp),
             clipboardImport,
@@ -1377,7 +1403,8 @@ public sealed class MainViewModelStateTests
             ocrWorkflow: null,
             externalEditReload: null,
             updateCheck: null,
-            pickFolder: pickFolder);
+            pickFolder: pickFolder,
+            setWallpaper: setWallpaper);
 
     private static SettingsService CreateSettings(TestDirectory temp)
         => new(Path.Combine(temp.Path, "settings.db"));

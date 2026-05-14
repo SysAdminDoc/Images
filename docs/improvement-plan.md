@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V30-20` is complete. Images now has copy/move-to-folder actions with collision-safe destination names, XMP sidecar transfer, a recent transfer-destination jump list, moved-file reload, and shell refresh notifications.
+Roadmap `V30-21` is complete. Images now offers explicit Fill, Fit, Span, and Tile wallpaper modes while preserving the stable app-data wallpaper copy behavior.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the remaining editor/file roadmap: approved lossless JPEG runtime artifact staging, richer selection/content-aware repair tools, and the remaining V30 file-operation items (`V30-21` wallpaper layout modes and `V30-22` send/print/clipboard actions). The content-aware inpaint runtime/model choice is now scoped in `docs/inpaint-runtime-decision.md`.
+The improvement-plan backlog is complete. Continue with the remaining editor/file roadmap: approved lossless JPEG runtime artifact staging, richer selection/content-aware repair tools, and the remaining V30 file-operation item (`V30-22` send/email/default print/clipboard actions). The content-aware inpaint runtime/model choice is now scoped in `docs/inpaint-runtime-decision.md`.
 
 ## Research Inputs
 
@@ -143,6 +143,7 @@ The improvement-plan backlog is complete. Continue with the remaining editor/fil
 - 2026-05-05: Closed roadmap `V40-61` by adding a local file-health scan for content-signature extension mismatches, corrupt supported images, zero-byte files, and suspicious temporary files, with preview, conflict-safe extension rename, reviewed dismissal, app-local quarantine moves, and regression coverage.
 - 2026-05-05: Closed roadmap `V40-62` by adding current-folder Gallery smart filters backed by `AssetSmartFilterService`, covering format, folder, sidecar rating/tag data, palette, orientation, dimensions, date, and exact duplicate status with quick chips, token filters, clear-filter UX, and regression coverage.
 - 2026-05-14: Closed roadmap `V30-20` by adding copy/move-to-folder actions with recent transfer destinations, collision-safe destination naming, XMP sidecar transfer, moved-file reload, shell refresh notifications, and service/ViewModel/settings regression coverage.
+- 2026-05-14: Closed roadmap `V30-21` by adding Fill, Fit, Span, and Tile wallpaper modes backed by Windows wallpaper registry style values, stable-copy preservation, context-menu mode selection, and service/ViewModel regression coverage.
 
 ## Verification Standard
 
