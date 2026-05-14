@@ -28,6 +28,27 @@ public sealed class JpegTranTransformServiceTests
     }
 
     [Fact]
+    public void BuildRotateArguments_DropsStaleEmbeddedThumbnailsAndUsesOutfile()
+    {
+        var args = JpegTranTransformService.BuildRotateArguments(
+            LosslessJpegRotation.Rotate90,
+            @"C:\temp\rotated.jpg",
+            @"C:\temp\source.jpg");
+
+        Assert.Equal(
+            [
+                "-copy",
+                "icc",
+                "-rotate",
+                "90",
+                "-outfile",
+                @"C:\temp\rotated.jpg",
+                @"C:\temp\source.jpg"
+            ],
+            args);
+    }
+
+    [Fact]
     public void TryApplyExactCrop_WhenRuntimeAvailable_ReplacesSourceAndCleansTempFiles()
     {
         using var temp = TestDirectory.Create();
@@ -57,6 +78,64 @@ public sealed class JpegTranTransformServiceTests
         Assert.Contains("-crop", args);
         Assert.Contains("16x16+0+0", args);
         Assert.Empty(Directory.EnumerateFiles(temp.Path, ".images-jpegtran-*", SearchOption.TopDirectoryOnly));
+    }
+
+    [Fact]
+    public void TryApplyExactRotation_WhenRuntimeAvailable_ReplacesSourceAndCleansTempFiles()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteJpeg(temp.Path, "source.jpg", 32, 48, MagickColors.Red);
+        var originalBytes = File.ReadAllBytes(source);
+        var runtime = RuntimeFor(temp);
+        IReadOnlyList<string>? capturedArgs = null;
+
+        var result = JpegTranTransformService.TryApplyExactRotation(
+            source,
+            LosslessJpegRotation.Rotate90,
+            imageWidth: 32,
+            imageHeight: 48,
+            runtime,
+            (_, args, _) =>
+            {
+                capturedArgs = args.ToList();
+                WriteJpeg(PathFromOutfile(args), 48, 32, MagickColors.Blue);
+                return new JpegTranProcessResult(0, "", "");
+            });
+
+        Assert.True(result.Attempted);
+        Assert.True(result.Applied);
+        Assert.NotEqual(originalBytes, File.ReadAllBytes(source));
+        Assert.Equal((48, 32), ReadImageSize(source));
+        var args = Assert.IsAssignableFrom<IReadOnlyList<string>>(capturedArgs);
+        Assert.Contains("-rotate", args);
+        Assert.Contains("90", args);
+        Assert.Empty(Directory.EnumerateFiles(temp.Path, ".images-jpegtran-*", SearchOption.TopDirectoryOnly));
+    }
+
+    [Fact]
+    public void TryApplyExactRotation_WhenRotationNeedsTrim_DoesNotRunJpegTran()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteJpeg(temp.Path, "source.jpg", 33, 48, MagickColors.Red);
+        var runtime = RuntimeFor(temp);
+        var invoked = false;
+
+        var result = JpegTranTransformService.TryApplyExactRotation(
+            source,
+            LosslessJpegRotation.Rotate90,
+            imageWidth: 33,
+            imageHeight: 48,
+            runtime,
+            (_, _, _) =>
+            {
+                invoked = true;
+                return new JpegTranProcessResult(0, "", "");
+            });
+
+        Assert.False(result.Attempted);
+        Assert.False(result.Applied);
+        Assert.False(invoked);
+        Assert.Equal((33, 48), ReadImageSize(source));
     }
 
     [Fact]
@@ -165,6 +244,42 @@ public sealed class JpegTranTransformServiceTests
         Assert.True(invoked);
         Assert.Equal(Path.GetFullPath(source), savedPath);
         Assert.Equal((16, 16), ReadImageSize(source));
+    }
+
+    [Fact]
+    public void Overwrite_WhenExactJpegRotationAndRuntimeAvailable_UsesJpegTranPath()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteJpeg(temp.Path, "source.jpg", 32, 48, MagickColors.Red);
+        var runtime = RuntimeFor(temp);
+        var operation = new EditOperation(
+            "rotate",
+            "rotate",
+            DateTimeOffset.UtcNow,
+            Enabled: true,
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["degrees"] = "90"
+            },
+            "Rotate");
+        var invoked = false;
+
+        var savedPath = ImageExportService.Overwrite(
+            source,
+            [operation],
+            runtime,
+            (_, args, _) =>
+            {
+                invoked = true;
+                Assert.Contains("-rotate", args);
+                Assert.Contains("90", args);
+                WriteJpeg(PathFromOutfile(args), 48, 32, MagickColors.Green);
+                return new JpegTranProcessResult(0, "", "");
+            });
+
+        Assert.True(invoked);
+        Assert.Equal(Path.GetFullPath(source), savedPath);
+        Assert.Equal((48, 32), ReadImageSize(source));
     }
 
     private static JpegTranRuntimeStatus RuntimeFor(TestDirectory temp)

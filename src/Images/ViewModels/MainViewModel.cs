@@ -144,6 +144,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RotateCwCommand = new RelayCommand(() => Rotate(90), () => CanUseDisplayImageCommands);
         RotateCcwCommand = new RelayCommand(() => Rotate(-90), () => CanUseDisplayImageCommands);
         Rotate180Command = new RelayCommand(() => Rotate(180), () => CanUseDisplayImageCommands);
+        ApplyRotationToFileCommand = new RelayCommand(ApplyRotationToFile, () => CanApplyRotationToFile);
         ToggleInspectorCommand = new RelayCommand(() => IsInspectorMode = !IsInspectorMode, () => CanUseInspector);
         ToggleSelectionModeCommand = new RelayCommand(() => IsSelectionMode = !IsSelectionMode, () => CanUseSelection);
         CopySelectionCommand = new RelayCommand(CopyCanvasSelection, () => CanCopySelection);
@@ -275,6 +276,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseInspector));
                 Raise(nameof(CanUseSelection));
                 Raise(nameof(CanUseCrop));
+                Raise(nameof(CanApplyRotationToFile));
                 Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseRetouch));
@@ -528,6 +530,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(PageSpan));
         Raise(nameof(IsArchiveBook));
         Raise(nameof(CanUseCrop));
+        Raise(nameof(CanApplyRotationToFile));
         Raise(nameof(CanUseExposureBrush));
         Raise(nameof(CanUseRedEyeCorrection));
         Raise(nameof(CanUseRetouch));
@@ -558,6 +561,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CurrentArchiveProgressText));
                 Raise(nameof(CanUseCrop));
                 Raise(nameof(CurrentFormatSupportsCrop));
+                Raise(nameof(CanApplyRotationToFile));
                 Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseRetouch));
@@ -573,6 +577,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool CurrentFormatSupportsCrop => CurrentPath is not null && SupportedImageFormats.IsCropWritableRaster(CurrentPath);
     private bool CanUsePixelEditTools => HasImage && HasDisplayImage && !IsOperationBusy && !IsArchiveBook && !IsPeekMode;
     public bool CanUseCrop => CanUsePixelEditTools && CurrentFormatSupportsCrop;
+    public bool CanApplyRotationToFile =>
+        CanUsePixelEditTools &&
+        CurrentPath is not null &&
+        SupportedImageFormats.IsCropWritableRaster(CurrentPath) &&
+        NormalizeRotationForWriteback(Rotation) != 0;
     private bool CanUseResize => CanUsePixelEditTools;
     private bool CanUseAdjustments => CanUsePixelEditTools;
     private bool CanUseEffects => CanUsePixelEditTools;
@@ -621,6 +630,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseSelection));
                 Raise(nameof(CanUseCrop));
                 Raise(nameof(CurrentFormatSupportsCrop));
+                Raise(nameof(CanApplyRotationToFile));
                 Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseRetouch));
@@ -729,6 +739,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanToggleMetadataHud));
                 Raise(nameof(CanUseOverlayMode));
                 Raise(nameof(CanUseCrop));
+                Raise(nameof(CanApplyRotationToFile));
                 Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseRetouch));
@@ -899,7 +910,18 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _nav.Count == 0 ? "" : $"{_nav.CurrentIndex + 1} / {_nav.Count}";
 
     private double _rotation;
-    public double Rotation { get => _rotation; private set => Set(ref _rotation, value); }
+    public double Rotation
+    {
+        get => _rotation;
+        private set
+        {
+            if (Set(ref _rotation, value))
+            {
+                Raise(nameof(CanApplyRotationToFile));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
 
     // V15-02/V15-08: FlipHorizontal / FlipVertical are exposed as independent booleans so a
     // double-flip via the context menu toggles cleanly. ZoomPanImage consumes both via bindings
@@ -2135,6 +2157,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand RotateCwCommand { get; }
     public ICommand RotateCcwCommand { get; }
     public ICommand Rotate180Command { get; }
+    public ICommand ApplyRotationToFileCommand { get; }
     public ICommand ToggleInspectorCommand { get; }
     public ICommand ToggleSelectionModeCommand { get; }
     public ICommand CopySelectionCommand { get; }
@@ -3103,6 +3126,63 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void Rotate(double delta)
     {
         Rotation = (Rotation + delta) % 360;
+    }
+
+    private void ApplyRotationToFile()
+    {
+        if (!CanApplyRotationToFile || CurrentPath is null)
+            return;
+
+        var degrees = NormalizeRotationForWriteback(Rotation);
+        if (degrees == 0)
+            return;
+
+        var path = CurrentPath;
+        var existingOperations = GetEnabledDisplayEditOperations(path, isArchiveBookPage: false);
+        var operations = existingOperations
+            .Append(new EditOperation(
+                Guid.NewGuid().ToString("N"),
+                "rotate",
+                DateTimeOffset.UtcNow,
+                Enabled: true,
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["degrees"] = degrees.ToString(CultureInfo.InvariantCulture)
+                },
+                $"Rotate {degrees} degrees"))
+            .ToList();
+
+        BeginOperationStatus("Applying rotation", $"Overwriting {Path.GetFileName(path)}.");
+        try
+        {
+            ImageExportService.Overwrite(path, operations);
+            if (existingOperations.Count > 0)
+            {
+                var clearResult = _editStack.ClearMasterOperations(path);
+                if (!clearResult.Success)
+                    throw new IOException(clearResult.Message);
+            }
+
+            _preload.Reset();
+            ShellChangeNotificationService.NotifyFileUpdated(path);
+            Rotation = 0;
+            var fileUpdated = LoadCurrent(startCropMode: false);
+            Toast(fileUpdated ? "Rotation applied to file" : "Rotation saved to file");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
+        {
+            Toast("Rotation failed: " + ex.Message);
+        }
+        finally
+        {
+            EndOperationStatus();
+        }
+    }
+
+    private static int NormalizeRotationForWriteback(double rotation)
+    {
+        var degrees = ((int)Math.Round(rotation) % 360 + 360) % 360;
+        return degrees is 90 or 180 or 270 ? degrees : 0;
     }
 
     public void SetOverlayExitHotKeyAvailable(bool available)

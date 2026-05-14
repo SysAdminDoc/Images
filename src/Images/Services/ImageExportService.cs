@@ -116,21 +116,21 @@ public static class ImageExportService
         var extension = Path.GetExtension(normalizedSourcePath).ToLowerInvariant();
         var format = ResolveMagickFormat(extension);
         if (!SupportedImageFormats.IsCropWritableRasterExtension(extension) || format is null || !CanWrite(format.Value))
-            throw new InvalidOperationException("Crop can overwrite only flat raster image files such as JPEG, PNG, WebP, TIFF, GIF, BMP, HEIC/AVIF/JXL, and similar bitmap formats.");
+            throw new InvalidOperationException("Source overwrite supports only flat raster image files such as JPEG, PNG, WebP, TIFF, GIF, BMP, HEIC/AVIF/JXL, and similar bitmap formats.");
 
         using var image = new MagickImage(normalizedSourcePath);
-        var losslessJpegCrop = TryOverwriteLosslessJpegCrop(
+        var losslessJpegTransform = TryOverwriteLosslessJpegTransform(
             normalizedSourcePath,
             operations,
             image,
             jpegTranRuntime ?? JpegTranRuntime.Inspect(),
             jpegTranProcessRunner);
-        if (losslessJpegCrop.Attempted)
+        if (losslessJpegTransform.Attempted)
         {
-            if (losslessJpegCrop.Applied)
+            if (losslessJpegTransform.Applied)
                 return normalizedSourcePath;
 
-            throw new InvalidOperationException(losslessJpegCrop.Message);
+            throw new InvalidOperationException(losslessJpegTransform.Message);
         }
 
         NonDestructiveEditService.ApplyOperations(image, operations);
@@ -141,7 +141,7 @@ public static class ImageExportService
         return normalizedSourcePath;
     }
 
-    private static JpegTranCropWriteResult TryOverwriteLosslessJpegCrop(
+    private static JpegTranWriteResult TryOverwriteLosslessJpegTransform(
         string sourcePath,
         IReadOnlyList<EditOperation> operations,
         MagickImage image,
@@ -150,25 +150,34 @@ public static class ImageExportService
     {
         var enabledOperations = operations.Where(operation => operation.Enabled).ToList();
         if (enabledOperations.Count != 1)
-            return JpegTranCropWriteResult.NotAttempted("Lossless JPEG crop requires exactly one enabled crop operation.");
+            return JpegTranWriteResult.NotAttempted("Lossless JPEG writeback requires exactly one enabled operation.");
 
         var operation = enabledOperations[0];
-        if (!NormalizeEditKind(operation.Kind).Equals("crop", StringComparison.Ordinal))
-            return JpegTranCropWriteResult.NotAttempted("Lossless JPEG writeback currently supports crop operations only.");
-
-        if (!TryReadCropSelection(operation, out var selection))
-            return JpegTranCropWriteResult.NotAttempted("Crop operation parameters are not valid for lossless JPEG writeback.");
-
         if (!IsDefaultJpegOrientation(image.Orientation.ToString()))
-            return JpegTranCropWriteResult.NotAttempted("Lossless JPEG crop is skipped for files with EXIF orientation metadata.");
+            return JpegTranWriteResult.NotAttempted("Lossless JPEG writeback is skipped for files with EXIF orientation metadata.");
 
-        return JpegTranTransformService.TryApplyExactCrop(
-            sourcePath,
-            selection,
-            (int)image.Width,
-            (int)image.Height,
-            jpegTranRuntime,
-            jpegTranProcessRunner);
+        return NormalizeEditKind(operation.Kind) switch
+        {
+            "crop" when TryReadCropSelection(operation, out var selection) =>
+                JpegTranTransformService.TryApplyExactCrop(
+                    sourcePath,
+                    selection,
+                    (int)image.Width,
+                    (int)image.Height,
+                    jpegTranRuntime,
+                    jpegTranProcessRunner),
+            "crop" => JpegTranWriteResult.NotAttempted("Crop operation parameters are not valid for lossless JPEG writeback."),
+            "rotate" when TryReadLosslessRotation(operation, out var rotation) =>
+                JpegTranTransformService.TryApplyExactRotation(
+                    sourcePath,
+                    rotation,
+                    (int)image.Width,
+                    (int)image.Height,
+                    jpegTranRuntime,
+                    jpegTranProcessRunner),
+            "rotate" => JpegTranWriteResult.NotAttempted("Rotate operation parameters are not valid for lossless JPEG writeback."),
+            _ => JpegTranWriteResult.NotAttempted("Lossless JPEG writeback currently supports crop and right-angle rotate operations only.")
+        };
     }
 
     private static bool TryReadCropSelection(EditOperation operation, out PixelSelection selection)
@@ -195,6 +204,26 @@ public static class ImageExportService
         value = 0;
         return parameters.TryGetValue(key, out var raw) &&
                int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out value);
+    }
+
+    private static bool TryReadLosslessRotation(EditOperation operation, out LosslessJpegRotation rotation)
+    {
+        rotation = default;
+        if (!operation.Parameters.TryGetValue("degrees", out var raw) ||
+            !double.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed))
+        {
+            return false;
+        }
+
+        var normalized = ((int)Math.Round(parsed) % 360 + 360) % 360;
+        rotation = normalized switch
+        {
+            90 => LosslessJpegRotation.Rotate90,
+            180 => LosslessJpegRotation.Rotate180,
+            270 => LosslessJpegRotation.Rotate270,
+            _ => default
+        };
+        return normalized is 90 or 180 or 270;
     }
 
     private static string NormalizeEditKind(string kind)
