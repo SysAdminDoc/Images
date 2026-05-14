@@ -16,14 +16,14 @@ internal sealed record JpegTranProcessResult(
     string StandardError,
     bool TimedOut = false);
 
-internal sealed record JpegTranCropWriteResult(
+internal sealed record JpegTranWriteResult(
     bool Attempted,
     bool Applied,
     string Message)
 {
-    public static JpegTranCropWriteResult NotAttempted(string message) => new(false, false, message);
-    public static JpegTranCropWriteResult AppliedResult(string message) => new(true, true, message);
-    public static JpegTranCropWriteResult Failed(string message) => new(true, false, message);
+    public static JpegTranWriteResult NotAttempted(string message) => new(false, false, message);
+    public static JpegTranWriteResult AppliedResult(string message) => new(true, true, message);
+    public static JpegTranWriteResult Failed(string message) => new(true, false, message);
 }
 
 internal static class JpegTranTransformService
@@ -35,7 +35,7 @@ internal static class JpegTranTransformService
         ".jpg", ".jpeg", ".jpe", ".jfif", ".jif"
     };
 
-    public static JpegTranCropWriteResult TryApplyExactCrop(
+    public static JpegTranWriteResult TryApplyExactCrop(
         string sourcePath,
         PixelSelection requestedSelection,
         int imageWidth,
@@ -45,10 +45,10 @@ internal static class JpegTranTransformService
     {
         var normalizedSourcePath = Path.GetFullPath(sourcePath);
         if (!JpegExtensions.Contains(Path.GetExtension(normalizedSourcePath)))
-            return JpegTranCropWriteResult.NotAttempted("jpegtran crop writeback is JPEG-only.");
+            return JpegTranWriteResult.NotAttempted("jpegtran crop writeback is JPEG-only.");
 
         if (!runtime.Available || string.IsNullOrWhiteSpace(runtime.ExecutablePath))
-            return JpegTranCropWriteResult.NotAttempted(runtime.StatusText);
+            return JpegTranWriteResult.NotAttempted(runtime.StatusText);
 
         var plan = LosslessJpegTransformPolicy.PlanCrop(
             requestedSelection,
@@ -56,11 +56,11 @@ internal static class JpegTranTransformService
             imageHeight,
             JpegMcuSize.Conservative420);
         if (!plan.IsExact || plan.AlignedSelection is not { } crop)
-            return JpegTranCropWriteResult.NotAttempted(plan.UserMessage);
+            return JpegTranWriteResult.NotAttempted(plan.UserMessage);
 
         var directory = Path.GetDirectoryName(normalizedSourcePath);
         if (string.IsNullOrWhiteSpace(directory))
-            return JpegTranCropWriteResult.Failed("JPEG crop failed: source file has no directory.");
+            return JpegTranWriteResult.Failed("JPEG crop failed: source file has no directory.");
 
         Directory.CreateDirectory(directory);
         var outputPath = Path.Combine(directory, $".images-jpegtran-{Guid.NewGuid():N}.jpg");
@@ -72,26 +72,26 @@ internal static class JpegTranTransformService
             var runner = processRunner ?? RunProcess;
             var result = runner(runtime.ExecutablePath, arguments, TransformTimeoutMilliseconds);
             if (result.TimedOut)
-                return JpegTranCropWriteResult.Failed("JPEG crop failed: jpegtran timed out.");
+                return JpegTranWriteResult.Failed("JPEG crop failed: jpegtran timed out.");
 
             if (result.ExitCode != 0)
             {
                 var details = FirstNonEmptyLine(result.StandardError, result.StandardOutput);
-                return JpegTranCropWriteResult.Failed(
+                return JpegTranWriteResult.Failed(
                     string.IsNullOrWhiteSpace(details)
                         ? $"JPEG crop failed: jpegtran exited with code {result.ExitCode}."
                         : $"JPEG crop failed: jpegtran exited with code {result.ExitCode}: {details}");
             }
 
             if (!ValidateJpegOutput(outputPath, crop.Width, crop.Height, out var validationError))
-                return JpegTranCropWriteResult.Failed($"JPEG crop failed: {validationError}");
+                return JpegTranWriteResult.Failed($"JPEG crop failed: {validationError}");
 
             ReplaceAtomically(outputPath, normalizedSourcePath, backupPath);
-            return JpegTranCropWriteResult.AppliedResult("JPEG crop applied losslessly with jpegtran.");
+            return JpegTranWriteResult.AppliedResult("JPEG crop applied losslessly with jpegtran.");
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or InvalidOperationException or NotSupportedException)
         {
-            return JpegTranCropWriteResult.Failed($"JPEG crop failed: {ex.Message}");
+            return JpegTranWriteResult.Failed($"JPEG crop failed: {ex.Message}");
         }
         finally
         {
@@ -110,6 +110,87 @@ internal static class JpegTranTransformService
             "icc",
             "-crop",
             FormattableString.Invariant($"{crop.Width}x{crop.Height}+{crop.X}+{crop.Y}"),
+            "-outfile",
+            outputPath,
+            sourcePath
+        ];
+
+    public static JpegTranWriteResult TryApplyExactRotation(
+        string sourcePath,
+        LosslessJpegRotation rotation,
+        int imageWidth,
+        int imageHeight,
+        JpegTranRuntimeStatus runtime,
+        JpegTranProcessRunner? processRunner = null)
+    {
+        var normalizedSourcePath = Path.GetFullPath(sourcePath);
+        if (!JpegExtensions.Contains(Path.GetExtension(normalizedSourcePath)))
+            return JpegTranWriteResult.NotAttempted("jpegtran rotation writeback is JPEG-only.");
+
+        if (!runtime.Available || string.IsNullOrWhiteSpace(runtime.ExecutablePath))
+            return JpegTranWriteResult.NotAttempted(runtime.StatusText);
+
+        var plan = LosslessJpegTransformPolicy.PlanRotation(
+            imageWidth,
+            imageHeight,
+            rotation,
+            JpegMcuSize.Conservative420);
+        if (!plan.IsExact)
+            return JpegTranWriteResult.NotAttempted(plan.UserMessage);
+
+        var directory = Path.GetDirectoryName(normalizedSourcePath);
+        if (string.IsNullOrWhiteSpace(directory))
+            return JpegTranWriteResult.Failed("JPEG rotation failed: source file has no directory.");
+
+        Directory.CreateDirectory(directory);
+        var outputPath = Path.Combine(directory, $".images-jpegtran-{Guid.NewGuid():N}.jpg");
+        var backupPath = Path.Combine(directory, $".images-jpegtran-backup-{Guid.NewGuid():N}{Path.GetExtension(normalizedSourcePath)}");
+        var expectedSize = ExpectedRotatedSize(imageWidth, imageHeight, rotation);
+
+        try
+        {
+            var arguments = BuildRotateArguments(rotation, outputPath, normalizedSourcePath);
+            var runner = processRunner ?? RunProcess;
+            var result = runner(runtime.ExecutablePath, arguments, TransformTimeoutMilliseconds);
+            if (result.TimedOut)
+                return JpegTranWriteResult.Failed("JPEG rotation failed: jpegtran timed out.");
+
+            if (result.ExitCode != 0)
+            {
+                var details = FirstNonEmptyLine(result.StandardError, result.StandardOutput);
+                return JpegTranWriteResult.Failed(
+                    string.IsNullOrWhiteSpace(details)
+                        ? $"JPEG rotation failed: jpegtran exited with code {result.ExitCode}."
+                        : $"JPEG rotation failed: jpegtran exited with code {result.ExitCode}: {details}");
+            }
+
+            if (!ValidateJpegOutput(outputPath, expectedSize.Width, expectedSize.Height, out var validationError))
+                return JpegTranWriteResult.Failed($"JPEG rotation failed: {validationError}");
+
+            ReplaceAtomically(outputPath, normalizedSourcePath, backupPath);
+            return JpegTranWriteResult.AppliedResult("JPEG rotation applied losslessly with jpegtran.");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or InvalidOperationException or NotSupportedException)
+        {
+            return JpegTranWriteResult.Failed($"JPEG rotation failed: {ex.Message}");
+        }
+        finally
+        {
+            TryDeleteFile(outputPath);
+            TryDeleteFile(backupPath);
+        }
+    }
+
+    internal static IReadOnlyList<string> BuildRotateArguments(
+        LosslessJpegRotation rotation,
+        string outputPath,
+        string sourcePath)
+        =>
+        [
+            "-copy",
+            "icc",
+            "-rotate",
+            ((int)rotation).ToString(CultureInfo.InvariantCulture),
             "-outfile",
             outputPath,
             sourcePath
@@ -230,6 +311,14 @@ internal static class JpegTranTransformService
 
         return true;
     }
+
+    private static (int Width, int Height) ExpectedRotatedSize(
+        int imageWidth,
+        int imageHeight,
+        LosslessJpegRotation rotation)
+        => rotation is LosslessJpegRotation.Rotate90 or LosslessJpegRotation.Rotate270
+            ? (imageHeight, imageWidth)
+            : (imageWidth, imageHeight);
 
     private static string FirstNonEmptyLine(params string[] values)
         => values

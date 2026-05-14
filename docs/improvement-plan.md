@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V30-09` is complete. Images now has a modeless non-destructive effects workbench with live Magick.NET previews, Crisp/Clean/Focus presets, sharpen/noise/vignette sliders, edit-stack persistence, and Save-a-copy application.
+Roadmap `V30-02` advanced again. Images now has an explicit rotation writeback command that bakes right-angle view rotations into flat raster sources, uses `jpegtran -rotate` for exact aligned JPEGs when an approved runtime is present, and falls back to normal raster overwrite otherwise.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the remaining editor roadmap: approved lossless JPEG runtime artifact staging, trim confirmation, rotation writeback, annotations/redaction, and richer selection tools. The content-aware inpaint runtime/model choice is now scoped in `docs/inpaint-runtime-decision.md`.
+The improvement-plan backlog is complete. Continue with the remaining editor roadmap: approved lossless JPEG runtime artifact staging, trim confirmation, annotations/redaction, and richer selection tools. The content-aware inpaint runtime/model choice is now scoped in `docs/inpaint-runtime-decision.md`.
 
 ## Research Inputs
 
@@ -87,7 +87,8 @@ The improvement-plan backlog is complete. Continue with the remaining editor roa
 - 2026-05-05: Partially completed roadmap `E12` by adding an on-canvas non-destructive crop mode with image-pixel drag selection, side-panel and keyboard apply/cancel flows, XMP edit-stack crop operations, docs, and regression coverage.
 - 2026-05-05: Completed roadmap `V30-01` within `E12` by adding free/square/3:2/4:3/16:9/custom crop aspect controls, custom ratio validation, rule-of-thirds overlay guides, and focused crop selection regression coverage.
 - 2026-05-05: Scoped roadmap `V30-02` by adding a lossless JPEG transform policy plus tested MCU-alignment planning for future `jpegtran.exe` crop/rotate trim confirmations; runtime bundling remains blocked on exact binary approval.
-- 2026-05-14: Advanced roadmap `V30-02` by adding exact MCU-aligned JPEG crop shell-out through the optional `jpegtran.exe` runtime, fake-process command/rollback coverage, output validation, atomic replacement, and stale embedded-thumbnail avoidance. Approved artifact staging, trim confirmation, and rotation writeback remain.
+- 2026-05-14: Advanced roadmap `V30-02` by adding exact MCU-aligned JPEG crop shell-out through the optional `jpegtran.exe` runtime, fake-process command/rollback coverage, output validation, atomic replacement, and stale embedded-thumbnail avoidance. Approved artifact staging, trim confirmation, and rotation writeback remained after this slice.
+- 2026-05-14: Advanced roadmap `V30-02` by adding explicit right-angle rotation writeback, exact aligned `jpegtran -rotate` shell-out with fake-process coverage, output validation, atomic replacement, rollback cleanup, raster fallback, viewer refresh, and Explorer thumbnail notification. Approved artifact staging and trim confirmation remain.
 - 2026-05-05: Completed roadmap `V30-03` by adding a resize dialog with percent/pixel/long-edge/short-edge modes, aspect lock, Lanczos-3/Mitchell/Bicubic filters, live output-dimension preview, non-destructive edit-stack persistence, and focused resize planning tests.
 - 2026-05-05: Completed roadmap `V30-05` by adding a no-modal non-destructive dodge/burn brush with soft falloff, side-panel radius/strength/tone controls, paint-to-stroke overlay feedback, XMP edit-stack persistence, Save-a-copy application, and focused brush/export coverage.
 - 2026-05-05: Completed roadmap `V30-06` by adding a no-modal non-destructive red-eye correction tool with pupil marks, soft overlay feedback, radius/strength/red-threshold controls, XMP edit-stack persistence, Save-a-copy application, and focused correction/export coverage.

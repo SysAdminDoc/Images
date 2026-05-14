@@ -247,6 +247,11 @@
                                            Text="180" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Apply rotation to file" Command="{Binding ApplyRotationToFileCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE74E;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="Flip horizontal" Command="{Binding FlipHorizontalCommand}">
                             <MenuItem.Icon>
                                 <TextBlock FontFamily="Segoe UI Symbol"
