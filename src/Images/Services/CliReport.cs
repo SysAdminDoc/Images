@@ -77,8 +77,9 @@ public static class CliReport
 
     /// <summary>
     /// Builds the <c>--system-info</c> report. Includes app version, build, .NET runtime, OS
-    /// + architecture, decoder runtime provenance (Magick.NET version + assembly path,
-    /// SharpCompress version + assembly path, Ghostscript path/version/source/SHA-256),
+    /// + architecture, decoder/runtime provenance (Magick.NET version + assembly path,
+    /// SharpCompress version + assembly path, Ghostscript path/version/source/SHA-256,
+    /// jpegtran path/version/source/SHA-256),
     /// and the writable storage paths Images uses at runtime so support requests can
     /// pinpoint where logs / settings / caches live.
     /// </summary>
@@ -127,6 +128,12 @@ public static class CliReport
             sb.AppendLine($"- Ghostscript DLL:   {provenance.GhostscriptDllPath}");
         if (provenance.GhostscriptDllSha256 is not null)
             sb.AppendLine($"- Ghostscript hash:  sha256:{provenance.GhostscriptDllSha256}");
+        sb.AppendLine($"- jpegtran:          {(provenance.JpegTranAvailable ? "available" : "not available")}");
+        sb.AppendLine($"- jpegtran src:      {provenance.JpegTranExecutablePath ?? provenance.JpegTranSource}");
+        if (provenance.JpegTranVersion is not null)
+            sb.AppendLine($"- jpegtran ver:      {provenance.JpegTranVersion}");
+        if (provenance.JpegTranSha256 is not null)
+            sb.AppendLine($"- jpegtran hash:     sha256:{provenance.JpegTranSha256}");
         sb.AppendLine();
 
         sb.AppendLine("Format coverage");

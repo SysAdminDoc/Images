@@ -91,7 +91,7 @@ Copy this block into a new design or decision document before adding the integra
 | SharpCompress 0.47.4 | Accepted | Managed MIT NuGet dependency for read-only RAR/CBR and 7z/CB7 archive books. See `docs/archive-runtime-review.md`. |
 | Windows.Media.Ocr | Accepted | In-box Windows API; no bundled runtime. |
 | 7-Zip/UnRAR native archive readers | Not reviewed | Native sidecars remain unapproved; ZIP/CBZ use .NET built-in APIs and RAR/7z use the reviewed managed SharpCompress path. |
-| jpegtran.exe | Policy scoped, runtime not approved | Lossless JPEG crop/rotation planning is documented in `docs/lossless-jpeg-transform-policy.md`; the exact libjpeg-turbo Windows artifact still needs license, provenance, and CVE review before bundling. |
+| jpegtran.exe | Conditionally accepted resolver/provenance scaffold | Lossless JPEG crop/rotation planning and runtime diagnostics are documented in `docs/lossless-jpeg-transform-policy.md`; bundling and writeback still require staging the exact libjpeg-turbo Windows artifact, carrying license files, recording SHA-256 provenance, and adding command/rollback/UI confirmation coverage. |
 | ExifTool | Not reviewed | Required before sidecar or metadata write workflows. |
 | ONNX models | Not reviewed | Required before semantic search, AI tagging, background removal, upscaling, or face recognition. |
 | OpenSlide/Bio-Formats | Not reviewed | Required before lab/scientific image packs. |

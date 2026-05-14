@@ -1,13 +1,13 @@
 # Lossless JPEG transform policy
 
-Status: scoped for roadmap `V30-02`; runtime integration blocked until an approved `jpegtran.exe` artifact exists.
-Date: 2026-05-05
+Status: runtime resolver and provenance scaffold shipped; writeback remains blocked until an approved `jpegtran.exe` artifact is staged.
+Date: 2026-05-14
 
 ## Decision
 
 Images may support lossless JPEG rotate and crop only through an app-local `jpegtran.exe` sidecar after the exact binary passes the optional-runtime review gate in `docs/integration-policy.md`.
 
-No runtime binary is committed to source control in this slice. The shipped code only contains deterministic MCU-alignment planning so future UI and shell-out work can warn users before a lossless transform trims pixels.
+No runtime binary is committed to source control in this slice. The shipped code contains deterministic MCU-alignment planning plus an optional runtime resolver that recognizes only `Codecs\JpegTran\jpegtran.exe` or the explicit `IMAGES_JPEGTRAN_EXE` developer override. About, `--system-info`, and `--codec-report` report path, source, version, and SHA-256 when a runtime is present.
 
 ## User contract
 
@@ -34,9 +34,31 @@ Required before enabling the feature:
 | Failure mode | Calm status explaining missing runtime, failed transform, or canceled trim. |
 | Test corpus | Generated JPEGs covering 4:2:0 and 4:4:4 MCU sizes, odd dimensions, EXIF orientation, and metadata sidecars. |
 
+## Integration review: libjpeg-turbo jpegtran
+
+- Version: libjpeg-turbo 3.1.4.1 target artifact.
+- Source: https://github.com/libjpeg-turbo/libjpeg-turbo
+- Release artifact: `libjpeg-turbo-3.1.4.1-vc-x64.exe` from https://github.com/libjpeg-turbo/libjpeg-turbo/releases/tag/3.1.4.1
+- Official binaries documentation: https://libjpeg-turbo.org/Documentation/OfficialBinaries
+- License: BSD-style libjpeg-turbo license, with license text from https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/LICENSE.md.
+- Redistribution permission: permissive license appears compatible, but release bundling still requires staging the exact artifact and carrying its license/readme files in `Codecs\JpegTran`.
+- Source-use boundary: child-process shell-out only; no in-process native linking and no source copied into Images.
+- Update cadence: monitor libjpeg-turbo GitHub releases and security advisories before each Images release that bundles jpegtran.
+- CVE/advisory tracking: GitHub security advisories for `libjpeg-turbo/libjpeg-turbo`.
+- Binary provenance: record SHA-256 for the staged `jpegtran.exe` in release notes and diagnostics. Do not claim a bundled runtime until the extracted executable hash is recorded.
+- Process boundary: child process through `CreateProcess` / `ProcessStartInfo.ArgumentList`.
+- File access boundary: source JPEG plus same-volume temp output and rollback files only.
+- Network behavior: no network access; Images never downloads the runtime automatically.
+- Failure mode: disabled or explanatory UI when unavailable; calm transform-failed status on non-zero exit, invalid output, missing output, or timeout.
+- Test corpus: generated JPEGs for MCU planning plus future shell-out tests using a fake process seam and at least one present-runtime smoke case.
+- Release impact: app-local sidecar size only when bundled; no startup cost beyond diagnostics probing.
+- Decision: conditionally accepted resolver/provenance scaffold; writeback remains disabled until artifact staging, command execution, rollback, and UI confirmation are implemented.
+- Owner: Images release maintainer.
+
 ## Shell-out rules
 
 - Resolve only app-local `Codecs\JpegTran\jpegtran.exe` or an explicit developer override. Do not auto-download.
+- If `IMAGES_JPEGTRAN_EXE` is set but invalid, report the override as unavailable instead of silently falling back to an app-local binary.
 - Use a temp output file in the same volume as the target when replacing originals.
 - Pass arguments through `ProcessStartInfo.ArgumentList`; never build a shell string.
 - Time out and kill the process tree if the transform stalls.
@@ -52,7 +74,7 @@ The actual runtime path must replace the conservative default with the MCU size 
 ## Completion criteria for `V30-02`
 
 - Approved and bundled `jpegtran.exe` artifact with license and SHA-256 provenance.
-- Diagnostics surface for runtime path, version, and hash.
+- Diagnostics surface for runtime path, version, and hash. Shipped 2026-05-14 for app-local/override detection.
 - UI commands for rotate 90/180/270 and crop writeback that are disabled or explanatory when the runtime is unavailable.
 - Confirmation dialog for any MCU trim, including the exact edge pixel counts.
 - Tests for command construction, unavailable runtime, trim confirmation, failed process output, atomic replacement, and metadata/sidecar preservation.

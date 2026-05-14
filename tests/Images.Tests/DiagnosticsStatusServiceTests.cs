@@ -121,5 +121,11 @@ public sealed class DiagnosticsStatusServiceTests
             GhostscriptSource: "installed Ghostscript",
             GhostscriptVersion: "10.04.0",
             GhostscriptDllPath: @"C:\Program Files\gs\gs10.04.0\bin\gsdll64.dll",
-            GhostscriptDllSha256: "sha256:test");
+            GhostscriptDllSha256: "sha256:test",
+            JpegTranAvailable: true,
+            JpegTranExecutablePath: @"C:\Images\Codecs\JpegTran\jpegtran.exe",
+            JpegTranSource: "app-local Codecs\\JpegTran",
+            JpegTranVersion: "libjpeg-turbo 3.1.4.1",
+            JpegTranSha256: "sha256:jpegtran-test",
+            JpegTranStatus: "jpegtran available via app-local Codecs\\JpegTran");
 }
