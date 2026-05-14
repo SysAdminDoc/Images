@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Printing;
 
 namespace Images.Services;
 
@@ -28,6 +29,23 @@ public static class PrintService
         var dlg = new PrintDialog();
         if (dlg.ShowDialog() != true) return false;
 
+        PrintWithDialog(source, documentTitle, dlg);
+        return true;
+    }
+
+    public static void PrintDefault(BitmapSource source, string documentTitle)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        var dlg = new PrintDialog
+        {
+            PrintQueue = LocalPrintServer.GetDefaultPrintQueue()
+        };
+        PrintWithDialog(source, documentTitle, dlg);
+    }
+
+    private static void PrintWithDialog(BitmapSource source, string documentTitle, PrintDialog dlg)
+    {
         var pageWidth = dlg.PrintableAreaWidth;
         var pageHeight = dlg.PrintableAreaHeight;
         var marginDiu = MarginInches * DIU_PER_INCH;
@@ -67,6 +85,5 @@ public static class PrintService
         canvas.Arrange(new Rect(0, 0, pageWidth, pageHeight));
 
         dlg.PrintVisual(canvas, documentTitle);
-        return true;
     }
 }
