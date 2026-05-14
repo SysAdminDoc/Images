@@ -139,6 +139,36 @@ public sealed class JpegTranTransformServiceTests
     }
 
     [Fact]
+    public void TryApplyExactRotation_WhenTrimConfirmed_RunsJpegTranWithTrim()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteJpeg(temp.Path, "source.jpg", 33, 48, MagickColors.Red);
+        var runtime = RuntimeFor(temp);
+        IReadOnlyList<string>? capturedArgs = null;
+
+        var result = JpegTranTransformService.TryApplyExactRotation(
+            source,
+            LosslessJpegRotation.Rotate90,
+            imageWidth: 33,
+            imageHeight: 48,
+            runtime,
+            (_, args, _) =>
+            {
+                capturedArgs = args.ToList();
+                WriteJpeg(PathFromOutfile(args), 48, 32, MagickColors.Blue);
+                return new JpegTranProcessResult(0, "", "");
+            },
+            allowTrim: true);
+
+        Assert.True(result.Attempted);
+        Assert.True(result.Applied);
+        Assert.Contains("confirmed MCU trim", result.Message);
+        var args = Assert.IsAssignableFrom<IReadOnlyList<string>>(capturedArgs);
+        Assert.Contains("-trim", args);
+        Assert.Equal((48, 32), ReadImageSize(source));
+    }
+
+    [Fact]
     public void TryApplyExactCrop_WhenSelectionNeedsTrim_DoesNotRunJpegTran()
     {
         using var temp = TestDirectory.Create();
@@ -162,6 +192,36 @@ public sealed class JpegTranTransformServiceTests
         Assert.False(result.Applied);
         Assert.False(invoked);
         Assert.Equal((32, 32), ReadImageSize(source));
+    }
+
+    [Fact]
+    public void TryApplyExactCrop_WhenTrimConfirmed_RunsAlignedJpegTranCrop()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteJpeg(temp.Path, "source.jpg", 64, 64, MagickColors.Red);
+        var runtime = RuntimeFor(temp);
+        IReadOnlyList<string>? capturedArgs = null;
+
+        var result = JpegTranTransformService.TryApplyExactCrop(
+            source,
+            new PixelSelection(1, 1, 63, 63),
+            imageWidth: 64,
+            imageHeight: 64,
+            runtime,
+            (_, args, _) =>
+            {
+                capturedArgs = args.ToList();
+                WriteJpeg(PathFromOutfile(args), 48, 48, MagickColors.Blue);
+                return new JpegTranProcessResult(0, "", "");
+            },
+            allowTrim: true);
+
+        Assert.True(result.Attempted);
+        Assert.True(result.Applied);
+        Assert.Contains("confirmed MCU trim", result.Message);
+        var args = Assert.IsAssignableFrom<IReadOnlyList<string>>(capturedArgs);
+        Assert.Contains("48x48+16+16", args);
+        Assert.Equal((48, 48), ReadImageSize(source));
     }
 
     [Fact]
@@ -280,6 +340,94 @@ public sealed class JpegTranTransformServiceTests
         Assert.True(invoked);
         Assert.Equal(Path.GetFullPath(source), savedPath);
         Assert.Equal((48, 32), ReadImageSize(source));
+    }
+
+    [Fact]
+    public void Overwrite_WhenConfirmedTrimJpegCrop_UsesAlignedJpegTranPath()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteJpeg(temp.Path, "source.jpg", 64, 64, MagickColors.Red);
+        var runtime = RuntimeFor(temp);
+        var operation = new EditOperation(
+            "crop",
+            "crop",
+            DateTimeOffset.UtcNow,
+            Enabled: true,
+            CropSelectionService.ToEditParameters(new PixelSelection(1, 1, 63, 63)),
+            "Crop");
+        var invoked = false;
+
+        var savedPath = ImageExportService.Overwrite(
+            source,
+            [operation],
+            runtime,
+            (_, args, _) =>
+            {
+                invoked = true;
+                Assert.Contains("48x48+16+16", args);
+                WriteJpeg(PathFromOutfile(args), 48, 48, MagickColors.Green);
+                return new JpegTranProcessResult(0, "", "");
+            },
+            allowLosslessJpegTrim: true);
+
+        Assert.True(invoked);
+        Assert.Equal(Path.GetFullPath(source), savedPath);
+        Assert.Equal((48, 48), ReadImageSize(source));
+    }
+
+    [Fact]
+    public void Overwrite_WhenConfirmedTrimJpegRotation_UsesTrimmedJpegTranPath()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteJpeg(temp.Path, "source.jpg", 33, 48, MagickColors.Red);
+        var runtime = RuntimeFor(temp);
+        var operation = new EditOperation(
+            "rotate",
+            "rotate",
+            DateTimeOffset.UtcNow,
+            Enabled: true,
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["degrees"] = "90"
+            },
+            "Rotate");
+        var invoked = false;
+
+        var savedPath = ImageExportService.Overwrite(
+            source,
+            [operation],
+            runtime,
+            (_, args, _) =>
+            {
+                invoked = true;
+                Assert.Contains("-trim", args);
+                WriteJpeg(PathFromOutfile(args), 48, 32, MagickColors.Green);
+                return new JpegTranProcessResult(0, "", "");
+            },
+            allowLosslessJpegTrim: true);
+
+        Assert.True(invoked);
+        Assert.Equal(Path.GetFullPath(source), savedPath);
+        Assert.Equal((48, 32), ReadImageSize(source));
+    }
+
+    [Fact]
+    public void TryPlanLosslessJpegCropTrimConfirmation_WhenRuntimeAvailable_ReturnsTrimPlan()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteJpeg(temp.Path, "source.jpg", 64, 64, MagickColors.Red);
+
+        var plan = ImageExportService.TryPlanLosslessJpegCropTrimConfirmation(
+            source,
+            new PixelSelection(1, 1, 63, 63),
+            imageWidth: 64,
+            imageHeight: 64,
+            existingOperations: [],
+            RuntimeFor(temp));
+
+        Assert.NotNull(plan);
+        Assert.True(plan.RequiresTrimConfirmation);
+        Assert.Equal(new PixelSelection(16, 16, 48, 48), plan.AlignedSelection);
     }
 
     private static JpegTranRuntimeStatus RuntimeFor(TestDirectory temp)

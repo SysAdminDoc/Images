@@ -27,6 +27,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly UpdateCheckController _updateCheck;
     private readonly RecycleBinDeleteService _recycleBinDelete;
     private readonly NonDestructiveEditService _editStack = new();
+    private readonly Func<LosslessJpegTrimConfirmation, LosslessJpegTrimChoice> _confirmLosslessJpegTrim;
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
     private readonly DispatcherTimer _animationTimer;
@@ -70,7 +71,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         PhotoMetadataController? photoMetadata,
         OcrWorkflowController? ocrWorkflow,
         ExternalEditReloadController? externalEditReload,
-        UpdateCheckController? updateCheck)
+        UpdateCheckController? updateCheck,
+        Func<LosslessJpegTrimConfirmation, LosslessJpegTrimChoice>? confirmLosslessJpegTrim = null)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _clipboardImport = clipboardImport ?? new ClipboardImportService();
@@ -99,6 +101,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Toast,
             openTarget: ShellIntegration.OpenShellTarget,
             invalidateCommands: CommandManager.InvalidateRequerySuggested);
+        _confirmLosslessJpegTrim = confirmLosslessJpegTrim ?? ShowLosslessJpegTrimConfirmation;
         _updateCheck.PropertyChanged += (_, e) =>
         {
             if (!string.IsNullOrEmpty(e.PropertyName))
@@ -3142,6 +3145,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         var path = CurrentPath;
         var existingOperations = GetEnabledDisplayEditOperations(path, isArchiveBookPage: false);
+        var allowLosslessJpegTrim = false;
+        if (TryReadLosslessJpegRotation(degrees, out var losslessRotation) &&
+            ImageExportService.TryPlanLosslessJpegRotationTrimConfirmation(
+                path,
+                losslessRotation,
+                existingOperations) is { } trimPlan)
+        {
+            var choice = _confirmLosslessJpegTrim(LosslessJpegTrimConfirmation.ForRotation(trimPlan));
+            if (choice == LosslessJpegTrimChoice.Cancel)
+            {
+                Toast("Rotation canceled");
+                return;
+            }
+
+            allowLosslessJpegTrim = choice == LosslessJpegTrimChoice.ApplyTrimmedLossless;
+        }
+
         var operations = existingOperations
             .Append(new EditOperation(
                 Guid.NewGuid().ToString("N"),
@@ -3158,7 +3178,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         BeginOperationStatus("Applying rotation", $"Overwriting {Path.GetFileName(path)}.");
         try
         {
-            ImageExportService.Overwrite(path, operations);
+            ImageExportService.Overwrite(path, operations, allowLosslessJpegTrim);
             if (existingOperations.Count > 0)
             {
                 var clearResult = _editStack.ClearMasterOperations(path);
@@ -3170,7 +3190,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             ShellChangeNotificationService.NotifyFileUpdated(path);
             Rotation = 0;
             var fileUpdated = LoadCurrent(startCropMode: false);
-            Toast(fileUpdated ? "Rotation applied to file" : "Rotation saved to file");
+            Toast(allowLosslessJpegTrim
+                ? "Rotation applied losslessly with JPEG trim"
+                : fileUpdated ? "Rotation applied to file" : "Rotation saved to file");
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
         {
@@ -3186,6 +3208,42 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var degrees = ((int)Math.Round(rotation) % 360 + 360) % 360;
         return degrees is 90 or 180 or 270 ? degrees : 0;
+    }
+
+    private static bool TryReadLosslessJpegRotation(int degrees, out LosslessJpegRotation rotation)
+    {
+        rotation = degrees switch
+        {
+            90 => LosslessJpegRotation.Rotate90,
+            180 => LosslessJpegRotation.Rotate180,
+            270 => LosslessJpegRotation.Rotate270,
+            _ => default
+        };
+        return degrees is 90 or 180 or 270;
+    }
+
+    private static LosslessJpegTrimChoice ShowLosslessJpegTrimConfirmation(LosslessJpegTrimConfirmation confirmation)
+    {
+        var result = MessageBox.Show(
+            confirmation.Message +
+            Environment.NewLine +
+            Environment.NewLine +
+            $"Yes: {confirmation.TrimActionText}" +
+            Environment.NewLine +
+            $"No: {confirmation.ExactActionText}" +
+            Environment.NewLine +
+            "Cancel: leave the file unchanged.",
+            confirmation.Title,
+            MessageBoxButton.YesNoCancel,
+            MessageBoxImage.Warning,
+            MessageBoxResult.No);
+
+        return result switch
+        {
+            MessageBoxResult.Yes => LosslessJpegTrimChoice.ApplyTrimmedLossless,
+            MessageBoxResult.No => LosslessJpegTrimChoice.ReencodeExact,
+            _ => LosslessJpegTrimChoice.Cancel
+        };
     }
 
     public void SetOverlayExitHotKeyAvailable(bool available)
@@ -3729,6 +3787,25 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         var path = CurrentPath;
         var existingOperations = GetEnabledDisplayEditOperations(path, isArchiveBookPage: false);
+        var allowLosslessJpegTrim = false;
+        if (ImageExportService.TryPlanLosslessJpegCropTrimConfirmation(
+                path,
+                crop,
+                PixelWidth,
+                PixelHeight,
+                existingOperations) is { } trimPlan)
+        {
+            var choice = _confirmLosslessJpegTrim(LosslessJpegTrimConfirmation.ForCrop(trimPlan));
+            if (choice == LosslessJpegTrimChoice.Cancel)
+            {
+                CropStatusText = "Crop canceled.";
+                Toast("Crop canceled");
+                return;
+            }
+
+            allowLosslessJpegTrim = choice == LosslessJpegTrimChoice.ApplyTrimmedLossless;
+        }
+
         var operations = existingOperations
             .Append(new EditOperation(
                 Guid.NewGuid().ToString("N"),
@@ -3742,7 +3819,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         BeginOperationStatus("Applying crop", $"Overwriting {Path.GetFileName(path)}.");
         try
         {
-            ImageExportService.Overwrite(path, operations);
+            ImageExportService.Overwrite(path, operations, allowLosslessJpegTrim);
             if (existingOperations.Count > 0)
             {
                 var clearResult = _editStack.ClearMasterOperations(path);
@@ -3756,7 +3833,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             IsCropMode = false;
             ClearCropSelection();
 
-            Toast(fileUpdated ? "Crop applied to file" : "Crop saved to file");
+            Toast(allowLosslessJpegTrim
+                ? "Crop applied losslessly with JPEG trim"
+                : fileUpdated ? "Crop applied to file" : "Crop saved to file");
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
         {
@@ -4823,4 +4902,36 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         GC.SuppressFinalize(this);
     }
+}
+
+internal enum LosslessJpegTrimChoice
+{
+    ApplyTrimmedLossless,
+    ReencodeExact,
+    Cancel,
+}
+
+internal sealed record LosslessJpegTrimConfirmation(
+    string Title,
+    string Message,
+    string TrimActionText,
+    string ExactActionText)
+{
+    public static LosslessJpegTrimConfirmation ForCrop(LosslessJpegCropPlan plan)
+    {
+        var aligned = plan.AlignedSelection;
+        var trimmedSize = aligned is null ? "the aligned JPEG MCU area" : $"{aligned.Value.Width} x {aligned.Value.Height} px";
+        return new LosslessJpegTrimConfirmation(
+            "Lossless JPEG crop needs trimming",
+            $"{plan.UserMessage} The requested crop is {plan.RequestedSelection.Width} x {plan.RequestedSelection.Height} px; the lossless JPEG result will be {trimmedSize}.",
+            "apply the trimmed crop losslessly with jpegtran",
+            "keep the exact crop by re-encoding the JPEG");
+    }
+
+    public static LosslessJpegTrimConfirmation ForRotation(LosslessJpegRotationPlan plan)
+        => new(
+            "Lossless JPEG rotation needs trimming",
+            $"{plan.UserMessage} The trimmed edge pixels are required only for the lossless jpegtran path.",
+            "apply the rotation losslessly after trimming edge pixels",
+            "keep the full image by re-encoding the JPEG");
 }
