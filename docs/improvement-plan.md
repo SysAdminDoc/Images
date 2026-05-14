@@ -14,7 +14,7 @@ Roadmap `V30-07` is complete. Images now has a no-modal non-destructive clone/he
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the remaining editor roadmap: approved lossless JPEG writeback runtime integration, annotations/redaction, richer selection tools, sharpen/noise/vignette presets, and the explicit content-aware inpaint runtime/model choice.
+The improvement-plan backlog is complete. Continue with the remaining editor roadmap: approved lossless JPEG writeback runtime integration, annotations/redaction, richer selection tools, and sharpen/noise/vignette presets. The content-aware inpaint runtime/model choice is now scoped in `docs/inpaint-runtime-decision.md`.
 
 ## Research Inputs
 
