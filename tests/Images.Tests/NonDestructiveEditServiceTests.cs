@@ -176,6 +176,37 @@ public sealed class NonDestructiveEditServiceTests
     }
 
     [Fact]
+    public void Export_AppliesAnnotationOperation()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteImage(temp.Path, "source.png", 32, 32);
+        var baseline = ImageExportService.Save(
+            source,
+            Path.Combine(temp.Path, "baseline.png"),
+            []);
+
+        var service = new NonDestructiveEditService();
+        var mutation = service.AppendOperation(
+            source,
+            "annotation",
+            ImageAnnotationService.ToEditParameters(
+            [
+                new ImageAnnotationItem(ImageAnnotationKind.Rectangle, 4, 4, 20, 12, 0, 0, "", 1, "#F38BA8", 3, 24, [])
+            ]));
+
+        Assert.True(mutation.Success);
+
+        var result = service.Export(source, Path.Combine(temp.Path, "annotated.png"));
+
+        Assert.True(result.Success);
+        Assert.Equal(1, result.AppliedOperationCount);
+        Assert.False(File.ReadAllBytes(baseline).SequenceEqual(File.ReadAllBytes(result.OutputPath)));
+
+        var provenance = XDocument.Load(result.ProvenanceSidecarPath).ToString();
+        Assert.Contains("annotation", provenance, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Export_AppliesLocalExposureOperation()
     {
         using var temp = TestDirectory.Create();
