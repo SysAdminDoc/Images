@@ -564,6 +564,46 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void SelectionMode_CapturesCopyablePixelsAndCancelsCleanly()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "photo.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            Assert.False(viewModel.ToggleSelectionModeCommand.CanExecute(null));
+
+            viewModel.OpenFile(image);
+
+            Assert.True(viewModel.ToggleSelectionModeCommand.CanExecute(null));
+            Assert.True(viewModel.IsCropMode);
+
+            viewModel.ToggleSelectionModeCommand.Execute(null);
+
+            Assert.True(viewModel.IsSelectionMode);
+            Assert.False(viewModel.IsCropMode);
+            Assert.True(viewModel.IsCanvasSelectionMode);
+            Assert.Contains("Selection mode is ready", viewModel.SelectionStatusText);
+
+            viewModel.UpdateCanvasSelection(new PixelCoordinate(0, 0), new PixelCoordinate(1, 1));
+
+            Assert.True(viewModel.HasCanvasSelection);
+            Assert.True(viewModel.CanCopySelection);
+            Assert.True(viewModel.CopySelectionCommand.CanExecute(null));
+            Assert.Equal(new PixelSelection(0, 0, 2, 2), viewModel.CanvasSelection);
+            Assert.Equal("2 x 2 px at 0, 0", viewModel.CanvasSelectionText);
+
+            viewModel.CancelSelectionCommand.Execute(null);
+
+            Assert.False(viewModel.IsSelectionMode);
+            Assert.False(viewModel.HasCanvasSelection);
+            Assert.False(viewModel.CanCopySelection);
+            Assert.Equal("No selection", viewModel.CanvasSelectionText);
+        });
+    }
+
+    [Fact]
     public void CropMode_StartsAutomaticallyAndOverwritesSourceFile()
     {
         RunOnSta(() =>
