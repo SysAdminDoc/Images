@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -97,6 +98,13 @@ public static class ImageExportService
     }
 
     public static string Overwrite(string sourcePath, IReadOnlyList<EditOperation> operations)
+        => Overwrite(sourcePath, operations, jpegTranRuntime: null, jpegTranProcessRunner: null);
+
+    internal static string Overwrite(
+        string sourcePath,
+        IReadOnlyList<EditOperation> operations,
+        JpegTranRuntimeStatus? jpegTranRuntime,
+        JpegTranProcessRunner? jpegTranProcessRunner)
     {
         if (string.IsNullOrWhiteSpace(sourcePath))
             throw new ArgumentException("A source image path is required.", nameof(sourcePath));
@@ -111,6 +119,20 @@ public static class ImageExportService
             throw new InvalidOperationException("Crop can overwrite only flat raster image files such as JPEG, PNG, WebP, TIFF, GIF, BMP, HEIC/AVIF/JXL, and similar bitmap formats.");
 
         using var image = new MagickImage(normalizedSourcePath);
+        var losslessJpegCrop = TryOverwriteLosslessJpegCrop(
+            normalizedSourcePath,
+            operations,
+            image,
+            jpegTranRuntime ?? JpegTranRuntime.Inspect(),
+            jpegTranProcessRunner);
+        if (losslessJpegCrop.Attempted)
+        {
+            if (losslessJpegCrop.Applied)
+                return normalizedSourcePath;
+
+            throw new InvalidOperationException(losslessJpegCrop.Message);
+        }
+
         NonDestructiveEditService.ApplyOperations(image, operations);
         PrepareForWrite(image, format.Value, 92);
 
@@ -118,6 +140,69 @@ public static class ImageExportService
         File.SetLastWriteTimeUtc(normalizedSourcePath, DateTime.UtcNow);
         return normalizedSourcePath;
     }
+
+    private static JpegTranCropWriteResult TryOverwriteLosslessJpegCrop(
+        string sourcePath,
+        IReadOnlyList<EditOperation> operations,
+        MagickImage image,
+        JpegTranRuntimeStatus jpegTranRuntime,
+        JpegTranProcessRunner? jpegTranProcessRunner)
+    {
+        var enabledOperations = operations.Where(operation => operation.Enabled).ToList();
+        if (enabledOperations.Count != 1)
+            return JpegTranCropWriteResult.NotAttempted("Lossless JPEG crop requires exactly one enabled crop operation.");
+
+        var operation = enabledOperations[0];
+        if (!NormalizeEditKind(operation.Kind).Equals("crop", StringComparison.Ordinal))
+            return JpegTranCropWriteResult.NotAttempted("Lossless JPEG writeback currently supports crop operations only.");
+
+        if (!TryReadCropSelection(operation, out var selection))
+            return JpegTranCropWriteResult.NotAttempted("Crop operation parameters are not valid for lossless JPEG writeback.");
+
+        if (!IsDefaultJpegOrientation(image.Orientation.ToString()))
+            return JpegTranCropWriteResult.NotAttempted("Lossless JPEG crop is skipped for files with EXIF orientation metadata.");
+
+        return JpegTranTransformService.TryApplyExactCrop(
+            sourcePath,
+            selection,
+            (int)image.Width,
+            (int)image.Height,
+            jpegTranRuntime,
+            jpegTranProcessRunner);
+    }
+
+    private static bool TryReadCropSelection(EditOperation operation, out PixelSelection selection)
+    {
+        selection = default;
+        if (!TryReadInt(operation.Parameters, "x", out var x) ||
+            !TryReadInt(operation.Parameters, "y", out var y) ||
+            !TryReadInt(operation.Parameters, "width", out var width) ||
+            !TryReadInt(operation.Parameters, "height", out var height) ||
+            x < 0 ||
+            y < 0 ||
+            width <= 0 ||
+            height <= 0)
+        {
+            return false;
+        }
+
+        selection = new PixelSelection(x, y, width, height);
+        return true;
+    }
+
+    private static bool TryReadInt(IReadOnlyDictionary<string, string> parameters, string key, out int value)
+    {
+        value = 0;
+        return parameters.TryGetValue(key, out var raw) &&
+               int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out value);
+    }
+
+    private static string NormalizeEditKind(string kind)
+        => (kind ?? "").Trim().ToLowerInvariant().Replace("_", "-", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsDefaultJpegOrientation(string orientation)
+        => orientation.Equals("Undefined", StringComparison.OrdinalIgnoreCase) ||
+           orientation.Equals("TopLeft", StringComparison.OrdinalIgnoreCase);
 
     private static (string Path, MagickFormat Format) ResolveWritableTarget(string requestedPath)
     {
