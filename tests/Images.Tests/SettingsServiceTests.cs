@@ -47,6 +47,48 @@ public sealed class SettingsServiceTests
     }
 
     [Fact]
+    public void TouchRecentTransferFolderNormalizesDeduplicatesAndOrdersFolders()
+    {
+        using var temp = TestDirectory.Create();
+        var service = new SettingsService(System.IO.Path.Combine(temp.Path, "settings.db"));
+        var first = System.IO.Path.Combine(temp.Path, "First");
+        var second = System.IO.Path.Combine(temp.Path, "Second");
+        Directory.CreateDirectory(first);
+        Directory.CreateDirectory(second);
+
+        service.TouchRecentTransferFolder(first);
+        service.TouchRecentTransferFolder(second);
+        service.TouchRecentTransferFolder(first + System.IO.Path.DirectorySeparatorChar);
+
+        Assert.Equal(
+            [
+                System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(first)),
+                System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(second))
+            ],
+            service.GetRecentTransferFolders());
+    }
+
+    [Fact]
+    public void GetRecentTransferFoldersFiltersMissingFoldersAndHonorsMax()
+    {
+        using var temp = TestDirectory.Create();
+        var service = new SettingsService(System.IO.Path.Combine(temp.Path, "settings.db"));
+        var first = System.IO.Path.Combine(temp.Path, "First");
+        var second = System.IO.Path.Combine(temp.Path, "Second");
+        var missing = System.IO.Path.Combine(temp.Path, "Missing");
+        Directory.CreateDirectory(first);
+        Directory.CreateDirectory(second);
+
+        service.SetString(
+            Keys.RecentTransferFolders,
+            $"[\"{first.Replace("\\", "\\\\")}\",\"{missing.Replace("\\", "\\\\")}\",\"{second.Replace("\\", "\\\\")}\"]");
+
+        Assert.Equal([first], service.GetRecentTransferFolders(1));
+        Assert.Equal([first, second], service.GetRecentTransferFolders());
+        Assert.Empty(service.GetRecentTransferFolders(0));
+    }
+
+    [Fact]
     public void ConfirmRecycleBinDeleteSettingDefaultsOnAndPersistsOptOut()
     {
         using var temp = TestDirectory.Create();

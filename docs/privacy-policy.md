@@ -23,7 +23,7 @@ All under `%LOCALAPPDATA%\Images\` (with a fallback to `%TEMP%\Images\` when Loc
 
 | Path | Why | Contains |
 |---|---|---|
-| `settings.db` | Window state, recent folders, hotkey overrides | Window geometry, last-N folders, keybindings |
+| `settings.db` | Window state, recent folders, transfer destinations, hotkey overrides | Window geometry, last-N opened folders, last-N copy/move destination folders, keybindings |
 | `Logs/images-<date>.log` | Structured Serilog log, rolling daily, 14-day retention | App version, runtime, OS, error traces, update-check call records |
 | `Logs/crash-<timestamp>.dmp` | Minidump on fatal exception | Process state at crash time (no image bytes) |
 | `crash.log` | Plain-text fatal-exception record | Stack traces, no image bytes |
