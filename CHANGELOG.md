@@ -23,6 +23,7 @@ All notable changes to **Images** are documented here.
 - **Auto Enhance** — `Ctrl+Alt+E` now adds a one-click balanced enhancement edit with automatic gamma, white balance, contrast curve, and mild sharpening during Save a copy/export rendering.
 - **Copy/Move to folder** — the viewport context menu now copies or moves the current file to a chosen folder, preserves matching XMP sidecars, resolves destination name collisions safely, remembers recent transfer destinations, and refreshes the shell after moves/copies.
 - **Wallpaper layout modes** — Set as desktop wallpaper now offers Fill, Fit, Span, and Tile modes and writes the matching Windows wallpaper style before applying the stable app-data wallpaper copy.
+- **Send/print/copy actions** — the viewport context menu now supports no-dialog printing to the default printer, local `.eml` email drafts with the current file attached, Copy image, and Copy image and path clipboard payloads.
 
 ## v0.2.11 — 2026-05-05
 

@@ -146,6 +146,7 @@ public static class CliReport
         AppendPath(sb, "Logs",          AppStorage.TryGetAppDirectory("Logs"));
         AppendPath(sb, "Thumbnails",    AppStorage.TryGetAppDirectory("thumbs"));
         AppendPath(sb, "Wallpaper",     AppStorage.TryGetAppDirectory("wallpaper"));
+        AppendPath(sb, "Email drafts",  AppStorage.TryGetAppDirectory("email-drafts"));
         AppendPath(sb, "Crash log",     CrashLog.LogPath);
         sb.AppendLine();
 

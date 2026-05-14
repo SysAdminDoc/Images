@@ -487,6 +487,90 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void CopyImageCommands_UseClipboardSeams()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "a.png");
+            BitmapSource? copiedImage = null;
+            BitmapSource? copiedImageWithPath = null;
+            string? copiedPath = null;
+            using var viewModel = CreateViewModelWithFastPreview(
+                temp,
+                copyImageToClipboard: bitmap => copiedImage = bitmap,
+                copyImageAndPathToClipboard: (bitmap, path) =>
+                {
+                    copiedImageWithPath = bitmap;
+                    copiedPath = path;
+                });
+
+            viewModel.OpenFile(image);
+            viewModel.CopyImageCommand.Execute(null);
+            viewModel.CopyImageAndPathCommand.Execute(null);
+
+            Assert.NotNull(copiedImage);
+            Assert.NotNull(copiedImageWithPath);
+            Assert.Equal(image, copiedPath);
+            Assert.Equal("Copied image and path", viewModel.ToastMessage);
+        });
+    }
+
+    [Fact]
+    public void PrintDefaultCommand_UsesCurrentImageWithoutDialog()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "a.png");
+            BitmapSource? printedImage = null;
+            string? documentTitle = null;
+            using var viewModel = CreateViewModelWithFastPreview(
+                temp,
+                printDefault: (bitmap, title) =>
+                {
+                    printedImage = bitmap;
+                    documentTitle = title;
+                });
+
+            viewModel.OpenFile(image);
+            viewModel.PrintDefaultCommand.Execute(null);
+
+            Assert.NotNull(printedImage);
+            Assert.Equal("a.png", documentTitle);
+            Assert.Equal("Sent to default printer", viewModel.ToastMessage);
+        });
+    }
+
+    [Fact]
+    public void SendToEmailCommand_CreatesDraftAndOpensIt()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "a.png");
+            var draft = Path.Combine(temp.Path, "draft.eml");
+            string? draftInput = null;
+            string? openedTarget = null;
+            using var viewModel = CreateViewModelWithFastPreview(
+                temp,
+                createEmailDraft: path =>
+                {
+                    draftInput = path;
+                    return draft;
+                },
+                openShellTarget: path => openedTarget = path);
+
+            viewModel.OpenFile(image);
+            viewModel.SendToEmailCommand.Execute(null);
+
+            Assert.Equal(image, draftInput);
+            Assert.Equal(draft, openedTarget);
+            Assert.Equal("Email draft opened", viewModel.ToastMessage);
+        });
+    }
+
+    [Fact]
     public void DeleteCommand_WhenConfirmationDisabled_SkipsDialogAndAdvances()
     {
         RunOnSta(() =>
@@ -1389,7 +1473,12 @@ public sealed class MainViewModelStateTests
         TestDirectory temp,
         ClipboardImportService? clipboardImport = null,
         Func<string, string?>? pickFolder = null,
-        Func<string, WallpaperLayout, string>? setWallpaper = null)
+        Func<string, WallpaperLayout, string>? setWallpaper = null,
+        Action<BitmapSource>? copyImageToClipboard = null,
+        Action<BitmapSource, string>? copyImageAndPathToClipboard = null,
+        Func<string, string>? createEmailDraft = null,
+        Action<string>? openShellTarget = null,
+        Action<BitmapSource, string>? printDefault = null)
         => new(
             CreateSettings(temp),
             clipboardImport,
@@ -1404,7 +1493,12 @@ public sealed class MainViewModelStateTests
             externalEditReload: null,
             updateCheck: null,
             pickFolder: pickFolder,
-            setWallpaper: setWallpaper);
+            setWallpaper: setWallpaper,
+            copyImageToClipboard: copyImageToClipboard,
+            copyImageAndPathToClipboard: copyImageAndPathToClipboard,
+            createEmailDraft: createEmailDraft,
+            openShellTarget: openShellTarget,
+            printDefault: printDefault);
 
     private static SettingsService CreateSettings(TestDirectory temp)
         => new(Path.Combine(temp.Path, "settings.db"));
