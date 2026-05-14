@@ -7,7 +7,7 @@ What "broad codec support" means for Images, what's bundled vs optional, and how
 | Tier | What it means | Examples |
 |---|---|---|
 | **Bundled, in-process** | Always available, ships inside the app's directory. | WIC (via Windows), Magick.NET (Apache 2.0, NuGet), SharpCompress (MIT, NuGet), .NET ZIP APIs |
-| **Optional, app-local or system-installed** | Surfaces extra format families when present, never required. Provenance shown in About + `--system-info`. | Ghostscript (PDF/EPS/PS/AI previews) |
+| **Optional, app-local or system-installed** | Surfaces extra format families or safer writeback paths when present, never required. Provenance shown in About + `--system-info`. | Ghostscript (PDF/EPS/PS/AI previews), jpegtran (exact JPEG crop writeback) |
 | **Not supported** | Requested, not in scope today. The viewer's unsupported-format hint points at the right tool. | video, audio, native design-suite docs |
 
 ## What ships in the bundle
@@ -42,7 +42,7 @@ Required before any new optional decoder/runtime lands (per ROADMAP X-03):
 
 This applies to: Ghostscript, native 7-Zip / UnRAR sidecars, OpenSlide, Bio-Formats, OCR engines, AI models, plugin hosts.
 
-Lossless JPEG writeback is covered by the same gate. The `V30-02` planning scaffold documents the required `jpegtran.exe` review in [`lossless-jpeg-transform-policy.md`](lossless-jpeg-transform-policy.md), but no JPEG transform sidecar ships until the exact binary is approved.
+Lossless JPEG writeback is covered by the same gate. The `V30-02` policy in [`lossless-jpeg-transform-policy.md`](lossless-jpeg-transform-policy.md) documents the required `jpegtran.exe` review and the guarded exact-crop shell-out path, but no JPEG transform sidecar ships until the exact binary is approved.
 
 ## Dropping a decoder
 

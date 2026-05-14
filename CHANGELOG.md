@@ -13,6 +13,7 @@ All notable changes to **Images** are documented here.
 - **Crop format gate** — crop mode now starts only for flat raster image files such as JPEG, PNG, WebP, TIFF, GIF, BMP, HEIC/AVIF/JXL, and similar bitmap formats; PSD/PSB, vector/document previews, archives, and RAW files remain view-only for crop.
 - **Pixel selection tool** — `S` now toggles a rectangular on-canvas pixel selection mode with copy/clear controls on the selection edge, side-panel controls, and `Ctrl+C` extraction of the selected pixels to the clipboard.
 - **jpegtran runtime provenance** — the app now resolves an optional app-local libjpeg-turbo `jpegtran.exe` sidecar or explicit `IMAGES_JPEGTRAN_EXE` override, then surfaces its path, version, and SHA-256 in About, `--system-info`, and `--codec-report` diagnostics.
+- **Lossless JPEG crop writeback** — when an approved local `jpegtran.exe` runtime is available, a single exact MCU-aligned JPEG crop now shells out through a test seam, validates the output, replaces the source atomically with rollback data, and avoids copying stale embedded thumbnails. Missing runtimes, unaligned crops, oriented JPEGs, and multi-operation edit stacks continue through the existing raster overwrite path.
 - **Inpaint runtime decision** — content-aware repair is now scoped as a future opt-in local LaMa ONNX workflow, using Windows ML first and ONNX Runtime DirectML as fallback, with no bundled model or automatic download in the current viewer/editor.
 
 ## v0.2.11 — 2026-05-05

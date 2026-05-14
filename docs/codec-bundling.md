@@ -1,6 +1,6 @@
 # Codec bundling
 
-Images ships WIC and Magick.NET support with the app. Official release artifacts also ship Ghostscript app-local so PDF, EPS, PS, and AI previews work on clean machines. Lossless JPEG writeback may later ship an app-local libjpeg-turbo `jpegtran.exe` sidecar, but the current source tree contains only the resolver/provenance scaffold and placeholder docs.
+Images ships WIC and Magick.NET support with the app. Official release artifacts also ship Ghostscript app-local so PDF, EPS, PS, and AI previews work on clean machines. Lossless JPEG writeback can use an app-local libjpeg-turbo `jpegtran.exe` sidecar for exact MCU-aligned crop overwrite when that runtime is present, but the current source tree contains only the resolver, writeback code, tests, and placeholder docs. It does not contain the runtime binary.
 
 ## App-local layout
 
@@ -27,7 +27,7 @@ src/Images/Codecs/JpegTran/LICENSE.md
 src/Images/Codecs/JpegTran/README.ijg
 ```
 
-`jpegtran.exe` is resolved only from this app-local folder or the explicit `IMAGES_JPEGTRAN_EXE` developer override. Images does not search PATH and does not auto-download codec runtimes.
+`jpegtran.exe` is resolved only from this app-local folder or the explicit `IMAGES_JPEGTRAN_EXE` developer override. Images does not search PATH and does not auto-download codec runtimes. When available, the current crop path uses a same-folder temp output and atomic replacement for exact MCU-aligned JPEG crops only; other crop writes use the normal raster overwrite path.
 
 ## Prepare a release bundle
 

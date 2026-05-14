@@ -1,8 +1,9 @@
 Optional app-local jpegtran runtime
 ===================================
 
-Images can use libjpeg-turbo's jpegtran.exe for future lossless JPEG crop
-and rotation writeback after the exact runtime artifact is approved.
+Images can use libjpeg-turbo's jpegtran.exe for exact MCU-aligned JPEG crop
+writeback after the exact runtime artifact is approved. Rotation writeback
+and trim-confirmation UI are still future work.
 
 Expected app-local layout:
 
