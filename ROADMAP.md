@@ -546,7 +546,7 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 
 ### File ops
 - [x] **V30-20** *P0* — Copy to folder / Move to folder with recent-folder jump list (IrfanView pattern). Shipped 2026-05-14: viewport context menu actions copy or move the current file to a chosen folder, preserve matching XMP sidecars, resolve destination collisions safely, maintain a separate recent transfer-destination jump list, reload moved files from their new path, and notify the shell so Explorer catches up.
-- [ ] **V30-21** *P0* — Set as wallpaper (span/fill/fit/tile).
+- [x] **V30-21** *P0* — Set as wallpaper (span/fill/fit/tile). Shipped 2026-05-14: the viewport context menu now exposes Fill, Fit, Span, and Tile wallpaper modes, writes the matching Windows `WallpaperStyle` / `TileWallpaper` registry values, then applies the stable app-data wallpaper copy through `SystemParametersInfo`.
 - [ ] **V30-22** *P0* — Send to email / default print / copy to clipboard (image AND path).
 - [x] **V30-23** *P1* — **Send-to-app** integration *(first slice — open with default app shipped v0.1.8)*. Shipped: `Open with default app` context menu item opens the current image in the system-registered default application (`UseShellExecute = true`). Remaining: configurable external editors (ImageGlass-style "open in Photoshop / GIMP / Paint.NET" menu).
 - [ ] **V30-24** *P2* — Scan via TWAIN/WIA to image (IrfanView pattern — `Saraff.Twain.NET` NuGet). Breaks under MSIX AppContainer (S-07) — unpackaged build only.

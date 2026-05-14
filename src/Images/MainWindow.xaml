@@ -328,7 +328,7 @@
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator />
-                        <MenuItem Header="Set as desktop wallpaper" Command="{Binding SetAsWallpaperCommand}">
+                        <MenuItem Header="Set as desktop wallpaper">
                             <MenuItem.Icon>
                                 <TextBlock FontFamily="Segoe UI Symbol"
                                            FontSize="12"
@@ -337,6 +337,18 @@
                                            VerticalAlignment="Center"
                                            Text="▣" />
                             </MenuItem.Icon>
+                            <MenuItem Header="Fill"
+                                      Command="{Binding SetAsWallpaperCommand}"
+                                      CommandParameter="Fill" />
+                            <MenuItem Header="Fit"
+                                      Command="{Binding SetAsWallpaperCommand}"
+                                      CommandParameter="Fit" />
+                            <MenuItem Header="Span"
+                                      Command="{Binding SetAsWallpaperCommand}"
+                                      CommandParameter="Span" />
+                            <MenuItem Header="Tile"
+                                      Command="{Binding SetAsWallpaperCommand}"
+                                      CommandParameter="Tile" />
                         </MenuItem>
                         <Separator />
                         <MenuItem Header="Move to Recycle Bin…" Command="{Binding DeleteCommand}" InputGestureText="Del">
