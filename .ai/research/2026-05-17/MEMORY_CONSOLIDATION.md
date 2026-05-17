@@ -90,10 +90,10 @@ The new `ROADMAP.md` v7 section emphasizes:
 | Global instruction discourages adding agent/meta references to repo docs. | The user explicitly required `.ai/research` artifacts, project memory consolidation, and future-session handoff files for this run. The user-specific task takes priority. |
 | Global recipe says tests are not needed unless explicitly requested. | This task explicitly required self-audit and evidence-backed completion; build/test/security verification is appropriate. |
 | `AGENTS.md` points to `CLAUDE.md`, while both are local/tool-specific guidance in this checkout. | Preserved the tool-specific files as local guidance and put the committed canonical context in `PROJECT_CONTEXT.md`. |
+| `CHANGELOG.md` had future-dated `v0.1.8` and `v0.1.9` entries. | Repaired on 2026-05-17. `v0.1.9` now uses its GitHub release publication date, 2026-05-04. `v0.1.8` now uses release commit `2f28a5b` dated 2026-04-25 because no local tag or GitHub release exists. |
 
 ## Open Conflicts
 
-- `CHANGELOG.md` has `v0.1.8` and `v0.1.9` dated 2026-06-02, after the current date 2026-05-17. This should be corrected only after checking tags, commits, and release history.
 - The project continues to use `.NET 9` while `.NET 10` is now LTS according to the official .NET support policy. This is not a defect because .NET 9 remains supported until 2026-11-10, but a migration decision should be scheduled.
 - The roadmap includes historical source IDs from prior research. They are useful as context, but future sessions should refresh source freshness before making new "latest" claims.
 
