@@ -78,12 +78,16 @@ public static class ImageColorAnalysisService
         if (SupportedImageFormats.RequiresGhostscript(path))
             settings.Density = new Density(72);
 
-        using var frames = new MagickImageCollection(new FileInfo(path), settings);
+        using var stream = OpenSharedRead(path);
+        using var frames = new MagickImageCollection(stream, settings);
         if (frames.Count == 0)
             throw new InvalidOperationException("No color-analysis frame was decoded.");
 
         return (MagickImage)frames[0].Clone();
     }
+
+    private static FileStream OpenSharedRead(string path)
+        => new(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
 
     private static ChannelStats BuildChannelStats(MagickImage image)
     {

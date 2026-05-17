@@ -11,12 +11,19 @@ namespace Images;
 public partial class FileHealthScanWindow : Window
 {
     private readonly FileHealthScanService _healthScan = new();
+    private readonly RecoveryCenterService _recoveryCenter;
     private readonly ObservableCollection<string> _scanFolders = [];
     private readonly ObservableCollection<FileHealthFinding> _findings = [];
     private CancellationTokenSource? _scanCancellation;
 
     public FileHealthScanWindow()
+        : this(null)
     {
+    }
+
+    internal FileHealthScanWindow(RecoveryCenterService? recoveryCenter)
+    {
+        _recoveryCenter = recoveryCenter ?? new RecoveryCenterService();
         InitializeComponent();
 
         ScanFoldersList.ItemsSource = _scanFolders;
@@ -127,6 +134,11 @@ public partial class FileHealthScanWindow : Window
         var result = _healthScan.RenameToSuggestedExtension(finding);
         if (result.Status == FileHealthActionStatus.Completed)
         {
+            _recoveryCenter.RecordRename(
+                result.SourcePath ?? finding.Path,
+                result.DestinationPath ?? finding.Path,
+                "File health rename",
+                $"Renamed {finding.FileName} to the detected {finding.DetectedFormat} extension.");
             RemoveFinding(finding);
             SetStatus($"Renamed extension: {Path.GetFileName(result.DestinationPath)}", FileHealthStatus.Ready);
             return;
@@ -154,6 +166,11 @@ public partial class FileHealthScanWindow : Window
         var result = _healthScan.Quarantine(finding);
         if (result.Status == FileHealthActionStatus.Completed)
         {
+            _recoveryCenter.RecordQuarantine(
+                result.SourcePath ?? finding.Path,
+                result.DestinationPath ?? finding.Path,
+                "File health quarantine",
+                $"Moved {finding.FileName} to app-local quarantine after {finding.Title.ToLowerInvariant()}.");
             RemoveFinding(finding);
             SetStatus($"Moved to quarantine: {result.DestinationPath}", FileHealthStatus.Ready);
             return;

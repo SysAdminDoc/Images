@@ -33,6 +33,7 @@ Scoring:
 | 11 | Target-format capability warnings | 5 | 4 | 4 | 3 | 2 | 8 | Shipped 2026-05-17 under V7-14 with shared export preview, batch preview, and macro dry-run warnings for alpha, animation, pages/layers, metadata, ICC profile, and lossy settings. |
 | 12 | Release/post-install smoke script | 5 | 4 | 4 | 3 | 2 | 8 | Shipped 2026-05-17 under V7-07; catches Ghostscript/OCR/portable/installer regressions early. |
 | 13 | ICC/profile status and histogram basics | 4 | 4 | 4 | 4 | 3 | 5 | Shipped 2026-05-17 under V7-15 with read-only embedded ICC/profile status, sampled histogram/channel stats, alpha stats, and unmanaged-color warnings. |
+| 14 | Destructive-action recovery center | 5 | 5 | 4 | 4 | 3 | 7 | Shipped 2026-05-17 under V7-16 with app-local operation records, reveal actions, restore for moves/renames/quarantines, sidecar recovery, and writeback/Recycling guidance. |
 
 ## Later
 
