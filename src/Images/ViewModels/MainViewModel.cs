@@ -230,6 +230,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         PrintDefaultCommand = new RelayCommand(PrintCurrentToDefault, () => CanUseDisplayImageCommands);
         SendToEmailCommand = new RelayCommand(SendCurrentToEmail, () => CanUseImageCommands);
         SaveAsCopyCommand = new RelayCommand(async () => await SaveAsCopyAsync(), () => CanUseDisplayImageCommands);
+        OpenExportWorkbenchCommand = new RelayCommand(OpenExportWorkbench, () => CanUseDisplayImageCommands);
         CheckForUpdatesCommand = new RelayCommand(async () => await CheckForUpdatesAsync(userInitiated: true), () => !IsCheckingForUpdates);
         OpenLatestUpdateCommand = new RelayCommand(_updateCheck.OpenLatestUpdate, () => HasUpdateAvailable && !IsCheckingForUpdates);
         RefreshCommand = new RelayCommand(RefreshFolder, () => CanRefreshFolder);
@@ -2365,6 +2366,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand PrintDefaultCommand { get; }
     public ICommand SendToEmailCommand { get; }
     public ICommand SaveAsCopyCommand { get; }
+    public ICommand OpenExportWorkbenchCommand { get; }
     public ICommand CheckForUpdatesCommand { get; }
     public ICommand OpenLatestUpdateCommand { get; }
     public ICommand RefreshCommand { get; }
@@ -5328,6 +5330,22 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             batch.AddSource(CurrentPath);
 
         batch.Show();
+    }
+
+    private void OpenExportWorkbench()
+    {
+        if (CurrentImage is not BitmapSource bitmap)
+            return;
+
+        var extension = CurrentPath is null
+            ? ".jpg"
+            : ImageExportService.NormalizeExportExtension(Path.GetExtension(CurrentPath));
+        var window = new Images.ExportPreviewWindow(bitmap, CurrentPath, extension)
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        window.Show();
     }
 
     private void OpenEditStack()

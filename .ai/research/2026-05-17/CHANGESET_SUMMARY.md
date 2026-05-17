@@ -39,6 +39,11 @@ Date: 2026-05-17
 - `src/Images/DuplicateCleanupWindow.xaml` and `src/Images/DuplicateCleanupWindow.xaml.cs` - add a selected-pair compare handoff back to the main viewer.
 - `tests/Images.Tests/MainViewModelStateTests.cs` - covers current+next compare, overlay opacity, A/B swap, and pair-based compare entry.
 - `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, `docs/improvement-plan.md`, and `.ai/research/2026-05-17/STATE_OF_REPO.md` - updated for V7-10 completion.
+- `src/Images/Services/ExportPreviewService.cs`, `src/Images/ExportPreviewWindow.xaml`, and `src/Images/ExportPreviewWindow.xaml.cs` - add the V7-11 export workbench with original versus encoded preview, JPEG/PNG/WebP/AVIF/JXL presets, quality and resize controls, size deltas, warning copy, and resize-aware saves.
+- `src/Images/Services/ImageExportService.cs` - adds quality/max-dimension Save overloads plus internal preview helpers for in-memory export estimation.
+- `src/Images/Services/BatchProcessorService.cs` and `src/Images/BatchProcessorWindow.xaml` - add dry-run estimated output size, byte delta, and warning rows using the export preview estimator.
+- `tests/Images.Tests/ExportPreviewServiceTests.cs`, `tests/Images.Tests/ImageExportServiceTests.cs`, and `tests/Images.Tests/BatchProcessorServiceTests.cs` - cover in-memory preview encoding, request normalization, resize-aware saves, and batch dry-run estimates.
+- `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, `docs/improvement-plan.md`, `.ai/research/2026-05-17/STATE_OF_REPO.md`, `.ai/research/2026-05-17/FEATURE_BACKLOG.md`, and `.ai/research/2026-05-17/PRIORITIZATION_MATRIX.md` - updated for V7-11 completion.
 
 ## Preserved
 
@@ -54,7 +59,7 @@ Completed before commit:
 - `dotnet list Images.sln package --vulnerable --include-transitive` - passed; no vulnerable packages for `Images` or `Images.Tests`.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Test-VersionSync.ps1` - passed for 0.2.11.
 - `dotnet build Images.sln -c Release` - passed with 0 warnings and 0 errors.
-- `dotnet test Images.sln -c Release --no-build` - passed 351 tests after V7-10 compare coverage was added.
+- `dotnet test Images.sln -c Release --no-build` - passed 356 tests after V7-11 export preview coverage was added.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Test-ReleaseReadiness.ps1 -Version 0.2.11` - passed.
 - `src\Images\bin\Release\net9.0-windows10.0.22621.0\Images.exe --system-info` - exited 0 in the local shell smoke.
 - `src\Images\bin\Release\net9.0-windows10.0.22621.0\Images.exe --codec-report` - exited 0 in the local shell smoke.

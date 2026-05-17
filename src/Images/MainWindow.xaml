@@ -221,6 +221,11 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE74E;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Export workbench…" Command="{Binding OpenExportWorkbenchCommand}" InputGestureText="Ctrl+Alt+W">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EF;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="Print…" Command="{Binding PrintCommand}" InputGestureText="Ctrl+P">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE749;" />
@@ -2521,6 +2526,7 @@
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding DeleteCommand}" Content="&#xE74D;" ToolTip="Delete (Recycle Bin)" AutomationProperties.Name="Send image to Recycle Bin" />
                             <Border Width="1" Height="22" Background="{StaticResource HairlineBrush}" Margin="12,6" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding SaveAsCopyCommand}" Content="&#xE74E;" ToolTip="Save a copy (Ctrl+Shift+S)" AutomationProperties.Name="Save a copy" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenExportWorkbenchCommand}" Content="&#xE8EF;" ToolTip="Export workbench (Ctrl+Alt+W)" Margin="4,0,0,0" AutomationProperties.Name="Export workbench" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrintCommand}" Content="&#xE749;" ToolTip="Print (Ctrl+P)" Margin="4,0,0,0" AutomationProperties.Name="Print image" />
                             <Border Width="1" Height="22" Background="{StaticResource HairlineBrush}" Margin="12,6" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}" Content="&#xE838;" ToolTip="Reveal in Explorer" AutomationProperties.Name="Reveal image in Explorer" />
