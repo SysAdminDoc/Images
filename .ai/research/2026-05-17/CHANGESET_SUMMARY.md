@@ -26,9 +26,14 @@ Date: 2026-05-17
 - `docs/integration-policy.md` - updated the SharpCompress accepted integration row.
 - `src/Images/Services/CodecCapabilityService.cs` - added shared dependency provenance rows with source, version, path, SHA-256, advisory status, and action copy for About and CLI reports.
 - `src/Images/AboutWindow.xaml.cs` - renders the structured provenance rows in the About runtime provenance card.
-- `src/Images/Services/CliReport.cs` - includes the shared provenance rows in `--system-info`.
+- `src/Images/Services/CliReport.cs` - includes the shared provenance rows in `--system-info` and supports redirected stdout/stderr for release diagnostics logs.
 - `tests/Images.Tests/CodecCapabilityServiceTests.cs` - covers structured provenance rows and the codec report provenance section.
-- `PROJECT_CONTEXT.md`, `README.md`, `CHANGELOG.md`, `docs/improvement-plan.md`, `.ai/research/2026-05-17/STATE_OF_REPO.md`, and `.ai/research/2026-05-17/SECURITY_AND_DEPENDENCY_REVIEW.md` - updated for V7-05 completion.
+- `PROJECT_CONTEXT.md`, `README.md`, `CHANGELOG.md`, `docs/improvement-plan.md`, `.ai/research/2026-05-17/STATE_OF_REPO.md`, and `.ai/research/2026-05-17/SECURITY_AND_DEPENDENCY_REVIEW.md` - updated for V7-05 through V7-07 completion.
+- `.github/workflows/release.yml` - stages approved jpegtran before publish, smokes portable and installed diagnostics, and uploads diagnostics logs.
+- `.gitignore` - keeps temporary codec artifacts and runtime binaries ignored while allowing tracked jpegtran license/provenance files.
+- `scripts/Prepare-JpegTranBundle.ps1` - downloads/extracts the approved libjpeg-turbo 3.1.4.1 artifact and verifies artifact plus executable SHA-256 values.
+- `scripts/Test-ReleaseDiagnostics.ps1` - validates portable/installed `--system-info` and `--codec-report` logs for Ghostscript, OCR, jpegtran, and provenance rows.
+- `scripts/Test-ReleaseReadiness.ps1`, `docs/release-checklist.md`, `docs/codec-bundling.md`, `docs/lossless-jpeg-transform-policy.md`, `docs/integration-policy.md`, `installer/Images.iss`, and `src/Images/Codecs/JpegTran/*` - updated for approved jpegtran release staging and installed smoke support.
 
 ## Preserved
 

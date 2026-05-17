@@ -210,6 +210,15 @@ public static class CliReport
     {
         try
         {
+            if (Console.IsOutputRedirected || Console.IsErrorRedirected)
+            {
+                var redirectedStdout = new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true };
+                var redirectedStderr = new StreamWriter(Console.OpenStandardError()) { AutoFlush = true };
+                Console.SetOut(redirectedStdout);
+                Console.SetError(redirectedStderr);
+                return true;
+            }
+
             if (!OperatingSystem.IsWindows()) return false;
             if (!AttachConsole(ATTACH_PARENT_PROCESS)) return false;
 

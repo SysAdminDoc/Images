@@ -18,7 +18,7 @@ The project philosophy is stable across `README.md`, `CLAUDE.md`, `docs/integrat
 ## Verified Repository State
 
 - Branch: `main`, tracking `origin/main`.
-- Initial 2026-05-17 research baseline: `6da0641aa2b241c1b108f28ed01be69836ec56a3` (`feat: add send print clipboard actions`, 2026-05-14). Later autonomous roadmap commits on 2026-05-17 closed V7-02 through V7-05.
+- Initial 2026-05-17 research baseline: `6da0641aa2b241c1b108f28ed01be69836ec56a3` (`feat: add send print clipboard actions`, 2026-05-14). Later autonomous roadmap commits on 2026-05-17 closed V7-02 through V7-07.
 - Latest published tag found locally and on GitHub Releases: `v0.2.11`, commit `0abf855e109016b3e2279a99cdf43243d3efa35b`, published 2026-05-05.
 - Root version surfaces still show `0.2.11` in `src/Images/Images.csproj`, `README.md`, and installer docs.
 - `CHANGELOG.md` has substantial Unreleased work after `v0.2.11`: crop/writeback refinement, selection, jpegtran provenance, lossless JPEG writeback and trim confirmation, inpaint runtime decision, editor workbenches, wallpaper modes, send/print/clipboard actions.
@@ -86,6 +86,7 @@ Shipped or present in current docs and changelog:
 - Non-destructive resize, adjustments, effects, annotations/redaction, perspective correction, auto enhance, edit history, virtual copies.
 - Destructive crop apply for flat raster formats only; crop is intentionally disabled for layered, vector, document, archive, and RAW formats.
 - Optional jpegtran runtime discovery and lossless JPEG transform paths when an approved local runtime is available.
+- Approved libjpeg-turbo 3.1.4.1 jpegtran release staging with tracked license/provenance files, SHA-256 verification, and portable/installed diagnostics smoke coverage.
 - Wallpaper layout modes and send/print/clipboard actions.
 - Serilog logging, minidump crash capture, support diagnostics, app storage/cache cleanup, update checks disabled by default.
 
@@ -95,8 +96,6 @@ The old `ROADMAP.md` v6 header said there was no editor, organizer, or batch pro
 
 - Roadmap/status hygiene needs to stay synchronized with shipped features.
 - The future-dated historical `CHANGELOG.md` entries for `v0.1.8` and `v0.1.9` were repaired on 2026-05-17: `v0.1.9` uses GitHub release publication date 2026-05-04, and `v0.1.8` uses local release commit date 2026-04-25 because no tag or GitHub release exists.
-- The optional `jpegtran.exe` sidecar still needs an approved staged artifact, license files, SHA-256 provenance, and release smoke coverage before it can be bundled.
-- Installed and portable release outputs still need automated `--system-info` / `--codec-report` smoke coverage across Ghostscript, OCR, jpegtran, and dependency-provenance rows.
 - There is no full local catalog/schema layer yet for library-scale metadata, smart search, long-running indexing, or durable job progress.
 - Semantic search, local model management, background removal, upscaling, and inpainting all need a shared model/runtime foundation before feature work.
 - Color management is still a gap: ICC awareness, soft-proof/status copy, histogram/channel tools, and output profile handling need design and tests.
@@ -130,7 +129,7 @@ Root `ROADMAP.md` now starts with an authoritative 2026-05-17 v7 plan. The older
 
 ## Recommended Next Work
 
-1. Stage the approved jpegtran artifact and add release smoke tests before treating lossless JPEG transforms as a fully bundled feature.
-2. Add installed and portable diagnostics smoke coverage for `--system-info` and `--codec-report`.
-3. Build compare/overlay mode by reusing duplicate-cleanup, gallery selection, and linked viewport primitives.
-4. Design catalog schema v1 before semantic search, model-backed organization, or library-scale jobs.
+1. Build compare/overlay mode by reusing duplicate-cleanup, gallery selection, and linked viewport primitives.
+2. Add target-format capability warnings for export and batch so users see alpha, animation, page, metadata, and color-profile loss before writing copies.
+3. Design catalog schema v1 before semantic search, model-backed organization, or library-scale jobs.
+4. Plan the local model/runtime manager only after catalog and provenance foundations are stable.
