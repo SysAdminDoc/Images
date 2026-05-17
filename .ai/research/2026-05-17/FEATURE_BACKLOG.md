@@ -70,8 +70,8 @@ This is the raw harvested backlog before final prioritization. Final tiering is 
 | Idea | Source evidence | Fit |
 | --- | --- | --- |
 | Build a local model manager before semantic search/inpaint/upscale/background removal. | `docs/inpaint-runtime-decision.md`, Windows ML docs, Immich model settings, OpenCV/Carve LaMa ONNX files. | High - V7-30 shipped approved model definitions, manual import/delete/reveal controls, app-local `models\inpaint` storage, pinned SHA-256 readiness gates, runtime status copy, and diagnostics provenance rows. |
-| Add OpenCLIP/SigLIP embedding provider behind model manager. | OpenCLIP, SigLIP, Immich search docs. | Medium |
-| Use sqlite-vec only after catalog and embedding shapes stabilize. | `docs/design-product-differentiators.md`, sqlite-vec source. | Medium |
+| Add OpenCLIP/SigLIP embedding provider behind model manager. | OpenCLIP, SigLIP, Immich search docs. | Medium - V7-31 now has `ISemanticEmbeddingProvider` and deterministic local metadata embeddings; approved ONNX image/text provider remains open. |
+| Use sqlite-vec only after catalog and embedding shapes stabilize. | `docs/design-product-differentiators.md`, sqlite-vec source. | Medium - exact in-process cosine search shipped first for the V7-31 foundation; sqlite-vec remains optional after real embedding dimensions stabilize. |
 | Add LaMa ONNX content-aware repair only after model foundation. | `docs/inpaint-runtime-decision.md`, LaMa sources. | Medium |
 | Add background removal with BiRefNet/U2-Net/rembg-style models after model foundation. | BiRefNet, U2-Net, rembg. | Medium |
 | Add local super-resolution with OpenModelDB/Real-ESRGAN model provenance. | OpenModelDB, Real-ESRGAN, Upscayl. | Medium |
