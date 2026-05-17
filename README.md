@@ -54,6 +54,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Compare mode** — press `Ctrl+Alt+C` to compare the current image with the next folder item, choose another local image from the side panel or context menu, or send the selected duplicate-cleanup pair into the viewer. 2-up and opacity-overlay layouts share pan, zoom, rotate, flip, A/B swap, and keyboard-accessible opacity controls.
 - **Rebuildable catalog foundation** — Images maintains an app-local SQLite catalog cache for future library-scale workflows. It records source path, SHA-256 fingerprint, dimensions, file dates, codec metadata, XMP sidecar rating/tags, and scan timestamps; sidecars and source files remain authoritative.
 - **File health scan** — press `Ctrl+Shift+H` to find files with mismatched image extensions, corrupt supported images, zero-byte files, and temporary/partial-download artifacts, then rename detected extensions, mark reviewed, or move files to app-local quarantine.
+- **Recovery center** — open it from the context menu or Cleanup card to review recent move, rename, quarantine, writeback, and Recycle Bin actions. Moves, renames, and quarantines can be restored with collision-safe targets and matching XMP sidecars when the recovery source still exists; writebacks and Recycle Bin sends show explicit restore guidance.
 - **Pinned overlay mode** — pin the current image above other windows for tracing or design comparison, tune opacity in the side panel, and optionally enable click-through only when the `Ctrl+Alt+O` global exit hotkey is registered.
 - **Pixel inspector** — enable Inspector in the side panel to sample coordinates and HEX/RGB/HSV/alpha values, copy color values, Shift-drag pixel measurements, and switch to nearest-neighbor preview scaling for pixel art.
 - **Animation frame workbench** — animated GIF/APNG/WebP files get a side-panel timeline with a scrubber, frame stepping, playback-speed control, copy-current-frame, PNG frame export, and drag-out selected frames.
@@ -61,7 +62,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Zoom + pan** — mouse wheel to zoom in/out about the cursor, drag to pan, double-click to toggle fit/1:1.
 - **Export a copy** to JPEG, PNG, WebP, AVIF, JXL, TIFF, BMP, GIF/APNG, PSD/PSB, PDF/EPS/SVG, TGA, DDS, QOI, EXR, HDR, JPEG 2000, X11/Magick, production/scientific, and portable bitmap formats.
 - **Rotate**, **delete-to-Recycle-Bin**, **Reveal in Explorer**, **Copy path**.
-- **Calm confirmations and recovery** — destructive file actions confirm before moving anything to Recycle Bin; routine actions complete with toast feedback.
+- **Calm confirmations and recovery** — destructive file actions confirm before moving anything to Recycle Bin, routine actions complete with toast feedback, and recent destructive operations are recorded in the app-local Recovery Center.
 - **Organized settings** — Settings groups startup, appearance, accessibility, archive defaults, hotkeys, diagnostics, text extraction, and privacy controls, including reduced motion and window-placement preferences.
 - **Runtime provenance dashboard** — About, `--system-info`, and `--codec-report` list key NuGet packages, optional runtimes, OS OCR, and future model-runtime placeholders with source, version, path, SHA-256 where available, advisory status, and setup/release action copy.
 - **Network-quiet by default** — automatic update checks are disabled until enabled in Settings; manual About checks remain available.
@@ -162,6 +163,7 @@ src/Images/
 ├── ReferenceBoardWindow.xaml   # Local reference-board canvas for images, notes, groups, and PNG export
 ├── DuplicateCleanupWindow.xaml # Local duplicate/similar-image cleanup review surface
 ├── FileHealthScanWindow.xaml   # Local bad-extension, broken-file, zero-byte, and temp-file review surface
+├── RecoveryCenterWindow.xaml   # Review, reveal, and restore recent destructive actions where possible
 ├── ViewModels/
 │   ├── ObservableObject.cs     # INotifyPropertyChanged base
 │   ├── RelayCommand.cs         # ICommand impl
@@ -174,6 +176,7 @@ src/Images/
 │   ├── ReferenceBoardLayoutService.cs # Board placement, clamping, and export bounds
 │   ├── DuplicateCleanupService.cs # Exact hash grouping, perceptual similarity, and quarantine moves
 │   ├── FileHealthScanService.cs # Content-signature checks, decode health scans, rename/quarantine actions
+│   ├── RecoveryCenterService.cs # Durable destructive-action ledger and collision-safe restore support
 │   ├── OverlayWindowService.cs # Native always-on-top/click-through overlay window helpers
 │   ├── PixelInspectorService.cs # Pixel coordinate mapping, sampling, color formatting, and measurement math
 │   ├── ImageExportService.cs   # Codec-aware Save a copy / conversion output

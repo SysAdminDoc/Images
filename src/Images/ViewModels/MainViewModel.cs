@@ -29,6 +29,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly RecycleBinDeleteService _recycleBinDelete;
     private readonly NonDestructiveEditService _editStack = new();
     private readonly ImageFileTransferService _fileTransfer = new();
+    private readonly RecoveryCenterService _recoveryCenter = new();
     private readonly ReviewLabelService _reviewLabels = new();
     private readonly Func<LosslessJpegTrimConfirmation, LosslessJpegTrimChoice> _confirmLosslessJpegTrim;
     private readonly Func<string, string?> _pickFolder;
@@ -255,6 +256,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenReferenceBoardCommand = new RelayCommand(OpenReferenceBoard);
         OpenDuplicateCleanupCommand = new RelayCommand(OpenDuplicateCleanup);
         OpenFileHealthScanCommand = new RelayCommand(OpenFileHealthScan);
+        OpenRecoveryCenterCommand = new RelayCommand(OpenRecoveryCenter);
         OpenTagGraphCommand = new RelayCommand(OpenTagGraph);
         OpenImportInboxCommand = new RelayCommand(OpenImportInbox);
         OpenMacroActionsCommand = new RelayCommand(OpenMacroActions);
@@ -2541,6 +2543,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenReferenceBoardCommand { get; }
     public ICommand OpenDuplicateCleanupCommand { get; }
     public ICommand OpenFileHealthScanCommand { get; }
+    public ICommand OpenRecoveryCenterCommand { get; }
     public ICommand OpenTagGraphCommand { get; }
     public ICommand OpenImportInboxCommand { get; }
     public ICommand OpenMacroActionsCommand { get; }
@@ -3483,6 +3486,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
 
         _nav.RemoveCurrent();
+        _recoveryCenter.RecordRecycleBin(
+            toDelete,
+            "Sent image to Recycle Bin",
+            $"Sent {Path.GetFileName(toDelete)} to the Windows Recycle Bin from the main viewer.");
         Toast($"Sent to Recycle Bin: {result.FileName}");
         AdvanceAfterRemovedCurrent();
     }
@@ -3544,6 +3551,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         try
         {
             ImageExportService.Overwrite(path, operations, allowLosslessJpegTrim);
+            _recoveryCenter.RecordWriteback(
+                path,
+                "Rotation writeback",
+                $"Overwrote {Path.GetFileName(path)} with a {degrees}-degree rotation.");
             if (existingOperations.Count > 0)
             {
                 var clearResult = _editStack.ClearMasterOperations(path);
@@ -4426,6 +4437,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         try
         {
             ImageExportService.Overwrite(path, operations, allowLosslessJpegTrim);
+            _recoveryCenter.RecordWriteback(
+                path,
+                "Crop writeback",
+                $"Overwrote {Path.GetFileName(path)} with crop {crop.Width}x{crop.Height} at {crop.X},{crop.Y}.");
             if (existingOperations.Count > 0)
             {
                 var clearResult = _editStack.ClearMasterOperations(path);
@@ -5217,6 +5232,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var destinationLabel = $"{DisplayFolderName(destinationFolder)}\\{Path.GetFileName(result.DestinationPath)}";
         if (result.Mode == ImageFileTransferMode.Move)
         {
+            _recoveryCenter.RecordMove(
+                result.SourcePath,
+                result.DestinationPath,
+                "Moved image",
+                $"Moved {Path.GetFileName(result.SourcePath)} to {DisplayFolderName(destinationFolder)}.",
+                BuildRecoverySidecarMoves(result));
             OpenFile(result.DestinationPath);
             Toast($"Moved to {destinationLabel}");
             return;
@@ -5421,7 +5442,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void OpenDuplicateCleanup()
     {
-        var cleanup = new Images.DuplicateCleanupWindow
+        var cleanup = new Images.DuplicateCleanupWindow(_recoveryCenter)
         {
             Owner = Application.Current?.MainWindow
         };
@@ -5435,7 +5456,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void OpenFileHealthScan()
     {
-        var scan = new Images.FileHealthScanWindow
+        var scan = new Images.FileHealthScanWindow(_recoveryCenter)
         {
             Owner = Application.Current?.MainWindow
         };
@@ -5444,6 +5465,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             scan.AddScanFolder(CurrentFolder);
 
         scan.Show();
+    }
+
+    private void OpenRecoveryCenter()
+    {
+        var recovery = new Images.RecoveryCenterWindow(_recoveryCenter)
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        recovery.Show();
     }
 
     private void OpenTagGraph()
@@ -5612,6 +5643,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             }
             else
             {
+                _recoveryCenter.RecordWriteback(
+                    path,
+                    "GPS metadata writeback",
+                    $"Removed {removed} GPS metadata field{(removed == 1 ? "" : "s")} from {Path.GetFileName(path)}.");
                 _preload.Reset();
                 LoadCurrent();
                 Toast($"GPS location removed ({removed} {(removed == 1 ? "field" : "fields")})");
@@ -5706,6 +5741,38 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     private sealed record ReviewLabelUndoEntry(string Path, ReviewLabelState State);
+
+    private static IReadOnlyList<RecoverySidecarMove> BuildRecoverySidecarMoves(ImageFileTransferResult result)
+    {
+        if (result.SidecarDestinationPaths.Count == 0)
+            return [];
+
+        var moves = new List<RecoverySidecarMove>();
+        var sourceDirectory = Path.GetDirectoryName(result.SourcePath);
+        var sourceStem = Path.GetFileNameWithoutExtension(result.SourcePath);
+        foreach (var sidecarDestination in result.SidecarDestinationPaths)
+        {
+            if (string.IsNullOrWhiteSpace(sidecarDestination))
+                continue;
+
+            if (sidecarDestination.Equals(result.DestinationPath + ".xmp", StringComparison.OrdinalIgnoreCase))
+            {
+                moves.Add(new RecoverySidecarMove(result.SourcePath + ".xmp", sidecarDestination));
+                continue;
+            }
+
+            if (!string.IsNullOrWhiteSpace(sourceDirectory) &&
+                !string.IsNullOrWhiteSpace(sourceStem) &&
+                Path.GetFileName(sidecarDestination).Equals(
+                    Path.GetFileNameWithoutExtension(result.DestinationPath) + ".xmp",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                moves.Add(new RecoverySidecarMove(Path.Combine(sourceDirectory, sourceStem + ".xmp"), sidecarDestination));
+            }
+        }
+
+        return moves;
+    }
 
     public void Dispose()
     {

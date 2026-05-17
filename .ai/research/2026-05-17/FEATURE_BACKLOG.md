@@ -32,7 +32,7 @@ This is the raw harvested backlog before final prioritization. Final tiering is 
 | Finish Settings IA: General, Appearance, Advanced, Hotkeys, Accessibility, Diagnostics. | `ROADMAP.md`, shipped feature breadth in `README.md`. | High |
 | Add high-contrast and reduced-motion modes. | Accessibility gap in prior roadmap and GUI polish requirements. | High |
 | Add keyboard shortcut editor/export/import. | `README.md` shortcuts, growing feature count. | High |
-| Add destructive-action recovery center for quarantine, recent moves, crop/writeback rollback, and sidecar operations. | Duplicate cleanup, file health, crop overwrite, copy/move actions. | High |
+| Add destructive-action recovery center for quarantine, recent moves, crop/writeback records, and sidecar operations. | Duplicate cleanup, file health, crop overwrite, copy/move actions. | High - V7-16 shipped app-local recovery records, reveal actions, restore for moves/renames/quarantines, sidecar recovery, and non-restorable writeback/Recycling guidance. |
 | Add per-feature first-run/onboarding copy only where workflows are risky. | Current privacy/trust first-run pattern in README/docs. | Medium |
 | Add operation history and background job queue diagnostics. | `BackgroundTaskTracker`, Immich job patterns. | Medium |
 

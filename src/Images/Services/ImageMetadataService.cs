@@ -25,8 +25,9 @@ public static class ImageMetadataService
         {
             CodecRuntime.Configure();
 
+            using var stream = OpenSharedRead(path);
             using var image = new MagickImage();
-            image.Ping(new FileInfo(path), new MagickReadSettings
+            image.Ping(stream, new MagickReadSettings
             {
                 FrameIndex = 0,
                 FrameCount = 1,
@@ -84,6 +85,9 @@ public static class ImageMetadataService
             return PhotoMetadata.Empty;
         }
     }
+
+    private static FileStream OpenSharedRead(string path)
+        => new(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
 
     private static string? ReadString(IExifProfile profile, ExifTag<string> tag)
         => profile.GetValue(tag)?.Value;

@@ -18,7 +18,7 @@ The project philosophy is stable across `README.md`, `CLAUDE.md`, `docs/integrat
 ## Verified Repository State
 
 - Branch: `main`, tracking `origin/main`.
-- Initial 2026-05-17 research baseline: `6da0641aa2b241c1b108f28ed01be69836ec56a3` (`feat: add send print clipboard actions`, 2026-05-14). Later autonomous roadmap commits on 2026-05-17 closed V7-02 through V7-07 and V7-10 through V7-15.
+- Initial 2026-05-17 research baseline: `6da0641aa2b241c1b108f28ed01be69836ec56a3` (`feat: add send print clipboard actions`, 2026-05-14). Later autonomous roadmap commits on 2026-05-17 closed V7-02 through V7-07 and V7-10 through V7-16.
 - Latest published tag found locally and on GitHub Releases: `v0.2.11`, commit `0abf855e109016b3e2279a99cdf43243d3efa35b`, published 2026-05-05.
 - Root version surfaces still show `0.2.11` in `src/Images/Images.csproj`, `README.md`, and installer docs.
 - `CHANGELOG.md` has substantial Unreleased work after `v0.2.11`: crop/writeback refinement, selection, jpegtran provenance, lossless JPEG writeback and trim confirmation, inpaint runtime decision, compare/overlay mode, editor workbenches, wallpaper modes, send/print/clipboard actions.
@@ -44,6 +44,7 @@ Important services and controllers:
 - `Services/SettingsService.cs` - SQLite-backed app settings and local state.
 - `Services/CatalogService.cs` - rebuildable app-local catalog cache for indexed source paths, fingerprints, dimensions, codec metadata, sidecar rating/tags, and scan timestamps.
 - `Services/ReviewLabelService.cs` - XMP-backed star rating plus pick/reject review labels with restoreable previous state.
+- `Services/RecoveryCenterService.cs` - app-local JSONL destructive-action ledger plus collision-safe restore support for moves, renames, quarantines, and matching sidecars.
 - `Services/ArchiveBookService.cs` - read-only ZIP/CBZ plus SharpCompress-backed RAR/CBR and 7z/CB7 book pages.
 - `Services/DuplicateCleanupService.cs` - exact and perceptual duplicate cleanup.
 - `Services/FileHealthScanService.cs` - extension mismatch, corrupt file, zero-byte, and temp-file review.
@@ -90,6 +91,7 @@ Shipped or present in current docs and changelog:
 - Viewer compare mode with current+next, chosen local file, and duplicate-cleanup pair entry points; 2-up and opacity-overlay layouts share pan, zoom, rotate, flip, A/B swap, keyboard opacity controls, and Escape exit behavior.
 - Export preview workbench with original versus in-memory encoded preview, JPEG/PNG/WebP/AVIF/JXL presets, quality and max-dimension controls, estimated output size and byte delta, resize-aware save output, and shared target-format warnings for alpha flattening, animation frame loss, page/layer flattening, EXIF/IPTC/XMP metadata, ICC profile risk, and lossy quality settings. Batch preview and dry-run paths use the same warning service.
 - Side-panel color analysis with embedded ICC/profile status, decoded color space, sampled luma and RGB channel stats, shadow/midtone/highlight histogram percentages, alpha transparency stats, and explicit unmanaged-color warnings without changing pixels.
+- Recovery Center for recent destructive actions: move, file-health rename, duplicate/file-health quarantine, crop/rotation/GPS writeback, and Recycle Bin sends are recorded locally; moves, renames, and quarantines can be revealed and restored when the recovery source still exists, including collision-safe target names and XMP sidecar moves where available.
 - Rebuildable catalog schema v1 in app-local SQLite: source path, SHA-256 fingerprint, dimensions, file dates, size, codec/format metadata, XMP sidecar path/modified time, rating, tags, scan timestamps, and root scan rows.
 - Batch processor, macro actions, import inbox, private tag relationships.
 - Non-destructive resize, adjustments, effects, annotations/redaction, perspective correction, auto enhance, edit history, virtual copies.
@@ -108,6 +110,7 @@ The old `ROADMAP.md` v6 header said there was no editor, organizer, or batch pro
 - Catalog schema v1 exists as a rebuildable cache, but there is no full library UI, incremental indexer, durable job progress surface, or semantic-search integration yet.
 - Semantic search, local model management, background removal, upscaling, and inpainting all need a shared model/runtime foundation before feature work.
 - Color management is still a gap: the side panel now reports embedded-profile and histogram basics, but actual ICC display transforms, soft-proof controls, and output profile handling remain future work.
+- Recovery coverage is intentionally practical rather than magical: moves, renames, and quarantines can be restored while their recovery files exist; in-place crop/rotation/GPS writebacks and Windows Recycle Bin sends are logged with reveal/recovery guidance but do not have private rollback copies.
 - Distribution trust is still checksum-first; code signing, package-manager manifests, and SmartScreen reputation remain future work.
 - Large-image/deep-zoom tile architecture is not implemented.
 
@@ -138,5 +141,5 @@ Root `ROADMAP.md` now starts with an authoritative 2026-05-17 v7 plan. The older
 
 ## Recommended Next Work
 
-1. Add a destructive-action recovery center for quarantine, moves, writeback, and review-sidecar changes.
-2. Plan the local model/runtime manager only after catalog and provenance foundations are stable.
+1. Plan the local model/runtime manager only after catalog, provenance, and recovery foundations are stable.
+2. Keep distribution trust, real color management, and deep-zoom architecture as separate follow-up tracks rather than mixing them into model/runtime work.
