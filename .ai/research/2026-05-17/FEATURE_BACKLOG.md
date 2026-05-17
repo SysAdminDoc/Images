@@ -81,8 +81,8 @@ This is the raw harvested backlog before final prioritization. Final tiering is 
 
 | Idea | Source evidence | Fit |
 | --- | --- | --- |
-| Add ICC/profile awareness, display transform status, and profile mismatch warnings. | OpenColorIO/OpenImageIO references, user expectations around color-managed viewers. | High |
-| Add histogram/channel panels with color counter and pixel stats. | FastStone histogram, local pixel inspector. | Medium |
+| Add ICC/profile awareness, display transform status, and profile mismatch warnings. | OpenColorIO/OpenImageIO references, user expectations around color-managed viewers. | High - V7-15 shipped read-only embedded ICC/profile status and unmanaged-color warnings; actual display transforms remain future work. |
+| Add histogram/channel panels with color counter and pixel stats. | FastStone histogram, local pixel inspector. | Medium - V7-15 shipped sampled luma/RGB/alpha and shadow/midtone/highlight basics; fuller histogram UI remains optional future polish. |
 | Build deep-zoom/tile architecture for huge images. | OpenSeadragon, OpenSlide, libvips. | Later |
 | Add scientific/whole-slide format review only if a target workflow emerges. | Bio-Formats, napari, QuPath. | Later |
 | Add C2PA/content provenance inspection after metadata/catalog foundations. | C2PA spec. | Later |

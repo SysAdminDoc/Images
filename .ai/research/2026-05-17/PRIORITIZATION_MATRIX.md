@@ -32,7 +32,7 @@ Scoring:
 | 10 | Culling/review mode | 5 | 4 | 4 | 4 | 2 | 7 | Shipped 2026-05-17 under V7-13 with XMP-backed star ratings, pick/reject labels, side-panel controls, keyboard flow, gallery refresh, and undo. |
 | 11 | Target-format capability warnings | 5 | 4 | 4 | 3 | 2 | 8 | Shipped 2026-05-17 under V7-14 with shared export preview, batch preview, and macro dry-run warnings for alpha, animation, pages/layers, metadata, ICC profile, and lossy settings. |
 | 12 | Release/post-install smoke script | 5 | 4 | 4 | 3 | 2 | 8 | Shipped 2026-05-17 under V7-07; catches Ghostscript/OCR/portable/installer regressions early. |
-| 13 | ICC/profile status and histogram basics | 4 | 4 | 4 | 4 | 3 | 5 | High user trust value; needs careful technical design. |
+| 13 | ICC/profile status and histogram basics | 4 | 4 | 4 | 4 | 3 | 5 | Shipped 2026-05-17 under V7-15 with read-only embedded ICC/profile status, sampled histogram/channel stats, alpha stats, and unmanaged-color warnings. |
 
 ## Later
 
@@ -63,8 +63,7 @@ Scoring:
 2. Security and runtime provenance.
 3. Settings/accessibility surface.
 4. jpegtran artifact staging and release smoke.
-5. ICC/profile basics.
-6. Destructive-action recovery center.
-7. Model manager.
-8. Semantic search and AI-assisted tools.
-9. Deep-zoom and specialized imaging.
+5. Destructive-action recovery center.
+6. Model manager.
+7. Semantic search and AI-assisted tools.
+8. Deep-zoom and specialized imaging.
