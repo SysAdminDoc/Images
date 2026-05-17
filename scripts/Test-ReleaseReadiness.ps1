@@ -36,7 +36,8 @@ $checklist = Read-RepoText "docs\release-checklist.md"
 $requiredChecklistSections = @(
     "Current-State Audit",
     "Shipped-Roadmap Closure Pass",
-    "Version/Date Consistency Check"
+    "Version/Date Consistency Check",
+    "Runtime And Artifact Checks"
 )
 
 foreach ($section in $requiredChecklistSections) {
@@ -61,6 +62,28 @@ if ($roadmap -match "No editor, no organizer, no batch processor") {
 $projectContext = Read-RepoText "PROJECT_CONTEXT.md"
 if ($projectContext -notmatch "Recommended Next Work") {
     throw "PROJECT_CONTEXT.md must include a Recommended Next Work section before release."
+}
+
+$requiredRuntimeFiles = @(
+    "scripts\Prepare-JpegTranBundle.ps1",
+    "scripts\Test-ReleaseDiagnostics.ps1",
+    "src\Images\Codecs\JpegTran\PROVENANCE.md",
+    "src\Images\Codecs\JpegTran\LICENSE.md",
+    "src\Images\Codecs\JpegTran\README.ijg"
+)
+
+foreach ($relativePath in $requiredRuntimeFiles) {
+    $path = Resolve-RepoPath $relativePath
+    if (-not (Test-Path -LiteralPath $path)) {
+        throw "Required runtime provenance file is missing: $relativePath"
+    }
+}
+
+$jpegTranProvenance = Read-RepoText "src\Images\Codecs\JpegTran\PROVENANCE.md"
+if ($jpegTranProvenance -notmatch "libjpeg-turbo-3\.1\.4\.1-vc-x64\.exe" -or
+    $jpegTranProvenance -notmatch "2bb347f106473c12635bdd414b1f289de9f4d6dea4a496d3f9dd212db9eda0dc" -or
+    $jpegTranProvenance -notmatch "2000c205ed99fe2409e42a6cb87c19d88e33e516d5d40ff11bb19b7830e3ee33") {
+    throw "jpegtran provenance must include the approved artifact URL and SHA-256 values."
 }
 
 $changelog = Read-RepoText "CHANGELOG.md"

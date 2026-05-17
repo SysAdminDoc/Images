@@ -39,7 +39,8 @@ The GitHub release workflow runs the same gate before build, package, and upload
 ## Runtime And Artifact Checks
 
 1. Run the vulnerable package gate.
-2. Confirm optional runtime provenance for Ghostscript and any staged `jpegtran.exe` artifact.
-3. Run `--system-info` and `--codec-report` on the release build or published output.
-4. Confirm the installer, portable zip, and checksum file names match the release tag.
-5. Do not mutate assets attached to an already-published version; publish a patch release instead.
+2. Run `scripts\Prepare-JpegTranBundle.ps1 -Force` or confirm the workflow staged the approved libjpeg-turbo artifact from `src\Images\Codecs\JpegTran\PROVENANCE.md`.
+3. Confirm optional runtime provenance for Ghostscript and any staged `jpegtran.exe` artifact.
+4. Run `scripts\Test-ReleaseDiagnostics.ps1` against the portable and installed outputs. The workflow stores the resulting logs as a `release-diagnostics-*` artifact.
+5. Confirm the installer, portable zip, and checksum file names match the release tag.
+6. Do not mutate assets attached to an already-published version; publish a patch release instead.

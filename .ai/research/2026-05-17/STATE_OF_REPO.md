@@ -8,7 +8,7 @@ Repository: `C:\Users\--\repos\Images`
 - Branch: `main`, tracking `origin/main`.
 - HEAD: `6da0641aa2b241c1b108f28ed01be69836ec56a3`.
 - HEAD subject: `feat: add send print clipboard actions`.
-- Follow-up autonomous roadmap work on 2026-05-17 closed V7-02 through V7-05 after this initial state snapshot, including changelog date repair, release-readiness hygiene gates, settings IA, and the runtime/dependency provenance dashboard.
+- Follow-up autonomous roadmap work on 2026-05-17 closed V7-02 through V7-07 after this initial state snapshot, including changelog date repair, release-readiness hygiene gates, settings IA, runtime/dependency provenance dashboard, approved jpegtran artifact staging, and portable/installed release diagnostics smoke.
 - Latest local/GitHub release tag inspected: `v0.2.11` at `0abf855e109016b3e2279a99cdf43243d3efa35b`.
 - Latest release publication date from `gh release view v0.2.11`: 2026-05-05T21:12:36Z.
 - Release assets inspected:
@@ -65,6 +65,7 @@ Images is no longer only a viewer. Current source and documentation show these s
 - Destructive crop/writeback for flat rasters only.
 - Optional jpegtran discovery and lossless JPEG transform path.
 - Structured runtime/dependency provenance rows in About, `--system-info`, and `--codec-report` for .NET, Magick.NET, SharpCompress, Ghostscript, jpegtran, Windows OCR, AI runtime, and local model registry placeholders.
+- Approved libjpeg-turbo 3.1.4.1 jpegtran release staging with tracked license/provenance, SHA-256 validation, and release diagnostics smoke coverage.
 - Wallpaper, send, print, and clipboard actions.
 
 This means the older `ROADMAP.md` v6 "No editor, no organizer, no batch processor" line is stale and should not guide new work.

@@ -93,6 +93,11 @@ jobs:
 
           pwsh -NoProfile -ExecutionPolicy RemoteSigned -File scripts\Prepare-GhostscriptBundle.ps1 -Source $source -Force
 
+      - name: Bundle jpegtran runtime
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy RemoteSigned -File scripts\Prepare-JpegTranBundle.ps1 -Force
+
       - name: Publish (self-contained, win-x64)
         run: >
           dotnet publish src/Images
@@ -102,6 +107,14 @@ jobs:
           -p:PublishSingleFile=false
           -p:Version=${{ github.event.inputs.version }}
           -o publish
+
+      - name: Smoke portable diagnostics
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy RemoteSigned -File scripts\Test-ReleaseDiagnostics.ps1 `
+            -PortableDir publish `
+            -RequireGhostscript `
+            -RequireJpegTran
 
       - name: Package portable zip
         shell: pwsh
@@ -127,6 +140,37 @@ jobs:
           $setup = "installer\output\Images-v${{ github.event.inputs.version }}-setup-win-x64.exe"
           if (-not (Test-Path $setup)) { throw "Installer not produced at $setup" }
           "SETUP=$setup" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Smoke installed diagnostics
+        shell: pwsh
+        run: |
+          $installDir = Join-Path $PWD "installed-smoke"
+          if (Test-Path -LiteralPath $installDir) {
+            Remove-Item -LiteralPath $installDir -Recurse -Force
+          }
+          & $env:SETUP /VERYSILENT /SUPPRESSMSGBOXES /NORESTART "/DIR=$installDir" /SKIPOCR
+          if ($LASTEXITCODE -ne 0) { throw "Installer smoke install failed with exit code $LASTEXITCODE" }
+          try {
+            pwsh -NoProfile -ExecutionPolicy RemoteSigned -File scripts\Test-ReleaseDiagnostics.ps1 `
+              -InstalledDir $installDir `
+              -RequireGhostscript `
+              -RequireJpegTran
+          }
+          finally {
+            $uninstaller = Get-ChildItem -LiteralPath $installDir -Filter "unins*.exe" -ErrorAction SilentlyContinue |
+              Select-Object -First 1
+            if ($uninstaller) {
+              & $uninstaller.FullName /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+            }
+          }
+
+      - name: Upload release diagnostics logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-diagnostics-${{ github.event.inputs.version }}
+          path: release-diagnostics/**
+          if-no-files-found: ignore
 
       - name: Generate checksums
         shell: pwsh

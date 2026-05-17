@@ -83,10 +83,11 @@ Current project state:
 - The app can resolve an optional app-local libjpeg-turbo `jpegtran.exe` sidecar or `IMAGES_JPEGTRAN_EXE`.
 - Diagnostics expose path, version, and SHA-256.
 - Lossless JPEG crop/rotation writeback can use the runtime when available.
+- Follow-up on 2026-05-17 approved libjpeg-turbo 3.1.4.1 `libjpeg-turbo-3.1.4.1-vc-x64.exe` for release staging, with installer SHA-256 `2bb347f106473c12635bdd414b1f289de9f4d6dea4a496d3f9dd212db9eda0dc` and extracted `jpegtran.exe` SHA-256 `2000c205ed99fe2409e42a6cb87c19d88e33e516d5d40ff11bb19b7830e3ee33`.
 
-Gap:
+Release policy:
 
-- Bundled artifact staging is still not complete. The exact libjpeg-turbo Windows artifact, license files, SHA-256 provenance, and staged-runtime smoke coverage remain required before shipping a bundled runtime.
+- The runtime binary remains intentionally ignored by git. Release packaging stages it through `scripts\Prepare-JpegTranBundle.ps1`; `scripts\Test-ReleaseDiagnostics.ps1` and the release workflow validate portable and installed diagnostics after staging.
 
 ### OCR
 

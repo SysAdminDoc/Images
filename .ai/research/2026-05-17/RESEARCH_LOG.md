@@ -96,6 +96,7 @@ Representative queries:
 - `SharpCompress GHSA-6c8g-7p36-r338 CVE-2026-44788 0.48.1`
 - `.NET 9 support policy end of support official Microsoft`
 - `Ghostscript 10.07.0 release CVE security official`
+- `libjpeg-turbo 3.1.4.1 vc x64 jpegtran SHA-256`
 - `NuGet Magick.NET-Q16-AnyCPU 14.13.0 release`
 - `Serilog 4.3.1 release notes GitHub`
 
@@ -104,6 +105,7 @@ Findings:
 - SharpCompress 0.47.4 is not acceptable for the vulnerability gate even though Images avoids the affected API.
 - .NET 9 remains supported until 2026-11-10; .NET 10 is LTS and should be planned but not rushed.
 - Ghostscript 10.07.0 is current as of the release page inspected and should stay on a monitored CVE gate.
+- libjpeg-turbo 3.1.4.1 has a GitHub release asset digest for `libjpeg-turbo-3.1.4.1-vc-x64.exe`; local extraction verified `bin\jpegtran.exe` SHA-256 before staging policy was updated.
 - Magick.NET 14.13.0 is current in this repo and recent enough to avoid the older vulnerable floors shown by NuGet.
 
 ### Models, Datasets, And Integrations Search
