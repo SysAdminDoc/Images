@@ -203,16 +203,18 @@ public sealed class MacroActionService
         var outputFolder = ResolveOutputFolder(path, options.OutputFolder);
         var targetName = Path.GetFileNameWithoutExtension(path) + extension;
         var targetPath = ResolveUniqueDestination(outputFolder, targetName);
+        var format = ImageExportService.TryResolveFormat(extension) ?? MagickFormat.Png;
         if (options.DryRun)
         {
+            AppendExportWarnings(path, extension, format, messages);
             messages.Add($"Would export {Path.GetFileName(path)} to {targetPath}.");
             return targetPath;
         }
 
         using var image = new MagickImage(path);
         ApplyResize(image, parameters);
+        AppendExportWarnings(image, path, extension, format, messages);
 
-        var format = ImageExportService.TryResolveFormat(extension) ?? MagickFormat.Png;
         image.Format = format;
         image.Quality = (uint)ParseInt(GetParameter(parameters, "quality", "92"), 1, 100, 92);
         if (RequiresOpaqueBackground(format))
@@ -224,6 +226,35 @@ public sealed class MacroActionService
         WriteAtomically(image, targetPath);
         messages.Add($"Exported {Path.GetFileName(targetPath)}.");
         return targetPath;
+    }
+
+    private static void AppendExportWarnings(
+        string path,
+        string extension,
+        MagickFormat format,
+        List<string> messages)
+    {
+        try
+        {
+            using var image = new MagickImage(path);
+            AppendExportWarnings(image, path, extension, format, messages);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or MagickException)
+        {
+            messages.Add($"Warning: could not inspect export capability losses for {Path.GetFileName(path)}.");
+            Log.LogDebug(ex, "Could not inspect export warnings for {Path}", path);
+        }
+    }
+
+    private static void AppendExportWarnings(
+        MagickImage image,
+        string path,
+        string extension,
+        MagickFormat format,
+        List<string> messages)
+    {
+        foreach (var warning in ExportCapabilityWarningService.BuildWarnings(image, path, extension, format))
+            messages.Add("Warning: " + warning);
     }
 
     private static string RenamePattern(
