@@ -47,6 +47,10 @@ Date: 2026-05-17
 - `src/Images/Services/CatalogService.cs` - adds the V7-12 rebuildable app-local catalog cache with schema migration v1, root rebuild, SHA-256 fingerprints, dimensions, dates, codec/format metadata, XMP sidecar path/modified time, rating, tags, and scan timestamps.
 - `tests/Images.Tests/CatalogServiceTests.cs` - covers catalog rebuild/query behavior, sidecar rating/tag indexing, fingerprint/dimension storage, unsupported-file skipping, and cache clearing on rebuild.
 - `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, `docs/improvement-plan.md`, `.ai/research/2026-05-17/STATE_OF_REPO.md`, `.ai/research/2026-05-17/FEATURE_BACKLOG.md`, and `.ai/research/2026-05-17/PRIORITIZATION_MATRIX.md` - updated for V7-12 completion.
+- `src/Images/Services/ReviewLabelService.cs` - adds XMP-backed star ratings, pick/reject labels, sidecar reading/writing, and restoreable previous state for culling review mode.
+- `src/Images/ViewModels/MainViewModel.cs`, `src/Images/MainWindow.xaml`, and `src/Images/MainWindow.xaml.cs` - add review mode state, commands, side-panel controls, keyboard flow, gallery smart-filter refresh after sidecar writes, and undo routing.
+- `tests/Images.Tests/ReviewLabelServiceTests.cs` and `tests/Images.Tests/MainViewModelStateTests.cs` - cover review sidecar mutations and ViewModel undo behavior.
+- `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, `docs/improvement-plan.md`, `.ai/research/2026-05-17/STATE_OF_REPO.md`, `.ai/research/2026-05-17/FEATURE_BACKLOG.md`, and `.ai/research/2026-05-17/PRIORITIZATION_MATRIX.md` - updated for V7-13 completion.
 
 ## Preserved
 
@@ -62,7 +66,7 @@ Completed before commit:
 - `dotnet list Images.sln package --vulnerable --include-transitive` - passed; no vulnerable packages for `Images` or `Images.Tests`.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Test-VersionSync.ps1` - passed for 0.2.11.
 - `dotnet build Images.sln -c Release` - passed with 0 warnings and 0 errors.
-- `dotnet test Images.sln -c Release --no-build` - passed 359 tests after V7-12 catalog coverage was added.
+- `dotnet test Images.sln -c Release --no-build` - passed 363 tests after V7-13 review-mode coverage was added.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Test-ReleaseReadiness.ps1 -Version 0.2.11` - passed.
 - `src\Images\bin\Release\net9.0-windows10.0.22621.0\Images.exe --system-info` - exited 0 in the local shell smoke.
 - `src\Images\bin\Release\net9.0-windows10.0.22621.0\Images.exe --codec-report` - exited 0 in the local shell smoke.

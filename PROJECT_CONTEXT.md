@@ -41,6 +41,7 @@ Important services and controllers:
 - `Services/DirectoryNavigator.cs` - natural-sort folder navigation and file watching.
 - `Services/SettingsService.cs` - SQLite-backed app settings and local state.
 - `Services/CatalogService.cs` - rebuildable app-local catalog cache for indexed source paths, fingerprints, dimensions, codec metadata, sidecar rating/tags, and scan timestamps.
+- `Services/ReviewLabelService.cs` - XMP-backed star rating plus pick/reject review labels with restoreable previous state.
 - `Services/ArchiveBookService.cs` - read-only ZIP/CBZ plus SharpCompress-backed RAR/CBR and 7z/CB7 book pages.
 - `Services/DuplicateCleanupService.cs` - exact and perceptual duplicate cleanup.
 - `Services/FileHealthScanService.cs` - extension mismatch, corrupt file, zero-byte, and temp-file review.
@@ -81,6 +82,7 @@ Shipped or present in current docs and changelog:
 - Archive book mode for ZIP/CBZ, RAR/CBR, and 7z/CB7 with right-to-left mode, spreads, progress, and clean-scan preview.
 - Animated GIF playback and support for animated WebP/APNG when available in the Magick build.
 - Gallery workbench with smart filters and current-folder thumbnail grid.
+- Culling review mode with keyboard-first rating, pick/reject labels, side-panel controls, XMP sidecar writes, and undo of prior review state without requiring catalog state.
 - OCR overlay using Windows.Media.Ocr and installed Windows OCR capabilities.
 - Duplicate cleanup and file health scan.
 - Viewer compare mode with current+next, chosen local file, and duplicate-cleanup pair entry points; 2-up and opacity-overlay layouts share pan, zoom, rotate, flip, A/B swap, keyboard opacity controls, and Escape exit behavior.
@@ -133,7 +135,7 @@ Root `ROADMAP.md` now starts with an authoritative 2026-05-17 v7 plan. The older
 
 ## Recommended Next Work
 
-1. Build V7-13 culling/review mode on top of current gallery, sidecar, duplicate-cleanup, move/quarantine, and catalog foundations.
-2. Expand target-format capability warnings beyond the V7-11 export/batch warnings so users see animation, page, and color-profile loss before writing copies.
-3. Add ICC/profile awareness and histogram basics after the export/capability-warning surface is stable.
+1. Expand target-format capability warnings beyond the V7-11 export/batch warnings so users see animation, page, and color-profile loss before writing copies.
+2. Add ICC/profile awareness and histogram basics after the export/capability-warning surface is stable.
+3. Add a destructive-action recovery center for quarantine, moves, writeback, and review-sidecar changes.
 4. Plan the local model/runtime manager only after catalog and provenance foundations are stable.
