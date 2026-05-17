@@ -157,7 +157,33 @@ public sealed class ModelManagerService
             ExpectedSha256: "1faef5301d78db7dda502fe59966957ec4b79dd64e16f03ed96913c7a4eb68d6",
             ExpectedSizeBytes: 208_000_000,
             RuntimeContract: "Fixed 512x512 input, opset 17; Windows ML first, ONNX Runtime DirectML fallback.",
-            Notes: "Fallback validation candidate. The alternate Carve lama.onnx export is intentionally not approved because the model card marks it slower/not recommended.")
+            Notes: "Fallback validation candidate. The alternate Carve lama.onnx export is intentionally not approved because the model card marks it slower/not recommended."),
+        new(
+            Id: "qdrant-clip-vit-b32-text",
+            DisplayName: "Qdrant CLIP ViT-B/32 Text ONNX",
+            Purpose: "Semantic search text embeddings",
+            StorageGroup: "semantic",
+            SourceUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-text",
+            DownloadUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-text/resolve/main/model.onnx",
+            License: "MIT per model card",
+            FileName: "clip-vit-b32-text.onnx",
+            ExpectedSha256: "4dbe762b11e36488304471e439cde89da053ad7acaddbf9e096745d142ec8d8b",
+            ExpectedSizeBytes: 254_102_519,
+            RuntimeContract: "Text encoder for CLIP-style semantic search; requires tokenizer validation before runtime use.",
+            Notes: "Approved file candidate only. The V7-31 provider must still validate tokenizer files, input names/shapes, normalization, and runtime output compatibility before enabling model-backed search."),
+        new(
+            Id: "qdrant-clip-vit-b32-vision",
+            DisplayName: "Qdrant CLIP ViT-B/32 Vision ONNX",
+            Purpose: "Semantic search image embeddings",
+            StorageGroup: "semantic",
+            SourceUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-vision",
+            DownloadUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-vision/resolve/main/model.onnx",
+            License: "MIT per model card",
+            FileName: "clip-vit-b32-vision.onnx",
+            ExpectedSha256: "c68d3d9a200ddd2a8c8a5510b576d4c94d1ae383bf8b36dd8c084f94e1fb4d63",
+            ExpectedSizeBytes: 352_000_000,
+            RuntimeContract: "Vision encoder for CLIP-style semantic search; requires 224px CLIP preprocessing and runtime validation before use.",
+            Notes: "Approved file candidate only. The V7-31 provider must still validate preprocessing, model output shape, and similarity parity before replacing deterministic metadata embeddings.")
     ];
 
     public LocalModelManagerSnapshot GetSnapshot()

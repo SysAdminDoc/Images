@@ -144,6 +144,10 @@ This register lists local and external sources used for the research and plannin
 | S-OPENCLIP | https://github.com/mlfoundations/open_clip | Local semantic search embedding model reference. |
 | S-SIGLIP | https://huggingface.co/docs/transformers/model_doc/siglip | Embedding/search model family reference. |
 | S-SQLITEVEC | https://github.com/asg017/sqlite-vec | Local vector search extension candidate. |
+| S-QDRANT-CLIP-TEXT | https://huggingface.co/Qdrant/clip-ViT-B-32-text | Approved semantic-search text encoder candidate and FastEmbed usage reference. |
+| S-QDRANT-CLIP-TEXT-ONNX | https://huggingface.co/Qdrant/clip-ViT-B-32-text/blob/main/model.onnx | Pinned text ONNX file SHA-256 and size for Model manager. |
+| S-QDRANT-CLIP-VISION | https://huggingface.co/Qdrant/clip-ViT-B-32-vision | Approved semantic-search vision encoder candidate and FastEmbed usage reference. |
+| S-QDRANT-CLIP-VISION-ONNX | https://huggingface.co/Qdrant/clip-ViT-B-32-vision/blob/main/model.onnx | Pinned vision ONNX file SHA-256 and size for Model manager. |
 | S-LAMA-OPENCV | https://huggingface.co/opencv/inpainting_lama | Primary inpaint model candidate from existing repo decision. |
 | S-LAMA-OPENCV-ONNX | https://huggingface.co/opencv/inpainting_lama/blob/main/inpainting_lama_2025jan.onnx | Approved OpenCV LaMa ONNX artifact identity and SHA-256 pin used by the model manager. |
 | S-LAMA-CARVE | https://huggingface.co/Carve/LaMa-ONNX | Fallback LaMa ONNX candidate from existing repo decision. |
