@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V7-30` is complete. Model manager now records approved local ONNX model definitions, keeps imported LaMa candidates under app-local `models\inpaint` storage, validates imports by pinned SHA-256, exposes manual import/delete/reveal controls, and feeds runtime/model readiness into About and CLI diagnostics without automatic downloads.
+Roadmap `V7-31` is in progress. The semantic search foundation now explicitly indexes selected folders into app-local `semantic-index.db`, searches deterministic offline metadata embeddings through an embedding-provider seam, opens/reveals results, supports cancellation, and can delete derived search data; approved ONNX CLIP/SigLIP inference remains the closure gap.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the remaining roadmap: local semantic search can now build on the catalog and model-manager foundations, but actual inference package selection, embedding-provider seams, and derived-data delete/rebuild controls remain required before shipping search, inpaint, background removal, or super-resolution.
+The improvement-plan backlog is complete. Continue with the remaining roadmap by finishing `V7-31`: choose and validate the approved ONNX image/text embedding provider, keep model imports manual and SHA-gated through Model manager, and preserve explicit delete/rebuild controls for derived embeddings before checking the item off.
 
 ## Research Inputs
 
@@ -88,6 +88,7 @@ The improvement-plan backlog is complete. Continue with the remaining roadmap: l
 - 2026-05-17: Completed `V7-15` by adding `ImageColorAnalysisService`, `ColorAnalysisController`, side-panel color/histogram rows, safe unmanaged-color warnings, and coverage for profiled, unprofiled, transparent, and controller supersession cases.
 - 2026-05-17: Completed `V7-16` by adding `RecoveryCenterService`, a Recovery Center window, destructive-action logging across move/rename/quarantine/writeback/Recycling paths, collision-safe restore support with sidecar moves, and focused recovery service coverage.
 - 2026-05-17: Completed `V7-30` by adding `ModelManagerService`, a Model manager window, approved OpenCV/Carve LaMa ONNX definitions, app-local grouped model storage, manual import/delete/reveal workflows, SHA-256 readiness gates, runtime status reporting, diagnostics provenance rows, and focused model-manager coverage.
+- 2026-05-17: Started `V7-31` by adding `SemanticSearchService`, `SemanticSearchWindow`, a local `semantic-index.db`, deterministic metadata embeddings behind `ISemanticEmbeddingProvider`, exact cosine search, folder filtering, open/reveal actions, cancellation-safe rebuild behavior, delete-index controls, and focused semantic-search service coverage.
 - 2026-05-05: Completed roadmap `V30-04` by adding a modeless non-destructive adjustment workbench, live Magick.NET preview rendering, XMP edit-stack persistence, Save-a-copy application, command routing, and regression coverage for adjustment export.
 - 2026-05-05: Completed roadmap `V40-63` by adding a private offline tag relationship graph with namespace, alias, parent, sidecar import/export, UI entry points, and regression coverage.
 - 2026-05-05: Completed roadmap `V40-64` by adding a local import inbox with duplicate-aware staging, tag/rating sidecars, optional GPS stripping, Recycle Bin cleanup, and copy/move import.

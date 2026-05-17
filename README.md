@@ -53,6 +53,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Duplicate cleanup center** — press `Ctrl+Shift+D` or use the side-panel Cleanup card to scan local folders for exact SHA-256 duplicates and perceptually similar images, prefer keep candidates from reference folders, review pairs side by side, mark false positives, and move extras to app-local quarantine or the Recycle Bin.
 - **Compare mode** — press `Ctrl+Alt+C` to compare the current image with the next folder item, choose another local image from the side panel or context menu, or send the selected duplicate-cleanup pair into the viewer. 2-up and opacity-overlay layouts share pan, zoom, rotate, flip, A/B swap, and keyboard-accessible opacity controls.
 - **Rebuildable catalog foundation** — Images maintains an app-local SQLite catalog cache for future library-scale workflows. It records source path, SHA-256 fingerprint, dimensions, file dates, codec metadata, XMP sidecar rating/tags, and scan timestamps; sidecars and source files remain authoritative.
+- **Semantic search foundation** — open Semantic search from the context menu or Automation card to explicitly index selected folders into app-local `semantic-index.db`, search with a deterministic offline metadata embedding provider, filter by folder, reveal results, open results in the viewer, cancel indexing, and delete derived search data. Approved ONNX CLIP/SigLIP inference remains future work.
 - **File health scan** — press `Ctrl+Shift+H` to find files with mismatched image extensions, corrupt supported images, zero-byte files, and temporary/partial-download artifacts, then rename detected extensions, mark reviewed, or move files to app-local quarantine.
 - **Recovery center** — open it from the context menu or Cleanup card to review recent move, rename, quarantine, writeback, and Recycle Bin actions. Moves, renames, and quarantines can be restored with collision-safe targets and matching XMP sidecars when the recovery source still exists; writebacks and Recycle Bin sends show explicit restore guidance.
 - **Pinned overlay mode** — pin the current image above other windows for tracing or design comparison, tune opacity in the side panel, and optionally enable click-through only when the `Ctrl+Alt+O` global exit hotkey is registered.
@@ -166,6 +167,7 @@ src/Images/
 ├── FileHealthScanWindow.xaml   # Local bad-extension, broken-file, zero-byte, and temp-file review surface
 ├── RecoveryCenterWindow.xaml   # Review, reveal, and restore recent destructive actions where possible
 ├── ModelManagerWindow.xaml     # Approved local ONNX model import, hash verification, and runtime status
+├── SemanticSearchWindow.xaml   # Local semantic-index build/search/reveal surface
 ├── ViewModels/
 │   ├── ObservableObject.cs     # INotifyPropertyChanged base
 │   ├── RelayCommand.cs         # ICommand impl
@@ -186,6 +188,7 @@ src/Images/
 │   ├── ExportPreviewService.cs # In-memory export previews, size estimates, and format warnings
 │   ├── ExportCapabilityWarningService.cs # Shared target-format loss warnings for export and batch
 │   ├── CatalogService.cs       # Rebuildable app-local catalog cache for metadata/search foundations
+│   ├── SemanticSearchService.cs # Local semantic index, embedding provider seam, and cosine search
 │   ├── ReviewLabelService.cs   # XMP-backed rating, pick/reject labels, and review undo state
 │   ├── NonDestructiveEditService.cs # XMP edit-stack persistence and export application
 │   ├── ImageAdjustmentService.cs # Levels, curve, and HSL adjustment planning/rendering

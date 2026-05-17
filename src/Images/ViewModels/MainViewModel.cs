@@ -258,6 +258,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenFileHealthScanCommand = new RelayCommand(OpenFileHealthScan);
         OpenRecoveryCenterCommand = new RelayCommand(OpenRecoveryCenter);
         OpenModelManagerCommand = new RelayCommand(OpenModelManager);
+        OpenSemanticSearchCommand = new RelayCommand(OpenSemanticSearch);
         OpenTagGraphCommand = new RelayCommand(OpenTagGraph);
         OpenImportInboxCommand = new RelayCommand(OpenImportInbox);
         OpenMacroActionsCommand = new RelayCommand(OpenMacroActions);
@@ -2546,6 +2547,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenFileHealthScanCommand { get; }
     public ICommand OpenRecoveryCenterCommand { get; }
     public ICommand OpenModelManagerCommand { get; }
+    public ICommand OpenSemanticSearchCommand { get; }
     public ICommand OpenTagGraphCommand { get; }
     public ICommand OpenImportInboxCommand { get; }
     public ICommand OpenMacroActionsCommand { get; }
@@ -5487,6 +5489,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         };
 
         manager.Show();
+    }
+
+    private void OpenSemanticSearch()
+    {
+        var semanticSearch = new Images.SemanticSearchWindow
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        if (Directory.Exists(CurrentFolder))
+            semanticSearch.AddSearchRoot(CurrentFolder);
+
+        semanticSearch.OpenRequested += (_, args) => OpenFile(args.Path);
+        semanticSearch.Show();
     }
 
     private void OpenTagGraph()

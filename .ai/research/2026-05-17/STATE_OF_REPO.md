@@ -8,7 +8,7 @@ Repository: `C:\Users\--\repos\Images`
 - Branch: `main`, tracking `origin/main`.
 - HEAD: `6da0641aa2b241c1b108f28ed01be69836ec56a3`.
 - HEAD subject: `feat: add send print clipboard actions`.
-- Follow-up autonomous roadmap work on 2026-05-17 closed V7-02 through V7-07, V7-10 through V7-16, and V7-30 after this initial state snapshot, including changelog date repair, release-readiness hygiene gates, settings IA, runtime/dependency provenance dashboard, approved jpegtran artifact staging, portable/installed release diagnostics smoke, local compare/overlay mode, the export preview workbench, catalog schema v1, culling review mode, shared export/batch capability warnings, side-panel ICC/profile plus histogram basics, a destructive-action Recovery Center, and a local model/runtime manager.
+- Follow-up autonomous roadmap work on 2026-05-17 closed V7-02 through V7-07, V7-10 through V7-16, and V7-30 after this initial state snapshot, then started V7-31. Completed slices include changelog date repair, release-readiness hygiene gates, settings IA, runtime/dependency provenance dashboard, approved jpegtran artifact staging, portable/installed release diagnostics smoke, local compare/overlay mode, the export preview workbench, catalog schema v1, culling review mode, shared export/batch capability warnings, side-panel ICC/profile plus histogram basics, a destructive-action Recovery Center, a local model/runtime manager, and a semantic-index/search foundation.
 - Latest local/GitHub release tag inspected: `v0.2.11` at `0abf855e109016b3e2279a99cdf43243d3efa35b`.
 - Latest release publication date from `gh release view v0.2.11`: 2026-05-05T21:12:36Z.
 - Release assets inspected:
@@ -71,6 +71,7 @@ Images is no longer only a viewer. Current source and documentation show these s
 - Side-panel color analysis with embedded ICC/profile status, decoded color space, sampled luma/RGB channel stats, shadow/midtone/highlight histogram percentages, alpha transparency stats, and unmanaged-color warnings without modifying pixels.
 - Recovery Center with app-local JSONL records for moves, file-health renames, duplicate/file-health quarantines, crop/rotation/GPS writebacks, and Recycle Bin sends; move/rename/quarantine records can be revealed and restored with collision-safe targets and sidecar moves where possible.
 - Model manager with approved OpenCV/Carve LaMa ONNX definitions, manual local import/delete/reveal actions, app-local `models\inpaint` storage, pinned SHA-256 validation, runtime readiness copy, and no automatic downloads.
+- Semantic search foundation with explicit selected-folder indexing into app-local `semantic-index.db`, an embedding-provider seam, deterministic offline metadata embeddings, exact cosine search, folder filter, result open/reveal, cancellation, and delete-index controls. This is not yet an approved ONNX CLIP/SigLIP runtime.
 - Rebuildable app-local catalog schema v1 with source path, SHA-256 fingerprint, dimensions, file dates, size, codec/format metadata, XMP sidecar path/modified time, rating, tags, scan timestamps, and root scan rows.
 - Culling review mode with XMP-backed star ratings, pick/reject labels, side-panel controls, keyboard flow, gallery smart-filter refresh, and undo of previous review sidecar state.
 - Wallpaper, send, print, and clipboard actions.

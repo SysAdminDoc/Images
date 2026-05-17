@@ -50,6 +50,10 @@ Search a local folder or library with natural language such as "sunset over wate
 - `SimilaritySearch`: start with exact cosine search for small libraries; evaluate sqlite-vec only after model and data shape are stable.
 - `SearchResultsViewModel`: UI state only; no model inference directly from the view.
 
+### Current Implementation Note
+
+- 2026-05-17: V7-31 foundation started with `SemanticSearchService`, `ISemanticEmbeddingProvider`, app-local `semantic-index.db`, deterministic offline metadata embeddings, exact cosine search, cancellation-safe rebuilds, delete-index controls, and `SemanticSearchWindow`. This is a usable local indexing/search seam, not the final CLIP/SigLIP ONNX provider.
+
 ### Non-Goals
 
 - No cloud search.
