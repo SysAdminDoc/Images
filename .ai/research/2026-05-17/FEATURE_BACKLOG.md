@@ -59,7 +59,7 @@ This is the raw harvested backlog before final prioritization. Final tiering is 
 
 | Idea | Source evidence | Fit |
 | --- | --- | --- |
-| Design catalog schema v1 with source path, content hash, sidecar state, tags, rating, dimensions, dates, and codec metadata. | digiKam database docs, local SQLite state. | High |
+| Design catalog schema v1 with source path, content hash, sidecar state, tags, rating, dimensions, dates, and codec metadata. | digiKam database docs, local SQLite state. | High - shipped 2026-05-17 under V7-12 as rebuildable `catalog.db` schema and `CatalogService`. |
 | Keep source files authoritative; catalog can be rebuilt. | Eagle lock-in concerns, local-first philosophy. | High |
 | Add incremental indexer with cancel/rebuild/delete controls. | Immich/PhotoPrism indexing patterns. | High |
 | Add advanced metadata search before embedding search. | Immich/PhotoPrism/digiKam filters, current gallery smart filters. | High |

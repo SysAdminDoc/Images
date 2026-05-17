@@ -51,6 +51,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Reference board mode** — press `Ctrl+B` to open a separate local board seeded from the current image. Drop supported files, arrange image cards, add notes and group frames, pin the board above other windows, zoom the canvas, and export the composed board as PNG.
 - **Duplicate cleanup center** — press `Ctrl+Shift+D` or use the side-panel Cleanup card to scan local folders for exact SHA-256 duplicates and perceptually similar images, prefer keep candidates from reference folders, review pairs side by side, mark false positives, and move extras to app-local quarantine or the Recycle Bin.
 - **Compare mode** — press `Ctrl+Alt+C` to compare the current image with the next folder item, choose another local image from the side panel or context menu, or send the selected duplicate-cleanup pair into the viewer. 2-up and opacity-overlay layouts share pan, zoom, rotate, flip, A/B swap, and keyboard-accessible opacity controls.
+- **Rebuildable catalog foundation** — Images maintains an app-local SQLite catalog cache for future library-scale workflows. It records source path, SHA-256 fingerprint, dimensions, file dates, codec metadata, XMP sidecar rating/tags, and scan timestamps; sidecars and source files remain authoritative.
 - **File health scan** — press `Ctrl+Shift+H` to find files with mismatched image extensions, corrupt supported images, zero-byte files, and temporary/partial-download artifacts, then rename detected extensions, mark reviewed, or move files to app-local quarantine.
 - **Pinned overlay mode** — pin the current image above other windows for tracing or design comparison, tune opacity in the side panel, and optionally enable click-through only when the `Ctrl+Alt+O` global exit hotkey is registered.
 - **Pixel inspector** — enable Inspector in the side panel to sample coordinates and HEX/RGB/HSV/alpha values, copy color values, Shift-drag pixel measurements, and switch to nearest-neighbor preview scaling for pixel art.
@@ -173,6 +174,7 @@ src/Images/
 │   ├── PixelInspectorService.cs # Pixel coordinate mapping, sampling, color formatting, and measurement math
 │   ├── ImageExportService.cs   # Codec-aware Save a copy / conversion output
 │   ├── ExportPreviewService.cs # In-memory export previews, size estimates, and format warnings
+│   ├── CatalogService.cs       # Rebuildable app-local catalog cache for metadata/search foundations
 │   ├── NonDestructiveEditService.cs # XMP edit-stack persistence and export application
 │   ├── ImageAdjustmentService.cs # Levels, curve, and HSL adjustment planning/rendering
 │   ├── LocalExposureBrushService.cs # Soft dodge/burn brush strokes for non-destructive local exposure

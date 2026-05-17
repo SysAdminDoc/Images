@@ -28,7 +28,7 @@ Scoring:
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | 7 | Compare/overlay mode | 5 | 5 | 5 | 4 | 2 | 9 | Shipped 2026-05-17 under V7-10 with current+next, chosen-file, and duplicate-pair entry points. |
 | 8 | Visual diff export workbench | 5 | 5 | 4 | 4 | 2 | 8 | Shipped 2026-05-17 under V7-11 with original/encoded preview, size delta, resize-aware save, warning copy, and batch dry-run estimates. |
-| 9 | Catalog schema v1 | 5 | 5 | 5 | 5 | 3 | 7 | Required foundation for search, culling, metadata, embeddings, and long-running jobs. |
+| 9 | Catalog schema v1 | 5 | 5 | 5 | 5 | 3 | 7 | Shipped 2026-05-17 under V7-12 as rebuildable `catalog.db` schema with source paths, fingerprints, dimensions, dates, codec metadata, and sidecar rating/tag state. |
 | 10 | Culling/review mode | 5 | 4 | 4 | 4 | 2 | 7 | Uses existing gallery, sidecar, duplicate cleanup, and move/quarantine primitives. |
 | 11 | Release/post-install smoke script | 5 | 4 | 4 | 3 | 2 | 8 | Shipped 2026-05-17 under V7-07; catches Ghostscript/OCR/portable/installer regressions early. |
 | 12 | ICC/profile status and histogram basics | 4 | 4 | 4 | 4 | 3 | 5 | High user trust value; needs careful technical design. |
@@ -62,7 +62,7 @@ Scoring:
 2. Security and runtime provenance.
 3. Settings/accessibility surface.
 4. jpegtran artifact staging and release smoke.
-5. Catalog schema and culling.
+5. Culling/review mode.
 6. Fuller export/batch capability warnings and ICC/profile basics.
 7. Model manager.
 8. Semantic search and AI-assisted tools.

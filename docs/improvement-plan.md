@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V7-11` is complete. Images now has an export preview workbench with original versus in-memory encoded preview, JPEG/PNG/WebP/AVIF/JXL presets, resize-aware save output, size deltas, and format-loss warnings; batch dry-run previews share the same estimator.
+Roadmap `V7-12` is complete. Images now has a rebuildable app-local `catalog.db` foundation that stores source path, SHA-256 fingerprint, dimensions, dates, codec metadata, XMP sidecar rating/tags, and scan timestamps while keeping source files and sidecars authoritative.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the remaining roadmap: catalog schema v1, fuller export/batch target-format warnings, ICC/profile and histogram basics, and local model/runtime management. The content-aware inpaint runtime/model choice is scoped in `docs/inpaint-runtime-decision.md`.
+The improvement-plan backlog is complete. Continue with the remaining roadmap: culling/review mode, fuller export/batch target-format warnings, ICC/profile and histogram basics, and local model/runtime management. The content-aware inpaint runtime/model choice is scoped in `docs/inpaint-runtime-decision.md`.
 
 ## Research Inputs
 
@@ -82,6 +82,7 @@ The improvement-plan backlog is complete. Continue with the remaining roadmap: c
 - 2026-05-17: Completed `V7-06` and `V7-07` by approving libjpeg-turbo 3.1.4.1 `jpegtran.exe` for release staging, tracking license/provenance files, adding a SHA-verified staging script, fixing redirected CLI diagnostics output, and wiring portable plus installed release diagnostics smoke into the workflow.
 - 2026-05-17: Completed `V7-10` and `RS-01` by adding viewer compare mode with current+next, chosen-file, and duplicate-cleanup pair entry points; linked 2-up and opacity-overlay canvases; A/B swap; keyboard opacity controls; and regression coverage for compare state.
 - 2026-05-17: Completed `V7-11` by adding an export preview workbench with in-memory encoded previews, JPEG/PNG/WebP/AVIF/JXL presets, quality and resize controls, size deltas, warning copy, resize-aware saves, batch preview estimates, and export-preview service coverage.
+- 2026-05-17: Completed `V7-12` by adding `CatalogService`, app-local `catalog.db` schema migration v1, folder rebuild/query support, SHA-256 fingerprints, dimensions, dates, codec metadata, XMP sidecar rating/tag indexing, root scan rows, and catalog service coverage.
 - 2026-05-05: Completed roadmap `V30-04` by adding a modeless non-destructive adjustment workbench, live Magick.NET preview rendering, XMP edit-stack persistence, Save-a-copy application, command routing, and regression coverage for adjustment export.
 - 2026-05-05: Completed roadmap `V40-63` by adding a private offline tag relationship graph with namespace, alias, parent, sidecar import/export, UI entry points, and regression coverage.
 - 2026-05-05: Completed roadmap `V40-64` by adding a local import inbox with duplicate-aware staging, tag/rating sidecars, optional GPS stripping, Recycle Bin cleanup, and copy/move import.
