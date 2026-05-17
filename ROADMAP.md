@@ -3,6 +3,75 @@
 Tracks planned work. `[ ]` pending, `[x]` shipped. Priorities `P0` must / `P1` should / `P2` nice.
 Effort tags: **S** ≤ 2 days · **M** ≤ 1 week · **L** > 1 week · **XL** multi-week project.
 
+> **Document version**: v7 · 2026-05-17. This section is the authoritative planning layer after live repo reconciliation, source refresh, dependency/security review, and memory consolidation. The v6 roadmap and source appendix remain below as historical research material.
+
+> **Current verified state**: Images is past the old viewer-only baseline. Current `README.md`, `CHANGELOG.md`, `docs/improvement-plan.md`, and recent commits show archive books, gallery, duplicate cleanup, file health scan, batch processor, macro actions, import inbox, OCR, edit history, non-destructive editor workbenches, flat-raster crop/writeback, optional jpegtran diagnostics, wallpaper modes, and send/print/clipboard actions. Treat any older "no editor, no organizer, no batch processor" claim below this section as stale.
+
+## 2026-05-17 Planning Snapshot
+
+Evidence bundle for this refresh:
+
+- Local state: `README.md`, `CHANGELOG.md`, `docs/improvement-plan.md`, `docs/design-product-differentiators.md`, `docs/inpaint-runtime-decision.md`, `docs/archive-runtime-review.md`, `docs/integration-policy.md`, `src/Images/Images.csproj`, `.github/workflows/*.yml`, `installer/Images.iss`, recent git history, and `gh release view v0.2.11`.
+- Research artifacts: `.ai/research/2026-05-17/STATE_OF_REPO.md`, `.ai/research/2026-05-17/MEMORY_CONSOLIDATION.md`, `.ai/research/2026-05-17/SOURCE_REGISTER.md`, `.ai/research/2026-05-17/RESEARCH_LOG.md`, `.ai/research/2026-05-17/COMPETITOR_MATRIX.md`, `.ai/research/2026-05-17/FEATURE_BACKLOG.md`, `.ai/research/2026-05-17/PRIORITIZATION_MATRIX.md`, `.ai/research/2026-05-17/SECURITY_AND_DEPENDENCY_REVIEW.md`, and `.ai/research/2026-05-17/DATASET_MODEL_INTEGRATION_REVIEW.md`.
+- External source clusters: ImageGlass, nomacs, PicView, QuickLook, qView, XnView MP, FastStone, ACDSee, Eagle, PureRef, digiKam, Immich, PhotoPrism, Czkawka, Squoosh, OpenSeadragon, OpenSlide, Bio-Formats, napari, QuPath, libvips, OpenImageIO, OpenColorIO, C2PA, .NET support policy, Magick.NET NuGet/releases, SharpCompress advisory, Ghostscript releases/CVE stream, Windows.Media.Ocr, Windows ML, ONNX Runtime DirectML, OpenCLIP, SigLIP, sqlite-vec, LaMa ONNX, BiRefNet, rembg, U-2-Net, OpenModelDB, and Real-ESRGAN.
+
+### Open Status Conflicts
+
+- `CHANGELOG.md` lists `v0.1.8` and `v0.1.9` with dates of 2026-06-02, which is after the 2026-05-17 current date. Verify against tags/release metadata before editing.
+- The old v6 top section below is useful research but stale as a status source.
+- Shared external memory described older Images state. Live repo evidence wins.
+
+## P0 - Now
+
+| ID | Status | Effort | Item | Evidence | Acceptance gates |
+| --- | --- | --- | --- | --- | --- |
+| V7-00 | [x] | S | Create canonical project context and research run artifacts. | User prompt; `AGENTS.md`; stale v6 status. | `PROJECT_CONTEXT.md` and all required `.ai/research/2026-05-17/*` files exist; source register and research log include local and external evidence. |
+| V7-01 | [x] | S | Clear SharpCompress vulnerability gate. | GHSA-6c8g-7p36-r338 / CVE-2026-44788; `dotnet list package --vulnerable`; `docs/archive-runtime-review.md`. | `SharpCompress` is 0.48.1; changelog/docs updated; vulnerable package scan is clean. |
+| V7-02 | [ ] | S | Verify and repair future-dated historical changelog entries. | `CHANGELOG.md`; current date 2026-05-17; tag/release history. | Dates for `v0.1.8` and `v0.1.9` are either corrected or annotated with verified release evidence. |
+| V7-03 | [ ] | M | Add roadmap/status hygiene to release checklist. | Current roadmap drift; `docs/improvement-plan.md`; release workflow docs. | Release checklist includes current-state audit, shipped-roadmap closure pass, and version/date consistency check. |
+| V7-04 | [ ] | M | Finish Settings IA for the current feature surface. | `README.md` shortcut/feature breadth; old roadmap gap; accessibility needs. | Settings includes General, Appearance, Accessibility, Advanced, Hotkeys, Diagnostics/Privacy sections with persisted settings and regression coverage. |
+| V7-05 | [ ] | M | Build runtime/dependency provenance dashboard. | ImageGlass format matrix; current About codec report; `docs/integration-policy.md`. | About and `--codec-report` show NuGet/runtime/model rows with source, version, path, SHA-256 where applicable, advisory status, and missing-runtime action copy. |
+| V7-06 | [ ] | M | Stage approved `jpegtran.exe` release artifact. | `docs/lossless-jpeg-transform-policy.md`; `CHANGELOG.md` Unreleased jpegtran diagnostics/writeback; libjpeg-turbo packaging requirement. | Exact artifact URL, license files, SHA-256, app-local path, resolver tests, and installed/portable smoke coverage are committed. |
+| V7-07 | [ ] | M | Add release smoke for installed and portable diagnostics. | Ghostscript/OCR/jpegtran runtime risk; `.github/workflows/release.yml`; `README.md` CLI diagnostics. | Release workflow or script runs portable and installed `--system-info` and `--codec-report`, validates Ghostscript/OCR/runtime status, and stores logs. |
+
+## P1 - Next
+
+| ID | Status | Effort | Item | Evidence | Acceptance gates |
+| --- | --- | --- | --- | --- | --- |
+| V7-10 | [ ] | L | Compare/overlay mode with linked pan, zoom, rotate, opacity, and A/B swap. | nomacs synchronization/overlay; `docs/design-product-differentiators.md`; duplicate cleanup shipped. | Enter compare from current+next, selected duplicate pair, or "Compare with"; linked transforms have tests; overlay opacity and swap are keyboard accessible. |
+| V7-11 | [ ] | L | Visual diff export workbench. | Squoosh; FastStone Save As quality/file-size comparison; current batch/export services. | User can preview A/B quality and output size before writing a copy; presets remain dry-run friendly; metadata loss warnings are visible. |
+| V7-12 | [ ] | L | Catalog schema v1. | digiKam database split; Immich/PhotoPrism search pipelines; current SQLite settings. | Rebuildable app-local catalog stores source path, fingerprint, dimensions, dates, codec metadata, rating/tag sidecar state, and scan timestamps. |
+| V7-13 | [ ] | M | Culling/review mode. | XnView/ACDSee/digiKam workflows; current Gallery, duplicate cleanup, sidecar tags/ratings, copy/move actions. | Pick/reject/rating labels write sidecars or review state with undo/recovery; keyboard flow works on folders without requiring a catalog. |
+| V7-14 | [ ] | M | Target-format capability warnings for export/batch. | ImageGlass and nomacs capability tables; current codec report; `ImageExportService`. | Export UI and batch dry-run warn when a target loses alpha, animation, pages, metadata, or color profile support. |
+| V7-15 | [ ] | L | ICC/profile awareness and histogram basics. | FastStone histogram; OpenColorIO/OpenImageIO; current pixel inspector. | Side panel shows embedded profile/status, histogram/channel stats, and safe warnings without changing pixels by default. |
+| V7-16 | [ ] | M | Destructive-action recovery center. | Duplicate cleanup, file health quarantine, crop overwrite, move actions. | User can review recent quarantine/move/writeback operations, reveal paths, restore where possible, and see expiration/cleanup rules. |
+
+## P2 - Later
+
+| ID | Status | Effort | Item | Evidence | Dependency |
+| --- | --- | --- | --- | --- | --- |
+| V7-30 | [ ] | XL | Local model/runtime manager. | `docs/inpaint-runtime-decision.md`; Windows ML; ONNX Runtime DirectML; Immich model settings. | Complete before semantic search, inpaint, background removal, or super-resolution. |
+| V7-31 | [ ] | XL | Local semantic search MVP. | OpenCLIP, SigLIP, sqlite-vec, Immich CLIP search, `docs/design-product-differentiators.md`. | Requires catalog schema and model manager. |
+| V7-32 | [ ] | L | LaMa ONNX content-aware repair. | `docs/inpaint-runtime-decision.md`; LaMa ONNX model cards. | Requires model manager and non-destructive patch provenance. |
+| V7-33 | [ ] | L | Background removal. | BiRefNet, rembg, U-2-Net. | Requires model manager, mask preview, and export-copy default. |
+| V7-34 | [ ] | L | Super-resolution. | OpenModelDB, Real-ESRGAN, Upscayl. | Requires model manager, batch/export integration, hardware/time estimates. |
+| V7-35 | [ ] | XL | Deep-zoom/tile engine for huge images. | OpenSeadragon, OpenSlide, libvips, Bio-Formats. | Requires separate tile/cache architecture and large-file test corpus. |
+| V7-36 | [ ] | M | WinGet/Scoop and signing plan. | Existing release docs; distribution trust gap. | Best after release smoke and version/provenance metadata are stable. |
+| V7-37 | [ ] | M | C2PA/content provenance inspection. | C2PA 2.4 spec. | Best after metadata/catalog foundations. |
+
+## Explicit Non-Goals For This Roadmap Window
+
+- No cloud sync, account system, telemetry, or subscription-dependent workflow.
+- No automatic model downloads.
+- No full video player expansion.
+- No full Lightroom-style RAW development suite.
+- No unreviewed native sidecar bundling.
+- No face recognition until catalog, consent, delete controls, and derived-data policy are mature.
+
+## Historical V6 Roadmap And Source Appendix
+
+The material below is retained as historical research and backlog context. Use the v7 section above plus `PROJECT_CONTEXT.md` as the current planning source.
+
 > **Document version**: v6 · 2026-05-04. Supersedes v5 (2026-04-25). Adds comprehensive Phase 1 exhaustive research update: **60+ new distinct sources** spanning direct OSS competitors (ImageGlass 10 Avalonia rewrite intelligence, qimgv video-hybrid rejection rationale, Oculante IPC/network-listen reference), commercial competitors (XnView MP 2026 metadata enhancements, ACDSee 2026 local AI features, PureRef canvas workflows), adjacent-domain intelligence (digiKam 8.6 GPU-accelerated face recognition, Immich vs PhotoPrism positioning, Squoosh visual-diff architecture, Upscayl/Real-ESRGAN model comparison, BiRefNet vs rembg vs U²-Net benchmarks, Czkawka duplicate/bad-extension/broken-file workflows), **standards** (C2PA 2.3 adoption + controversy signals, ACES 2.0/OCIO color-management roadmap), **platform APIs** (Windows 11 24H2 HEIF/AVIF/JXL codec dependency on Store extensions, Windows ML vs DirectML split-path strategy, DirectML EP landscape), **security advisories** (Magick.NET CVE-2026-25966/32636/25794 floor validation, Ghostscript 10.06.0+ CVE fixes, libvips 8.18 UltraHDR/RAW/Oklab features, libheif/libavif vulnerability tracking), **community signal** (Reddit Windows viewer pain points, HN photo-management discussions, local-first vs cloud-lock-in sentiment, C2PA trust skepticism), **specialized tools** (YACReader vs CDisplayEx comic-library workflows, PureRef reference-board UX, TagSpaces/Photoview CLIP-retrieval integration patterns), **dependency changelogs** (Serilog 4.2.0, Microsoft.Data.Sqlite 9.0.0, .NET 9 servicing updates), and **awesome-lists** cross-validation. Phase 2/3 harvest expanded to **200+ raw features** with refined scoring. Phase 4 reconciled with v0.1.9 shipped state. Phase 5 self-audit passed all 7 checkpoints. Retains all v5 strategic intelligence, project-mining pass, and appendix sources.
 
 > **Vision**: One Windows app that replaces Photos, IrfanView, XnConvert, Upscayl, and a light Lightroom — by cannibalising the best ideas from a dozen OSS/freeware projects. Local-first, fast, dark-mode, no cloud, no subscription. The killer features are **CLIP semantic search** on a local library, **live inline rename** (already shipped), **Squoosh-style visual-diff converter**, and — differentiator nobody else ships — **network-egress transparency**: the viewer never touches the network silently, and you can see every call it makes.

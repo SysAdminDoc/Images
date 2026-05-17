@@ -88,7 +88,7 @@ Copy this block into a new design or decision document before adding the integra
 | --- | --- | --- |
 | Magick.NET | Accepted | Existing NuGet dependency; release workflow vulnerable-package gate covers managed package advisories. |
 | Ghostscript | Conditionally accepted | Optional app-local/system runtime; bundling requires exact approved artifact and SHA-256 continuity. See `docs/codec-bundling.md`. |
-| SharpCompress 0.47.4 | Accepted | Managed MIT NuGet dependency for read-only RAR/CBR and 7z/CB7 archive books. See `docs/archive-runtime-review.md`. |
+| SharpCompress 0.48.1 | Accepted | Managed MIT NuGet dependency for read-only RAR/CBR and 7z/CB7 archive books. Upgraded from 0.47.4 after GHSA-6c8g-7p36-r338 / CVE-2026-44788 flagged the extraction helper API that Images does not call. See `docs/archive-runtime-review.md`. |
 | Windows.Media.Ocr | Accepted | In-box Windows API; no bundled runtime. |
 | 7-Zip/UnRAR native archive readers | Not reviewed | Native sidecars remain unapproved; ZIP/CBZ use .NET built-in APIs and RAR/7z use the reviewed managed SharpCompress path. |
 | jpegtran.exe | Conditionally accepted resolver/provenance and exact/confirmed-trim shell-out | Lossless JPEG crop/rotation planning, runtime diagnostics, exact MCU-aligned writeback, right-angle rotation writeback, and confirmed-trim UI are documented in `docs/lossless-jpeg-transform-policy.md`; bundling still requires staging the exact libjpeg-turbo Windows artifact, carrying license files, recording SHA-256 provenance, and staged-runtime smoke coverage. |

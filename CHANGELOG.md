@@ -4,6 +4,10 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### Security
+
+- **Archive reader dependency** — upgraded SharpCompress from 0.47.4 to 0.48.1, clearing the GHSA-6c8g-7p36-r338 / CVE-2026-44788 NuGet vulnerability gate. Images still uses SharpCompress only for read-only archive page streams and does not call the affected `WriteToDirectory()` extraction API.
+
 ### Changed
 
 - **Automatic freehand crop mode** — normal flat-raster image loads now enter free-aspect crop mode immediately, so dragging on the open image starts a crop without pressing `C`; `C` still toggles crop mode when pan-only canvas control is needed.

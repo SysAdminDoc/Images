@@ -1,0 +1,127 @@
+# Security And Dependency Review
+
+Date: 2026-05-17
+
+## Summary
+
+The only actionable vulnerable NuGet finding during this run was SharpCompress 0.47.4. It was upgraded to 0.48.1 and the vulnerability gate was re-run successfully.
+
+The affected advisory, GHSA-6c8g-7p36-r338 / CVE-2026-44788, concerns path traversal in the `WriteToDirectory()` extraction helper. Images uses SharpCompress for read-only archive page streams and local source search found no `WriteToDirectory()` use in `src`. Upgrading is still correct because the project treats a clean vulnerability gate as a release requirement.
+
+## Local Package State
+
+Main app package references from `src/Images/Images.csproj`:
+
+| Package | Local version | Review |
+| --- | ---: | --- |
+| `CommunityToolkit.Mvvm` | 8.4.0 | Keep unless MVVM Toolkit warnings or release notes justify a focused update. |
+| `Magick.NET-Q16-AnyCPU` | 14.13.0 | Current/recent NuGet version; previous vulnerable floors are below this. |
+| `Microsoft.Data.Sqlite` | 9.0.0 | Outdated; evaluate with .NET 10 package strategy rather than automatic major update. |
+| `Microsoft.Extensions.Logging` | 9.0.0 | Outdated; evaluate with .NET 10 package strategy. |
+| `Serilog` | 4.2.0 | Minor update to 4.3.1 available. Low priority unless release notes or advisories require it. |
+| `Serilog.Extensions.Logging` | 9.0.0 | 10.x available; coordinate with framework/package strategy. |
+| `Serilog.Sinks.File` | 6.0.0 | 7.x available; update should be regression-tested against log retention/concurrent read behavior. |
+| `SharpCompress` | 0.48.1 | Upgraded in this run to clear GHSA-6c8g-7p36-r338 / CVE-2026-44788. |
+
+Test package opportunities:
+
+| Package | Local version | Update | Recommendation |
+| --- | ---: | ---: | --- |
+| `coverlet.collector` | 6.0.2 | 10.0.0 | Defer unless CI coverage format changes are reviewed. |
+| `Microsoft.NET.Test.Sdk` | 17.12.0 | 18.5.1 | Candidate after full test run. |
+| `xunit` | 2.9.2 | 2.9.3 | Low-risk patch candidate. |
+| `xunit.runner.visualstudio` | 2.8.2 | 3.1.5 | Major runner jump; test in CI and local VS discovery. |
+
+## Vulnerability Gate Evidence
+
+Before the fix:
+
+- `dotnet list Images.sln package --vulnerable --include-transitive` flagged `SharpCompress 0.47.4` with moderate advisory `GHSA-6c8g-7p36-r338`.
+
+Change made:
+
+- `SharpCompress` updated to `0.48.1` in `src/Images/Images.csproj`.
+- `CHANGELOG.md` updated under Unreleased Security.
+- `docs/archive-runtime-review.md` updated to the new version and advisory context.
+- `docs/integration-policy.md` updated to the new accepted integration row.
+
+After the fix:
+
+```text
+The given project `Images` has no vulnerable packages given the current sources.
+The given project `Images.Tests` has no vulnerable packages given the current sources.
+```
+
+## Runtime Sidecars
+
+### Ghostscript
+
+Current project claim:
+
+- Release artifacts bundle Ghostscript 10.07.0 app-local under `Codecs\Ghostscript`.
+- The matching source archive is attached to the GitHub release.
+- License is installed at `Codecs\Ghostscript\doc\COPYING`.
+
+External evidence:
+
+- Ghostscript release page lists Ghostscript 10.07.0 as the latest release dated 2026-03-16.
+- Ghostscript maintains a CVE/fixes page.
+
+Recommendations:
+
+- Keep Ghostscript version, source URL, binary SHA-256, source SHA-256, license path, and smoke result in release notes.
+- Add a recurring or release-time advisory check against Ghostscript CVE pages.
+- Keep binaries out of source control unless the exact redistribution path is approved.
+
+### jpegtran
+
+Current project state:
+
+- The app can resolve an optional app-local libjpeg-turbo `jpegtran.exe` sidecar or `IMAGES_JPEGTRAN_EXE`.
+- Diagnostics expose path, version, and SHA-256.
+- Lossless JPEG crop/rotation writeback can use the runtime when available.
+
+Gap:
+
+- Bundled artifact staging is still not complete. The exact libjpeg-turbo Windows artifact, license files, SHA-256 provenance, and staged-runtime smoke coverage remain required before shipping a bundled runtime.
+
+### OCR
+
+Current project state:
+
+- Uses Windows.Media.Ocr and installed Windows OCR language capabilities.
+- Installer provisions UI language and `en-US` fallback where needed.
+
+Recommendation:
+
+- Keep OCR capability status in diagnostics and release smoke tests.
+- Do not bundle Microsoft OCR language packs.
+
+## Platform Support
+
+External evidence:
+
+- Official .NET support policy says .NET 9 is STS, active, and supported until 2026-11-10.
+- .NET 10 is LTS and active until 2028-11-14.
+
+Recommendation:
+
+- Schedule a .NET 10 migration spike before .NET 9 enters late lifecycle.
+- Do not mix major Microsoft.Extensions 10.x package updates into the current app without a build/test/package smoke pass.
+
+## Hardening Opportunities
+
+1. Add an internal dependency/runtime status model used by About, CLI reports, and release smoke.
+2. Expand release smoke to launch `--system-info` and `--codec-report` from both portable and installed outputs.
+3. Add source-scanning assertions for known dangerous APIs where possible:
+   - no SharpCompress `WriteToDirectory()` in app code.
+   - no unreviewed native sidecar resolver.
+   - no automatic model download path.
+4. Add optional-runtime test fixtures that can simulate missing, system, app-local, bad-hash, and wrong-version runtimes.
+5. Add a `docs/runtime-provenance.md` ledger or generate it from release metadata.
+
+## Residual Risk
+
+- Magick.NET bundles native codecs. NuGet advisory gates help, but release builds should still track ImageMagick/Magick.NET release notes.
+- Ghostscript processes complex document formats and has recurring CVE history. The app-local bundle must stay current.
+- Future local model runtimes can introduce large binaries, derived user data, and hardware-specific failure modes. Do not implement model features before model provenance, delete controls, and opt-in download/import UX exist.
