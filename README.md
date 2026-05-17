@@ -35,6 +35,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Text extraction (OCR)** — press `E` to overlay selectable text boxes directly over detected text regions. Highlight any recognized text manually and copy it with Ctrl+C or the context menu. Uses Windows.Media.Ocr for local, offline processing with installed Windows OCR language packs. No cloud, no network, no bloat.
 - **Togglable folder filmstrip** — a compact, virtualized, cached thumbnail rail spans the current folder, keeps the current item centered, supports right-click Open/Reveal/Copy actions, and falls back to the side panel when hidden.
 - **Gallery workbench** — press `G` to open a multi-column thumbnail grid for the current folder with quick filtering, smart filter tokens for format/folder/rating/tag/palette/orientation/dimensions/date/duplicate status, sort shortcuts, context actions, selection, and Enter-to-load.
+- **Culling review mode** — press `L` while moving through a folder to enable keyboard review. In review mode, `1`-`5` writes a star rating, `0` clears the rating, `P` marks pick, `R` marks reject, and `U` restores the previous review label state. Labels are stored in local XMP sidecars and do not require a catalog rebuild.
 - **Private tag relationships** — press `Ctrl+Shift+T` to manage local-only tag namespaces such as `person:`, `place:`, and `project:`, resolve aliases/siblings, expand parent tags, and import/export the current image's XMP sidecar tags.
 - **Import inbox** — press `Ctrl+Shift+I` to stage new files before they join a library folder. The inbox detects exact duplicates in the staging set and destination, lets you tag/rate into XMP sidecars, strip GPS from imported JPEG/TIFF copies, recycle unwanted staged files, and copy or move originals with collision-safe naming.
 - **Macro actions** — press `Ctrl+Shift+M` to build and run local JSON actions. Plans stay inspectable before execution, support dry runs, load/save as JSON, and currently cover GPS stripping, export/convert/resize copies with quality settings, and rename patterns with tokens.
@@ -132,6 +133,9 @@ OCR depends on Microsoft Windows OCR optional capabilities. The installer instal
 | **Ctrl+Shift+M** | Open macro actions |
 | **Ctrl+Shift+B** | Open batch processor |
 | **Ctrl+Shift+E** | Open edit history |
+| **L** | Toggle review mode |
+| **1-5 / 0** | In review mode, set star rating / clear rating |
+| **P / R / U** | In review mode, mark pick / reject / undo review label |
 | **Ctrl+Alt+W** | Open export workbench |
 | **Ctrl+Alt+C** | Compare current image with next folder item |
 | **Ctrl+Alt+V** | Compare current image with a chosen local file |
@@ -175,6 +179,7 @@ src/Images/
 │   ├── ImageExportService.cs   # Codec-aware Save a copy / conversion output
 │   ├── ExportPreviewService.cs # In-memory export previews, size estimates, and format warnings
 │   ├── CatalogService.cs       # Rebuildable app-local catalog cache for metadata/search foundations
+│   ├── ReviewLabelService.cs   # XMP-backed rating, pick/reject labels, and review undo state
 │   ├── NonDestructiveEditService.cs # XMP edit-stack persistence and export application
 │   ├── ImageAdjustmentService.cs # Levels, curve, and HSL adjustment planning/rendering
 │   ├── LocalExposureBrushService.cs # Soft dodge/burn brush strokes for non-destructive local exposure
