@@ -40,7 +40,7 @@ Scoring:
 
 | Candidate | Fit | Impact | Evidence | Effort | Risk | Score | Rationale |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| Semantic search | 5 | 5 | 5 | 5 | 4 | 6 | V7-31 foundation started with local index/search UI, provider seam, deterministic metadata embeddings, exact cosine search, and delete controls; next blockers are approved ONNX image/text provider, runtime package selection, and model execution validation. |
+| Semantic search | 5 | 5 | 5 | 5 | 4 | 6 | V7-31 foundation started with local index/search UI, provider seam, deterministic metadata embeddings, exact cosine search, delete controls, and Qdrant CLIP text/vision ONNX hash pins; next blockers are tokenizer/preprocessor handling, approved ONNX provider, runtime package selection, and model execution validation. |
 | LaMa content-aware repair | 4 | 4 | 4 | 4 | 4 | 4 | Existing decision exists, but should wait for runtime foundation. |
 | Background removal | 4 | 4 | 4 | 4 | 4 | 4 | Useful but model/runtime and UX boundaries must be solved first. |
 | Super-resolution | 4 | 4 | 4 | 4 | 4 | 4 | Good fit if opt-in and local; not before model manager. |
