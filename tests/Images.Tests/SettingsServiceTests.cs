@@ -102,6 +102,25 @@ public sealed class SettingsServiceTests
     }
 
     [Fact]
+    public void SettingsIaKeysDefaultAndPersist()
+    {
+        using var temp = TestDirectory.Create();
+        var service = new SettingsService(System.IO.Path.Combine(temp.Path, "settings.db"));
+
+        Assert.True(service.GetBool(Keys.RememberWindowPlacement, true));
+        Assert.False(service.GetBool(Keys.AccessibilityReduceMotion, false));
+        Assert.False(service.GetBool(Keys.AccessibilityHighContrast, false));
+
+        service.SetBool(Keys.RememberWindowPlacement, false);
+        service.SetBool(Keys.AccessibilityReduceMotion, true);
+        service.SetBool(Keys.AccessibilityHighContrast, true);
+
+        Assert.False(service.GetBool(Keys.RememberWindowPlacement, true));
+        Assert.True(service.GetBool(Keys.AccessibilityReduceMotion, false));
+        Assert.True(service.GetBool(Keys.AccessibilityHighContrast, false));
+    }
+
+    [Fact]
     public void Constructor_WhenDatabaseIsCorrupt_QuarantinesAndStartsFresh()
     {
         using var temp = TestDirectory.Create();

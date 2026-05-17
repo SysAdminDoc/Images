@@ -260,6 +260,13 @@ public partial class MainWindow : Window
     private void FadeArrows(double target)
     {
         if (!Vm.HasImage) return;
+        if (SettingsService.Instance.GetBool(Keys.AccessibilityReduceMotion, false))
+        {
+            PrevArrow.Opacity = target;
+            NextArrow.Opacity = target;
+            return;
+        }
+
         var anim = new DoubleAnimation
         {
             To = target,
@@ -291,6 +298,8 @@ public partial class MainWindow : Window
     private void RestoreWindowState()
     {
         var settings = SettingsService.Instance;
+        if (!settings.GetBool(Keys.RememberWindowPlacement, true)) return;
+
         var w = settings.GetDouble(Keys.WindowWidth, Width);
         var h = settings.GetDouble(Keys.WindowHeight, Height);
         var l = settings.GetDouble(Keys.WindowLeft, double.NaN);
@@ -323,6 +332,8 @@ public partial class MainWindow : Window
         if (Vm.IsPeekMode) return;
 
         var settings = SettingsService.Instance;
+        if (!settings.GetBool(Keys.RememberWindowPlacement, true)) return;
+
         // Only record non-maximized geometry; if the user's maximized, the RestoreBounds holds
         // what they'd get back after unmaximize, so that's what we want to persist.
         var bounds = WindowState == System.Windows.WindowState.Maximized ? RestoreBounds : new Rect(Left, Top, Width, Height);

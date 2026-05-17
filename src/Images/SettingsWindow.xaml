@@ -28,7 +28,7 @@
                 <StackPanel Grid.Column="0">
                     <TextBlock Style="{StaticResource Text.Display}" Text="Settings" />
                     <TextBlock Style="{StaticResource Text.Subtitle}"
-                               Text="Customize viewer defaults, text extraction readiness, and privacy preferences."
+                               Text="Customize startup, appearance, accessibility, hotkeys, diagnostics, and privacy preferences."
                                Margin="0,5,0,0" />
                 </StackPanel>
                 <!-- Gear icon — decorative, reinforces context -->
@@ -41,8 +41,34 @@
                            Margin="12,4,0,0" />
             </Grid>
 
-            <!-- ── Viewer ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="Viewer" Margin="1,0,0,10" />
+            <!-- ── General ── -->
+            <TextBlock Style="{StaticResource SectionLabel}" Text="General" Margin="1,0,0,10" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Remember window size and position"
+                                       Style="{StaticResource Text.Body}"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Restores the last normal window bounds unless Images was launched in peek mode."
+                                       Style="{StaticResource Text.Hint}"
+                                       Margin="0,3,0,0"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  VerticalAlignment="Center"
+                                  IsChecked="{Binding RememberWindowPlacement}"
+                                  AutomationProperties.Name="Remember window size and position" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ── Appearance ── -->
+            <TextBlock Style="{StaticResource SectionLabel}" Text="Appearance" Margin="1,0,0,10" />
             <Border Style="{StaticResource Card}" Margin="0,0,0,18">
                 <StackPanel>
 
@@ -117,6 +143,144 @@
                                   AutomationProperties.Name="Confirm before moving images to Recycle Bin" />
                     </Grid>
 
+                </StackPanel>
+            </Border>
+
+            <!-- ── Accessibility ── -->
+            <TextBlock Style="{StaticResource SectionLabel}" Text="Accessibility" Margin="1,0,0,10" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Reduce viewer motion"
+                                       Style="{StaticResource Text.Body}"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Disables hover fade animation for the edge navigation buttons."
+                                       Style="{StaticResource Text.Hint}"
+                                       Margin="0,3,0,0"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  VerticalAlignment="Center"
+                                  IsChecked="{Binding ReduceMotion}"
+                                  AutomationProperties.Name="Reduce viewer motion" />
+                    </Grid>
+
+                    <Border Height="1"
+                            Background="{StaticResource HairlineBrush}"
+                            Margin="0,14" />
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Prefer high-contrast surfaces"
+                                       Style="{StaticResource Text.Body}"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Stores a contrast preference for settings, diagnostics, and future contrast-aware views."
+                                       Style="{StaticResource Text.Hint}"
+                                       Margin="0,3,0,0"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  VerticalAlignment="Center"
+                                  IsChecked="{Binding HighContrastMode}"
+                                  AutomationProperties.Name="Prefer high-contrast surfaces" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ── Advanced ── -->
+            <TextBlock Style="{StaticResource SectionLabel}" Text="Advanced" Margin="1,0,0,10" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Archive books turn right-to-left"
+                                       Style="{StaticResource Text.Body}"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Uses manga-style page turn direction for supported archive books."
+                                       Style="{StaticResource Text.Hint}"
+                                       Margin="0,3,0,0"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  VerticalAlignment="Center"
+                                  IsChecked="{Binding ArchiveRightToLeft}"
+                                  AutomationProperties.Name="Archive books turn right-to-left" />
+                    </Grid>
+
+                    <Border Height="1"
+                            Background="{StaticResource HairlineBrush}"
+                            Margin="0,14" />
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Clean scanned archive pages"
+                                       Style="{StaticResource Text.Body}"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Applies the preview-only old-scan filter when opening archive books."
+                                       Style="{StaticResource Text.Hint}"
+                                       Margin="0,3,0,0"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  VerticalAlignment="Center"
+                                  IsChecked="{Binding ArchiveOldScanFilter}"
+                                  AutomationProperties.Name="Clean scanned archive pages" />
+                    </Grid>
+
+                    <Border Height="1"
+                            Background="{StaticResource HairlineBrush}"
+                            Margin="0,14" />
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Open archive books in two-page spreads"
+                                       Style="{StaticResource Text.Body}"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Keeps explicit covers single and pairs interior pages where possible."
+                                       Style="{StaticResource Text.Hint}"
+                                       Margin="0,3,0,0"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  VerticalAlignment="Center"
+                                  IsChecked="{Binding ArchiveSpreadMode}"
+                                  AutomationProperties.Name="Open archive books in two-page spreads" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ── Hotkeys ── -->
+            <TextBlock Style="{StaticResource SectionLabel}" Text="Hotkeys" Margin="1,0,0,10" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
+                <StackPanel>
+                    <TextBlock Text="Keyboard shortcuts are fixed in this release."
+                               Style="{StaticResource Text.Body}"
+                               FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding HotkeySummary}"
+                               Style="{StaticResource Text.Hint}"
+                               Margin="0,5,0,0"
+                               TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
 
@@ -238,6 +402,47 @@
                                    Style="{StaticResource Text.Hint}"
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- ── Diagnostics ── -->
+            <TextBlock Style="{StaticResource SectionLabel}" Text="Diagnostics" Margin="1,0,0,10" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
+                <StackPanel>
+                    <TextBlock Text="{Binding DiagnosticsStorageSummary}"
+                               Style="{StaticResource Text.Hint}"
+                               TextWrapping="Wrap" />
+                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                        <Button Style="{StaticResource ChromeButton}"
+                                Command="{Binding OpenAppDataCommand}"
+                                Padding="11,5"
+                                MinHeight="30"
+                                AutomationProperties.Name="Open app data folder">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE838;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="11"
+                                           Margin="0,0,7,0"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Text="App data" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource ChromeButton}"
+                                Command="{Binding OpenLogsCommand}"
+                                Padding="11,5"
+                                MinHeight="30"
+                                Margin="8,0,0,0"
+                                AutomationProperties.Name="Open logs folder">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE8A5;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="11"
+                                           Margin="0,0,7,0"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Text="Logs" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </StackPanel>
             </Border>

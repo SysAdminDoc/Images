@@ -10,6 +10,7 @@ All notable changes to **Images** are documented here.
 
 ### Changed
 
+- **Settings information architecture** — Settings now has first-class General, Appearance, Accessibility, Advanced, Hotkeys, Diagnostics, Text extraction, and Privacy sections. New persisted controls cover window-placement restore, reduced viewer motion, high-contrast preference, and archive-book defaults; reduced motion now disables the main viewer's edge-arrow fade animation.
 - **Automatic freehand crop mode** — normal flat-raster image loads now enter free-aspect crop mode immediately, so dragging on the open image starts a crop without pressing `C`; `C` still toggles crop mode when pan-only canvas control is needed.
 - **Crop apply affordances** — Enter now applies an active crop selection from the preview key path, and the crop rectangle shows an on-canvas Apply button anchored to its lower-right edge.
 - **Immediate edit preview** — applied crop operations now refresh the displayed image immediately, and the main viewer renders enabled edit-stack operations when loading the current image.
