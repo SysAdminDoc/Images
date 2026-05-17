@@ -129,9 +129,8 @@ Root `ROADMAP.md` now starts with an authoritative 2026-05-17 v7 plan. The older
 
 ## Recommended Next Work
 
-1. Keep the 2026-05-17 roadmap/status reconciliation in place and add a release checklist gate so shipped-roadmap status cannot drift again.
-2. Finish the settings/accessibility IA because it touches many already-shipped features and reduces user friction without adding new runtime risk.
-3. Implement a dependency/runtime provenance dashboard that covers NuGet, Ghostscript, jpegtran, Magick.NET, OCR, and future model runtimes.
-4. Stage the approved jpegtran artifact and add release smoke tests before treating lossless JPEG transforms as a fully bundled feature.
-5. Build compare/overlay mode by reusing duplicate-cleanup, gallery selection, and linked viewport primitives.
-6. Design catalog schema v1 before semantic search, model-backed organization, or library-scale jobs.
+1. Finish the settings/accessibility IA because it touches many already-shipped features and reduces user friction without adding new runtime risk.
+2. Implement a dependency/runtime provenance dashboard that covers NuGet, Ghostscript, jpegtran, Magick.NET, OCR, and future model runtimes.
+3. Stage the approved jpegtran artifact and add release smoke tests before treating lossless JPEG transforms as a fully bundled feature.
+4. Build compare/overlay mode by reusing duplicate-cleanup, gallery selection, and linked viewport primitives.
+5. Design catalog schema v1 before semantic search, model-backed organization, or library-scale jobs.
