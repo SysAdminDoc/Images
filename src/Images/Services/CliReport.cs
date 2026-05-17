@@ -136,6 +136,11 @@ public static class CliReport
             sb.AppendLine($"- jpegtran hash:     sha256:{provenance.JpegTranSha256}");
         sb.AppendLine();
 
+        CodecCapabilityService.AppendDependencyProvenance(
+            sb,
+            CodecCapabilityService.BuildDependencyProvenanceRows(provenance, ocrStatus));
+        sb.AppendLine();
+
         sb.AppendLine("Format coverage");
         sb.AppendLine($"- Open extensions:   {SupportedImageFormats.Extensions.Count}");
         sb.AppendLine($"- Export extensions: {ImageExportService.ExportExtensions.Length}");

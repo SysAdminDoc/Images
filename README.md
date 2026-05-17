@@ -58,6 +58,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Rotate**, **delete-to-Recycle-Bin**, **Reveal in Explorer**, **Copy path**.
 - **Calm confirmations and recovery** — destructive file actions confirm before moving anything to Recycle Bin; routine actions complete with toast feedback.
 - **Organized settings** — Settings groups startup, appearance, accessibility, archive defaults, hotkeys, diagnostics, text extraction, and privacy controls, including reduced motion and window-placement preferences.
+- **Runtime provenance dashboard** — About, `--system-info`, and `--codec-report` list key NuGet packages, optional runtimes, OS OCR, and future model-runtime placeholders with source, version, path, SHA-256 where available, advisory status, and setup/release action copy.
 - **Network-quiet by default** — automatic update checks are disabled until enabled in Settings; manual About checks remain available.
 
 ## Install
@@ -190,8 +191,8 @@ Images carries its own diagnostics surface — no terminal required for the comm
 
 - **About → Save system info** writes the same content as `Images.exe --system-info` to a file in `%TEMP%` and reveals it in Explorer. Attach the file to a bug report.
 - **About → Open data folder** opens `%LOCALAPPDATA%\Images\` so logs (`Logs\images-<date>.log`), crash records (`crash.log`, `crash-*.dmp`), settings (`settings.db`), and caches (`thumbs/`, `update-check.json`) are reachable in one click.
-- **About → Codec report** copies the per-format capability matrix and supported-extension list to the clipboard.
-- `Images.exe --system-info` and `Images.exe --codec-report` print the same content to stdout for support tickets and CI smoke tests.
+- **About → Codec report** copies the per-format capability matrix, supported-extension list, and runtime/dependency provenance rows to the clipboard.
+- `Images.exe --system-info` and `Images.exe --codec-report` print the same provenance rows to stdout for support tickets and CI smoke tests.
 
 ## Policies
 
