@@ -9,7 +9,7 @@ Scope: decide whether Images should expand archive/book mode beyond ZIP/CBZ to R
 Approved and implemented for a managed in-process adapter:
 
 - ZIP/CBZ remain on `System.IO.Compression`.
-- RAR/CBR and 7z/CB7 use `SharpCompress` 0.47.4 from NuGet.
+- RAR/CBR and 7z/CB7 use `SharpCompress` 0.48.1 from NuGet.
 - The adapter is read-only. It lists candidate page entries, rejects unsafe paths, skips nested archives and document-preview entries, caps every buffered page at 256 MiB, and never extracts entry names or archive contents to disk.
 
 SharpCompress was accepted because the package is MIT licensed, NuGet-distributed, targets `net9.0`, has no additional dependencies for this target, and keeps Images away from native 7-Zip or UnRAR sidecars for this first expansion.
@@ -18,7 +18,7 @@ SharpCompress was accepted because the package is MIT licensed, NuGet-distribute
 
 Review result:
 
-- Version: `SharpCompress` 0.47.4.
+- Version: `SharpCompress` 0.48.1.
 - Source: NuGet package and upstream GitHub repository.
 - License: MIT.
 - Redistribution permission: allowed as a NuGet dependency in the app output.
@@ -37,6 +37,7 @@ Validation gates completed:
 - `dotnet list package --vulnerable --include-transitive` required after the package add.
 - `ArchiveBookService` kept read-only with unsafe path rejection, nested archive skipping, document-preview entry skipping, and per-entry byte caps.
 - Generated 7z/CB7 regression coverage added without binary fixtures.
+- 2026-05-17 dependency refresh: 0.47.4 was flagged by GHSA-6c8g-7p36-r338 / CVE-2026-44788 for the `WriteToDirectory()` extraction helper. Images does not call that API, but the package was upgraded to 0.48.1 so the solution vulnerability gate is clean again.
 
 ## Rejected Or Deferred Candidates
 
