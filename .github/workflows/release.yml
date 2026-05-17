@@ -31,10 +31,10 @@ jobs:
       - name: Restore
         run: dotnet restore Images.sln
 
-      - name: Validate release version sync
+      - name: Validate release readiness
         shell: pwsh
         run: |
-          pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\Test-VersionSync.ps1 -Version "${{ github.event.inputs.version }}"
+          pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\Test-ReleaseReadiness.ps1 -Version "${{ github.event.inputs.version }}"
 
       # ROADMAP item 34: refuse to ship a release that depends on a NuGet
       # package with a known CVE. Mirrors the standalone Security workflow but
