@@ -1,0 +1,69 @@
+# Prioritization Matrix
+
+Date: 2026-05-17
+
+Scoring:
+
+- Fit: 1 to 5, alignment with Images philosophy and current architecture.
+- Impact: 1 to 5, user/release value.
+- Evidence: 1 to 5, strength of local/external evidence.
+- Effort: 1 to 5, lower is easier.
+- Risk: 1 to 5, lower is safer.
+- Score: `Fit + Impact + Evidence - Effort - Risk`.
+
+## Now
+
+| Rank | Candidate | Fit | Impact | Evidence | Effort | Risk | Score | Rationale |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| 1 | Roadmap/status reconciliation and canonical context | 5 | 5 | 5 | 2 | 1 | 12 | Current roadmap drift is actively misleading; docs are the operating map for future work. |
+| 2 | SharpCompress vulnerability gate fix | 5 | 5 | 5 | 1 | 1 | 13 | Local vulnerable scan flagged a package; 0.48.1 clears the gate. Done in this run. |
+| 3 | Settings/accessibility IA completion | 5 | 5 | 4 | 3 | 2 | 9 | Shipped feature surface is too broad for current settings tabs. Reduces user friction and support cost. |
+| 4 | Runtime/dependency provenance dashboard | 5 | 5 | 5 | 3 | 2 | 10 | Fits codec-report culture and de-risks Ghostscript/jpegtran/model expansion. |
+| 5 | Approved jpegtran artifact staging | 5 | 4 | 5 | 3 | 2 | 9 | Unreleased lossless JPEG path needs bundled-runtime proof before it is complete. |
+| 6 | Repair verified changelog date inconsistency | 4 | 3 | 5 | 1 | 1 | 10 | Low-cost release-history trust fix after tag/date verification. |
+
+## Next
+
+| Rank | Candidate | Fit | Impact | Evidence | Effort | Risk | Score | Rationale |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| 7 | Compare/overlay mode | 5 | 5 | 5 | 4 | 2 | 9 | Strong competitor pattern and natural extension of duplicate cleanup/gallery. |
+| 8 | Visual diff export workbench | 5 | 5 | 4 | 4 | 2 | 8 | Differentiates Save a copy/batch workflows and matches local-first converter value. |
+| 9 | Catalog schema v1 | 5 | 5 | 5 | 5 | 3 | 7 | Required foundation for search, culling, metadata, embeddings, and long-running jobs. |
+| 10 | Culling/review mode | 5 | 4 | 4 | 4 | 2 | 7 | Uses existing gallery, sidecar, duplicate cleanup, and move/quarantine primitives. |
+| 11 | Release/post-install smoke script | 5 | 4 | 4 | 3 | 2 | 8 | Catches Ghostscript/OCR/portable/installer regressions early. |
+| 12 | ICC/profile status and histogram basics | 4 | 4 | 4 | 4 | 3 | 5 | High user trust value; needs careful technical design. |
+
+## Later
+
+| Candidate | Fit | Impact | Evidence | Effort | Risk | Score | Rationale |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| Local model manager | 5 | 5 | 5 | 5 | 4 | 6 | Mandatory before model features, but large and policy-heavy. |
+| Semantic search | 5 | 5 | 5 | 5 | 4 | 6 | Best long-term differentiator; blocked by catalog and model manager. |
+| LaMa content-aware repair | 4 | 4 | 4 | 4 | 4 | 4 | Existing decision exists, but should wait for runtime foundation. |
+| Background removal | 4 | 4 | 4 | 4 | 4 | 4 | Useful but model/runtime and UX boundaries must be solved first. |
+| Super-resolution | 4 | 4 | 4 | 4 | 4 | 4 | Good fit if opt-in and local; not before model manager. |
+| Deep-zoom/tile engine | 4 | 4 | 4 | 5 | 4 | 3 | Strategic for huge images, but separate architecture. |
+| WinGet/Scoop publishing | 4 | 3 | 3 | 3 | 2 | 5 | Valuable after release smoke/signing decisions are stronger. |
+| C2PA provenance inspection | 3 | 3 | 4 | 4 | 3 | 3 | Interesting trust feature, but depends on metadata/catalog foundations. |
+
+## Watch Or Reject
+
+| Candidate | Decision | Reason |
+| --- | --- | --- |
+| Full video player | Reject for now | Not central to image workflow; qimgv-style hybrid scope would add many unrelated edge cases. |
+| Cloud sync/account features | Reject | Conflicts with local-first and no-subscription positioning. |
+| Automatic model downloads | Reject unless opt-in | Existing model policy requires visible user action, hash verification, and delete controls. |
+| Full RAW development suite | Later/watch | Too large; current app should stay viewer/workflow first. |
+| Scientific/whole-slide domain support | Watch | Needs a target user and tile/metadata architecture first. |
+
+## Dependency Order
+
+1. Roadmap/context hygiene.
+2. Security and runtime provenance.
+3. Settings/accessibility surface.
+4. jpegtran artifact staging and release smoke.
+5. Compare/overlay and export workbench.
+6. Catalog schema and culling.
+7. Model manager.
+8. Semantic search and AI-assisted tools.
+9. Deep-zoom and specialized imaging.
