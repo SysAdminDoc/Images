@@ -75,7 +75,8 @@ Date: 2026-05-17
 - `src/Images/Services/CodecCapabilityService.cs` and `tests/Images.Tests/CodecCapabilityServiceTests.cs` - connect runtime/model provenance rows to the local model manager snapshot and verify the visible model-manager action copy.
 - `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, `docs/improvement-plan.md`, `docs/inpaint-runtime-decision.md`, `.ai/research/2026-05-17/STATE_OF_REPO.md`, `.ai/research/2026-05-17/SOURCE_REGISTER.md`, `.ai/research/2026-05-17/RESEARCH_LOG.md`, `.ai/research/2026-05-17/FEATURE_BACKLOG.md`, `.ai/research/2026-05-17/PRIORITIZATION_MATRIX.md`, and `.ai/research/2026-05-17/DATASET_MODEL_INTEGRATION_REVIEW.md` - updated for V7-30 completion.
 - `src/Images/ViewModels/MainViewModel.cs` and `src/Images/MainWindow.xaml` - add Semantic search entry points and current-folder seeding for the new window.
-- `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, `docs/improvement-plan.md`, `docs/design-product-differentiators.md`, `.ai/research/2026-05-17/STATE_OF_REPO.md`, `.ai/research/2026-05-17/FEATURE_BACKLOG.md`, `.ai/research/2026-05-17/PRIORITIZATION_MATRIX.md`, and `.ai/research/2026-05-17/DATASET_MODEL_INTEGRATION_REVIEW.md` - updated for the V7-31 foundation, while keeping V7-31 unchecked until an approved ONNX image/text embedding provider and runtime validation exist.
+- `src/Images/Services/ModelManagerService.cs` - adds pinned Qdrant CLIP ViT-B/32 text and vision ONNX candidates for the next semantic-search runtime slice.
+- `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, `docs/improvement-plan.md`, `docs/design-product-differentiators.md`, `.ai/research/2026-05-17/STATE_OF_REPO.md`, `.ai/research/2026-05-17/SOURCE_REGISTER.md`, `.ai/research/2026-05-17/FEATURE_BACKLOG.md`, `.ai/research/2026-05-17/PRIORITIZATION_MATRIX.md`, and `.ai/research/2026-05-17/DATASET_MODEL_INTEGRATION_REVIEW.md` - updated for the V7-31 foundation, while keeping V7-31 unchecked until an approved ONNX image/text embedding provider and runtime validation exist.
 
 ## Preserved
 
@@ -98,6 +99,7 @@ Completed before commit:
 - `dotnet test Images.sln -c Release --filter "ImageCommands_AreDisabledUntilImageIsLoaded|RecoveryCenterServiceTests|ImageColorAnalysisServiceTests|ColorAnalysisControllerTests"` - passed 11 focused tests after delete-sharing hardening.
 - `dotnet test Images.sln -c Release --filter "ModelManagerServiceTests|CodecCapabilityServiceTests"` - passed 7 focused V7-30 model-manager and provenance tests.
 - `dotnet test Images.sln -c Release --filter SemanticSearchServiceTests` - passed 4 focused V7-31 semantic-index foundation tests.
+- `dotnet test Images.sln -c Release --filter "ModelManagerServiceTests|SemanticSearchServiceTests|CodecCapabilityServiceTests"` - passed 11 focused tests after adding Qdrant CLIP registry pins.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Test-ReleaseReadiness.ps1 -Version 0.2.11` - passed.
 - `src\Images\bin\Release\net9.0-windows10.0.22621.0\Images.exe --system-info` - exited 0 in the local shell smoke.
 - `src\Images\bin\Release\net9.0-windows10.0.22621.0\Images.exe --codec-report` - exited 0 in the local shell smoke.

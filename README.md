@@ -66,7 +66,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Calm confirmations and recovery** — destructive file actions confirm before moving anything to Recycle Bin, routine actions complete with toast feedback, and recent destructive operations are recorded in the app-local Recovery Center.
 - **Organized settings** — Settings groups startup, appearance, accessibility, archive defaults, hotkeys, diagnostics, text extraction, and privacy controls, including reduced motion and window-placement preferences.
 - **Runtime provenance dashboard** — About, `--system-info`, and `--codec-report` list key NuGet packages, optional runtimes, OS OCR, and local model/runtime status with source, version, path, SHA-256 where available, advisory status, and setup/release action copy.
-- **Local model manager** — open Model manager from the context menu or Automation card to inspect approved local model definitions, reveal app-local model storage, import ONNX files you downloaded yourself, verify SHA-256 against pinned OpenCV/Carve LaMa candidates, and delete mismatched or stale files. Images does not download models automatically.
+- **Local model manager** — open Model manager from the context menu or Automation card to inspect approved local model definitions, reveal app-local model storage, import ONNX files you downloaded yourself, verify SHA-256 against pinned OpenCV/Carve LaMa and Qdrant CLIP ViT-B/32 candidates, and delete mismatched or stale files. Images does not download models automatically.
 - **Network-quiet by default** — automatic update checks are disabled until enabled in Settings; manual About checks remain available.
 
 ## Install

@@ -55,6 +55,8 @@ Candidate models/sources:
 
 - OpenCLIP: https://github.com/mlfoundations/open_clip
 - SigLIP docs: https://huggingface.co/docs/transformers/model_doc/siglip
+- Qdrant CLIP ViT-B/32 text ONNX candidate: https://huggingface.co/Qdrant/clip-ViT-B-32-text
+- Qdrant CLIP ViT-B/32 vision ONNX candidate: https://huggingface.co/Qdrant/clip-ViT-B-32-vision
 
 Architecture:
 
@@ -63,6 +65,7 @@ Architecture:
 - Store file fingerprint, model ID, embedding version, dimensions, and indexed timestamp.
 - Start with exact cosine search for small libraries. Done for the deterministic local provider.
 - Evaluate sqlite-vec only after embedding shape and catalog update rules are stable.
+- Model manager now pins Qdrant text ONNX SHA-256 `4dbe762b11e36488304471e439cde89da053ad7acaddbf9e096745d142ec8d8b` and vision ONNX SHA-256 `c68d3d9a200ddd2a8c8a5510b576d4c94d1ae383bf8b36dd8c084f94e1fb4d63`; tokenizer/preprocessor sidecar handling is still required before runtime enablement.
 
 User controls:
 
