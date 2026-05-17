@@ -66,6 +66,21 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="{Binding CompareModeText}" Command="{Binding StartCompareCommand}" InputGestureText="Ctrl+Alt+C">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8AB;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Compare with..." Command="{Binding CompareWithCommand}" InputGestureText="Ctrl+Alt+V">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Exit compare" Command="{Binding ExitCompareCommand}" InputGestureText="Esc">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE711;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="File health scan" Command="{Binding OpenFileHealthScanCommand}" InputGestureText="Ctrl+Shift+H">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE946;" />
@@ -394,10 +409,127 @@
                                    FlipVertical="{Binding FlipVertical}"
                                    InspectorMode="{Binding IsCanvasSelectionMode}"
                                    UseNearestNeighborScaling="{Binding InspectorNearestNeighborPreview}"
+                                   Visibility="{Binding ShowCompareMode, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}"
                                    MouseMove="Canvas_MouseMove"
                                    MouseLeave="Canvas_MouseLeave"
                                    MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
                                    MouseLeftButtonUp="Canvas_MouseLeftButtonUp" />
+
+                <Grid Visibility="{Binding ShowCompareMode, Converter={StaticResource BoolToVis}}"
+                      AutomationProperties.Name="Image compare mode"
+                      AutomationProperties.HelpText="{Binding CompareStatusText}">
+                    <Grid Visibility="{Binding IsCompareOverlayMode, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="1" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid Grid.Column="0" Background="{StaticResource ViewportBrush}" ClipToBounds="True">
+                            <ctl:ZoomPanImage x:Name="ComparePrimaryCanvas"
+                                              Source="{Binding CurrentImage}"
+                                              Rotation="{Binding Rotation}"
+                                              FlipHorizontal="{Binding FlipHorizontal}"
+                                              FlipVertical="{Binding FlipVertical}"
+                                              UseNearestNeighborScaling="{Binding InspectorNearestNeighborPreview}"
+                                              ViewChanged="CompareCanvas_ViewChanged"
+                                              AutomationProperties.Name="Compare A image" />
+                            <Border HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Margin="16"
+                                    Padding="10,7"
+                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                    Background="{StaticResource ToastBrush}"
+                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="A"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource AccentBrush}" />
+                                    <TextBlock Text="{Binding ComparePrimaryFileName}"
+                                               Style="{StaticResource Text.Caption}"
+                                               TextTrimming="CharacterEllipsis"
+                                               MaxWidth="300" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Border Grid.Column="1" Background="{StaticResource HairlineBrush}" />
+
+                        <Grid Grid.Column="2" Background="{StaticResource ViewportBrush}" ClipToBounds="True">
+                            <ctl:ZoomPanImage x:Name="CompareSecondaryCanvas"
+                                              Source="{Binding CompareImage}"
+                                              Rotation="{Binding Rotation}"
+                                              FlipHorizontal="{Binding FlipHorizontal}"
+                                              FlipVertical="{Binding FlipVertical}"
+                                              UseNearestNeighborScaling="{Binding InspectorNearestNeighborPreview}"
+                                              ViewChanged="CompareCanvas_ViewChanged"
+                                              AutomationProperties.Name="Compare B image" />
+                            <Border HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Margin="16"
+                                    Padding="10,7"
+                                    CornerRadius="{StaticResource Radius.Sm.CR}"
+                                    Background="{StaticResource ToastBrush}"
+                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="B"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource YellowBrush}" />
+                                    <TextBlock Text="{Binding CompareSecondaryFileName}"
+                                               Style="{StaticResource Text.Caption}"
+                                               TextTrimming="CharacterEllipsis"
+                                               MaxWidth="300" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Grid>
+
+                    <Grid Visibility="{Binding IsCompareOverlayMode, Converter={StaticResource BoolToVis}}"
+                          Background="{StaticResource ViewportBrush}"
+                          ClipToBounds="True">
+                        <ctl:ZoomPanImage x:Name="CompareOverlayPrimaryCanvas"
+                                          Source="{Binding CurrentImage}"
+                                          Rotation="{Binding Rotation}"
+                                          FlipHorizontal="{Binding FlipHorizontal}"
+                                          FlipVertical="{Binding FlipVertical}"
+                                          UseNearestNeighborScaling="{Binding InspectorNearestNeighborPreview}"
+                                          ViewChanged="CompareCanvas_ViewChanged"
+                                          AutomationProperties.Name="Compare overlay A image" />
+                        <ctl:ZoomPanImage x:Name="CompareOverlaySecondaryCanvas"
+                                          Source="{Binding CompareImage}"
+                                          Rotation="{Binding Rotation}"
+                                          FlipHorizontal="{Binding FlipHorizontal}"
+                                          FlipVertical="{Binding FlipVertical}"
+                                          Opacity="{Binding CompareOverlayOpacity}"
+                                          IsHitTestVisible="False"
+                                          UseNearestNeighborScaling="{Binding InspectorNearestNeighborPreview}"
+                                          ViewChanged="CompareCanvas_ViewChanged"
+                                          AutomationProperties.Name="Compare overlay B image" />
+                        <Border HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Margin="16"
+                                Padding="10,7"
+                                CornerRadius="{StaticResource Radius.Sm.CR}"
+                                Background="{StaticResource ToastBrush}"
+                                BorderBrush="{StaticResource HairlineBrush}"
+                                BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock Text="Overlay A/B"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource AccentBrush}" />
+                                <TextBlock Text="{Binding CompareStatusText}"
+                                           Style="{StaticResource Text.Caption}"
+                                           TextTrimming="CharacterEllipsis"
+                                           MaxWidth="520" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
 
                 <!-- OCR text extraction overlay — selectable recognized text regions.
                       Target binding keeps OCR pixel coordinates aligned with image zoom/pan transforms. -->
@@ -1709,7 +1841,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Wheel" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom about cursor" />
@@ -1735,6 +1867,14 @@
                                         <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle red-eye correction" />
                                         <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+H" />
                                         <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle clone/heal retouch" />
+                                        <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+C" />
+                                        <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Compare with next image" />
+                                        <TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="O / X" />
+                                        <TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle compare overlay / swap A-B" />
+                                        <TextBlock Grid.Row="14" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="[ / ]" />
+                                        <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Adjust compare overlay opacity" />
+                                        <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+V" />
+                                        <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Compare with chosen image" />
                                     </Grid>
 
                                     <TextBlock Text="File" Style="{StaticResource SectionLabel}" />
@@ -2310,6 +2450,24 @@
                                     <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsMetadataHudVisible}" Value="True">
+                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button Command="{Binding StartCompareCommand}"
+                                    Content="&#xE8AB;"
+                                    ToolTip="{Binding CompareStatusText}"
+                                    Margin="4,0,0,0"
+                                    Visibility="{Binding CanUseCompareMode, Converter={StaticResource BoolToVis}}"
+                                    AutomationProperties.Name="Compare with next image">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCompareMode}" Value="True">
                                                 <Setter Property="Background" Value="#1F89B4FA" />
                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                 <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
@@ -3397,6 +3555,97 @@
                                 </Button>
                             </StackPanel>
                         </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource Divider}" />
+
+                    <!-- COMPARE section -->
+                    <TextBlock Text="Compare" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource Card}"
+                            Padding="13,12"
+                            AutomationProperties.Name="Compare controls">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding CompareModeText}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrush}" />
+                                    <TextBlock Text="{Binding CompareStatusText}"
+                                               Style="{StaticResource Text.Hint}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,3,0,0" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1"
+                                            Margin="12,0,0,0">
+                                    <Button Command="{Binding StartCompareCommand}"
+                                            Style="{StaticResource ChromeButton}"
+                                            MinWidth="92"
+                                            AutomationProperties.Name="Compare with next image">
+                                        <TextBlock Text="Next" />
+                                    </Button>
+                                    <Button Command="{Binding CompareWithCommand}"
+                                            Style="{StaticResource ChromeButton}"
+                                            MinWidth="92"
+                                            Margin="0,8,0,0"
+                                            AutomationProperties.Name="Compare with chosen image">
+                                        <TextBlock Text="Choose" />
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+
+                            <WrapPanel Margin="0,12,0,0"
+                                       Visibility="{Binding IsCompareMode, Converter={StaticResource BoolToVis}}">
+                                <Button Command="{Binding ToggleCompareOverlayCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Toggle compare layout">
+                                    <TextBlock Text="{Binding CompareLayoutToggleText}" />
+                                </Button>
+                                <Button Command="{Binding SwapCompareCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Swap compare A and B">
+                                    <TextBlock Text="Swap A/B" />
+                                </Button>
+                                <Button Command="{Binding ExitCompareCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,8"
+                                        AutomationProperties.Name="Exit compare mode">
+                                    <TextBlock Text="Exit" />
+                                </Button>
+                            </WrapPanel>
+
+                            <Grid Margin="0,4,0,0"
+                                  Visibility="{Binding IsCompareMode, Converter={StaticResource BoolToVis}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Text="B opacity"
+                                           Style="{StaticResource Text.Hint}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,10,0" />
+                                <Slider Grid.Column="1"
+                                        Minimum="0.05"
+                                        Maximum="1"
+                                        TickFrequency="0.05"
+                                        SmallChange="0.05"
+                                        LargeChange="0.1"
+                                        Value="{Binding CompareOverlayOpacity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        AutomationProperties.Name="Compare B opacity" />
+                                <TextBlock Grid.Column="2"
+                                           Text="{Binding CompareOverlayOpacityText}"
+                                           Style="{StaticResource Text.Caption}"
+                                           VerticalAlignment="Center"
+                                           Margin="10,0,0,0" />
+                            </Grid>
+                        </StackPanel>
                     </Border>
 
                     <Border Style="{StaticResource Divider}" />

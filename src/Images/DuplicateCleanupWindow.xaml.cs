@@ -8,6 +8,8 @@ using Microsoft.Win32;
 
 namespace Images;
 
+public sealed record DuplicateCompareRequestedEventArgs(string PrimaryPath, string SecondaryPath);
+
 public partial class DuplicateCleanupWindow : Window
 {
     private readonly DuplicateCleanupService _cleanupService = new();
@@ -16,6 +18,8 @@ public partial class DuplicateCleanupWindow : Window
     private readonly ObservableCollection<string> _referenceFolders = [];
     private readonly ObservableCollection<DuplicateCleanupFinding> _findings = [];
     private CancellationTokenSource? _scanCancellation;
+
+    public event EventHandler<DuplicateCompareRequestedEventArgs>? CompareRequested;
 
     public DuplicateCleanupWindow()
     {
@@ -170,6 +174,29 @@ public partial class DuplicateCleanupWindow : Window
 
         RemoveFinding(finding);
         SetStatus("Finding marked not duplicate for this session.", CleanupStatus.Ready);
+    }
+
+    private void CompareSelectedButton_Click(object sender, RoutedEventArgs e)
+    {
+        var finding = SelectedFinding;
+        if (finding?.PrimaryCandidate is null || finding.SecondaryCandidate is null)
+        {
+            SetStatus("Select a duplicate or similar-image finding before comparing.", CleanupStatus.Warning);
+            return;
+        }
+
+        if (!File.Exists(finding.PrimaryCandidate.Path) || !File.Exists(finding.SecondaryCandidate.Path))
+        {
+            SetStatus("One of the selected compare files is no longer available.", CleanupStatus.Warning);
+            return;
+        }
+
+        CompareRequested?.Invoke(
+            this,
+            new DuplicateCompareRequestedEventArgs(
+                finding.PrimaryCandidate.Path,
+                finding.SecondaryCandidate.Path));
+        SetStatus("Opened selected pair in viewer compare mode.", CleanupStatus.Ready);
     }
 
     private async void QuarantineExtrasButton_Click(object sender, RoutedEventArgs e)

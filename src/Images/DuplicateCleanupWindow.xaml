@@ -335,6 +335,12 @@
                                        Margin="16,0,0,0">
                                 <Button Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,0"
+                                        Click="CompareSelectedButton_Click"
+                                        AutomationProperties.Name="Compare selected duplicate pair in viewer">
+                                    <TextBlock Text="Compare" />
+                                </Button>
+                                <Button Style="{StaticResource ChromeButton}"
+                                        Margin="0,0,8,0"
                                         Click="MarkNotDuplicateButton_Click"
                                         AutomationProperties.Name="Mark selected finding not duplicate">
                                     <TextBlock Text="Mark not duplicate" />

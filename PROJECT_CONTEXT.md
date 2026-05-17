@@ -18,10 +18,10 @@ The project philosophy is stable across `README.md`, `CLAUDE.md`, `docs/integrat
 ## Verified Repository State
 
 - Branch: `main`, tracking `origin/main`.
-- Initial 2026-05-17 research baseline: `6da0641aa2b241c1b108f28ed01be69836ec56a3` (`feat: add send print clipboard actions`, 2026-05-14). Later autonomous roadmap commits on 2026-05-17 closed V7-02 through V7-07.
+- Initial 2026-05-17 research baseline: `6da0641aa2b241c1b108f28ed01be69836ec56a3` (`feat: add send print clipboard actions`, 2026-05-14). Later autonomous roadmap commits on 2026-05-17 closed V7-02 through V7-07 and V7-10.
 - Latest published tag found locally and on GitHub Releases: `v0.2.11`, commit `0abf855e109016b3e2279a99cdf43243d3efa35b`, published 2026-05-05.
 - Root version surfaces still show `0.2.11` in `src/Images/Images.csproj`, `README.md`, and installer docs.
-- `CHANGELOG.md` has substantial Unreleased work after `v0.2.11`: crop/writeback refinement, selection, jpegtran provenance, lossless JPEG writeback and trim confirmation, inpaint runtime decision, editor workbenches, wallpaper modes, send/print/clipboard actions.
+- `CHANGELOG.md` has substantial Unreleased work after `v0.2.11`: crop/writeback refinement, selection, jpegtran provenance, lossless JPEG writeback and trim confirmation, inpaint runtime decision, compare/overlay mode, editor workbenches, wallpaper modes, send/print/clipboard actions.
 - Pre-existing unrelated untracked file during this run: `assets/banner.png.xmp`.
 
 ## Architecture Map
@@ -82,6 +82,7 @@ Shipped or present in current docs and changelog:
 - Gallery workbench with smart filters and current-folder thumbnail grid.
 - OCR overlay using Windows.Media.Ocr and installed Windows OCR capabilities.
 - Duplicate cleanup and file health scan.
+- Viewer compare mode with current+next, chosen local file, and duplicate-cleanup pair entry points; 2-up and opacity-overlay layouts share pan, zoom, rotate, flip, A/B swap, keyboard opacity controls, and Escape exit behavior.
 - Batch processor, macro actions, import inbox, private tag relationships.
 - Non-destructive resize, adjustments, effects, annotations/redaction, perspective correction, auto enhance, edit history, virtual copies.
 - Destructive crop apply for flat raster formats only; crop is intentionally disabled for layered, vector, document, archive, and RAW formats.
@@ -94,7 +95,7 @@ Shipped or present in current docs and changelog:
 
 The old `ROADMAP.md` v6 header said there was no editor, organizer, or batch processor. That is stale. The current gap set is more specific:
 
-- Roadmap/status hygiene needs to stay synchronized with shipped features.
+- Roadmap/status hygiene has release-readiness coverage; continue updating `ROADMAP.md` and `PROJECT_CONTEXT.md` in the same change set as roadmap work.
 - The future-dated historical `CHANGELOG.md` entries for `v0.1.8` and `v0.1.9` were repaired on 2026-05-17: `v0.1.9` uses GitHub release publication date 2026-05-04, and `v0.1.8` uses local release commit date 2026-04-25 because no tag or GitHub release exists.
 - There is no full local catalog/schema layer yet for library-scale metadata, smart search, long-running indexing, or durable job progress.
 - Semantic search, local model management, background removal, upscaling, and inpainting all need a shared model/runtime foundation before feature work.
@@ -129,7 +130,7 @@ Root `ROADMAP.md` now starts with an authoritative 2026-05-17 v7 plan. The older
 
 ## Recommended Next Work
 
-1. Build compare/overlay mode by reusing duplicate-cleanup, gallery selection, and linked viewport primitives.
-2. Add target-format capability warnings for export and batch so users see alpha, animation, page, metadata, and color-profile loss before writing copies.
-3. Design catalog schema v1 before semantic search, model-backed organization, or library-scale jobs.
+1. Build the V7-11 visual diff export workbench on top of compare mode and existing export/batch services.
+2. Design catalog schema v1 before semantic search, model-backed organization, or library-scale jobs.
+3. Add target-format capability warnings for export and batch so users see alpha, animation, page, metadata, and color-profile loss before writing copies.
 4. Plan the local model/runtime manager only after catalog and provenance foundations are stable.
