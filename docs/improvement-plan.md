@@ -145,6 +145,7 @@ The improvement-plan backlog is complete. Continue later with the remaining edit
 - 2026-05-14: Closed roadmap `V30-20` by adding copy/move-to-folder actions with recent transfer destinations, collision-safe destination naming, XMP sidecar transfer, moved-file reload, shell refresh notifications, and service/ViewModel/settings regression coverage.
 - 2026-05-14: Closed roadmap `V30-21` by adding Fill, Fit, Span, and Tile wallpaper modes backed by Windows wallpaper registry style values, stable-copy preservation, context-menu mode selection, and service/ViewModel regression coverage.
 - 2026-05-14: Closed roadmap `V30-22` by adding local `.eml` email draft creation with attachment, default-printer output without a dialog, copy-image and copy-image-plus-path clipboard payloads, CLI storage-path reporting, privacy documentation, and regression coverage around all non-deterministic OS seams.
+- 2026-05-17: Closed roadmap `V7-04` by expanding Settings into General, Appearance, Accessibility, Advanced, Hotkeys, Diagnostics, Text extraction, and Privacy sections, adding persisted window-placement, reduced-motion, high-contrast, and archive-default controls, wiring reduced motion into viewer arrow animation, and adding settings ViewModel/service regression coverage.
 
 ## Verification Standard
 

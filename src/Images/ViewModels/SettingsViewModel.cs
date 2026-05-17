@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.IO;
 using System.Windows.Input;
 using Images.Services;
 
@@ -13,14 +14,23 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 {
     public enum SettingsStatusToneKind { Info, Success, Warning }
 
+    private readonly SettingsService _settings;
     private OcrCapabilityService.OcrCapabilityStatus _ocrStatus = OcrCapabilityService.GetStatus();
     private string? _settingsStatusText;
     private SettingsStatusToneKind _settingsStatusTone = SettingsStatusToneKind.Info;
 
     public SettingsViewModel()
+        : this(SettingsService.Instance)
     {
+    }
+
+    internal SettingsViewModel(SettingsService settings)
+    {
+        _settings = settings;
         RefreshOcrStatusCommand = new RelayCommand(RefreshOcrStatus);
         OpenOcrLanguageSettingsCommand = new RelayCommand(OpenOcrLanguageSettings);
+        OpenAppDataCommand = new RelayCommand(OpenAppData);
+        OpenLogsCommand = new RelayCommand(OpenLogs);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -30,12 +40,25 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     // ---- Viewer ----
 
-    public bool FilmstripVisibleOnStartup
+    public bool RememberWindowPlacement
     {
-        get => SettingsService.Instance.GetBool(Keys.FilmstripVisible, true);
+        get => _settings.GetBool(Keys.RememberWindowPlacement, true);
         set
         {
-            SettingsService.Instance.SetBool(Keys.FilmstripVisible, value);
+            _settings.SetBool(Keys.RememberWindowPlacement, value);
+            Raise(nameof(RememberWindowPlacement));
+            SetStatus(
+                value ? "Window size and position will be restored at startup." : "Images will use its default window placement at startup.",
+                SettingsStatusToneKind.Success);
+        }
+    }
+
+    public bool FilmstripVisibleOnStartup
+    {
+        get => _settings.GetBool(Keys.FilmstripVisible, true);
+        set
+        {
+            _settings.SetBool(Keys.FilmstripVisible, value);
             Raise(nameof(FilmstripVisibleOnStartup));
             SetStatus(
                 value ? "Filmstrip will be shown at startup." : "Filmstrip will stay hidden at startup.",
@@ -45,10 +68,10 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     public bool MetadataHudVisibleOnStartup
     {
-        get => SettingsService.Instance.GetBool(Keys.MetadataHudVisible, false);
+        get => _settings.GetBool(Keys.MetadataHudVisible, false);
         set
         {
-            SettingsService.Instance.SetBool(Keys.MetadataHudVisible, value);
+            _settings.SetBool(Keys.MetadataHudVisible, value);
             Raise(nameof(MetadataHudVisibleOnStartup));
             SetStatus(
                 value ? "Metadata overlay will be shown at startup." : "Metadata overlay will stay hidden at startup.",
@@ -58,15 +81,80 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     public bool ConfirmRecycleBinDeletes
     {
-        get => SettingsService.Instance.GetBool(Keys.ConfirmRecycleBinDelete, true);
+        get => _settings.GetBool(Keys.ConfirmRecycleBinDelete, true);
         set
         {
-            SettingsService.Instance.SetBool(Keys.ConfirmRecycleBinDelete, value);
+            _settings.SetBool(Keys.ConfirmRecycleBinDelete, value);
             Raise(nameof(ConfirmRecycleBinDeletes));
             SetStatus(
                 value
                     ? "Recycle Bin confirmation enabled."
                     : "Recycle Bin confirmation disabled. Delete will move images immediately.",
+                SettingsStatusToneKind.Success);
+        }
+    }
+
+    public bool ReduceMotion
+    {
+        get => _settings.GetBool(Keys.AccessibilityReduceMotion, false);
+        set
+        {
+            _settings.SetBool(Keys.AccessibilityReduceMotion, value);
+            Raise(nameof(ReduceMotion));
+            SetStatus(
+                value ? "Motion reduction enabled for viewer chrome animations." : "Viewer chrome animations enabled.",
+                SettingsStatusToneKind.Success);
+        }
+    }
+
+    public bool HighContrastMode
+    {
+        get => _settings.GetBool(Keys.AccessibilityHighContrast, false);
+        set
+        {
+            _settings.SetBool(Keys.AccessibilityHighContrast, value);
+            Raise(nameof(HighContrastMode));
+            SetStatus(
+                value ? "High-contrast preference saved for contrast-aware surfaces." : "High-contrast preference disabled.",
+                SettingsStatusToneKind.Success);
+        }
+    }
+
+    public bool ArchiveRightToLeft
+    {
+        get => _settings.GetBool(Keys.ArchiveRightToLeft, false);
+        set
+        {
+            _settings.SetBool(Keys.ArchiveRightToLeft, value);
+            Raise(nameof(ArchiveRightToLeft));
+            SetStatus(
+                value ? "Archive books will use right-to-left page turns." : "Archive books will use left-to-right page turns.",
+                SettingsStatusToneKind.Success);
+        }
+    }
+
+    public bool ArchiveOldScanFilter
+    {
+        get => _settings.GetBool(Keys.ArchiveOldScanFilter, false);
+        set
+        {
+            _settings.SetBool(Keys.ArchiveOldScanFilter, value);
+            Raise(nameof(ArchiveOldScanFilter));
+            SetStatus(
+                value ? "Archive clean-scan preview filter enabled by default." : "Archive clean-scan preview filter disabled by default.",
+                SettingsStatusToneKind.Success);
+        }
+    }
+
+    public bool ArchiveSpreadMode
+    {
+        get => _settings.GetBool(Keys.ArchiveSpreadMode, false);
+        set
+        {
+            _settings.SetBool(Keys.ArchiveSpreadMode, value);
+            Raise(nameof(ArchiveSpreadMode));
+            SetStatus(
+                value ? "Archive two-page spreads enabled by default." : "Archive two-page spreads disabled by default.",
                 SettingsStatusToneKind.Success);
         }
     }
@@ -106,6 +194,16 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public ICommand RefreshOcrStatusCommand { get; }
 
     public ICommand OpenOcrLanguageSettingsCommand { get; }
+
+    public ICommand OpenAppDataCommand { get; }
+
+    public ICommand OpenLogsCommand { get; }
+
+    public string HotkeySummary =>
+        "Ctrl+, Settings; Ctrl+Shift+B Batch; Ctrl+Shift+D Duplicate cleanup; Ctrl+Shift+H File health; Ctrl+Shift+E Edit history; Ctrl+Alt+A Adjustments; Ctrl+Alt+F Effects; Ctrl+Alt+P Perspective; C Crop; S Selection.";
+
+    public string DiagnosticsStorageSummary =>
+        "Diagnostics and support files stay under the local Images app data folder. Use About for the full codec report, system info, logs, and cache controls.";
 
     public string? SettingsStatusText
     {
@@ -164,6 +262,36 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         catch (Exception ex)
         {
             SetStatus($"Could not open Windows language settings: {ex.Message}", SettingsStatusToneKind.Warning);
+        }
+    }
+
+    private void OpenAppData()
+    {
+        OpenStoragePath(AppStorage.TryGetAppDirectory(), "App data folder opened.");
+    }
+
+    private void OpenLogs()
+    {
+        OpenStoragePath(AppStorage.TryGetAppDirectory("Logs"), "Logs folder opened.");
+    }
+
+    private void OpenStoragePath(string? path, string successMessage)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                SetStatus("Storage path is unavailable in this session.", SettingsStatusToneKind.Warning);
+                return;
+            }
+
+            Directory.CreateDirectory(path);
+            ShellIntegration.OpenShellTarget(path);
+            SetStatus(successMessage, SettingsStatusToneKind.Success);
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"Could not open storage folder: {ex.Message}", SettingsStatusToneKind.Warning);
         }
     }
 }
