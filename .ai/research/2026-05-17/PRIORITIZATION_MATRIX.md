@@ -26,11 +26,11 @@ Scoring:
 
 | Rank | Candidate | Fit | Impact | Evidence | Effort | Risk | Score | Rationale |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| 7 | Compare/overlay mode | 5 | 5 | 5 | 4 | 2 | 9 | Strong competitor pattern and natural extension of duplicate cleanup/gallery. |
-| 8 | Visual diff export workbench | 5 | 5 | 4 | 4 | 2 | 8 | Differentiates Save a copy/batch workflows and matches local-first converter value. |
+| 7 | Compare/overlay mode | 5 | 5 | 5 | 4 | 2 | 9 | Shipped 2026-05-17 under V7-10 with current+next, chosen-file, and duplicate-pair entry points. |
+| 8 | Visual diff export workbench | 5 | 5 | 4 | 4 | 2 | 8 | Next practical item after compare mode; differentiates Save a copy/batch workflows and matches local-first converter value. |
 | 9 | Catalog schema v1 | 5 | 5 | 5 | 5 | 3 | 7 | Required foundation for search, culling, metadata, embeddings, and long-running jobs. |
 | 10 | Culling/review mode | 5 | 4 | 4 | 4 | 2 | 7 | Uses existing gallery, sidecar, duplicate cleanup, and move/quarantine primitives. |
-| 11 | Release/post-install smoke script | 5 | 4 | 4 | 3 | 2 | 8 | Catches Ghostscript/OCR/portable/installer regressions early. |
+| 11 | Release/post-install smoke script | 5 | 4 | 4 | 3 | 2 | 8 | Shipped 2026-05-17 under V7-07; catches Ghostscript/OCR/portable/installer regressions early. |
 | 12 | ICC/profile status and histogram basics | 4 | 4 | 4 | 4 | 3 | 5 | High user trust value; needs careful technical design. |
 
 ## Later
@@ -62,7 +62,7 @@ Scoring:
 2. Security and runtime provenance.
 3. Settings/accessibility surface.
 4. jpegtran artifact staging and release smoke.
-5. Compare/overlay and export workbench.
+5. Visual diff export workbench.
 6. Catalog schema and culling.
 7. Model manager.
 8. Semantic search and AI-assisted tools.

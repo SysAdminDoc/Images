@@ -36,6 +36,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly Func<string, string> _createEmailDraft;
     private readonly Action<string> _openShellTarget;
     private readonly Action<BitmapSource, string> _printDefault;
+    private readonly Func<string?> _pickCompareFile;
     private readonly DispatcherTimer _renameTimer;
     private readonly DispatcherTimer _toastTimer;
     private readonly DispatcherTimer _animationTimer;
@@ -87,7 +88,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Action<BitmapSource, string>? copyImageAndPathToClipboard = null,
         Func<string, string>? createEmailDraft = null,
         Action<string>? openShellTarget = null,
-        Action<BitmapSource, string>? printDefault = null)
+        Action<BitmapSource, string>? printDefault = null,
+        Func<string?>? pickCompareFile = null)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _clipboardImport = clipboardImport ?? new ClipboardImportService();
@@ -124,6 +126,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _createEmailDraft = createEmailDraft ?? (path => EmailShareService.CreateDraftWithAttachment(path).DraftPath);
         _openShellTarget = openShellTarget ?? ShellIntegration.OpenShellTarget;
         _printDefault = printDefault ?? PrintService.PrintDefault;
+        _pickCompareFile = pickCompareFile ?? PickCompareFile;
         _updateCheck.PropertyChanged += (_, e) =>
         {
             if (!string.IsNullOrEmpty(e.PropertyName))
@@ -235,6 +238,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         UnlockExtensionCommand = new RelayCommand(() => IsExtensionUnlocked = !IsExtensionUnlocked);
         UndoRenameCommand = new RelayCommand(p => UndoOne(p as RenameService.UndoEntry), p => p is RenameService.UndoEntry);
         AboutCommand = new RelayCommand(ShowAboutWindow);
+        StartCompareCommand = new RelayCommand(StartCompareWithNext, () => CanStartCompareWithNext);
+        CompareWithCommand = new RelayCommand(StartCompareWithPickedFile, () => CanUseCompareMode);
+        ExitCompareCommand = new RelayCommand(() => ClearCompareMode(showToast: true), () => IsCompareMode);
+        SwapCompareCommand = new RelayCommand(SwapComparePair, () => CanSwapComparePair);
+        ToggleCompareOverlayCommand = new RelayCommand(() => IsCompareOverlayMode = !IsCompareOverlayMode, () => IsCompareMode);
+        IncreaseCompareOpacityCommand = new RelayCommand(() => AdjustCompareOverlayOpacity(0.05), () => IsCompareMode);
+        DecreaseCompareOpacityCommand = new RelayCommand(() => AdjustCompareOverlayOpacity(-0.05), () => IsCompareMode);
         ToggleOverlayModeCommand = new RelayCommand(() => IsPinnedOverlayMode = !IsPinnedOverlayMode, () => CanUseOverlayMode || IsPinnedOverlayMode);
         ExitOverlayModeCommand = new RelayCommand(ExitOverlayMode, () => IsPinnedOverlayMode);
         OpenReferenceBoardCommand = new RelayCommand(OpenReferenceBoard);
@@ -265,7 +275,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenInDefaultAppCommand = new RelayCommand(OpenInDefaultApp, () => HasImage);
         StripLocationCommand = new RelayCommand(async () => await StripLocationAsync(), () => CanUseImageCommands);
         SettingsCommand = new RelayCommand(ShowSettingsWindow);
-        ExtractTextCommand = new RelayCommand(async () => await _ocrWorkflow.ToggleAsync(), () => HasImage && !IsOperationBusy);
+        ExtractTextCommand = new RelayCommand(async () => await _ocrWorkflow.ToggleAsync(), () => HasImage && !IsOperationBusy && !IsCompareMode);
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
         // panel renders prior-session folders before the user opens anything.
@@ -316,6 +326,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseRetouch));
                 Raise(nameof(CanUseOverlayMode));
+                RaiseCompareState();
                 Raise(nameof(CanToggleMetadataHud));
                 Raise(nameof(ShowMetadataHud));
                 CommandManager.InvalidateRequerySuggested();
@@ -600,6 +611,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseExposureBrush));
                 Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseRetouch));
+                RaiseCompareState();
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -607,10 +619,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public bool HasImage => !string.IsNullOrEmpty(CurrentPath) && File.Exists(CurrentPath);
     public bool HasDisplayImage => CurrentImage is not null;
-    public bool CanUseInspector => HasDisplayImage && !IsOperationBusy;
-    public bool CanUseSelection => HasDisplayImage && !IsOperationBusy;
+    public bool CanUseInspector => HasDisplayImage && !IsOperationBusy && !IsCompareMode;
+    public bool CanUseSelection => HasDisplayImage && !IsOperationBusy && !IsCompareMode;
     public bool CurrentFormatSupportsCrop => CurrentPath is not null && SupportedImageFormats.IsCropWritableRaster(CurrentPath);
-    private bool CanUsePixelEditTools => HasImage && HasDisplayImage && !IsOperationBusy && !IsArchiveBook && !IsPeekMode;
+    private bool CanUsePixelEditTools => HasImage && HasDisplayImage && !IsOperationBusy && !IsArchiveBook && !IsPeekMode && !IsCompareMode;
     public bool CanUseCrop => CanUsePixelEditTools && CurrentFormatSupportsCrop;
     public bool CanApplyRotationToFile =>
         CanUsePixelEditTools &&
@@ -673,6 +685,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseRetouch));
                 Raise(nameof(CanUseOverlayMode));
+                RaiseCompareState();
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -782,6 +795,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseRetouch));
                 Raise(nameof(ShowMetadataHud));
+                RaiseCompareState();
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -846,7 +860,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private bool _overlayExitHotKeyAvailable = true;
     public bool OverlayExitHotKeyAvailable => _overlayExitHotKeyAvailable;
-    public bool CanUseOverlayMode => HasDisplayImage && !IsOperationBusy && !IsPeekMode;
+    public bool CanUseOverlayMode => HasDisplayImage && !IsOperationBusy && !IsPeekMode && !IsCompareMode;
     public bool ShowOverlayBanner => IsPinnedOverlayMode;
     public string OverlayModeText => IsPinnedOverlayMode ? "Overlay on" : "Overlay off";
     public string OverlayToggleText => IsPinnedOverlayMode ? "Turn off" : "Turn on";
@@ -868,6 +882,95 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return IsOverlayClickThrough
                 ? $"Click-through is active. Use {OverlayWindowService.ExitHotKeyText} or the taskbar close command to exit."
                 : $"Pinned above other windows at {OverlayOpacityText}. Use {OverlayWindowService.ExitHotKeyText}, Exit overlay, or the context menu to exit.";
+        }
+    }
+
+    private ImageSource? _compareImage;
+    public ImageSource? CompareImage
+    {
+        get => _compareImage;
+        private set
+        {
+            if (Set(ref _compareImage, value))
+                RaiseCompareState();
+        }
+    }
+
+    private string? _comparePath;
+    public string? ComparePath
+    {
+        get => _comparePath;
+        private set
+        {
+            if (Set(ref _comparePath, value))
+                RaiseCompareState();
+        }
+    }
+
+    private bool _isCompareMode;
+    public bool IsCompareMode
+    {
+        get => _isCompareMode;
+        private set
+        {
+            if (Set(ref _isCompareMode, value))
+            {
+                RaiseCompareState();
+                RaiseImageToolState();
+            }
+        }
+    }
+
+    private bool _isCompareOverlayMode;
+    public bool IsCompareOverlayMode
+    {
+        get => _isCompareOverlayMode;
+        set
+        {
+            if (!IsCompareMode && value)
+                value = false;
+
+            if (!Set(ref _isCompareOverlayMode, value))
+                return;
+
+            RaiseCompareState();
+            if (IsCompareMode)
+                Toast(value ? "Compare overlay on" : "Compare 2-up on");
+        }
+    }
+
+    private double _compareOverlayOpacity = 0.5;
+    public double CompareOverlayOpacity
+    {
+        get => _compareOverlayOpacity;
+        set
+        {
+            var clamped = Math.Clamp(double.IsNaN(value) ? 0.5 : value, 0.05, 1.0);
+            if (Set(ref _compareOverlayOpacity, clamped))
+                RaiseCompareState();
+        }
+    }
+
+    public bool CanUseCompareMode => HasImage && HasDisplayImage && !IsOperationBusy && !IsPeekMode;
+    public bool CanStartCompareWithNext => CanUseCompareMode && TryGetNextComparePath() is not null;
+    public bool CanSwapComparePair => IsCompareMode && CurrentPath is not null && ComparePath is not null && File.Exists(ComparePath);
+    public bool ShowCompareMode => IsCompareMode && HasDisplayImage && CompareImage is not null && !IsPeekMode;
+    public string CompareModeText => IsCompareMode ? "Compare on" : "Compare with next";
+    public string CompareLayoutText => IsCompareOverlayMode ? "Overlay" : "2-up";
+    public string CompareLayoutToggleText => IsCompareOverlayMode ? "2-up" : "Overlay";
+    public string CompareOverlayOpacityText => $"{CompareOverlayOpacity:P0}";
+    public string ComparePrimaryFileName => CurrentPath is null ? "A" : Path.GetFileName(CurrentPath);
+    public string CompareSecondaryFileName => ComparePath is null ? "B" : Path.GetFileName(ComparePath);
+    public string CompareStatusText
+    {
+        get
+        {
+            if (!IsCompareMode)
+                return CanStartCompareWithNext
+                    ? "Compare the current image with the next file, another local file, or a duplicate cleanup pair."
+                    : "Open at least two images in a folder, or choose another local file to compare.";
+
+            return $"{ComparePrimaryFileName} vs {CompareSecondaryFileName} - {CompareLayoutText} - B opacity {CompareOverlayOpacityText}";
         }
     }
 
@@ -2270,6 +2373,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand UnlockExtensionCommand { get; }
     public ICommand UndoRenameCommand { get; }
     public ICommand AboutCommand { get; }
+    public ICommand StartCompareCommand { get; }
+    public ICommand CompareWithCommand { get; }
+    public ICommand ExitCompareCommand { get; }
+    public ICommand SwapCompareCommand { get; }
+    public ICommand ToggleCompareOverlayCommand { get; }
+    public ICommand IncreaseCompareOpacityCommand { get; }
+    public ICommand DecreaseCompareOpacityCommand { get; }
     public ICommand ToggleOverlayModeCommand { get; }
     public ICommand ExitOverlayModeCommand { get; }
     public ICommand OpenReferenceBoardCommand { get; }
@@ -2620,6 +2730,21 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             await OpenFileWithOperationStatusAsync(dlg.FileName, "Opening file");
     }
 
+    private string? PickCompareFile()
+    {
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Compare with image",
+            Filter = SupportedImageFormats.OpenDialogFilter,
+            CheckFileExists = true,
+            Multiselect = false
+        };
+        if (Directory.Exists(CurrentFolder))
+            dlg.InitialDirectory = CurrentFolder;
+
+        return dlg.ShowDialog() == true ? dlg.FileName : null;
+    }
+
     private async Task NextAsync()
     {
         await NavigateImageAsync(_nav.MoveNext, "Loading next image");
@@ -2914,6 +3039,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void ApplyLoadFailure(Exception ex)
     {
         IsPinnedOverlayMode = false;
+        ClearCompareMode(showToast: false);
         CurrentImage = null;
         CurrentAnimation = null;
         PixelWidth = PixelHeight = 0;
@@ -3315,6 +3441,247 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             MessageBoxResult.No => LosslessJpegTrimChoice.ReencodeExact,
             _ => LosslessJpegTrimChoice.Cancel
         };
+    }
+
+    public void StartCompareWithPath(string? secondaryPath)
+    {
+        if (!CanUseCompareMode || string.IsNullOrWhiteSpace(secondaryPath))
+        {
+            Toast("Open an image before comparing");
+            return;
+        }
+
+        if (!TryLoadCompareImage(secondaryPath, out var image, out var normalizedPath, out var message))
+        {
+            ShowSecondaryStatus(
+                "Compare image unavailable",
+                message,
+                SecondaryStatusToneKind.Warning,
+                "\uE783");
+            Toast("Compare image unavailable");
+            return;
+        }
+
+        EnterCompareMode(image, normalizedPath);
+    }
+
+    public void StartCompareWithPair(string? primaryPath, string? secondaryPath)
+    {
+        if (string.IsNullOrWhiteSpace(primaryPath) || string.IsNullOrWhiteSpace(secondaryPath))
+        {
+            Toast("Choose two images to compare");
+            return;
+        }
+
+        if (!string.Equals(CurrentPath, primaryPath, StringComparison.OrdinalIgnoreCase) || !HasDisplayImage)
+        {
+            if (!OpenPrimaryForCompare(primaryPath))
+                return;
+        }
+
+        StartCompareWithPath(secondaryPath);
+    }
+
+    private void StartCompareWithNext()
+    {
+        var nextPath = TryGetNextComparePath();
+        if (nextPath is null)
+        {
+            Toast("No next image to compare");
+            return;
+        }
+
+        StartCompareWithPath(nextPath);
+    }
+
+    private void StartCompareWithPickedFile()
+    {
+        var path = _pickCompareFile();
+        if (!string.IsNullOrWhiteSpace(path))
+            StartCompareWithPath(path);
+    }
+
+    private string? TryGetNextComparePath()
+    {
+        if (_nav.Count < 2 || _nav.CurrentIndex < 0)
+            return null;
+
+        var nextIndex = (_nav.CurrentIndex + 1) % _nav.Count;
+        var nextPath = _nav.Files[nextIndex];
+        return string.Equals(nextPath, CurrentPath, StringComparison.OrdinalIgnoreCase)
+            ? null
+            : nextPath;
+    }
+
+    private bool OpenPrimaryForCompare(string primaryPath)
+    {
+        if (!TryPrepareOpenFile(primaryPath, out var resumedArchivePage))
+            return false;
+
+        var loaded = LoadCurrent(startCropMode: false);
+        CompletePreparedOpenFile(_nav.CurrentPath ?? primaryPath, resumedArchivePage, loaded);
+        if (!loaded || !HasDisplayImage)
+        {
+            Toast("Could not open compare primary");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void EnterCompareMode(ImageSource image, string path)
+    {
+        IsPinnedOverlayMode = false;
+        IsGalleryOpen = false;
+        IsInspectorMode = false;
+        IsSelectionMode = false;
+        IsCropMode = false;
+        IsOcrMode = false;
+        IsExposureBrushMode = false;
+        IsRedEyeCorrectionMode = false;
+        IsRetouchMode = false;
+        ClearInspectorState();
+        ClearCanvasSelection();
+        ClearCropSelection();
+        ClearExposureBrushStrokes(showToast: false);
+        ClearRedEyeCorrectionMarks(showToast: false);
+        ClearRetouchState(showToast: false);
+
+        CompareImage = image;
+        ComparePath = path;
+        IsCompareMode = true;
+        ClearSecondaryStatus();
+        Toast("Compare mode on");
+    }
+
+    private bool TryLoadCompareImage(
+        string path,
+        out ImageSource image,
+        out string normalizedPath,
+        out string message)
+    {
+        image = null!;
+        normalizedPath = string.Empty;
+        message = string.Empty;
+
+        try
+        {
+            normalizedPath = Path.GetFullPath(path);
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or System.Security.SecurityException)
+        {
+            message = "The selected compare path is not valid.";
+            return false;
+        }
+
+        if (!File.Exists(normalizedPath))
+        {
+            message = "The selected compare file no longer exists.";
+            return false;
+        }
+
+        if (!SupportedImageFormats.IsSupported(normalizedPath))
+        {
+            message = $"{FormatExtensionForMessage(Path.GetExtension(normalizedPath))} is not a supported compare format.";
+            return false;
+        }
+
+        if (string.Equals(normalizedPath, CurrentPath, StringComparison.OrdinalIgnoreCase))
+        {
+            message = "Choose a different image for the B side.";
+            return false;
+        }
+
+        try
+        {
+            var result = ImageLoader.Load(normalizedPath);
+            var isArchiveBookPage = SupportedImageFormats.IsArchive(normalizedPath);
+            var display = ApplyArchiveDisplayFilters(result.Image, isArchiveBookPage, ArchiveOldScanFilterEnabled);
+            var editOperations = GetEnabledDisplayEditOperations(normalizedPath, isArchiveBookPage);
+            if (editOperations.Count > 0 && display is BitmapSource bitmap)
+                display = ImageExportService.RenderPreview(bitmap, editOperations);
+
+            image = display;
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
+        {
+            message = $"Images could not decode {Path.GetFileName(normalizedPath)} for compare: {ex.Message}";
+            return false;
+        }
+    }
+
+    private void SwapComparePair()
+    {
+        if (!CanSwapComparePair || CurrentPath is null || ComparePath is null)
+            return;
+
+        var oldPrimary = CurrentPath;
+        var oldSecondary = ComparePath;
+        var keepOverlay = IsCompareOverlayMode;
+        if (!OpenPrimaryForCompare(oldSecondary))
+            return;
+
+        if (!TryLoadCompareImage(oldPrimary, out var image, out var normalizedPath, out var message))
+        {
+            ShowSecondaryStatus("Compare swap failed", message, SecondaryStatusToneKind.Warning, "\uE783");
+            ClearCompareMode(showToast: false);
+            Toast("Compare swap failed");
+            return;
+        }
+
+        CompareImage = image;
+        ComparePath = normalizedPath;
+        IsCompareMode = true;
+        IsCompareOverlayMode = keepOverlay;
+        Toast("Compare A/B swapped");
+    }
+
+    private void AdjustCompareOverlayOpacity(double delta)
+    {
+        CompareOverlayOpacity += delta;
+        Toast($"Compare opacity {CompareOverlayOpacityText}");
+    }
+
+    private void ClearCompareMode(bool showToast)
+    {
+        var wasActive = IsCompareMode || CompareImage is not null || ComparePath is not null;
+        IsCompareMode = false;
+        CompareImage = null;
+        ComparePath = null;
+        IsCompareOverlayMode = false;
+        if (showToast && wasActive)
+            Toast("Compare mode off");
+    }
+
+    private void RaiseCompareState()
+    {
+        Raise(nameof(CanUseCompareMode));
+        Raise(nameof(CanStartCompareWithNext));
+        Raise(nameof(CanSwapComparePair));
+        Raise(nameof(ShowCompareMode));
+        Raise(nameof(CompareModeText));
+        Raise(nameof(CompareLayoutText));
+        Raise(nameof(CompareLayoutToggleText));
+        Raise(nameof(CompareOverlayOpacityText));
+        Raise(nameof(ComparePrimaryFileName));
+        Raise(nameof(CompareSecondaryFileName));
+        Raise(nameof(CompareStatusText));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void RaiseImageToolState()
+    {
+        Raise(nameof(CanUseInspector));
+        Raise(nameof(CanUseSelection));
+        Raise(nameof(CanUseCrop));
+        Raise(nameof(CurrentFormatSupportsCrop));
+        Raise(nameof(CanApplyRotationToFile));
+        Raise(nameof(CanUseExposureBrush));
+        Raise(nameof(CanUseRedEyeCorrection));
+        Raise(nameof(CanUseRetouch));
+        Raise(nameof(CanUseOverlayMode));
+        CommandManager.InvalidateRequerySuggested();
     }
 
     public void SetOverlayExitHotKeyAvailable(bool available)
@@ -4890,6 +5257,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             Owner = Application.Current?.MainWindow
         };
+        cleanup.CompareRequested += (_, e) => StartCompareWithPair(e.PrimaryPath, e.SecondaryPath);
 
         if (!string.IsNullOrWhiteSpace(CurrentFolder) && Directory.Exists(CurrentFolder))
             cleanup.AddScanFolder(CurrentFolder);
@@ -5111,6 +5479,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _renameTimer.Stop();
         _externalEditReload.Disarm();
         IsPinnedOverlayMode = false;
+        ClearCompareMode(showToast: false);
         CurrentImage = null;
         CurrentAnimation = null;
         CurrentPath = null;

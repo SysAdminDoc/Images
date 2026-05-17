@@ -6,6 +6,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using Images.Controls;
 using Images.Services;
 using Images.ViewModels;
 
@@ -22,6 +23,7 @@ public partial class MainWindow : Window
     private bool _retouchPainting;
     private HwndSource? _hwndSource;
     private bool _overlayExitHotKeyRegistered;
+    private bool _syncingCompareCanvases;
 
     public MainWindow()
     {
@@ -293,6 +295,62 @@ public partial class MainWindow : Window
         return _zoomMode;
     }
 
+    private void CompareCanvas_ViewChanged(object sender, EventArgs e)
+    {
+        if (_syncingCompareCanvases ||
+            !Vm.ShowCompareMode ||
+            sender is not ZoomPanImage source ||
+            !source.IsVisible)
+        {
+            return;
+        }
+
+        _syncingCompareCanvases = true;
+        try
+        {
+            var state = source.GetViewState();
+            foreach (var target in VisibleCompareCanvases())
+            {
+                if (!ReferenceEquals(target, source))
+                    target.SetViewState(state);
+            }
+        }
+        finally
+        {
+            _syncingCompareCanvases = false;
+        }
+    }
+
+    private IEnumerable<ZoomPanImage> VisibleCompareCanvases()
+    {
+        if (ComparePrimaryCanvas?.IsVisible == true)
+            yield return ComparePrimaryCanvas;
+        if (CompareSecondaryCanvas?.IsVisible == true)
+            yield return CompareSecondaryCanvas;
+        if (CompareOverlayPrimaryCanvas?.IsVisible == true)
+            yield return CompareOverlayPrimaryCanvas;
+        if (CompareOverlaySecondaryCanvas?.IsVisible == true)
+            yield return CompareOverlaySecondaryCanvas;
+    }
+
+    private ZoomPanImage ActiveImageCanvas()
+    {
+        if (Vm.ShowCompareMode)
+        {
+            if (ComparePrimaryCanvas?.IsVisible == true)
+                return ComparePrimaryCanvas;
+            if (CompareOverlayPrimaryCanvas?.IsVisible == true)
+                return CompareOverlayPrimaryCanvas;
+        }
+
+        return Canvas;
+    }
+
+    private void SetActiveZoomMode(ZoomPanImage.ZoomMode mode) => ActiveImageCanvas().SetZoomMode(mode);
+    private void ZoomActiveCanvasBy(double factor) => ActiveImageCanvas().ZoomBy(factor);
+    private void ResetActiveCanvas() => ActiveImageCanvas().ResetView();
+    private void OneToOneActiveCanvas() => ActiveImageCanvas().OneToOne();
+
     // V20-02: restore saved window geometry; clamp to current working area so a window that
     // was last on a now-disconnected second monitor doesn't land offscreen.
     private void RestoreWindowState()
@@ -505,6 +563,14 @@ public partial class MainWindow : Window
                     e.Handled = true;
                     break;
                 }
+                if (Vm.IsCompareMode)
+                {
+                    Vm.ExitCompareCommand.Execute(null);
+                    Keyboard.ClearFocus();
+                    Focus();
+                    e.Handled = true;
+                    break;
+                }
                 if (Vm.ShowCheatsheet)
                 {
                     Vm.ShowCheatsheet = false;
@@ -543,6 +609,14 @@ public partial class MainWindow : Window
                 break;
             case Key.O when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
                 Vm.OpenCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.C when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
+                Vm.StartCompareCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.V when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
+                Vm.CompareWithCommand.Execute(null);
                 e.Handled = true;
                 break;
             case Key.V when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
@@ -634,7 +708,23 @@ public partial class MainWindow : Window
                 break;
             case Key.F when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
                 // V20-20: Ctrl+F cycles zoom modes Fit → 1:1 → FitWidth → FitHeight → Fill → Fit.
-                Canvas.SetZoomMode(NextZoomMode());
+                SetActiveZoomMode(NextZoomMode());
+                e.Handled = true;
+                break;
+            case Key.O when Vm.IsCompareMode && Keyboard.Modifiers == ModifierKeys.None:
+                Vm.ToggleCompareOverlayCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.X when Vm.IsCompareMode && Keyboard.Modifiers == ModifierKeys.None:
+                Vm.SwapCompareCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.OemOpenBrackets when Vm.IsCompareMode && Keyboard.Modifiers == ModifierKeys.None:
+                Vm.DecreaseCompareOpacityCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.OemCloseBrackets when Vm.IsCompareMode && Keyboard.Modifiers == ModifierKeys.None:
+                Vm.IncreaseCompareOpacityCommand.Execute(null);
                 e.Handled = true;
                 break;
             case Key.T:
@@ -729,16 +819,16 @@ public partial class MainWindow : Window
                 Vm.RefreshCommand.Execute(null); e.Handled = true; break;
             case Key.OemPlus:
             case Key.Add:
-                Canvas.ZoomBy(1.2); e.Handled = true; break;
+                ZoomActiveCanvasBy(1.2); e.Handled = true; break;
             case Key.OemMinus:
             case Key.Subtract:
-                Canvas.ZoomBy(1 / 1.2); e.Handled = true; break;
+                ZoomActiveCanvasBy(1 / 1.2); e.Handled = true; break;
             case Key.D0:
             case Key.NumPad0:
-                Canvas.ResetView(); e.Handled = true; break;
+                ResetActiveCanvas(); e.Handled = true; break;
             case Key.D1:
             case Key.NumPad1:
-                Canvas.OneToOne(); e.Handled = true; break;
+                OneToOneActiveCanvas(); e.Handled = true; break;
         }
     }
 

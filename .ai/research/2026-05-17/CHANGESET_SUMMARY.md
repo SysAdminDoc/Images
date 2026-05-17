@@ -34,6 +34,11 @@ Date: 2026-05-17
 - `scripts/Prepare-JpegTranBundle.ps1` - downloads/extracts the approved libjpeg-turbo 3.1.4.1 artifact and verifies artifact plus executable SHA-256 values.
 - `scripts/Test-ReleaseDiagnostics.ps1` - validates portable/installed `--system-info` and `--codec-report` logs for Ghostscript, OCR, jpegtran, and provenance rows.
 - `scripts/Test-ReleaseReadiness.ps1`, `docs/release-checklist.md`, `docs/codec-bundling.md`, `docs/lossless-jpeg-transform-policy.md`, `docs/integration-policy.md`, `installer/Images.iss`, and `src/Images/Codecs/JpegTran/*` - updated for approved jpegtran release staging and installed smoke support.
+- `src/Images/Controls/ZoomPanImage.cs` - exposes view-state get/set helpers so compare canvases can synchronize pan and zoom.
+- `src/Images/ViewModels/MainViewModel.cs`, `src/Images/MainWindow.xaml`, and `src/Images/MainWindow.xaml.cs` - add compare mode entry points, state, commands, 2-up and opacity-overlay layouts, linked transforms, A/B swap, keyboard opacity controls, and Escape exit behavior.
+- `src/Images/DuplicateCleanupWindow.xaml` and `src/Images/DuplicateCleanupWindow.xaml.cs` - add a selected-pair compare handoff back to the main viewer.
+- `tests/Images.Tests/MainViewModelStateTests.cs` - covers current+next compare, overlay opacity, A/B swap, and pair-based compare entry.
+- `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, `docs/improvement-plan.md`, and `.ai/research/2026-05-17/STATE_OF_REPO.md` - updated for V7-10 completion.
 
 ## Preserved
 
@@ -49,7 +54,7 @@ Completed before commit:
 - `dotnet list Images.sln package --vulnerable --include-transitive` - passed; no vulnerable packages for `Images` or `Images.Tests`.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Test-VersionSync.ps1` - passed for 0.2.11.
 - `dotnet build Images.sln -c Release` - passed with 0 warnings and 0 errors.
-- `dotnet test Images.sln -c Release --no-build` - passed 349 tests after V7-05 provenance coverage was added.
+- `dotnet test Images.sln -c Release --no-build` - passed 351 tests after V7-10 compare coverage was added.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Test-ReleaseReadiness.ps1 -Version 0.2.11` - passed.
 - `src\Images\bin\Release\net9.0-windows10.0.22621.0\Images.exe --system-info` - exited 0 in the local shell smoke.
 - `src\Images\bin\Release\net9.0-windows10.0.22621.0\Images.exe --codec-report` - exited 0 in the local shell smoke.
