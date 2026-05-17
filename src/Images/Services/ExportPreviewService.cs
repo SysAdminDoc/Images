@@ -1,7 +1,6 @@
 using System.IO;
 using System.Windows.Media.Imaging;
 using ImageMagick;
-using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
 
@@ -50,8 +49,6 @@ public sealed record ExportPreviewResult(
 
 public sealed class ExportPreviewService
 {
-    private static readonly ILogger Log = Images.Services.Log.Get(nameof(ExportPreviewService));
-
     public ExportPreviewResult BuildPreview(BitmapSource source, string? sourcePath, ExportPreviewRequest request)
     {
         ArgumentNullException.ThrowIfNull(source);
@@ -122,7 +119,7 @@ public sealed class ExportPreviewService
             ImageExportService.FormatBytes(sourceBytes),
             ImageExportService.FormatBytes(encoded.Bytes.LongLength),
             FormatDelta(delta),
-            BuildWarnings(image, sourcePath, request.Extension, format));
+            ExportCapabilityWarningService.BuildWarnings(image, sourcePath, request.Extension, format));
     }
 
     private static EncodedPreview Encode(MagickImage image, ExportPreviewRequest request)
@@ -158,52 +155,6 @@ public sealed class ExportPreviewService
             image.Alpha(AlphaOption.Remove);
         }
     }
-
-    private static IReadOnlyList<string> BuildWarnings(
-        MagickImage image,
-        string? sourcePath,
-        string extension,
-        MagickFormat format)
-    {
-        var warnings = new List<string>();
-
-        if (ImageExportService.FormatRequiresOpaqueBackground(format) && image.HasAlpha)
-            warnings.Add("Transparency will be flattened to white for this target format.");
-
-        if (HasMetadataProfile(image))
-            warnings.Add("Metadata/profile data may not be preserved when exporting this copy.");
-        else if (!string.IsNullOrWhiteSpace(sourcePath))
-            warnings.Add("Preview is based on encoded display pixels; verify EXIF/XMP needs before deleting originals.");
-
-        if (IsLossyFormat(extension))
-            warnings.Add("Quality changes are lossy; keep the original when comparing compression settings.");
-
-        return warnings;
-    }
-
-    private static bool HasMetadataProfile(MagickImage image)
-    {
-        try
-        {
-            return image.GetExifProfile() is not null ||
-                   image.GetIptcProfile() is not null ||
-                   image.GetXmpProfile() is not null ||
-                   image.GetColorProfile() is not null;
-        }
-        catch (Exception ex) when (ex is MagickException or NotSupportedException)
-        {
-            Log.LogDebug(ex, "Could not inspect export preview metadata profiles.");
-            return false;
-        }
-    }
-
-    private static bool IsLossyFormat(string extension)
-        => extension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
-           extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-           extension.Equals(".jpe", StringComparison.OrdinalIgnoreCase) ||
-           extension.Equals(".jfif", StringComparison.OrdinalIgnoreCase) ||
-           extension.Equals(".webp", StringComparison.OrdinalIgnoreCase) ||
-           extension.Equals(".avif", StringComparison.OrdinalIgnoreCase);
 
     private static long? TryGetSourceBytes(string? sourcePath)
     {

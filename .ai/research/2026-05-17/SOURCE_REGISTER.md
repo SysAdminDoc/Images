@@ -19,6 +19,7 @@ This register lists local and external sources used for the research and plannin
 | L-ARCHIVE | `docs/archive-runtime-review.md` | SharpCompress archive runtime review and security refresh. |
 | L-INTEGRATION | `docs/integration-policy.md` | Optional dependency review template and current integration statuses. |
 | L-CSPROJ | `src/Images/Images.csproj` | Target framework and NuGet package versions. |
+| L-EXPORT | `src/Images/Services/ImageExportService.cs`, `src/Images/Services/ExportPreviewService.cs`, `src/Images/Services/BatchProcessorService.cs`, `src/Images/Services/MacroActionService.cs`, `src/Images/Services/ExportCapabilityWarningService.cs` | Export/write path, preview estimator, batch dry-run behavior, and target-format capability warning implementation. |
 | L-CI | `.github/workflows/ci.yml` | CI gates for build/test/version/security smoke. |
 | L-RELEASE | `.github/workflows/release.yml` | Release packaging and artifact policy. |
 | L-INSTALLER | `installer/Images.iss` | Installer version and release packaging details. |
