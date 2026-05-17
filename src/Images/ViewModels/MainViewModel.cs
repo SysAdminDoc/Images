@@ -257,6 +257,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenDuplicateCleanupCommand = new RelayCommand(OpenDuplicateCleanup);
         OpenFileHealthScanCommand = new RelayCommand(OpenFileHealthScan);
         OpenRecoveryCenterCommand = new RelayCommand(OpenRecoveryCenter);
+        OpenModelManagerCommand = new RelayCommand(OpenModelManager);
         OpenTagGraphCommand = new RelayCommand(OpenTagGraph);
         OpenImportInboxCommand = new RelayCommand(OpenImportInbox);
         OpenMacroActionsCommand = new RelayCommand(OpenMacroActions);
@@ -2544,6 +2545,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenDuplicateCleanupCommand { get; }
     public ICommand OpenFileHealthScanCommand { get; }
     public ICommand OpenRecoveryCenterCommand { get; }
+    public ICommand OpenModelManagerCommand { get; }
     public ICommand OpenTagGraphCommand { get; }
     public ICommand OpenImportInboxCommand { get; }
     public ICommand OpenMacroActionsCommand { get; }
@@ -5475,6 +5477,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         };
 
         recovery.Show();
+    }
+
+    private void OpenModelManager()
+    {
+        var manager = new Images.ModelManagerWindow
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        manager.Show();
     }
 
     private void OpenTagGraph()

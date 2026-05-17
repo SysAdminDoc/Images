@@ -1,7 +1,7 @@
 # Content-aware inpaint runtime decision
 
-Status: decision scoped for E12 / V60-08; no model bundled and no runtime enabled yet.
-Date: 2026-05-14
+Status: decision scoped for E12 / V60-08; V7-30 model manager shipped approved local model import and hash validation, but no inference runtime is enabled yet.
+Date: 2026-05-17
 
 ## Decision
 
@@ -22,6 +22,8 @@ Primary candidate:
 
 - Model: `opencv/inpainting_lama`
 - Source: https://huggingface.co/opencv/inpainting_lama
+- Approved file: `inpainting_lama_2025jan.onnx`
+- SHA-256: `7df918ac3921d3daf0aae1d219776cf0dc4e4935f035af81841b40adcf74fdf2`
 - License: Apache License, per the model card.
 - Notes: ONNX source, OpenCV 5 sample code, approx 93 MB model package.
 
@@ -29,6 +31,8 @@ Fallback validation candidate:
 
 - Model: `Carve/LaMa-ONNX` `lama_fp32.onnx`
 - Source: https://huggingface.co/Carve/LaMa-ONNX
+- Approved file: `lama_fp32.onnx`
+- SHA-256: `1faef5301d78db7dda502fe59966957ec4b79dd64e16f03ed96913c7a4eb68d6`
 - License: Apache-2.0, per the model card.
 - Notes: fixed 512 x 512 input shape, opset 17, recommended over the alternate `lama.onnx` export.
 
@@ -44,16 +48,17 @@ Original research reference:
 - No model is bundled in the installer or committed to source control.
 - First use must show an explicit local-model setup flow: download from an approved URL or choose a local model file.
 - Every download must be user initiated, logged through the network-egress surface, and verified by SHA-256 before use.
-- Model files live under `%LOCALAPPDATA%\Images\models\inpaint\`.
+- Model files live under `%LOCALAPPDATA%\Images\models\inpaint\<approved-model-id>\`.
 - The diagnostics surfaces must show model ID, source, path, size, SHA-256, runtime backend, and last validation result.
 - Output must flow through the existing non-destructive edit stack first. Original overwrite needs the same confirmation and rollback rules as crop/JPEG writeback.
 - The UI copy must label the feature "Generative erase" or "Content-aware repair" only when a validated local model is available; otherwise it remains disabled with a setup/status explanation.
 
 ## Implementation shape
 
-- `InpaintModelRegistry`: approved model IDs, expected hashes, source URLs, license text paths, input size, opset, and preprocessing contract.
-- `ModelStorage`: app-data model folder, temp download, SHA-256 verification, license/readme retention, and delete/reset action.
-- `InpaintRuntime`: detects Windows ML first, falls back to ONNX Runtime DirectML, reports CPU fallback explicitly.
+- `ModelManagerService`: shipped shared registry/storage foundation for approved model IDs, expected hashes, source URLs, app-local grouped folders, SHA-256 verification, import/delete/reveal actions, and runtime status copy.
+- `InpaintModelRegistry`: future inpaint-specific tensor shape, opset, preprocessing, mask, and tiling contract layered over the shared model manager.
+- `ModelStorage`: app-data model folder and SHA-256 verification are shipped; future user-initiated download and license/readme retention remain unimplemented.
+- `InpaintRuntime`: future runtime detects Windows ML first, falls back to ONNX Runtime DirectML, and reports CPU fallback explicitly.
 - `InpaintPlanner`: converts a pixel selection or mask into 512 x 512 tiles with mask dilation and overlap.
 - `InpaintOperation`: XMP edit-stack operation with model ID/hash, mask bounds, tile grid, and renderer version. Store raster patch sidecars if exact replay is not stable across runtime updates.
 - `InpaintRenderer`: deterministic apply path used by preview, Save a copy, and future original overwrite flows.
@@ -62,14 +67,14 @@ Original research reference:
 
 | Field | Decision |
 | --- | --- |
-| Name and version | LaMa ONNX; exact artifact version/hash pending model-manager implementation. |
+| Name and version | LaMa ONNX; approved artifacts are `inpainting_lama_2025jan.onnx` and `lama_fp32.onnx` with pinned SHA-256 values above. |
 | Source URL | Primary: `https://huggingface.co/opencv/inpainting_lama`; fallback: `https://huggingface.co/Carve/LaMa-ONNX`. |
 | License | Apache-2.0 / Apache License per model cards and original repository. |
 | Redistribution permission | Do not bundle by default; user-initiated download or local import only until exact artifact hashes and license files are recorded. |
 | Source-use boundary | Reference only. Runtime consumes ONNX model files; no OpenCV sample code copied into Images. |
 | Update cadence | Pin approved model IDs and hashes; manual review before adding or replacing a model. |
 | CVE/advisory tracking | Windows ML / Windows App SDK ML, ONNX Runtime DirectML, and model-source repository advisories. |
-| Binary provenance | SHA-256 required for every approved model file before the setup UI enables it. |
+| Binary provenance | SHA-256 is required for every approved model file before the setup UI marks it ready. |
 | Process boundary | In-process managed runtime only after V60-01 review; no Python, no OpenCV native dependency in the first Images implementation. |
 | File access boundary | Current image pixels, mask/selection, model folder, and temp files under app data. |
 | Network behavior | No automatic download. User-initiated download only, logged and checksum-verified. |

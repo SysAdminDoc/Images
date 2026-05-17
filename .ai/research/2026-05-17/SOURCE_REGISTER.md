@@ -145,5 +145,7 @@ This register lists local and external sources used for the research and plannin
 | S-SIGLIP | https://huggingface.co/docs/transformers/model_doc/siglip | Embedding/search model family reference. |
 | S-SQLITEVEC | https://github.com/asg017/sqlite-vec | Local vector search extension candidate. |
 | S-LAMA-OPENCV | https://huggingface.co/opencv/inpainting_lama | Primary inpaint model candidate from existing repo decision. |
+| S-LAMA-OPENCV-ONNX | https://huggingface.co/opencv/inpainting_lama/blob/main/inpainting_lama_2025jan.onnx | Approved OpenCV LaMa ONNX artifact identity and SHA-256 pin used by the model manager. |
 | S-LAMA-CARVE | https://huggingface.co/Carve/LaMa-ONNX | Fallback LaMa ONNX candidate from existing repo decision. |
+| S-LAMA-CARVE-ONNX | https://huggingface.co/Carve/LaMa-ONNX/blob/main/lama_fp32.onnx | Approved Carve LaMa ONNX fallback artifact identity and SHA-256 pin used by the model manager. |
 | S-LAMA-ORIGINAL | https://github.com/advimman/lama | Original LaMa source/paper reference. |

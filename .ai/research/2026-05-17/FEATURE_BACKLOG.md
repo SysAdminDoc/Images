@@ -69,7 +69,7 @@ This is the raw harvested backlog before final prioritization. Final tiering is 
 
 | Idea | Source evidence | Fit |
 | --- | --- | --- |
-| Build a local model manager before semantic search/inpaint/upscale/background removal. | `docs/inpaint-runtime-decision.md`, Windows ML docs, Immich model settings. | High |
+| Build a local model manager before semantic search/inpaint/upscale/background removal. | `docs/inpaint-runtime-decision.md`, Windows ML docs, Immich model settings, OpenCV/Carve LaMa ONNX files. | High - V7-30 shipped approved model definitions, manual import/delete/reveal controls, app-local `models\inpaint` storage, pinned SHA-256 readiness gates, runtime status copy, and diagnostics provenance rows. |
 | Add OpenCLIP/SigLIP embedding provider behind model manager. | OpenCLIP, SigLIP, Immich search docs. | Medium |
 | Use sqlite-vec only after catalog and embedding shapes stabilize. | `docs/design-product-differentiators.md`, sqlite-vec source. | Medium |
 | Add LaMa ONNX content-aware repair only after model foundation. | `docs/inpaint-runtime-decision.md`, LaMa sources. | Medium |

@@ -50,7 +50,7 @@ Evidence bundle for this refresh:
 
 | ID | Status | Effort | Item | Evidence | Dependency |
 | --- | --- | --- | --- | --- | --- |
-| V7-30 | [ ] | XL | Local model/runtime manager. | `docs/inpaint-runtime-decision.md`; Windows ML; ONNX Runtime DirectML; Immich model settings. | Complete before semantic search, inpaint, background removal, or super-resolution. |
+| V7-30 | [x] | XL | Local model/runtime manager. | `docs/inpaint-runtime-decision.md`; Windows ML; ONNX Runtime DirectML; Immich model settings; OpenCV/Carve LaMa ONNX model files. | Approved-model registry, manual ONNX import/delete/reveal UI, app-local `models\inpaint` storage, SHA-256 validation for pinned LaMa candidates, runtime status reporting, no automatic downloads, and About/CLI model provenance rows are shipped. |
 | V7-31 | [ ] | XL | Local semantic search MVP. | OpenCLIP, SigLIP, sqlite-vec, Immich CLIP search, `docs/design-product-differentiators.md`. | Requires catalog schema and model manager. |
 | V7-32 | [ ] | L | LaMa ONNX content-aware repair. | `docs/inpaint-runtime-decision.md`; LaMa ONNX model cards. | Requires model manager and non-destructive patch provenance. |
 | V7-33 | [ ] | L | Background removal. | BiRefNet, rembg, U-2-Net. | Requires model manager, mask preview, and export-copy default. |

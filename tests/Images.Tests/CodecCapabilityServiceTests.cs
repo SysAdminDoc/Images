@@ -42,7 +42,8 @@ public sealed class CodecCapabilityServiceTests
         Assert.Contains(rows, row =>
             row.Name == "Local model registry"
             && row.Kind == "Model"
-            && row.AdvisoryStatus.Contains("No model is installed", StringComparison.Ordinal));
+            && row.AdvisoryStatus.Contains("SHA-256 matched", StringComparison.Ordinal)
+            && row.Action.Contains("Model Manager", StringComparison.Ordinal));
     }
 
     [Fact]

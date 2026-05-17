@@ -91,6 +91,11 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE777;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Model manager" Command="{Binding OpenModelManagerCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE950;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="Tag relationships" Command="{Binding OpenTagGraphCommand}" InputGestureText="Ctrl+Shift+T">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EC;" />
@@ -3590,7 +3595,7 @@
                                 <TextBlock Text="Macro actions"
                                            FontWeight="SemiBold"
                                            Foreground="{StaticResource TextBrush}" />
-                                <TextBlock Text="Build inspectable JSON actions for export copies, GPS stripping, and rename patterns."
+                                <TextBlock Text="Build inspectable JSON actions and manage approved local model files before future AI tools use them."
                                            Style="{StaticResource Text.Hint}"
                                            TextWrapping="Wrap"
                                            Margin="0,3,0,0" />
@@ -3609,6 +3614,13 @@
                                         Margin="0,8,0,0"
                                         AutomationProperties.Name="Open batch processor">
                                     <TextBlock Text="Batch" />
+                                </Button>
+                                <Button Command="{Binding OpenModelManagerCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        MinWidth="92"
+                                        Margin="0,8,0,0"
+                                        AutomationProperties.Name="Open model manager">
+                                    <TextBlock Text="Models" />
                                 </Button>
                             </StackPanel>
                         </Grid>
