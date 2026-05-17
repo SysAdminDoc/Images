@@ -16,10 +16,11 @@ Shipped or documented:
 - `docs/inpaint-runtime-decision.md` chooses an opt-in local LaMa ONNX direction for future content-aware repair.
 - `docs/design-product-differentiators.md` scopes semantic search to local indexing, an embedding provider abstraction, SQLite records, and no automatic model download.
 - `ModelManagerService` and `ModelManagerWindow` now provide the V7-30 shared model manager foundation: approved local model definitions, app-local grouped storage, manual ONNX import/delete/reveal controls, pinned SHA-256 validation, runtime readiness copy, and diagnostics provenance rows.
+- `SemanticSearchService` and `SemanticSearchWindow` now provide the first V7-31 foundation: selected-folder indexing, app-local `semantic-index.db`, `ISemanticEmbeddingProvider`, deterministic offline metadata embeddings, exact cosine search, folder filtering, cancellation, result open/reveal, and delete-index controls.
 
 Not present yet:
 
-- Local embedding index.
+- Approved ONNX image/text embedding provider.
 - Face/person recognition.
 - Background removal.
 - Super-resolution.
@@ -57,10 +58,10 @@ Candidate models/sources:
 
 Architecture:
 
-- Build catalog schema first.
-- Add embedding provider interface.
+- Build catalog schema first. Done under V7-12.
+- Add embedding provider interface. Done under the V7-31 foundation.
 - Store file fingerprint, model ID, embedding version, dimensions, and indexed timestamp.
-- Start with exact cosine search for small libraries.
+- Start with exact cosine search for small libraries. Done for the deterministic local provider.
 - Evaluate sqlite-vec only after embedding shape and catalog update rules are stable.
 
 User controls:
@@ -174,7 +175,7 @@ For models, add:
 
 1. Catalog schema v1. Done under V7-12.
 2. Model manager/runtime registry. Registry/import/status foundation done under V7-30; runtime execution still pending.
-3. Fake-provider tests and CLI diagnostics for embedding providers.
-4. Local embedding index MVP.
-5. Semantic search UI.
+3. Fake-provider tests and CLI diagnostics for embedding providers. Service tests and UI exist; CLI diagnostics remain optional.
+4. Local embedding index MVP. Deterministic local foundation exists; approved ONNX embeddings remain open.
+5. Semantic search UI. Foundation window exists.
 6. Inpaint/background/upscale workbenches only after the shared runtime execution foundation is stable.

@@ -20,6 +20,9 @@ Date: 2026-05-17
 - `src/Images/Services/ModelManagerService.cs` - approved local model registry, app-local grouped storage, runtime status, manual import/delete/reveal support, and SHA-256 validation for future model-backed tools.
 - `src/Images/ModelManagerWindow.xaml` and `src/Images/ModelManagerWindow.xaml.cs` - user-facing Model manager for inspecting approved definitions, importing local ONNX files, revealing storage, opening source pages, and deleting local model files.
 - `tests/Images.Tests/ModelManagerServiceTests.cs` - focused coverage for approved definitions, import/hash readiness, mismatched hashes, delete, and unknown model rejection.
+- `src/Images/Services/SemanticSearchService.cs` - V7-31 local semantic-index foundation with an embedding-provider seam, app-local SQLite storage, deterministic metadata embeddings, exact cosine search, cancellation-safe rebuild, and delete-index support.
+- `src/Images/SemanticSearchWindow.xaml` and `src/Images/SemanticSearchWindow.xaml.cs` - user-facing semantic search surface for explicit folder indexing, query/folder-filter search, result open/reveal, cancellation, and derived-data deletion.
+- `tests/Images.Tests/SemanticSearchServiceTests.cs` - focused coverage for indexing/search ordering, folder filtering, cancellation preserving the previous index, and delete-index behavior.
 
 `CONTINUE_FROM_HERE.md` was not created because no hard limit blocked completion.
 
@@ -71,6 +74,8 @@ Date: 2026-05-17
 - `src/Images/ViewModels/MainViewModel.cs` and `src/Images/MainWindow.xaml` - add Model manager entry points from the context menu and Automation card.
 - `src/Images/Services/CodecCapabilityService.cs` and `tests/Images.Tests/CodecCapabilityServiceTests.cs` - connect runtime/model provenance rows to the local model manager snapshot and verify the visible model-manager action copy.
 - `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, `docs/improvement-plan.md`, `docs/inpaint-runtime-decision.md`, `.ai/research/2026-05-17/STATE_OF_REPO.md`, `.ai/research/2026-05-17/SOURCE_REGISTER.md`, `.ai/research/2026-05-17/RESEARCH_LOG.md`, `.ai/research/2026-05-17/FEATURE_BACKLOG.md`, `.ai/research/2026-05-17/PRIORITIZATION_MATRIX.md`, and `.ai/research/2026-05-17/DATASET_MODEL_INTEGRATION_REVIEW.md` - updated for V7-30 completion.
+- `src/Images/ViewModels/MainViewModel.cs` and `src/Images/MainWindow.xaml` - add Semantic search entry points and current-folder seeding for the new window.
+- `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, `docs/improvement-plan.md`, `docs/design-product-differentiators.md`, `.ai/research/2026-05-17/STATE_OF_REPO.md`, `.ai/research/2026-05-17/FEATURE_BACKLOG.md`, `.ai/research/2026-05-17/PRIORITIZATION_MATRIX.md`, and `.ai/research/2026-05-17/DATASET_MODEL_INTEGRATION_REVIEW.md` - updated for the V7-31 foundation, while keeping V7-31 unchecked until an approved ONNX image/text embedding provider and runtime validation exist.
 
 ## Preserved
 
@@ -86,12 +91,13 @@ Completed before commit:
 - `dotnet list Images.sln package --vulnerable --include-transitive` - passed; no vulnerable packages for `Images` or `Images.Tests`.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Test-VersionSync.ps1` - passed for 0.2.11.
 - `dotnet build Images.sln -c Release` - passed with 0 warnings and 0 errors.
-- `dotnet test Images.sln -c Release --no-build` - passed 383 tests after V7-30 model-manager coverage was added.
+- `dotnet test Images.sln -c Release --no-build` - passed 387 tests after the V7-31 semantic-search foundation coverage was added.
 - `dotnet test Images.sln -c Release --filter ExportCapabilityWarningServiceTests` - passed 5 focused V7-14 capability-warning tests.
 - `dotnet test Images.sln -c Release --filter "ImageColorAnalysisServiceTests|ColorAnalysisControllerTests"` - passed 5 focused V7-15 color-analysis tests.
 - `dotnet test Images.sln -c Release --filter RecoveryCenterServiceTests` - passed 5 focused V7-16 recovery-center tests.
 - `dotnet test Images.sln -c Release --filter "ImageCommands_AreDisabledUntilImageIsLoaded|RecoveryCenterServiceTests|ImageColorAnalysisServiceTests|ColorAnalysisControllerTests"` - passed 11 focused tests after delete-sharing hardening.
 - `dotnet test Images.sln -c Release --filter "ModelManagerServiceTests|CodecCapabilityServiceTests"` - passed 7 focused V7-30 model-manager and provenance tests.
+- `dotnet test Images.sln -c Release --filter SemanticSearchServiceTests` - passed 4 focused V7-31 semantic-index foundation tests.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Test-ReleaseReadiness.ps1 -Version 0.2.11` - passed.
 - `src\Images\bin\Release\net9.0-windows10.0.22621.0\Images.exe --system-info` - exited 0 in the local shell smoke.
 - `src\Images\bin\Release\net9.0-windows10.0.22621.0\Images.exe --codec-report` - exited 0 in the local shell smoke.
