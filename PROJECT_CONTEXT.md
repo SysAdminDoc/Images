@@ -93,7 +93,7 @@ Shipped or present in current docs and changelog:
 The old `ROADMAP.md` v6 header said there was no editor, organizer, or batch processor. That is stale. The current gap set is more specific:
 
 - Roadmap/status hygiene needs to stay synchronized with shipped features.
-- `CHANGELOG.md` contains future-dated historical entries for `v0.1.8` and `v0.1.9` dated 2026-06-02, which is after this 2026-05-17 reconciliation date.
+- The future-dated historical `CHANGELOG.md` entries for `v0.1.8` and `v0.1.9` were repaired on 2026-05-17: `v0.1.9` uses GitHub release publication date 2026-05-04, and `v0.1.8` uses local release commit date 2026-04-25 because no tag or GitHub release exists.
 - Settings remains incomplete relative to the app surface: General, Appearance, Advanced, Hotkeys, accessibility, and diagnostics preferences need first-class IA.
 - The optional `jpegtran.exe` sidecar still needs an approved staged artifact, license files, SHA-256 provenance, and release smoke coverage before it can be bundled.
 - There is no full local catalog/schema layer yet for library-scale metadata, smart search, long-running indexing, or durable job progress.
@@ -129,7 +129,7 @@ Root `ROADMAP.md` now starts with an authoritative 2026-05-17 v7 plan. The older
 
 ## Recommended Next Work
 
-1. Keep the 2026-05-17 roadmap/status reconciliation in place and repair the future-dated changelog entries after source verification.
+1. Keep the 2026-05-17 roadmap/status reconciliation in place and add a release checklist gate so shipped-roadmap status cannot drift again.
 2. Finish the settings/accessibility IA because it touches many already-shipped features and reduces user friction without adding new runtime risk.
 3. Implement a dependency/runtime provenance dashboard that covers NuGet, Ghostscript, jpegtran, Magick.NET, OCR, and future model runtimes.
 4. Stage the approved jpegtran artifact and add release smoke tests before treating lossless JPEG transforms as a fully bundled feature.

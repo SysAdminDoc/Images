@@ -17,7 +17,7 @@ Evidence bundle for this refresh:
 
 ### Open Status Conflicts
 
-- `CHANGELOG.md` lists `v0.1.8` and `v0.1.9` with dates of 2026-06-02, which is after the 2026-05-17 current date. Verify against tags/release metadata before editing.
+- `CHANGELOG.md` previously listed `v0.1.8` and `v0.1.9` with future dates of 2026-06-02. This was repaired on 2026-05-17 using local release commits and GitHub release metadata.
 - The old v6 top section below is useful research but stale as a status source.
 - Shared external memory described older Images state. Live repo evidence wins.
 
@@ -27,7 +27,7 @@ Evidence bundle for this refresh:
 | --- | --- | --- | --- | --- | --- |
 | V7-00 | [x] | S | Create canonical project context and research run artifacts. | User prompt; `AGENTS.md`; stale v6 status. | `PROJECT_CONTEXT.md` and all required `.ai/research/2026-05-17/*` files exist; source register and research log include local and external evidence. |
 | V7-01 | [x] | S | Clear SharpCompress vulnerability gate. | GHSA-6c8g-7p36-r338 / CVE-2026-44788; `dotnet list package --vulnerable`; `docs/archive-runtime-review.md`. | `SharpCompress` is 0.48.1; changelog/docs updated; vulnerable package scan is clean. |
-| V7-02 | [ ] | S | Verify and repair future-dated historical changelog entries. | `CHANGELOG.md`; current date 2026-05-17; tag/release history. | Dates for `v0.1.8` and `v0.1.9` are either corrected or annotated with verified release evidence. |
+| V7-02 | [x] | S | Verify and repair future-dated historical changelog entries. | `CHANGELOG.md`; current date 2026-05-17; tag/release history. | `v0.1.9` now uses GitHub release publication date 2026-05-04; `v0.1.8` now uses local release commit date 2026-04-25 because no local tag or GitHub release exists. |
 | V7-03 | [ ] | M | Add roadmap/status hygiene to release checklist. | Current roadmap drift; `docs/improvement-plan.md`; release workflow docs. | Release checklist includes current-state audit, shipped-roadmap closure pass, and version/date consistency check. |
 | V7-04 | [ ] | M | Finish Settings IA for the current feature surface. | `README.md` shortcut/feature breadth; old roadmap gap; accessibility needs. | Settings includes General, Appearance, Accessibility, Advanced, Hotkeys, Diagnostics/Privacy sections with persisted settings and regression coverage. |
 | V7-05 | [ ] | M | Build runtime/dependency provenance dashboard. | ImageGlass format matrix; current About codec report; `docs/integration-policy.md`. | About and `--codec-report` show NuGet/runtime/model rows with source, version, path, SHA-256 where applicable, advisory status, and missing-runtime action copy. |
