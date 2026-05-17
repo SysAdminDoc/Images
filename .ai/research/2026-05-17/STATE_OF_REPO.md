@@ -8,7 +8,7 @@ Repository: `C:\Users\--\repos\Images`
 - Branch: `main`, tracking `origin/main`.
 - HEAD: `6da0641aa2b241c1b108f28ed01be69836ec56a3`.
 - HEAD subject: `feat: add send print clipboard actions`.
-- Follow-up autonomous roadmap work on 2026-05-17 closed V7-02 through V7-07 and V7-10 through V7-16 after this initial state snapshot, including changelog date repair, release-readiness hygiene gates, settings IA, runtime/dependency provenance dashboard, approved jpegtran artifact staging, portable/installed release diagnostics smoke, local compare/overlay mode, the export preview workbench, catalog schema v1, culling review mode, shared export/batch capability warnings, side-panel ICC/profile plus histogram basics, and a destructive-action Recovery Center.
+- Follow-up autonomous roadmap work on 2026-05-17 closed V7-02 through V7-07, V7-10 through V7-16, and V7-30 after this initial state snapshot, including changelog date repair, release-readiness hygiene gates, settings IA, runtime/dependency provenance dashboard, approved jpegtran artifact staging, portable/installed release diagnostics smoke, local compare/overlay mode, the export preview workbench, catalog schema v1, culling review mode, shared export/batch capability warnings, side-panel ICC/profile plus histogram basics, a destructive-action Recovery Center, and a local model/runtime manager.
 - Latest local/GitHub release tag inspected: `v0.2.11` at `0abf855e109016b3e2279a99cdf43243d3efa35b`.
 - Latest release publication date from `gh release view v0.2.11`: 2026-05-05T21:12:36Z.
 - Release assets inspected:
@@ -64,12 +64,13 @@ Images is no longer only a viewer. Current source and documentation show these s
 - Non-destructive edit stack with resize, adjustments, effects, annotations/redaction, perspective correction, auto enhance, and virtual copies.
 - Destructive crop/writeback for flat rasters only.
 - Optional jpegtran discovery and lossless JPEG transform path.
-- Structured runtime/dependency provenance rows in About, `--system-info`, and `--codec-report` for .NET, Magick.NET, SharpCompress, Ghostscript, jpegtran, Windows OCR, AI runtime, and local model registry placeholders.
+- Structured runtime/dependency provenance rows in About, `--system-info`, and `--codec-report` for .NET, Magick.NET, SharpCompress, Ghostscript, jpegtran, Windows OCR, AI runtime, and the local model registry.
 - Approved libjpeg-turbo 3.1.4.1 jpegtran release staging with tracked license/provenance, SHA-256 validation, and release diagnostics smoke coverage.
 - Local compare mode for current+next, chosen local files, and duplicate-cleanup pairs; 2-up and opacity-overlay layouts share pan/zoom/rotate/flip, A/B swap, keyboard opacity controls, and Escape exit behavior.
 - Export preview workbench with original versus in-memory encoded preview, JPEG/PNG/WebP/AVIF/JXL presets, quality and resize controls, estimated output size and byte delta, visible target-format capability warnings, and batch preview/dry-run warnings for alpha, animation, pages/layers, metadata, ICC profile risk, and lossy settings.
 - Side-panel color analysis with embedded ICC/profile status, decoded color space, sampled luma/RGB channel stats, shadow/midtone/highlight histogram percentages, alpha transparency stats, and unmanaged-color warnings without modifying pixels.
 - Recovery Center with app-local JSONL records for moves, file-health renames, duplicate/file-health quarantines, crop/rotation/GPS writebacks, and Recycle Bin sends; move/rename/quarantine records can be revealed and restored with collision-safe targets and sidecar moves where possible.
+- Model manager with approved OpenCV/Carve LaMa ONNX definitions, manual local import/delete/reveal actions, app-local `models\inpaint` storage, pinned SHA-256 validation, runtime readiness copy, and no automatic downloads.
 - Rebuildable app-local catalog schema v1 with source path, SHA-256 fingerprint, dimensions, file dates, size, codec/format metadata, XMP sidecar path/modified time, rating, tags, scan timestamps, and root scan rows.
 - Culling review mode with XMP-backed star ratings, pick/reject labels, side-panel controls, keyboard flow, gallery smart-filter refresh, and undo of previous review sidecar state.
 - Wallpaper, send, print, and clipboard actions.
@@ -82,7 +83,7 @@ This means the older `ROADMAP.md` v6 "No editor, no organizer, no batch processo
 - Core IO policies are service-owned rather than spread directly through XAML code-behind.
 - The app already has a strong local-only privacy contract and many optional-runtime review docs.
 - Test coverage is broad for services and view-model workflow seams, with generated image fixtures preferred over checked-in binaries.
-- The current highest-risk areas are not basic viewer features; they are runtime provenance, status/documentation drift, optional model/runtime expansion, and workflow integration across already-shipped surfaces.
+- The current highest-risk areas are not basic viewer features; they are actual model execution and derived-data lifecycle, status/documentation drift, optional runtime expansion, and workflow integration across already-shipped surfaces.
 
 ## Build And Dependency State
 

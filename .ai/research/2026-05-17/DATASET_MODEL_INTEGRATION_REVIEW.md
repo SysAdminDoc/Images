@@ -15,36 +15,36 @@ Shipped or documented:
 - Gallery smart filters use local metadata/sidecar signals.
 - `docs/inpaint-runtime-decision.md` chooses an opt-in local LaMa ONNX direction for future content-aware repair.
 - `docs/design-product-differentiators.md` scopes semantic search to local indexing, an embedding provider abstraction, SQLite records, and no automatic model download.
+- `ModelManagerService` and `ModelManagerWindow` now provide the V7-30 shared model manager foundation: approved local model definitions, app-local grouped storage, manual ONNX import/delete/reveal controls, pinned SHA-256 validation, runtime readiness copy, and diagnostics provenance rows.
 
 Not present yet:
 
-- Shared model manager.
 - Local embedding index.
-- Catalog schema v1.
 - Face/person recognition.
 - Background removal.
 - Super-resolution.
 - Bundled AI model artifacts.
+- Model inference package/runtime execution.
 
 ## Model Manager Requirement
 
-Before adding any model-backed feature, implement a shared model/runtime registry with:
+V7-30 implemented the shared model/runtime registry foundation with:
 
 - Model ID and display name.
 - Source URL.
-- License and license file path.
-- Version or revision.
+- License summary.
+- Version, revision, or exact artifact filename where available.
 - SHA-256.
 - Size.
 - Runtime: Windows ML, ONNX Runtime DirectML, CPU fallback, or external executable.
 - Storage path under app-local data.
 - Download/import status.
 - Hardware/runtime compatibility status.
-- Last validation result.
+- Last validation/import result.
 - Delete/rebuild controls.
 - No automatic network call without explicit user action.
 
-This model manager should feed About diagnostics, CLI reports, settings, and feature enablement.
+The current manager feeds About diagnostics, CLI reports, and future feature enablement. Settings integration, user-initiated download logging, license/readme retention, and real runtime validation remain future work.
 
 ## Candidate Feature Paths
 
@@ -76,7 +76,9 @@ User controls:
 Existing decision:
 
 - Primary candidate: https://huggingface.co/opencv/inpainting_lama
+- Approved primary file: `inpainting_lama_2025jan.onnx`, SHA-256 `7df918ac3921d3daf0aae1d219776cf0dc4e4935f035af81841b40adcf74fdf2`
 - Fallback validation candidate: https://huggingface.co/Carve/LaMa-ONNX
+- Approved fallback file: `lama_fp32.onnx`, SHA-256 `1faef5301d78db7dda502fe59966957ec4b79dd64e16f03ed96913c7a4eb68d6`
 - Original project: https://github.com/advimman/lama
 
 Implementation constraints:
@@ -170,9 +172,9 @@ For models, add:
 
 ## Recommended Sequence
 
-1. Catalog schema v1.
-2. Model manager/runtime registry.
-3. Fake-provider tests and CLI diagnostics.
+1. Catalog schema v1. Done under V7-12.
+2. Model manager/runtime registry. Registry/import/status foundation done under V7-30; runtime execution still pending.
+3. Fake-provider tests and CLI diagnostics for embedding providers.
 4. Local embedding index MVP.
 5. Semantic search UI.
-6. Inpaint/background/upscale workbenches only after the shared runtime foundation is stable.
+6. Inpaint/background/upscale workbenches only after the shared runtime execution foundation is stable.

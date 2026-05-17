@@ -137,6 +137,7 @@ public static class CodecCapabilityService
     {
         ArgumentNullException.ThrowIfNull(provenance);
         ArgumentNullException.ThrowIfNull(ocrStatus);
+        var modelSnapshot = new ModelManagerService().GetSnapshot();
 
         return
         [
@@ -218,21 +219,25 @@ public static class CodecCapabilityService
                 Name: "AI inference runtime",
                 Kind: "Runtime",
                 Source: "Windows ML: https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview; ONNX Runtime DirectML: https://onnxruntime.ai/docs/execution-providers/DirectML-ExecutionProvider.html",
-                Version: "not referenced by current build",
+                Version: modelSnapshot.Runtime.PreferredBackend,
                 Path: null,
                 Sha256: null,
-                AdvisoryStatus: "Not enabled; model features require V7-30 runtime review before package or runtime references are added.",
-                Action: "Complete V7-30 model/runtime manager before semantic search, inpaint, background removal, or super-resolution."),
+                AdvisoryStatus: modelSnapshot.Runtime.StatusText,
+                Action: modelSnapshot.Runtime.WindowsMlReferenced || modelSnapshot.Runtime.OnnxDirectMlReferenced
+                    ? "Keep runtime package versions visible here and run model smoke tests before enabling AI tools."
+                    : "Inference packages are still disabled; use Model Manager to prepare verified local model files first."),
 
             new(
                 Name: "Local model registry",
                 Kind: "Model",
-                Source: "No bundled model; scoped candidates include https://huggingface.co/opencv/inpainting_lama and https://huggingface.co/Carve/LaMa-ONNX",
-                Version: "not installed",
-                Path: BuildAppDataPath("models"),
+                Source: "Approved sources include https://huggingface.co/opencv/inpainting_lama and https://huggingface.co/Carve/LaMa-ONNX; no automatic downloads.",
+                Version: modelSnapshot.RegistrySummary,
+                Path: modelSnapshot.ModelRoot ?? BuildAppDataPath("models"),
                 Sha256: null,
-                AdvisoryStatus: "No model is installed or auto-downloaded; future model files must be user initiated and SHA-256 verified.",
-                Action: "Use a future approved model-manager flow; do not enable model-backed tools from ad hoc files.")
+                AdvisoryStatus: "Model files must be user imported, app-local, and SHA-256 matched to an approved registry entry before model-backed tools can use them.",
+                Action: modelSnapshot.ReadyCount > 0
+                    ? "Keep model hashes pinned and visible; do not run model-backed tools without matching runtime validation."
+                    : "Open Model Manager, download manually from an approved source, and import the exact ONNX file.")
         ];
     }
 
