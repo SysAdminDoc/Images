@@ -242,7 +242,7 @@ Text extraction (OCR) using Windows.Media.Ocr API. Local processing, privacy-fir
 - **Single-region copy only** — no multi-select, Ctrl+click, or Select All. Click one box → copies one line. Phase 2 will add multi-region selection and "Copy all text" button.
 - **No in-app language picker** — users must install language packs via Windows Settings. Phase 2 will add Settings window OCR section with language enumeration and direct link to Windows language settings.
 
-## v0.1.9 — 2026-06-02
+## v0.1.9 — 2026-05-04
 
 Settings window, GPS-location strip, and automatic external-edit reload. Three ROADMAP items closed.
 
@@ -252,7 +252,7 @@ Settings window, GPS-location strip, and automatic external-edit reload. Three R
 - **Strip GPS location (P-01)** — "Strip GPS location" toolbar button and context-menu item removes all GPS EXIF values from the current file using Magick.NET and writes the result atomically (temp-file swap — crash-safe). Reports the number of GPS fields removed via toast. Returns "No GPS data found" when the file is clean. Reloads the image and metadata HUD after stripping so the overlay updates in place.
 - **Auto-reload on external edit (Item 61)** — when an image is opened, a `FileSystemWatcher` monitors it for `LastWrite` / `Size` changes. Rapid writes are coalesced via an 800 ms debounce timer so incremental saves from Photoshop / Paint.NET / etc. produce a single reload. Toast: "Reloaded — file changed externally". Degrades silently on network drives or locked volumes. Preload cache is cleared before reload so stale decoded frames are not reused.
 
-## v0.1.8 — 2026-06-02
+## v0.1.8 — 2026-04-25
 
 UI surface release. Promotes the foundation work from v0.1.7 into user-visible features: clipboard paste, open-with-default-app, richer decode error messages, and the recent-folders side panel. Eight ROADMAP items closed or advanced.
 

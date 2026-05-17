@@ -101,7 +101,7 @@ Known package update opportunities from `dotnet list Images.sln package --outdat
 
 ## Local Contradictions And Risks
 
-- `CHANGELOG.md` contains `v0.1.8` and `v0.1.9` entries dated 2026-06-02, which is after the 2026-05-17 current date. Treat these dates as suspicious until verified against commits or release metadata.
+- `CHANGELOG.md` previously contained `v0.1.8` and `v0.1.9` entries dated 2026-06-02, which was after the 2026-05-17 current date. This was repaired on 2026-05-17 after checking local commits/tags and GitHub release metadata.
 - Root `ROADMAP.md` contains excellent source material but its top current-state narrative predates several shipped features.
 - `.claude` project memory found through the shared memory index described older Images state around `v0.1.2`; this is historical and must be verified against live repo before use.
 - Runtime sidecars and model expansion need checksum/license/release smoke gates before bundling.
