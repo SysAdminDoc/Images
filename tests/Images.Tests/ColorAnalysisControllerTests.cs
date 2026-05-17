@@ -1,0 +1,131 @@
+using System.Runtime.ExceptionServices;
+using System.Threading;
+using System.Windows.Threading;
+using Images.Services;
+using Images.ViewModels;
+
+namespace Images.Tests;
+
+public sealed class ColorAnalysisControllerTests
+{
+    [Fact]
+    public void Refresh_WhenReaderReturnsRows_PopulatesRowsAndWarning()
+    {
+        RunOnSta(() =>
+        {
+            var path = @"C:\photos\color.png";
+            using var controller = new ColorAnalysisController(
+                Dispatcher.CurrentDispatcher,
+                isDisposed: () => false,
+                currentPath: () => path,
+                readAnalysis: _ => new ImageColorAnalysis(
+                    [new MetadataFact("Profile", "Embedded ICC")],
+                    "",
+                    "Profile warning"),
+                timeout: TimeSpan.FromSeconds(1));
+
+            controller.Refresh(path);
+            PumpUntil(() => !controller.IsLoading);
+
+            var row = Assert.Single(controller.Rows);
+            Assert.Equal("Profile", row.Label);
+            Assert.Equal("Embedded ICC", row.Value);
+            Assert.Equal("Profile warning", controller.WarningText);
+        });
+    }
+
+    [Fact]
+    public void Refresh_WhenSuperseded_IgnoresOlderResult()
+    {
+        RunOnSta(() =>
+        {
+            var first = @"C:\photos\first.png";
+            var second = @"C:\photos\second.png";
+            var currentPath = first;
+            using var firstStarted = new ManualResetEventSlim();
+            using var releaseFirst = new ManualResetEventSlim();
+
+            using var controller = new ColorAnalysisController(
+                Dispatcher.CurrentDispatcher,
+                isDisposed: () => false,
+                currentPath: () => currentPath,
+                readAnalysis: path =>
+                {
+                    if (path == first)
+                    {
+                        firstStarted.Set();
+                        releaseFirst.Wait(TimeSpan.FromSeconds(5));
+                        return new ImageColorAnalysis([new MetadataFact("Path", "first")], "", "");
+                    }
+
+                    return new ImageColorAnalysis([new MetadataFact("Path", "second")], "", "");
+                },
+                timeout: TimeSpan.FromSeconds(1));
+
+            controller.Refresh(first);
+            Assert.True(firstStarted.Wait(TimeSpan.FromSeconds(1)));
+
+            currentPath = second;
+            controller.Refresh(second);
+            PumpUntil(() => !controller.IsLoading && controller.Rows.FirstOrDefault()?.Value == "second");
+
+            releaseFirst.Set();
+            PumpFor(TimeSpan.FromMilliseconds(50));
+
+            var row = Assert.Single(controller.Rows);
+            Assert.Equal("second", row.Value);
+        });
+    }
+
+    private static void PumpUntil(Func<bool> condition)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(3);
+        while (!condition())
+        {
+            if (DateTime.UtcNow >= deadline)
+                throw new TimeoutException("Timed out while waiting for dispatcher work.");
+
+            PumpFor(TimeSpan.FromMilliseconds(10));
+        }
+    }
+
+    private static void PumpFor(TimeSpan interval)
+    {
+        var frame = new DispatcherFrame();
+        var timer = new DispatcherTimer(DispatcherPriority.Background)
+        {
+            Interval = interval
+        };
+
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            frame.Continue = false;
+        };
+
+        timer.Start();
+        Dispatcher.PushFrame(frame);
+    }
+
+    private static void RunOnSta(Action action)
+    {
+        Exception? exception = null;
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        if (exception is not null)
+            ExceptionDispatchInfo.Capture(exception).Throw();
+    }
+}

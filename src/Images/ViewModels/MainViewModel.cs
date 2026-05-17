@@ -22,6 +22,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly ClipboardImportService _clipboardImport;
     private readonly FolderPreviewController _folderPreview;
     private readonly PhotoMetadataController _photoMetadata;
+    private readonly ColorAnalysisController _colorAnalysis;
     private readonly OcrWorkflowController _ocrWorkflow;
     private readonly ExternalEditReloadController _externalEditReload;
     private readonly UpdateCheckController _updateCheck;
@@ -100,6 +101,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _folderPreview.StateChanged += (_, _) => RaiseFolderPreviewState();
         _photoMetadata = photoMetadata ?? new PhotoMetadataController(_uiDispatcher, () => _isDisposed, () => CurrentPath);
         _photoMetadata.StateChanged += (_, _) => RaisePhotoMetadataState();
+        _colorAnalysis = new ColorAnalysisController(_uiDispatcher, () => _isDisposed, () => CurrentPath);
+        _colorAnalysis.StateChanged += (_, _) => RaiseColorAnalysisState();
         _ocrWorkflow = ocrWorkflow ?? new OcrWorkflowController(
             () => CurrentPath,
             () => HasImage,
@@ -1866,6 +1869,37 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(MetadataStatusText));
     }
 
+    public ObservableCollection<MetadataFact> ColorAnalysisRows => _colorAnalysis.Rows;
+
+    public bool IsColorAnalysisLoading => _colorAnalysis.IsLoading;
+
+    public string ColorAnalysisStatusText => _colorAnalysis.StatusText;
+
+    public string ColorAnalysisWarningText => _colorAnalysis.WarningText;
+
+    public bool ShowColorAnalysisPanel =>
+        ColorAnalysisRows.Count > 0 ||
+        !string.IsNullOrWhiteSpace(ColorAnalysisStatusText) ||
+        !string.IsNullOrWhiteSpace(ColorAnalysisWarningText);
+
+    private void RefreshColorAnalysis(string path)
+    {
+        _colorAnalysis.Refresh(path);
+    }
+
+    private void ClearColorAnalysis()
+    {
+        _colorAnalysis.Clear();
+    }
+
+    private void RaiseColorAnalysisState()
+    {
+        Raise(nameof(IsColorAnalysisLoading));
+        Raise(nameof(ColorAnalysisStatusText));
+        Raise(nameof(ColorAnalysisWarningText));
+        Raise(nameof(ShowColorAnalysisPanel));
+    }
+
     // -------------------- Folder preview strip --------------------
 
     public ObservableCollection<FolderPreviewItem> FolderPreviewItems => _folderPreview.Items;
@@ -3127,9 +3161,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(FileSizeText));
         RefreshFolderPreview();
         if (CurrentImage is null)
+        {
             ClearPhotoMetadata();
+            ClearColorAnalysis();
+        }
         else
+        {
             RefreshPhotoMetadata(path);
+            RefreshColorAnalysis(path);
+        }
 
         if (loaded && !CurrentFormatSupportsCrop)
             CropStatusText = CropUnavailableStatusText;
@@ -5647,6 +5687,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClearRetouchState(showToast: false);
         ResetPageState();
         ClearPhotoMetadata();
+        ClearColorAnalysis();
         _folderPreview.Clear();
         RenameStatus = RenameStatusKind.Idle;
         SyncRenameEditorFromDisk();
@@ -5682,6 +5723,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _nav.ListChanged -= OnDirectoryListChanged;
         _ocrWorkflow.Dispose();
         _photoMetadata.Dispose();
+        _colorAnalysis.Dispose();
         _folderPreview.Dispose();
         _preload.Dispose();
         _nav.Dispose();
