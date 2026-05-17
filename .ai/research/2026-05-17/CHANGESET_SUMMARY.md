@@ -14,6 +14,9 @@ Date: 2026-05-17
 - `.ai/research/2026-05-17/PRIORITIZATION_MATRIX.md` - scored and tiered candidates.
 - `.ai/research/2026-05-17/SECURITY_AND_DEPENDENCY_REVIEW.md` - package/runtime/advisory review and hardening plan.
 - `.ai/research/2026-05-17/DATASET_MODEL_INTEGRATION_REVIEW.md` - model/dataset/integration review.
+- `src/Images/Services/RecoveryCenterService.cs` - durable destructive-action ledger plus restore service for moves, renames, quarantines, and sidecars.
+- `src/Images/RecoveryCenterWindow.xaml` and `src/Images/RecoveryCenterWindow.xaml.cs` - user-facing Recovery Center to review, reveal, and restore recorded operations.
+- `tests/Images.Tests/RecoveryCenterServiceTests.cs` - focused coverage for restore, conflict-safe targets, sidecar recovery, missing recovery sources, and non-restorable writebacks.
 
 `CONTINUE_FROM_HERE.md` was not created because no hard limit blocked completion.
 
@@ -59,6 +62,9 @@ Date: 2026-05-17
 - `src/Images/ViewModels/ColorAnalysisController.cs`, `src/Images/ViewModels/MainViewModel.cs`, and `src/Images/MainWindow.xaml` - add an asynchronous side-panel color/histogram section with safe unmanaged-color warnings that do not transform pixels.
 - `tests/Images.Tests/ImageColorAnalysisServiceTests.cs` and `tests/Images.Tests/ColorAnalysisControllerTests.cs` - cover profiled, unprofiled, transparent, and controller supersession behavior.
 - `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, `docs/improvement-plan.md`, `.ai/research/2026-05-17/STATE_OF_REPO.md`, `.ai/research/2026-05-17/FEATURE_BACKLOG.md`, and `.ai/research/2026-05-17/PRIORITIZATION_MATRIX.md` - updated for V7-15 completion.
+- `src/Images/ViewModels/MainViewModel.cs`, `src/Images/MainWindow.xaml`, `src/Images/DuplicateCleanupWindow.xaml.cs`, and `src/Images/FileHealthScanWindow.xaml.cs` - add Recovery Center entry points and record move, rename, quarantine, writeback, and Recycle Bin operations.
+- `src/Images/Services/ImageColorAnalysisService.cs` and `src/Images/Services/ImageMetadataService.cs` - open background Magick.NET inspection streams with delete-sharing so read-only panels do not block move/delete flows.
+- `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, `docs/improvement-plan.md`, `.ai/research/2026-05-17/STATE_OF_REPO.md`, `.ai/research/2026-05-17/SOURCE_REGISTER.md`, `.ai/research/2026-05-17/FEATURE_BACKLOG.md`, and `.ai/research/2026-05-17/PRIORITIZATION_MATRIX.md` - updated for V7-16 completion.
 
 ## Preserved
 
@@ -74,9 +80,11 @@ Completed before commit:
 - `dotnet list Images.sln package --vulnerable --include-transitive` - passed; no vulnerable packages for `Images` or `Images.Tests`.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Test-VersionSync.ps1` - passed for 0.2.11.
 - `dotnet build Images.sln -c Release` - passed with 0 warnings and 0 errors.
-- `dotnet test Images.sln -c Release --no-build` - passed 373 tests after V7-15 color-analysis coverage was added.
+- `dotnet test Images.sln -c Release --no-build` - passed 378 tests after V7-16 recovery coverage was added and background metadata/color reads were hardened for delete-sharing.
 - `dotnet test Images.sln -c Release --filter ExportCapabilityWarningServiceTests` - passed 5 focused V7-14 capability-warning tests.
 - `dotnet test Images.sln -c Release --filter "ImageColorAnalysisServiceTests|ColorAnalysisControllerTests"` - passed 5 focused V7-15 color-analysis tests.
+- `dotnet test Images.sln -c Release --filter RecoveryCenterServiceTests` - passed 5 focused V7-16 recovery-center tests.
+- `dotnet test Images.sln -c Release --filter "ImageCommands_AreDisabledUntilImageIsLoaded|RecoveryCenterServiceTests|ImageColorAnalysisServiceTests|ColorAnalysisControllerTests"` - passed 11 focused tests after delete-sharing hardening.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Test-ReleaseReadiness.ps1 -Version 0.2.11` - passed.
 - `src\Images\bin\Release\net9.0-windows10.0.22621.0\Images.exe --system-info` - exited 0 in the local shell smoke.
 - `src\Images\bin\Release\net9.0-windows10.0.22621.0\Images.exe --codec-report` - exited 0 in the local shell smoke.

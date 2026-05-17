@@ -86,6 +86,11 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE946;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Recovery center" Command="{Binding OpenRecoveryCenterCommand}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE777;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="Tag relationships" Command="{Binding OpenTagGraphCommand}" InputGestureText="Ctrl+Shift+T">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EC;" />
@@ -3644,6 +3649,13 @@
                                         Margin="0,8,0,0"
                                         AutomationProperties.Name="Open file health scan">
                                     <TextBlock Text="File health" />
+                                </Button>
+                                <Button Command="{Binding OpenRecoveryCenterCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        MinWidth="86"
+                                        Margin="0,8,0,0"
+                                        AutomationProperties.Name="Open recovery center">
+                                    <TextBlock Text="Recovery" />
                                 </Button>
                             </StackPanel>
                         </Grid>

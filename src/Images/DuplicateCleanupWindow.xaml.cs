@@ -14,6 +14,7 @@ public partial class DuplicateCleanupWindow : Window
 {
     private readonly DuplicateCleanupService _cleanupService = new();
     private readonly RecycleBinDeleteService _deleteService = new(SettingsService.Instance);
+    private readonly RecoveryCenterService _recoveryCenter;
     private readonly ObservableCollection<string> _scanFolders = [];
     private readonly ObservableCollection<string> _referenceFolders = [];
     private readonly ObservableCollection<DuplicateCleanupFinding> _findings = [];
@@ -22,7 +23,13 @@ public partial class DuplicateCleanupWindow : Window
     public event EventHandler<DuplicateCompareRequestedEventArgs>? CompareRequested;
 
     public DuplicateCleanupWindow()
+        : this(null)
     {
+    }
+
+    internal DuplicateCleanupWindow(RecoveryCenterService? recoveryCenter)
+    {
+        _recoveryCenter = recoveryCenter ?? new RecoveryCenterService();
         InitializeComponent();
 
         ScanFoldersList.ItemsSource = _scanFolders;
@@ -215,6 +222,15 @@ public partial class DuplicateCleanupWindow : Window
         try
         {
             var result = await Task.Run(() => _cleanupService.Quarantine(paths));
+            foreach (var moved in result.Moved)
+            {
+                _recoveryCenter.RecordQuarantine(
+                    moved.SourcePath,
+                    moved.DestinationPath,
+                    "Duplicate cleanup quarantine",
+                    $"Moved duplicate candidate {Path.GetFileName(moved.SourcePath)} to app-local quarantine batch {Path.GetFileName(result.BatchDirectory ?? string.Empty)}.");
+            }
+
             if (result.MovedCount > 0 && finding is not null)
                 RemoveFinding(finding);
 
@@ -255,6 +271,10 @@ public partial class DuplicateCleanupWindow : Window
             switch (result.Status)
             {
                 case RecycleBinDeleteStatus.Deleted:
+                    _recoveryCenter.RecordRecycleBin(
+                        path,
+                        "Duplicate cleanup Recycle Bin",
+                        $"Sent duplicate candidate {Path.GetFileName(path)} to the Windows Recycle Bin.");
                     deleted++;
                     break;
                 case RecycleBinDeleteStatus.Canceled:
