@@ -64,14 +64,14 @@
                             Style="{StaticResource PrimaryButton}"
                             Margin="8,0,0,0"
                             Click="ImportButton_Click"
-                            AutomationProperties.Name="Import selected model">
+                            AutomationProperties.Name="Import selected model file">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE8B7;"
                                        FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="12"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center" />
-                            <TextBlock Text="Import ONNX" />
+                            <TextBlock Text="Import file" />
                         </StackPanel>
                     </Button>
                 </WrapPanel>
