@@ -41,6 +41,9 @@ artifacts/
 ## Installer build outputs — Inno Setup compiled artifacts live here
 installer/output/
 installer/*.exe
+codec-artifacts/
+.tmp-jpegtran-bundle/
+release-diagnostics/
 
 ## Optional third-party codec runtimes
 src/Images/Codecs/Ghostscript/**
@@ -49,6 +52,9 @@ src/Images/Codecs/Ghostscript/**
 src/Images/Codecs/JpegTran/**
 !src/Images/Codecs/JpegTran/
 !src/Images/Codecs/JpegTran/README.txt
+!src/Images/Codecs/JpegTran/LICENSE.md
+!src/Images/Codecs/JpegTran/README.ijg
+!src/Images/Codecs/JpegTran/PROVENANCE.md
 
 ## OS
 Thumbs.db

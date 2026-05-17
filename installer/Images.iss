@@ -522,6 +522,12 @@ var
   LogPath: String;
   Parameters: String;
 begin
+  if Pos('/SKIPOCR', Uppercase(GetCmdTail)) > 0 then
+  begin
+    Log('Skipping Windows OCR optional capability install because /SKIPOCR was supplied.');
+    Exit;
+  end;
+
   if not IsAdminInstallMode then
   begin
     Log('Skipping Windows OCR optional capability install because this is a non-administrative install.');

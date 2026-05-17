@@ -119,6 +119,9 @@ This register lists local and external sources used for the research and plannin
 | S-GHOSTSCRIPT-RELEASES | https://www.ghostscript.com/releases/ | Ghostscript 10.07.0 latest release and date. |
 | S-GHOSTSCRIPT-CVE | https://ghostscript.com/releases/cve/index.html | Ghostscript CVE tracking. |
 | S-GHOSTSCRIPT-NEWS | https://ghostscript.readthedocs.io/en/gs10.07.0/News.html | 10.07.0 release notes and behavior/security notes. |
+| S-LIBJPEG-TURBO-RELEASE | https://github.com/libjpeg-turbo/libjpeg-turbo/releases/tag/3.1.4.1 | Approved jpegtran release artifact, source archive, and GitHub-provided SHA-256 digests. |
+| S-LIBJPEG-TURBO-BINARIES | https://libjpeg-turbo.org/Documentation/OfficialBinaries | Official binary packaging reference for libjpeg-turbo. |
+| S-LIBJPEG-TURBO-LICENSE | https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/LICENSE.md | BSD-style license text and redistribution notice source for tracked `Codecs\JpegTran` license files. |
 | S-SERILOG | https://github.com/serilog/serilog/releases | Logging package update review. |
 | S-SERILOG-NUGET | https://www.nuget.org/packages/Serilog | Current Serilog release evidence. |
 | S-INNO | https://jrsoftware.org/isinfo.php | Installer tooling reference. |

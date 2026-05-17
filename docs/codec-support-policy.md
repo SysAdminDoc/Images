@@ -7,7 +7,7 @@ What "broad codec support" means for Images, what's bundled vs optional, and how
 | Tier | What it means | Examples |
 |---|---|---|
 | **Bundled, in-process** | Always available, ships inside the app's directory. | WIC (via Windows), Magick.NET (Apache 2.0, NuGet), SharpCompress (MIT, NuGet), .NET ZIP APIs |
-| **Optional, app-local or system-installed** | Surfaces extra format families or safer writeback paths when present, never required. Provenance shown in About + `--system-info`. | Ghostscript (PDF/EPS/PS/AI previews), jpegtran (exact JPEG crop writeback) |
+| **Optional, app-local or system-installed** | Surfaces extra format families or safer writeback paths when present, never required. Provenance shown in About + `--system-info`. | Ghostscript (PDF/EPS/PS/AI previews), jpegtran (exact JPEG crop/rotation writeback) |
 | **Not supported** | Requested, not in scope today. The viewer's unsupported-format hint points at the right tool. | video, audio, native design-suite docs |
 
 ## What ships in the bundle
@@ -28,7 +28,7 @@ The current open extension count and writable export count are reported live by 
 
 The active source is shown in About → Runtime provenance (path, version, SHA-256 of `gsdll64.dll`). See [`codec-bundling.md`](codec-bundling.md) for the bundling layout and the SHA-256 drift check.
 
-Ghostscript is **never bundled into a public release** unless redistribution rights for the exact package are explicitly approved. Out of the box, Images relies on the user's installed copy.
+Official release artifacts bundle the approved Ghostscript 10.07.0 runtime with AGPL license/source provenance. Development builds may still rely on a user's installed copy or `IMAGES_GHOSTSCRIPT_DIR`.
 
 ## Adding a new optional decoder
 
@@ -42,7 +42,7 @@ Required before any new optional decoder/runtime lands (per ROADMAP X-03):
 
 This applies to: Ghostscript, native 7-Zip / UnRAR sidecars, OpenSlide, Bio-Formats, OCR engines, AI models, plugin hosts.
 
-Lossless JPEG writeback is covered by the same gate. The `V30-02` policy in [`lossless-jpeg-transform-policy.md`](lossless-jpeg-transform-policy.md) documents the required `jpegtran.exe` review and the guarded exact-crop shell-out path, but no JPEG transform sidecar ships until the exact binary is approved.
+Lossless JPEG writeback is covered by the same gate. The `V30-02` policy in [`lossless-jpeg-transform-policy.md`](lossless-jpeg-transform-policy.md) documents the approved libjpeg-turbo 3.1.4.1 `jpegtran.exe` artifact, tracked license/provenance files, guarded crop/rotation shell-out path, and release diagnostics smoke. The executable remains ignored by git and is staged only for release build/publish output.
 
 ## Dropping a decoder
 
