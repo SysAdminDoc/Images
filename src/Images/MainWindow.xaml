@@ -4761,6 +4761,67 @@
                         </ItemsControl>
                     </StackPanel>
 
+                    <StackPanel Visibility="{Binding ShowColorAnalysisPanel, Converter={StaticResource BoolToVis}}">
+                        <Border Style="{StaticResource Divider}" />
+                        <TextBlock Text="Color &amp; histogram" Style="{StaticResource SectionLabel}" />
+
+                        <ItemsControl ItemsSource="{Binding ColorAnalysisRows}"
+                                      Visibility="{Binding ColorAnalysisRows.Count, Converter={StaticResource BoolToVis}}"
+                                      AutomationProperties.Name="Color profile and histogram">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="1,0,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding Label}"
+                                                   Style="{StaticResource MetaLabel}" />
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Value}"
+                                                   Style="{StaticResource MetaValue}"
+                                                   ToolTip="{Binding Value}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Border Style="{StaticResource Card}"
+                                Margin="0,6,0,0"
+                                Visibility="{Binding ColorAnalysisWarningText, Converter={StaticResource BoolToVis}}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE7BA;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="12"
+                                           Foreground="{StaticResource YellowBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,9,0" />
+                                <TextBlock Text="{Binding ColorAnalysisWarningText}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}"
+                                Margin="0,6,0,0"
+                                Visibility="{Binding ColorAnalysisStatusText, Converter={StaticResource BoolToVis}}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE946;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="12"
+                                           Foreground="{StaticResource OverlayBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,9,0" />
+                                <TextBlock Text="{Binding ColorAnalysisStatusText}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
                     <Border Style="{StaticResource Card}"
                             Margin="0,4,0,0"
                             Visibility="{Binding MetadataStatusText, Converter={StaticResource BoolToVis}}">

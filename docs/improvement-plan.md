@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V7-14` is complete. Export preview, batch preview, and batch dry-run now share target-format loss warnings for alpha flattening, animation frames, pages/layers, EXIF/IPTC/XMP metadata, ICC profiles, and lossy quality settings.
+Roadmap `V7-15` is complete. The side panel now reports embedded ICC/profile status, decoded color space, sampled luma/RGB channel stats, shadow/midtone/highlight histogram percentages, alpha transparency stats, and unmanaged-color warnings without changing pixels.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the remaining roadmap: ICC/profile and histogram basics, destructive-action recovery, and local model/runtime management. The content-aware inpaint runtime/model choice is scoped in `docs/inpaint-runtime-decision.md`.
+The improvement-plan backlog is complete. Continue with the remaining roadmap: destructive-action recovery and local model/runtime management. The content-aware inpaint runtime/model choice is scoped in `docs/inpaint-runtime-decision.md`.
 
 ## Research Inputs
 
@@ -85,6 +85,7 @@ The improvement-plan backlog is complete. Continue with the remaining roadmap: I
 - 2026-05-17: Completed `V7-12` by adding `CatalogService`, app-local `catalog.db` schema migration v1, folder rebuild/query support, SHA-256 fingerprints, dimensions, dates, codec metadata, XMP sidecar rating/tag indexing, root scan rows, and catalog service coverage.
 - 2026-05-17: Completed `V7-13` by adding `ReviewLabelService`, XMP-backed star rating and pick/reject labels, review side-panel controls, `L` review mode with `1`-`5`/`0`/`P`/`R`/`U` keyboard flow, gallery smart-filter refresh after sidecar writes, and regression coverage for service and ViewModel undo behavior.
 - 2026-05-17: Completed `V7-14` by adding `ExportCapabilityWarningService`, wiring export preview, batch preview, and macro dry-run warnings through it, and covering alpha, animation, pages/layers, metadata, ICC profile, and dry-run warning cases.
+- 2026-05-17: Completed `V7-15` by adding `ImageColorAnalysisService`, `ColorAnalysisController`, side-panel color/histogram rows, safe unmanaged-color warnings, and coverage for profiled, unprofiled, transparent, and controller supersession cases.
 - 2026-05-05: Completed roadmap `V30-04` by adding a modeless non-destructive adjustment workbench, live Magick.NET preview rendering, XMP edit-stack persistence, Save-a-copy application, command routing, and regression coverage for adjustment export.
 - 2026-05-05: Completed roadmap `V40-63` by adding a private offline tag relationship graph with namespace, alias, parent, sidecar import/export, UI entry points, and regression coverage.
 - 2026-05-05: Completed roadmap `V40-64` by adding a local import inbox with duplicate-aware staging, tag/rating sidecars, optional GPS stripping, Recycle Bin cleanup, and copy/move import.

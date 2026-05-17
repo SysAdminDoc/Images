@@ -8,7 +8,7 @@ Repository: `C:\Users\--\repos\Images`
 - Branch: `main`, tracking `origin/main`.
 - HEAD: `6da0641aa2b241c1b108f28ed01be69836ec56a3`.
 - HEAD subject: `feat: add send print clipboard actions`.
-- Follow-up autonomous roadmap work on 2026-05-17 closed V7-02 through V7-07 and V7-10 through V7-14 after this initial state snapshot, including changelog date repair, release-readiness hygiene gates, settings IA, runtime/dependency provenance dashboard, approved jpegtran artifact staging, portable/installed release diagnostics smoke, local compare/overlay mode, the export preview workbench, catalog schema v1, culling review mode, and shared export/batch capability warnings.
+- Follow-up autonomous roadmap work on 2026-05-17 closed V7-02 through V7-07 and V7-10 through V7-15 after this initial state snapshot, including changelog date repair, release-readiness hygiene gates, settings IA, runtime/dependency provenance dashboard, approved jpegtran artifact staging, portable/installed release diagnostics smoke, local compare/overlay mode, the export preview workbench, catalog schema v1, culling review mode, shared export/batch capability warnings, and side-panel ICC/profile plus histogram basics.
 - Latest local/GitHub release tag inspected: `v0.2.11` at `0abf855e109016b3e2279a99cdf43243d3efa35b`.
 - Latest release publication date from `gh release view v0.2.11`: 2026-05-05T21:12:36Z.
 - Release assets inspected:
@@ -68,6 +68,7 @@ Images is no longer only a viewer. Current source and documentation show these s
 - Approved libjpeg-turbo 3.1.4.1 jpegtran release staging with tracked license/provenance, SHA-256 validation, and release diagnostics smoke coverage.
 - Local compare mode for current+next, chosen local files, and duplicate-cleanup pairs; 2-up and opacity-overlay layouts share pan/zoom/rotate/flip, A/B swap, keyboard opacity controls, and Escape exit behavior.
 - Export preview workbench with original versus in-memory encoded preview, JPEG/PNG/WebP/AVIF/JXL presets, quality and resize controls, estimated output size and byte delta, visible target-format capability warnings, and batch preview/dry-run warnings for alpha, animation, pages/layers, metadata, ICC profile risk, and lossy settings.
+- Side-panel color analysis with embedded ICC/profile status, decoded color space, sampled luma/RGB channel stats, shadow/midtone/highlight histogram percentages, alpha transparency stats, and unmanaged-color warnings without modifying pixels.
 - Rebuildable app-local catalog schema v1 with source path, SHA-256 fingerprint, dimensions, file dates, size, codec/format metadata, XMP sidecar path/modified time, rating, tags, scan timestamps, and root scan rows.
 - Culling review mode with XMP-backed star ratings, pick/reject labels, side-panel controls, keyboard flow, gallery smart-filter refresh, and undo of previous review sidecar state.
 - Wallpaper, send, print, and clipboard actions.

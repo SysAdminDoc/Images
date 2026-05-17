@@ -57,7 +57,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Pinned overlay mode** — pin the current image above other windows for tracing or design comparison, tune opacity in the side panel, and optionally enable click-through only when the `Ctrl+Alt+O` global exit hotkey is registered.
 - **Pixel inspector** — enable Inspector in the side panel to sample coordinates and HEX/RGB/HSV/alpha values, copy color values, Shift-drag pixel measurements, and switch to nearest-neighbor preview scaling for pixel art.
 - **Animation frame workbench** — animated GIF/APNG/WebP files get a side-panel timeline with a scrubber, frame stepping, playback-speed control, copy-current-frame, PNG frame export, and drag-out selected frames.
-- **Photo metadata at a glance** — the Details panel and optional `I` metadata HUD surface embedded EXIF date, camera, lens, exposure, focal length, and GPS coordinates when present, without opening a separate info window or sending location data anywhere.
+- **Photo metadata and color at a glance** — the Details panel and optional `I` metadata HUD surface embedded EXIF date, camera, lens, exposure, focal length, and GPS coordinates when present. The side panel also reports embedded ICC/profile status, decoded color space, luma/RGB histogram basics, alpha transparency stats, and unmanaged-color warnings without transforming pixels or sending data anywhere.
 - **Zoom + pan** — mouse wheel to zoom in/out about the cursor, drag to pan, double-click to toggle fit/1:1.
 - **Export a copy** to JPEG, PNG, WebP, AVIF, JXL, TIFF, BMP, GIF/APNG, PSD/PSB, PDF/EPS/SVG, TGA, DDS, QOI, EXR, HDR, JPEG 2000, X11/Magick, production/scientific, and portable bitmap formats.
 - **Rotate**, **delete-to-Recycle-Bin**, **Reveal in Explorer**, **Copy path**.
@@ -187,6 +187,7 @@ src/Images/
 │   ├── RedEyeCorrectionService.cs # Red-dominant pupil correction marks for non-destructive red-eye removal
 │   ├── RetouchBrushService.cs # Clone stamp and healing brush retouch operations
 │   ├── ImageMetadataService.cs # Read-only EXIF summary for the Details panel and HUD
+│   ├── ImageColorAnalysisService.cs # Read-only ICC/profile and histogram/channel summaries
 │   ├── CodecCapabilityService.cs # About-window codec summary and copyable diagnostics
 │   ├── SupportedImageFormats.cs # Central extension catalog for discovery/dialogs
 │   ├── CodecRuntime.cs         # Optional app-local Ghostscript runtime discovery
