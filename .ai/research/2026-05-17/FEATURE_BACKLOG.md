@@ -70,7 +70,7 @@ This is the raw harvested backlog before final prioritization. Final tiering is 
 | Idea | Source evidence | Fit |
 | --- | --- | --- |
 | Build a local model manager before semantic search/inpaint/upscale/background removal. | `docs/inpaint-runtime-decision.md`, Windows ML docs, Immich model settings, OpenCV/Carve LaMa ONNX files. | High - V7-30 shipped approved model definitions, manual import/delete/reveal controls, app-local `models\inpaint` storage, pinned SHA-256 readiness gates, runtime status copy, and diagnostics provenance rows. |
-| Add OpenCLIP/SigLIP embedding provider behind model manager. | OpenCLIP, SigLIP, Immich search docs, Qdrant CLIP ViT-B/32 ONNX files. | Medium - V7-31 now has `ISemanticEmbeddingProvider`, deterministic local metadata embeddings, and Qdrant text/vision ONNX hash pins; tokenizer/preprocessor handling and approved runtime execution remain open. |
+| Add OpenCLIP/SigLIP embedding provider behind model manager. | OpenCLIP, SigLIP, Immich search docs, Qdrant CLIP ViT-B/32 model files. | Medium - V7-31 now has `ISemanticEmbeddingProvider`, deterministic local metadata embeddings, and Qdrant text/vision/tokenizer/preprocessor hash pins; approved runtime execution remains open. |
 | Use sqlite-vec only after catalog and embedding shapes stabilize. | `docs/design-product-differentiators.md`, sqlite-vec source. | Medium - exact in-process cosine search shipped first for the V7-31 foundation; sqlite-vec remains optional after real embedding dimensions stabilize. |
 | Add LaMa ONNX content-aware repair only after model foundation. | `docs/inpaint-runtime-decision.md`, LaMa sources. | Medium |
 | Add background removal with BiRefNet/U2-Net/rembg-style models after model foundation. | BiRefNet, U2-Net, rembg. | Medium |

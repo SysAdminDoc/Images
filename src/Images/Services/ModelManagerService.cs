@@ -172,6 +172,19 @@ public sealed class ModelManagerService
             RuntimeContract: "Text encoder for CLIP-style semantic search; requires tokenizer validation before runtime use.",
             Notes: "Approved file candidate only. The V7-31 provider must still validate tokenizer files, input names/shapes, normalization, and runtime output compatibility before enabling model-backed search."),
         new(
+            Id: "qdrant-clip-vit-b32-tokenizer",
+            DisplayName: "Qdrant CLIP ViT-B/32 Tokenizer",
+            Purpose: "Semantic search text tokenization",
+            StorageGroup: "semantic",
+            SourceUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-text",
+            DownloadUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-text/resolve/main/tokenizer.json",
+            License: "MIT per model card",
+            FileName: "clip-vit-b32-tokenizer.json",
+            ExpectedSha256: "b68d571997a1f81bf521fb73806740ddb91e4ed6666cb6e996c066bb289cf55b",
+            ExpectedSizeBytes: 2_224_147,
+            RuntimeContract: "Tokenizer metadata for the CLIP text encoder; required before model-backed text search can replace deterministic metadata embeddings.",
+            Notes: "Approved tokenizer candidate only. The V7-31 provider must still validate BPE behavior, context length, truncation, and special-token parity before runtime use."),
+        new(
             Id: "qdrant-clip-vit-b32-vision",
             DisplayName: "Qdrant CLIP ViT-B/32 Vision ONNX",
             Purpose: "Semantic search image embeddings",
@@ -183,7 +196,20 @@ public sealed class ModelManagerService
             ExpectedSha256: "c68d3d9a200ddd2a8c8a5510b576d4c94d1ae383bf8b36dd8c084f94e1fb4d63",
             ExpectedSizeBytes: 352_000_000,
             RuntimeContract: "Vision encoder for CLIP-style semantic search; requires 224px CLIP preprocessing and runtime validation before use.",
-            Notes: "Approved file candidate only. The V7-31 provider must still validate preprocessing, model output shape, and similarity parity before replacing deterministic metadata embeddings.")
+            Notes: "Approved file candidate only. The V7-31 provider must still validate preprocessing, model output shape, and similarity parity before replacing deterministic metadata embeddings."),
+        new(
+            Id: "qdrant-clip-vit-b32-preprocessor",
+            DisplayName: "Qdrant CLIP ViT-B/32 Vision Preprocessor",
+            Purpose: "Semantic search image preprocessing",
+            StorageGroup: "semantic",
+            SourceUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-vision",
+            DownloadUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-vision/resolve/main/preprocessor_config.json",
+            License: "MIT per model card",
+            FileName: "clip-vit-b32-preprocessor_config.json",
+            ExpectedSha256: "ce945ef831c9972c135b5b198a03d8eeb70478cd69c0238f24caf1903a9965e6",
+            ExpectedSizeBytes: 780,
+            RuntimeContract: "Preprocessor metadata for the CLIP vision encoder; required before image embeddings can be generated from local files.",
+            Notes: "Approved preprocessor candidate only. The V7-31 provider must still validate resize/crop, RGB normalization, tensor layout, and output parity before runtime use.")
     ];
 
     public LocalModelManagerSnapshot GetSnapshot()

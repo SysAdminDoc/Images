@@ -53,8 +53,8 @@ public partial class ModelManagerWindow : Window
 
         var dialog = new OpenFileDialog
         {
-            Title = "Import approved ONNX model",
-            Filter = "ONNX model (*.onnx)|*.onnx|All files (*.*)|*.*",
+            Title = "Import approved model file",
+            Filter = "Approved model files (*.onnx;*.json)|*.onnx;*.json|All files (*.*)|*.*",
             CheckFileExists = true,
             Multiselect = false
         };
