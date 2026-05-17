@@ -52,7 +52,7 @@ This is the raw harvested backlog before final prioritization. Final tiering is 
 | --- | --- | --- |
 | Add Squoosh/FastStone-style visual diff export workbench with quality/size preview. | Squoosh, FastStone Save As comparison. | High - shipped 2026-05-17 under V7-11 with original/encoded preview, size delta, resize-aware save, warnings, and batch dry-run estimates. |
 | Add batch preset provenance and dry-run result export. | Current batch processor, macro actions. | Medium |
-| Add target-format capability warnings before conversion. | ImageGlass and nomacs format matrices, local codec report. | High |
+| Add target-format capability warnings before conversion. | ImageGlass and nomacs format matrices, local codec report. | High - shipped 2026-05-17 under V7-14 for export preview, batch preview, and macro dry-run warnings across alpha, animation, pages/layers, metadata, ICC profile, and lossy settings. |
 | Add visual regression corpus for export quality and metadata preservation. | Current generated fixtures, codec-aware export memory. | Medium |
 
 ## Catalog, Metadata, And Search

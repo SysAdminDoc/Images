@@ -30,8 +30,9 @@ Scoring:
 | 8 | Visual diff export workbench | 5 | 5 | 4 | 4 | 2 | 8 | Shipped 2026-05-17 under V7-11 with original/encoded preview, size delta, resize-aware save, warning copy, and batch dry-run estimates. |
 | 9 | Catalog schema v1 | 5 | 5 | 5 | 5 | 3 | 7 | Shipped 2026-05-17 under V7-12 as rebuildable `catalog.db` schema with source paths, fingerprints, dimensions, dates, codec metadata, and sidecar rating/tag state. |
 | 10 | Culling/review mode | 5 | 4 | 4 | 4 | 2 | 7 | Shipped 2026-05-17 under V7-13 with XMP-backed star ratings, pick/reject labels, side-panel controls, keyboard flow, gallery refresh, and undo. |
-| 11 | Release/post-install smoke script | 5 | 4 | 4 | 3 | 2 | 8 | Shipped 2026-05-17 under V7-07; catches Ghostscript/OCR/portable/installer regressions early. |
-| 12 | ICC/profile status and histogram basics | 4 | 4 | 4 | 4 | 3 | 5 | High user trust value; needs careful technical design. |
+| 11 | Target-format capability warnings | 5 | 4 | 4 | 3 | 2 | 8 | Shipped 2026-05-17 under V7-14 with shared export preview, batch preview, and macro dry-run warnings for alpha, animation, pages/layers, metadata, ICC profile, and lossy settings. |
+| 12 | Release/post-install smoke script | 5 | 4 | 4 | 3 | 2 | 8 | Shipped 2026-05-17 under V7-07; catches Ghostscript/OCR/portable/installer regressions early. |
+| 13 | ICC/profile status and histogram basics | 4 | 4 | 4 | 4 | 3 | 5 | High user trust value; needs careful technical design. |
 
 ## Later
 
@@ -62,7 +63,7 @@ Scoring:
 2. Security and runtime provenance.
 3. Settings/accessibility surface.
 4. jpegtran artifact staging and release smoke.
-5. Fuller export/batch capability warnings and ICC/profile basics.
+5. ICC/profile basics.
 6. Destructive-action recovery center.
 7. Model manager.
 8. Semantic search and AI-assisted tools.
