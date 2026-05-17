@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V30-22` is complete. Images now has no-dialog default-printer output, local email drafts with the current file attached, and clipboard commands for image-only or combined image/path payloads.
+Roadmap `V7-05` is complete. Images now has a shared runtime/dependency provenance model rendered in About, `--system-info`, and `--codec-report`, including NuGet/runtime/model source, version, path, SHA-256 where available, advisory status, and missing-runtime action copy.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue later with the remaining editor/file roadmap: approved lossless JPEG runtime artifact staging, richer selection/content-aware repair tools, configurable external editors, and scan/TWAIN investigation. The content-aware inpaint runtime/model choice is now scoped in `docs/inpaint-runtime-decision.md`.
+The improvement-plan backlog is complete. Continue with the remaining roadmap: approved lossless JPEG runtime artifact staging, installed/portable diagnostics smoke coverage, compare/overlay mode, catalog schema v1, and local model/runtime management. The content-aware inpaint runtime/model choice is scoped in `docs/inpaint-runtime-decision.md`.
 
 ## Research Inputs
 
@@ -78,6 +78,7 @@ The improvement-plan backlog is complete. Continue later with the remaining edit
 - 2026-05-05: Completed `IP-02E` by extracting photo metadata HUD loading into `PhotoMetadataController`, adding owned cancellation/status handling, and covering success, superseded-result, and timeout outcomes with dispatcher-backed tests.
 - 2026-05-05: Completed `IP-02F` by extracting external-edit watcher/debounce/reload feedback into `ExternalEditReloadController` and covering coalesced reloads, failed reload notifications, disarm cancellation, and watcher creation failure.
 - 2026-05-05: Completed `IP-02G` by extracting OCR busy/active overlay workflow into `OcrWorkflowController` and covering no-image, success, no-text, cancellation, and stale-result outcomes.
+- 2026-05-17: Completed `V7-05` by adding structured dependency provenance rows for .NET, Magick.NET, SharpCompress, Ghostscript, jpegtran, Windows OCR, AI runtime, and local model registry placeholders; About and CLI reports now share the same source/version/path/hash/advisory/action surface.
 - 2026-05-05: Completed roadmap `V30-04` by adding a modeless non-destructive adjustment workbench, live Magick.NET preview rendering, XMP edit-stack persistence, Save-a-copy application, command routing, and regression coverage for adjustment export.
 - 2026-05-05: Completed roadmap `V40-63` by adding a private offline tag relationship graph with namespace, alias, parent, sidecar import/export, UI entry points, and regression coverage.
 - 2026-05-05: Completed roadmap `V40-64` by adding a local import inbox with duplicate-aware staging, tag/rating sidecars, optional GPS stripping, Recycle Bin cleanup, and copy/move import.
