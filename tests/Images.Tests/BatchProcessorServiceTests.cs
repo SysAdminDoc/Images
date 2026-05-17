@@ -22,6 +22,9 @@ public sealed class BatchProcessorServiceTests
         Assert.Equal(0, result.FailedCount);
         Assert.Equal("8 x 4", item.OutputDimensions);
         Assert.EndsWith("source.jpg", item.OutputPath, StringComparison.OrdinalIgnoreCase);
+        Assert.False(string.IsNullOrWhiteSpace(item.EstimatedOutputSizeText));
+        Assert.False(string.IsNullOrWhiteSpace(item.DeltaText));
+        Assert.Contains("lossy", item.WarningsText, StringComparison.OrdinalIgnoreCase);
         Assert.Equal("Resize to 8 x 4", item.StatusText);
     }
 

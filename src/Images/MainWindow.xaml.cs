@@ -687,6 +687,10 @@ public partial class MainWindow : Window
                 Vm.ToggleRetouchModeCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.W when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
+                Vm.OpenExportWorkbenchCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.OemComma when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
                 Vm.SettingsCommand.Execute(null);
                 e.Handled = true;
