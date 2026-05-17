@@ -44,6 +44,53 @@ public sealed class ImageExportServiceTests
     }
 
     [Fact]
+    public void Save_WithQuality_ClampsAndWritesCopy()
+    {
+        using var temp = TestDirectory.Create();
+        var target = Path.Combine(temp.Path, "export.jpg");
+        var bitmap = BitmapSource.Create(
+            2,
+            2,
+            96,
+            96,
+            PixelFormats.Bgra32,
+            null,
+            new byte[]
+            {
+                0xFF, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
+                0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+            },
+            8);
+        bitmap.Freeze();
+
+        var savedPath = ImageExportService.Save(bitmap, target, 250);
+
+        Assert.Equal(Path.GetFullPath(target), savedPath);
+        Assert.True(new FileInfo(target).Length > 0);
+    }
+
+    [Fact]
+    public void Save_WithMaxDimensions_WritesResizedCopy()
+    {
+        using var temp = TestDirectory.Create();
+        var target = Path.Combine(temp.Path, "export.png");
+        var bitmap = BitmapSource.Create(
+            16,
+            8,
+            96,
+            96,
+            PixelFormats.Bgra32,
+            null,
+            Enumerable.Repeat((byte)0x80, 16 * 8 * 4).ToArray(),
+            16 * 4);
+        bitmap.Freeze();
+
+        ImageExportService.Save(bitmap, target, 92, maxWidth: 8, maxHeight: 8);
+
+        Assert.Equal((8, 4), ReadImageSize(target));
+    }
+
+    [Fact]
     public void Overwrite_WithCropOperation_ReplacesSourcePixelsAndTouchesFile()
     {
         using var temp = TestDirectory.Create();

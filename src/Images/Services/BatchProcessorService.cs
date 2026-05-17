@@ -31,6 +31,9 @@ public sealed record BatchPreviewItem(
     string OriginalDimensions,
     string OutputDimensions,
     string SizeText,
+    string EstimatedOutputSizeText,
+    string DeltaText,
+    string WarningsText,
     string StatusText);
 
 public sealed record BatchPreviewResult(
@@ -55,10 +58,14 @@ public sealed class BatchProcessorService
     };
 
     private readonly MacroActionService _macroActionService;
+    private readonly ExportPreviewService _exportPreviewService;
 
-    public BatchProcessorService(MacroActionService? macroActionService = null)
+    public BatchProcessorService(
+        MacroActionService? macroActionService = null,
+        ExportPreviewService? exportPreviewService = null)
     {
         _macroActionService = macroActionService ?? new MacroActionService();
+        _exportPreviewService = exportPreviewService ?? new ExportPreviewService();
     }
 
     public static string SerializePreset(BatchProcessorPreset preset)
@@ -110,16 +117,21 @@ public sealed class BatchProcessorService
 
                 using var image = new MagickImage();
                 image.Ping(info);
-                var outputDimensions = OutputDimensions(image.Width, image.Height, preset);
+                var preview = _exportPreviewService.EstimateFile(
+                    info.FullName,
+                    new ExportPreviewRequest(preset.Extension, preset.Quality, preset.MaxWidth, preset.MaxHeight));
                 items.Add(new BatchPreviewItem(
                     info.FullName,
                     info.Name,
                     ResolveUniqueDestination(ResolveOutputFolder(info.FullName, outputFolder), Path.GetFileNameWithoutExtension(info.Name) + preset.Extension),
                     preset.Extension.TrimStart('.').ToUpperInvariant(),
                     FormatDimensions(image.Width, image.Height),
-                    FormatDimensions(outputDimensions.Width, outputDimensions.Height),
+                    preview.DimensionsText,
                     FormatBytes(info.Length),
-                    StatusFor(image.Width, image.Height, outputDimensions.Width, outputDimensions.Height)));
+                    preview.EstimatedSizeText,
+                    preview.DeltaText,
+                    preview.WarningText,
+                    StatusFor(image.Width, image.Height, preview.Width, preview.Height)));
             }
             catch (OperationCanceledException)
             {

@@ -57,12 +57,19 @@ public static class ImageExportService
         => ResolveWritableTarget(requestedPath).Path;
 
     public static string Save(BitmapSource source, string path)
+        => Save(source, path, 92);
+
+    public static string Save(BitmapSource source, string path, uint quality)
+        => Save(source, path, quality, maxWidth: 0, maxHeight: 0);
+
+    public static string Save(BitmapSource source, string path, uint quality, int maxWidth, int maxHeight)
     {
         var target = ResolveWritableTarget(path);
 
         using var image = ToMagickImage(source);
+        ApplyResize(image, Math.Max(0, maxWidth), Math.Max(0, maxHeight));
 
-        PrepareForWrite(image, target.Format, 92);
+        PrepareForWrite(image, target.Format, Math.Clamp(quality, 1, 100));
 
         WriteAtomically(image, target.Path);
         return target.Path;
@@ -393,6 +400,19 @@ public static class ImageExportService
         }
     }
 
+    private static void ApplyResize(MagickImage image, int maxWidth, int maxHeight)
+    {
+        if (maxWidth <= 0 && maxHeight <= 0)
+            return;
+
+        var width = maxWidth > 0 ? (uint)maxWidth : image.Width;
+        var height = maxHeight > 0 ? (uint)maxHeight : image.Height;
+        image.Resize(new MagickGeometry(width, height)
+        {
+            IgnoreAspectRatio = false
+        });
+    }
+
     private static void TryDeleteFile(string path)
     {
         try
@@ -403,6 +423,37 @@ public static class ImageExportService
         {
             // Best-effort cleanup; failed temp deletes are harmless and rare.
         }
+    }
+
+    internal static MagickImage CreateMagickImage(BitmapSource source)
+        => ToMagickImage(source);
+
+    internal static BitmapSource CreateBitmapSource(MagickImage image)
+        => ToBitmapSource(image);
+
+    internal static void PrepareForExport(MagickImage image, MagickFormat format, uint quality)
+        => PrepareForWrite(image, format, Math.Clamp(quality, 1, 100));
+
+    internal static bool FormatRequiresOpaqueBackground(MagickFormat format)
+        => RequiresOpaqueBackground(format);
+
+    internal static bool CanWriteFormat(MagickFormat format)
+        => CanWrite(format);
+
+    internal static string FormatBytes(long bytes)
+    {
+        string[] units = ["B", "KB", "MB", "GB", "TB"];
+        double value = Math.Max(0, bytes);
+        var unit = 0;
+        while (value >= 1024 && unit < units.Length - 1)
+        {
+            value /= 1024;
+            unit++;
+        }
+
+        return unit == 0
+            ? $"{bytes} B"
+            : $"{value:0.#} {units[unit]}";
     }
 
     private static MagickImage ToMagickImage(BitmapSource source)

@@ -8,7 +8,7 @@ Repository: `C:\Users\--\repos\Images`
 - Branch: `main`, tracking `origin/main`.
 - HEAD: `6da0641aa2b241c1b108f28ed01be69836ec56a3`.
 - HEAD subject: `feat: add send print clipboard actions`.
-- Follow-up autonomous roadmap work on 2026-05-17 closed V7-02 through V7-07 and V7-10 after this initial state snapshot, including changelog date repair, release-readiness hygiene gates, settings IA, runtime/dependency provenance dashboard, approved jpegtran artifact staging, portable/installed release diagnostics smoke, and local compare/overlay mode.
+- Follow-up autonomous roadmap work on 2026-05-17 closed V7-02 through V7-07, V7-10, and V7-11 after this initial state snapshot, including changelog date repair, release-readiness hygiene gates, settings IA, runtime/dependency provenance dashboard, approved jpegtran artifact staging, portable/installed release diagnostics smoke, local compare/overlay mode, and the export preview workbench.
 - Latest local/GitHub release tag inspected: `v0.2.11` at `0abf855e109016b3e2279a99cdf43243d3efa35b`.
 - Latest release publication date from `gh release view v0.2.11`: 2026-05-05T21:12:36Z.
 - Release assets inspected:
@@ -67,6 +67,7 @@ Images is no longer only a viewer. Current source and documentation show these s
 - Structured runtime/dependency provenance rows in About, `--system-info`, and `--codec-report` for .NET, Magick.NET, SharpCompress, Ghostscript, jpegtran, Windows OCR, AI runtime, and local model registry placeholders.
 - Approved libjpeg-turbo 3.1.4.1 jpegtran release staging with tracked license/provenance, SHA-256 validation, and release diagnostics smoke coverage.
 - Local compare mode for current+next, chosen local files, and duplicate-cleanup pairs; 2-up and opacity-overlay layouts share pan/zoom/rotate/flip, A/B swap, keyboard opacity controls, and Escape exit behavior.
+- Export preview workbench with original versus in-memory encoded preview, JPEG/PNG/WebP/AVIF/JXL presets, quality and resize controls, estimated output size and byte delta, visible format warnings, and batch dry-run size/warning estimates.
 - Wallpaper, send, print, and clipboard actions.
 
 This means the older `ROADMAP.md` v6 "No editor, no organizer, no batch processor" line is stale and should not guide new work.

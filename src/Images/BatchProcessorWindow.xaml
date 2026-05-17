@@ -226,6 +226,9 @@
                                             <TextBlock Text="{Binding StatusText}" Style="{StaticResource Text.Caption}" Margin="0,3,0,0" />
                                             <TextBlock Text="{Binding OutputPath}" Style="{StaticResource Text.Hint}" TextWrapping="Wrap" Margin="0,3,0,0" />
                                             <TextBlock Text="{Binding OutputDimensions}" Style="{StaticResource Text.Hint}" Margin="0,3,0,0" />
+                                            <TextBlock Text="{Binding EstimatedOutputSizeText, StringFormat=Estimated output: {0}}" Style="{StaticResource Text.Hint}" Margin="0,3,0,0" />
+                                            <TextBlock Text="{Binding DeltaText, StringFormat=Delta: {0}}" Style="{StaticResource Text.Hint}" Margin="0,3,0,0" />
+                                            <TextBlock Text="{Binding WarningsText}" Style="{StaticResource Text.Hint}" TextWrapping="Wrap" Margin="0,3,0,0" />
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>
