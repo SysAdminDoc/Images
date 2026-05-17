@@ -64,7 +64,8 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Rotate**, **delete-to-Recycle-Bin**, **Reveal in Explorer**, **Copy path**.
 - **Calm confirmations and recovery** — destructive file actions confirm before moving anything to Recycle Bin, routine actions complete with toast feedback, and recent destructive operations are recorded in the app-local Recovery Center.
 - **Organized settings** — Settings groups startup, appearance, accessibility, archive defaults, hotkeys, diagnostics, text extraction, and privacy controls, including reduced motion and window-placement preferences.
-- **Runtime provenance dashboard** — About, `--system-info`, and `--codec-report` list key NuGet packages, optional runtimes, OS OCR, and future model-runtime placeholders with source, version, path, SHA-256 where available, advisory status, and setup/release action copy.
+- **Runtime provenance dashboard** — About, `--system-info`, and `--codec-report` list key NuGet packages, optional runtimes, OS OCR, and local model/runtime status with source, version, path, SHA-256 where available, advisory status, and setup/release action copy.
+- **Local model manager** — open Model manager from the context menu or Automation card to inspect approved local model definitions, reveal app-local model storage, import ONNX files you downloaded yourself, verify SHA-256 against pinned OpenCV/Carve LaMa candidates, and delete mismatched or stale files. Images does not download models automatically.
 - **Network-quiet by default** — automatic update checks are disabled until enabled in Settings; manual About checks remain available.
 
 ## Install
@@ -164,6 +165,7 @@ src/Images/
 ├── DuplicateCleanupWindow.xaml # Local duplicate/similar-image cleanup review surface
 ├── FileHealthScanWindow.xaml   # Local bad-extension, broken-file, zero-byte, and temp-file review surface
 ├── RecoveryCenterWindow.xaml   # Review, reveal, and restore recent destructive actions where possible
+├── ModelManagerWindow.xaml     # Approved local ONNX model import, hash verification, and runtime status
 ├── ViewModels/
 │   ├── ObservableObject.cs     # INotifyPropertyChanged base
 │   ├── RelayCommand.cs         # ICommand impl
@@ -177,6 +179,7 @@ src/Images/
 │   ├── DuplicateCleanupService.cs # Exact hash grouping, perceptual similarity, and quarantine moves
 │   ├── FileHealthScanService.cs # Content-signature checks, decode health scans, rename/quarantine actions
 │   ├── RecoveryCenterService.cs # Durable destructive-action ledger and collision-safe restore support
+│   ├── ModelManagerService.cs  # Approved model registry, app-local storage, SHA-256 checks, runtime status
 │   ├── OverlayWindowService.cs # Native always-on-top/click-through overlay window helpers
 │   ├── PixelInspectorService.cs # Pixel coordinate mapping, sampling, color formatting, and measurement math
 │   ├── ImageExportService.cs   # Codec-aware Save a copy / conversion output

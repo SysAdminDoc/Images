@@ -127,6 +127,12 @@ Findings:
 - Inpaint/upscale/background removal should use opt-in local runtimes and avoid automatic downloads.
 - Embeddings and face data are derived user data and need explicit delete/rebuild controls.
 
+Follow-up implementation pass:
+
+- Verified Hugging Face blob pages for the approved OpenCV `inpainting_lama_2025jan.onnx` and Carve `lama_fp32.onnx` files so the V7-30 registry could pin file names and SHA-256 values.
+- Implemented the local model manager as a registry/import/delete/reveal foundation only; no model download or inference package was enabled in this pass.
+- Kept semantic search as the next model-backed feature, but narrowed its remaining prerequisites to an embedding-provider seam, runtime package choice, derived-data delete/rebuild controls, and optional/manual real-model tests.
+
 ## Failed Or Thin Searches
 
 - Exact "latest" activity signals for every viewer were not normalized into a single star/release table. That would require a deeper GitHub API pass and is lower value than feature and architecture extraction.

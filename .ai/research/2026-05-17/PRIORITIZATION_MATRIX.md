@@ -34,13 +34,13 @@ Scoring:
 | 12 | Release/post-install smoke script | 5 | 4 | 4 | 3 | 2 | 8 | Shipped 2026-05-17 under V7-07; catches Ghostscript/OCR/portable/installer regressions early. |
 | 13 | ICC/profile status and histogram basics | 4 | 4 | 4 | 4 | 3 | 5 | Shipped 2026-05-17 under V7-15 with read-only embedded ICC/profile status, sampled histogram/channel stats, alpha stats, and unmanaged-color warnings. |
 | 14 | Destructive-action recovery center | 5 | 5 | 4 | 4 | 3 | 7 | Shipped 2026-05-17 under V7-16 with app-local operation records, reveal actions, restore for moves/renames/quarantines, sidecar recovery, and writeback/Recycling guidance. |
+| 15 | Local model manager | 5 | 5 | 5 | 5 | 4 | 6 | Shipped 2026-05-17 under V7-30 with approved ONNX definitions, manual import/delete/reveal controls, app-local grouped storage, pinned SHA-256 validation, runtime status copy, and diagnostics provenance rows. |
 
 ## Later
 
 | Candidate | Fit | Impact | Evidence | Effort | Risk | Score | Rationale |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| Local model manager | 5 | 5 | 5 | 5 | 4 | 6 | Mandatory before model features, but large and policy-heavy. |
-| Semantic search | 5 | 5 | 5 | 5 | 4 | 6 | Best long-term differentiator; blocked by catalog and model manager. |
+| Semantic search | 5 | 5 | 5 | 5 | 4 | 6 | Best long-term differentiator; next blockers are embedding-provider design, runtime package selection, and derived-data delete/rebuild controls. |
 | LaMa content-aware repair | 4 | 4 | 4 | 4 | 4 | 4 | Existing decision exists, but should wait for runtime foundation. |
 | Background removal | 4 | 4 | 4 | 4 | 4 | 4 | Useful but model/runtime and UX boundaries must be solved first. |
 | Super-resolution | 4 | 4 | 4 | 4 | 4 | 4 | Good fit if opt-in and local; not before model manager. |
@@ -65,6 +65,6 @@ Scoring:
 3. Settings/accessibility surface.
 4. jpegtran artifact staging and release smoke.
 5. Destructive-action recovery center.
-6. Model manager.
+6. Embedding provider seam and derived-data controls.
 7. Semantic search and AI-assisted tools.
 8. Deep-zoom and specialized imaging.
