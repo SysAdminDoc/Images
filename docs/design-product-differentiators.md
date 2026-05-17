@@ -52,7 +52,7 @@ Search a local folder or library with natural language such as "sunset over wate
 
 ### Current Implementation Note
 
-- 2026-05-17: V7-31 foundation started with `SemanticSearchService`, `ISemanticEmbeddingProvider`, app-local `semantic-index.db`, deterministic offline metadata embeddings, exact cosine search, cancellation-safe rebuilds, delete-index controls, and `SemanticSearchWindow`. Model manager now pins Qdrant CLIP ViT-B/32 text/vision ONNX candidates, but tokenizer/preprocessor handling and runtime execution are still open before this becomes the final CLIP/SigLIP provider.
+- 2026-05-17: V7-31 foundation started with `SemanticSearchService`, `ISemanticEmbeddingProvider`, app-local `semantic-index.db`, deterministic offline metadata embeddings, exact cosine search, cancellation-safe rebuilds, delete-index controls, and `SemanticSearchWindow`. Model manager now pins Qdrant CLIP ViT-B/32 text/vision ONNX plus tokenizer/preprocessor candidates, but runtime execution is still open before this becomes the final CLIP/SigLIP provider.
 
 ### Non-Goals
 

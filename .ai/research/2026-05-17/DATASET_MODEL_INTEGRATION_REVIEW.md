@@ -65,7 +65,7 @@ Architecture:
 - Store file fingerprint, model ID, embedding version, dimensions, and indexed timestamp.
 - Start with exact cosine search for small libraries. Done for the deterministic local provider.
 - Evaluate sqlite-vec only after embedding shape and catalog update rules are stable.
-- Model manager now pins Qdrant text ONNX SHA-256 `4dbe762b11e36488304471e439cde89da053ad7acaddbf9e096745d142ec8d8b` and vision ONNX SHA-256 `c68d3d9a200ddd2a8c8a5510b576d4c94d1ae383bf8b36dd8c084f94e1fb4d63`; tokenizer/preprocessor sidecar handling is still required before runtime enablement.
+- Model manager now pins Qdrant text ONNX SHA-256 `4dbe762b11e36488304471e439cde89da053ad7acaddbf9e096745d142ec8d8b`, tokenizer SHA-256 `b68d571997a1f81bf521fb73806740ddb91e4ed6666cb6e996c066bb289cf55b`, vision ONNX SHA-256 `c68d3d9a200ddd2a8c8a5510b576d4c94d1ae383bf8b36dd8c084f94e1fb4d63`, and preprocessor SHA-256 `ce945ef831c9972c135b5b198a03d8eeb70478cd69c0238f24caf1903a9965e6`; runtime enablement remains open.
 
 User controls:
 

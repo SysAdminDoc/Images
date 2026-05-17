@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V7-31` is in progress. The semantic search foundation now explicitly indexes selected folders into app-local `semantic-index.db`, searches deterministic offline metadata embeddings through an embedding-provider seam, opens/reveals results, supports cancellation, can delete derived search data, and has pinned Qdrant CLIP ViT-B/32 text/vision ONNX candidates in Model manager; tokenizer/preprocessor handling and approved ONNX inference remain the closure gaps.
+Roadmap `V7-31` is in progress. The semantic search foundation now explicitly indexes selected folders into app-local `semantic-index.db`, searches deterministic offline metadata embeddings through an embedding-provider seam, opens/reveals results, supports cancellation, can delete derived search data, and has pinned Qdrant CLIP ViT-B/32 text/vision/tokenizer/preprocessor candidates in Model manager; approved ONNX inference remains the closure gap.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the remaining roadmap by finishing `V7-31`: define tokenizer/preprocessor import policy for the pinned Qdrant CLIP candidates, validate the ONNX image/text embedding provider, keep model imports manual and SHA-gated through Model manager, and preserve explicit delete/rebuild controls for derived embeddings before checking the item off.
+The improvement-plan backlog is complete. Continue with the remaining roadmap by finishing `V7-31`: validate the ONNX image/text embedding provider against the pinned Qdrant CLIP candidates, keep model imports manual and SHA-gated through Model manager, and preserve explicit delete/rebuild controls for derived embeddings before checking the item off.
 
 ## Research Inputs
 
@@ -88,7 +88,7 @@ The improvement-plan backlog is complete. Continue with the remaining roadmap by
 - 2026-05-17: Completed `V7-15` by adding `ImageColorAnalysisService`, `ColorAnalysisController`, side-panel color/histogram rows, safe unmanaged-color warnings, and coverage for profiled, unprofiled, transparent, and controller supersession cases.
 - 2026-05-17: Completed `V7-16` by adding `RecoveryCenterService`, a Recovery Center window, destructive-action logging across move/rename/quarantine/writeback/Recycling paths, collision-safe restore support with sidecar moves, and focused recovery service coverage.
 - 2026-05-17: Completed `V7-30` by adding `ModelManagerService`, a Model manager window, approved OpenCV/Carve LaMa ONNX definitions, app-local grouped model storage, manual import/delete/reveal workflows, SHA-256 readiness gates, runtime status reporting, diagnostics provenance rows, and focused model-manager coverage.
-- 2026-05-17: Started `V7-31` by adding `SemanticSearchService`, `SemanticSearchWindow`, a local `semantic-index.db`, deterministic metadata embeddings behind `ISemanticEmbeddingProvider`, exact cosine search, folder filtering, open/reveal actions, cancellation-safe rebuild behavior, delete-index controls, Qdrant CLIP ViT-B/32 text/vision ONNX hash pins in Model manager, and focused semantic-search service coverage.
+- 2026-05-17: Started `V7-31` by adding `SemanticSearchService`, `SemanticSearchWindow`, a local `semantic-index.db`, deterministic metadata embeddings behind `ISemanticEmbeddingProvider`, exact cosine search, folder filtering, open/reveal actions, cancellation-safe rebuild behavior, delete-index controls, Qdrant CLIP ViT-B/32 text/vision/tokenizer/preprocessor hash pins in Model manager, and focused semantic-search service coverage.
 - 2026-05-05: Completed roadmap `V30-04` by adding a modeless non-destructive adjustment workbench, live Magick.NET preview rendering, XMP edit-stack persistence, Save-a-copy application, command routing, and regression coverage for adjustment export.
 - 2026-05-05: Completed roadmap `V40-63` by adding a private offline tag relationship graph with namespace, alias, parent, sidecar import/export, UI entry points, and regression coverage.
 - 2026-05-05: Completed roadmap `V40-64` by adding a local import inbox with duplicate-aware staging, tag/rating sidecars, optional GPS stripping, Recycle Bin cleanup, and copy/move import.
