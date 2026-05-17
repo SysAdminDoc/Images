@@ -405,9 +405,12 @@ public static class Keys
     public const string WindowMaximized = "window.maximized";
 
     // Viewer chrome
+    public const string RememberWindowPlacement = "general.remember-window-placement";
     public const string FilmstripVisible = "viewer.filmstrip.visible";
     public const string MetadataHudVisible = "viewer.metadata-hud.visible";
     public const string ConfirmRecycleBinDelete = "viewer.delete.confirm-recycle";
+    public const string AccessibilityReduceMotion = "accessibility.reduce-motion";
+    public const string AccessibilityHighContrast = "accessibility.high-contrast";
     public const string RecentTransferFolders = "viewer.transfer.recent-folders";
     public const string ArchiveRightToLeft = "viewer.archive.right-to-left";
     public const string ArchiveOldScanFilter = "viewer.archive.old-scan-filter";
