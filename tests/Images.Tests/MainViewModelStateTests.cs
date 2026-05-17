@@ -179,6 +179,34 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void ReviewMode_WritesRatingAndLabelSidecarAndSupportsUndo()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "photo.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(image);
+            viewModel.ToggleReviewModeCommand.Execute(null);
+            viewModel.SetReviewRatingCommand.Execute(5);
+            viewModel.MarkReviewRejectCommand.Execute(null);
+
+            Assert.True(viewModel.IsReviewMode);
+            Assert.Equal("5 stars", viewModel.ReviewRatingText);
+            Assert.Equal("Reject", viewModel.ReviewLabelText);
+            Assert.True(viewModel.IsReviewReject);
+            Assert.True(File.Exists(image + ".xmp"));
+
+            viewModel.UndoReviewLabelCommand.Execute(null);
+
+            Assert.Equal("5 stars", viewModel.ReviewRatingText);
+            Assert.Equal("No label", viewModel.ReviewLabelText);
+            Assert.False(viewModel.IsReviewReject);
+        });
+    }
+
+    [Fact]
     public void AnimatedImageWorkbench_LoadsTimelineAndFrameCommands()
     {
         RunOnSta(() =>

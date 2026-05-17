@@ -28,6 +28,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly RecycleBinDeleteService _recycleBinDelete;
     private readonly NonDestructiveEditService _editStack = new();
     private readonly ImageFileTransferService _fileTransfer = new();
+    private readonly ReviewLabelService _reviewLabels = new();
     private readonly Func<LosslessJpegTrimConfirmation, LosslessJpegTrimChoice> _confirmLosslessJpegTrim;
     private readonly Func<string, string?> _pickFolder;
     private readonly Func<string, WallpaperLayout, string> _setWallpaper;
@@ -270,6 +271,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenSelectedGalleryItemCommand = new RelayCommand(OpenSelectedGalleryItem, () => IsGalleryOpen && SelectedGalleryItem is not null);
         ApplyGallerySmartFilterCommand = new RelayCommand(ApplyGallerySmartFilter, p => p is string);
         ClearGalleryFilterCommand = new RelayCommand(() => GalleryFilterText = "", () => HasGalleryFilter);
+        ToggleReviewModeCommand = new RelayCommand(() => IsReviewMode = !IsReviewMode, () => CanUseReviewLabels || IsReviewMode);
+        SetReviewRatingCommand = new RelayCommand(SetReviewRating, _ => CanUseReviewLabels);
+        MarkReviewPickCommand = new RelayCommand(() => SetReviewLabel(ReviewLabelKind.Pick), () => CanUseReviewLabels);
+        MarkReviewRejectCommand = new RelayCommand(() => SetReviewLabel(ReviewLabelKind.Reject), () => CanUseReviewLabels);
+        ClearReviewLabelCommand = new RelayCommand(() => SetReviewLabel(ReviewLabelKind.None), () => CanUseReviewLabels);
+        UndoReviewLabelCommand = new RelayCommand(UndoReviewLabel, () => CanUndoReviewLabel);
         ToggleFilmstripCommand = new RelayCommand(ToggleFilmstrip, () => CanToggleFilmstrip);
         ToggleMetadataHudCommand = new RelayCommand(ToggleMetadataHud, () => CanToggleMetadataHud);
         PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard, () => !IsOperationBusy);
@@ -613,6 +620,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseRetouch));
                 RaiseCompareState();
+                RefreshReviewState(value);
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -687,6 +695,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseRetouch));
                 Raise(nameof(CanUseOverlayMode));
                 RaiseCompareState();
+                RaiseReviewState();
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -1864,6 +1873,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private IReadOnlyList<AssetSmartFilterItem> _gallerySmartFilterIndex = [];
     private string _gallerySmartFilterSignature = "";
     private string _galleryFilterSummaryText = "";
+    private readonly Stack<ReviewLabelUndoEntry> _reviewUndo = new();
+    private ReviewLabelState _currentReviewState = new(null, ReviewLabelKind.None, "");
 
     private bool _isGalleryOpen;
     public bool IsGalleryOpen
@@ -1922,6 +1933,27 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public string GalleryFilterSummaryText => _galleryFilterSummaryText;
     public string GalleryFilterTooltip =>
         "Filter by name/path or use smart filters such as format:png, orientation:landscape, size:large, date:week, duplicate:yes, rating:5, tag:portrait, or palette:blue.";
+
+    private bool _isReviewMode;
+    public bool IsReviewMode
+    {
+        get => _isReviewMode;
+        set
+        {
+            if (!Set(ref _isReviewMode, value)) return;
+            RaiseReviewState();
+            Toast(value ? "Review mode on" : "Review mode off");
+        }
+    }
+
+    public bool CanUseReviewLabels => HasImage && !IsArchiveBook && !IsPeekMode && !IsOperationBusy;
+    public bool CanUndoReviewLabel => _reviewUndo.Count > 0;
+    public string ReviewModeText => IsReviewMode ? "Review on" : "Review off";
+    public string ReviewRatingText => _currentReviewState.RatingText;
+    public string ReviewLabelText => _currentReviewState.LabelText;
+    public string ReviewStatusText => $"{ReviewRatingText} · {ReviewLabelText}";
+    public bool IsReviewPick => _currentReviewState.Label == ReviewLabelKind.Pick;
+    public bool IsReviewReject => _currentReviewState.Label == ReviewLabelKind.Reject;
 
     private string _galleryFilterText = "";
     public string GalleryFilterText
@@ -2058,6 +2090,94 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             parts.Add(token);
 
         GalleryFilterText = string.Join(' ', parts);
+    }
+
+    private void SetReviewRating(object? parameter)
+    {
+        if (!CanUseReviewLabels || CurrentPath is null)
+            return;
+
+        int? rating = null;
+        if (parameter is int numeric)
+            rating = Math.Clamp(numeric, 0, 5);
+        else if (parameter is string raw && int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
+            rating = Math.Clamp(parsed, 0, 5);
+
+        ApplyReviewMutation(CurrentPath, _reviewLabels.SetRating(CurrentPath, rating));
+    }
+
+    private void SetReviewLabel(ReviewLabelKind label)
+    {
+        if (!CanUseReviewLabels || CurrentPath is null)
+            return;
+
+        ApplyReviewMutation(CurrentPath, _reviewLabels.SetLabel(CurrentPath, label));
+    }
+
+    private void ApplyReviewMutation(string path, ReviewLabelMutationResult result)
+    {
+        if (!result.Success)
+        {
+            Toast(result.Message);
+            return;
+        }
+
+        _reviewUndo.Push(new ReviewLabelUndoEntry(path, result.Previous));
+        _currentReviewState = result.Current;
+        RaiseReviewState();
+        InvalidateGallerySmartFilterIndex();
+        Toast(result.Message);
+    }
+
+    private void UndoReviewLabel()
+    {
+        if (_reviewUndo.Count == 0)
+            return;
+
+        var entry = _reviewUndo.Pop();
+        var result = _reviewLabels.Restore(entry.Path, entry.State);
+        if (!result.Success)
+        {
+            Toast(result.Message);
+            return;
+        }
+
+        if (CurrentPath is not null && string.Equals(Path.GetFullPath(CurrentPath), Path.GetFullPath(entry.Path), StringComparison.OrdinalIgnoreCase))
+            _currentReviewState = result.Current;
+        RaiseReviewState();
+        InvalidateGallerySmartFilterIndex();
+        Toast("Review change undone");
+    }
+
+    private void RefreshReviewState(string? path)
+    {
+        _currentReviewState = path is not null && File.Exists(path)
+            ? _reviewLabels.ReadState(path)
+            : new ReviewLabelState(null, ReviewLabelKind.None, "");
+        RaiseReviewState();
+    }
+
+    private void RaiseReviewState()
+    {
+        Raise(nameof(IsReviewMode));
+        Raise(nameof(CanUseReviewLabels));
+        Raise(nameof(CanUndoReviewLabel));
+        Raise(nameof(ReviewModeText));
+        Raise(nameof(ReviewRatingText));
+        Raise(nameof(ReviewLabelText));
+        Raise(nameof(ReviewStatusText));
+        Raise(nameof(IsReviewPick));
+        Raise(nameof(IsReviewReject));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    private void InvalidateGallerySmartFilterIndex()
+    {
+        _gallerySmartFilterSignature = "";
+        if (IsGalleryOpen || HasGalleryFilter)
+            RefreshGalleryItems();
+        Raise(nameof(GalleryStatusText));
+        Raise(nameof(GalleryFilterSummaryText));
     }
 
     private void RaiseFolderPreviewState()
@@ -2404,6 +2524,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenSelectedGalleryItemCommand { get; }
     public ICommand ApplyGallerySmartFilterCommand { get; }
     public ICommand ClearGalleryFilterCommand { get; }
+    public ICommand ToggleReviewModeCommand { get; }
+    public ICommand SetReviewRatingCommand { get; }
+    public ICommand MarkReviewPickCommand { get; }
+    public ICommand MarkReviewRejectCommand { get; }
+    public ICommand ClearReviewLabelCommand { get; }
+    public ICommand UndoReviewLabelCommand { get; }
     public ICommand ToggleFilmstripCommand { get; }
     public ICommand ToggleMetadataHudCommand { get; }
     public ICommand PasteFromClipboardCommand { get; }
@@ -5537,6 +5663,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         while (v >= 1024 && i < units.Length - 1) { v /= 1024; i++; }
         return $"{v:0.##} {units[i]}";
     }
+
+    private sealed record ReviewLabelUndoEntry(string Path, ReviewLabelState State);
 
     public void Dispose()
     {
