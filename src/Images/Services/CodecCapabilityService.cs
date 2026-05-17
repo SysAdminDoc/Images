@@ -1,3 +1,5 @@
+using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 using ImageMagick;
 using SharpCompress.Archives;
@@ -29,6 +31,16 @@ public static class CodecCapabilityService
         bool? Metadata,
         string Runtime,
         string Notes);
+
+    public sealed record DependencyProvenanceRow(
+        string Name,
+        string Kind,
+        string Source,
+        string Version,
+        string? Path,
+        string? Sha256,
+        string AdvisoryStatus,
+        string Action);
 
     /// <summary>
     /// Compact runtime/provenance snapshot — used by About and <c>--system-info</c>. None of
@@ -114,6 +126,114 @@ public static class CodecCapabilityService
             JpegTranVersion: jpegTran.Version,
             JpegTranSha256: jpegTran.Sha256,
             JpegTranStatus: jpegTran.StatusText);
+    }
+
+    public static IReadOnlyList<DependencyProvenanceRow> BuildDependencyProvenanceRows()
+        => BuildDependencyProvenanceRows(BuildProvenance(), OcrCapabilityService.GetStatus());
+
+    internal static IReadOnlyList<DependencyProvenanceRow> BuildDependencyProvenanceRows(
+        RuntimeProvenance provenance,
+        OcrCapabilityService.OcrCapabilityStatus ocrStatus)
+    {
+        ArgumentNullException.ThrowIfNull(provenance);
+        ArgumentNullException.ThrowIfNull(ocrStatus);
+
+        return
+        [
+            new(
+                Name: ".NET Desktop Runtime",
+                Kind: "Runtime",
+                Source: "Microsoft .NET support policy: https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core",
+                Version: provenance.Runtime,
+                Path: System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory(),
+                Sha256: null,
+                AdvisoryStatus: ".NET servicing comes from Microsoft; release builds must use a current supported SDK/runtime.",
+                Action: "Update the build image/runtime when Microsoft ships .NET 9 servicing releases."),
+
+            new(
+                Name: "Magick.NET-Q16-AnyCPU / Magick.NET.Core",
+                Kind: "NuGet",
+                Source: "NuGet: https://www.nuget.org/packages/Magick.NET-Q16-AnyCPU; releases: https://github.com/dlemstra/Magick.NET/releases",
+                Version: provenance.MagickVersion,
+                Path: provenance.MagickAssemblyPath,
+                Sha256: TrySha256(provenance.MagickAssemblyPath),
+                AdvisoryStatus: IsVersionAtLeast(provenance.MagickVersion, 14, 11, 0)
+                    ? "OK: current version is above the project-reviewed 14.11.0 security floor; the NuGet vulnerability gate still runs before release."
+                    : "Needs review: version is below the project-reviewed 14.11.0 security floor.",
+                Action: "Keep Magick.NET package versions aligned and run the release readiness/vulnerability gate before shipping."),
+
+            new(
+                Name: "SharpCompress",
+                Kind: "NuGet",
+                Source: "NuGet: https://www.nuget.org/packages/SharpCompress; advisory: https://github.com/advisories/GHSA-6c8g-7p36-r338",
+                Version: provenance.SharpCompressVersion,
+                Path: provenance.SharpCompressAssemblyPath,
+                Sha256: TrySha256(provenance.SharpCompressAssemblyPath),
+                AdvisoryStatus: IsVersionAtLeast(provenance.SharpCompressVersion, 0, 48, 1)
+                    ? "OK: 0.48.1+ clears GHSA-6c8g-7p36-r338 / CVE-2026-44788 for this package gate; Images uses read-only archive streams."
+                    : "Needs upgrade: GHSA-6c8g-7p36-r338 / CVE-2026-44788 affects older SharpCompress versions.",
+                Action: "Keep SharpCompress at 0.48.1+ and avoid WriteToDirectory() extraction helpers."),
+
+            new(
+                Name: "Ghostscript",
+                Kind: "Optional runtime",
+                Source: $"Resolver: {provenance.GhostscriptSource}; Artifex releases: https://ghostscript.com/releases/; CVE index: https://ghostscript.com/releases/cve/index.html",
+                Version: provenance.GhostscriptVersion ?? (provenance.GhostscriptAvailable ? "version unavailable" : "not loaded"),
+                Path: provenance.GhostscriptDllPath ?? provenance.GhostscriptDirectory,
+                Sha256: provenance.GhostscriptDllSha256,
+                AdvisoryStatus: provenance.GhostscriptAvailable
+                    ? "Runtime present; compare version and SHA-256 against the approved Ghostscript artifact review and Artifex CVE index."
+                    : "Not loaded; document/vector preview runtime is absent.",
+                Action: provenance.GhostscriptAvailable
+                    ? "Keep bundled license/source/checksum receipts attached to release artifacts."
+                    : "Install Ghostscript, set IMAGES_GHOSTSCRIPT_DIR, or place an approved runtime under Codecs\\Ghostscript."),
+
+            new(
+                Name: "jpegtran",
+                Kind: "Optional runtime",
+                Source: "libjpeg-turbo releases: https://github.com/libjpeg-turbo/libjpeg-turbo/releases; policy: docs/lossless-jpeg-transform-policy.md",
+                Version: provenance.JpegTranVersion ?? (provenance.JpegTranAvailable ? "version unavailable" : "not loaded"),
+                Path: provenance.JpegTranExecutablePath,
+                Sha256: provenance.JpegTranSha256,
+                AdvisoryStatus: provenance.JpegTranAvailable
+                    ? "Runtime present; verify hash, license files, and release source before bundling."
+                    : "Optional child-process runtime is not bundled by current releases.",
+                Action: provenance.JpegTranAvailable
+                    ? "Match this binary to the approved libjpeg-turbo artifact before release."
+                    : "Stage approved libjpeg-turbo jpegtran.exe under Codecs\\JpegTran or set IMAGES_JPEGTRAN_EXE."),
+
+            new(
+                Name: "Windows.Media.Ocr",
+                Kind: "OS runtime",
+                Source: "Windows OCR API: https://learn.microsoft.com/en-us/uwp/api/windows.media.ocr",
+                Version: ocrStatus.IsAvailable ? ocrStatus.LanguageSummary : "no OCR language installed",
+                Path: null,
+                Sha256: null,
+                AdvisoryStatus: "OS-managed Windows API and language packs; Images does not bundle OCR models.",
+                Action: ocrStatus.IsAvailable
+                    ? "No action needed unless additional OCR languages are required."
+                    : "Install a Windows OCR language capability from Windows language settings."),
+
+            new(
+                Name: "AI inference runtime",
+                Kind: "Runtime",
+                Source: "Windows ML: https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview; ONNX Runtime DirectML: https://onnxruntime.ai/docs/execution-providers/DirectML-ExecutionProvider.html",
+                Version: "not referenced by current build",
+                Path: null,
+                Sha256: null,
+                AdvisoryStatus: "Not enabled; model features require V7-30 runtime review before package or runtime references are added.",
+                Action: "Complete V7-30 model/runtime manager before semantic search, inpaint, background removal, or super-resolution."),
+
+            new(
+                Name: "Local model registry",
+                Kind: "Model",
+                Source: "No bundled model; scoped candidates include https://huggingface.co/opencv/inpainting_lama and https://huggingface.co/Carve/LaMa-ONNX",
+                Version: "not installed",
+                Path: BuildAppDataPath("models"),
+                Sha256: null,
+                AdvisoryStatus: "No model is installed or auto-downloaded; future model files must be user initiated and SHA-256 verified.",
+                Action: "Use a future approved model-manager flow; do not enable model-backed tools from ad hoc files.")
+        ];
     }
 
     /// <summary>
@@ -209,6 +329,7 @@ public static class CodecCapabilityService
     {
         var status = CodecRuntime.Status;
         var provenance = BuildProvenance();
+        var dependencyRows = BuildDependencyProvenanceRows(provenance, OcrCapabilityService.GetStatus());
         var writableExports = CountWritableExportFormats();
         var sb = new StringBuilder();
 
@@ -241,6 +362,9 @@ public static class CodecCapabilityService
             sb.AppendLine($"- jpegtran SHA-256: {provenance.JpegTranSha256}");
         sb.AppendLine();
 
+        AppendDependencyProvenance(sb, dependencyRows);
+        sb.AppendLine();
+
         sb.AppendLine("Capability matrix");
         foreach (var row in BuildCapabilityMatrix())
         {
@@ -268,6 +392,23 @@ public static class CodecCapabilityService
         sb.AppendLine("- Camera RAW formats are read-only preview formats; export through Save a copy.");
 
         return sb.ToString();
+    }
+
+    internal static void AppendDependencyProvenance(
+        StringBuilder sb,
+        IEnumerable<DependencyProvenanceRow> rows)
+    {
+        sb.AppendLine("Dependency provenance");
+        foreach (var row in rows)
+        {
+            sb.AppendLine($"- {row.Name} [{row.Kind}]");
+            sb.AppendLine($"    Source: {row.Source}");
+            sb.AppendLine($"    Version: {row.Version}");
+            sb.AppendLine($"    Path: {row.Path ?? "(not applicable)"}");
+            sb.AppendLine($"    SHA-256: {row.Sha256 ?? "(not applicable)"}");
+            sb.AppendLine($"    Advisory: {row.AdvisoryStatus}");
+            sb.AppendLine($"    Action: {row.Action}");
+        }
     }
 
     private static string Tri(bool? value) => value switch
@@ -328,5 +469,49 @@ public static class CodecCapabilityService
     {
         var location = typeof(ArchiveFactory).Assembly.Location;
         return string.IsNullOrWhiteSpace(location) ? null : location;
+    }
+
+    private static string? TrySha256(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            return null;
+
+        try
+        {
+            using var stream = File.OpenRead(path);
+            return Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static bool IsVersionAtLeast(string value, int major, int minor, int patch)
+    {
+        var normalized = new string(value
+            .TakeWhile(c => char.IsDigit(c) || c == '.')
+            .ToArray());
+
+        if (!Version.TryParse(normalized, out var version))
+            return false;
+
+        var required = new Version(major, minor, patch);
+        return version >= required;
+    }
+
+    private static string? BuildAppDataPath(params string[] relativeSegments)
+    {
+        var root = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        if (string.IsNullOrWhiteSpace(root))
+            return null;
+
+        var parts = new string[relativeSegments.Length + 2];
+        parts[0] = root;
+        parts[1] = "Images";
+        for (var i = 0; i < relativeSegments.Length; i++)
+            parts[i + 2] = relativeSegments[i];
+
+        return Path.Combine(parts);
     }
 }

@@ -18,7 +18,7 @@ The project philosophy is stable across `README.md`, `CLAUDE.md`, `docs/integrat
 ## Verified Repository State
 
 - Branch: `main`, tracking `origin/main`.
-- HEAD at reconciliation: `6da0641aa2b241c1b108f28ed01be69836ec56a3` (`feat: add send print clipboard actions`, 2026-05-14).
+- Initial 2026-05-17 research baseline: `6da0641aa2b241c1b108f28ed01be69836ec56a3` (`feat: add send print clipboard actions`, 2026-05-14). Later autonomous roadmap commits on 2026-05-17 closed V7-02 through V7-05.
 - Latest published tag found locally and on GitHub Releases: `v0.2.11`, commit `0abf855e109016b3e2279a99cdf43243d3efa35b`, published 2026-05-05.
 - Root version surfaces still show `0.2.11` in `src/Images/Images.csproj`, `README.md`, and installer docs.
 - `CHANGELOG.md` has substantial Unreleased work after `v0.2.11`: crop/writeback refinement, selection, jpegtran provenance, lossless JPEG writeback and trim confirmation, inpaint runtime decision, editor workbenches, wallpaper modes, send/print/clipboard actions.
@@ -74,6 +74,7 @@ Shipped or present in current docs and changelog:
 
 - Natural folder navigation, zoom/pan/rotate/flip, inline rename, drag/drop, FSW reload.
 - Broad WIC plus Magick.NET format support with About/CLI codec reports.
+- Structured runtime/dependency provenance rows in About, `--system-info`, and `--codec-report`, covering NuGet packages, optional runtimes, OS OCR, and future model-runtime placeholders with source, version, path, SHA-256 where available, advisory status, and action copy.
 - App-local Ghostscript support for PDF/EPS/PS/AI previews in release artifacts.
 - Multi-page documents and layered/page formats.
 - Archive book mode for ZIP/CBZ, RAR/CBR, and 7z/CB7 with right-to-left mode, spreads, progress, and clean-scan preview.
@@ -94,8 +95,8 @@ The old `ROADMAP.md` v6 header said there was no editor, organizer, or batch pro
 
 - Roadmap/status hygiene needs to stay synchronized with shipped features.
 - The future-dated historical `CHANGELOG.md` entries for `v0.1.8` and `v0.1.9` were repaired on 2026-05-17: `v0.1.9` uses GitHub release publication date 2026-05-04, and `v0.1.8` uses local release commit date 2026-04-25 because no tag or GitHub release exists.
-- Settings remains incomplete relative to the app surface: General, Appearance, Advanced, Hotkeys, accessibility, and diagnostics preferences need first-class IA.
 - The optional `jpegtran.exe` sidecar still needs an approved staged artifact, license files, SHA-256 provenance, and release smoke coverage before it can be bundled.
+- Installed and portable release outputs still need automated `--system-info` / `--codec-report` smoke coverage across Ghostscript, OCR, jpegtran, and dependency-provenance rows.
 - There is no full local catalog/schema layer yet for library-scale metadata, smart search, long-running indexing, or durable job progress.
 - Semantic search, local model management, background removal, upscaling, and inpainting all need a shared model/runtime foundation before feature work.
 - Color management is still a gap: ICC awareness, soft-proof/status copy, histogram/channel tools, and output profile handling need design and tests.
@@ -129,7 +130,7 @@ Root `ROADMAP.md` now starts with an authoritative 2026-05-17 v7 plan. The older
 
 ## Recommended Next Work
 
-1. Implement a dependency/runtime provenance dashboard that covers NuGet, Ghostscript, jpegtran, Magick.NET, OCR, and future model runtimes.
-2. Stage the approved jpegtran artifact and add release smoke tests before treating lossless JPEG transforms as a fully bundled feature.
+1. Stage the approved jpegtran artifact and add release smoke tests before treating lossless JPEG transforms as a fully bundled feature.
+2. Add installed and portable diagnostics smoke coverage for `--system-info` and `--codec-report`.
 3. Build compare/overlay mode by reusing duplicate-cleanup, gallery selection, and linked viewport primitives.
 4. Design catalog schema v1 before semantic search, model-backed organization, or library-scale jobs.

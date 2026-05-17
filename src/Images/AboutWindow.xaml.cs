@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -398,10 +399,9 @@ public partial class AboutWindow : Window
     };
 
     /// <summary>
-    /// Populates the provenance card with the live runtime snapshot — Magick.NET version +
-    /// assembly path, Ghostscript path/source/version/SHA-256, and jpegtran sidecar
-    /// path/source/version/SHA-256 — so the values match exactly what <c>--system-info</c>
-    /// would print.
+    /// Populates the provenance card with the live runtime snapshot and the structured
+    /// dependency rows used by <c>--codec-report</c>: source, version, path, SHA-256,
+    /// advisory status, and missing-runtime action copy.
     /// </summary>
     private void PopulateProvenance()
     {
@@ -410,28 +410,9 @@ public partial class AboutWindow : Window
 
         AddProvenanceRow("App directory", p.AppDirectory);
         AddProvenanceRow("Process arch", p.ProcessArchitecture);
-        AddProvenanceRow("Magick.NET", p.MagickVersion);
-        if (p.MagickAssemblyPath is not null)
-            AddProvenanceRow("Magick.NET path", p.MagickAssemblyPath);
-        AddProvenanceRow("SharpCompress", p.SharpCompressVersion);
-        if (p.SharpCompressAssemblyPath is not null)
-            AddProvenanceRow("Archive reader path", p.SharpCompressAssemblyPath);
 
-        AddProvenanceRow("Ghostscript", p.GhostscriptAvailable ? "available" : "not available");
-        AddProvenanceRow("Ghostscript source", p.GhostscriptDirectory ?? p.GhostscriptSource);
-        if (p.GhostscriptVersion is not null)
-            AddProvenanceRow("Ghostscript ver", p.GhostscriptVersion);
-        if (p.GhostscriptDllPath is not null)
-            AddProvenanceRow("Ghostscript DLL", p.GhostscriptDllPath);
-        if (p.GhostscriptDllSha256 is not null)
-            AddProvenanceRow("DLL SHA-256", p.GhostscriptDllSha256);
-
-        AddProvenanceRow("jpegtran", p.JpegTranAvailable ? "available" : "not available");
-        AddProvenanceRow("jpegtran source", p.JpegTranExecutablePath ?? p.JpegTranSource);
-        if (p.JpegTranVersion is not null)
-            AddProvenanceRow("jpegtran ver", p.JpegTranVersion);
-        if (p.JpegTranSha256 is not null)
-            AddProvenanceRow("jpegtran SHA-256", p.JpegTranSha256);
+        foreach (var row in CodecCapabilityService.BuildDependencyProvenanceRows(p, OcrCapabilityService.GetStatus()))
+            AddDependencyProvenanceRow(row);
     }
 
     private void AddProvenanceRow(string label, string value)
@@ -447,6 +428,42 @@ public partial class AboutWindow : Window
         };
         Grid.SetColumn(labelBlock, 0);
         grid.Children.Add(labelBlock);
+
+        var valueBlock = new TextBlock
+        {
+            Text = value,
+            Style = (Style)FindResource("MetaValue"),
+            TextWrapping = TextWrapping.Wrap
+        };
+        Grid.SetColumn(valueBlock, 1);
+        grid.Children.Add(valueBlock);
+
+        ProvenancePanel.Children.Add(grid);
+    }
+
+    private void AddDependencyProvenanceRow(CodecCapabilityService.DependencyProvenanceRow row)
+    {
+        var grid = new Grid { Margin = new Thickness(0, 8, 0, 6) };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(120) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+        var labelBlock = new TextBlock
+        {
+            Text = row.Name,
+            Style = (Style)FindResource("MetaLabel"),
+            TextWrapping = TextWrapping.Wrap
+        };
+        Grid.SetColumn(labelBlock, 0);
+        grid.Children.Add(labelBlock);
+
+        var value = new StringBuilder()
+            .AppendLine($"{row.Kind} | Version: {row.Version}")
+            .AppendLine($"Source: {row.Source}")
+            .AppendLine($"Path: {row.Path ?? "(not applicable)"}")
+            .AppendLine($"SHA-256: {row.Sha256 ?? "(not applicable)"}")
+            .AppendLine($"Advisory: {row.AdvisoryStatus}")
+            .Append($"Action: {row.Action}")
+            .ToString();
 
         var valueBlock = new TextBlock
         {

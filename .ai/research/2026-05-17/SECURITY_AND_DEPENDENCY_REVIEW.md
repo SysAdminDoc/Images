@@ -8,16 +8,19 @@ The only actionable vulnerable NuGet finding during this run was SharpCompress 0
 
 The affected advisory, GHSA-6c8g-7p36-r338 / CVE-2026-44788, concerns path traversal in the `WriteToDirectory()` extraction helper. Images uses SharpCompress for read-only archive page streams and local source search found no `WriteToDirectory()` use in `src`. Upgrading is still correct because the project treats a clean vulnerability gate as a release requirement.
 
+Follow-up on 2026-05-17 closed the first hardening opportunity from this review: About, `--system-info`, and `--codec-report` now share a structured dependency/runtime/model provenance surface with source URLs, versions, paths, SHA-256 values where available, advisory status, and missing-runtime action copy.
+
 ## Local Package State
 
 Main app package references from `src/Images/Images.csproj`:
 
 | Package | Local version | Review |
 | --- | ---: | --- |
-| `CommunityToolkit.Mvvm` | 8.4.0 | Keep unless MVVM Toolkit warnings or release notes justify a focused update. |
 | `Magick.NET-Q16-AnyCPU` | 14.13.0 | Current/recent NuGet version; previous vulnerable floors are below this. |
+| `Magick.NET.Core` | 14.13.0 | Kept aligned with `Magick.NET-Q16-AnyCPU`. |
 | `Microsoft.Data.Sqlite` | 9.0.0 | Outdated; evaluate with .NET 10 package strategy rather than automatic major update. |
 | `Microsoft.Extensions.Logging` | 9.0.0 | Outdated; evaluate with .NET 10 package strategy. |
+| `Microsoft.VisualBasic` | 10.3.0 | Framework helper dependency used by the app; keep unless a build warning or advisory requires change. |
 | `Serilog` | 4.2.0 | Minor update to 4.3.1 available. Low priority unless release notes or advisories require it. |
 | `Serilog.Extensions.Logging` | 9.0.0 | 10.x available; coordinate with framework/package strategy. |
 | `Serilog.Sinks.File` | 6.0.0 | 7.x available; update should be regression-tested against log retention/concurrent read behavior. |
@@ -111,8 +114,8 @@ Recommendation:
 
 ## Hardening Opportunities
 
-1. Add an internal dependency/runtime status model used by About, CLI reports, and release smoke.
-2. Expand release smoke to launch `--system-info` and `--codec-report` from both portable and installed outputs.
+1. Expand release smoke to launch `--system-info` and `--codec-report` from both portable and installed outputs.
+2. Add assertions over the new dependency provenance rows in release smoke, including Ghostscript presence, jpegtran status, and model runtime disabled state.
 3. Add source-scanning assertions for known dangerous APIs where possible:
    - no SharpCompress `WriteToDirectory()` in app code.
    - no unreviewed native sidecar resolver.
