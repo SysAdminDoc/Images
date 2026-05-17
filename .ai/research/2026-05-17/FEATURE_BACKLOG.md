@@ -40,8 +40,8 @@ This is the raw harvested backlog before final prioritization. Final tiering is 
 
 | Idea | Source evidence | Fit |
 | --- | --- | --- |
-| Build compare/overlay mode with linked pan, zoom, rotate, opacity, and A/B swap. | nomacs sync/overlay, `docs/design-product-differentiators.md`. | High |
-| Integrate compare mode with duplicate cleanup pairs and gallery selections. | Local duplicate cleanup shipped; nomacs/FastStone references. | High |
+| Build compare/overlay mode with linked pan, zoom, rotate, opacity, and A/B swap. | nomacs sync/overlay, `docs/design-product-differentiators.md`. | High - shipped 2026-05-17 under V7-10 for current+next, chosen-file, and duplicate-pair entry points. |
+| Integrate compare mode with duplicate cleanup pairs and gallery selections. | Local duplicate cleanup shipped; nomacs/FastStone references. | High - duplicate-cleanup pair handoff shipped 2026-05-17; gallery-selection handoff remains optional future expansion. |
 | Add culling mode: pick/reject, rating, color labels, sidecar writes, undo. | XnView/ACDSee/digiKam DAM patterns, current tag/rating sidecar flow. | High |
 | Add folder review session state: reviewed, kept, rejected, exported. | Duplicate cleanup/file health/import inbox workflows. | Medium |
 | Add multi-window sync later only after in-window compare is stable. | nomacs local/LAN sync. | Low |

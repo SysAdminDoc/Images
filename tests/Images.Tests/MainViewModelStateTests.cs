@@ -272,6 +272,80 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void CompareMode_StartsWithNextAndSupportsOverlayOpacityAndSwap()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var first = WritePng(temp.Path, "a.png");
+            var second = WritePng(temp.Path, "b.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(first);
+
+            Assert.True(viewModel.CanUseCompareMode);
+            Assert.True(viewModel.CanStartCompareWithNext);
+            Assert.True(viewModel.StartCompareCommand.CanExecute(null));
+
+            viewModel.StartCompareCommand.Execute(null);
+
+            Assert.True(viewModel.IsCompareMode);
+            Assert.True(viewModel.ShowCompareMode);
+            Assert.NotNull(viewModel.CompareImage);
+            Assert.Equal(second, viewModel.ComparePath);
+            Assert.Equal("2-up", viewModel.CompareLayoutText);
+            Assert.False(viewModel.IsCropMode);
+            Assert.Contains("a.png vs b.png", viewModel.CompareStatusText);
+
+            viewModel.ToggleCompareOverlayCommand.Execute(null);
+            viewModel.CompareOverlayOpacity = 2;
+            viewModel.DecreaseCompareOpacityCommand.Execute(null);
+
+            Assert.True(viewModel.IsCompareOverlayMode);
+            Assert.Equal(0.95, viewModel.CompareOverlayOpacity, precision: 2);
+            Assert.Equal("95%", viewModel.CompareOverlayOpacityText);
+
+            viewModel.SwapCompareCommand.Execute(null);
+
+            Assert.Equal(second, viewModel.CurrentPath);
+            Assert.Equal(first, viewModel.ComparePath);
+            Assert.True(viewModel.IsCompareMode);
+            Assert.True(viewModel.IsCompareOverlayMode);
+            Assert.Equal("b.png", viewModel.ComparePrimaryFileName);
+            Assert.Equal("a.png", viewModel.CompareSecondaryFileName);
+
+            viewModel.ExitCompareCommand.Execute(null);
+
+            Assert.False(viewModel.IsCompareMode);
+            Assert.False(viewModel.ShowCompareMode);
+            Assert.Null(viewModel.CompareImage);
+            Assert.Null(viewModel.ComparePath);
+        });
+    }
+
+    [Fact]
+    public void CompareMode_StartCompareWithPairOpensPrimaryAndSecondary()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var first = WritePng(temp.Path, "keep.png");
+            var second = WritePng(temp.Path, "extra.png");
+            var third = WritePng(temp.Path, "other.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(third);
+            viewModel.StartCompareWithPair(first, second);
+
+            Assert.True(viewModel.IsCompareMode);
+            Assert.Equal(first, viewModel.CurrentPath);
+            Assert.Equal(second, viewModel.ComparePath);
+            Assert.NotNull(viewModel.CompareImage);
+            Assert.True(viewModel.SwapCompareCommand.CanExecute(null));
+        });
+    }
+
+    [Fact]
     public void PasteFromClipboardCommand_SavesImageAndOpensIt()
     {
         RunOnSta(() =>

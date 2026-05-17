@@ -49,6 +49,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Clone/heal retouch** — press `Ctrl+Alt+H`, Alt-click or first-click a clean source, then paint clone-stamp or healing-brush strokes over the target area. The side panel exposes mode, radius, and strength controls; Save a copy renders the retouch stack without changing the source file.
 - **Reference board mode** — press `Ctrl+B` to open a separate local board seeded from the current image. Drop supported files, arrange image cards, add notes and group frames, pin the board above other windows, zoom the canvas, and export the composed board as PNG.
 - **Duplicate cleanup center** — press `Ctrl+Shift+D` or use the side-panel Cleanup card to scan local folders for exact SHA-256 duplicates and perceptually similar images, prefer keep candidates from reference folders, review pairs side by side, mark false positives, and move extras to app-local quarantine or the Recycle Bin.
+- **Compare mode** — press `Ctrl+Alt+C` to compare the current image with the next folder item, choose another local image from the side panel or context menu, or send the selected duplicate-cleanup pair into the viewer. 2-up and opacity-overlay layouts share pan, zoom, rotate, flip, A/B swap, and keyboard-accessible opacity controls.
 - **File health scan** — press `Ctrl+Shift+H` to find files with mismatched image extensions, corrupt supported images, zero-byte files, and temporary/partial-download artifacts, then rename detected extensions, mark reviewed, or move files to app-local quarantine.
 - **Pinned overlay mode** — pin the current image above other windows for tracing or design comparison, tune opacity in the side panel, and optionally enable click-through only when the `Ctrl+Alt+O` global exit hotkey is registered.
 - **Pixel inspector** — enable Inspector in the side panel to sample coordinates and HEX/RGB/HSV/alpha values, copy color values, Shift-drag pixel measurements, and switch to nearest-neighbor preview scaling for pixel art.
@@ -129,6 +130,10 @@ OCR depends on Microsoft Windows OCR optional capabilities. The installer instal
 | **Ctrl+Shift+M** | Open macro actions |
 | **Ctrl+Shift+B** | Open batch processor |
 | **Ctrl+Shift+E** | Open edit history |
+| **Ctrl+Alt+C** | Compare current image with next folder item |
+| **Ctrl+Alt+V** | Compare current image with a chosen local file |
+| **O / X** | In compare mode, toggle overlay layout / swap A-B |
+| **[ / ]** | In compare mode, adjust B opacity |
 | **Ctrl+Alt+O** | Exit pinned overlay mode |
 | **Ctrl+Left / Ctrl+Right** | Step animated image frames |
 | **Ctrl+Space** | Play/pause animated image |

@@ -9,6 +9,8 @@ using Images.Services;
 
 namespace Images.Controls;
 
+public readonly record struct ZoomPanViewState(double Scale, double TranslateX, double TranslateY);
+
 /// <summary>
 /// A content host that draws its image with wheel-zoom, drag-pan, and double-click fit/1:1 toggle.
 /// Used as the photo canvas. When the <see cref="Animation"/> DP is set, the view model owns the
@@ -221,6 +223,28 @@ public sealed class ZoomPanImage : ContentControl
             _rotate.Angle,
             FlipHorizontal,
             FlipVertical);
+    }
+
+    public ZoomPanViewState GetViewState()
+        => new(_scale.ScaleX, _translate.X, _translate.Y);
+
+    public void SetViewState(ZoomPanViewState state)
+    {
+        var scale = double.IsFinite(state.Scale) ? Math.Clamp(state.Scale, 0.1, 20) : 1;
+        var translateX = double.IsFinite(state.TranslateX) ? state.TranslateX : 0;
+        var translateY = double.IsFinite(state.TranslateY) ? state.TranslateY : 0;
+
+        if (Math.Abs(_scale.ScaleX - scale) < 0.0001 &&
+            Math.Abs(_translate.X - translateX) < 0.0001 &&
+            Math.Abs(_translate.Y - translateY) < 0.0001)
+        {
+            return;
+        }
+
+        _scale.ScaleX = _scale.ScaleY = scale;
+        _translate.X = translateX;
+        _translate.Y = translateY;
+        RaiseViewChanged();
     }
 
     // V20-20: four zoom modes. All compute against the source image's pixel size in the

@@ -10,11 +10,11 @@ Status values:
 
 ## Latest Completed Slice
 
-Roadmap `V7-06` and `V7-07` are complete. Images now stages the approved libjpeg-turbo 3.1.4.1 `jpegtran.exe` artifact for release builds and runs portable plus installed diagnostics smoke over `--system-info` and `--codec-report`.
+Roadmap `V7-10` is complete. Images now has a local compare mode with current+next, chosen-file, and duplicate-cleanup pair entry points, plus linked 2-up and opacity-overlay review layouts.
 
 ## Next Focus
 
-The improvement-plan backlog is complete. Continue with the remaining roadmap: compare/overlay mode, export/batch target-format warnings, catalog schema v1, and local model/runtime management. The content-aware inpaint runtime/model choice is scoped in `docs/inpaint-runtime-decision.md`.
+The improvement-plan backlog is complete. Continue with the remaining roadmap: visual diff export workbench, catalog schema v1, export/batch target-format warnings, ICC/profile and histogram basics, and local model/runtime management. The content-aware inpaint runtime/model choice is scoped in `docs/inpaint-runtime-decision.md`.
 
 ## Research Inputs
 
@@ -46,7 +46,7 @@ The improvement-plan backlog is complete. Continue with the remaining roadmap: c
 
 | ID | Priority | Status | Workstream | Source signal | Planned sequence |
 | --- | --- | --- | --- | --- | --- |
-| RS-01 | P2 | Planned | Local comparison mode | nomacs synchronized views and opacity overlay | Design doc, UI-state tests, local 2-up compare, linked pan/zoom, linked next/previous, overlay opacity. |
+| RS-01 | P2 | Done | Local comparison mode | nomacs synchronized views and opacity overlay | Current+next, chosen-file, and duplicate-cleanup pair entry points; local 2-up compare; opacity overlay; linked pan/zoom/rotate/flip; A/B swap; keyboard opacity controls; ViewModel tests. |
 | RS-02 | P2 | Done | Archive/book navigation | NeeView book model, PicView archive navigation, Tacent folder continuity | ZIP/CBZ read-only pages, page scrubber, archive-only controls, edge page-turn zones, reader-mode keyboard routing, remembered read position, side-panel book history, explicit cover promotion, right-to-left page turns, old-scan filtering, cover-aware spreads, RAR/7z runtime review, managed RAR/CBR and 7z/CB7 expansion, diagnostics provenance, and generated archive coverage shipped. |
 | RS-03 | P0 | In progress | Folder sorting and Explorer fidelity | ImageGlass Explorer sort sync, NeeView/Geeqie folder models | App-owned sort modes first, visible sort control, sort-state tests, later Explorer saved-search/sort investigation. |
 | RS-04 | P2 | Planned | Metadata culling workflow | Geeqie XMP keywords/search, gThumb catalogs/comments, Tacent metadata sort | Sidecar decision, rating/reject model, folder filters, keep/reject/move actions, undo and no-original-write defaults. |
@@ -80,6 +80,7 @@ The improvement-plan backlog is complete. Continue with the remaining roadmap: c
 - 2026-05-05: Completed `IP-02G` by extracting OCR busy/active overlay workflow into `OcrWorkflowController` and covering no-image, success, no-text, cancellation, and stale-result outcomes.
 - 2026-05-17: Completed `V7-05` by adding structured dependency provenance rows for .NET, Magick.NET, SharpCompress, Ghostscript, jpegtran, Windows OCR, AI runtime, and local model registry placeholders; About and CLI reports now share the same source/version/path/hash/advisory/action surface.
 - 2026-05-17: Completed `V7-06` and `V7-07` by approving libjpeg-turbo 3.1.4.1 `jpegtran.exe` for release staging, tracking license/provenance files, adding a SHA-verified staging script, fixing redirected CLI diagnostics output, and wiring portable plus installed release diagnostics smoke into the workflow.
+- 2026-05-17: Completed `V7-10` and `RS-01` by adding viewer compare mode with current+next, chosen-file, and duplicate-cleanup pair entry points; linked 2-up and opacity-overlay canvases; A/B swap; keyboard opacity controls; and regression coverage for compare state.
 - 2026-05-05: Completed roadmap `V30-04` by adding a modeless non-destructive adjustment workbench, live Magick.NET preview rendering, XMP edit-stack persistence, Save-a-copy application, command routing, and regression coverage for adjustment export.
 - 2026-05-05: Completed roadmap `V40-63` by adding a private offline tag relationship graph with namespace, alias, parent, sidecar import/export, UI entry points, and regression coverage.
 - 2026-05-05: Completed roadmap `V40-64` by adding a local import inbox with duplicate-aware staging, tag/rating sidecars, optional GPS stripping, Recycle Bin cleanup, and copy/move import.
