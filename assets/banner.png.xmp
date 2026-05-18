@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" xmlns:images="https://github.com/SysAdminDoc/Images/ns/edit/1.0/">
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:images="https://github.com/SysAdminDoc/Images/ns/edit/1.0/">
+    <rdf:Description>
+      <images:EditStack>{
+  "SchemaVersion": 1,
+  "SourceFileName": "banner.png",
+  "UpdatedUtc": "2026-05-13T19:55:45.2946322+00:00",
+  "Operations": [
+    {
+      "Id": "252779139dc24c3ab85060518ba39b94",
+      "Kind": "crop",
+      "CreatedUtc": "2026-05-13T19:55:45.2925823+00:00",
+      "Enabled": true,
+      "Label": "Crop 327x343 at 1498,177",
+      "Parameters": {
+        "x": "1498",
+        "y": "177",
+        "width": "327",
+        "height": "343"
+      }
+    }
+  ],
+  "VirtualCopies": []
+}</images:EditStack>
+    </rdf:Description>
+  </rdf:RDF>
+</x:xmpmeta>
