@@ -166,7 +166,7 @@ jobs:
 
       - name: Upload release diagnostics logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-diagnostics-${{ github.event.inputs.version }}
           path: release-diagnostics/**
