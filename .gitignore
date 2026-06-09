@@ -79,3 +79,7 @@ CODEX_CHANGELOG.md
 ## Internal briefs — not public
 assets/logo-prompt.md
 Images-*.zip
+
+# Markdown files local-only (except README)
+*.md
+!README.md
