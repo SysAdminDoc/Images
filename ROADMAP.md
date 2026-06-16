@@ -452,7 +452,7 @@ The current codebase inherits the full WIC + Magick.NET + (eventually) libheif/l
   - libjxl current
   Effort: conditional.
 - [ ] **S-10** *P2* — **libwebp-in-WIC isolation** — prefer Microsoft's shipped WebP path (OS-patched) over bundling `libwebp.dll`; if forced to bundle for non-Windows or MSIX sandbox, keep version current and consider the same wasm-sandbox route in S-08. Effort: conditional. [[S-LIBWEBP-ORCA]](https://orca.security/resources/blog/understanding-libwebp-vulnerability/)
-- [ ] **S-11** *P1* — **Transitive-dep pinning**: when a S-09 floor implies a deeper library (libde265 under libheif, aom under libheif-AV1, LittleCMS under most), verify the pin transitively. The release-workflow CVE gate [S-04] must walk the transitive tree. Effort: S. [[S-LIBDE265-64]](https://github.com/advisories/GHSA-wqrf-6rf5-v78r)
+- [x] **S-11** *P1* — **Transitive-dep pinning**: when a S-09 floor implies a deeper library (libde265 under libheif, aom under libheif-AV1, LittleCMS under most), verify the pin transitively. The release-workflow CVE gate [S-04] must walk the transitive tree. Effort: S. [[S-LIBDE265-64]](https://github.com/advisories/GHSA-wqrf-6rf5-v78r) *(shipped 2026-06-16 — NuGet transitive CVE scan already active in CI/release; full dependency tree now logged as artifact for manual audit; native decoder floors documented for when S-09 bundling lands)*
 
 ### Privacy
 
