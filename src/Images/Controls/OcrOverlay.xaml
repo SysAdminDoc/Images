@@ -1,14 +1,15 @@
 <UserControl x:Class="Images.Controls.OcrOverlay"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:Images.Localization"
              xmlns:vm="clr-namespace:Images.ViewModels"
              IsHitTestVisible="True"
              Background="Transparent">
     <Grid x:Name="Root">
         <ItemsControl x:Name="OverlayItems"
                        ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.OcrOverlayLines}"
-                       AutomationProperties.Name="OCR text regions"
-                       AutomationProperties.HelpText="Select text inside a region, then copy it with Ctrl+C or the text box context menu">
+                       AutomationProperties.Name="{loc:Loc OcrTextRegions}"
+                       AutomationProperties.HelpText="{loc:Loc OcrTextRegionsHelpText}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Canvas />
@@ -28,9 +29,9 @@
                             Width="{Binding BoundingBox.Width}"
                             Height="{Binding BoundingBox.Height}"
                             Focusable="False"
-                            ToolTip="{Binding Text, StringFormat=OCR text: {0}}"
+                            ToolTip="{Binding Text, StringFormat={x:Static loc:Strings.OcrTextTooltipFormat}}"
                             AutomationProperties.Name="{Binding Text}"
-                            AutomationProperties.HelpText="Selectable OCR text region">
+                            AutomationProperties.HelpText="{loc:Loc OcrTextRegionHelpText}">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Background" Value="{StaticResource OcrRegionBrush}" />
@@ -59,9 +60,9 @@
                                  VerticalContentAlignment="Center"
                                  HorizontalContentAlignment="Left"
                                  Cursor="IBeam"
-                                 ToolTip="{Binding Text, StringFormat=Select and copy: {0}}"
+                                 ToolTip="{Binding Text, StringFormat={x:Static loc:Strings.OcrSelectCopyTooltipFormat}}"
                                  AutomationProperties.Name="{Binding Text}"
-                                 AutomationProperties.HelpText="Selectable OCR text. Drag to highlight text, then press Ctrl+C or use the context menu to copy." />
+                                 AutomationProperties.HelpText="{loc:Loc OcrTextBoxHelpText}" />
                     </Border>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

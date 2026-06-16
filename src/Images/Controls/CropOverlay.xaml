@@ -1,6 +1,7 @@
 <UserControl x:Class="Images.Controls.CropOverlay"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:Images.Localization"
              Background="{x:Null}">
     <Grid>
         <Canvas x:Name="OverlayCanvas"
@@ -55,15 +56,15 @@
                     MinHeight="32"
                     Padding="10,6"
                     Visibility="Collapsed"
-                    AutomationProperties.Name="Apply crop"
-                    ToolTip="Apply crop">
+                    AutomationProperties.Name="{loc:Loc ApplyCrop}"
+                    ToolTip="{loc:Loc ApplyCrop}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock FontFamily="{StaticResource IconFontFamily}"
                                Text="&#xE73E;"
                                FontSize="11"
                                Margin="0,0,7,0"
                                VerticalAlignment="Center" />
-                    <TextBlock Text="Apply"
+                    <TextBlock Text="{loc:Loc Apply}"
                                FontWeight="SemiBold"
                                VerticalAlignment="Center" />
                 </StackPanel>
