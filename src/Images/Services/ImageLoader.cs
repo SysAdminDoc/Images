@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
@@ -102,6 +103,11 @@ public static class ImageLoader
             if (animated is not null) return animated;
         }
 
+        var evtSrc = ImageEventSource.Instance;
+        evtSrc.RecordDecodeAttempt();
+        var sw = Stopwatch.StartNew();
+        evtSrc.DecodeStarted(displayName, "WIC");
+
         // Primary: WIC via BitmapImage. CacheOption.OnLoad fully reads the stream during EndInit,
         // so the MemoryStream can be disposed immediately after.
         try
@@ -114,6 +120,11 @@ public static class ImageLoader
             bmp.StreamSource = ms;
             bmp.EndInit();
             bmp.Freeze();
+
+            sw.Stop();
+            evtSrc.RecordWicDecode();
+            evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
+            evtSrc.DecodeCompleted(displayName, "WIC", (long)sw.Elapsed.TotalMilliseconds);
             return new LoadResult(bmp, bmp.PixelWidth, bmp.PixelHeight, "WIC");
         }
         // Narrow: only fall through for decode/format failures. Let OOM, stack overflow,
@@ -129,14 +140,24 @@ public static class ImageLoader
         }
 
         // Fallback: Magick.NET decodes to BGRA bytes → WriteableBitmap.
+        sw.Restart();
+        evtSrc.DecodeStarted(displayName, "Magick.NET");
         try
         {
             using var image = new MagickImage(bytes);
             var wb = MagickToBitmap(image);
+
+            sw.Stop();
+            evtSrc.RecordMagickFallbackDecode();
+            evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
+            evtSrc.DecodeCompleted(displayName, "Magick.NET", (long)sw.Elapsed.TotalMilliseconds);
             return new LoadResult(wb, wb.PixelWidth, wb.PixelHeight, "Magick.NET");
         }
         catch (Exception ex)
         {
+            sw.Stop();
+            evtSrc.RecordDecodeFailure();
+            evtSrc.DecodeFailed(displayName, ex.Message);
             throw new InvalidOperationException($"Could not decode '{displayName}': {ex.Message}", ex);
         }
     }
@@ -448,6 +469,12 @@ public static class ImageLoader
             throw new InvalidOperationException($"Could not map '{Path.GetFileName(path)}': {ex.Message}", ex);
         }
 
+        var evtSrc = ImageEventSource.Instance;
+        var displayName = Path.GetFileName(path);
+        evtSrc.RecordDecodeAttempt();
+        var sw = Stopwatch.StartNew();
+        evtSrc.DecodeStarted(displayName, "WIC (memory-mapped)");
+
         try
         {
             // Primary: WIC via BitmapImage. EndInit fully reads the view stream under CacheOption.OnLoad.
@@ -461,6 +488,11 @@ public static class ImageLoader
                 bmp.StreamSource = view;
                 bmp.EndInit();
                 bmp.Freeze();
+
+                sw.Stop();
+                evtSrc.RecordWicDecode();
+                evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
+                evtSrc.DecodeCompleted(displayName, "WIC (memory-mapped)", (long)sw.Elapsed.TotalMilliseconds);
                 return new LoadResult(bmp, bmp.PixelWidth, bmp.PixelHeight, "WIC (memory-mapped)");
             }
             catch (Exception ex) when (
@@ -474,16 +506,26 @@ public static class ImageLoader
             }
 
             // Fallback: Magick.NET reads the mapping directly.
+            sw.Restart();
+            evtSrc.DecodeStarted(displayName, "Magick.NET (memory-mapped)");
             try
             {
                 using var view = mmf.CreateViewStream(0, 0, MemoryMappedFileAccess.Read);
                 using var image = new MagickImage(view);
                 var wb = MagickToBitmap(image);
+
+                sw.Stop();
+                evtSrc.RecordMagickFallbackDecode();
+                evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
+                evtSrc.DecodeCompleted(displayName, "Magick.NET (memory-mapped)", (long)sw.Elapsed.TotalMilliseconds);
                 return new LoadResult(wb, wb.PixelWidth, wb.PixelHeight, "Magick.NET (memory-mapped)");
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"Could not decode '{Path.GetFileName(path)}': {ex.Message}", ex);
+                sw.Stop();
+                evtSrc.RecordDecodeFailure();
+                evtSrc.DecodeFailed(displayName, ex.Message);
+                throw new InvalidOperationException($"Could not decode '{displayName}': {ex.Message}", ex);
             }
         }
         finally

@@ -144,6 +144,7 @@ public sealed class ThumbnailCache
             ct.ThrowIfCancellationRequested();
             cachePath = WriteAtomically(image, cachePath);
 
+            ImageEventSource.Instance.RecordThumbnailWrite();
             _log.LogDebug("thumb cached: {Cache} ({Bytes} bytes) from {Src}", cachePath, new FileInfo(cachePath).Length, sourcePath);
             ScheduleEvictionSweep();
             return cachePath;
