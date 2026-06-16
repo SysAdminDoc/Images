@@ -352,6 +352,10 @@ public static class Strings
     public static string SettingsHeading => Get(nameof(SettingsHeading));
     public static string SettingsSubtitle => Get(nameof(SettingsSubtitle));
     public static string SettingsSectionGeneral => Get(nameof(SettingsSectionGeneral));
+    public static string SettingsLanguageTitle => Get(nameof(SettingsLanguageTitle));
+    public static string SettingsLanguageDescription => Get(nameof(SettingsLanguageDescription));
+    public static string SettingsLanguageSystemDefault => Get(nameof(SettingsLanguageSystemDefault));
+    public static string SettingsLanguageRestartNotice => Get(nameof(SettingsLanguageRestartNotice));
     public static string SettingsRememberWindowTitle => Get(nameof(SettingsRememberWindowTitle));
     public static string SettingsRememberWindowDescription => Get(nameof(SettingsRememberWindowDescription));
     public static string SettingsSectionAppearance => Get(nameof(SettingsSectionAppearance));

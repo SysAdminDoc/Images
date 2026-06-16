@@ -1,6 +1,8 @@
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
+using Images.Localization;
 using Images.Services;
 using Microsoft.Extensions.Logging;
 
@@ -75,6 +77,23 @@ public partial class App : Application
         };
 
         Exit += (_, _) => Log.Shutdown();
+
+        // I-05: apply persisted locale before any UI is created so x:Static bindings
+        // resolve against the chosen culture from the first paint.
+        var persistedLocale = SettingsService.Instance.GetString(Keys.Locale, string.Empty);
+        if (!string.IsNullOrEmpty(persistedLocale))
+        {
+            try
+            {
+                Strings.Culture = new CultureInfo(persistedLocale);
+                _log.LogInformation("Locale override applied: {Locale}", persistedLocale);
+            }
+            catch (CultureNotFoundException ex)
+            {
+                _log.LogWarning(ex, "Persisted locale '{Locale}' is invalid — falling back to system default", persistedLocale);
+            }
+        }
+
         ThemeService.Initialize(this, SettingsService.Instance);
 
         // P-03: load any persisted network-egress entries from prior sessions so the About

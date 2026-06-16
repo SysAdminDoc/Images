@@ -1,6 +1,9 @@
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Windows.Input;
+using Images.Localization;
 using Images.Services;
 
 namespace Images.ViewModels;
@@ -37,6 +40,47 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     private void Raise(string name) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+    // ---- Language ----
+
+    /// <summary>
+    /// Available locale options for the language picker. Each item is a display-name / IETF-tag
+    /// pair. Empty string = system default (whatever <see cref="CultureInfo.CurrentUICulture"/>
+    /// resolves to at startup).
+    /// </summary>
+    public IReadOnlyList<LocaleOption> AvailableLocales { get; } = new[]
+    {
+        new LocaleOption(Strings.SettingsLanguageSystemDefault, string.Empty),
+        new LocaleOption("English", "en"),
+    };
+
+    public LocaleOption SelectedLocale
+    {
+        get
+        {
+            var persisted = _settings.GetString(Keys.Locale, string.Empty) ?? string.Empty;
+            foreach (var opt in AvailableLocales)
+            {
+                if (string.Equals(opt.Tag, persisted, StringComparison.OrdinalIgnoreCase))
+                    return opt;
+            }
+            return AvailableLocales[0];
+        }
+        set
+        {
+            var tag = value.Tag;
+            _settings.SetString(Keys.Locale, tag);
+
+            // Apply to the static Culture immediately so any runtime-generated strings (code-behind,
+            // toasts, status messages) pick up the new locale for the remainder of this session.
+            Strings.Culture = string.IsNullOrEmpty(tag)
+                ? null
+                : new CultureInfo(tag);
+
+            Raise(nameof(SelectedLocale));
+            SetStatus(Strings.SettingsLanguageRestartNotice, SettingsStatusToneKind.Warning);
+        }
+    }
 
     // ---- Viewer ----
 
@@ -295,4 +339,12 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             SetStatus($"Could not open storage folder: {ex.Message}", SettingsStatusToneKind.Warning);
         }
     }
+}
+
+/// <summary>
+/// A display-name / IETF-tag pair for the language picker ComboBox.
+/// </summary>
+public sealed record LocaleOption(string DisplayName, string Tag)
+{
+    public override string ToString() => DisplayName;
 }
