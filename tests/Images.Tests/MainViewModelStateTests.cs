@@ -50,6 +50,28 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void SetFolderSort_PersistsAndRestoresOnNewInstance()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "pic.png");
+            var settings = CreateSettings(temp);
+
+            using (var vm1 = new MainViewModel(settings))
+            {
+                vm1.OpenFile(image);
+                vm1.SetFolderSortCommand.Execute(DirectorySortMode.ModifiedNewest);
+                Assert.Equal(DirectorySortMode.ModifiedNewest, vm1.CurrentSortMode);
+            }
+
+            // A fresh ViewModel backed by the same DB should restore the persisted sort mode.
+            using var vm2 = new MainViewModel(settings);
+            Assert.Equal(DirectorySortMode.ModifiedNewest, vm2.CurrentSortMode);
+        });
+    }
+
+    [Fact]
     public void ToggleFilmstrip_PersistsPreferenceAndSwitchesPreviewSurface()
     {
         RunOnSta(() =>

@@ -602,6 +602,16 @@ public static class Strings
     public static string CommandPalette_ChannelAlpha => Get(nameof(CommandPalette_ChannelAlpha));
     public static string CommandPalette_Category_Window => Get(nameof(CommandPalette_Category_Window));
     public static string CommandPalette_SendToMonitorFormat => Get(nameof(CommandPalette_SendToMonitorFormat));
+    public static string CommandPalette_Category_Sort => Get(nameof(CommandPalette_Category_Sort));
+    public static string CommandPalette_SortName => Get(nameof(CommandPalette_SortName));
+    public static string CommandPalette_SortNameDesc => Get(nameof(CommandPalette_SortNameDesc));
+    public static string CommandPalette_SortModifiedNewest => Get(nameof(CommandPalette_SortModifiedNewest));
+    public static string CommandPalette_SortModifiedOldest => Get(nameof(CommandPalette_SortModifiedOldest));
+    public static string CommandPalette_SortCreatedNewest => Get(nameof(CommandPalette_SortCreatedNewest));
+    public static string CommandPalette_SortCreatedOldest => Get(nameof(CommandPalette_SortCreatedOldest));
+    public static string CommandPalette_SortSizeLargest => Get(nameof(CommandPalette_SortSizeLargest));
+    public static string CommandPalette_SortSizeSmallest => Get(nameof(CommandPalette_SortSizeSmallest));
+    public static string CommandPalette_SortType => Get(nameof(CommandPalette_SortType));
 
     // ---- Macro action window ----
     public static string MacroWindowTitle => Get(nameof(MacroWindowTitle));

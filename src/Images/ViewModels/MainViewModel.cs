@@ -165,6 +165,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _archiveRightToLeft = _settings.GetBool(Keys.ArchiveRightToLeft, false);
         _archiveOldScanFilterEnabled = _settings.GetBool(Keys.ArchiveOldScanFilter, false);
         _archiveSpreadModeEnabled = _settings.GetBool(Keys.ArchiveSpreadMode, false);
+        RestorePersistedSortMode();
 
         OpenCommand = new RelayCommand(async () => await OpenFileDialogAsync(), () => !IsOperationBusy);
         NextCommand = new RelayCommand(async () => await NextAsync(), () => CanUseImageCommands);
@@ -995,6 +996,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var tools = Strings.CommandPalette_Category_Tools;
         var review = Strings.CommandPalette_Category_Review;
         var compare = Strings.CommandPalette_Category_Compare;
+        var sort = Strings.CommandPalette_Category_Sort;
         var help = Strings.CommandPalette_Category_Help;
 
         var items = new List<CommandPaletteItem>
@@ -1070,6 +1072,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             // Compare
             new() { Name = Strings.CommandPalette_Compare, Shortcut = "Ctrl+Alt+C", Category = compare, Command = StartCompareCommand },
             new() { Name = Strings.CommandPalette_CompareWith, Shortcut = "Ctrl+Alt+V", Category = compare, Command = CompareWithCommand },
+
+            // Sort
+            new() { Name = Strings.CommandPalette_SortName, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.NaturalName)) },
+            new() { Name = Strings.CommandPalette_SortNameDesc, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.NameDescending)) },
+            new() { Name = Strings.CommandPalette_SortModifiedNewest, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ModifiedNewest)) },
+            new() { Name = Strings.CommandPalette_SortModifiedOldest, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ModifiedOldest)) },
+            new() { Name = Strings.CommandPalette_SortCreatedNewest, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.CreatedNewest)) },
+            new() { Name = Strings.CommandPalette_SortCreatedOldest, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.CreatedOldest)) },
+            new() { Name = Strings.CommandPalette_SortSizeLargest, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.SizeLargest)) },
+            new() { Name = Strings.CommandPalette_SortSizeSmallest, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.SizeSmallest)) },
+            new() { Name = Strings.CommandPalette_SortType, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ExtensionThenName)) },
 
             // Help
             new() { Name = Strings.CommandPalette_Settings, Shortcut = "Ctrl+,", Category = help, Command = SettingsCommand },
@@ -2522,8 +2535,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (!DirectorySortModeInfo.TryParseCommandParameter(parameter, out var mode)) return;
         if (!_nav.SetSortMode(mode)) return;
 
+        _settings.SetString(Keys.ViewerSortMode, mode.ToString());
         RaiseFolderPreviewState();
         Toast($"Sorted by {DirectorySortModeInfo.DisplayName(mode)}");
+    }
+
+    private void RestorePersistedSortMode()
+    {
+        var raw = _settings.GetString(Keys.ViewerSortMode);
+        if (raw is not null && Enum.TryParse<DirectorySortMode>(raw, ignoreCase: true, out var mode))
+            _nav.SetSortMode(mode);
     }
 
     private void ToggleGallery()
