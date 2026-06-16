@@ -1140,6 +1140,57 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         set => Set(ref _isFullscreen, value);
     }
 
+    // V20-31: listen-mode — TCP listener for piped workflows (--listen <port>).
+    private ListenService? _listenService;
+
+    private bool _isListening;
+    public bool IsListening
+    {
+        get => _isListening;
+        private set => Set(ref _isListening, value);
+    }
+
+    private int _listenPort;
+    public int ListenPort
+    {
+        get => _listenPort;
+        private set
+        {
+            if (Set(ref _listenPort, value))
+            {
+                Raise(nameof(ListenPortLabel));
+                Raise(nameof(ListenPortTooltip));
+            }
+        }
+    }
+
+    public string ListenPortLabel => IsListening
+        ? Strings.Format(nameof(Strings.ListenMode_PortLabel), ListenPort)
+        : "";
+
+    public string ListenPortTooltip => IsListening
+        ? Strings.Format(nameof(Strings.ListenMode_Tooltip), ListenPort)
+        : "";
+
+    /// <summary>
+    /// V20-31: starts the local TCP listen service. The <paramref name="port"/> is bound
+    /// to loopback only (127.0.0.1). Received paths dispatch to the UI thread and open
+    /// through the normal <see cref="OpenFile"/> path.
+    /// </summary>
+    public void StartListenMode(int port)
+    {
+        if (_listenService is not null) return;
+
+        _listenService = new ListenService(
+            path => _uiDispatcher.Invoke(() => OpenFile(path)));
+        _listenService.Start(port);
+        ListenPort = _listenService.Port;
+        IsListening = true;
+
+        _log.LogInformation("V20-31 listen mode started on port {Port}", ListenPort);
+        Toast($"Listen mode active on port {ListenPort}");
+    }
+
     // V20-32: peek-mode flag — true when launched via `Images.exe --peek <path>` for chromeless,
     // topmost preview integrations (PowerToys Peek-style external-tool callout). Set ONCE at
     // construction by MainWindow.EnterPeekMode; never toggled at runtime. Drives toolbar +
@@ -6450,6 +6501,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _toastTimer.Stop();
         _animationTimer.Stop();
         _hintTimer.Stop();
+        _listenService?.Dispose();
         _externalEditReload.Dispose();
 
         _nav.ListChanged -= OnDirectoryListChanged;

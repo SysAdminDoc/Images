@@ -247,6 +247,12 @@ public partial class MainWindow : Window
     public void OpenPath(string path) => Vm.OpenFile(path);
 
     /// <summary>
+    /// V20-31: start listen mode on the specified loopback TCP port.
+    /// Called by App.xaml.cs when the launch argv contains <c>--listen &lt;port&gt;</c>.
+    /// </summary>
+    public void StartListenMode(int port) => Vm.StartListenMode(port);
+
+    /// <summary>
     /// V20-32: enter chromeless preview mode (PowerToys-Peek-style invocation). The window
     /// becomes a borderless, topmost, maximized overlay with the side panel + bottom toolbar
     /// hidden — only the image and floating navigation arrows remain. Escape closes the window.
