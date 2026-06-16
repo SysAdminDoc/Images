@@ -45,6 +45,9 @@ codec-artifacts/
 .tmp-jpegtran-bundle/
 release-diagnostics/
 
+## Generated package manifests
+packaging/output/
+
 ## Optional third-party codec runtimes
 src/Images/Codecs/Ghostscript/**
 !src/Images/Codecs/Ghostscript/
