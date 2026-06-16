@@ -4138,4 +4138,48 @@ Details written to:
     <value>Listen mode active on port {0}. Send UTF-8 file paths to tcp://127.0.0.1:{0}</value>
   </data>
 
+  <!-- V30-33: slideshow -->
+  <data name="Slideshow_Playing" xml:space="preserve">
+    <value>Slideshow {0}s</value>
+  </data>
+  <data name="Slideshow_Paused" xml:space="preserve">
+    <value>Slideshow paused</value>
+  </data>
+  <data name="CommandPalette_ToggleSlideshow" xml:space="preserve">
+    <value>Start / stop slideshow</value>
+  </data>
+  <data name="CommandPalette_PauseSlideshow" xml:space="preserve">
+    <value>Pause / resume slideshow</value>
+  </data>
+  <data name="CommandPalette_StopSlideshow" xml:space="preserve">
+    <value>Stop slideshow</value>
+  </data>
+  <data name="CommandPalette_SlideshowShuffle" xml:space="preserve">
+    <value>Toggle slideshow shuffle</value>
+  </data>
+  <data name="CommandPalette_SlideshowFaster" xml:space="preserve">
+    <value>Slideshow faster</value>
+  </data>
+  <data name="CommandPalette_SlideshowSlower" xml:space="preserve">
+    <value>Slideshow slower</value>
+  </data>
+  <data name="MainToastSlideshowStarted" xml:space="preserve">
+    <value>Slideshow started</value>
+  </data>
+  <data name="MainToastSlideshowStopped" xml:space="preserve">
+    <value>Slideshow stopped</value>
+  </data>
+  <data name="MainToastSlideshowPaused" xml:space="preserve">
+    <value>Slideshow paused</value>
+  </data>
+  <data name="MainToastSlideshowResumed" xml:space="preserve">
+    <value>Slideshow resumed</value>
+  </data>
+  <data name="MainToastSlideshowShuffleOn" xml:space="preserve">
+    <value>Slideshow shuffle on</value>
+  </data>
+  <data name="MainToastSlideshowShuffleOff" xml:space="preserve">
+    <value>Slideshow shuffle off</value>
+  </data>
+
 </root>
