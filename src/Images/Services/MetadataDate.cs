@@ -42,7 +42,7 @@ public readonly struct MetadataDate : IEquatable<MetadataDate>
         var datePart = local.ToString(culture.DateTimeFormat.ShortDatePattern, culture);
         var timePart = local.ToString(culture.DateTimeFormat.LongTimePattern, culture);
         return HasOffset
-            ? $"{datePart} {timePart} {local.Offset:hh\\:mm}"
+            ? $"{datePart} {timePart} {FormatOffset(local.Offset)}"
             : $"{datePart} {timePart}";
     }
 
@@ -89,4 +89,11 @@ public readonly struct MetadataDate : IEquatable<MetadataDate>
     public override int GetHashCode() => HashCode.Combine(Value, HasOffset);
     public static bool operator ==(MetadataDate a, MetadataDate b) => a.Equals(b);
     public static bool operator !=(MetadataDate a, MetadataDate b) => !a.Equals(b);
+
+    private static string FormatOffset(TimeSpan offset)
+    {
+        var sign = offset < TimeSpan.Zero ? "-" : "+";
+        var magnitude = offset.Duration();
+        return $"{sign}{magnitude:hh\\:mm}";
+    }
 }
