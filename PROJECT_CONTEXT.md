@@ -54,7 +54,7 @@ Important services and controllers:
 - `Services/FileHealthScanService.cs` - extension mismatch, corrupt file, zero-byte, and temp-file review.
 - `Services/NonDestructiveEditService.cs` - XMP sidecar edit stack.
 - `Services/CodecRuntime.cs` - Ghostscript and optional runtime discovery.
-- `Services/JpegtranRuntime.cs` and JPEG transform helpers - optional lossless JPEG runtime path.
+- `Services/JpegtranRuntime.cs` and JPEG transform helpers - optional lossless JPEG runtime path. App-local libjpeg-turbo staging requires `jpegtran.exe` plus adjacent `jpeg62.dll`.
 
 Tests:
 
@@ -103,7 +103,7 @@ Shipped or present in current docs and changelog:
 - Non-destructive resize, adjustments, effects, annotations/redaction, perspective correction, auto enhance, edit history, virtual copies.
 - Destructive crop apply for flat raster formats only; crop is intentionally disabled for layered, vector, document, archive, and RAW formats.
 - Optional jpegtran runtime discovery and lossless JPEG transform paths when an approved local runtime is available.
-- Approved libjpeg-turbo 3.1.4.1 jpegtran release staging with tracked license/provenance files, SHA-256 verification, and portable/installed diagnostics smoke coverage.
+- Approved libjpeg-turbo 3.1.4.1 jpegtran release staging with tracked license/provenance files, `jpegtran.exe` plus `jpeg62.dll` SHA-256 verification, and portable/installed diagnostics smoke coverage.
 - Wallpaper layout modes and send/print/clipboard actions.
 - Serilog logging, minidump crash capture, support diagnostics, app storage/cache cleanup, update checks disabled by default.
 

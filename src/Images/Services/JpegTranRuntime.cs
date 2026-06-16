@@ -14,6 +14,7 @@ public static class JpegTranRuntime
     public const string EnvironmentVariable = "IMAGES_JPEGTRAN_EXE";
 
     private const int VersionTimeoutMilliseconds = 1500;
+    private const string AppLocalSource = "app-local Codecs\\JpegTran";
 
     public static JpegTranRuntimeStatus Inspect()
         => Inspect(AppContext.BaseDirectory, Environment.GetEnvironmentVariable(EnvironmentVariable));
@@ -36,6 +37,16 @@ public static class JpegTranRuntime
                 $"jpegtran not found; place an approved libjpeg-turbo jpegtran.exe under Codecs\\JpegTran or set {EnvironmentVariable}");
         }
 
+        if (location.RequiresJpeg62Dll)
+        {
+            var jpeg62Path = Path.Combine(Path.GetDirectoryName(location.ExecutablePath) ?? string.Empty, "jpeg62.dll");
+            if (!File.Exists(jpeg62Path))
+            {
+                return JpegTranRuntimeStatus.Missing(
+                    $"jpegtran dependency missing: place jpeg62.dll next to {NormalizePath(location.ExecutablePath)}");
+            }
+        }
+
         var sha256 = GetSha256(location.ExecutablePath);
         var version = (versionReader ?? TryReadVersion)(location.ExecutablePath);
         return new JpegTranRuntimeStatus(
@@ -53,14 +64,14 @@ public static class JpegTranRuntime
         {
             var overridePath = NormalizePath(environmentExecutablePath);
             return File.Exists(overridePath)
-                ? new JpegTranRuntimeLocation(overridePath, EnvironmentVariable)
+                ? new JpegTranRuntimeLocation(overridePath, EnvironmentVariable, RequiresJpeg62Dll: false)
                 : null;
         }
 
         foreach (var candidate in AppLocalCandidates(baseDirectory))
         {
             if (File.Exists(candidate))
-                return new JpegTranRuntimeLocation(candidate, "app-local Codecs\\JpegTran");
+                return new JpegTranRuntimeLocation(candidate, AppLocalSource, RequiresJpeg62Dll: true);
         }
 
         return null;
@@ -142,7 +153,7 @@ public static class JpegTranRuntime
     }
 }
 
-internal sealed record JpegTranRuntimeLocation(string ExecutablePath, string Source);
+internal sealed record JpegTranRuntimeLocation(string ExecutablePath, string Source, bool RequiresJpeg62Dll);
 
 public sealed record JpegTranRuntimeStatus(
     bool Available,

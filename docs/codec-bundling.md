@@ -1,6 +1,6 @@
 # Codec bundling
 
-Images ships WIC and Magick.NET support with the app. Official release artifacts also ship Ghostscript app-local so PDF, EPS, PS, and AI previews work on clean machines. Lossless JPEG writeback uses an approved app-local libjpeg-turbo `jpegtran.exe` sidecar when release packaging stages it. The executable is not committed to git; `scripts\Prepare-JpegTranBundle.ps1` downloads the reviewed artifact, verifies SHA-256, extracts `jpegtran.exe`, and stages it before publish.
+Images ships WIC and Magick.NET support with the app. Official release artifacts also ship Ghostscript app-local so PDF, EPS, PS, and AI previews work on clean machines. Lossless JPEG writeback uses an approved app-local libjpeg-turbo `jpegtran.exe` sidecar when release packaging stages it. The runtime binaries are not committed to git; `scripts\Prepare-JpegTranBundle.ps1` downloads the reviewed artifact, verifies SHA-256, extracts `jpegtran.exe` plus `jpeg62.dll`, and stages them before publish.
 
 ## App-local layout
 
@@ -23,6 +23,7 @@ Place the approved jpegtran runtime under:
 
 ```text
 src/Images/Codecs/JpegTran/jpegtran.exe
+src/Images/Codecs/JpegTran/jpeg62.dll
 src/Images/Codecs/JpegTran/LICENSE.md
 src/Images/Codecs/JpegTran/README.ijg
 ```
@@ -64,6 +65,7 @@ Official releases stage jpegtran from libjpeg-turbo 3.1.4.1:
 - Runtime artifact URL: `https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.4.1/libjpeg-turbo-3.1.4.1-vc-x64.exe`
 - Runtime artifact SHA-256: `2bb347f106473c12635bdd414b1f289de9f4d6dea4a496d3f9dd212db9eda0dc`
 - Extracted executable: `bin\jpegtran.exe`
+- Extracted runtime dependency: `bin\jpeg62.dll`
 - Extracted executable SHA-256: `2000c205ed99fe2409e42a6cb87c19d88e33e516d5d40ff11bb19b7830e3ee33`
 - Source archive: `https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.4.1/libjpeg-turbo-3.1.4.1.tar.gz`
 - Source archive SHA-256: `ecae8008e2cc9ade2f2c1bb9d5e6d4fb73e7c433866a056bd82980741571a022`
@@ -81,11 +83,11 @@ The GitHub release workflow also has an optional `ghostscript_bundle_url` input.
 
 ## Source-control policy
 
-Runtime binaries are intentionally ignored by `.gitignore`; only placeholder/provenance/license files are tracked. Release artifacts may include runtimes after license review, but do not commit Ghostscript or jpegtran binaries to git.
+Runtime binaries are intentionally ignored by `.gitignore`; only placeholder/provenance/license files are tracked. Release artifacts may include runtimes after license review, but do not commit Ghostscript or jpegtran runtime binaries to git.
 
 Ghostscript is available under the GNU AGPL or a commercial Artifex license. If the AGPL distribution is bundled, keep `Codecs\Ghostscript\doc\COPYING` in the app output and attach or link the matching source archive in the GitHub release.
 
-libjpeg-turbo is BSD-style licensed. If jpegtran is bundled, keep the libjpeg-turbo license/readme files in `Codecs\JpegTran`, record the exact upstream release URL and staged `jpegtran.exe` SHA-256 in release notes, and confirm the staged executable matches `src\Images\Codecs\JpegTran\PROVENANCE.md` before publishing.
+libjpeg-turbo is BSD-style licensed. If jpegtran is bundled, keep the libjpeg-turbo license/readme files in `Codecs\JpegTran`, record the exact upstream release URL plus staged `jpegtran.exe` and `jpeg62.dll` SHA-256 values in release notes, and confirm the staged files match `src\Images\Codecs\JpegTran\PROVENANCE.md` before publishing.
 
 ## Verifying provenance at runtime
 

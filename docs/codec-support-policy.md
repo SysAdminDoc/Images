@@ -42,7 +42,7 @@ Required before any new optional decoder/runtime lands (per ROADMAP X-03):
 
 This applies to: Ghostscript, native 7-Zip / UnRAR sidecars, OpenSlide, Bio-Formats, OCR engines, AI models, plugin hosts.
 
-Lossless JPEG writeback is covered by the same gate. The `V30-02` policy in [`lossless-jpeg-transform-policy.md`](lossless-jpeg-transform-policy.md) documents the approved libjpeg-turbo 3.1.4.1 `jpegtran.exe` artifact, tracked license/provenance files, guarded crop/rotation shell-out path, and release diagnostics smoke. The executable remains ignored by git and is staged only for release build/publish output.
+Lossless JPEG writeback is covered by the same gate. The `V30-02` policy in [`lossless-jpeg-transform-policy.md`](lossless-jpeg-transform-policy.md) documents the approved libjpeg-turbo 3.1.4.1 `jpegtran.exe` artifact plus required `jpeg62.dll`, tracked license/provenance files, guarded crop/rotation shell-out path, and release diagnostics smoke. Runtime binaries remain ignored by git and are staged only for release build/publish output.
 
 ## Dropping a decoder
 

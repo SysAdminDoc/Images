@@ -3,511 +3,598 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:loc="clr-namespace:Images.Localization"
         Title="{x:Static loc:Strings.SettingsWindowTitle}"
-        Width="500"
-        SizeToContent="Height"
-        MinWidth="460"
-        MaxHeight="720"
+        Width="720"
+        Height="640"
+        MinWidth="640"
+        MinHeight="540"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
-        ResizeMode="NoResize"
+        ResizeMode="CanResize"
         Background="{StaticResource BaseBrush}"
         TextOptions.TextFormattingMode="Display"
         UseLayoutRounding="True">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Disabled"
-                  CanContentScroll="False">
-    <Border Padding="28,24,28,28">
-        <StackPanel>
+    <Window.Resources>
+        <Style x:Key="SettingsCard" TargetType="Border" BasedOn="{StaticResource Card}">
+            <Setter Property="Padding" Value="16,14" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+        </Style>
 
-            <!-- Window header -->
-            <Grid Margin="0,0,0,22">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0">
-                    <TextBlock Style="{StaticResource Text.Display}" Text="{x:Static loc:Strings.SettingsHeading}" />
-                    <TextBlock Style="{StaticResource Text.Subtitle}"
-                               Text="{x:Static loc:Strings.SettingsSubtitle}"
-                               Margin="0,5,0,0" />
-                </StackPanel>
-                <!-- Gear icon — decorative, reinforces context -->
-                <TextBlock Grid.Column="1"
-                           Text="&#xE713;"
+        <Style x:Key="SettingsDivider" TargetType="Border">
+            <Setter Property="Height" Value="1" />
+            <Setter Property="Background" Value="{StaticResource HairlineBrush}" />
+            <Setter Property="Margin" Value="0,14" />
+        </Style>
+
+        <Style x:Key="SettingsIconTile" TargetType="Border">
+            <Setter Property="Width" Value="38" />
+            <Setter Property="Height" Value="38" />
+            <Setter Property="CornerRadius" Value="{StaticResource Radius.Md.CR}" />
+            <Setter Property="Background" Value="#1F89B4FA" />
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="28,24,28,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,22">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock Style="{StaticResource Text.Display}"
+                           Text="{x:Static loc:Strings.SettingsHeading}" />
+                <TextBlock Style="{StaticResource Text.Subtitle}"
+                           Text="{x:Static loc:Strings.SettingsSubtitle}"
+                           Margin="0,5,0,0"
+                           MaxWidth="540" />
+            </StackPanel>
+
+            <Border Grid.Column="1"
+                    Style="{StaticResource SettingsIconTile}"
+                    Margin="16,0,0,0"
+                    AutomationProperties.Name="{x:Static loc:Strings.SettingsHeading}">
+                <TextBlock Text="&#xE713;"
                            FontFamily="{StaticResource IconFontFamily}"
-                           FontSize="24"
-                           Foreground="{StaticResource OverlayBrush}"
-                           VerticalAlignment="Top"
-                           Margin="12,4,0,0" />
-            </Grid>
-
-            <!-- ── General ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionGeneral}" Margin="1,0,0,10" />
-            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
-                <StackPanel>
-
-                    <!-- Language row -->
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="{x:Static loc:Strings.SettingsLanguageTitle}"
-                                       Style="{StaticResource Text.Body}"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Text="{x:Static loc:Strings.SettingsLanguageDescription}"
-                                       Style="{StaticResource Text.Hint}"
-                                       Margin="0,3,0,0"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                        <ComboBox Grid.Column="1"
-                                  VerticalAlignment="Center"
-                                  MinWidth="140"
-                                  ItemsSource="{Binding AvailableLocales}"
-                                  SelectedItem="{Binding SelectedLocale}"
-                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsLanguageTitle}" />
-                    </Grid>
-
-                    <Border Height="1"
-                            Background="{StaticResource HairlineBrush}"
-                            Margin="0,14" />
-
-                    <!-- Remember window row -->
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="{x:Static loc:Strings.SettingsRememberWindowTitle}"
-                                       Style="{StaticResource Text.Body}"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Text="{x:Static loc:Strings.SettingsRememberWindowDescription}"
-                                       Style="{StaticResource Text.Hint}"
-                                       Margin="0,3,0,0"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                        <CheckBox Grid.Column="1"
-                                  VerticalAlignment="Center"
-                                  IsChecked="{Binding RememberWindowPlacement}"
-                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsRememberWindowTitle}" />
-                    </Grid>
-                </StackPanel>
+                           FontSize="15"
+                           Foreground="{StaticResource AccentBrush}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
             </Border>
+        </Grid>
 
-            <!-- ── Appearance ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionAppearance}" Margin="1,0,0,10" />
-            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
-                <StackPanel>
+        <TabControl Grid.Row="1">
+            <TabItem Header="{x:Static loc:Strings.SettingsSectionGeneral}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              CanContentScroll="False">
+                    <StackPanel>
+                        <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsLanguageTitle}"
+                                                   Style="{StaticResource Text.Body}"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsLanguageDescription}"
+                                                   Style="{StaticResource Text.Hint}"
+                                                   Margin="0,3,0,0"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <ComboBox Grid.Column="1"
+                                              VerticalAlignment="Center"
+                                              MinWidth="170"
+                                              ItemsSource="{Binding AvailableLocales}"
+                                              SelectedItem="{Binding SelectedLocale}"
+                                              AutomationProperties.Name="{x:Static loc:Strings.SettingsLanguageTitle}" />
+                                </Grid>
 
-                    <!-- Filmstrip row -->
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="{x:Static loc:Strings.SettingsFilmstripTitle}"
-                                       Style="{StaticResource Text.Body}"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Text="{x:Static loc:Strings.SettingsFilmstripDescription}"
-                                       Style="{StaticResource Text.Hint}"
-                                       Margin="0,3,0,0"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                        <CheckBox Grid.Column="1"
-                                  VerticalAlignment="Center"
-                                  IsChecked="{Binding FilmstripVisibleOnStartup}"
-                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsFilmstripTitle}" />
-                    </Grid>
+                                <Border Style="{StaticResource SettingsDivider}" />
 
-                    <Border Height="1"
-                            Background="{StaticResource HairlineBrush}"
-                            Margin="0,14" />
-
-                    <!-- Metadata HUD row -->
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="{x:Static loc:Strings.SettingsMetadataHudTitle}"
-                                       Style="{StaticResource Text.Body}"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Text="{x:Static loc:Strings.SettingsMetadataHudDescription}"
-                                       Style="{StaticResource Text.Hint}"
-                                       Margin="0,3,0,0"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                        <CheckBox Grid.Column="1"
-                                  VerticalAlignment="Center"
-                                  IsChecked="{Binding MetadataHudVisibleOnStartup}"
-                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsMetadataHudTitle}" />
-                    </Grid>
-
-                    <Border Height="1"
-                            Background="{StaticResource HairlineBrush}"
-                            Margin="0,14" />
-
-                    <!-- Recycle Bin confirmation row -->
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="{x:Static loc:Strings.SettingsConfirmRecycleBinTitle}"
-                                       Style="{StaticResource Text.Body}"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Text="{x:Static loc:Strings.SettingsConfirmRecycleBinDescription}"
-                                       Style="{StaticResource Text.Hint}"
-                                       Margin="0,3,0,0"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                        <CheckBox Grid.Column="1"
-                                  VerticalAlignment="Center"
-                                  IsChecked="{Binding ConfirmRecycleBinDeletes}"
-                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsConfirmRecycleBinTitle}" />
-                    </Grid>
-
-                </StackPanel>
-            </Border>
-
-            <!-- ── Accessibility ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionAccessibility}" Margin="1,0,0,10" />
-            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
-                <StackPanel>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="{x:Static loc:Strings.SettingsReduceMotionTitle}"
-                                       Style="{StaticResource Text.Body}"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Text="{x:Static loc:Strings.SettingsReduceMotionDescription}"
-                                       Style="{StaticResource Text.Hint}"
-                                       Margin="0,3,0,0"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                        <CheckBox Grid.Column="1"
-                                  VerticalAlignment="Center"
-                                  IsChecked="{Binding ReduceMotion}"
-                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsReduceMotionTitle}" />
-                    </Grid>
-
-                    <Border Height="1"
-                            Background="{StaticResource HairlineBrush}"
-                            Margin="0,14" />
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="{x:Static loc:Strings.SettingsHighContrastTitle}"
-                                       Style="{StaticResource Text.Body}"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Text="{x:Static loc:Strings.SettingsHighContrastDescription}"
-                                       Style="{StaticResource Text.Hint}"
-                                       Margin="0,3,0,0"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                        <CheckBox Grid.Column="1"
-                                  VerticalAlignment="Center"
-                                  IsChecked="{Binding HighContrastMode}"
-                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsHighContrastTitle}" />
-                    </Grid>
-                </StackPanel>
-            </Border>
-
-            <!-- ── Advanced ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionAdvanced}" Margin="1,0,0,10" />
-            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
-                <StackPanel>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="{x:Static loc:Strings.SettingsArchiveRtlTitle}"
-                                       Style="{StaticResource Text.Body}"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Text="{x:Static loc:Strings.SettingsArchiveRtlDescription}"
-                                       Style="{StaticResource Text.Hint}"
-                                       Margin="0,3,0,0"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                        <CheckBox Grid.Column="1"
-                                  VerticalAlignment="Center"
-                                  IsChecked="{Binding ArchiveRightToLeft}"
-                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsArchiveRtlTitle}" />
-                    </Grid>
-
-                    <Border Height="1"
-                            Background="{StaticResource HairlineBrush}"
-                            Margin="0,14" />
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="{x:Static loc:Strings.SettingsArchiveCleanScanTitle}"
-                                       Style="{StaticResource Text.Body}"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Text="{x:Static loc:Strings.SettingsArchiveCleanScanDescription}"
-                                       Style="{StaticResource Text.Hint}"
-                                       Margin="0,3,0,0"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                        <CheckBox Grid.Column="1"
-                                  VerticalAlignment="Center"
-                                  IsChecked="{Binding ArchiveOldScanFilter}"
-                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsArchiveCleanScanTitle}" />
-                    </Grid>
-
-                    <Border Height="1"
-                            Background="{StaticResource HairlineBrush}"
-                            Margin="0,14" />
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="{x:Static loc:Strings.SettingsArchiveSpreadTitle}"
-                                       Style="{StaticResource Text.Body}"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Text="{x:Static loc:Strings.SettingsArchiveSpreadDescription}"
-                                       Style="{StaticResource Text.Hint}"
-                                       Margin="0,3,0,0"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                        <CheckBox Grid.Column="1"
-                                  VerticalAlignment="Center"
-                                  IsChecked="{Binding ArchiveSpreadMode}"
-                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsArchiveSpreadTitle}" />
-                    </Grid>
-                </StackPanel>
-            </Border>
-
-            <!-- ── Hotkeys ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionHotkeys}" Margin="1,0,0,10" />
-            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
-                <StackPanel>
-                    <TextBlock Text="{x:Static loc:Strings.SettingsHotkeysFixed}"
-                               Style="{StaticResource Text.Body}"
-                               FontWeight="SemiBold" />
-                    <TextBlock Text="{Binding HotkeySummary}"
-                               Style="{StaticResource Text.Hint}"
-                               Margin="0,5,0,0"
-                               TextWrapping="Wrap" />
-                </StackPanel>
-            </Border>
-
-            <!-- ── Text extraction ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionTextExtraction}" Margin="1,0,0,10" />
-            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
-                <StackPanel>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <Border Grid.Column="0"
-                                Width="38"
-                                Height="38"
-                                CornerRadius="{StaticResource Radius.Md.CR}"
-                                Background="#1F89B4FA"
-                                BorderBrush="{StaticResource AccentBrush}"
-                                BorderThickness="1"
-                                Margin="0,0,13,0"
-                                VerticalAlignment="Top">
-                            <TextBlock Text="&#xE8EA;"
-                                       FontFamily="{StaticResource IconFontFamily}"
-                                       FontSize="15"
-                                       Foreground="{StaticResource AccentBrush}"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsRememberWindowTitle}"
+                                                   Style="{StaticResource Text.Body}"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsRememberWindowDescription}"
+                                                   Style="{StaticResource Text.Hint}"
+                                                   Margin="0,3,0,0"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1"
+                                              VerticalAlignment="Center"
+                                              IsChecked="{Binding RememberWindowPlacement}"
+                                              AutomationProperties.Name="{x:Static loc:Strings.SettingsRememberWindowTitle}" />
+                                </Grid>
+                            </StackPanel>
                         </Border>
 
-                        <StackPanel Grid.Column="1" Margin="0,0,14,0">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding OcrStatusTitle}"
-                                           Style="{StaticResource Text.Body}"
-                                           FontWeight="SemiBold"
-                                           VerticalAlignment="Center" />
-                                <Border Padding="7,2"
-                                        Margin="10,0,0,0"
-                                        VerticalAlignment="Center">
-                                    <Border.Style>
-                                        <Style TargetType="Border" BasedOn="{StaticResource Badge}">
-                                            <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
-                                            <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsOcrAvailable}" Value="True">
-                                                    <Setter Property="Background" Value="#22A6E3A1" />
-                                                    <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    <TextBlock Text="{Binding OcrStatusBadge}"
-                                               FontSize="10.5"
-                                               FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}" />
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0"
+                                        Style="{StaticResource SettingsIconTile}"
+                                        Margin="0,0,14,0">
+                                    <TextBlock Text="&#xE895;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="14"
+                                               Foreground="{StaticResource AccentBrush}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
                                 </Border>
-                            </StackPanel>
-                            <TextBlock Text="{Binding OcrStatusDescription}"
-                                       Style="{StaticResource Text.Hint}"
-                                       Margin="0,5,0,0"
-                                       TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding OcrLanguageSummary}"
-                                       Style="{StaticResource Text.Caption}"
-                                       Margin="0,9,0,0"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
 
-                        <StackPanel Grid.Column="2"
-                                    Width="128"
-                                    VerticalAlignment="Top">
-                            <Button Style="{StaticResource ChromeButton}"
-                                    Command="{Binding OpenOcrLanguageSettingsCommand}"
-                                    Padding="11,5"
-                                    MinHeight="30"
-                                    HorizontalAlignment="Stretch"
-                                    ToolTip="{x:Static loc:Strings.SettingsOcrLanguagesTooltip}"
-                                    AutomationProperties.Name="{x:Static loc:Strings.SettingsOcrLanguagesAutomationName}">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <TextBlock Text="&#xE713;"
-                                               FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="11"
-                                               Margin="0,0,7,0"
-                                               VerticalAlignment="Center" />
-                                    <TextBlock Text="{x:Static loc:Strings.SettingsOcrLanguagesButton}" VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" Margin="0,0,18,0">
+                                    <TextBlock Text="{x:Static loc:Strings.SettingsUpdateCheckTitle}"
+                                               Style="{StaticResource Text.Body}"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding UpdateCheckDescription}"
+                                               Style="{StaticResource Text.Hint}"
+                                               Margin="0,3,0,0"
+                                               TextWrapping="Wrap" />
                                 </StackPanel>
-                            </Button>
-                            <Button Style="{StaticResource ChromeButton}"
-                                    Command="{Binding RefreshOcrStatusCommand}"
-                                    Padding="11,5"
-                                    MinHeight="30"
-                                    Margin="0,8,0,0"
-                                    HorizontalAlignment="Stretch"
-                                    AutomationProperties.Name="{x:Static loc:Strings.SettingsOcrRefreshAutomationName}">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <TextBlock Text="&#xE72C;"
-                                               FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="11"
-                                               Margin="0,0,7,0"
-                                               VerticalAlignment="Center" />
-                                    <TextBlock Text="{x:Static loc:Strings.SettingsOcrRefreshButton}" VerticalAlignment="Center" />
+
+                                <CheckBox Grid.Column="2"
+                                          VerticalAlignment="Center"
+                                          IsChecked="{Binding UpdateCheckEnabled}"
+                                          AutomationProperties.Name="{x:Static loc:Strings.SettingsUpdateCheckTitle}" />
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="{x:Static loc:Strings.SettingsSectionAppearance}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              CanContentScroll="False">
+                    <StackPanel>
+                        <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsFilmstripTitle}"
+                                                   Style="{StaticResource Text.Body}"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsFilmstripDescription}"
+                                                   Style="{StaticResource Text.Hint}"
+                                                   Margin="0,3,0,0"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1"
+                                              VerticalAlignment="Center"
+                                              IsChecked="{Binding FilmstripVisibleOnStartup}"
+                                              AutomationProperties.Name="{x:Static loc:Strings.SettingsFilmstripTitle}" />
+                                </Grid>
+
+                                <Border Style="{StaticResource SettingsDivider}" />
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsMetadataHudTitle}"
+                                                   Style="{StaticResource Text.Body}"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsMetadataHudDescription}"
+                                                   Style="{StaticResource Text.Hint}"
+                                                   Margin="0,3,0,0"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1"
+                                              VerticalAlignment="Center"
+                                              IsChecked="{Binding MetadataHudVisibleOnStartup}"
+                                              AutomationProperties.Name="{x:Static loc:Strings.SettingsMetadataHudTitle}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                    <TextBlock Text="{x:Static loc:Strings.SettingsConfirmRecycleBinTitle}"
+                                               Style="{StaticResource Text.Body}"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Static loc:Strings.SettingsConfirmRecycleBinDescription}"
+                                               Style="{StaticResource Text.Hint}"
+                                               Margin="0,3,0,0"
+                                               TextWrapping="Wrap" />
                                 </StackPanel>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-
-                    <Border Height="1"
-                            Background="{StaticResource HairlineBrush}"
-                            Margin="0,14" />
-
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="&#xE72E;"
-                                   FontFamily="{StaticResource IconFontFamily}"
-                                   FontSize="12"
-                                   Foreground="{StaticResource OverlayBrush}"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,9,0" />
-                        <TextBlock Text="{x:Static loc:Strings.SettingsOcrPrivacyNote}"
-                                   Style="{StaticResource Text.Hint}"
-                                   TextWrapping="Wrap"
-                                   VerticalAlignment="Center" />
+                                <CheckBox Grid.Column="1"
+                                          VerticalAlignment="Center"
+                                          IsChecked="{Binding ConfirmRecycleBinDeletes}"
+                                          AutomationProperties.Name="{x:Static loc:Strings.SettingsConfirmRecycleBinTitle}" />
+                            </Grid>
+                        </Border>
                     </StackPanel>
-                </StackPanel>
-            </Border>
+                </ScrollViewer>
+            </TabItem>
 
-            <!-- ── Diagnostics ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionDiagnostics}" Margin="1,0,0,10" />
-            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
-                <StackPanel>
-                    <TextBlock Text="{Binding DiagnosticsStorageSummary}"
-                               Style="{StaticResource Text.Hint}"
-                               TextWrapping="Wrap" />
-                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                        <Button Style="{StaticResource ChromeButton}"
-                                Command="{Binding OpenAppDataCommand}"
-                                Padding="11,5"
-                                MinHeight="30"
-                                AutomationProperties.Name="{x:Static loc:Strings.SettingsAppDataAutomationName}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE838;"
-                                           FontFamily="{StaticResource IconFontFamily}"
-                                           FontSize="11"
-                                           Margin="0,0,7,0"
-                                           VerticalAlignment="Center" />
-                                <TextBlock Text="{x:Static loc:Strings.SettingsAppDataButton}" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                        <Button Style="{StaticResource ChromeButton}"
-                                Command="{Binding OpenLogsCommand}"
-                                Padding="11,5"
-                                MinHeight="30"
-                                Margin="8,0,0,0"
-                                AutomationProperties.Name="{x:Static loc:Strings.SettingsLogsAutomationName}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE8A5;"
-                                           FontFamily="{StaticResource IconFontFamily}"
-                                           FontSize="11"
-                                           Margin="0,0,7,0"
-                                           VerticalAlignment="Center" />
-                                <TextBlock Text="{x:Static loc:Strings.SettingsLogsButton}" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
+            <TabItem Header="{x:Static loc:Strings.SettingsSectionAccessibility}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              CanContentScroll="False">
+                    <Border Style="{StaticResource SettingsCard}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                    <TextBlock Text="{x:Static loc:Strings.SettingsReduceMotionTitle}"
+                                               Style="{StaticResource Text.Body}"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Static loc:Strings.SettingsReduceMotionDescription}"
+                                               Style="{StaticResource Text.Hint}"
+                                               Margin="0,3,0,0"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                                <CheckBox Grid.Column="1"
+                                          VerticalAlignment="Center"
+                                          IsChecked="{Binding ReduceMotion}"
+                                          AutomationProperties.Name="{x:Static loc:Strings.SettingsReduceMotionTitle}" />
+                            </Grid>
 
-            <!-- ── Privacy ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionPrivacy}" Margin="1,0,0,10" />
-            <Border Style="{StaticResource Card}" Margin="0,0,0,0">
-                <StackPanel>
+                            <Border Style="{StaticResource SettingsDivider}" />
 
-                    <!-- Update check row -->
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="{x:Static loc:Strings.SettingsUpdateCheckTitle}"
-                                       Style="{StaticResource Text.Body}"
-                                       FontWeight="SemiBold" />
-                             <TextBlock Text="{Binding UpdateCheckDescription}"
-                                        Style="{StaticResource Text.Hint}"
-                                       Margin="0,3,0,0"
-                                       TextWrapping="Wrap" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                    <TextBlock Text="{x:Static loc:Strings.SettingsHighContrastTitle}"
+                                               Style="{StaticResource Text.Body}"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Static loc:Strings.SettingsHighContrastDescription}"
+                                               Style="{StaticResource Text.Hint}"
+                                               Margin="0,3,0,0"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                                <CheckBox Grid.Column="1"
+                                          VerticalAlignment="Center"
+                                          IsChecked="{Binding HighContrastMode}"
+                                          AutomationProperties.Name="{x:Static loc:Strings.SettingsHighContrastTitle}" />
+                            </Grid>
                         </StackPanel>
-                        <CheckBox Grid.Column="1"
-                                  VerticalAlignment="Center"
-                                  IsChecked="{Binding UpdateCheckEnabled}"
-                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsUpdateCheckTitle}" />
-                    </Grid>
+                    </Border>
+                </ScrollViewer>
+            </TabItem>
 
-                </StackPanel>
-            </Border>
+            <TabItem Header="{x:Static loc:Strings.SettingsSectionAdvanced}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              CanContentScroll="False">
+                    <StackPanel>
+                        <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsArchiveRtlTitle}"
+                                                   Style="{StaticResource Text.Body}"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsArchiveRtlDescription}"
+                                                   Style="{StaticResource Text.Hint}"
+                                                   Margin="0,3,0,0"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1"
+                                              VerticalAlignment="Center"
+                                              IsChecked="{Binding ArchiveRightToLeft}"
+                                              AutomationProperties.Name="{x:Static loc:Strings.SettingsArchiveRtlTitle}" />
+                                </Grid>
 
-            <Border Padding="12,9"
-                    Margin="0,14,0,0"
+                                <Border Style="{StaticResource SettingsDivider}" />
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsArchiveCleanScanTitle}"
+                                                   Style="{StaticResource Text.Body}"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsArchiveCleanScanDescription}"
+                                                   Style="{StaticResource Text.Hint}"
+                                                   Margin="0,3,0,0"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1"
+                                              VerticalAlignment="Center"
+                                              IsChecked="{Binding ArchiveOldScanFilter}"
+                                              AutomationProperties.Name="{x:Static loc:Strings.SettingsArchiveCleanScanTitle}" />
+                                </Grid>
+
+                                <Border Style="{StaticResource SettingsDivider}" />
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsArchiveSpreadTitle}"
+                                                   Style="{StaticResource Text.Body}"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsArchiveSpreadDescription}"
+                                                   Style="{StaticResource Text.Hint}"
+                                                   Margin="0,3,0,0"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1"
+                                              VerticalAlignment="Center"
+                                              IsChecked="{Binding ArchiveSpreadMode}"
+                                              AutomationProperties.Name="{x:Static loc:Strings.SettingsArchiveSpreadTitle}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <TextBlock Text="{x:Static loc:Strings.SettingsHotkeysFixed}"
+                                           Style="{StaticResource Text.Body}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding HotkeySummary}"
+                                           Style="{StaticResource Text.Hint}"
+                                           Margin="0,5,0,0"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="{x:Static loc:Strings.SettingsSectionTextExtraction}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              CanContentScroll="False">
+                    <StackPanel>
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0"
+                                        Style="{StaticResource SettingsIconTile}"
+                                        Margin="0,0,14,0">
+                                    <TextBlock Text="&#xE8EA;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="15"
+                                               Foreground="{StaticResource AccentBrush}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+
+                                <StackPanel Grid.Column="1" Margin="0,0,18,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding OcrStatusTitle}"
+                                                   Style="{StaticResource Text.Body}"
+                                                   FontWeight="SemiBold"
+                                                   VerticalAlignment="Center" />
+                                        <Border Padding="7,2"
+                                                Margin="10,0,0,0"
+                                                VerticalAlignment="Center">
+                                            <Border.Style>
+                                                <Style TargetType="Border" BasedOn="{StaticResource Badge}">
+                                                    <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
+                                                    <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsOcrAvailable}" Value="True">
+                                                            <Setter Property="Background" Value="#22A6E3A1" />
+                                                            <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding OcrStatusBadge}"
+                                                       FontSize="10.5"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextBrush}" />
+                                        </Border>
+                                    </StackPanel>
+
+                                    <TextBlock Text="{Binding OcrStatusDescription}"
+                                               Style="{StaticResource Text.Hint}"
+                                               Margin="0,5,0,0"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding OcrLanguageSummary}"
+                                               Style="{StaticResource Text.Caption}"
+                                               Margin="0,9,0,0"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2"
+                                            Width="136"
+                                            VerticalAlignment="Top">
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            Command="{Binding OpenOcrLanguageSettingsCommand}"
+                                            Padding="11,5"
+                                            MinHeight="32"
+                                            HorizontalAlignment="Stretch"
+                                            ToolTip="{x:Static loc:Strings.SettingsOcrLanguagesTooltip}"
+                                            AutomationProperties.Name="{x:Static loc:Strings.SettingsOcrLanguagesAutomationName}">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock Text="&#xE713;"
+                                                       FontFamily="{StaticResource IconFontFamily}"
+                                                       FontSize="11"
+                                                       Margin="0,0,7,0"
+                                                       VerticalAlignment="Center" />
+                                            <TextBlock Text="{x:Static loc:Strings.SettingsOcrLanguagesButton}"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            Command="{Binding RefreshOcrStatusCommand}"
+                                            Padding="11,5"
+                                            MinHeight="32"
+                                            Margin="0,8,0,0"
+                                            HorizontalAlignment="Stretch"
+                                            AutomationProperties.Name="{x:Static loc:Strings.SettingsOcrRefreshAutomationName}">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock Text="&#xE72C;"
+                                                       FontFamily="{StaticResource IconFontFamily}"
+                                                       FontSize="11"
+                                                       Margin="0,0,7,0"
+                                                       VerticalAlignment="Center" />
+                                            <TextBlock Text="{x:Static loc:Strings.SettingsOcrRefreshButton}"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource SettingsCard}"
+                                Background="#14181825">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE72E;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="12"
+                                           Foreground="{StaticResource OverlayBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,9,0" />
+                                <TextBlock Text="{x:Static loc:Strings.SettingsOcrPrivacyNote}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="{x:Static loc:Strings.SettingsSectionDiagnostics}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              CanContentScroll="False">
+                    <StackPanel>
+                        <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <TextBlock Text="{Binding DiagnosticsStorageSummary}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap" />
+
+                                <WrapPanel Margin="0,14,0,0">
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            Command="{Binding OpenAppDataCommand}"
+                                            Padding="12,6"
+                                            MinHeight="32"
+                                            Margin="0,0,8,8"
+                                            AutomationProperties.Name="{x:Static loc:Strings.SettingsAppDataAutomationName}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE838;"
+                                                       FontFamily="{StaticResource IconFontFamily}"
+                                                       FontSize="11"
+                                                       Margin="0,0,7,0"
+                                                       VerticalAlignment="Center" />
+                                            <TextBlock Text="{x:Static loc:Strings.SettingsAppDataButton}"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            Command="{Binding OpenLogsCommand}"
+                                            Padding="12,6"
+                                            MinHeight="32"
+                                            Margin="0,0,8,8"
+                                            AutomationProperties.Name="{x:Static loc:Strings.SettingsLogsAutomationName}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE8A5;"
+                                                       FontFamily="{StaticResource IconFontFamily}"
+                                                       FontSize="11"
+                                                       Margin="0,0,7,0"
+                                                       VerticalAlignment="Center" />
+                                            <TextBlock Text="{x:Static loc:Strings.SettingsLogsButton}"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0"
+                                        Style="{StaticResource SettingsIconTile}"
+                                        Margin="0,0,14,0">
+                                    <TextBlock Text="&#xE72E;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="14"
+                                               Foreground="{StaticResource AccentBrush}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="{x:Static loc:Strings.SettingsSectionPrivacy}"
+                                               Style="{StaticResource Text.Body}"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding UpdateCheckDescription}"
+                                               Style="{StaticResource Text.Hint}"
+                                               Margin="0,4,0,0"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+
+        <Grid Grid.Row="2" Margin="0,18,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Padding="12,9"
+                    Margin="0,0,14,0"
                     Visibility="{Binding SettingsStatusText, Converter={StaticResource BoolToVis}}"
                     AutomationProperties.LiveSetting="Polite">
                 <Border.Style>
@@ -551,17 +638,15 @@
                 </StackPanel>
             </Border>
 
-            <!-- Close -->
-            <Button Content="Close"
+            <Button Grid.Column="1"
+                    Content="{x:Static loc:Strings.SettingsCloseButton}"
                     Style="{StaticResource ChromeButton}"
                     HorizontalAlignment="Right"
                     Padding="20,7"
-                    Margin="0,22,0,0"
+                    MinWidth="92"
                     IsCancel="True"
                     Click="CloseButton_Click"
-                    AutomationProperties.Name="Close settings" />
-
-        </StackPanel>
-    </Border>
-    </ScrollViewer>
+                    AutomationProperties.Name="{x:Static loc:Strings.SettingsCloseAutomationName}" />
+        </Grid>
+    </Grid>
 </Window>

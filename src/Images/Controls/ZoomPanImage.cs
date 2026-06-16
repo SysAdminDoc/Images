@@ -185,6 +185,17 @@ public sealed class ZoomPanImage : ContentControl
         };
     }
 
+    protected override Size MeasureOverride(Size constraint)
+    {
+        var desired = base.MeasureOverride(constraint);
+
+        // The viewer is a clipping canvas, not document content. Large source pixels should not
+        // make the root Grid preserve image width at the expense of the surrounding tool chrome.
+        var width = double.IsInfinity(constraint.Width) ? desired.Width : Math.Min(desired.Width, constraint.Width);
+        var height = double.IsInfinity(constraint.Height) ? desired.Height : Math.Min(desired.Height, constraint.Height);
+        return new Size(Math.Max(0, width), Math.Max(0, height));
+    }
+
     private void OnSourceChanged(ImageSource? src)
     {
         // A new source always wins over whatever animation was playing. The Animation DP will

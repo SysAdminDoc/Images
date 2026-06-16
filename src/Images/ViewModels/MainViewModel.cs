@@ -897,7 +897,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public string FirstRunRecoveryText => Strings.MainFirstRunRecovery;
 
     // First-run gesture hint. Flipped true exactly once — the first time an image successfully
-    // lands in the viewport. The view animates the pill in, then fades it out after 2.4 s.
+    // lands in the viewport. The view animates the hint in, then fades it out after 2.4 s.
     private bool _hasShownGestureHint;
     private bool _showGestureHint;
     public bool ShowGestureHint
@@ -3888,7 +3888,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 ClearLoadError();
                 loaded = true;
 
-                // First-run only — surface the gesture hint pill the first time an image lands.
+                // First-run only — surface the gesture hint the first time an image lands.
                 if (!_hasShownGestureHint)
                 {
                     _hasShownGestureHint = true;
