@@ -1,0 +1,180 @@
+# Accessibility: UIA tree reference
+
+Images publishes a documented UIA tree so screen readers (Narrator, NVDA, JAWS) can announce image state, navigation, and editing actions.
+
+This document describes what each screen reader surface exposes. It is a developer and accessibility-tester reference.
+
+## Image canvas
+
+The main image surface (`ZoomPanImage`) has a custom `ImageCanvasAutomationPeer` (`src/Images/Controls/ImageCanvasAutomationPeer.cs`).
+
+| UIA property | Value |
+|---|---|
+| ControlType | `Image` |
+| ClassName | `ZoomPanImage` |
+| Name (loaded) | `"Image, {W} by {H} pixels"` (e.g. "Image, 2048 by 1365 pixels") |
+| Name (empty) | `"Image (none loaded)"` |
+| HelpText | `"Use arrow keys to navigate previous / next in folder. Mouse wheel zooms; drag pans; double-click fits. F1 shortcut help."` |
+| IsContentElement | true |
+| IsControlElement | true |
+
+The Name updates dynamically when the source changes. WPF re-queries the peer on UIA events automatically.
+
+The window title is bound to `WindowTitle` (format: `"{filename} -- Images"`), so Narrator announces the current file on window focus.
+
+## Navigation
+
+### Arrow overlays and position chip
+
+| Element | AutomationProperties.Name | HelpText |
+|---|---|---|
+| Previous button | `"Previous image"` | `"Left arrow or Backspace"` |
+| Next button | `"Next image"` | `"Right arrow or Space"` |
+| Position chip | `"Folder position"` | -- |
+| Page position chip | `"Page position"` | -- |
+| Page scrubber slider | `"Page scrubber"` | `"Drag to jump to another page in the current document or archive."` |
+
+The position chip and gallery workbench use `AutomationProperties.LiveSetting="Polite"` so Narrator announces changes without interrupting the current utterance.
+
+### Filmstrip
+
+The bottom filmstrip is a virtualizing ListBox:
+
+- Container: `Name="Bottom folder filmstrip"`, `DirectionalNavigation=Cycle`
+- Each thumbnail button: `Name="{FileName}"`, `HelpText="{PositionText}"`, `ItemStatus="{PositionText}"`
+
+The side-panel folder preview (shown when the filmstrip is hidden) mirrors this pattern with `Name="Folder preview thumbnails"`.
+
+The filmstrip toggle button is named `"Toggle filmstrip"`.
+
+### Gallery
+
+The gallery workbench is announced with `Name="Gallery workbench"`, `LiveSetting="Polite"`.
+
+- Thumbnails ListBox: `Name="Gallery thumbnails"`, `HelpText="{GalleryStatusText}"`, `DirectionalNavigation=Contained`, `TabNavigation=Cycle`
+- Each gallery item: `Name="{FileName}"`, `HelpText="{PositionText}"`, `ItemStatus="{PositionText}"`
+- Sort controls group: `Name="Gallery sort controls"`
+- Sort buttons: `"Sort gallery by name"`, `"Sort gallery by newest modified date"`, `"Sort gallery by type"`, `"Sort gallery by largest file size"`
+- Filter buttons: `"Filter gallery to landscape images"`, `"Filter gallery to portrait images"`, `"Filter gallery to recently modified images"`, `"Filter gallery to large images"`, `"Filter gallery to exact duplicates"`
+- Filter TextBox: `Name="Filter gallery"`
+- Clear filter: `Name="Clear gallery filter"`
+- Empty state: `Name="No gallery filter matches"`
+
+### Archive book navigation
+
+When viewing archives/multi-page documents:
+
+- Container: `Name="Archive book controls"`, `LiveSetting="Polite"`
+- Buttons: `"First book page"`, `"Previous book page"`, `"Next book page"`, `"Last book page"`
+- Page-turn buttons on the viewport: `Name="{LeftBookPageTurnTooltip}"` / `Name="{RightBookPageTurnTooltip}"` (dynamic text)
+- Toggle switches: `"Right-to-left book page turns"`, `"Clean old archive scans"`, `"Two-page archive spreads"`
+
+## Rename
+
+The rename section in the right panel:
+
+| Element | AutomationProperties.Name | Notes |
+|---|---|---|
+| Stem TextBox | `"File name without extension"` | `PreviewKeyDown` handler stops arrow propagation so caret moves within text |
+| Extension chip/button | `Name="{ExtensionLockText}"` | Dynamic: locked vs unlocked state |
+| Extension chip | `HelpText="{ExtensionLockHelpText}"` | Explains the lock/unlock behavior |
+| Extension TextBox (unlocked) | `"File extension"` | Only visible when extension editing is unlocked |
+| Recent renames list | `Name="Recent renames"` | `DirectionalNavigation=Cycle` (from A-03) |
+| Undo rename button | `"Undo rename"` | Per-item in the recent renames list |
+
+Rename status (Pending/Saved/Conflict/Error) is communicated visually via a colored dot; the `RenameStatusText` and `RenamePreview` text blocks next to it provide the same information as plain text for screen readers.
+
+## Rating and review
+
+The review section (`Name="Review labels"`) contains:
+
+**Star ratings** (1-5 buttons plus clear):
+- `"Rate one star"` through `"Rate five stars"`
+- `"Clear rating"` (the 0 button)
+
+**Pick/Reject labels:**
+- `"Mark pick"` -- highlighted green when active (`IsReviewPick`)
+- `"Mark reject"` -- highlighted red when active (`IsReviewReject`)
+- `"Clear review label"`
+- `"Undo review label"`
+
+The review mode toggle: `Name="Toggle review mode"`, with dynamic text from `ReviewModeText`.
+
+All review buttons are disabled (`IsEnabled=false`) when `CanUseReviewLabels` is false, which screen readers report as unavailable.
+
+## Toolbar and side-panel actions
+
+Key toolbar buttons expose `AutomationProperties.Name`:
+
+- `"Open image"` (HelpText: "Choose an image file from disk. Shortcut: Ctrl+O.")
+- `"Paste from clipboard"` (HelpText: clipboard paste behavior)
+- `"Open settings"`, `"Open diagnostics"`, `"Previous image"`, `"Next image"`, `"Toggle filmstrip"`
+
+Side-panel tool sections are grouped:
+
+| Group Name | Buttons |
+|---|---|
+| `"Organization controls"` | "Open tag relationships", "Open import inbox" |
+| `"Automation controls"` | "Open macro actions", "Open batch processor", "Open model manager", "Open semantic search" |
+| `"Cleanup controls"` | "Open duplicate cleanup", "Open file health scan", "Open recovery center" |
+| `"Compare controls"` | "Compare with next image", "Compare with chosen image", "Toggle compare layout", "Swap compare A and B", "Exit compare mode" |
+| `"Pinned overlay controls"` | "Toggle pinned overlay mode", opacity slider, "Toggle click-through overlay", "Exit pinned overlay mode" |
+
+## Editing overlays
+
+Each editing overlay on the canvas has an `AutomationProperties.Name`:
+
+- `"OCR text overlay"` -- individual OCR regions expose `Name="{Text}"` and `HelpText` describing copy behavior
+- `"Pixel selection overlay"` -- with "Copy selected pixels", "Clear selected pixels", "Cancel pixel selection mode"
+- `"Crop selection overlay"` -- aspect presets ("Free crop aspect", "Square crop aspect", etc.), "Apply crop to file", "Cancel crop"
+- `"Local exposure brush overlay"` -- "Use dodge brush", "Use burn brush", radius/strength sliders
+- `"Red-eye correction overlay"` -- radius/strength/threshold sliders, apply/clear/cancel
+- `"Retouch brush overlay"` -- "Use clone stamp", "Use healing brush", radius/strength sliders
+- Metadata HUD: `Name="Metadata HUD"`, `LiveSetting="Polite"`
+
+The animation frame workbench (`Name="Animation frame workbench"`) exposes: "Play or pause animation", frame scrubber, first/prev/next/last frame buttons, playback speed slider, frame timeline, per-frame `Name="{FrameText}"`, "Copy selected animation frame", "Export selected animation frame".
+
+## Dialogs
+
+All secondary windows use `AutomationProperties.Name` on interactive controls:
+
+**Effects window:** Preset buttons ("Apply crisp preset", "Apply clean preset", "Apply focus preset"), named sliders ("Sharpen amount", "Noise reduction amount", "Vignette amount"), preview image, Reset/Close/Apply buttons.
+
+**Adjustments window:** Named sliders for black point, white point, gamma, curve, hue, saturation, lightness. Preview image, Reset/Close/Apply buttons.
+
+**Annotations window:** Text input, stroke width slider, font size slider, preview image.
+
+**About window:** Diagnostics section with "Copy system info", "Copy codec report", "Open logs", "Open data folder", "Open thumbnail cache", "Clear thumbnails". Codec capability matrix, update check controls, GitHub/crash-log links.
+
+**Settings window:** Each toggle is named (e.g. "Remember window position", "Filmstrip", "Metadata HUD", "Confirm recycle bin", "Reduce motion", "High contrast", "Archive RTL", "Update check"). OCR language list, "Open app data", "Open logs" buttons.
+
+**Batch processor:** Source list, preset selector, dimension limits, preview items list, run log.
+
+**Duplicate cleanup:** Folder lists with add/remove/clear, similarity threshold, findings list with compare/mark/quarantine/recycle actions.
+
+**Confirm dialog:** "Don't ask again" checkbox, Cancel and confirm buttons.
+
+**Crash dialog:** "Copy crash details", "Open crash log folder", "Open GitHub issue", "Close crash dialog".
+
+**Export preview:** Preset selector, extension, warnings list.
+
+**Edit stack:** Reload, create virtual copy, export. Per-edit-copy entries with reveal/copy-summary. Toggle and operation list.
+
+## Keyboard focus
+
+All interactive controls use a shared `FocusVisual` style (dashed ring, ~7:1 contrast ratio on the Catppuccin base -- WCAG AA pass). Applied to `ChromeButton`, `ToolbarButton`, `NavArrowButton`, and standard controls.
+
+The rename TextBox intercepts arrow keys via `PreviewKeyDown` so left/right move the caret instead of navigating images. `Escape` in the rename field reverts; `Enter` commits.
+
+`DirectionalNavigation=Cycle` is set on Recent renames, filmstrip, gallery thumbnails, and folder preview lists.
+
+Window-level `Escape` dismisses toasts, overlays, or closes peek-mode windows.
+
+## Known limitations
+
+- **No live-region on rename status**: The rename status dot color changes (Pending/Saved/Conflict/Error) are not raised as UIA `LiveRegionChanged` events. Screen reader users must Tab to the status area to hear the current rename state.
+- **Pixel inspector values**: Color values under the cursor (HEX/RGB/HSV) update on mouse move but do not raise live-region events; they must be explicitly focused.
+- **Magnifier integration**: The OS Magnifier does not track the rename TextBox caret via UIA `TextSelectionChanged` events (roadmap item A-04).
+- **No NVDA/JAWS test matrix**: Automated screen reader testing is not yet part of the release checklist (roadmap item A-06). Testing has been done manually with Windows Narrator.
+- **Gallery item count**: The gallery status text is exposed via `HelpText` on the ListBox but does not auto-announce item count changes.
+- **Filmstrip thumbnail labels**: Filmstrip items expose the filename but not the image dimensions or file size.
