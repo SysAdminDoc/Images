@@ -1,0 +1,34 @@
+name: Publish WinGet
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish to WinGet, e.g. v0.2.11"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+    steps:
+      - name: Skip without WinGet token
+        if: ${{ env.WINGET_TOKEN == '' }}
+        run: |
+          echo "::notice title=WinGet publish skipped::Set WINGET_TOKEN to a classic public_repo PAT after the first SysAdminDoc.Images submission exists in microsoft/winget-pkgs."
+
+      - name: Publish installer to WinGet
+        if: ${{ env.WINGET_TOKEN != '' }}
+        uses: vedantmgoyal9/winget-releaser@v2
+        with:
+          identifier: SysAdminDoc.Images
+          installers-regex: 'Images-v[0-9]+\.[0-9]+\.[0-9]+-setup-win-x64\.exe$'
+          release-tag: ${{ github.event.release.tag_name || inputs.tag }}
+          fork-user: ${{ vars.WINGET_FORK_USER || github.repository_owner }}
+          token: ${{ env.WINGET_TOKEN }}
