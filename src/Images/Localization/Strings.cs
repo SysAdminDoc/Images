@@ -512,6 +512,19 @@ public static class Strings
     public static string AboutProvenanceAdvisoryFormat => Get(nameof(AboutProvenanceAdvisoryFormat));
     public static string AboutProvenanceActionFormat => Get(nameof(AboutProvenanceActionFormat));
 
+    // ---- Network activity (P-03) ----
+    public static string AboutNetworkActivityHeading => Get(nameof(AboutNetworkActivityHeading));
+    public static string AboutNetworkActivityAutomationName => Get(nameof(AboutNetworkActivityAutomationName));
+    public static string AboutNetworkActivityEmpty => Get(nameof(AboutNetworkActivityEmpty));
+    public static string AboutNetworkActivitySummaryFormat => Get(nameof(AboutNetworkActivitySummaryFormat));
+    public static string AboutNetworkActivityCopyAutomationName => Get(nameof(AboutNetworkActivityCopyAutomationName));
+    public static string AboutNetworkActivityCopy => Get(nameof(AboutNetworkActivityCopy));
+    public static string AboutNetworkActivityClearAutomationName => Get(nameof(AboutNetworkActivityClearAutomationName));
+    public static string AboutNetworkActivityClear => Get(nameof(AboutNetworkActivityClear));
+    public static string AboutNetworkActivityCopied => Get(nameof(AboutNetworkActivityCopied));
+    public static string AboutNetworkActivityCleared => Get(nameof(AboutNetworkActivityCleared));
+    public static string AboutNetworkActivityNothingToCopy => Get(nameof(AboutNetworkActivityNothingToCopy));
+
     // ---- Macro action window ----
     public static string MacroWindowTitle => Get(nameof(MacroWindowTitle));
     public static string MacroHeading => Get(nameof(MacroHeading));

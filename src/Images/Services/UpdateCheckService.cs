@@ -63,6 +63,7 @@ public static class UpdateCheckService
             var bytes = resp.Content.Headers.ContentLength ?? -1;
             var ms = (int)(utcNow() - startedAt).TotalMilliseconds;
             _log.LogInformation("update-check: {Status} {Bytes} bytes in {Ms} ms", (int)resp.StatusCode, bytes, ms);
+            NetworkEgressService.Record(ReleasesApiUrl, "Update check (GitHub Releases API)", bytes >= 0 ? bytes : 0, ms);
 
             if (!resp.IsSuccessStatusCode)
                 return CompletedCheck(false, null, null, $"HTTP {(int)resp.StatusCode}");

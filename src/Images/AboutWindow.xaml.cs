@@ -33,6 +33,8 @@ public partial class AboutWindow : Window
 
         UpdateCheckCheckBox.IsChecked = UpdateCheckService.OptedIn;
 
+        PopulateNetworkActivity();
+
         SourceInitialized += (_, _) =>
         {
             var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
@@ -232,6 +234,50 @@ public partial class AboutWindow : Window
         }
     }
 
+    private void PopulateNetworkActivity()
+    {
+        NetworkActivityItems.ItemsSource = NetworkEgressService.Entries;
+        var count = NetworkEgressService.Entries.Count;
+        if (count == 0)
+        {
+            NetworkActivitySummary.Text = Strings.AboutNetworkActivityEmpty;
+        }
+        else
+        {
+            var totalBytes = NetworkEgressService.TotalBytes;
+            NetworkActivitySummary.Text = Strings.Format(
+                nameof(Strings.AboutNetworkActivitySummaryFormat),
+                count,
+                FormatBytes(totalBytes));
+        }
+    }
+
+    private void CopyNetworkLogButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (NetworkEgressService.Entries.Count == 0)
+        {
+            ShowUpdateStatus(Strings.AboutNetworkActivityNothingToCopy, "Info");
+            return;
+        }
+
+        try
+        {
+            ClipboardService.SetText(NetworkEgressService.BuildClipboardText());
+            ShowUpdateStatus(Strings.AboutNetworkActivityCopied, "Success");
+        }
+        catch (Exception ex)
+        {
+            ShowUpdateStatus($"Could not copy: {ex.Message}", "Warning");
+        }
+    }
+
+    private void ClearNetworkLogButton_Click(object sender, RoutedEventArgs e)
+    {
+        NetworkEgressService.Clear();
+        PopulateNetworkActivity();
+        ShowUpdateStatus(Strings.AboutNetworkActivityCleared, "Success");
+    }
+
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
 
     private void ApplyCodecSummary(CodecCapabilityService.CodecCapabilitySummary summary)
@@ -293,6 +339,7 @@ public partial class AboutWindow : Window
         finally
         {
             PopulateDiagnostics();
+            PopulateNetworkActivity();
             btn.IsEnabled = true;
             CheckUpdatesButtonText.Text = Strings.AboutCheckUpdates;
         }
