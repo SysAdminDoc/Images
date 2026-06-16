@@ -168,8 +168,8 @@ If the build is unsigned, say so plainly and direct users to checksum validation
 
 ## Open Follow-Ups
 
-- Create the first WinGet manifest after the next stable release is published.
-- Create the first Scoop manifest after the next stable release is published.
+- ~~Create the first WinGet manifest after the next stable release is published.~~ Shipped — `scripts/New-PackageManifests.ps1` generates WinGet multi-file manifests and the release workflow uploads them as artifacts.
+- ~~Create the first Scoop manifest after the next stable release is published.~~ Shipped — same script generates a Scoop portable manifest with autoupdate metadata.
 - Add a release-workflow step that can sign artifacts once credentials are available.
 - Add package-manager installation smoke tests to release validation after the first accepted manifests.
 
