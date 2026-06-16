@@ -568,7 +568,6 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [x] **V30-30** *P1* — **Image compare** 2-up / 4-up with synchronized pan/zoom (XnView MP, FastStone). **CLOSED** 2026-05-17 under `V7-10`: 2-up compare mode ships for current+next, chosen local files, and duplicate-cleanup pairs, with linked pan/zoom/rotate/flip and regression coverage. 4-up remains a possible future expansion, but the accepted P1 local compare workflow is complete.
 - [x] **V30-31** *P1* — **Opacity-overlay compare** (nomacs) — slider blend two images for AB review. **CLOSED** 2026-05-17 under `V7-10`: opacity-overlay compare ships with B-opacity slider, keyboard opacity controls, A/B swap, shared transforms, and Escape exit behavior.
 
-- [ ] **V30-33** *P1* — Slideshow — configurable interval, transitions (fade/slide/wipe), background music (MP3/FLAC), loop/shuffle, pause on hover.
 
 ---
 
