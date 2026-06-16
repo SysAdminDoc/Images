@@ -4,6 +4,10 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### Features
+
+- **Command palette (V20-29)** — `Ctrl+Shift+P` opens a VS Code-style fuzzy-search overlay listing 55 commands across 8 categories (Navigate, View, Edit, File, Tools, Review, Compare, Help). Type to filter by name, category, or shortcut; Up/Down to select; Enter or double-click to execute; Escape or click the dimmer to dismiss. No other Windows image viewer ships a command palette.
+
 ### Security
 
 - **Archive reader dependency** — upgraded SharpCompress from 0.47.4 to 0.48.1, clearing the GHSA-6c8g-7p36-r338 / CVE-2026-44788 NuGet vulnerability gate. Images still uses SharpCompress only for read-only archive page streams and does not call the affected `WriteToDirectory()` extraction API.
