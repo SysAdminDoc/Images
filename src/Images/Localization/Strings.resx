@@ -149,4 +149,136 @@ Details written to:
   <data name="ClipboardBusyRetry" xml:space="preserve">
     <value>Clipboard is busy. Try again in a moment.</value>
   </data>
+  <data name="AddResizeButton" xml:space="preserve">
+    <value>Add resize</value>
+  </data>
+  <data name="AddResizeToEditHistory" xml:space="preserve">
+    <value>Add resize to edit history</value>
+  </data>
+  <data name="CancelResize" xml:space="preserve">
+    <value>Cancel resize</value>
+  </data>
+  <data name="ResizeAspectLock" xml:space="preserve">
+    <value>Lock aspect ratio</value>
+  </data>
+  <data name="ResizeAspectLockAutomationName" xml:space="preserve">
+    <value>Lock resize aspect ratio</value>
+  </data>
+  <data name="ResizeDescription" xml:space="preserve">
+    <value>Add a non-destructive resize operation to edit history.</value>
+  </data>
+  <data name="ResizeDimensions" xml:space="preserve">
+    <value>Dimensions</value>
+  </data>
+  <data name="ResizeEdge" xml:space="preserve">
+    <value>Edge</value>
+  </data>
+  <data name="ResizeEdgePixelsAutomationName" xml:space="preserve">
+    <value>Resize edge pixels</value>
+  </data>
+  <data name="ResizeFilter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="ResizeFilterAutomationName" xml:space="preserve">
+    <value>Resize filter</value>
+  </data>
+  <data name="ResizeFilterBicubicDescription" xml:space="preserve">
+    <value>Smooth general-purpose interpolation.</value>
+  </data>
+  <data name="ResizeFilterBicubicLabel" xml:space="preserve">
+    <value>Bicubic</value>
+  </data>
+  <data name="ResizeFilterLanczos3Description" xml:space="preserve">
+    <value>Crisp detail for high-quality downscaling.</value>
+  </data>
+  <data name="ResizeFilterLanczos3Label" xml:space="preserve">
+    <value>Lanczos-3</value>
+  </data>
+  <data name="ResizeFilterMitchellDescription" xml:space="preserve">
+    <value>Balanced resize with fewer halos.</value>
+  </data>
+  <data name="ResizeFilterMitchellLabel" xml:space="preserve">
+    <value>Mitchell</value>
+  </data>
+  <data name="ResizeHeading" xml:space="preserve">
+    <value>Resize</value>
+  </data>
+  <data name="ResizeHeightAutomationName" xml:space="preserve">
+    <value>Resize height</value>
+  </data>
+  <data name="ResizeLongEdge" xml:space="preserve">
+    <value>Long edge</value>
+  </data>
+  <data name="ResizeMode" xml:space="preserve">
+    <value>Mode</value>
+  </data>
+  <data name="ResizeModeAutomationName" xml:space="preserve">
+    <value>Resize mode</value>
+  </data>
+  <data name="ResizeModeLongEdgeDescription" xml:space="preserve">
+    <value>Set the longest side and preserve the source ratio.</value>
+  </data>
+  <data name="ResizeModePercentDescription" xml:space="preserve">
+    <value>Scale both dimensions by a percentage.</value>
+  </data>
+  <data name="ResizeModePixelsDescription" xml:space="preserve">
+    <value>Enter target width and height.</value>
+  </data>
+  <data name="ResizeModeShortEdgeDescription" xml:space="preserve">
+    <value>Set the shortest side and preserve the source ratio.</value>
+  </data>
+  <data name="ResizeOpenValidImageError" xml:space="preserve">
+    <value>Open an image with valid pixel dimensions before resizing.</value>
+  </data>
+  <data name="ResizeOutputMinimumError" xml:space="preserve">
+    <value>Resize output must be at least 1 x 1 pixels.</value>
+  </data>
+  <data name="ResizeOutputTooLargeFormat" xml:space="preserve">
+    <value>Resize output cannot exceed {0} pixels on either edge.</value>
+  </data>
+  <data name="ResizePercent" xml:space="preserve">
+    <value>Percent</value>
+  </data>
+  <data name="ResizePercentAutomationName" xml:space="preserve">
+    <value>Resize percent</value>
+  </data>
+  <data name="ResizePixelSize" xml:space="preserve">
+    <value>Pixel size</value>
+  </data>
+  <data name="ResizePlanChooseFilterError" xml:space="preserve">
+    <value>Choose a resize filter.</value>
+  </data>
+  <data name="ResizePlanEnterPositiveValuesError" xml:space="preserve">
+    <value>Enter positive resize values.</value>
+  </data>
+  <data name="ResizePlanLabel" xml:space="preserve">
+    <value>Resize</value>
+  </data>
+  <data name="ResizePlanLabelFormat" xml:space="preserve">
+    <value>Resize {0}x{1} ({2})</value>
+  </data>
+  <data name="ResizePlanSummaryFormat" xml:space="preserve">
+    <value>{0} x {1} -&gt; {2} x {3} ({4} x {5}, {6})</value>
+  </data>
+  <data name="ResizePreview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="ResizePreviewNote" xml:space="preserve">
+    <value>This records an edit operation only. Use Save a copy to export pixels with the resize applied.</value>
+  </data>
+  <data name="ResizeReadyStatus" xml:space="preserve">
+    <value>Ready to add this resize to edit history.</value>
+  </data>
+  <data name="ResizeShortEdge" xml:space="preserve">
+    <value>Short edge</value>
+  </data>
+  <data name="ResizeSourceFormat" xml:space="preserve">
+    <value>Source: {0} x {1} px</value>
+  </data>
+  <data name="ResizeTitle" xml:space="preserve">
+    <value>Images - Resize</value>
+  </data>
+  <data name="ResizeWidthAutomationName" xml:space="preserve">
+    <value>Resize width</value>
+  </data>
 </root>

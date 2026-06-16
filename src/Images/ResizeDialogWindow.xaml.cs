@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using Images.Localization;
 using Images.Services;
 
 namespace Images;
@@ -26,7 +27,7 @@ public partial class ResizeDialogWindow : Window
             WindowChrome.ApplyDarkCaption(hwnd);
         };
 
-        SourceText.Text = $"Source: {_sourceWidth} x {_sourceHeight} px";
+        SourceText.Text = Strings.Format("ResizeSourceFormat", _sourceWidth, _sourceHeight);
         ModeCombo.ItemsSource = ResizePlanService.ModeOptions;
         FilterCombo.ItemsSource = ResizePlanService.FilterPresets;
         ModeCombo.SelectedItem = ResizePlanService.ModeOptions[0];
@@ -73,7 +74,7 @@ public partial class ResizeDialogWindow : Window
         EdgePanel.Visibility = mode is ResizeDimensionMode.LongEdge or ResizeDimensionMode.ShortEdge
             ? Visibility.Visible
             : Visibility.Collapsed;
-        EdgeLabel.Text = mode == ResizeDimensionMode.ShortEdge ? "Short edge" : "Long edge";
+        EdgeLabel.Text = mode == ResizeDimensionMode.ShortEdge ? Strings.ResizeShortEdge : Strings.ResizeLongEdge;
         AspectLockCheckBox.IsEnabled = mode == ResizeDimensionMode.Pixels;
 
         if (ModeCombo.SelectedItem is ResizeDimensionModeOption option)
@@ -83,7 +84,7 @@ public partial class ResizeDialogWindow : Window
 
         var plan = CreatePlan();
         PreviewText.Text = plan.Summary;
-        StatusText.Text = plan.IsValid ? "Ready to add this resize to edit history." : plan.Error;
+        StatusText.Text = plan.IsValid ? Strings.ResizeReadyStatus : plan.Error;
         AddButton.IsEnabled = plan.IsValid;
     }
 

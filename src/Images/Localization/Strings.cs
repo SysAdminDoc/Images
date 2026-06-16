@@ -35,6 +35,27 @@ public static class Strings
     public static string CrashLogFolderOpened => Get(nameof(CrashLogFolderOpened));
     public static string InnerExceptionSeparator => Get(nameof(InnerExceptionSeparator));
     public static string LogFolderUnavailable => Get(nameof(LogFolderUnavailable));
+    public static string ResizeEdge => Get(nameof(ResizeEdge));
+    public static string ResizeFilterBicubicDescription => Get(nameof(ResizeFilterBicubicDescription));
+    public static string ResizeFilterBicubicLabel => Get(nameof(ResizeFilterBicubicLabel));
+    public static string ResizeFilterLanczos3Description => Get(nameof(ResizeFilterLanczos3Description));
+    public static string ResizeFilterLanczos3Label => Get(nameof(ResizeFilterLanczos3Label));
+    public static string ResizeFilterMitchellDescription => Get(nameof(ResizeFilterMitchellDescription));
+    public static string ResizeFilterMitchellLabel => Get(nameof(ResizeFilterMitchellLabel));
+    public static string ResizeLongEdge => Get(nameof(ResizeLongEdge));
+    public static string ResizeModeLongEdgeDescription => Get(nameof(ResizeModeLongEdgeDescription));
+    public static string ResizeModePercentDescription => Get(nameof(ResizeModePercentDescription));
+    public static string ResizeModePixelsDescription => Get(nameof(ResizeModePixelsDescription));
+    public static string ResizeModeShortEdgeDescription => Get(nameof(ResizeModeShortEdgeDescription));
+    public static string ResizeOpenValidImageError => Get(nameof(ResizeOpenValidImageError));
+    public static string ResizeOutputMinimumError => Get(nameof(ResizeOutputMinimumError));
+    public static string ResizePercent => Get(nameof(ResizePercent));
+    public static string ResizePixelSize => Get(nameof(ResizePixelSize));
+    public static string ResizePlanChooseFilterError => Get(nameof(ResizePlanChooseFilterError));
+    public static string ResizePlanEnterPositiveValuesError => Get(nameof(ResizePlanEnterPositiveValuesError));
+    public static string ResizePlanLabel => Get(nameof(ResizePlanLabel));
+    public static string ResizeReadyStatus => Get(nameof(ResizeReadyStatus));
+    public static string ResizeShortEdge => Get(nameof(ResizeShortEdge));
 
     public static string Get(string key)
     {
