@@ -2916,4 +2916,896 @@ Details written to:
     <value>Copy failed: {0}</value>
   </data>
 
+  <data name="MainAnimWorkbenchEmpty" xml:space="preserve">
+    <value>Open an animated GIF, APNG, or WebP to inspect frames.</value>
+  </data>
+  <data name="MainAnimPause" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="MainAnimPlay" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="MainPageLabel" xml:space="preserve">
+    <value>Page</value>
+  </data>
+  <data name="MainArchiveNextPage" xml:space="preserve">
+    <value>Next book page</value>
+  </data>
+  <data name="MainArchivePrevPage" xml:space="preserve">
+    <value>Previous book page</value>
+  </data>
+  <data name="MainArchiveRtlTurns" xml:space="preserve">
+    <value>Right-to-left page turns</value>
+  </data>
+  <data name="MainArchiveLtrTurns" xml:space="preserve">
+    <value>Left-to-right page turns</value>
+  </data>
+  <data name="MainArchiveRtlHint" xml:space="preserve">
+    <value>For manga-style books, the left edge and Left Arrow advance; the right edge goes back.</value>
+  </data>
+  <data name="MainArchiveLtrHint" xml:space="preserve">
+    <value>For western books, the right edge and Right Arrow advance; the left edge goes back.</value>
+  </data>
+  <data name="MainArchiveCleanScansOn" xml:space="preserve">
+    <value>Clean old scans on</value>
+  </data>
+  <data name="MainArchiveCleanScans" xml:space="preserve">
+    <value>Clean old scans</value>
+  </data>
+  <data name="MainArchiveCleanScansHint" xml:space="preserve">
+    <value>Preview-only: converts archive pages to high-contrast grayscale. The archive file is not changed.</value>
+  </data>
+  <data name="MainArchiveSpreadsOn" xml:space="preserve">
+    <value>Two-page spreads on</value>
+  </data>
+  <data name="MainArchiveSpreads" xml:space="preserve">
+    <value>Two-page spreads</value>
+  </data>
+  <data name="MainArchiveSpreadHintRtl" xml:space="preserve">
+    <value>Pairs pages side by side for reading, with the next page on the left in right-to-left mode.</value>
+  </data>
+  <data name="MainArchiveSpreadHintLtr" xml:space="preserve">
+    <value>Pairs pages side by side for reading, keeping explicit covers as single pages.</value>
+  </data>
+  <data name="MainFirstRunPrivacyOn" xml:space="preserve">
+    <value>Automatic update checks are enabled. Image files stay local; release checks only contact GitHub.</value>
+  </data>
+  <data name="MainFirstRunPrivacyOff" xml:space="preserve">
+    <value>No telemetry and no image uploads. Automatic update checks are off until you enable them.</value>
+  </data>
+  <data name="MainFirstRunRecovery" xml:space="preserve">
+    <value>Settings manages privacy and viewer defaults. Diagnostics shows codec, OCR, log, and storage status.</value>
+  </data>
+  <data name="MainOverlayOn" xml:space="preserve">
+    <value>Overlay on</value>
+  </data>
+  <data name="MainOverlayOff" xml:space="preserve">
+    <value>Overlay off</value>
+  </data>
+  <data name="MainOverlayTurnOff" xml:space="preserve">
+    <value>Turn off</value>
+  </data>
+  <data name="MainOverlayTurnOn" xml:space="preserve">
+    <value>Turn on</value>
+  </data>
+  <data name="MainOverlayClickThroughOn" xml:space="preserve">
+    <value>Click-through on</value>
+  </data>
+  <data name="MainOverlayClickThroughOff" xml:space="preserve">
+    <value>Click-through off</value>
+  </data>
+  <data name="MainOverlayExitNoHotkey" xml:space="preserve">
+    <value>Use Exit overlay, the context menu, or the taskbar close command.</value>
+  </data>
+  <data name="MainOverlayStatusIdle" xml:space="preserve">
+    <value>Pin the current image above other windows for tracing or visual comparison.</value>
+  </data>
+  <data name="MainOverlayStatusNoHotkey" xml:space="preserve">
+    <value>Overlay is pinned. Click-through is disabled because the global exit hotkey could not register.</value>
+  </data>
+  <data name="MainCompareOn" xml:space="preserve">
+    <value>Compare on</value>
+  </data>
+  <data name="MainCompareWithNext" xml:space="preserve">
+    <value>Compare with next</value>
+  </data>
+  <data name="MainCompareOverlay" xml:space="preserve">
+    <value>Overlay</value>
+  </data>
+  <data name="MainCompare2Up" xml:space="preserve">
+    <value>2-up</value>
+  </data>
+  <data name="MainComparePrimaryDefault" xml:space="preserve">
+    <value>A</value>
+  </data>
+  <data name="MainCompareSecondaryDefault" xml:space="preserve">
+    <value>B</value>
+  </data>
+  <data name="MainCompareStatusCanStart" xml:space="preserve">
+    <value>Compare the current image with the next file, another local file, or a duplicate cleanup pair.</value>
+  </data>
+  <data name="MainCompareStatusNeedTwo" xml:space="preserve">
+    <value>Open at least two images in a folder, or choose another local file to compare.</value>
+  </data>
+  <data name="MainWindowTitleDefault" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="MainLoadErrorDefault" xml:space="preserve">
+    <value>This image couldn't be displayed</value>
+  </data>
+  <data name="MainLoadErrorGhostscriptTitle" xml:space="preserve">
+    <value>Document preview needs Ghostscript</value>
+  </data>
+  <data name="MainLoadErrorGhostscriptMessage" xml:space="preserve">
+    <value>This file type depends on Ghostscript for document and Adobe Illustrator previews. Images can use a bundled runtime, IMAGES_GHOSTSCRIPT_DIR, or an installed Ghostscript copy.</value>
+  </data>
+  <data name="MainLoadErrorGhostscriptHelp" xml:space="preserve">
+    <value>Open codec details to see the active runtime status and copy a support report.</value>
+  </data>
+  <data name="MainLoadErrorNotFoundTitle" xml:space="preserve">
+    <value>File not found</value>
+  </data>
+  <data name="MainLoadErrorNotFoundMessage" xml:space="preserve">
+    <value>This file no longer exists. It may have been moved, renamed, or deleted.</value>
+  </data>
+  <data name="MainLoadErrorNotFoundHelp" xml:space="preserve">
+    <value>Navigate to another image or open a new file.</value>
+  </data>
+  <data name="MainLoadErrorAccessTitle" xml:space="preserve">
+    <value>Access denied</value>
+  </data>
+  <data name="MainLoadErrorAccessMessage" xml:space="preserve">
+    <value>You do not have permission to read this file.</value>
+  </data>
+  <data name="MainLoadErrorAccessHelp" xml:space="preserve">
+    <value>Check the file's security properties in Explorer, or try running Images as Administrator.</value>
+  </data>
+  <data name="MainLoadErrorOomTitle" xml:space="preserve">
+    <value>Image too large</value>
+  </data>
+  <data name="MainLoadErrorOomMessage" xml:space="preserve">
+    <value>This image is too large to fit in available memory.</value>
+  </data>
+  <data name="MainLoadErrorOomHelp" xml:space="preserve">
+    <value>Close other applications to free memory, or try reopening the file.</value>
+  </data>
+  <data name="MainLoadErrorDecodeHelp" xml:space="preserve">
+    <value>Try another file, reveal the file in Explorer, or reload after another app finishes writing it.</value>
+  </data>
+  <data name="MainDropAcceptedTitle" xml:space="preserve">
+    <value>Drop to open file</value>
+  </data>
+  <data name="MainDropRejectedTitle" xml:space="preserve">
+    <value>Unsupported file</value>
+  </data>
+  <data name="MainDropAcceptedMessage" xml:space="preserve">
+    <value>Images will load this file and scan the folder for navigation.</value>
+  </data>
+  <data name="MainInspectorOn" xml:space="preserve">
+    <value>Inspector on</value>
+  </data>
+  <data name="MainInspectorOff" xml:space="preserve">
+    <value>Inspector off</value>
+  </data>
+  <data name="MainInspectorActiveHelp" xml:space="preserve">
+    <value>Sampling is active. Shift-drag measures a rectangle.</value>
+  </data>
+  <data name="MainInspectorInactiveHelp" xml:space="preserve">
+    <value>Turn on Inspector to read pixel color and coordinates.</value>
+  </data>
+  <data name="MainInspectorReady" xml:space="preserve">
+    <value>Move over the image to sample pixels. Click to hold a sample; Ctrl+click copies it. Shift-drag measures.</value>
+  </data>
+  <data name="MainInspectorDefault" xml:space="preserve">
+    <value>Turn on Inspector to sample pixel color, coordinates, and dimensions.</value>
+  </data>
+  <data name="MainInspectorOutside" xml:space="preserve">
+    <value>Pointer is outside the image.</value>
+  </data>
+  <data name="MainInspectorMoveToSample" xml:space="preserve">
+    <value>Move over the image to sample pixels.</value>
+  </data>
+  <data name="MainInspectorNoPixel" xml:space="preserve">
+    <value>No pixel selected</value>
+  </data>
+  <data name="MainInspectorShiftDrag" xml:space="preserve">
+    <value>Shift-drag to measure</value>
+  </data>
+  <data name="MainSelectOn" xml:space="preserve">
+    <value>Select on</value>
+  </data>
+  <data name="MainSelectOff" xml:space="preserve">
+    <value>Select off</value>
+  </data>
+  <data name="MainSelectActiveHelp" xml:space="preserve">
+    <value>Drag a rectangle on the image. Copy places the selected pixels on the clipboard; Esc cancels.</value>
+  </data>
+  <data name="MainSelectInactiveHelp" xml:space="preserve">
+    <value>Select pixels without changing the source file.</value>
+  </data>
+  <data name="MainSelectReady" xml:space="preserve">
+    <value>Selection mode is ready. Drag on the image to choose pixels to copy.</value>
+  </data>
+  <data name="MainSelectPaused" xml:space="preserve">
+    <value>Selection is paused. Toggle it on to drag a pixel selection.</value>
+  </data>
+  <data name="MainSelectOpen" xml:space="preserve">
+    <value>Open an image to select pixels.</value>
+  </data>
+  <data name="MainSelectNoSelection" xml:space="preserve">
+    <value>No selection</value>
+  </data>
+  <data name="MainSelectOutside" xml:space="preserve">
+    <value>Pointer is outside the image.</value>
+  </data>
+  <data name="MainCropOn" xml:space="preserve">
+    <value>Crop on</value>
+  </data>
+  <data name="MainCropOff" xml:space="preserve">
+    <value>Crop off</value>
+  </data>
+  <data name="MainCropActiveHelp" xml:space="preserve">
+    <value>Freehand crop is active. Drag a rectangle on the image. Enter overwrites the file; Esc cancels.</value>
+  </data>
+  <data name="MainCropInactiveHelp" xml:space="preserve">
+    <value>Crop starts automatically for normal images; toggle it off when you need canvas pan-only control.</value>
+  </data>
+  <data name="MainCropReady" xml:space="preserve">
+    <value>Freehand crop is ready. Drag on the image to choose a crop. Enter or Apply overwrites the file.</value>
+  </data>
+  <data name="MainCropPaused" xml:space="preserve">
+    <value>Crop is paused. Toggle it on to drag a crop that overwrites the file.</value>
+  </data>
+  <data name="MainCropOpen" xml:space="preserve">
+    <value>Open an image to start freehand crop mode.</value>
+  </data>
+  <data name="MainCropUnavailable" xml:space="preserve">
+    <value>Crop is available only for flat raster image files like JPEG, PNG, WebP, TIFF, GIF, BMP, HEIC/AVIF/JXL, and similar bitmap formats.</value>
+  </data>
+  <data name="MainCropNoSelection" xml:space="preserve">
+    <value>No crop selected</value>
+  </data>
+  <data name="MainCropCustomRatio" xml:space="preserve">
+    <value>Custom ratio needed</value>
+  </data>
+  <data name="MainCropCustomHelp" xml:space="preserve">
+    <value>Enter positive whole numbers for custom width and height.</value>
+  </data>
+  <data name="MainCropCanceledStatus" xml:space="preserve">
+    <value>Crop canceled.</value>
+  </data>
+  <data name="MainCropOutside" xml:space="preserve">
+    <value>Pointer is outside the image.</value>
+  </data>
+  <data name="MainCropCustomAspectError" xml:space="preserve">
+    <value>Enter a positive custom aspect ratio before dragging.</value>
+  </data>
+  <data name="MainExposureOn" xml:space="preserve">
+    <value>Exposure brush on</value>
+  </data>
+  <data name="MainExposureOff" xml:space="preserve">
+    <value>Exposure brush off</value>
+  </data>
+  <data name="MainExposureActiveHelp" xml:space="preserve">
+    <value>Paint directly on the image. Enter adds strokes to edit history; Esc cancels.</value>
+  </data>
+  <data name="MainExposureInactiveHelp" xml:space="preserve">
+    <value>Non-destructive dodge and burn strokes for Save a copy exports.</value>
+  </data>
+  <data name="MainExposureBurnText" xml:space="preserve">
+    <value>Burn</value>
+  </data>
+  <data name="MainExposureDodgeText" xml:space="preserve">
+    <value>Dodge</value>
+  </data>
+  <data name="MainExposureNoStrokes" xml:space="preserve">
+    <value>No strokes painted</value>
+  </data>
+  <data name="MainExposureActiveStatus" xml:space="preserve">
+    <value>Paint on the image. Enter adds strokes to edit history; Esc cancels.</value>
+  </data>
+  <data name="MainExposureInactiveStatus" xml:space="preserve">
+    <value>Turn on exposure brush, then paint dodge or burn strokes without changing the source file.</value>
+  </data>
+  <data name="MainExposureBurnActive" xml:space="preserve">
+    <value>Burn mode selected. Paint to darken local areas.</value>
+  </data>
+  <data name="MainExposureBurnInactive" xml:space="preserve">
+    <value>Burn mode selected. Turn on exposure brush to paint.</value>
+  </data>
+  <data name="MainExposureDodgeActive" xml:space="preserve">
+    <value>Dodge mode selected. Paint to brighten local areas.</value>
+  </data>
+  <data name="MainExposureDodgeInactive" xml:space="preserve">
+    <value>Dodge mode selected. Turn on exposure brush to paint.</value>
+  </data>
+  <data name="MainRedEyeOn" xml:space="preserve">
+    <value>Red-eye on</value>
+  </data>
+  <data name="MainRedEyeOff" xml:space="preserve">
+    <value>Red-eye off</value>
+  </data>
+  <data name="MainRedEyeActiveHelp" xml:space="preserve">
+    <value>Click or paint over red pupils. Enter applies the correction; Esc cancels.</value>
+  </data>
+  <data name="MainRedEyeInactiveHelp" xml:space="preserve">
+    <value>Non-destructive red-eye correction for Save a copy exports.</value>
+  </data>
+  <data name="MainRedEyeNoMarks" xml:space="preserve">
+    <value>No pupils marked</value>
+  </data>
+  <data name="MainRedEyeActiveStatus" xml:space="preserve">
+    <value>Click or drag over red pupils. Enter adds corrections to edit history; Esc cancels.</value>
+  </data>
+  <data name="MainRedEyeInactiveStatus" xml:space="preserve">
+    <value>Turn on red-eye correction, then mark red pupils without changing the source file.</value>
+  </data>
+  <data name="MainRetouchOn" xml:space="preserve">
+    <value>Retouch on</value>
+  </data>
+  <data name="MainRetouchOff" xml:space="preserve">
+    <value>Retouch off</value>
+  </data>
+  <data name="MainRetouchActiveHelp" xml:space="preserve">
+    <value>Alt-click picks a source. Drag paints clone or healing strokes.</value>
+  </data>
+  <data name="MainRetouchInactiveHelp" xml:space="preserve">
+    <value>Non-destructive clone stamp and healing brush for Save a copy exports.</value>
+  </data>
+  <data name="MainRetouchHealingBrush" xml:space="preserve">
+    <value>Healing brush</value>
+  </data>
+  <data name="MainRetouchCloneStamp" xml:space="preserve">
+    <value>Clone stamp</value>
+  </data>
+  <data name="MainRetouchNoStrokes" xml:space="preserve">
+    <value>No retouch strokes</value>
+  </data>
+  <data name="MainRetouchNoSource" xml:space="preserve">
+    <value>No source selected</value>
+  </data>
+  <data name="MainRetouchActiveWithSource" xml:space="preserve">
+    <value>Paint over the target area. Alt-click picks a new source; Enter applies.</value>
+  </data>
+  <data name="MainRetouchActiveNoSource" xml:space="preserve">
+    <value>Alt-click or click once to pick a source, then paint the target area.</value>
+  </data>
+  <data name="MainRetouchInactiveStatus" xml:space="preserve">
+    <value>Turn on retouch, pick a source, then paint clone or healing strokes.</value>
+  </data>
+  <data name="MainRetouchSourceClearedStatus" xml:space="preserve">
+    <value>Source cleared. Alt-click or click once to pick a new source.</value>
+  </data>
+  <data name="MainRetouchHealActive" xml:space="preserve">
+    <value>Healing brush selected. Alt-click a clean source, then paint the target.</value>
+  </data>
+  <data name="MainRetouchHealInactive" xml:space="preserve">
+    <value>Healing brush selected. Turn on retouch to paint.</value>
+  </data>
+  <data name="MainRetouchCloneActive" xml:space="preserve">
+    <value>Clone stamp selected. Alt-click a source, then paint the target.</value>
+  </data>
+  <data name="MainRetouchCloneInactive" xml:space="preserve">
+    <value>Clone stamp selected. Turn on retouch to paint.</value>
+  </data>
+  <data name="MainInpaintActiveWithMask" xml:space="preserve">
+    <value>Paint to add mask regions. Enter or Apply runs AI repair; Esc cancels.</value>
+  </data>
+  <data name="MainInpaintActiveNoMask" xml:space="preserve">
+    <value>Paint over areas to repair. The AI model fills painted regions from surrounding content.</value>
+  </data>
+  <data name="MainRenameUnsaved" xml:space="preserve">
+    <value>Unsaved changes</value>
+  </data>
+  <data name="MainRenameSaved" xml:space="preserve">
+    <value>Saved</value>
+  </data>
+  <data name="MainRenameConflict" xml:space="preserve">
+    <value>Saved with safe suffix</value>
+  </data>
+  <data name="MainRenameError" xml:space="preserve">
+    <value>Needs attention</value>
+  </data>
+  <data name="MainRenameCurrent" xml:space="preserve">
+    <value>Name is current</value>
+  </data>
+  <data name="MainRenameOpenImage" xml:space="preserve">
+    <value>Open an image to rename</value>
+  </data>
+  <data name="MainExtensionUnlockedHelp" xml:space="preserve">
+    <value>Extension changes rename the file but do not convert image format.</value>
+  </data>
+  <data name="MainExtensionLockedHelp" xml:space="preserve">
+    <value>Unlock only if you need to rename the file extension.</value>
+  </data>
+  <data name="MainRenameUnsupportedExt" xml:space="preserve">
+    <value>Choose a supported Images extension</value>
+  </data>
+  <data name="MainRenameUndoFailed" xml:space="preserve">
+    <value>Cannot undo &#x2014; file no longer exists at that path</value>
+  </data>
+  <data name="MainGalleryCloseTooltip" xml:space="preserve">
+    <value>Close gallery (G)</value>
+  </data>
+  <data name="MainGalleryOpenTooltip" xml:space="preserve">
+    <value>Open gallery (G)</value>
+  </data>
+  <data name="MainGalleryFilterTooltip" xml:space="preserve">
+    <value>Filter by name/path or use smart filters such as format:png, orientation:landscape, size:large, date:week, duplicate:yes, rating:5, tag:portrait, or palette:blue.</value>
+  </data>
+  <data name="MainFilmstripHideTooltip" xml:space="preserve">
+    <value>Hide filmstrip (T)</value>
+  </data>
+  <data name="MainFilmstripShowTooltip" xml:space="preserve">
+    <value>Show filmstrip (T)</value>
+  </data>
+  <data name="MainMetadataHudHide" xml:space="preserve">
+    <value>Hide metadata HUD (I)</value>
+  </data>
+  <data name="MainMetadataHudShow" xml:space="preserve">
+    <value>Show metadata HUD (I)</value>
+  </data>
+  <data name="MainReviewOn" xml:space="preserve">
+    <value>Review on</value>
+  </data>
+  <data name="MainReviewOff" xml:space="preserve">
+    <value>Review off</value>
+  </data>
+  <data name="MainSecondaryThumbnailFailure" xml:space="preserve">
+    <value>Some thumbnails could not be shown</value>
+  </data>
+  <data name="MainSecondaryFileTypeNotSupported" xml:space="preserve">
+    <value>File type not supported</value>
+  </data>
+  <data name="MainSecondaryFileGone" xml:space="preserve">
+    <value>File no longer exists</value>
+  </data>
+  <data name="MainSecondaryFileGoneDetail" xml:space="preserve">
+    <value>The file may have been moved, renamed, deleted, or disconnected.</value>
+  </data>
+  <data name="MainSecondaryRecentFolderRemoved" xml:space="preserve">
+    <value>Recent folder removed</value>
+  </data>
+  <data name="MainSecondaryRecentFolderRemovedDetail" xml:space="preserve">
+    <value>It was removed from the list because the folder no longer exists.</value>
+  </data>
+  <data name="MainSecondaryNoSupportedImages" xml:space="preserve">
+    <value>No supported images in this folder</value>
+  </data>
+  <data name="MainSecondaryFolderUnreachable" xml:space="preserve">
+    <value>Folder unreachable</value>
+  </data>
+  <data name="MainSecondaryFolderUnreachableDetail" xml:space="preserve">
+    <value>Check permissions or reconnect the drive, then try again.</value>
+  </data>
+  <data name="MainSecondaryArchiveGone" xml:space="preserve">
+    <value>Archive no longer available</value>
+  </data>
+  <data name="MainSecondaryArchiveGoneDetail" xml:space="preserve">
+    <value>It was removed from book history because the file no longer exists.</value>
+  </data>
+  <data name="MainSecondaryClipboardNotSupported" xml:space="preserve">
+    <value>Clipboard file not supported</value>
+  </data>
+  <data name="MainSecondaryClipboardNotSupportedDetail" xml:space="preserve">
+    <value>The clipboard contains files, but none are formats Images can open.</value>
+  </data>
+  <data name="MainSecondaryClipboardNoImage" xml:space="preserve">
+    <value>Clipboard has no image</value>
+  </data>
+  <data name="MainSecondaryClipboardNoImageDetail" xml:space="preserve">
+    <value>Copy an image, screenshot, or supported image file, then paste again.</value>
+  </data>
+  <data name="MainSecondaryClipboardUnreadable" xml:space="preserve">
+    <value>Clipboard image could not be read</value>
+  </data>
+  <data name="MainSecondaryClipboardUnreadableDetail" xml:space="preserve">
+    <value>Try copying the image again from the source app.</value>
+  </data>
+  <data name="MainSecondaryClipboardSaveFailed" xml:space="preserve">
+    <value>Clipboard paste could not be saved</value>
+  </data>
+  <data name="MainSecondaryClipboardSaveFailedDetail" xml:space="preserve">
+    <value>Images could not create a temporary local copy. Open Diagnostics to inspect storage.</value>
+  </data>
+  <data name="MainSecondaryEmailFailed" xml:space="preserve">
+    <value>Email draft failed</value>
+  </data>
+  <data name="MainSecondaryCompareUnavailable" xml:space="preserve">
+    <value>Compare image unavailable</value>
+  </data>
+  <data name="MainSecondaryTransferSourceDetail" xml:space="preserve">
+    <value>The image could not be copied or moved because it was removed from disk.</value>
+  </data>
+  <data name="MainSecondaryTransferFolderGone" xml:space="preserve">
+    <value>Transfer folder unavailable</value>
+  </data>
+  <data name="MainSecondaryTransferFolderGoneDetail" xml:space="preserve">
+    <value>It was removed from the recent destination list because the folder no longer exists.</value>
+  </data>
+  <data name="MainSecondaryTransferNotSupportedDetail" xml:space="preserve">
+    <value>Only files Images can open can be copied or moved from this viewer.</value>
+  </data>
+  <data name="MainSecondaryCopyFailed" xml:space="preserve">
+    <value>Copy failed</value>
+  </data>
+  <data name="MainSecondaryMoveFailed" xml:space="preserve">
+    <value>Move failed</value>
+  </data>
+  <data name="MainSecondaryCouldNotOpen" xml:space="preserve">
+    <value>Could not open file</value>
+  </data>
+  <data name="MainToastOverlayOn" xml:space="preserve">
+    <value>Overlay mode on</value>
+  </data>
+  <data name="MainToastOverlayOff" xml:space="preserve">
+    <value>Overlay mode off</value>
+  </data>
+  <data name="MainToastClickThroughOn" xml:space="preserve">
+    <value>Click-through overlay on</value>
+  </data>
+  <data name="MainToastClickThroughOff" xml:space="preserve">
+    <value>Click-through overlay off</value>
+  </data>
+  <data name="MainToastCompareOverlayOn" xml:space="preserve">
+    <value>Compare overlay on</value>
+  </data>
+  <data name="MainToastCompare2UpOn" xml:space="preserve">
+    <value>Compare 2-up on</value>
+  </data>
+  <data name="MainToastNearestNeighborOn" xml:space="preserve">
+    <value>Nearest-neighbor preview on</value>
+  </data>
+  <data name="MainToastHighQualityOn" xml:space="preserve">
+    <value>High-quality preview on</value>
+  </data>
+  <data name="MainToastCleanScanOn" xml:space="preserve">
+    <value>Clean scan preview on</value>
+  </data>
+  <data name="MainToastCleanScanOff" xml:space="preserve">
+    <value>Clean scan preview off</value>
+  </data>
+  <data name="MainToastTwoPageOn" xml:space="preserve">
+    <value>Two-page spreads on</value>
+  </data>
+  <data name="MainToastTwoPageOff" xml:space="preserve">
+    <value>Two-page spreads off</value>
+  </data>
+  <data name="MainToastMetadataHudOn" xml:space="preserve">
+    <value>Metadata HUD on</value>
+  </data>
+  <data name="MainToastMetadataHudOff" xml:space="preserve">
+    <value>Metadata HUD off</value>
+  </data>
+  <data name="MainToastReviewModeOn" xml:space="preserve">
+    <value>Review mode on</value>
+  </data>
+  <data name="MainToastReviewModeOff" xml:space="preserve">
+    <value>Review mode off</value>
+  </data>
+  <data name="MainToastFilmstripShown" xml:space="preserve">
+    <value>Filmstrip shown</value>
+  </data>
+  <data name="MainToastFilmstripHidden" xml:space="preserve">
+    <value>Filmstrip hidden</value>
+  </data>
+  <data name="MainToastGalleryClosed" xml:space="preserve">
+    <value>Gallery closed</value>
+  </data>
+  <data name="MainToastGalleryOpenFolder" xml:space="preserve">
+    <value>Open a folder with images to use Gallery</value>
+  </data>
+  <data name="MainToastGalleryOpen" xml:space="preserve">
+    <value>Gallery open</value>
+  </data>
+  <data name="MainToastReviewUndone" xml:space="preserve">
+    <value>Review change undone</value>
+  </data>
+  <data name="MainToastDeleteCanceled" xml:space="preserve">
+    <value>Delete canceled</value>
+  </data>
+  <data name="MainToastRotationCanceled" xml:space="preserve">
+    <value>Rotation canceled</value>
+  </data>
+  <data name="MainToastCompareModeOn" xml:space="preserve">
+    <value>Compare mode on</value>
+  </data>
+  <data name="MainToastCompareModeOff" xml:space="preserve">
+    <value>Compare mode off</value>
+  </data>
+  <data name="MainToastCompareSwapped" xml:space="preserve">
+    <value>Compare A/B swapped</value>
+  </data>
+  <data name="MainToastCompareSwapFailed" xml:space="preserve">
+    <value>Compare swap failed</value>
+  </data>
+  <data name="MainToastCompareUnavailable" xml:space="preserve">
+    <value>Compare image unavailable</value>
+  </data>
+  <data name="MainToastOpenBeforeCompare" xml:space="preserve">
+    <value>Open an image before comparing</value>
+  </data>
+  <data name="MainToastChooseTwoImages" xml:space="preserve">
+    <value>Choose two images to compare</value>
+  </data>
+  <data name="MainToastNoNextCompare" xml:space="preserve">
+    <value>No next image to compare</value>
+  </data>
+  <data name="MainToastCompareOpenFailed" xml:space="preserve">
+    <value>Could not open compare primary</value>
+  </data>
+  <data name="MainToastClickThroughDisabled" xml:space="preserve">
+    <value>Click-through disabled: exit hotkey unavailable</value>
+  </data>
+  <data name="MainToastCropCanceled" xml:space="preserve">
+    <value>Crop canceled</value>
+  </data>
+  <data name="MainToastCropFailed" xml:space="preserve">
+    <value>Crop failed</value>
+  </data>
+  <data name="MainToastAdjustmentUnavailable" xml:space="preserve">
+    <value>Adjustment failed: image is no longer available</value>
+  </data>
+  <data name="MainToastEffectsUnavailable" xml:space="preserve">
+    <value>Effects failed: image is no longer available</value>
+  </data>
+  <data name="MainToastAnnotationsUnavailable" xml:space="preserve">
+    <value>Annotations failed: image is no longer available</value>
+  </data>
+  <data name="MainToastPerspectiveUnavailable" xml:space="preserve">
+    <value>Perspective failed: image is no longer available</value>
+  </data>
+  <data name="MainToastExposureBrushAdded" xml:space="preserve">
+    <value>Exposure brush added to edit history</value>
+  </data>
+  <data name="MainToastExposureBrushFailed" xml:space="preserve">
+    <value>Exposure brush failed</value>
+  </data>
+  <data name="MainToastExposureBrushCanceled" xml:space="preserve">
+    <value>Exposure brush canceled</value>
+  </data>
+  <data name="MainToastExposureBrushCleared" xml:space="preserve">
+    <value>Exposure brush strokes cleared</value>
+  </data>
+  <data name="MainToastRedEyeAdded" xml:space="preserve">
+    <value>Red-eye correction added to edit history</value>
+  </data>
+  <data name="MainToastRedEyeFailed" xml:space="preserve">
+    <value>Red-eye correction failed</value>
+  </data>
+  <data name="MainToastRedEyeCanceled" xml:space="preserve">
+    <value>Red-eye correction canceled</value>
+  </data>
+  <data name="MainToastRedEyeCleared" xml:space="preserve">
+    <value>Red-eye correction marks cleared</value>
+  </data>
+  <data name="MainToastRetouchAdded" xml:space="preserve">
+    <value>Retouch added to edit history</value>
+  </data>
+  <data name="MainToastRetouchFailed" xml:space="preserve">
+    <value>Retouch failed</value>
+  </data>
+  <data name="MainToastRetouchCanceled" xml:space="preserve">
+    <value>Retouch canceled</value>
+  </data>
+  <data name="MainToastRetouchStrokesCleared" xml:space="preserve">
+    <value>Retouch strokes cleared</value>
+  </data>
+  <data name="MainToastRetouchSourceCleared" xml:space="preserve">
+    <value>Retouch source cleared</value>
+  </data>
+  <data name="MainToastRetouchCleared" xml:space="preserve">
+    <value>Retouch cleared</value>
+  </data>
+  <data name="MainToastNoLamaModel" xml:space="preserve">
+    <value>No LaMa model imported &#x2014; open Model Manager first</value>
+  </data>
+  <data name="MainToastAiRepaintMode" xml:space="preserve">
+    <value>AI repair mode &#x2014; paint areas to fill</value>
+  </data>
+  <data name="MainToastAiRepairRunning" xml:space="preserve">
+    <value>Running AI repair...</value>
+  </data>
+  <data name="MainToastAiRepairApplied" xml:space="preserve">
+    <value>AI repair applied</value>
+  </data>
+  <data name="MainToastAiRepairCanceled" xml:space="preserve">
+    <value>AI repair canceled</value>
+  </data>
+  <data name="MainToastSelectionCanceled" xml:space="preserve">
+    <value>Selection canceled</value>
+  </data>
+  <data name="MainToastSelectionCopyFailed" xml:space="preserve">
+    <value>Selection copy failed</value>
+  </data>
+  <data name="MainToastCopiedPath" xml:space="preserve">
+    <value>Copied path</value>
+  </data>
+  <data name="MainToastCopiedImage" xml:space="preserve">
+    <value>Copied image</value>
+  </data>
+  <data name="MainToastCopiedImageAndPath" xml:space="preserve">
+    <value>Copied image and path</value>
+  </data>
+  <data name="MainToastReloaded" xml:space="preserve">
+    <value>Reloaded</value>
+  </data>
+  <data name="MainToastFileNoLongerExists" xml:space="preserve">
+    <value>File no longer exists</value>
+  </data>
+  <data name="MainToastFolderNoLongerExists" xml:space="preserve">
+    <value>Folder no longer exists</value>
+  </data>
+  <data name="MainToastFolderUnreachable" xml:space="preserve">
+    <value>Folder unreachable</value>
+  </data>
+  <data name="MainToastArchiveNoLongerExists" xml:space="preserve">
+    <value>Archive no longer exists</value>
+  </data>
+  <data name="MainToastEmailOpened" xml:space="preserve">
+    <value>Email draft opened</value>
+  </data>
+  <data name="MainToastSentToPrinter" xml:space="preserve">
+    <value>Sent to printer</value>
+  </data>
+  <data name="MainToastSentToDefaultPrinter" xml:space="preserve">
+    <value>Sent to default printer</value>
+  </data>
+  <data name="MainToastNoGpsData" xml:space="preserve">
+    <value>No GPS data found in this file</value>
+  </data>
+  <data name="MainToastFolderRefreshed" xml:space="preserve">
+    <value>Folder refreshed</value>
+  </data>
+  <data name="MainToastFileNotFound" xml:space="preserve">
+    <value>File not found</value>
+  </data>
+  <data name="MainToastAccessDenied" xml:space="preserve">
+    <value>Access denied</value>
+  </data>
+  <data name="MainToastImageTooLarge" xml:space="preserve">
+    <value>Image too large for available memory</value>
+  </data>
+  <data name="MainToastCouldNotDecode" xml:space="preserve">
+    <value>Could not decode this file</value>
+  </data>
+  <data name="MainToastGhostscriptNeeded" xml:space="preserve">
+    <value>Document preview needs Ghostscript</value>
+  </data>
+  <data name="MainToastFilenameInvalid" xml:space="preserve">
+    <value>Filename needs at least one valid character</value>
+  </data>
+  <data name="MainToastTransferUnsupported" xml:space="preserve">
+    <value>Transfer failed: unsupported file type</value>
+  </data>
+  <data name="MainToastTransferFolderGone" xml:space="preserve">
+    <value>Transfer folder no longer exists</value>
+  </data>
+  <data name="MainToastAutoEnhanceAdded" xml:space="preserve">
+    <value>Auto Enhance added to edit history</value>
+  </data>
+  <data name="MainToastAdjustmentAdded" xml:space="preserve">
+    <value>Adjustment added to edit history</value>
+  </data>
+  <data name="MainToastEffectsAdded" xml:space="preserve">
+    <value>Effects added to edit history</value>
+  </data>
+  <data name="MainToastAnnotationsAdded" xml:space="preserve">
+    <value>Annotations added to edit history</value>
+  </data>
+  <data name="MainToastPerspectiveAdded" xml:space="preserve">
+    <value>Perspective correction added to edit history</value>
+  </data>
+  <data name="MainToastRepairFailed" xml:space="preserve">
+    <value>Repair failed</value>
+  </data>
+  <data name="MainDialogOpenImage" xml:space="preserve">
+    <value>Open image or preview</value>
+  </data>
+  <data name="MainDialogCompareWith" xml:space="preserve">
+    <value>Compare with image</value>
+  </data>
+  <data name="MainDialogExportFrame" xml:space="preserve">
+    <value>Export animation frame</value>
+  </data>
+  <data name="MainDialogSaveCopy" xml:space="preserve">
+    <value>Save a copy</value>
+  </data>
+  <data name="MainDialogCopyToFolder" xml:space="preserve">
+    <value>Copy image to folder</value>
+  </data>
+  <data name="MainDialogMoveToFolder" xml:space="preserve">
+    <value>Move image to folder</value>
+  </data>
+  <data name="MainOpOpeningFile" xml:space="preserve">
+    <value>Opening file</value>
+  </data>
+  <data name="MainOpOpeningArchive" xml:space="preserve">
+    <value>Opening archive book</value>
+  </data>
+  <data name="MainOpLoadingNext" xml:space="preserve">
+    <value>Loading next image</value>
+  </data>
+  <data name="MainOpLoadingPrev" xml:space="preserve">
+    <value>Loading previous image</value>
+  </data>
+  <data name="MainOpLoadingFirst" xml:space="preserve">
+    <value>Loading first image</value>
+  </data>
+  <data name="MainOpLoadingLast" xml:space="preserve">
+    <value>Loading last image</value>
+  </data>
+  <data name="MainOpLoadingPage" xml:space="preserve">
+    <value>Loading page</value>
+  </data>
+  <data name="MainOpLoadingNextPage" xml:space="preserve">
+    <value>Loading next page</value>
+  </data>
+  <data name="MainOpLoadingPrevPage" xml:space="preserve">
+    <value>Loading previous page</value>
+  </data>
+  <data name="MainOpLoadingFirstPage" xml:space="preserve">
+    <value>Loading first page</value>
+  </data>
+  <data name="MainOpLoadingLastPage" xml:space="preserve">
+    <value>Loading last page</value>
+  </data>
+  <data name="MainOpApplyingRotation" xml:space="preserve">
+    <value>Applying rotation</value>
+  </data>
+  <data name="MainOpApplyingCrop" xml:space="preserve">
+    <value>Applying crop</value>
+  </data>
+  <data name="MainOpExportingFrame" xml:space="preserve">
+    <value>Exporting frame</value>
+  </data>
+  <data name="MainOpReloadingImage" xml:space="preserve">
+    <value>Reloading image</value>
+  </data>
+  <data name="MainOpReloadingDetail" xml:space="preserve">
+    <value>Refreshing decoder output and metadata.</value>
+  </data>
+  <data name="MainOpRemovingLocation" xml:space="preserve">
+    <value>Removing location data</value>
+  </data>
+  <data name="MainOpSavingCopy" xml:space="preserve">
+    <value>Saving copy</value>
+  </data>
+  <data name="MainDecoderUnavailable" xml:space="preserve">
+    <value>Unavailable</value>
+  </data>
+  <data name="MainUnexpectedError" xml:space="preserve">
+    <value>Unexpected error</value>
+  </data>
+  <data name="MainCancelLeaveUnchanged" xml:space="preserve">
+    <value>Cancel: leave the file unchanged.</value>
+  </data>
+  <data name="MainMovedImage" xml:space="preserve">
+    <value>Moved image</value>
+  </data>
+  <data name="MainSentToRecycleBin" xml:space="preserve">
+    <value>Sent image to Recycle Bin</value>
+  </data>
+  <data name="MainRotationWriteback" xml:space="preserve">
+    <value>Rotation writeback</value>
+  </data>
+  <data name="MainCropWriteback" xml:space="preserve">
+    <value>Crop writeback</value>
+  </data>
+  <data name="MainGpsWriteback" xml:space="preserve">
+    <value>GPS metadata writeback</value>
+  </data>
+  <data name="MainComparePathInvalid" xml:space="preserve">
+    <value>The selected compare path is not valid.</value>
+  </data>
+  <data name="MainCompareFileGone" xml:space="preserve">
+    <value>The selected compare file no longer exists.</value>
+  </data>
+  <data name="MainCompareSameFile" xml:space="preserve">
+    <value>Choose a different image for the B side.</value>
+  </data>
+  <data name="MainChooseDifferentFilename" xml:space="preserve">
+    <value>Choose a different filename for the copy</value>
+  </data>
+
 </root>

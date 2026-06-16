@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Images.Localization;
 using Images.Services;
 using Microsoft.Extensions.Logging;
 
@@ -495,7 +496,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private int _animationCompletedLoops;
 
     public bool CanStepAnimationFrame => IsAnimated;
-    public string AnimationPlaybackText => IsAnimationPlaying ? "Pause" : "Play";
+    public string AnimationPlaybackText => IsAnimationPlaying ? Strings.MainAnimPause : Strings.MainAnimPlay;
     public string AnimationPlaybackSpeedText => AnimationWorkbenchService.FormatSpeed(AnimationPlaybackSpeed);
     public string SelectedAnimationFrameText => AnimationWorkbenchService.FormatFramePosition(
         CurrentAnimationFrameIndex,
@@ -511,9 +512,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         get
         {
             if (!IsAnimated)
-                return "Open an animated GIF, APNG, or WebP to inspect frames.";
+                return Strings.MainAnimWorkbenchEmpty;
 
-            var state = IsAnimationPlaying ? "Playing" : "Paused";
+            var state = IsAnimationPlaying ? Strings.MainAnimPlay : Strings.MainAnimPause;
             return $"{state} at {AnimationPlaybackSpeedText} · {SelectedAnimationFrameText} · {SelectedAnimationFrameDelayText}";
         }
     }
@@ -547,13 +548,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private string _pageLabel = "Page";
+    private string _pageLabel = Strings.MainPageLabel;
     public string PageLabel
     {
         get => _pageLabel;
         private set
         {
-            if (Set(ref _pageLabel, string.IsNullOrWhiteSpace(value) ? "Page" : value))
+            if (Set(ref _pageLabel, string.IsNullOrWhiteSpace(value) ? Strings.MainPageLabel : value))
             {
                 Raise(nameof(PagePositionText));
             }
@@ -589,18 +590,18 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool IsArchiveBook => CurrentPath is not null && SupportedImageFormats.IsArchive(CurrentPath) && HasMultiplePages;
     public bool CanTurnLeftBookPage => IsArchiveBook && !IsOperationBusy && (ArchiveRightToLeft ? HasNextPage : HasPreviousPage);
     public bool CanTurnRightBookPage => IsArchiveBook && !IsOperationBusy && (ArchiveRightToLeft ? HasPreviousPage : HasNextPage);
-    public string LeftBookPageTurnTooltip => ArchiveRightToLeft ? "Next book page" : "Previous book page";
-    public string RightBookPageTurnTooltip => ArchiveRightToLeft ? "Previous book page" : "Next book page";
-    public string ArchivePageTurnModeText => ArchiveRightToLeft ? "Right-to-left page turns" : "Left-to-right page turns";
+    public string LeftBookPageTurnTooltip => ArchiveRightToLeft ? Strings.MainArchiveNextPage : Strings.MainArchivePrevPage;
+    public string RightBookPageTurnTooltip => ArchiveRightToLeft ? Strings.MainArchivePrevPage : Strings.MainArchiveNextPage;
+    public string ArchivePageTurnModeText => ArchiveRightToLeft ? Strings.MainArchiveRtlTurns : Strings.MainArchiveLtrTurns;
     public string ArchivePageTurnModeHint => ArchiveRightToLeft
-        ? "For manga-style books, the left edge and Left Arrow advance; the right edge goes back."
-        : "For western books, the right edge and Right Arrow advance; the left edge goes back.";
-    public string ArchiveOldScanFilterText => ArchiveOldScanFilterEnabled ? "Clean old scans on" : "Clean old scans";
-    public string ArchiveOldScanFilterHint => "Preview-only: converts archive pages to high-contrast grayscale. The archive file is not changed.";
-    public string ArchiveSpreadModeText => ArchiveSpreadModeEnabled ? "Two-page spreads on" : "Two-page spreads";
+        ? Strings.MainArchiveRtlHint
+        : Strings.MainArchiveLtrHint;
+    public string ArchiveOldScanFilterText => ArchiveOldScanFilterEnabled ? Strings.MainArchiveCleanScansOn : Strings.MainArchiveCleanScans;
+    public string ArchiveOldScanFilterHint => Strings.MainArchiveCleanScansHint;
+    public string ArchiveSpreadModeText => ArchiveSpreadModeEnabled ? Strings.MainArchiveSpreadsOn : Strings.MainArchiveSpreads;
     public string ArchiveSpreadModeHint => ArchiveRightToLeft
-        ? "Pairs pages side by side for reading, with the next page on the left in right-to-left mode."
-        : "Pairs pages side by side for reading, keeping explicit covers as single pages.";
+        ? Strings.MainArchiveSpreadHintRtl
+        : Strings.MainArchiveSpreadHintLtr;
     public string CurrentArchiveProgressText => IsArchiveBook
         ? $"Reading {Path.GetFileName(CurrentPath)} · {PagePositionText}"
         : "";
@@ -612,7 +613,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (!HasMultiplePages || IsOperationBusy) return;
             var target = Math.Clamp(value, 1, PageCount) - 1;
             if (target == PageIndex) return;
-            _ = GoToPageAsync(target, "Loading page");
+            _ = GoToPageAsync(target, Strings.MainOpLoadingPage);
         }
     }
 
@@ -792,13 +793,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             || !string.IsNullOrWhiteSpace(SecondaryStatusDetail);
 
     public string FirstRunPrivacyText => _settings.GetBool(Keys.UpdateCheckEnabled, false)
-        ? "Automatic update checks are enabled. Image files stay local; release checks only contact GitHub."
-        : "No telemetry and no image uploads. Automatic update checks are off until you enable them.";
+        ? Strings.MainFirstRunPrivacyOn
+        : Strings.MainFirstRunPrivacyOff;
 
     public string FirstRunFormatStatusText => CodecCapabilityService.BuildOverviewText();
     public string FirstRunOcrStatusText => OcrCapabilityService.BuildOverviewText();
     public string FirstRunDocumentStatusText => CodecCapabilityService.BuildDocumentStatusText();
-    public string FirstRunRecoveryText => "Settings manages privacy and viewer defaults. Diagnostics shows codec, OCR, log, and storage status.";
+    public string FirstRunRecoveryText => Strings.MainFirstRunRecovery;
 
     // First-run gesture hint. Flipped true exactly once — the first time an image successfully
     // lands in the viewport. The view animates the pill in, then fades it out after 2.4 s.
@@ -873,7 +874,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             }
 
             RaiseOverlayState();
-            Toast(value ? "Overlay mode on" : "Overlay mode off");
+            Toast(value ? Strings.MainToastOverlayOn : Strings.MainToastOverlayOff);
         }
     }
 
@@ -891,7 +892,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
             Raise(nameof(OverlayClickThroughText));
             Raise(nameof(OverlayStatusText));
-            Toast(value ? "Click-through overlay on" : "Click-through overlay off");
+            Toast(value ? Strings.MainToastClickThroughOn : Strings.MainToastClickThroughOff);
         }
     }
 
@@ -914,22 +915,22 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool OverlayExitHotKeyAvailable => _overlayExitHotKeyAvailable;
     public bool CanUseOverlayMode => CurrentImage is not null && !IsTilePyramidActive && !IsOperationBusy && !IsPeekMode && !IsCompareMode;
     public bool ShowOverlayBanner => IsPinnedOverlayMode;
-    public string OverlayModeText => IsPinnedOverlayMode ? "Overlay on" : "Overlay off";
-    public string OverlayToggleText => IsPinnedOverlayMode ? "Turn off" : "Turn on";
-    public string OverlayClickThroughText => IsOverlayClickThrough ? "Click-through on" : "Click-through off";
+    public string OverlayModeText => IsPinnedOverlayMode ? Strings.MainOverlayOn : Strings.MainOverlayOff;
+    public string OverlayToggleText => IsPinnedOverlayMode ? Strings.MainOverlayTurnOff : Strings.MainOverlayTurnOn;
+    public string OverlayClickThroughText => IsOverlayClickThrough ? Strings.MainOverlayClickThroughOn : Strings.MainOverlayClickThroughOff;
     public string OverlayOpacityText => $"{OverlayOpacity:P0}";
     public string OverlayExitText => OverlayExitHotKeyAvailable
         ? $"{OverlayWindowService.ExitHotKeyText} exits overlay"
-        : "Use Exit overlay, the context menu, or the taskbar close command.";
+        : Strings.MainOverlayExitNoHotkey;
     public string OverlayStatusText
     {
         get
         {
             if (!IsPinnedOverlayMode)
-                return "Pin the current image above other windows for tracing or visual comparison.";
+                return Strings.MainOverlayStatusIdle;
 
             if (!OverlayExitHotKeyAvailable)
-                return "Overlay is pinned. Click-through is disabled because the global exit hotkey could not register.";
+                return Strings.MainOverlayStatusNoHotkey;
 
             return IsOverlayClickThrough
                 ? $"Click-through is active. Use {OverlayWindowService.ExitHotKeyText} or the taskbar close command to exit."
@@ -987,7 +988,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
             RaiseCompareState();
             if (IsCompareMode)
-                Toast(value ? "Compare overlay on" : "Compare 2-up on");
+                Toast(value ? Strings.MainToastCompareOverlayOn : Strings.MainToastCompare2UpOn);
         }
     }
 
@@ -1007,20 +1008,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool CanStartCompareWithNext => CanUseCompareMode && TryGetNextComparePath() is not null;
     public bool CanSwapComparePair => IsCompareMode && CurrentPath is not null && ComparePath is not null && File.Exists(ComparePath);
     public bool ShowCompareMode => IsCompareMode && CurrentImage is not null && !IsTilePyramidActive && CompareImage is not null && !IsPeekMode;
-    public string CompareModeText => IsCompareMode ? "Compare on" : "Compare with next";
-    public string CompareLayoutText => IsCompareOverlayMode ? "Overlay" : "2-up";
-    public string CompareLayoutToggleText => IsCompareOverlayMode ? "2-up" : "Overlay";
+    public string CompareModeText => IsCompareMode ? Strings.MainCompareOn : Strings.MainCompareWithNext;
+    public string CompareLayoutText => IsCompareOverlayMode ? Strings.MainCompareOverlay : Strings.MainCompare2Up;
+    public string CompareLayoutToggleText => IsCompareOverlayMode ? Strings.MainCompare2Up : Strings.MainCompareOverlay;
     public string CompareOverlayOpacityText => $"{CompareOverlayOpacity:P0}";
-    public string ComparePrimaryFileName => CurrentPath is null ? "A" : Path.GetFileName(CurrentPath);
-    public string CompareSecondaryFileName => ComparePath is null ? "B" : Path.GetFileName(ComparePath);
+    public string ComparePrimaryFileName => CurrentPath is null ? Strings.MainComparePrimaryDefault : Path.GetFileName(CurrentPath);
+    public string CompareSecondaryFileName => ComparePath is null ? Strings.MainCompareSecondaryDefault : Path.GetFileName(ComparePath);
     public string CompareStatusText
     {
         get
         {
             if (!IsCompareMode)
                 return CanStartCompareWithNext
-                    ? "Compare the current image with the next file, another local file, or a duplicate cleanup pair."
-                    : "Open at least two images in a folder, or choose another local file to compare.";
+                    ? Strings.MainCompareStatusCanStart
+                    : Strings.MainCompareStatusNeedTwo;
 
             return $"{ComparePrimaryFileName} vs {CompareSecondaryFileName} - {CompareLayoutText} - B opacity {CompareOverlayOpacityText}";
         }
@@ -1032,7 +1033,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     // Window title — filename first (Windows convention), app name second, em-dash separator.
     // Falls back to bare "Images" when no file is open.
     public string WindowTitle =>
-        CurrentPath is null ? "Images" : $"{Path.GetFileName(CurrentPath)} — Images";
+        CurrentPath is null ? Strings.MainWindowTitleDefault : $"{Path.GetFileName(CurrentPath)} \u2014 {Strings.MainWindowTitleDefault}";
 
     private string? _loadErrorMessage;
     public string? LoadErrorMessage
@@ -1047,7 +1048,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private string _loadErrorTitle = "This image couldn't be displayed";
+    private string _loadErrorTitle = Strings.MainLoadErrorDefault;
     public string LoadErrorTitle { get => _loadErrorTitle; private set => Set(ref _loadErrorTitle, value); }
 
     private string _loadErrorHelpText = "";
@@ -1083,9 +1084,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    public string DropOverlayTitle => IsDropAccepted ? "Drop to open file" : "Unsupported file";
+    public string DropOverlayTitle => IsDropAccepted ? Strings.MainDropAcceptedTitle : Strings.MainDropRejectedTitle;
     public string DropOverlayMessage => IsDropAccepted
-        ? "Images will load this file and scan the folder for navigation."
+        ? Strings.MainDropAcceptedMessage
         : SupportedImageFormats.DropUnsupportedMessage;
 
     private int _pixelWidth;
@@ -1151,7 +1152,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 ClearExposureBrushStrokes(showToast: false);
                 ClearRedEyeCorrectionMarks(showToast: false);
                 ClearRetouchState(showToast: false);
-                InspectorStatusText = "Move over the image to sample pixels. Click to hold a sample; Ctrl+click copies it. Shift-drag measures.";
+                InspectorStatusText = Strings.MainInspectorReady;
             }
 
             Raise(nameof(InspectorModeText));
@@ -1161,10 +1162,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    public string InspectorModeText => IsInspectorMode ? "Inspector on" : "Inspector off";
+    public string InspectorModeText => IsInspectorMode ? Strings.MainInspectorOn : Strings.MainInspectorOff;
     public string InspectorModeHelpText => IsInspectorMode
-        ? "Sampling is active. Shift-drag measures a rectangle."
-        : "Turn on Inspector to read pixel color and coordinates.";
+        ? Strings.MainInspectorActiveHelp
+        : Strings.MainInspectorInactiveHelp;
 
     private bool _inspectorNearestNeighborPreview;
     public bool InspectorNearestNeighborPreview
@@ -1173,14 +1174,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         set
         {
             if (Set(ref _inspectorNearestNeighborPreview, value))
-                Toast(value ? "Nearest-neighbor preview on" : "High-quality preview on");
+                Toast(value ? Strings.MainToastNearestNeighborOn : Strings.MainToastHighQualityOn);
         }
     }
 
     private PixelSample? _inspectorSample;
     private PixelSelection? _inspectorSelection;
 
-    private string _inspectorStatusText = "Turn on Inspector to sample pixel color, coordinates, and dimensions.";
+    private string _inspectorStatusText = Strings.MainInspectorDefault;
     public string InspectorStatusText
     {
         get => _inspectorStatusText;
@@ -1189,14 +1190,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public bool HasInspectorSample => _inspectorSample is not null;
     public bool HasInspectorSelection => _inspectorSelection is not null;
-    public string InspectorCoordinateText => _inspectorSample?.CoordinateText ?? "No pixel selected";
+    public string InspectorCoordinateText => _inspectorSample?.CoordinateText ?? Strings.MainInspectorNoPixel;
     public string InspectorHexText => _inspectorSample?.Hex ?? "#------";
     public string InspectorRgbText => _inspectorSample?.Rgb ?? "RGB --, --, --";
     public string InspectorHsvText => _inspectorSample?.Hsv ?? "HSV --, --%, --%";
     public string InspectorAlphaText => _inspectorSample?.Alpha ?? "A --";
     public string InspectorSelectionText => _inspectorSelection.HasValue
         ? _inspectorSelection.Value.DisplayText
-        : "Shift-drag to measure";
+        : Strings.MainInspectorShiftDrag;
 
     private bool _isSelectionMode;
     public bool IsSelectionMode
@@ -1219,11 +1220,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 ClearExposureBrushStrokes(showToast: false);
                 ClearRedEyeCorrectionMarks(showToast: false);
                 ClearRetouchState(showToast: false);
-                SelectionStatusText = "Selection mode is ready. Drag on the image to choose pixels to copy.";
+                SelectionStatusText = Strings.MainSelectReady;
             }
             else if (!HasCanvasSelection)
             {
-                SelectionStatusText = "Selection is paused. Toggle it on to drag a pixel selection.";
+                SelectionStatusText = Strings.MainSelectPaused;
             }
 
             RaiseSelectionModeState();
@@ -1241,7 +1242,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private string _selectionStatusText = "Open an image to select pixels.";
+    private string _selectionStatusText = Strings.MainSelectOpen;
     public string SelectionStatusText
     {
         get => _selectionStatusText;
@@ -1251,11 +1252,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasCanvasSelection => CanvasSelection is { Width: > 0, Height: > 0 };
     public bool CanCopySelection => HasCanvasSelection && CurrentImage is BitmapSource && CanUseSelection;
     public bool ShowSelectionOverlay => IsSelectionMode || HasCanvasSelection;
-    public string SelectionModeText => IsSelectionMode ? "Select on" : "Select off";
+    public string SelectionModeText => IsSelectionMode ? Strings.MainSelectOn : Strings.MainSelectOff;
     public string SelectionModeHelpText => IsSelectionMode
-        ? "Drag a rectangle on the image. Copy places the selected pixels on the clipboard; Esc cancels."
-        : "Select pixels without changing the source file.";
-    public string CanvasSelectionText => CanvasSelection?.DisplayText ?? "No selection";
+        ? Strings.MainSelectActiveHelp
+        : Strings.MainSelectInactiveHelp;
+    public string CanvasSelectionText => CanvasSelection?.DisplayText ?? Strings.MainSelectNoSelection;
 
     private bool _isCropMode;
     public bool IsCropMode
@@ -1278,11 +1279,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 ClearExposureBrushStrokes(showToast: false);
                 ClearRedEyeCorrectionMarks(showToast: false);
                 ClearRetouchState(showToast: false);
-                CropStatusText = "Freehand crop is ready. Drag on the image to choose a crop. Enter or Apply overwrites the file.";
+                CropStatusText = Strings.MainCropReady;
             }
             else if (!HasCropSelection)
             {
-                CropStatusText = "Crop is paused. Toggle it on to drag a crop that overwrites the file.";
+                CropStatusText = Strings.MainCropPaused;
             }
 
             RaiseCropModeState();
@@ -1300,7 +1301,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private string _cropStatusText = "Open an image to start freehand crop mode.";
+    private string _cropStatusText = Strings.MainCropOpen;
     public string CropStatusText
     {
         get => _cropStatusText;
@@ -1308,7 +1309,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     private static string CropUnavailableStatusText =>
-        "Crop is available only for flat raster image files like JPEG, PNG, WebP, TIFF, GIF, BMP, HEIC/AVIF/JXL, and similar bitmap formats.";
+        Strings.MainCropUnavailable;
 
     public IReadOnlyList<CropAspectPreset> CropAspectPresets { get; } = CropSelectionService.AspectPresets;
 
@@ -1356,13 +1357,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool CanApplyCrop => IsCropMode && HasCropSelection && CanUseCrop;
     public bool ShowCropOverlay => IsCropMode || HasCropSelection;
     public bool IsCanvasSelectionMode => IsInspectorMode || IsSelectionMode || IsCropMode || IsExposureBrushMode || IsRedEyeCorrectionMode || IsRetouchMode;
-    public string CropModeText => IsCropMode ? "Crop on" : "Crop off";
+    public string CropModeText => IsCropMode ? Strings.MainCropOn : Strings.MainCropOff;
     public string CropModeHelpText => IsCropMode
-        ? "Freehand crop is active. Drag a rectangle on the image. Enter overwrites the file; Esc cancels."
-        : "Crop starts automatically for normal images; toggle it off when you need canvas pan-only control.";
-    public string CropSelectionText => CropSelection?.DisplayText ?? "No crop selected";
-    public string CropAspectText => EffectiveCropAspectPreset?.Label ?? "Custom ratio needed";
-    public string CropAspectHelpText => EffectiveCropAspectPreset?.Description ?? "Enter positive whole numbers for custom width and height.";
+        ? Strings.MainCropActiveHelp
+        : Strings.MainCropInactiveHelp;
+    public string CropSelectionText => CropSelection?.DisplayText ?? Strings.MainCropNoSelection;
+    public string CropAspectText => EffectiveCropAspectPreset?.Label ?? Strings.MainCropCustomRatio;
+    public string CropAspectHelpText => EffectiveCropAspectPreset?.Description ?? Strings.MainCropCustomHelp;
     public bool ShowCustomCropAspect => SelectedCropAspectPreset.Id.Equals(CropSelectionService.CustomAspectPresetId, StringComparison.OrdinalIgnoreCase);
 
     private bool _isExposureBrushMode;
@@ -1386,7 +1387,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 ClearRedEyeCorrectionMarks(showToast: false);
                 ClearRetouchState(showToast: false);
                 ClearCropSelection();
-                ExposureBrushStatusText = "Paint on the image. Enter adds strokes to edit history; Esc cancels.";
+                ExposureBrushStatusText = Strings.MainExposureActiveStatus;
             }
             else if (!HasExposureBrushStrokes)
             {
@@ -1434,23 +1435,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private string _exposureBrushStatusText = "Turn on exposure brush, then paint dodge or burn strokes without changing the source file.";
+    private string _exposureBrushStatusText = Strings.MainExposureInactiveStatus;
     public string ExposureBrushStatusText
     {
         get => _exposureBrushStatusText;
         private set => Set(ref _exposureBrushStatusText, value);
     }
 
-    public string ExposureBrushModeText => IsExposureBrushMode ? "Exposure brush on" : "Exposure brush off";
+    public string ExposureBrushModeText => IsExposureBrushMode ? Strings.MainExposureOn : Strings.MainExposureOff;
     public string ExposureBrushModeHelpText => IsExposureBrushMode
-        ? "Paint directly on the image. Enter adds strokes to edit history; Esc cancels."
-        : "Non-destructive dodge and burn strokes for Save a copy exports.";
-    public string ExposureBrushToneText => IsExposureBrushBurn ? "Burn" : "Dodge";
+        ? Strings.MainExposureActiveHelp
+        : Strings.MainExposureInactiveHelp;
+    public string ExposureBrushToneText => IsExposureBrushBurn ? Strings.MainExposureBurnText : Strings.MainExposureDodgeText;
     public string ExposureBrushRadiusText => string.Create(CultureInfo.InvariantCulture, $"{ExposureBrushRadius:0} px");
     public string ExposureBrushStrengthText => string.Create(CultureInfo.InvariantCulture, $"{ExposureBrushStrength:0}%");
     public string ExposureBrushStrokeText => HasExposureBrushStrokes
         ? LocalExposureBrushService.CreateSummary(ExposureBrushStrokes.ToList())
-        : "No strokes painted";
+        : Strings.MainExposureNoStrokes;
     public bool HasExposureBrushStrokes => ExposureBrushStrokes.Count > 0;
     public bool CanApplyExposureBrush => IsExposureBrushMode && HasExposureBrushStrokes && CanUseExposureBrush;
     public bool ShowExposureBrushOverlay => IsExposureBrushMode || HasExposureBrushStrokes;
@@ -1477,11 +1478,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 ClearCropSelection();
                 ClearExposureBrushStrokes(showToast: false);
                 ClearRetouchState(showToast: false);
-                RedEyeCorrectionStatusText = "Click or drag over red pupils. Enter adds corrections to edit history; Esc cancels.";
+                RedEyeCorrectionStatusText = Strings.MainRedEyeActiveStatus;
             }
             else if (!HasRedEyeCorrectionMarks)
             {
-                RedEyeCorrectionStatusText = "Turn on red-eye correction, then mark red pupils without changing the source file.";
+                RedEyeCorrectionStatusText = Strings.MainRedEyeInactiveStatus;
             }
 
             RaiseRedEyeCorrectionModeState();
@@ -1526,23 +1527,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private string _redEyeCorrectionStatusText = "Turn on red-eye correction, then mark red pupils without changing the source file.";
+    private string _redEyeCorrectionStatusText = Strings.MainRedEyeInactiveStatus;
     public string RedEyeCorrectionStatusText
     {
         get => _redEyeCorrectionStatusText;
         private set => Set(ref _redEyeCorrectionStatusText, value);
     }
 
-    public string RedEyeCorrectionModeText => IsRedEyeCorrectionMode ? "Red-eye on" : "Red-eye off";
+    public string RedEyeCorrectionModeText => IsRedEyeCorrectionMode ? Strings.MainRedEyeOn : Strings.MainRedEyeOff;
     public string RedEyeCorrectionModeHelpText => IsRedEyeCorrectionMode
-        ? "Click or paint over red pupils. Enter applies the correction; Esc cancels."
-        : "Non-destructive red-eye correction for Save a copy exports.";
+        ? Strings.MainRedEyeActiveHelp
+        : Strings.MainRedEyeInactiveHelp;
     public string RedEyeCorrectionRadiusText => string.Create(CultureInfo.InvariantCulture, $"{RedEyeCorrectionRadius:0} px");
     public string RedEyeCorrectionStrengthText => string.Create(CultureInfo.InvariantCulture, $"{RedEyeCorrectionStrength:0}%");
     public string RedEyeCorrectionThresholdText => string.Create(CultureInfo.InvariantCulture, $"{RedEyeCorrectionThreshold:0}%");
     public string RedEyeCorrectionMarkText => HasRedEyeCorrectionMarks
         ? RedEyeCorrectionService.CreateSummary(RedEyeCorrectionMarks.ToList())
-        : "No pupils marked";
+        : Strings.MainRedEyeNoMarks;
     public bool HasRedEyeCorrectionMarks => RedEyeCorrectionMarks.Count > 0;
     public bool CanApplyRedEyeCorrection => IsRedEyeCorrectionMode && HasRedEyeCorrectionMarks && CanUseRedEyeCorrection;
     public bool ShowRedEyeCorrectionOverlay => IsRedEyeCorrectionMode || HasRedEyeCorrectionMarks;
@@ -1576,7 +1577,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             }
             else if (!HasRetouchStrokes)
             {
-                RetouchStatusText = "Turn on retouch, pick a source, then paint clone or healing strokes.";
+                RetouchStatusText = Strings.MainRetouchInactiveStatus;
             }
 
             RaiseRetouchModeState();
@@ -1591,7 +1592,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasRetouchSource => _retouchSource is not null;
     public string RetouchSourceText => _retouchSource is { } source
         ? $"Source {source.X}, {source.Y}"
-        : "No source selected";
+        : Strings.MainRetouchNoSource;
 
     private double _retouchRadius = 28;
     public double RetouchRadius
@@ -1628,23 +1629,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private string _retouchStatusText = "Turn on retouch, pick a source, then paint clone or healing strokes.";
+    private string _retouchStatusText = Strings.MainRetouchInactiveStatus;
     public string RetouchStatusText
     {
         get => _retouchStatusText;
         private set => Set(ref _retouchStatusText, value);
     }
 
-    public string RetouchModeText => IsRetouchMode ? "Retouch on" : "Retouch off";
+    public string RetouchModeText => IsRetouchMode ? Strings.MainRetouchOn : Strings.MainRetouchOff;
     public string RetouchModeHelpText => IsRetouchMode
-        ? "Alt-click picks a source. Drag paints clone or healing strokes."
-        : "Non-destructive clone stamp and healing brush for Save a copy exports.";
-    public string RetouchBrushModeText => IsRetouchHealing ? "Healing brush" : "Clone stamp";
+        ? Strings.MainRetouchActiveHelp
+        : Strings.MainRetouchInactiveHelp;
+    public string RetouchBrushModeText => IsRetouchHealing ? Strings.MainRetouchHealingBrush : Strings.MainRetouchCloneStamp;
     public string RetouchRadiusText => string.Create(CultureInfo.InvariantCulture, $"{RetouchRadius:0} px");
     public string RetouchStrengthText => string.Create(CultureInfo.InvariantCulture, $"{RetouchStrength:0}%");
     public string RetouchStrokeText => HasRetouchStrokes
         ? RetouchBrushService.CreateSummary(RetouchStrokes.ToList())
-        : "No retouch strokes";
+        : Strings.MainRetouchNoStrokes;
     public bool HasRetouchStrokes => RetouchStrokes.Count > 0;
     public bool CanApplyRetouch => IsRetouchMode && HasRetouchStrokes && CanUseRetouch;
     public bool ShowRetouchOverlay => IsRetouchMode || HasRetouchStrokes;
@@ -1705,8 +1706,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         : $"Extension locked: {Extension}";
 
     public string ExtensionLockHelpText => IsExtensionUnlocked
-        ? "Extension changes rename the file but do not convert image format."
-        : "Unlock only if you need to rename the file extension.";
+        ? Strings.MainExtensionUnlockedHelp
+        : Strings.MainExtensionLockedHelp;
 
     /// <summary>
     /// Preview of what the target name will be after commit — including any " (2)" conflict suffix.
@@ -1719,7 +1720,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             var clean = RenameService.Sanitize(EditableStem);
             if (string.IsNullOrEmpty(clean)) return "";
             if (!RenameService.IsSupportedTargetExtension(Extension, CurrentPath))
-                return "Choose a supported Images extension";
+                return Strings.MainRenameUnsupportedExt;
 
             var target = RenameService.ResolveTargetPath(
                 Path.GetDirectoryName(CurrentPath)!, clean, Extension, CurrentPath);
@@ -1747,12 +1748,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public string RenameStatusText => RenameStatus switch
     {
-        RenameStatusKind.Pending => "Unsaved changes",
-        RenameStatusKind.Saved => "Saved",
-        RenameStatusKind.Conflict => "Saved with safe suffix",
-        RenameStatusKind.Error => "Needs attention",
-        _ when HasImage => "Name is current",
-        _ => "Open an image to rename"
+        RenameStatusKind.Pending => Strings.MainRenameUnsaved,
+        RenameStatusKind.Saved => Strings.MainRenameSaved,
+        RenameStatusKind.Conflict => Strings.MainRenameConflict,
+        RenameStatusKind.Error => Strings.MainRenameError,
+        _ when HasImage => Strings.MainRenameCurrent,
+        _ => Strings.MainRenameOpenImage
     };
 
     // -------------------- Recent folders (V20-02 UI consumer) --------------------
@@ -1818,7 +1819,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (IsArchiveBook && HasDisplayImage && !IsOperationBusy)
             {
                 ReloadCurrentPreservingViewState(resetPreload: false);
-                Toast(value ? "Clean scan preview on" : "Clean scan preview off");
+                Toast(value ? Strings.MainToastCleanScanOn : Strings.MainToastCleanScanOff);
             }
         }
     }
@@ -1838,7 +1839,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (IsArchiveBook && HasDisplayImage && !IsOperationBusy)
             {
                 ReloadCurrentPreservingViewState(resetPreload: false);
-                Toast(value ? "Two-page spreads on" : "Two-page spreads off");
+                Toast(value ? Strings.MainToastTwoPageOn : Strings.MainToastTwoPageOff);
             }
         }
     }
@@ -1881,15 +1882,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool ShowMetadataHud => CanToggleMetadataHud && IsMetadataHudVisible;
 
     public string MetadataHudToggleTooltip => IsMetadataHudVisible
-        ? "Hide metadata HUD (I)"
-        : "Show metadata HUD (I)";
+        ? Strings.MainMetadataHudHide
+        : Strings.MainMetadataHudShow;
 
     private void ToggleMetadataHud()
     {
         if (!CanToggleMetadataHud) return;
 
         IsMetadataHudVisible = !IsMetadataHudVisible;
-        Toast(IsMetadataHudVisible ? "Metadata HUD on" : "Metadata HUD off");
+        Toast(IsMetadataHudVisible ? Strings.MainToastMetadataHudOn : Strings.MainToastMetadataHudOff);
     }
 
     private void RefreshPhotoMetadata(string path)
@@ -2071,7 +2072,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public bool CanToggleGallery => IsGalleryOpen || (HasImage && !IsPeekMode);
     public bool ShowGallery => IsGalleryOpen && HasImage && FolderPreviewItems.Count > 0 && !IsPeekMode;
-    public string GalleryToggleTooltip => IsGalleryOpen ? "Close gallery (G)" : "Open gallery (G)";
+    public string GalleryToggleTooltip => IsGalleryOpen ? Strings.MainGalleryCloseTooltip : Strings.MainGalleryOpenTooltip;
     public string GalleryStatusText
     {
         get
@@ -2090,8 +2091,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasGalleryFilter => !string.IsNullOrWhiteSpace(GalleryFilterText);
     public bool ShowGalleryFilterEmpty => ShowGallery && HasGalleryFilter && GalleryItems.Count == 0;
     public string GalleryFilterSummaryText => _galleryFilterSummaryText;
-    public string GalleryFilterTooltip =>
-        "Filter by name/path or use smart filters such as format:png, orientation:landscape, size:large, date:week, duplicate:yes, rating:5, tag:portrait, or palette:blue.";
+    public string GalleryFilterTooltip => Strings.MainGalleryFilterTooltip;
 
     private bool _isReviewMode;
     public bool IsReviewMode
@@ -2101,13 +2101,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             if (!Set(ref _isReviewMode, value)) return;
             RaiseReviewState();
-            Toast(value ? "Review mode on" : "Review mode off");
+            Toast(value ? Strings.MainToastReviewModeOn : Strings.MainToastReviewModeOff);
         }
     }
 
     public bool CanUseReviewLabels => HasImage && !IsArchiveBook && !IsPeekMode && !IsOperationBusy;
     public bool CanUndoReviewLabel => _reviewUndo.Count > 0;
-    public string ReviewModeText => IsReviewMode ? "Review on" : "Review off";
+    public string ReviewModeText => IsReviewMode ? Strings.MainReviewOn : Strings.MainReviewOff;
     public string ReviewRatingText => _currentReviewState.RatingText;
     public string ReviewLabelText => _currentReviewState.LabelText;
     public string ReviewStatusText => $"{ReviewRatingText} · {ReviewLabelText}";
@@ -2152,7 +2152,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public bool ShowSideFolderPreview => !IsFilmstripVisible && FolderPreviewItems.Count > 0;
 
-    public string FilmstripToggleTooltip => IsFilmstripVisible ? "Hide filmstrip (T)" : "Show filmstrip (T)";
+    public string FilmstripToggleTooltip => IsFilmstripVisible ? Strings.MainFilmstripHideTooltip : Strings.MainFilmstripShowTooltip;
 
     public DirectorySortMode CurrentSortMode => _nav.SortMode;
 
@@ -2198,7 +2198,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (!CanToggleFilmstrip) return;
 
         IsFilmstripVisible = !IsFilmstripVisible;
-        Toast(IsFilmstripVisible ? "Filmstrip shown" : "Filmstrip hidden");
+        Toast(IsFilmstripVisible ? Strings.MainToastFilmstripShown : Strings.MainToastFilmstripHidden);
     }
 
     private void SetFolderSort(object? parameter)
@@ -2215,18 +2215,18 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (IsGalleryOpen)
         {
             IsGalleryOpen = false;
-            Toast("Gallery closed");
+            Toast(Strings.MainToastGalleryClosed);
             return;
         }
 
         if (FolderPreviewItems.Count == 0)
         {
-            Toast("Open a folder with images to use Gallery");
+            Toast(Strings.MainToastGalleryOpenFolder);
             return;
         }
 
         IsGalleryOpen = true;
-        Toast("Gallery open");
+        Toast(Strings.MainToastGalleryOpen);
     }
 
     private void OpenSelectedGalleryItem()
@@ -2305,7 +2305,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _currentReviewState = result.Current;
         RaiseReviewState();
         InvalidateGallerySmartFilterIndex();
-        Toast("Review change undone");
+        Toast(Strings.MainToastReviewUndone);
     }
 
     private void RefreshReviewState(string? path)
@@ -2425,7 +2425,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (_folderPreview.HasThumbnailFailures)
         {
             ShowSecondaryStatus(
-                "Some thumbnails could not be shown",
+                Strings.MainSecondaryThumbnailFailure,
                 $"{_folderPreview.ThumbnailFailureStatusText} Refresh the folder or open Diagnostics if this repeats.",
                 SecondaryStatusToneKind.Warning,
                 "\uE783",
@@ -2450,7 +2450,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             var result = _rename.Revert(entry);
             if (result is null)
             {
-                Toast("Cannot undo — file no longer exists at that path");
+                Toast(Strings.MainRenameUndoFailed);
                 RecentRenames.Remove(entry);
                 return;
             }
@@ -2762,7 +2762,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             var ext = Path.GetExtension(path);
             var suggestion = SupportedImageFormats.SuggestionForUnsupported(ext);
             ShowSecondaryStatus(
-                "File type not supported",
+                Strings.MainSecondaryFileTypeNotSupported,
                 suggestion is null
                     ? $"Images does not recognize {FormatExtensionForMessage(ext)} as a supported image or document preview format."
                     : suggestion,
@@ -2778,15 +2778,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (!_nav.Open(path))
         {
             ShowSecondaryStatus(
-                File.Exists(path) ? "Could not open file" : "File no longer exists",
+                File.Exists(path) ? Strings.MainSecondaryCouldNotOpen : Strings.MainSecondaryFileGone,
                 File.Exists(path)
                     ? $"{Path.GetFileName(path)} could not be opened from this location."
-                    : "The file may have been moved, renamed, deleted, or disconnected.",
+                    : Strings.MainSecondaryFileGoneDetail,
                 SecondaryStatusToneKind.Warning,
                 "\uE783");
             Toast(File.Exists(path)
                 ? $"Could not open {Path.GetFileName(path)}"
-                : "File no longer exists");
+                : Strings.MainSecondaryFileGone);
             return false;
         }
 
@@ -2873,11 +2873,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (!Directory.Exists(folder))
         {
             ShowSecondaryStatus(
-                "Recent folder removed",
-                "It was removed from the list because the folder no longer exists.",
+                Strings.MainSecondaryRecentFolderRemoved,
+                Strings.MainSecondaryRecentFolderRemovedDetail,
                 SecondaryStatusToneKind.Warning,
                 "\uE8B7");
-            Toast("Folder no longer exists");
+            Toast(Strings.MainToastFolderNoLongerExists);
             RefreshRecentFolders(); // GetRecentFolders filters missing folders — re-pull.
             return;
         }
@@ -2888,7 +2888,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (first is null)
             {
                 ShowSecondaryStatus(
-                    "No supported images in this folder",
+                    Strings.MainSecondaryNoSupportedImages,
                     $"Images did not find supported formats in {DisplayFolderName(folder)}. Choose another folder or paste an image.",
                     SecondaryStatusToneKind.Info,
                     "\uE8B7");
@@ -2900,11 +2900,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
         {
             ShowSecondaryStatus(
-                "Folder unreachable",
-                "Check permissions or reconnect the drive, then try again.",
+                Strings.MainSecondaryFolderUnreachable,
+                Strings.MainSecondaryFolderUnreachableDetail,
                 SecondaryStatusToneKind.Warning,
                 "\uE783");
-            Toast("Folder unreachable");
+            Toast(Strings.MainToastFolderUnreachable);
         }
     }
 
@@ -2915,16 +2915,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (!File.Exists(archive.Path))
         {
             ShowSecondaryStatus(
-                "Archive no longer available",
-                "It was removed from book history because the file no longer exists.",
+                Strings.MainSecondaryArchiveGone,
+                Strings.MainSecondaryArchiveGoneDetail,
                 SecondaryStatusToneKind.Warning,
                 "\uE783");
-            Toast("Archive no longer exists");
+            Toast(Strings.MainToastArchiveNoLongerExists);
             RefreshArchiveReadHistory();
             return;
         }
 
-        await OpenFileWithOperationStatusAsync(archive.Path, "Opening archive book");
+        await OpenFileWithOperationStatusAsync(archive.Path, Strings.MainOpOpeningArchive);
     }
 
     private void PasteFromClipboard()
@@ -2945,30 +2945,30 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             case ClipboardImportStatus.NoSupportedFile:
                 ShowSecondaryStatus(
-                    "Clipboard file not supported",
-                    "The clipboard contains files, but none are formats Images can open.",
+                    Strings.MainSecondaryClipboardNotSupported,
+                    Strings.MainSecondaryClipboardNotSupportedDetail,
                     SecondaryStatusToneKind.Warning,
                     "\uE783");
                 break;
             case ClipboardImportStatus.NothingImageLike:
                 ShowSecondaryStatus(
-                    "Clipboard has no image",
-                    "Copy an image, screenshot, or supported image file, then paste again.",
+                    Strings.MainSecondaryClipboardNoImage,
+                    Strings.MainSecondaryClipboardNoImageDetail,
                     SecondaryStatusToneKind.Info,
                     "\uE946");
                 break;
             case ClipboardImportStatus.ImageUnavailable:
                 ShowSecondaryStatus(
-                    "Clipboard image could not be read",
-                    "Try copying the image again from the source app.",
+                    Strings.MainSecondaryClipboardUnreadable,
+                    Strings.MainSecondaryClipboardUnreadableDetail,
                     SecondaryStatusToneKind.Warning,
                     "\uE783");
                 break;
             case ClipboardImportStatus.StorageUnavailable:
             case ClipboardImportStatus.SaveFailed:
                 ShowSecondaryStatus(
-                    "Clipboard paste could not be saved",
-                    "Images could not create a temporary local copy. Open Diagnostics to inspect storage.",
+                    Strings.MainSecondaryClipboardSaveFailed,
+                    Strings.MainSecondaryClipboardSaveFailedDetail,
                     SecondaryStatusToneKind.Error,
                     "\uE783");
                 break;
@@ -2999,12 +2999,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             var draftPath = _createEmailDraft(CurrentPath);
             _openShellTarget(draftPath);
-            Toast("Email draft opened");
+            Toast(Strings.MainToastEmailOpened);
         }
         catch (Exception ex)
         {
             ShowSecondaryStatus(
-                "Email draft failed",
+                Strings.MainSecondaryEmailFailed,
                 FirstLine(ex.Message),
                 SecondaryStatusToneKind.Warning,
                 "\uE783");
@@ -3016,19 +3016,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "Open image or preview",
+            Title = Strings.MainDialogOpenImage,
             Filter = SupportedImageFormats.OpenDialogFilter,
             FilterIndex = 1
         };
         if (dlg.ShowDialog() == true)
-            await OpenFileWithOperationStatusAsync(dlg.FileName, "Opening file");
+            await OpenFileWithOperationStatusAsync(dlg.FileName, Strings.MainOpOpeningFile);
     }
 
     private string? PickCompareFile()
     {
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "Compare with image",
+            Title = Strings.MainDialogCompareWith,
             Filter = SupportedImageFormats.OpenDialogFilter,
             CheckFileExists = true,
             Multiselect = false
@@ -3041,22 +3041,22 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private async Task NextAsync()
     {
-        await NavigateImageAsync(_nav.MoveNext, "Loading next image");
+        await NavigateImageAsync(_nav.MoveNext, Strings.MainOpLoadingNext);
     }
 
     private async Task PrevAsync()
     {
-        await NavigateImageAsync(_nav.MovePrevious, "Loading previous image");
+        await NavigateImageAsync(_nav.MovePrevious, Strings.MainOpLoadingPrev);
     }
 
     private async Task FirstAsync()
     {
-        await NavigateImageAsync(_nav.MoveFirst, "Loading first image");
+        await NavigateImageAsync(_nav.MoveFirst, Strings.MainOpLoadingFirst);
     }
 
     private async Task LastAsync()
     {
-        await NavigateImageAsync(_nav.MoveLast, "Loading last image");
+        await NavigateImageAsync(_nav.MoveLast, Strings.MainOpLoadingLast);
     }
 
     private async Task NavigateImageAsync(Func<bool> move, string title)
@@ -3076,22 +3076,22 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private async Task NextPageAsync()
     {
-        await GoToPageAsync(PageIndex + PageStep, "Loading next page");
+        await GoToPageAsync(PageIndex + PageStep, Strings.MainOpLoadingNextPage);
     }
 
     private async Task PrevPageAsync()
     {
-        await GoToPageAsync(PageIndex - PageStep, "Loading previous page");
+        await GoToPageAsync(PageIndex - PageStep, Strings.MainOpLoadingPrevPage);
     }
 
     private async Task FirstPageAsync()
     {
-        await GoToPageAsync(0, "Loading first page");
+        await GoToPageAsync(0, Strings.MainOpLoadingFirstPage);
     }
 
     private async Task LastPageAsync()
     {
-        await GoToPageAsync(PageCount - 1, "Loading last page");
+        await GoToPageAsync(PageCount - 1, Strings.MainOpLoadingLastPage);
     }
 
     private async Task TurnLeftBookPageAsync()
@@ -3353,7 +3353,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         CurrentImage = null;
         CurrentAnimation = null;
         PixelWidth = PixelHeight = 0;
-        DecoderUsed = "Unavailable";
+        DecoderUsed = Strings.MainDecoderUnavailable;
         ClearInspectorState();
         IsSelectionMode = false;
         ClearCanvasSelection();
@@ -3390,42 +3390,42 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         // Ghostscript dependency — special case with codec-details link.
         if (ex.Message.Contains("requires Ghostscript", StringComparison.OrdinalIgnoreCase))
         {
-            LoadErrorTitle = "Document preview needs Ghostscript";
-            LoadErrorMessage = "This file type depends on Ghostscript for document and Adobe Illustrator previews. Images can use a bundled runtime, IMAGES_GHOSTSCRIPT_DIR, or an installed Ghostscript copy.";
-            LoadErrorHelpText = "Open codec details to see the active runtime status and copy a support report.";
+            LoadErrorTitle = Strings.MainLoadErrorGhostscriptTitle;
+            LoadErrorMessage = Strings.MainLoadErrorGhostscriptMessage;
+            LoadErrorHelpText = Strings.MainLoadErrorGhostscriptHelp;
             LoadErrorShowsCodecDetails = true;
-            Toast("Document preview needs Ghostscript");
+            Toast(Strings.MainToastGhostscriptNeeded);
             return;
         }
 
         // Specific exception types carry their own actionable message.
         if (ex is FileNotFoundException)
         {
-            LoadErrorTitle = "File not found";
-            LoadErrorMessage = "This file no longer exists. It may have been moved, renamed, or deleted.";
-            LoadErrorHelpText = "Navigate to another image or open a new file.";
+            LoadErrorTitle = Strings.MainLoadErrorNotFoundTitle;
+            LoadErrorMessage = Strings.MainLoadErrorNotFoundMessage;
+            LoadErrorHelpText = Strings.MainLoadErrorNotFoundHelp;
             LoadErrorShowsCodecDetails = false;
-            Toast("File not found");
+            Toast(Strings.MainToastFileNotFound);
             return;
         }
 
         if (ex is UnauthorizedAccessException)
         {
-            LoadErrorTitle = "Access denied";
-            LoadErrorMessage = "You do not have permission to read this file.";
-            LoadErrorHelpText = "Check the file's security properties in Explorer, or try running Images as Administrator.";
+            LoadErrorTitle = Strings.MainLoadErrorAccessTitle;
+            LoadErrorMessage = Strings.MainLoadErrorAccessMessage;
+            LoadErrorHelpText = Strings.MainLoadErrorAccessHelp;
             LoadErrorShowsCodecDetails = false;
-            Toast("Access denied");
+            Toast(Strings.MainToastAccessDenied);
             return;
         }
 
         if (ex is OutOfMemoryException)
         {
-            LoadErrorTitle = "Image too large";
-            LoadErrorMessage = "This image is too large to fit in available memory.";
-            LoadErrorHelpText = "Close other applications to free memory, or try reopening the file.";
+            LoadErrorTitle = Strings.MainLoadErrorOomTitle;
+            LoadErrorMessage = Strings.MainLoadErrorOomMessage;
+            LoadErrorHelpText = Strings.MainLoadErrorOomHelp;
             LoadErrorShowsCodecDetails = false;
-            Toast("Image too large for available memory");
+            Toast(Strings.MainToastImageTooLarge);
             return;
         }
 
@@ -3434,12 +3434,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             ? null
             : SupportedImageFormats.SuggestionForDecodeFailure(ext);
 
-        LoadErrorTitle = "This image couldn't be displayed";
+        LoadErrorTitle = Strings.MainLoadErrorDefault;
         LoadErrorMessage = $"This file could not be decoded. {ex.Message}";
         LoadErrorHelpText = decodeHint
-            ?? "Try another file, reveal the file in Explorer, or reload after another app finishes writing it.";
+            ?? Strings.MainLoadErrorDecodeHelp;
         LoadErrorShowsCodecDetails = false;
-        Toast("Could not decode this file");
+        Toast(Strings.MainToastCouldNotDecode);
     }
 
     private void ClearLoadError()
@@ -3466,7 +3466,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void ResetPageState()
     {
-        PageLabel = "Page";
+        PageLabel = Strings.MainPageLabel;
         PageCount = 1;
         PageSpan = 1;
         PageIndex = 0;
@@ -3527,7 +3527,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (string.IsNullOrEmpty(RenameService.Sanitize(EditableStem)))
             {
                 RenameStatus = RenameStatusKind.Error;
-                Toast("Filename needs at least one valid character");
+                Toast(Strings.MainToastFilenameInvalid);
                 return;
             }
 
@@ -3584,7 +3584,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
             .FirstOrDefault();
         if (string.IsNullOrWhiteSpace(line))
-            return "Unexpected error";
+            return Strings.MainUnexpectedError;
 
         var parameterSuffix = line.IndexOf(" (Parameter '", StringComparison.Ordinal);
         return parameterSuffix > 0 ? line[..parameterSuffix] : line;
@@ -3612,7 +3612,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         switch (result.Status)
         {
             case RecycleBinDeleteStatus.Canceled:
-                Toast("Delete canceled");
+                Toast(Strings.MainToastDeleteCanceled);
                 return;
             case RecycleBinDeleteStatus.Missing:
                 _nav.RemoveCurrent();
@@ -3627,7 +3627,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _nav.RemoveCurrent();
         _recoveryCenter.RecordRecycleBin(
             toDelete,
-            "Sent image to Recycle Bin",
+            Strings.MainSentToRecycleBin,
             $"Sent {Path.GetFileName(toDelete)} to the Windows Recycle Bin from the main viewer.");
         Toast($"Sent to Recycle Bin: {result.FileName}");
         AdvanceAfterRemovedCurrent();
@@ -3666,7 +3666,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             var choice = _confirmLosslessJpegTrim(LosslessJpegTrimConfirmation.ForRotation(trimPlan));
             if (choice == LosslessJpegTrimChoice.Cancel)
             {
-                Toast("Rotation canceled");
+                Toast(Strings.MainToastRotationCanceled);
                 return;
             }
 
@@ -3686,13 +3686,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 $"Rotate {degrees} degrees"))
             .ToList();
 
-        BeginOperationStatus("Applying rotation", $"Overwriting {Path.GetFileName(path)}.");
+        BeginOperationStatus(Strings.MainOpApplyingRotation, $"Overwriting {Path.GetFileName(path)}.");
         try
         {
             ImageExportService.Overwrite(path, operations, allowLosslessJpegTrim);
             _recoveryCenter.RecordWriteback(
                 path,
-                "Rotation writeback",
+                Strings.MainRotationWriteback,
                 $"Overwrote {Path.GetFileName(path)} with a {degrees}-degree rotation.");
             if (existingOperations.Count > 0)
             {
@@ -3747,7 +3747,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Environment.NewLine +
             $"No: {confirmation.ExactActionText}" +
             Environment.NewLine +
-            "Cancel: leave the file unchanged.",
+            Strings.MainCancelLeaveUnchanged,
             confirmation.Title,
             MessageBoxButton.YesNoCancel,
             MessageBoxImage.Warning,
@@ -3765,18 +3765,18 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         if (!CanUseCompareMode || string.IsNullOrWhiteSpace(secondaryPath))
         {
-            Toast("Open an image before comparing");
+            Toast(Strings.MainToastOpenBeforeCompare);
             return;
         }
 
         if (!TryLoadCompareImage(secondaryPath, out var image, out var normalizedPath, out var message))
         {
             ShowSecondaryStatus(
-                "Compare image unavailable",
+                Strings.MainSecondaryCompareUnavailable,
                 message,
                 SecondaryStatusToneKind.Warning,
                 "\uE783");
-            Toast("Compare image unavailable");
+            Toast(Strings.MainToastCompareUnavailable);
             return;
         }
 
@@ -3787,7 +3787,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         if (string.IsNullOrWhiteSpace(primaryPath) || string.IsNullOrWhiteSpace(secondaryPath))
         {
-            Toast("Choose two images to compare");
+            Toast(Strings.MainToastChooseTwoImages);
             return;
         }
 
@@ -3805,7 +3805,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var nextPath = TryGetNextComparePath();
         if (nextPath is null)
         {
-            Toast("No next image to compare");
+            Toast(Strings.MainToastNoNextCompare);
             return;
         }
 
@@ -3840,7 +3840,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         CompletePreparedOpenFile(_nav.CurrentPath ?? primaryPath, resumedArchivePage, loaded);
         if (!loaded || !HasDisplayImage)
         {
-            Toast("Could not open compare primary");
+            Toast(Strings.MainToastCompareOpenFailed);
             return false;
         }
 
@@ -3869,7 +3869,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ComparePath = path;
         IsCompareMode = true;
         ClearSecondaryStatus();
-        Toast("Compare mode on");
+        Toast(Strings.MainToastCompareModeOn);
     }
 
     private bool TryLoadCompareImage(
@@ -3888,13 +3888,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex) when (ex is ArgumentException or NotSupportedException or System.Security.SecurityException)
         {
-            message = "The selected compare path is not valid.";
+            message = Strings.MainComparePathInvalid;
             return false;
         }
 
         if (!File.Exists(normalizedPath))
         {
-            message = "The selected compare file no longer exists.";
+            message = Strings.MainCompareFileGone;
             return false;
         }
 
@@ -3906,7 +3906,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         if (string.Equals(normalizedPath, CurrentPath, StringComparison.OrdinalIgnoreCase))
         {
-            message = "Choose a different image for the B side.";
+            message = Strings.MainCompareSameFile;
             return false;
         }
 
@@ -3944,7 +3944,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             ShowSecondaryStatus("Compare swap failed", message, SecondaryStatusToneKind.Warning, "\uE783");
             ClearCompareMode(showToast: false);
-            Toast("Compare swap failed");
+            Toast(Strings.MainToastCompareSwapFailed);
             return;
         }
 
@@ -3952,7 +3952,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ComparePath = normalizedPath;
         IsCompareMode = true;
         IsCompareOverlayMode = keepOverlay;
-        Toast("Compare A/B swapped");
+        Toast(Strings.MainToastCompareSwapped);
     }
 
     private void AdjustCompareOverlayOpacity(double delta)
@@ -3969,7 +3969,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ComparePath = null;
         IsCompareOverlayMode = false;
         if (showToast && wasActive)
-            Toast("Compare mode off");
+            Toast(Strings.MainToastCompareModeOff);
     }
 
     private void RaiseCompareState()
@@ -4014,7 +4014,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _isOverlayClickThrough = false;
             Raise(nameof(IsOverlayClickThrough));
             Raise(nameof(OverlayClickThroughText));
-            Toast("Click-through disabled: exit hotkey unavailable");
+            Toast(Strings.MainToastClickThroughDisabled);
         }
     }
 
@@ -4205,7 +4205,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         var dialog = new Microsoft.Win32.SaveFileDialog
         {
-            Title = "Export animation frame",
+            Title = Strings.MainDialogExportFrame,
             FileName = AnimationWorkbenchService.CreateDefaultFrameExportFileName(CurrentPath, CurrentAnimationFrameIndex),
             Filter = "PNG image|*.png",
             DefaultExt = "png",
@@ -4215,7 +4215,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (dialog.ShowDialog() != true)
             return;
 
-        BeginOperationStatus("Exporting frame", $"{SelectedAnimationFrameText} to {Path.GetFileName(dialog.FileName)}.");
+        BeginOperationStatus(Strings.MainOpExportingFrame, $"{SelectedAnimationFrameText} to {Path.GetFileName(dialog.FileName)}.");
         try
         {
             await YieldForOperationStatusAsync();
@@ -4353,7 +4353,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (EffectiveCropAspectPreset is not { } aspect)
         {
             CropSelection = null;
-            CropStatusText = "Enter a positive custom aspect ratio before dragging.";
+            CropStatusText = Strings.MainCropCustomAspectError;
             return;
         }
 
@@ -4554,8 +4554,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             var choice = _confirmLosslessJpegTrim(LosslessJpegTrimConfirmation.ForCrop(trimPlan));
             if (choice == LosslessJpegTrimChoice.Cancel)
             {
-                CropStatusText = "Crop canceled.";
-                Toast("Crop canceled");
+                CropStatusText = Strings.MainCropCanceledStatus;
+                Toast(Strings.MainToastCropCanceled);
                 return;
             }
 
@@ -4572,13 +4572,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 $"Crop {crop.Width}x{crop.Height} at {crop.X},{crop.Y}"))
             .ToList();
 
-        BeginOperationStatus("Applying crop", $"Overwriting {Path.GetFileName(path)}.");
+        BeginOperationStatus(Strings.MainOpApplyingCrop, $"Overwriting {Path.GetFileName(path)}.");
         try
         {
             ImageExportService.Overwrite(path, operations, allowLosslessJpegTrim);
             _recoveryCenter.RecordWriteback(
                 path,
-                "Crop writeback",
+                Strings.MainCropWriteback,
                 $"Overwrote {Path.GetFileName(path)} with crop {crop.Width}x{crop.Height} at {crop.X},{crop.Y}.");
             if (existingOperations.Count > 0)
             {
@@ -4600,7 +4600,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
         {
             CropStatusText = "Crop failed: " + ex.Message;
-            Toast("Crop failed");
+            Toast(Strings.MainToastCropFailed);
         }
         finally
         {
@@ -4644,12 +4644,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 if (!File.Exists(imagePath))
                 {
-                    Toast("Adjustment failed: image is no longer available");
+                    Toast(Strings.MainToastAdjustmentUnavailable);
                     return;
                 }
 
                 var result = _editStack.AppendOperation(imagePath, "adjust", plan.ToEditParameters(), plan.Label);
-                Toast(result.Success ? "Adjustment added to edit history" : result.Message);
+                Toast(result.Success ? Strings.MainToastAdjustmentAdded : result.Message);
             })
         {
             Owner = Application.Current?.MainWindow
@@ -4670,12 +4670,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 if (!File.Exists(imagePath))
                 {
-                    Toast("Effects failed: image is no longer available");
+                    Toast(Strings.MainToastEffectsUnavailable);
                     return;
                 }
 
                 var result = _editStack.AppendOperation(imagePath, "effects", plan.ToEditParameters(), plan.Label);
-                Toast(result.Success ? "Effects added to edit history" : result.Message);
+                Toast(result.Success ? Strings.MainToastEffectsAdded : result.Message);
             })
         {
             Owner = Application.Current?.MainWindow
@@ -4695,7 +4695,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             ImageAutoEnhancePlan.Balanced.ToEditParameters(),
             ImageAutoEnhancePlan.Balanced.Label);
 
-        Toast(result.Success ? "Auto Enhance added to edit history" : result.Message);
+        Toast(result.Success ? Strings.MainToastAutoEnhanceAdded : result.Message);
     }
 
     private void OpenAnnotations()
@@ -4710,12 +4710,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 if (!File.Exists(imagePath))
                 {
-                    Toast("Annotations failed: image is no longer available");
+                    Toast(Strings.MainToastAnnotationsUnavailable);
                     return;
                 }
 
                 var result = _editStack.AppendOperation(imagePath, "annotation", plan.ToEditParameters(), plan.Label);
-                Toast(result.Success ? "Annotations added to edit history" : result.Message);
+                Toast(result.Success ? Strings.MainToastAnnotationsAdded : result.Message);
             })
         {
             Owner = Application.Current?.MainWindow
@@ -4736,12 +4736,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 if (!File.Exists(imagePath))
                 {
-                    Toast("Perspective failed: image is no longer available");
+                    Toast(Strings.MainToastPerspectiveUnavailable);
                     return;
                 }
 
                 var result = _editStack.AppendOperation(imagePath, "perspective", plan.ToEditParameters(), plan.Label);
-                Toast(result.Success ? "Perspective correction added to edit history" : result.Message);
+                Toast(result.Success ? Strings.MainToastPerspectiveAdded : result.Message);
             })
         {
             Owner = Application.Current?.MainWindow
@@ -4787,12 +4787,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             IsExposureBrushMode = false;
             ClearExposureBrushStrokes(showToast: false);
-            Toast("Exposure brush added to edit history");
+            Toast(Strings.MainToastExposureBrushAdded);
         }
         else
         {
             ExposureBrushStatusText = "Exposure brush failed: " + result.Message;
-            Toast("Exposure brush failed");
+            Toast(Strings.MainToastExposureBrushFailed);
         }
     }
 
@@ -4800,7 +4800,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         IsExposureBrushMode = false;
         ClearExposureBrushStrokes(showToast: false);
-        Toast("Exposure brush canceled");
+        Toast(Strings.MainToastExposureBrushCanceled);
     }
 
     private void ClearExposureBrushStrokes()
@@ -4819,7 +4819,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RaiseExposureBrushStrokeState();
 
         if (showToast)
-            Toast("Exposure brush strokes cleared");
+            Toast(Strings.MainToastExposureBrushCleared);
     }
 
     private void ApplyRedEyeCorrection()
@@ -4838,12 +4838,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             IsRedEyeCorrectionMode = false;
             ClearRedEyeCorrectionMarks(showToast: false);
-            Toast("Red-eye correction added to edit history");
+            Toast(Strings.MainToastRedEyeAdded);
         }
         else
         {
             RedEyeCorrectionStatusText = "Red-eye correction failed: " + result.Message;
-            Toast("Red-eye correction failed");
+            Toast(Strings.MainToastRedEyeFailed);
         }
     }
 
@@ -4851,7 +4851,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         IsRedEyeCorrectionMode = false;
         ClearRedEyeCorrectionMarks(showToast: false);
-        Toast("Red-eye correction canceled");
+        Toast(Strings.MainToastRedEyeCanceled);
     }
 
     private void ClearRedEyeCorrectionMarks()
@@ -4870,7 +4870,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RaiseRedEyeCorrectionMarkState();
 
         if (showToast)
-            Toast("Red-eye correction marks cleared");
+            Toast(Strings.MainToastRedEyeCleared);
     }
 
     private void SetRetouchMode(object? parameter)
@@ -4910,12 +4910,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             IsRetouchMode = false;
             ClearRetouchState(showToast: false);
-            Toast("Retouch added to edit history");
+            Toast(Strings.MainToastRetouchAdded);
         }
         else
         {
             RetouchStatusText = "Retouch failed: " + result.Message;
-            Toast("Retouch failed");
+            Toast(Strings.MainToastRetouchFailed);
         }
     }
 
@@ -4923,7 +4923,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         IsRetouchMode = false;
         ClearRetouchState(showToast: false);
-        Toast("Retouch canceled");
+        Toast(Strings.MainToastRetouchCanceled);
     }
 
     private void ClearRetouchStrokes()
@@ -4935,7 +4935,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             ? "Paint over the target area. Alt-click picks a new source; Enter applies."
             : "Alt-click or click once to pick a source, then paint the target area.";
         RaiseRetouchStrokeState();
-        Toast("Retouch strokes cleared");
+        Toast(Strings.MainToastRetouchStrokesCleared);
     }
 
     private void ClearRetouchSource()
@@ -4943,9 +4943,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _retouchSource = null;
         _retouchStrokeSourceAnchor = null;
         _retouchStrokeTargetAnchor = null;
-        RetouchStatusText = "Source cleared. Alt-click or click once to pick a new source.";
+        RetouchStatusText = Strings.MainRetouchSourceClearedStatus;
         RaiseRetouchSourceState();
-        Toast("Retouch source cleared");
+        Toast(Strings.MainToastRetouchSourceCleared);
     }
 
     private void ClearRetouchState(bool showToast)
@@ -4963,7 +4963,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RaiseRetouchStrokeState();
 
         if (showToast)
-            Toast("Retouch cleared");
+            Toast(Strings.MainToastRetouchCleared);
     }
 
     // -------------------- AI content-aware repair (LaMa inpaint) --------------------
@@ -4992,8 +4992,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public string InpaintStatusText => IsInpaintMode
         ? HasInpaintMaskRegions
-            ? "Paint to add mask regions. Enter or Apply runs AI repair; Esc cancels."
-            : "Paint over areas to repair. The AI model fills painted regions from surrounding content."
+            ? Strings.MainInpaintActiveWithMask
+            : Strings.MainInpaintActiveNoMask
         : "";
 
     public void AddInpaintMaskRegion(double x, double y)
@@ -5012,7 +5012,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         if (!LaMaInpaintService.IsAvailable())
         {
-            Toast("No LaMa model imported — open Model Manager first");
+            Toast(Strings.MainToastNoLamaModel);
             return;
         }
 
@@ -5025,7 +5025,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClearCropSelection();
 
         IsInpaintMode = true;
-        Toast("AI repair mode — paint areas to fill");
+        Toast(Strings.MainToastAiRepaintMode);
     }
 
     private async void ApplyInpaint()
@@ -5038,7 +5038,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var height = PixelHeight;
         if (width <= 0 || height <= 0) return;
 
-        Toast("Running AI repair...");
+        Toast(Strings.MainToastAiRepairRunning);
 
         InpaintResult result;
         try
@@ -5054,7 +5054,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         if (!result.Success || result.RepairedImage is null)
         {
-            Toast(result.ErrorMessage ?? "Repair failed");
+            Toast(result.ErrorMessage ?? Strings.MainToastRepairFailed);
             return;
         }
 
@@ -5065,7 +5065,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             ShellChangeNotificationService.NotifyFileUpdated(path);
             await ReloadCurrentAsync();
             ClearInpaintMask();
-            Toast("AI repair applied");
+            Toast(Strings.MainToastAiRepairApplied);
         }
         catch (Exception ex)
         {
@@ -5077,7 +5077,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         IsInpaintMode = false;
         ClearInpaintMask();
-        Toast("AI repair canceled");
+        Toast(Strings.MainToastAiRepairCanceled);
     }
 
     private void ClearInpaintMask()
@@ -5090,14 +5090,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         IsCropMode = false;
         ClearCropSelection();
-        Toast("Crop canceled");
+        Toast(Strings.MainToastCropCanceled);
     }
 
     private void CancelSelectionMode()
     {
         IsSelectionMode = false;
         ClearCanvasSelection();
-        Toast("Selection canceled");
+        Toast(Strings.MainToastSelectionCanceled);
     }
 
     private void CopyCanvasSelection()
@@ -5113,7 +5113,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         catch (Exception ex)
         {
             SelectionStatusText = "Selection copy failed: " + ex.Message;
-            Toast("Selection copy failed");
+            Toast(Strings.MainToastSelectionCopyFailed);
         }
     }
 
@@ -5302,12 +5302,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         if (!HasImage || IsOperationBusy) return;
 
-        BeginOperationStatus("Reloading image", "Refreshing decoder output and metadata.");
+        BeginOperationStatus(Strings.MainOpReloadingImage, Strings.MainOpReloadingDetail);
         try
         {
             await YieldForOperationStatusAsync();
             if (ReloadCurrentPreservingViewState(resetPreload: false))
-                Toast("Reloaded");
+                Toast(Strings.MainToastReloaded);
         }
         finally
         {
@@ -5348,7 +5348,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         if (!File.Exists(full))
         {
-            Toast("File no longer exists");
+            Toast(Strings.MainToastFileNoLongerExists);
             return;
         }
 
@@ -5364,7 +5364,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void CopyPath(string? path)
     {
         if (path is null) return;
-        try { ClipboardService.SetText(path); Toast("Copied path"); }
+        try { ClipboardService.SetText(path); Toast(Strings.MainToastCopiedPath); }
         catch (Exception ex) { Toast($"Copy failed: {ex.Message}"); }
     }
 
@@ -5374,7 +5374,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         try
         {
             _copyImageToClipboard(bitmap);
-            Toast("Copied image");
+            Toast(Strings.MainToastCopiedImage);
         }
         catch (Exception ex)
         {
@@ -5388,7 +5388,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         try
         {
             _copyImageAndPathToClipboard(bitmap, CurrentPath);
-            Toast("Copied image and path");
+            Toast(Strings.MainToastCopiedImageAndPath);
         }
         catch (Exception ex)
         {
@@ -5406,8 +5406,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             try
             {
                 destinationFolder = _pickFolder(mode == ImageFileTransferMode.Copy
-                    ? "Copy image to folder"
-                    : "Move image to folder");
+                    ? Strings.MainDialogCopyToFolder
+                    : Strings.MainDialogMoveToFolder);
             }
             catch (Exception ex)
             {
@@ -5444,32 +5444,32 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 break;
             case ImageFileTransferStatus.SourceMissing:
                 ShowSecondaryStatus(
-                    "File no longer exists",
-                    "The image could not be copied or moved because it was removed from disk.",
+                    Strings.MainSecondaryFileGone,
+                    Strings.MainSecondaryTransferSourceDetail,
                     SecondaryStatusToneKind.Warning,
                     "\uE783");
-                Toast("File no longer exists");
+                Toast(Strings.MainToastFileNoLongerExists);
                 break;
             case ImageFileTransferStatus.DestinationMissing:
                 ShowSecondaryStatus(
-                    "Transfer folder unavailable",
-                    "It was removed from the recent destination list because the folder no longer exists.",
+                    Strings.MainSecondaryTransferFolderGone,
+                    Strings.MainSecondaryTransferFolderGoneDetail,
                     SecondaryStatusToneKind.Warning,
                     "\uE8B7");
                 RefreshRecentTransferFolders();
-                Toast("Transfer folder no longer exists");
+                Toast(Strings.MainToastTransferFolderGone);
                 break;
             case ImageFileTransferStatus.UnsupportedSource:
                 ShowSecondaryStatus(
                     "File type not supported",
-                    "Only files Images can open can be copied or moved from this viewer.",
+                    Strings.MainSecondaryTransferNotSupportedDetail,
                     SecondaryStatusToneKind.Warning,
                     "\uE783");
-                Toast("Transfer failed: unsupported file type");
+                Toast(Strings.MainToastTransferUnsupported);
                 break;
             default:
                 ShowSecondaryStatus(
-                    result.Mode == ImageFileTransferMode.Copy ? "Copy failed" : "Move failed",
+                    result.Mode == ImageFileTransferMode.Copy ? Strings.MainSecondaryCopyFailed : Strings.MainSecondaryMoveFailed,
                     FirstLine(result.Message),
                     SecondaryStatusToneKind.Error,
                     "\uE783");
@@ -5494,7 +5494,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _recoveryCenter.RecordMove(
                 result.SourcePath,
                 result.DestinationPath,
-                "Moved image",
+                Strings.MainMovedImage,
                 $"Moved {Path.GetFileName(result.SourcePath)} to {DisplayFolderName(destinationFolder)}.",
                 BuildRecoverySidecarMoves(result));
             OpenFile(result.DestinationPath);
@@ -5578,7 +5578,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         var dlg = new Microsoft.Win32.SaveFileDialog
         {
-            Title = "Save a copy",
+            Title = Strings.MainDialogSaveCopy,
             FileName = Path.GetFileNameWithoutExtension(CurrentPath) + "_copy" + sourceExtension,
             Filter = ImageExportService.ExportFilter,
             DefaultExt = sourceExtension.TrimStart('.'),
@@ -5593,7 +5593,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             targetPath = ImageExportService.ResolveWritablePath(dlg.FileName);
             if (PathsReferToSameFile(targetPath, CurrentPath))
             {
-                Toast("Choose a different filename for the copy");
+                Toast(Strings.MainChooseDifferentFilename);
                 return;
             }
         }
@@ -5603,7 +5603,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return;
         }
 
-        BeginOperationStatus("Saving copy", $"Exporting {Path.GetFileName(targetPath)}.");
+        BeginOperationStatus(Strings.MainOpSavingCopy, $"Exporting {Path.GetFileName(targetPath)}.");
         try
         {
             await YieldForOperationStatusAsync();
@@ -5653,7 +5653,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             var title = System.IO.Path.GetFileName(CurrentPath);
             if (PrintService.Print(bs, title))
-                Toast("Sent to printer");
+                Toast(Strings.MainToastSentToPrinter);
         }
         catch (Exception ex)
         {
@@ -5667,7 +5667,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         try
         {
             _printDefault(bs, System.IO.Path.GetFileName(CurrentPath));
-            Toast("Sent to default printer");
+            Toast(Strings.MainToastSentToDefaultPrinter);
         }
         catch (Exception ex)
         {
@@ -5916,19 +5916,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (CurrentPath is null || IsOperationBusy) return;
         var path = CurrentPath;
 
-        BeginOperationStatus("Removing location data", $"Updating {Path.GetFileName(path)}.");
+        BeginOperationStatus(Strings.MainOpRemovingLocation, $"Updating {Path.GetFileName(path)}.");
         try
         {
             var removed = await Task.Run(() => MetadataEditService.StripGpsMetadata(path));
             if (removed == 0)
             {
-                Toast("No GPS data found in this file");
+                Toast(Strings.MainToastNoGpsData);
             }
             else
             {
                 _recoveryCenter.RecordWriteback(
                     path,
-                    "GPS metadata writeback",
+                    Strings.MainGpsWriteback,
                     $"Removed {removed} GPS metadata field{(removed == 1 ? "" : "s")} from {Path.GetFileName(path)}.");
                 _preload.Reset();
                 LoadCurrent();
@@ -5971,7 +5971,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         _nav.Refresh();
         RefreshFromNav();
-        Toast("Folder refreshed");
+        Toast(Strings.MainToastFolderRefreshed);
     }
 
     private bool RefreshFromNav() => LoadCurrent();
