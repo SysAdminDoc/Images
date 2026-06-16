@@ -243,6 +243,16 @@ public static class CodecCapabilityService
                     : "Install a Windows OCR language capability from Windows language settings."),
 
             new(
+                Name: "ONNX Runtime DirectML",
+                Kind: "NuGet",
+                Source: "NuGet: https://www.nuget.org/packages/Microsoft.ML.OnnxRuntime.DirectML; ONNX Runtime: https://onnxruntime.ai",
+                Version: GetOnnxRuntimeVersion(),
+                Path: GetOnnxRuntimeAssemblyPath(),
+                Sha256: TrySha256(GetOnnxRuntimeAssemblyPath()),
+                AdvisoryStatus: "ONNX Runtime DirectML provides GPU-accelerated inference for CLIP semantic search, LaMa inpainting, and future AI features.",
+                Action: "Keep runtime versions current and run model smoke tests before enabling AI tools."),
+
+            new(
                 Name: "AI inference runtime",
                 Kind: "Runtime",
                 Source: "Windows ML: https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview; ONNX Runtime DirectML: https://onnxruntime.ai/docs/execution-providers/DirectML-ExecutionProvider.html",
@@ -398,6 +408,7 @@ public static class CodecCapabilityService
             sb.AppendLine($"- c2patool version: {provenance.C2paToolVersion}");
         if (provenance.C2paToolSha256 is not null)
             sb.AppendLine($"- c2patool SHA-256: {provenance.C2paToolSha256}");
+        sb.AppendLine($"- ONNX Runtime DirectML: {GetOnnxRuntimeVersion()}");
         sb.AppendLine();
 
         AppendDependencyProvenance(sb, dependencyRows);
@@ -536,6 +547,32 @@ public static class CodecCapabilityService
 
         var required = new Version(major, minor, patch);
         return version >= required;
+    }
+
+    private static string GetOnnxRuntimeVersion()
+    {
+        try
+        {
+            var assembly = typeof(Microsoft.ML.OnnxRuntime.InferenceSession).Assembly;
+            return assembly.GetName().Version?.ToString() ?? "unknown";
+        }
+        catch
+        {
+            return "unknown";
+        }
+    }
+
+    private static string? GetOnnxRuntimeAssemblyPath()
+    {
+        try
+        {
+            var location = typeof(Microsoft.ML.OnnxRuntime.InferenceSession).Assembly.Location;
+            return string.IsNullOrWhiteSpace(location) ? null : location;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static string? BuildAppDataPath(params string[] relativeSegments)
