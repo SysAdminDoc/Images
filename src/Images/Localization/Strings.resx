@@ -665,4 +665,46 @@ Details written to:
   <data name="ValuePixelsFormat" xml:space="preserve">
     <value>{0} px</value>
   </data>
+  <data name="ApplyCrop" xml:space="preserve">
+    <value>Apply crop</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="ClearSelection" xml:space="preserve">
+    <value>Clear selection</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="CopySelection" xml:space="preserve">
+    <value>Copy selection</value>
+  </data>
+  <data name="ImageAutomationHelpText" xml:space="preserve">
+    <value>Use arrow keys to navigate previous / next in folder. Mouse wheel zooms; drag pans; double-click fits. F1 shortcut help.</value>
+  </data>
+  <data name="ImageAutomationLoadedNameFormat" xml:space="preserve">
+    <value>Image, {0} by {1} pixels</value>
+  </data>
+  <data name="ImageAutomationNoImageName" xml:space="preserve">
+    <value>Image (none loaded)</value>
+  </data>
+  <data name="OcrTextBoxHelpText" xml:space="preserve">
+    <value>Selectable OCR text. Drag to highlight text, then press Ctrl+C or use the context menu to copy.</value>
+  </data>
+  <data name="OcrSelectCopyTooltipFormat" xml:space="preserve">
+    <value>Select and copy: {0}</value>
+  </data>
+  <data name="OcrTextRegions" xml:space="preserve">
+    <value>OCR text regions</value>
+  </data>
+  <data name="OcrTextRegionHelpText" xml:space="preserve">
+    <value>Selectable OCR text region</value>
+  </data>
+  <data name="OcrTextRegionsHelpText" xml:space="preserve">
+    <value>Select text inside a region, then copy it with Ctrl+C or the text box context menu</value>
+  </data>
+  <data name="OcrTextTooltipFormat" xml:space="preserve">
+    <value>OCR text: {0}</value>
+  </data>
 </root>

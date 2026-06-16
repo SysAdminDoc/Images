@@ -1,6 +1,7 @@
 using System.Windows.Automation;
 using System.Windows.Automation.Peers;
 using System.Windows.Media.Imaging;
+using Images.Localization;
 
 namespace Images.Controls;
 
@@ -30,12 +31,12 @@ public sealed class ImageCanvasAutomationPeer : FrameworkElementAutomationPeer
         // Read the underlying image's dimensions to build a descriptive name so JAWS/NVDA
         // read "Image, 2048 by 1365 pixels" on focus rather than a bare "Image".
         if (Owner.Source is BitmapSource bs)
-            return $"Image, {bs.PixelWidth} by {bs.PixelHeight} pixels";
-        return "Image (none loaded)";
+            return Strings.Format("ImageAutomationLoadedNameFormat", bs.PixelWidth, bs.PixelHeight);
+        return Strings.ImageAutomationNoImageName;
     }
 
     protected override string GetHelpTextCore()
-        => "Use arrow keys to navigate previous / next in folder. Mouse wheel zooms; drag pans; double-click fits. F1 shortcut help.";
+        => Strings.ImageAutomationHelpText;
 
     protected override bool IsContentElementCore() => true;
     protected override bool IsControlElementCore() => true;

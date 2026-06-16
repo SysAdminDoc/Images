@@ -96,6 +96,10 @@ public static class Strings
     public static string AnnotationTextToolStatus => Get(nameof(AnnotationTextToolStatus));
     public static string AnnotationUnavailableMissingFile => Get(nameof(AnnotationUnavailableMissingFile));
     public static string NoAnnotationLabel => Get(nameof(NoAnnotationLabel));
+    public static string ImageAutomationHelpText => Get(nameof(ImageAutomationHelpText));
+    public static string ImageAutomationNoImageName => Get(nameof(ImageAutomationNoImageName));
+    public static string OcrSelectCopyTooltipFormat => Get(nameof(OcrSelectCopyTooltipFormat));
+    public static string OcrTextTooltipFormat => Get(nameof(OcrTextTooltipFormat));
 
     public static string Get(string key)
     {
