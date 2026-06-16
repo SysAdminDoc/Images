@@ -1,7 +1,8 @@
 <Window x:Class="Images.ConfirmDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Confirm action"
+        xmlns:loc="clr-namespace:Images.Localization"
+        Title="{loc:Loc ConfirmAction}"
         Width="520"
         SizeToContent="Height"
         MinWidth="500"
@@ -98,9 +99,9 @@
                     Margin="0,16,0,0"
                     Visibility="Collapsed">
                 <CheckBox x:Name="DontAskAgainCheckBox"
-                          Content="Don't ask again for Recycle Bin deletes"
-                          AutomationProperties.Name="Do not ask again for Recycle Bin deletes"
-                          AutomationProperties.HelpText="When checked, future Delete actions move images to the Recycle Bin without this confirmation. You can turn confirmation back on in Settings." />
+                          Content="{loc:Loc ConfirmRecycleBinDontAskAgain}"
+                          AutomationProperties.Name="{loc:Loc ConfirmRecycleBinDontAskAgainAutomationName}"
+                          AutomationProperties.HelpText="{loc:Loc ConfirmRecycleBinDontAskAgainHelpText}" />
             </Border>
 
             <StackPanel Grid.Row="4"
@@ -113,7 +114,7 @@
                         IsDefault="True"
                         IsCancel="True"
                         MinWidth="108"
-                        AutomationProperties.Name="Cancel">
+                        AutomationProperties.Name="{loc:Loc Cancel}">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="&#xE711;"
                                    FontFamily="{StaticResource IconFontFamily}"
@@ -128,7 +129,7 @@
                         Click="ConfirmButton_Click"
                         MinWidth="166"
                         Margin="12,0,0,0"
-                        AutomationProperties.Name="Confirm destructive action">
+                        AutomationProperties.Name="{loc:Loc ConfirmDestructiveAction}">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock x:Name="ConfirmIconText"
                                    Text="&#xE74D;"

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ConfirmAction" xml:space="preserve">
+    <value>Confirm action</value>
+  </data>
+  <data name="ConfirmDestructiveAction" xml:space="preserve">
+    <value>Confirm destructive action</value>
+  </data>
+  <data name="ConfirmRecycleBinButton" xml:space="preserve">
+    <value>Move to Recycle Bin</value>
+  </data>
+  <data name="ConfirmRecycleBinDontAskAgain" xml:space="preserve">
+    <value>Don't ask again for Recycle Bin deletes</value>
+  </data>
+  <data name="ConfirmRecycleBinDontAskAgainAutomationName" xml:space="preserve">
+    <value>Do not ask again for Recycle Bin deletes</value>
+  </data>
+  <data name="ConfirmRecycleBinDontAskAgainHelpText" xml:space="preserve">
+    <value>When checked, future Delete actions move images to the Recycle Bin without this confirmation. You can turn confirmation back on in Settings.</value>
+  </data>
+  <data name="ConfirmRecycleBinFootnote" xml:space="preserve">
+    <value>You can restore the file from the Recycle Bin until it is emptied.</value>
+  </data>
+  <data name="ConfirmRecycleBinMessage" xml:space="preserve">
+    <value>This keeps the file recoverable, but removes it from the current folder and advances the viewer.</value>
+  </data>
+  <data name="ConfirmRecycleBinTitle" xml:space="preserve">
+    <value>Move to Recycle Bin?</value>
+  </data>
+  <data name="ConfirmReferenceBoardButton" xml:space="preserve">
+    <value>Clear board</value>
+  </data>
+  <data name="ConfirmReferenceBoardClearTitle" xml:space="preserve">
+    <value>Clear reference board?</value>
+  </data>
+  <data name="ConfirmReferenceBoardDetail" xml:space="preserve">
+    <value>Images and notes are removed from the canvas only. Source files are not changed.</value>
+  </data>
+  <data name="ConfirmReferenceBoardFootnote" xml:space="preserve">
+    <value>This action cannot be undone.</value>
+  </data>
+  <data name="ConfirmReferenceBoardMessage" xml:space="preserve">
+    <value>This removes the current board layout from this window. Export first if you need to keep a copy.</value>
+  </data>
+  <data name="ConfirmReferenceBoardSubjectFormat" xml:space="preserve">
+    <value>{0} board item{1}</value>
+  </data>
+</root>

@@ -11,6 +11,7 @@ All notable changes to **Images** are documented here.
 ### Changed
 
 - **High-contrast runtime theme** — the accessibility high-contrast preference now installs a `SystemColors`-backed theme dictionary immediately, Windows high-contrast mode is honored automatically at startup, and Windows preference/color changes refresh the active dictionary at runtime.
+- **Localization foundation** — the app now has a default English `Strings.resx`, a WPF `LocExtension`, Confirm dialog strings routed through resources, and a CI localization parity check that fails when future non-English resource files have missing or extra keys.
 - **Metadata capture dates** — EXIF `OffsetTimeOriginal` is now covered by regression tests and rendered with an explicit signed UTC offset when present, while offset-free EXIF dates continue to display without inventing one.
 - **WinGet release publisher** — published GitHub releases now have a dedicated WinGet workflow wired to `vedantmgoyal9/winget-releaser@v2`, matching the setup installer asset and cleanly skipping until the required classic `WINGET_TOKEN` secret and `winget-pkgs` fork are configured.
 - **Settings information architecture** — Settings now has first-class General, Appearance, Accessibility, Advanced, Hotkeys, Diagnostics, Text extraction, and Privacy sections. New persisted controls cover window-placement restore, reduced viewer motion, high-contrast preference, and archive-book defaults; reduced motion now disables the main viewer's edge-arrow fade animation.
