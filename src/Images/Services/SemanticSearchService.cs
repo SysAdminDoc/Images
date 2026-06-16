@@ -74,7 +74,7 @@ public sealed class SemanticSearchService
             ? CreateDefaultPath()
             : Path.GetFullPath(dbPath);
         _catalog = catalog ?? new CatalogService();
-        _provider = provider ?? new DeterministicSemanticEmbeddingProvider();
+        _provider = provider ?? TryCreateClipProvider() ?? new DeterministicSemanticEmbeddingProvider();
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
 
         if (string.IsNullOrWhiteSpace(_dbPath))
@@ -554,6 +554,18 @@ public sealed class SemanticSearchService
         IReadOnlyList<float> Vector,
         string MatchedText,
         DateTimeOffset IndexedUtc);
+
+    private static ISemanticEmbeddingProvider? TryCreateClipProvider()
+    {
+        try
+        {
+            return ClipEmbeddingProvider.TryCreate();
+        }
+        catch
+        {
+            return null;
+        }
+    }
 }
 
 public sealed class DeterministicSemanticEmbeddingProvider : ISemanticEmbeddingProvider
