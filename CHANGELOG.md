@@ -49,6 +49,7 @@ All notable changes to **Images** are documented here.
 - **Copy/Move to folder** — the viewport context menu now copies or moves the current file to a chosen folder, preserves matching XMP sidecars, resolves destination name collisions safely, remembers recent transfer destinations, and refreshes the shell after moves/copies.
 - **Wallpaper layout modes** — Set as desktop wallpaper now offers Fill, Fit, Span, and Tile modes and writes the matching Windows wallpaper style before applying the stable app-data wallpaper copy.
 - **Send/print/copy actions** — the viewport context menu now supports no-dialog printing to the default printer, local `.eml` email drafts with the current file attached, Copy image, and Copy image and path clipboard payloads.
+- **ExifTool safe invocation wrapper** — future metadata-write workflows now have a process-boundary helper that runs ExifTool without shell invocation, sends arguments and target paths through a UTF-8 `-@` argfile, rejects line-break and shell-metacharacter path channels, and cleans temporary argfiles after execution.
 
 ## v0.2.11 — 2026-05-05
 
