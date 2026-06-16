@@ -47,6 +47,10 @@ jobs:
         shell: pwsh
         run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\Test-VersionSync.ps1
 
+      - name: Validate localization resources
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\Test-LocalizationResources.ps1
+
       - name: Vulnerable package gate
         shell: pwsh
         run: |

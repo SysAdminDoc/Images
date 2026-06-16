@@ -1,4 +1,5 @@
 using System.Windows;
+using Images.Localization;
 using Images.Services;
 
 namespace Images;
@@ -42,13 +43,13 @@ public partial class ConfirmDialog : Window
         var folder = System.IO.Path.GetDirectoryName(path) ?? "";
 
         var dialog = new ConfirmDialog(
-            title: "Move to Recycle Bin?",
-            message: "This keeps the file recoverable, but removes it from the current folder and advances the viewer.",
+            title: Strings.ConfirmRecycleBinTitle,
+            message: Strings.ConfirmRecycleBinMessage,
             subject: fileName,
             detail: folder,
-            footnote: "You can restore the file from the Recycle Bin until it is emptied.",
-            confirmText: "Move to Recycle Bin",
-            cancelText: "Cancel",
+            footnote: Strings.ConfirmRecycleBinFootnote,
+            confirmText: Strings.ConfirmRecycleBinButton,
+            cancelText: Strings.Cancel,
             showDoNotAskAgain: true)
         {
             Owner = owner
@@ -63,13 +64,13 @@ public partial class ConfirmDialog : Window
     public static bool ConfirmReferenceBoardClear(Window? owner, int itemCount)
     {
         var dialog = new ConfirmDialog(
-            title: "Clear reference board?",
-            message: "This removes the current board layout from this window. Export first if you need to keep a copy.",
-            subject: $"{itemCount} board item{(itemCount == 1 ? string.Empty : "s")}",
-            detail: "Images and notes are removed from the canvas only. Source files are not changed.",
-            footnote: "This action cannot be undone.",
-            confirmText: "Clear board",
-            cancelText: "Cancel")
+            title: Strings.ConfirmReferenceBoardClearTitle,
+            message: Strings.ConfirmReferenceBoardMessage,
+            subject: Strings.Format("ConfirmReferenceBoardSubjectFormat", itemCount, itemCount == 1 ? string.Empty : "s"),
+            detail: Strings.ConfirmReferenceBoardDetail,
+            footnote: Strings.ConfirmReferenceBoardFootnote,
+            confirmText: Strings.ConfirmReferenceBoardButton,
+            cancelText: Strings.Cancel)
         {
             Owner = owner
         };
