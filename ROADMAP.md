@@ -514,7 +514,7 @@ Primary = GitHub Releases (source of truth). Secondary = winget + Scoop extras. 
 
 Set the philosophy before writing the first migration. Getting this wrong means the v5 user can't open their v1 library.
 
-- [ ] **SCH-04** *P1* — **Hop, don't jump**. A v1→v5 upgrade runs v1→v2→v3→v4→v5 with integrity check after each hop, not a direct-to-target diff. Effort: S.
+- [x] **SCH-04** *P1* — **Hop, don't jump**. A v1→v5 upgrade runs v1→v2→v3→v4→v5 with integrity check after each hop, not a direct-to-target diff. Effort: S. *(shipped: CatalogService.EnsureSchema uses a `for` loop stepping v→v+1 with ApplyGuardedMigration per hop — each hop runs in a transaction, sets user_version, checks schema canary, asserts canary, validates integrity, and has backup/restore on failure; SettingsService and SemanticSearchService use the same hop philosophy at v1 with explicit per-step Migrate_0_to_1 methods)*
 - [x] **SCH-05** *P1* — **Snapshot fixtures under version control**. `tests/fixtures/catalog.v1.db`, `catalog.v2.db` etc. — every bump must roll every prior snapshot forward in CI. Effort: S (per version). *(shipped: v1 fixture checked in; csproj copies to output; migration regression tests verify CatalogService opens + preserves all data)*
 
 ### Migration from competing tools
