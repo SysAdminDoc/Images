@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Images.Localization;
 using Images.Services;
 using Microsoft.Win32;
 
@@ -44,13 +45,13 @@ public partial class FileHealthScanWindow : Window
             !_scanFolders.Contains(normalized, StringComparer.OrdinalIgnoreCase))
         {
             _scanFolders.Add(normalized);
-            SetStatus($"Added scan folder: {normalized}", FileHealthStatus.Ready);
+            SetStatus(Strings.Format(nameof(Strings.FileHealthScanAddedFolderFormat), normalized), FileHealthStatus.Ready);
         }
     }
 
     private void AddFolderButton_Click(object sender, RoutedEventArgs e)
     {
-        var folder = PickFolder("Add folder to scan");
+        var folder = PickFolder(Strings.FileHealthScanAddFolderDialogTitle);
         if (folder is not null)
             AddScanFolder(folder);
     }
@@ -59,7 +60,7 @@ public partial class FileHealthScanWindow : Window
     {
         if (_scanFolders.Count == 0)
         {
-            SetStatus("Add at least one folder before scanning.", FileHealthStatus.Warning);
+            SetStatus(Strings.FileHealthScanAddFolderBeforeScanning, FileHealthStatus.Warning);
             return;
         }
 
@@ -72,7 +73,7 @@ public partial class FileHealthScanWindow : Window
         SetBusy(true);
         _findings.Clear();
         ResetDetail();
-        SetStatus("Scanning selected folders for file health issues...", FileHealthStatus.Busy);
+        SetStatus(Strings.FileHealthScanScanningStatus, FileHealthStatus.Busy);
 
         try
         {
@@ -88,16 +89,16 @@ public partial class FileHealthScanWindow : Window
                 ResetDetail();
 
             var failed = result.FailedCount > 0
-                ? $" {result.FailedCount} file or folder issue{Plural(result.FailedCount)} was skipped."
+                ? Strings.Format(nameof(Strings.FileHealthScanFailedSuffixFormat), result.FailedCount, Plural(result.FailedCount))
                 : string.Empty;
 
             SetStatus(
-                $"Scanned {result.ScannedCount} file{Plural(result.ScannedCount)}. Found {_findings.Count} health issue{Plural(_findings.Count)}.{failed}",
+                Strings.Format(nameof(Strings.FileHealthScanResultFormat), result.ScannedCount, Plural(result.ScannedCount), _findings.Count, Plural(_findings.Count), failed),
                 _findings.Count > 0 ? FileHealthStatus.Ready : FileHealthStatus.Warning);
         }
         catch (OperationCanceledException)
         {
-            SetStatus("Scan canceled.", FileHealthStatus.Warning);
+            SetStatus(Strings.FileHealthScanCanceled, FileHealthStatus.Warning);
         }
         finally
         {
@@ -110,7 +111,7 @@ public partial class FileHealthScanWindow : Window
     private void CancelScanButton_Click(object sender, RoutedEventArgs e)
     {
         _scanCancellation?.Cancel();
-        SetStatus("Canceling scan...", FileHealthStatus.Busy);
+        SetStatus(Strings.FileHealthScanCanceling, FileHealthStatus.Busy);
     }
 
     private void RemoveFolderButton_Click(object sender, RoutedEventArgs e)
@@ -137,14 +138,14 @@ public partial class FileHealthScanWindow : Window
             _recoveryCenter.RecordRename(
                 result.SourcePath ?? finding.Path,
                 result.DestinationPath ?? finding.Path,
-                "File health rename",
-                $"Renamed {finding.FileName} to the detected {finding.DetectedFormat} extension.");
+                Strings.FileHealthScanRenameRecoveryReason,
+                Strings.Format(nameof(Strings.FileHealthScanRenameRecoveryDetailFormat), finding.FileName, finding.DetectedFormat));
             RemoveFinding(finding);
-            SetStatus($"Renamed extension: {Path.GetFileName(result.DestinationPath)}", FileHealthStatus.Ready);
+            SetStatus(Strings.Format(nameof(Strings.FileHealthScanRenamedFormat), Path.GetFileName(result.DestinationPath)), FileHealthStatus.Ready);
             return;
         }
 
-        SetStatus(result.Error ?? "Rename failed.", FileHealthStatus.Error);
+        SetStatus(result.Error ?? Strings.FileHealthScanRenameFailed, FileHealthStatus.Error);
     }
 
     private void MarkReviewedButton_Click(object sender, RoutedEventArgs e)
@@ -154,7 +155,7 @@ public partial class FileHealthScanWindow : Window
             return;
 
         RemoveFinding(finding);
-        SetStatus("Finding marked reviewed for this session.", FileHealthStatus.Ready);
+        SetStatus(Strings.FileHealthScanMarkedReviewed, FileHealthStatus.Ready);
     }
 
     private void QuarantineButton_Click(object sender, RoutedEventArgs e)
@@ -169,14 +170,14 @@ public partial class FileHealthScanWindow : Window
             _recoveryCenter.RecordQuarantine(
                 result.SourcePath ?? finding.Path,
                 result.DestinationPath ?? finding.Path,
-                "File health quarantine",
-                $"Moved {finding.FileName} to app-local quarantine after {finding.Title.ToLowerInvariant()}.");
+                Strings.FileHealthScanQuarantineRecoveryReason,
+                Strings.Format(nameof(Strings.FileHealthScanQuarantineRecoveryDetailFormat), finding.FileName, finding.Title.ToLowerInvariant()));
             RemoveFinding(finding);
-            SetStatus($"Moved to quarantine: {result.DestinationPath}", FileHealthStatus.Ready);
+            SetStatus(Strings.Format(nameof(Strings.FileHealthScanQuarantinedFormat), result.DestinationPath), FileHealthStatus.Ready);
             return;
         }
 
-        SetStatus(result.Error ?? "Quarantine failed.", FileHealthStatus.Error);
+        SetStatus(result.Error ?? Strings.FileHealthScanQuarantineFailed, FileHealthStatus.Error);
     }
 
     private FileHealthFinding? SelectedFinding => FindingsList.SelectedItem as FileHealthFinding;
@@ -203,8 +204,8 @@ public partial class FileHealthScanWindow : Window
         DetailText.ToolTip = finding.Detail;
         RenameButton.IsEnabled = finding.CanRename;
         DetailHelpText.Text = finding.CanRename
-            ? $"Detected {finding.DetectedFormat}; Rename extension will move this file to {Path.ChangeExtension(finding.Path, finding.SuggestedExtension)}."
-            : "Quarantine moves the file to app-local recovery storage. Mark reviewed hides this finding for the current window.";
+            ? Strings.Format(nameof(Strings.FileHealthScanDetectedRenameHelpFormat), finding.DetectedFormat, Path.ChangeExtension(finding.Path, finding.SuggestedExtension))
+            : Strings.FileHealthScanNoRenameHelp;
 
         try
         {
@@ -214,7 +215,7 @@ public partial class FileHealthScanWindow : Window
         catch
         {
             PreviewImage.Source = null;
-            PreviewImage.ToolTip = "Preview unavailable.";
+            PreviewImage.ToolTip = Strings.FileHealthScanPreviewUnavailable;
         }
     }
 

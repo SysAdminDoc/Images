@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
+using Images.Localization;
 using Images.Services;
 using Microsoft.Win32;
 
@@ -46,7 +47,7 @@ public partial class MacroActionWindow : Window
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
-            SetStatus("Could not add that macro source.", MacroActionStatus.Warning);
+            SetStatus(Strings.MacroCouldNotAddSource, MacroActionStatus.Warning);
         }
     }
 
@@ -54,7 +55,7 @@ public partial class MacroActionWindow : Window
     {
         var dialog = new OpenFileDialog
         {
-            Title = "Add files to macro runner",
+            Title = Strings.MacroAddFilesDialogTitle,
             Filter = SupportedImageFormats.OpenDialogFilter,
             Multiselect = true
         };
@@ -64,33 +65,33 @@ public partial class MacroActionWindow : Window
 
         foreach (var path in dialog.FileNames)
             AddSource(path);
-        SetStatus($"Added {dialog.FileNames.Length} source file{Plural(dialog.FileNames.Length)}.", MacroActionStatus.Ready);
+        SetStatus(Strings.Format(nameof(Strings.MacroAddedSourceFilesFormat), dialog.FileNames.Length, Plural(dialog.FileNames.Length)), MacroActionStatus.Ready);
     }
 
     private void AddFolderButton_Click(object sender, RoutedEventArgs e)
     {
-        var folder = PickFolder("Add folder to macro runner");
+        var folder = PickFolder(Strings.MacroAddFolderDialogTitle);
         if (folder is null)
             return;
 
         AddSource(folder);
-        SetStatus("Added source folder.", MacroActionStatus.Ready);
+        SetStatus(Strings.MacroAddedSourceFolder, MacroActionStatus.Ready);
     }
 
     private void ClearSourcesButton_Click(object sender, RoutedEventArgs e)
     {
         _sourceRows.Clear();
-        SetStatus("Sources cleared.", MacroActionStatus.Ready);
+        SetStatus(Strings.MacroSourcesCleared, MacroActionStatus.Ready);
     }
 
     private void ChooseOutputButton_Click(object sender, RoutedEventArgs e)
     {
-        var folder = PickFolder("Choose macro output folder");
+        var folder = PickFolder(Strings.MacroChooseOutputFolderDialogTitle);
         if (folder is null)
             return;
 
         _outputFolder = folder;
-        OutputFolderText.Text = "Output folder: " + folder;
+        OutputFolderText.Text = Strings.Format(nameof(Strings.MacroOutputFolderFormat), folder);
         OutputFolderText.ToolTip = folder;
     }
 
@@ -124,7 +125,7 @@ public partial class MacroActionWindow : Window
             return;
         }
 
-        SetStatus($"Macro JSON is valid: {plan.Actions.Count} action{Plural(plan.Actions.Count)}.", MacroActionStatus.Ready);
+        SetStatus(Strings.Format(nameof(Strings.MacroValidResultFormat), plan.Actions.Count, Plural(plan.Actions.Count)), MacroActionStatus.Ready);
         RefreshSummary(plan);
     }
 
@@ -132,8 +133,8 @@ public partial class MacroActionWindow : Window
     {
         var dialog = new OpenFileDialog
         {
-            Title = "Load macro JSON",
-            Filter = "Macro JSON|*.json|All files|*.*"
+            Title = Strings.MacroLoadDialogTitle,
+            Filter = Strings.MacroLoadDialogFilter
         };
 
         if (dialog.ShowDialog(this) != true)
@@ -146,7 +147,7 @@ public partial class MacroActionWindow : Window
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
         {
-            SetStatus("Could not load macro JSON.", MacroActionStatus.Error);
+            SetStatus(Strings.MacroCouldNotLoad, MacroActionStatus.Error);
         }
     }
 
@@ -160,8 +161,8 @@ public partial class MacroActionWindow : Window
 
         var dialog = new SaveFileDialog
         {
-            Title = "Save macro JSON",
-            Filter = "Macro JSON|*.json|All files|*.*",
+            Title = Strings.MacroSaveDialogTitle,
+            Filter = Strings.MacroSaveDialogFilter,
             FileName = "images-macro.json"
         };
 
@@ -171,11 +172,11 @@ public partial class MacroActionWindow : Window
         try
         {
             File.WriteAllText(dialog.FileName, MacroActionService.Serialize(plan));
-            SetStatus("Macro JSON saved.", MacroActionStatus.Ready);
+            SetStatus(Strings.MacroSaved, MacroActionStatus.Ready);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
         {
-            SetStatus("Could not save macro JSON.", MacroActionStatus.Error);
+            SetStatus(Strings.MacroCouldNotSave, MacroActionStatus.Error);
         }
     }
 
@@ -190,13 +191,13 @@ public partial class MacroActionWindow : Window
         var sources = CollectSourceFiles();
         if (sources.Count == 0)
         {
-            SetStatus("Add supported source files before running a macro.", MacroActionStatus.Warning);
+            SetStatus(Strings.MacroAddSourcesBeforeRunning, MacroActionStatus.Warning);
             return;
         }
 
         var options = new MacroRunOptions(_outputFolder, DryRunCheckBox.IsChecked == true);
         SetBusy(true);
-        SetStatus($"Running {plan.Actions.Count} action{Plural(plan.Actions.Count)} on {sources.Count} file{Plural(sources.Count)}...", MacroActionStatus.Busy);
+        SetStatus(Strings.Format(nameof(Strings.MacroRunningFormat), plan.Actions.Count, Plural(plan.Actions.Count), sources.Count, Plural(sources.Count)), MacroActionStatus.Busy);
         _resultRows.Clear();
 
         try
@@ -205,14 +206,14 @@ public partial class MacroActionWindow : Window
             foreach (var item in result.Items)
             {
                 _resultRows.Add(item.Success
-                    ? $"OK: {Path.GetFileName(item.SourcePath)} -> {item.FinalPath}"
-                    : $"Failed: {Path.GetFileName(item.SourcePath)} - {item.Error}");
+                    ? Strings.Format(nameof(Strings.MacroResultOkFormat), Path.GetFileName(item.SourcePath), item.FinalPath)
+                    : Strings.Format(nameof(Strings.MacroResultFailedFormat), Path.GetFileName(item.SourcePath), item.Error));
                 foreach (var message in item.Messages)
                     _resultRows.Add("  " + message);
             }
 
             SetStatus(
-                $"Macro complete: {result.SuccessCount} succeeded, {result.FailedCount} failed.",
+                Strings.Format(nameof(Strings.MacroCompleteFormat), result.SuccessCount, result.FailedCount),
                 result.FailedCount == 0 ? MacroActionStatus.Ready : MacroActionStatus.Warning);
         }
         finally
@@ -231,7 +232,7 @@ public partial class MacroActionWindow : Window
         var updated = new MacroActionPlan(plan.Name, actions);
         MacroJsonBox.Text = MacroActionService.Serialize(updated);
         RefreshSummary(updated);
-        SetStatus($"Added {action.Kind} action.", MacroActionStatus.Ready);
+        SetStatus(Strings.Format(nameof(Strings.MacroAddedActionFormat), action.Kind), MacroActionStatus.Ready);
     }
 
     private List<string> CollectSourceFiles()
@@ -259,7 +260,7 @@ public partial class MacroActionWindow : Window
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
             {
-                _resultRows.Add($"Skipped source: {row}");
+                _resultRows.Add(Strings.Format(nameof(Strings.MacroSkippedSourceFormat), row));
             }
         }
 
@@ -274,7 +275,7 @@ public partial class MacroActionWindow : Window
 
     private void RefreshSummary(MacroActionPlan plan)
     {
-        PlanSummaryText.Text = $"{plan.Name}: {plan.Actions.Count} action{Plural(plan.Actions.Count)}. JSON remains editable before running.";
+        PlanSummaryText.Text = Strings.Format(nameof(Strings.MacroPlanSummaryFormat), plan.Name, plan.Actions.Count, Plural(plan.Actions.Count));
     }
 
     private void SetBusy(bool busy)

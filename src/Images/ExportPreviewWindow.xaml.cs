@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Images.Localization;
 using Images.Services;
 using Microsoft.Win32;
 
@@ -33,8 +34,8 @@ public partial class ExportPreviewWindow : Window
         PresetCombo.SelectedItem = PickInitialPreset(initialExtension);
         ApplyPreset(PresetCombo.SelectedItem as ExportPreviewPreset ?? ExportPreviewPreset.Defaults[0]);
         SourceText.Text = _sourcePath is null
-            ? "Preview compression settings against the displayed bitmap before writing a copy."
-            : $"Preview compression settings for {Path.GetFileName(_sourcePath)} before writing a copy.";
+            ? Strings.ExportPreviewSubtitleGeneric
+            : Strings.Format(nameof(Strings.ExportPreviewSubtitleFormat), Path.GetFileName(_sourcePath));
 
         SourceInitialized += (_, _) =>
         {
@@ -69,7 +70,7 @@ public partial class ExportPreviewWindow : Window
             : Path.GetFileNameWithoutExtension(_sourcePath);
         var dialog = new SaveFileDialog
         {
-            Title = "Save previewed export copy",
+            Title = Strings.ExportPreviewSaveDialogTitle,
             FileName = stem + "_export" + request.Extension,
             Filter = ImageExportService.ExportFilter,
             DefaultExt = request.Extension.TrimStart('.'),
@@ -85,23 +86,23 @@ public partial class ExportPreviewWindow : Window
             var targetPath = ImageExportService.ResolveWritablePath(dialog.FileName);
             if (_sourcePath is not null && PathsReferToSameFile(targetPath, _sourcePath))
             {
-                SetStatus("Choose a different filename for the exported copy.", ExportPreviewStatus.Warning);
+                SetStatus(Strings.ExportPreviewChooseDifferentFilename, ExportPreviewStatus.Warning);
                 return;
             }
 
             SetBusy(true);
-            SetStatus($"Saving {Path.GetFileName(targetPath)}...", ExportPreviewStatus.Busy);
+            SetStatus(Strings.Format(nameof(Strings.ExportPreviewSavingFormat), Path.GetFileName(targetPath)), ExportPreviewStatus.Busy);
             var savedPath = await Task.Run(() => ImageExportService.Save(
                 _source,
                 targetPath,
                 (uint)request.Quality,
                 request.MaxWidth,
                 request.MaxHeight));
-            SetStatus($"Saved copy to {savedPath}.", ExportPreviewStatus.Ready);
+            SetStatus(Strings.Format(nameof(Strings.ExportPreviewSavedFormat), savedPath), ExportPreviewStatus.Ready);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
         {
-            SetStatus($"Save failed: {ex.Message}", ExportPreviewStatus.Error);
+            SetStatus(Strings.Format(nameof(Strings.ExportPreviewSaveFailedFormat), ex.Message), ExportPreviewStatus.Error);
         }
         finally
         {
@@ -131,7 +132,7 @@ public partial class ExportPreviewWindow : Window
             return;
 
         _hasPreview = false;
-        SetStatus("Settings changed. Build a new preview before saving.", ExportPreviewStatus.Warning);
+        SetStatus(Strings.ExportPreviewSettingsChanged, ExportPreviewStatus.Warning);
     }
 
     private void ApplyPreset(ExportPreviewPreset preset)
@@ -145,13 +146,13 @@ public partial class ExportPreviewWindow : Window
         MaxHeightBox.Text = request.MaxHeight.ToString(CultureInfo.InvariantCulture);
         _loadingPreset = false;
         _hasPreview = false;
-        SetStatus("Preset ready. Build a preview to inspect pixels, size, and warnings.", ExportPreviewStatus.Ready);
+        SetStatus(Strings.ExportPreviewPresetReady, ExportPreviewStatus.Ready);
     }
 
     private async Task BuildPreviewAsync()
     {
         SetBusy(true);
-        SetStatus("Encoding preview...", ExportPreviewStatus.Busy);
+        SetStatus(Strings.ExportPreviewEncoding, ExportPreviewStatus.Busy);
         try
         {
             var request = ReadRequest();
@@ -159,12 +160,12 @@ public partial class ExportPreviewWindow : Window
             PreviewImage.Source = result.PreviewImage;
             ApplySummary(result.Summary);
             _hasPreview = true;
-            SetStatus("Preview ready.", ExportPreviewStatus.Ready);
+            SetStatus(Strings.ExportPreviewReady, ExportPreviewStatus.Ready);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
         {
             _hasPreview = false;
-            SetStatus($"Preview failed: {ex.Message}", ExportPreviewStatus.Error);
+            SetStatus(Strings.Format(nameof(Strings.ExportPreviewFailedFormat), ex.Message), ExportPreviewStatus.Error);
         }
         finally
         {
@@ -192,13 +193,13 @@ public partial class ExportPreviewWindow : Window
         OutputSizeText.Text = summary.EstimatedSizeText;
         DeltaText.Text = summary.DeltaText;
         DimensionsText.Text = summary.DimensionsText;
-        FormatText.Text = $"{summary.FormatText} quality {summary.QualityText}";
+        FormatText.Text = Strings.Format(nameof(Strings.ExportPreviewFormatQualityFormat), summary.FormatText, summary.QualityText);
 
         _warnings.Clear();
         foreach (var warning in summary.Warnings)
             _warnings.Add(warning);
         if (_warnings.Count == 0)
-            _warnings.Add("No format warnings.");
+            _warnings.Add(Strings.ExportPreviewNoWarnings);
     }
 
     private void SetBusy(bool busy)

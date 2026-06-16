@@ -1559,4 +1559,1360 @@ Details written to:
   <data name="DuplicateCleanupPreviewUnavailable" xml:space="preserve">
     <value>Preview unavailable.</value>
   </data>
+  <data name="SettingsWindowTitle" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="SettingsHeading" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="SettingsSubtitle" xml:space="preserve">
+    <value>Customize startup, appearance, accessibility, hotkeys, diagnostics, and privacy preferences.</value>
+  </data>
+  <data name="SettingsSectionGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="SettingsRememberWindowTitle" xml:space="preserve">
+    <value>Remember window size and position</value>
+  </data>
+  <data name="SettingsRememberWindowDescription" xml:space="preserve">
+    <value>Restores the last normal window bounds unless Images was launched in peek mode.</value>
+  </data>
+  <data name="SettingsSectionAppearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="SettingsFilmstripTitle" xml:space="preserve">
+    <value>Show filmstrip at startup</value>
+  </data>
+  <data name="SettingsFilmstripDescription" xml:space="preserve">
+    <value>Displays folder thumbnails below the viewer when a folder is opened.</value>
+  </data>
+  <data name="SettingsMetadataHudTitle" xml:space="preserve">
+    <value>Show metadata overlay at startup</value>
+  </data>
+  <data name="SettingsMetadataHudDescription" xml:space="preserve">
+    <value>Floats camera, exposure, and location data over the image.</value>
+  </data>
+  <data name="SettingsConfirmRecycleBinTitle" xml:space="preserve">
+    <value>Confirm before moving images to Recycle Bin</value>
+  </data>
+  <data name="SettingsConfirmRecycleBinDescription" xml:space="preserve">
+    <value>Turn this back on if you used 'don't ask again' on the delete confirmation.</value>
+  </data>
+  <data name="SettingsSectionAccessibility" xml:space="preserve">
+    <value>Accessibility</value>
+  </data>
+  <data name="SettingsReduceMotionTitle" xml:space="preserve">
+    <value>Reduce viewer motion</value>
+  </data>
+  <data name="SettingsReduceMotionDescription" xml:space="preserve">
+    <value>Disables hover fade animation for the edge navigation buttons.</value>
+  </data>
+  <data name="SettingsHighContrastTitle" xml:space="preserve">
+    <value>Prefer high-contrast surfaces</value>
+  </data>
+  <data name="SettingsHighContrastDescription" xml:space="preserve">
+    <value>Stores a contrast preference for settings, diagnostics, and future contrast-aware views.</value>
+  </data>
+  <data name="SettingsSectionAdvanced" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+  <data name="SettingsArchiveRtlTitle" xml:space="preserve">
+    <value>Archive books turn right-to-left</value>
+  </data>
+  <data name="SettingsArchiveRtlDescription" xml:space="preserve">
+    <value>Uses manga-style page turn direction for supported archive books.</value>
+  </data>
+  <data name="SettingsArchiveCleanScanTitle" xml:space="preserve">
+    <value>Clean scanned archive pages</value>
+  </data>
+  <data name="SettingsArchiveCleanScanDescription" xml:space="preserve">
+    <value>Applies the preview-only old-scan filter when opening archive books.</value>
+  </data>
+  <data name="SettingsArchiveSpreadTitle" xml:space="preserve">
+    <value>Open archive books in two-page spreads</value>
+  </data>
+  <data name="SettingsArchiveSpreadDescription" xml:space="preserve">
+    <value>Keeps explicit covers single and pairs interior pages where possible.</value>
+  </data>
+  <data name="SettingsSectionHotkeys" xml:space="preserve">
+    <value>Hotkeys</value>
+  </data>
+  <data name="SettingsHotkeysFixed" xml:space="preserve">
+    <value>Keyboard shortcuts are fixed in this release.</value>
+  </data>
+  <data name="SettingsSectionTextExtraction" xml:space="preserve">
+    <value>Text extraction</value>
+  </data>
+  <data name="SettingsOcrLanguagesButton" xml:space="preserve">
+    <value>Languages</value>
+  </data>
+  <data name="SettingsOcrLanguagesTooltip" xml:space="preserve">
+    <value>Open Windows Language &amp; region settings</value>
+  </data>
+  <data name="SettingsOcrLanguagesAutomationName" xml:space="preserve">
+    <value>Open Windows language settings</value>
+  </data>
+  <data name="SettingsOcrRefreshButton" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="SettingsOcrRefreshAutomationName" xml:space="preserve">
+    <value>Refresh text extraction status</value>
+  </data>
+  <data name="SettingsOcrPrivacyNote" xml:space="preserve">
+    <value>OCR is local to Windows. Images does not upload image data for text extraction.</value>
+  </data>
+  <data name="SettingsSectionDiagnostics" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="SettingsAppDataButton" xml:space="preserve">
+    <value>App data</value>
+  </data>
+  <data name="SettingsAppDataAutomationName" xml:space="preserve">
+    <value>Open app data folder</value>
+  </data>
+  <data name="SettingsLogsButton" xml:space="preserve">
+    <value>Logs</value>
+  </data>
+  <data name="SettingsLogsAutomationName" xml:space="preserve">
+    <value>Open logs folder</value>
+  </data>
+  <data name="SettingsSectionPrivacy" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="SettingsUpdateCheckTitle" xml:space="preserve">
+    <value>Check for updates automatically</value>
+  </data>
+  <data name="SettingsCloseButton" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="SettingsCloseAutomationName" xml:space="preserve">
+    <value>Close settings</value>
+  </data>
+  <data name="SettingsRememberWindowOnStatus" xml:space="preserve">
+    <value>Window size and position will be restored at startup.</value>
+  </data>
+  <data name="SettingsRememberWindowOffStatus" xml:space="preserve">
+    <value>Images will use its default window placement at startup.</value>
+  </data>
+  <data name="SettingsFilmstripOnStatus" xml:space="preserve">
+    <value>Filmstrip will be shown at startup.</value>
+  </data>
+  <data name="SettingsFilmstripOffStatus" xml:space="preserve">
+    <value>Filmstrip will stay hidden at startup.</value>
+  </data>
+  <data name="SettingsMetadataHudOnStatus" xml:space="preserve">
+    <value>Metadata overlay will be shown at startup.</value>
+  </data>
+  <data name="SettingsMetadataHudOffStatus" xml:space="preserve">
+    <value>Metadata overlay will stay hidden at startup.</value>
+  </data>
+  <data name="SettingsRecycleBinConfirmOnStatus" xml:space="preserve">
+    <value>Recycle Bin confirmation enabled.</value>
+  </data>
+  <data name="SettingsRecycleBinConfirmOffStatus" xml:space="preserve">
+    <value>Recycle Bin confirmation disabled. Delete will move images immediately.</value>
+  </data>
+  <data name="SettingsReduceMotionOnStatus" xml:space="preserve">
+    <value>Motion reduction enabled for viewer chrome animations.</value>
+  </data>
+  <data name="SettingsReduceMotionOffStatus" xml:space="preserve">
+    <value>Viewer chrome animations enabled.</value>
+  </data>
+  <data name="SettingsHighContrastOnStatus" xml:space="preserve">
+    <value>High-contrast surfaces enabled.</value>
+  </data>
+  <data name="SettingsHighContrastOffStatus" xml:space="preserve">
+    <value>High-contrast preference disabled.</value>
+  </data>
+  <data name="SettingsArchiveRtlOnStatus" xml:space="preserve">
+    <value>Archive books will use right-to-left page turns.</value>
+  </data>
+  <data name="SettingsArchiveRtlOffStatus" xml:space="preserve">
+    <value>Archive books will use left-to-right page turns.</value>
+  </data>
+  <data name="SettingsArchiveCleanScanOnStatus" xml:space="preserve">
+    <value>Archive clean-scan preview filter enabled by default.</value>
+  </data>
+  <data name="SettingsArchiveCleanScanOffStatus" xml:space="preserve">
+    <value>Archive clean-scan preview filter disabled by default.</value>
+  </data>
+  <data name="SettingsArchiveSpreadOnStatus" xml:space="preserve">
+    <value>Archive two-page spreads enabled by default.</value>
+  </data>
+  <data name="SettingsArchiveSpreadOffStatus" xml:space="preserve">
+    <value>Archive two-page spreads disabled by default.</value>
+  </data>
+  <data name="SettingsUpdateCheckOnStatus" xml:space="preserve">
+    <value>Automatic update checks enabled. Images only contacts GitHub Releases.</value>
+  </data>
+  <data name="SettingsUpdateCheckOffStatus" xml:space="preserve">
+    <value>Automatic update checks disabled.</value>
+  </data>
+  <data name="SettingsUpdateCheckDescription" xml:space="preserve">
+    <value>Off by default. When enabled, Images pings github.com/SysAdminDoc/Images at startup. No usage data is sent.</value>
+  </data>
+  <data name="SettingsHotkeySummary" xml:space="preserve">
+    <value>Ctrl+, Settings; Ctrl+Shift+B Batch; Ctrl+Shift+D Duplicate cleanup; Ctrl+Shift+H File health; Ctrl+Shift+E Edit history; Ctrl+Alt+A Adjustments; Ctrl+Alt+F Effects; Ctrl+Alt+P Perspective; C Crop; S Selection.</value>
+  </data>
+  <data name="SettingsDiagnosticsStorageSummary" xml:space="preserve">
+    <value>Diagnostics and support files stay under the local Images app data folder. Use About for the full codec report, system info, logs, and cache controls.</value>
+  </data>
+  <data name="SettingsOcrRefreshedStatus" xml:space="preserve">
+    <value>Text extraction status refreshed.</value>
+  </data>
+  <data name="SettingsLanguageSettingsOpenedStatus" xml:space="preserve">
+    <value>Windows language settings opened.</value>
+  </data>
+  <data name="SettingsLanguageSettingsFailedFormat" xml:space="preserve">
+    <value>Could not open Windows language settings: {0}</value>
+  </data>
+  <data name="SettingsAppDataOpenedStatus" xml:space="preserve">
+    <value>App data folder opened.</value>
+  </data>
+  <data name="SettingsLogsOpenedStatus" xml:space="preserve">
+    <value>Logs folder opened.</value>
+  </data>
+  <data name="SettingsStorageUnavailableStatus" xml:space="preserve">
+    <value>Storage path is unavailable in this session.</value>
+  </data>
+  <data name="SettingsStorageOpenFailedFormat" xml:space="preserve">
+    <value>Could not open storage folder: {0}</value>
+  </data>
+  <data name="AboutTitle" xml:space="preserve">
+    <value>About Images</value>
+  </data>
+  <data name="AboutAppName" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="AboutDescription" xml:space="preserve">
+    <value>Windows 7&#x2013;style classic image viewer, reimagined in dark mode</value>
+  </data>
+  <data name="AboutBuildLabel" xml:space="preserve">
+    <value>Build</value>
+  </data>
+  <data name="AboutRuntimeLabel" xml:space="preserve">
+    <value>Runtime</value>
+  </data>
+  <data name="AboutOsLabel" xml:space="preserve">
+    <value>OS</value>
+  </data>
+  <data name="AboutCodecsLabel" xml:space="preserve">
+    <value>Codecs</value>
+  </data>
+  <data name="AboutDocumentsLabel" xml:space="preserve">
+    <value>Documents</value>
+  </data>
+  <data name="AboutTextExtractionLabel" xml:space="preserve">
+    <value>Text extraction</value>
+  </data>
+  <data name="AboutDiagnosticsHeading" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="AboutDiagnosticsAutomationName" xml:space="preserve">
+    <value>Runtime diagnostics status</value>
+  </data>
+  <data name="AboutCopySystemInfoAutomationName" xml:space="preserve">
+    <value>Copy system information</value>
+  </data>
+  <data name="AboutCopySystemInfo" xml:space="preserve">
+    <value>Copy system info</value>
+  </data>
+  <data name="AboutCopyCodecReportAutomationName" xml:space="preserve">
+    <value>Copy codec report</value>
+  </data>
+  <data name="AboutCopyCodecReport" xml:space="preserve">
+    <value>Copy codec report</value>
+  </data>
+  <data name="AboutOpenLogsAutomationName" xml:space="preserve">
+    <value>Open Images logs folder</value>
+  </data>
+  <data name="AboutOpenLogs" xml:space="preserve">
+    <value>Open logs</value>
+  </data>
+  <data name="AboutOpenDataFolderAutomationName" xml:space="preserve">
+    <value>Open Images data folder</value>
+  </data>
+  <data name="AboutOpenDataFolder" xml:space="preserve">
+    <value>Open data folder</value>
+  </data>
+  <data name="AboutOpenThumbnailCacheAutomationName" xml:space="preserve">
+    <value>Open thumbnail cache folder</value>
+  </data>
+  <data name="AboutOpenThumbnailCache" xml:space="preserve">
+    <value>Open thumbnail cache</value>
+  </data>
+  <data name="AboutClearThumbnailsAutomationName" xml:space="preserve">
+    <value>Clear thumbnail cache</value>
+  </data>
+  <data name="AboutClearThumbnails" xml:space="preserve">
+    <value>Clear thumbnails</value>
+  </data>
+  <data name="AboutCodecCapabilityHeading" xml:space="preserve">
+    <value>Codec capability</value>
+  </data>
+  <data name="AboutCapabilityMatrixHeading" xml:space="preserve">
+    <value>Capability matrix</value>
+  </data>
+  <data name="AboutCapabilityMatrixAutomationName" xml:space="preserve">
+    <value>Codec capability matrix</value>
+  </data>
+  <data name="AboutRuntimeProvenanceHeading" xml:space="preserve">
+    <value>Runtime provenance</value>
+  </data>
+  <data name="AboutUpdateCheckContent" xml:space="preserve">
+    <value>Check for updates automatically</value>
+  </data>
+  <data name="AboutUpdateCheckTooltip" xml:space="preserve">
+    <value>Off by default. When enabled, Images checks GitHub Releases at startup.</value>
+  </data>
+  <data name="AboutUpdateCheckAutomationName" xml:space="preserve">
+    <value>Check for updates automatically</value>
+  </data>
+  <data name="AboutUpdateCheckHelpText" xml:space="preserve">
+    <value>Off by default. When enabled, Images checks GitHub Releases at startup. No image, file, or folder metadata is sent.</value>
+  </data>
+  <data name="AboutViewUpdateAutomationName" xml:space="preserve">
+    <value>View available update</value>
+  </data>
+  <data name="AboutViewUpdate" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="AboutLicenseCopyright" xml:space="preserve">
+    <value>MIT licensed &#x00B7; &#x00A9; 2026 SysAdminDoc</value>
+  </data>
+  <data name="AboutCheckUpdatesAutomationName" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="AboutCheckUpdates" xml:space="preserve">
+    <value>Check updates</value>
+  </data>
+  <data name="AboutGitHubProjectAutomationName" xml:space="preserve">
+    <value>Open GitHub project page</value>
+  </data>
+  <data name="AboutGitHubProject" xml:space="preserve">
+    <value>GitHub project</value>
+  </data>
+  <data name="AboutCrashLogsAutomationName" xml:space="preserve">
+    <value>Open crash log folder</value>
+  </data>
+  <data name="AboutCrashLogs" xml:space="preserve">
+    <value>Crash logs</value>
+  </data>
+  <data name="AboutCodecReport" xml:space="preserve">
+    <value>Codec report</value>
+  </data>
+  <data name="AboutSaveSystemInfoAutomationName" xml:space="preserve">
+    <value>Save system info to a text file</value>
+  </data>
+  <data name="AboutSaveSystemInfoTooltip" xml:space="preserve">
+    <value>Writes Images --system-info output to a text file in your temp folder and reveals it in Explorer.</value>
+  </data>
+  <data name="AboutSaveSystemInfo" xml:space="preserve">
+    <value>Save system info</value>
+  </data>
+  <data name="AboutOpenDataFolderTooltip" xml:space="preserve">
+    <value>Opens %LOCALAPPDATA%\Images &#x2014; logs, settings.db, thumbs, update-check.json all live here.</value>
+  </data>
+  <data name="AboutCloseAutomationName" xml:space="preserve">
+    <value>Close About window</value>
+  </data>
+  <data name="AboutCouldNotOpenGitHubFormat" xml:space="preserve">
+    <value>Could not open GitHub: {0}</value>
+  </data>
+  <data name="AboutCouldNotOpenCrashLogsFormat" xml:space="preserve">
+    <value>Could not open crash logs: {0}</value>
+  </data>
+  <data name="AboutCodecReportCopied" xml:space="preserve">
+    <value>Codec report copied to clipboard.</value>
+  </data>
+  <data name="AboutCouldNotCopyCodecReportFormat" xml:space="preserve">
+    <value>Could not copy codec report: {0}</value>
+  </data>
+  <data name="AboutSystemInfoCopied" xml:space="preserve">
+    <value>System info copied to clipboard.</value>
+  </data>
+  <data name="AboutCouldNotCopySystemInfoFormat" xml:space="preserve">
+    <value>Could not copy system info: {0}</value>
+  </data>
+  <data name="AboutLogFolderUnavailable" xml:space="preserve">
+    <value>Log folder is unavailable.</value>
+  </data>
+  <data name="AboutCouldNotOpenLogsFormat" xml:space="preserve">
+    <value>Could not open logs: {0}</value>
+  </data>
+  <data name="AboutSavedToFormat" xml:space="preserve">
+    <value>Saved to {0}</value>
+  </data>
+  <data name="AboutCouldNotSaveSystemInfoFormat" xml:space="preserve">
+    <value>Could not save system info: {0}</value>
+  </data>
+  <data name="AboutCouldNotOpenDataFolderFormat" xml:space="preserve">
+    <value>Could not open data folder: {0}</value>
+  </data>
+  <data name="AboutThumbnailCacheFolderUnavailable" xml:space="preserve">
+    <value>Thumbnail cache folder is unavailable.</value>
+  </data>
+  <data name="AboutCouldNotOpenThumbnailCacheFormat" xml:space="preserve">
+    <value>Could not open thumbnail cache: {0}</value>
+  </data>
+  <data name="AboutThumbnailCacheStorageUnavailable" xml:space="preserve">
+    <value>Thumbnail cache storage is unavailable.</value>
+  </data>
+  <data name="AboutThumbnailCacheAlreadyEmpty" xml:space="preserve">
+    <value>Thumbnail cache is already empty.</value>
+  </data>
+  <data name="AboutClearThumbnailCachePromptFormat" xml:space="preserve">
+    <value>Clear {0} cached thumbnails and {1} temporary files? Images will rebuild thumbnails from the original files when folders are viewed again.</value>
+  </data>
+  <data name="AboutClearThumbnailCacheTitle" xml:space="preserve">
+    <value>Clear thumbnail cache</value>
+  </data>
+  <data name="AboutClearingThumbnailCache" xml:space="preserve">
+    <value>Clearing thumbnail cache...</value>
+  </data>
+  <data name="AboutThumbnailCacheClearedPartialFormat" xml:space="preserve">
+    <value>Cleared {0} files ({1}). {2} files could not be removed because they may be in use.</value>
+  </data>
+  <data name="AboutThumbnailCacheClearedFormat" xml:space="preserve">
+    <value>Cleared {0} thumbnail files ({1}). Thumbnails will rebuild automatically.</value>
+  </data>
+  <data name="AboutCouldNotClearThumbnailCacheFormat" xml:space="preserve">
+    <value>Could not clear thumbnail cache: {0}</value>
+  </data>
+  <data name="AboutChecking" xml:space="preserve">
+    <value>Checking...</value>
+  </data>
+  <data name="AboutCheckingGitHubReleases" xml:space="preserve">
+    <value>Checking GitHub Releases...</value>
+  </data>
+  <data name="AboutUpdateCheckFailedFormat" xml:space="preserve">
+    <value>Update check failed: {0}</value>
+  </data>
+  <data name="AboutNewerVersionAvailableFormat" xml:space="preserve">
+    <value>A newer version is available: {0}.</value>
+  </data>
+  <data name="AboutOnLatestVersion" xml:space="preserve">
+    <value>You're on the latest version.</value>
+  </data>
+  <data name="AboutCouldNotOpenReleasePageFormat" xml:space="preserve">
+    <value>Could not open release page: {0}</value>
+  </data>
+  <data name="AboutAppDirectoryLabel" xml:space="preserve">
+    <value>App directory</value>
+  </data>
+  <data name="AboutProcessArchLabel" xml:space="preserve">
+    <value>Process arch</value>
+  </data>
+  <data name="AboutCapabilityMatrixCountSummaryFormat" xml:space="preserve">
+    <value>{0} open &#x00B7; {1} export</value>
+  </data>
+  <data name="AboutCapabilityMatrixFacetsFormat" xml:space="preserve">
+    <value>Animation: {0} &#x00B7; Multi-page: {1} &#x00B7; Metadata: {2}</value>
+  </data>
+  <data name="AboutCapabilityMatrixRuntimeFormat" xml:space="preserve">
+    <value>Runtime: {0}</value>
+  </data>
+  <data name="AboutTriYes" xml:space="preserve">
+    <value>yes</value>
+  </data>
+  <data name="AboutTriNo" xml:space="preserve">
+    <value>no</value>
+  </data>
+  <data name="AboutTriNA" xml:space="preserve">
+    <value>n/a</value>
+  </data>
+  <data name="AboutProvenanceDependencyKindVersionFormat" xml:space="preserve">
+    <value>{0} | Version: {1}</value>
+  </data>
+  <data name="AboutProvenanceSourceFormat" xml:space="preserve">
+    <value>Source: {0}</value>
+  </data>
+  <data name="AboutProvenancePathFormat" xml:space="preserve">
+    <value>Path: {0}</value>
+  </data>
+  <data name="AboutProvenanceNotApplicable" xml:space="preserve">
+    <value>(not applicable)</value>
+  </data>
+  <data name="AboutProvenanceSha256Format" xml:space="preserve">
+    <value>SHA-256: {0}</value>
+  </data>
+  <data name="AboutProvenanceAdvisoryFormat" xml:space="preserve">
+    <value>Advisory: {0}</value>
+  </data>
+  <data name="AboutProvenanceActionFormat" xml:space="preserve">
+    <value>Action: {0}</value>
+  </data>
+  <data name="MacroWindowTitle" xml:space="preserve">
+    <value>Images - Macro actions</value>
+  </data>
+  <data name="MacroHeading" xml:space="preserve">
+    <value>Macro actions</value>
+  </data>
+  <data name="MacroSubtitle" xml:space="preserve">
+    <value>Build inspectable JSON actions, preview them, then run them against local files.</value>
+  </data>
+  <data name="MacroLoadJsonAutomationName" xml:space="preserve">
+    <value>Load macro action JSON</value>
+  </data>
+  <data name="MacroLoadJson" xml:space="preserve">
+    <value>Load JSON</value>
+  </data>
+  <data name="MacroSaveJsonAutomationName" xml:space="preserve">
+    <value>Save macro action JSON</value>
+  </data>
+  <data name="MacroSaveJson" xml:space="preserve">
+    <value>Save JSON</value>
+  </data>
+  <data name="MacroSources" xml:space="preserve">
+    <value>Sources</value>
+  </data>
+  <data name="MacroAddFilesAutomationName" xml:space="preserve">
+    <value>Add files to macro runner</value>
+  </data>
+  <data name="MacroAddFiles" xml:space="preserve">
+    <value>Add files</value>
+  </data>
+  <data name="MacroAddFolderAutomationName" xml:space="preserve">
+    <value>Add folder to macro runner</value>
+  </data>
+  <data name="MacroAddFolder" xml:space="preserve">
+    <value>Add folder</value>
+  </data>
+  <data name="MacroSourcesAutomationName" xml:space="preserve">
+    <value>Macro action sources</value>
+  </data>
+  <data name="MacroClearSourcesAutomationName" xml:space="preserve">
+    <value>Clear macro action sources</value>
+  </data>
+  <data name="MacroClearSources" xml:space="preserve">
+    <value>Clear sources</value>
+  </data>
+  <data name="MacroOutput" xml:space="preserve">
+    <value>Output</value>
+  </data>
+  <data name="MacroOutputFolderDefault" xml:space="preserve">
+    <value>Output folder: alongside source</value>
+  </data>
+  <data name="MacroOutputFolderFormat" xml:space="preserve">
+    <value>Output folder: {0}</value>
+  </data>
+  <data name="MacroChooseOutputAutomationName" xml:space="preserve">
+    <value>Choose macro output folder</value>
+  </data>
+  <data name="MacroChooseOutput" xml:space="preserve">
+    <value>Choose output</value>
+  </data>
+  <data name="MacroDryRunOnly" xml:space="preserve">
+    <value>Dry run only</value>
+  </data>
+  <data name="MacroDryRunAutomationName" xml:space="preserve">
+    <value>Run macro as dry run</value>
+  </data>
+  <data name="MacroActionPresets" xml:space="preserve">
+    <value>Action presets</value>
+  </data>
+  <data name="MacroAddStripGpsAutomationName" xml:space="preserve">
+    <value>Add strip GPS macro action</value>
+  </data>
+  <data name="MacroAddStripGps" xml:space="preserve">
+    <value>Add strip GPS</value>
+  </data>
+  <data name="MacroAddExportPngAutomationName" xml:space="preserve">
+    <value>Add export PNG macro action</value>
+  </data>
+  <data name="MacroAddExportPng" xml:space="preserve">
+    <value>Add export PNG</value>
+  </data>
+  <data name="MacroAddRenamePatternAutomationName" xml:space="preserve">
+    <value>Add rename pattern macro action</value>
+  </data>
+  <data name="MacroAddRenamePattern" xml:space="preserve">
+    <value>Add rename pattern</value>
+  </data>
+  <data name="MacroJsonHeading" xml:space="preserve">
+    <value>Macro JSON</value>
+  </data>
+  <data name="MacroValidateAutomationName" xml:space="preserve">
+    <value>Validate macro JSON</value>
+  </data>
+  <data name="MacroValidate" xml:space="preserve">
+    <value>Validate</value>
+  </data>
+  <data name="MacroJsonAutomationName" xml:space="preserve">
+    <value>Macro action JSON</value>
+  </data>
+  <data name="MacroRunLog" xml:space="preserve">
+    <value>Run log</value>
+  </data>
+  <data name="MacroRunLogAutomationName" xml:space="preserve">
+    <value>Macro run log</value>
+  </data>
+  <data name="MacroDefaultSummary" xml:space="preserve">
+    <value>Default macro: export PNG copy.</value>
+  </data>
+  <data name="MacroRunAutomationName" xml:space="preserve">
+    <value>Run macro actions</value>
+  </data>
+  <data name="MacroRunButton" xml:space="preserve">
+    <value>Run macro</value>
+  </data>
+  <data name="MacroReadyStatus" xml:space="preserve">
+    <value>Ready. Inspect the JSON before running actions.</value>
+  </data>
+  <data name="MacroCouldNotAddSource" xml:space="preserve">
+    <value>Could not add that macro source.</value>
+  </data>
+  <data name="MacroAddFilesDialogTitle" xml:space="preserve">
+    <value>Add files to macro runner</value>
+  </data>
+  <data name="MacroAddedSourceFilesFormat" xml:space="preserve">
+    <value>Added {0} source file{1}.</value>
+  </data>
+  <data name="MacroAddFolderDialogTitle" xml:space="preserve">
+    <value>Add folder to macro runner</value>
+  </data>
+  <data name="MacroAddedSourceFolder" xml:space="preserve">
+    <value>Added source folder.</value>
+  </data>
+  <data name="MacroSourcesCleared" xml:space="preserve">
+    <value>Sources cleared.</value>
+  </data>
+  <data name="MacroChooseOutputFolderDialogTitle" xml:space="preserve">
+    <value>Choose macro output folder</value>
+  </data>
+  <data name="MacroValidResultFormat" xml:space="preserve">
+    <value>Macro JSON is valid: {0} action{1}.</value>
+  </data>
+  <data name="MacroLoadDialogTitle" xml:space="preserve">
+    <value>Load macro JSON</value>
+  </data>
+  <data name="MacroLoadDialogFilter" xml:space="preserve">
+    <value>Macro JSON|*.json|All files|*.*</value>
+  </data>
+  <data name="MacroCouldNotLoad" xml:space="preserve">
+    <value>Could not load macro JSON.</value>
+  </data>
+  <data name="MacroSaveDialogTitle" xml:space="preserve">
+    <value>Save macro JSON</value>
+  </data>
+  <data name="MacroSaveDialogFilter" xml:space="preserve">
+    <value>Macro JSON|*.json|All files|*.*</value>
+  </data>
+  <data name="MacroSaved" xml:space="preserve">
+    <value>Macro JSON saved.</value>
+  </data>
+  <data name="MacroCouldNotSave" xml:space="preserve">
+    <value>Could not save macro JSON.</value>
+  </data>
+  <data name="MacroAddSourcesBeforeRunning" xml:space="preserve">
+    <value>Add supported source files before running a macro.</value>
+  </data>
+  <data name="MacroRunningFormat" xml:space="preserve">
+    <value>Running {0} action{1} on {2} file{3}...</value>
+  </data>
+  <data name="MacroResultOkFormat" xml:space="preserve">
+    <value>OK: {0} -&gt; {1}</value>
+  </data>
+  <data name="MacroResultFailedFormat" xml:space="preserve">
+    <value>Failed: {0} - {1}</value>
+  </data>
+  <data name="MacroCompleteFormat" xml:space="preserve">
+    <value>Macro complete: {0} succeeded, {1} failed.</value>
+  </data>
+  <data name="MacroAddedActionFormat" xml:space="preserve">
+    <value>Added {0} action.</value>
+  </data>
+  <data name="MacroPlanSummaryFormat" xml:space="preserve">
+    <value>{0}: {1} action{2}. JSON remains editable before running.</value>
+  </data>
+  <data name="MacroSkippedSourceFormat" xml:space="preserve">
+    <value>Skipped source: {0}</value>
+  </data>
+  <data name="ImportInboxWindowTitle" xml:space="preserve">
+    <value>Images - Import inbox</value>
+  </data>
+  <data name="ImportInboxHeading" xml:space="preserve">
+    <value>Import inbox</value>
+  </data>
+  <data name="ImportInboxSubtitle" xml:space="preserve">
+    <value>Stage new images, resolve duplicates, add sidecar tags and ratings, then import locally.</value>
+  </data>
+  <data name="ImportInboxAddFiles" xml:space="preserve">
+    <value>Add files</value>
+  </data>
+  <data name="ImportInboxAddFolder" xml:space="preserve">
+    <value>Add folder</value>
+  </data>
+  <data name="ImportInboxRefresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="ImportInboxAddFilesDialogTitle" xml:space="preserve">
+    <value>Add files to import inbox</value>
+  </data>
+  <data name="ImportInboxAddFolderDialogTitle" xml:space="preserve">
+    <value>Add folder to import inbox</value>
+  </data>
+  <data name="ImportInboxDestination" xml:space="preserve">
+    <value>Destination</value>
+  </data>
+  <data name="ImportInboxChooseDestination" xml:space="preserve">
+    <value>Choose a destination folder</value>
+  </data>
+  <data name="ImportInboxDuplicateCheckHint" xml:space="preserve">
+    <value>Duplicate checks compare staged files against this folder recursively.</value>
+  </data>
+  <data name="ImportInboxChoose" xml:space="preserve">
+    <value>Choose</value>
+  </data>
+  <data name="ImportInboxStagedFiles" xml:space="preserve">
+    <value>Staged files</value>
+  </data>
+  <data name="ImportInboxNoFileSelected" xml:space="preserve">
+    <value>No staged file selected</value>
+  </data>
+  <data name="ImportInboxNoFileSelectedHint" xml:space="preserve">
+    <value>Add files or folders, then select an item to tag, rate, strip GPS, or skip.</value>
+  </data>
+  <data name="ImportInboxApplyToIncluded" xml:space="preserve">
+    <value>Apply to included</value>
+  </data>
+  <data name="ImportInboxRecycleSelected" xml:space="preserve">
+    <value>Recycle selected</value>
+  </data>
+  <data name="ImportInboxMetadata" xml:space="preserve">
+    <value>Import metadata</value>
+  </data>
+  <data name="ImportInboxTags" xml:space="preserve">
+    <value>Tags</value>
+  </data>
+  <data name="ImportInboxTagsHint" xml:space="preserve">
+    <value>Tags are written to XMP sidecars. Aliases and parents from Tag relationships are applied on import.</value>
+  </data>
+  <data name="ImportInboxRating" xml:space="preserve">
+    <value>Rating</value>
+  </data>
+  <data name="ImportInboxWriteRatingSidecar" xml:space="preserve">
+    <value>Write rating sidecar</value>
+  </data>
+  <data name="ImportInboxStripGps" xml:space="preserve">
+    <value>Strip GPS metadata on imported copy</value>
+  </data>
+  <data name="ImportInboxAction" xml:space="preserve">
+    <value>Import action</value>
+  </data>
+  <data name="ImportInboxMoveOriginals" xml:space="preserve">
+    <value>Move originals instead of copying</value>
+  </data>
+  <data name="ImportInboxMoveOriginalsHint" xml:space="preserve">
+    <value>Copy keeps the source files untouched. Move is faster when this inbox is already your temporary intake folder.</value>
+  </data>
+  <data name="ImportInboxChooseDestinationThenImport" xml:space="preserve">
+    <value>Choose a destination, then import included files.</value>
+  </data>
+  <data name="ImportInboxImportIncluded" xml:space="preserve">
+    <value>Import included</value>
+  </data>
+  <data name="ImportInboxReadyStatus" xml:space="preserve">
+    <value>Ready. Add files or a folder to stage imports.</value>
+  </data>
+  <data name="ImportInboxCouldNotAddSource" xml:space="preserve">
+    <value>Could not add that import source.</value>
+  </data>
+  <data name="ImportInboxAddFolderBeforeRefresh" xml:space="preserve">
+    <value>Add files or a folder before refreshing the import inbox.</value>
+  </data>
+  <data name="ImportInboxBuildingStatus" xml:space="preserve">
+    <value>Building import inbox...</value>
+  </data>
+  <data name="ImportInboxStagedResultFormat" xml:space="preserve">
+    <value>Staged {0} file{1}. {2} inbox duplicate{3}, {4} destination duplicate{5}.</value>
+  </data>
+  <data name="ImportInboxRefreshCanceled" xml:space="preserve">
+    <value>Import inbox refresh canceled.</value>
+  </data>
+  <data name="ImportInboxChooseDestinationDialogTitle" xml:space="preserve">
+    <value>Choose import destination</value>
+  </data>
+  <data name="ImportInboxDestinationSelected" xml:space="preserve">
+    <value>Destination selected. Add files or a folder to stage imports.</value>
+  </data>
+  <data name="ImportInboxAppliedMetadata" xml:space="preserve">
+    <value>Applied selected metadata to included inbox files.</value>
+  </data>
+  <data name="ImportInboxSelectBeforeRecycling" xml:space="preserve">
+    <value>Select one or more staged files before recycling.</value>
+  </data>
+  <data name="ImportInboxRecycleCanceled" xml:space="preserve">
+    <value>Recycle canceled.</value>
+  </data>
+  <data name="ImportInboxRecycledFormat" xml:space="preserve">
+    <value>Moved {0} staged file{1} to Recycle Bin.</value>
+  </data>
+  <data name="ImportInboxRecycledPartialFormat" xml:space="preserve">
+    <value>Moved {0} staged file{1} to Recycle Bin. {2} failed.</value>
+  </data>
+  <data name="ImportInboxChooseDestinationBeforeImporting" xml:space="preserve">
+    <value>Choose a destination folder before importing.</value>
+  </data>
+  <data name="ImportInboxCheckBeforeImporting" xml:space="preserve">
+    <value>Check at least one staged file before importing.</value>
+  </data>
+  <data name="ImportInboxImportingFormat" xml:space="preserve">
+    <value>Importing {0} file{1}...</value>
+  </data>
+  <data name="ImportInboxImportedFormat" xml:space="preserve">
+    <value>Imported {0} file{1}.</value>
+  </data>
+  <data name="ImportInboxImportedPartialFormat" xml:space="preserve">
+    <value>Imported {0} file{1}. {2} failed.</value>
+  </data>
+  <data name="ImportInboxAddFilesBegin" xml:space="preserve">
+    <value>Add files or a folder to begin staging imports.</value>
+  </data>
+  <data name="ImportInboxIncludedSummaryFormat" xml:space="preserve">
+    <value>{0} of {1} staged file{2} included. Destination duplicates are skipped by default.</value>
+  </data>
+  <data name="ImportInboxRejectedText" xml:space="preserve">
+    <value>Rejected (-1)</value>
+  </data>
+  <data name="ImportInboxStarFormat" xml:space="preserve">
+    <value>{0} star{1}</value>
+  </data>
+  <data name="ImportInboxPreviewUnavailable" xml:space="preserve">
+    <value>Preview unavailable.</value>
+  </data>
+  <data name="ExportPreviewWindowTitle" xml:space="preserve">
+    <value>Images - Export workbench</value>
+  </data>
+  <data name="ExportPreviewHeading" xml:space="preserve">
+    <value>Export workbench</value>
+  </data>
+  <data name="ExportPreviewSubtitleGeneric" xml:space="preserve">
+    <value>Preview compression settings against the displayed bitmap before writing a copy.</value>
+  </data>
+  <data name="ExportPreviewSubtitleFormat" xml:space="preserve">
+    <value>Preview compression settings for {0} before writing a copy.</value>
+  </data>
+  <data name="ExportPreviewPreset" xml:space="preserve">
+    <value>Preset</value>
+  </data>
+  <data name="ExportPreviewExtension" xml:space="preserve">
+    <value>Extension</value>
+  </data>
+  <data name="ExportPreviewQuality" xml:space="preserve">
+    <value>Quality</value>
+  </data>
+  <data name="ExportPreviewMaxDimensions" xml:space="preserve">
+    <value>Max dimensions</value>
+  </data>
+  <data name="ExportPreviewSize" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="ExportPreviewSource" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="ExportPreviewOutput" xml:space="preserve">
+    <value>Output</value>
+  </data>
+  <data name="ExportPreviewDelta" xml:space="preserve">
+    <value>Delta</value>
+  </data>
+  <data name="ExportPreviewPixels" xml:space="preserve">
+    <value>Pixels</value>
+  </data>
+  <data name="ExportPreviewFormat" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="ExportPreviewWarnings" xml:space="preserve">
+    <value>Warnings</value>
+  </data>
+  <data name="ExportPreviewOriginal" xml:space="preserve">
+    <value>Original</value>
+  </data>
+  <data name="ExportPreviewEncodedPreview" xml:space="preserve">
+    <value>Encoded preview</value>
+  </data>
+  <data name="ExportPreviewReadyStatus" xml:space="preserve">
+    <value>Ready.</value>
+  </data>
+  <data name="ExportPreviewSaveDialogTitle" xml:space="preserve">
+    <value>Save previewed export copy</value>
+  </data>
+  <data name="ExportPreviewChooseDifferentFilename" xml:space="preserve">
+    <value>Choose a different filename for the exported copy.</value>
+  </data>
+  <data name="ExportPreviewSavingFormat" xml:space="preserve">
+    <value>Saving {0}...</value>
+  </data>
+  <data name="ExportPreviewSavedFormat" xml:space="preserve">
+    <value>Saved copy to {0}.</value>
+  </data>
+  <data name="ExportPreviewSaveFailedFormat" xml:space="preserve">
+    <value>Save failed: {0}</value>
+  </data>
+  <data name="ExportPreviewSettingsChanged" xml:space="preserve">
+    <value>Settings changed. Build a new preview before saving.</value>
+  </data>
+  <data name="ExportPreviewPresetReady" xml:space="preserve">
+    <value>Preset ready. Build a preview to inspect pixels, size, and warnings.</value>
+  </data>
+  <data name="ExportPreviewEncoding" xml:space="preserve">
+    <value>Encoding preview...</value>
+  </data>
+  <data name="ExportPreviewReady" xml:space="preserve">
+    <value>Preview ready.</value>
+  </data>
+  <data name="ExportPreviewFailedFormat" xml:space="preserve">
+    <value>Preview failed: {0}</value>
+  </data>
+  <data name="ExportPreviewFormatQualityFormat" xml:space="preserve">
+    <value>{0} quality {1}</value>
+  </data>
+  <data name="ExportPreviewNoWarnings" xml:space="preserve">
+    <value>No format warnings.</value>
+  </data>
+  <data name="ExportPreviewPreviewButton" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="ExportPreviewSaveCopy" xml:space="preserve">
+    <value>Save copy</value>
+  </data>
+  <data name="FileHealthScanWindowTitle" xml:space="preserve">
+    <value>Images - File health scan</value>
+  </data>
+  <data name="FileHealthScanHeading" xml:space="preserve">
+    <value>File health scan</value>
+  </data>
+  <data name="FileHealthScanSubtitle" xml:space="preserve">
+    <value>Find bad extensions, broken images, zero-byte files, and temporary artifacts locally.</value>
+  </data>
+  <data name="FileHealthScanAddFolder" xml:space="preserve">
+    <value>Add folder</value>
+  </data>
+  <data name="FileHealthScanScan" xml:space="preserve">
+    <value>Scan</value>
+  </data>
+  <data name="FileHealthScanFolders" xml:space="preserve">
+    <value>Folders</value>
+  </data>
+  <data name="FileHealthScanRemove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="FileHealthScanFindings" xml:space="preserve">
+    <value>Findings</value>
+  </data>
+  <data name="FileHealthScanEmptyHeading" xml:space="preserve">
+    <value>Scan for file problems</value>
+  </data>
+  <data name="FileHealthScanEmptyDescription" xml:space="preserve">
+    <value>Review each finding before renaming an extension or moving a file into app-local quarantine.</value>
+  </data>
+  <data name="FileHealthScanRename" xml:space="preserve">
+    <value>Rename extension</value>
+  </data>
+  <data name="FileHealthScanMarkReviewed" xml:space="preserve">
+    <value>Mark reviewed</value>
+  </data>
+  <data name="FileHealthScanQuarantine" xml:space="preserve">
+    <value>Quarantine</value>
+  </data>
+  <data name="FileHealthScanMetaFile" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="FileHealthScanMetaFolder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="FileHealthScanMetaSize" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="FileHealthScanMetaDetail" xml:space="preserve">
+    <value>Detail</value>
+  </data>
+  <data name="FileHealthScanHelpDefault" xml:space="preserve">
+    <value>Rename only changes the extension. Quarantine moves the file to app-local recovery storage.</value>
+  </data>
+  <data name="FileHealthScanReadyStatus" xml:space="preserve">
+    <value>Ready. Add one or more folders to scan.</value>
+  </data>
+  <data name="FileHealthScanAddFolderDialogTitle" xml:space="preserve">
+    <value>Add folder to scan</value>
+  </data>
+  <data name="FileHealthScanAddedFolderFormat" xml:space="preserve">
+    <value>Added scan folder: {0}</value>
+  </data>
+  <data name="FileHealthScanAddFolderBeforeScanning" xml:space="preserve">
+    <value>Add at least one folder before scanning.</value>
+  </data>
+  <data name="FileHealthScanScanningStatus" xml:space="preserve">
+    <value>Scanning selected folders for file health issues...</value>
+  </data>
+  <data name="FileHealthScanResultFormat" xml:space="preserve">
+    <value>Scanned {0} file{1}. Found {2} health issue{3}.{4}</value>
+  </data>
+  <data name="FileHealthScanFailedSuffixFormat" xml:space="preserve">
+    <value> {0} file or folder issue{1} was skipped.</value>
+  </data>
+  <data name="FileHealthScanCanceled" xml:space="preserve">
+    <value>Scan canceled.</value>
+  </data>
+  <data name="FileHealthScanCanceling" xml:space="preserve">
+    <value>Canceling scan...</value>
+  </data>
+  <data name="FileHealthScanRenameRecoveryReason" xml:space="preserve">
+    <value>File health rename</value>
+  </data>
+  <data name="FileHealthScanRenameRecoveryDetailFormat" xml:space="preserve">
+    <value>Renamed {0} to the detected {1} extension.</value>
+  </data>
+  <data name="FileHealthScanRenamedFormat" xml:space="preserve">
+    <value>Renamed extension: {0}</value>
+  </data>
+  <data name="FileHealthScanRenameFailed" xml:space="preserve">
+    <value>Rename failed.</value>
+  </data>
+  <data name="FileHealthScanMarkedReviewed" xml:space="preserve">
+    <value>Finding marked reviewed for this session.</value>
+  </data>
+  <data name="FileHealthScanQuarantineRecoveryReason" xml:space="preserve">
+    <value>File health quarantine</value>
+  </data>
+  <data name="FileHealthScanQuarantineRecoveryDetailFormat" xml:space="preserve">
+    <value>Moved {0} to app-local quarantine after {1}.</value>
+  </data>
+  <data name="FileHealthScanQuarantinedFormat" xml:space="preserve">
+    <value>Moved to quarantine: {0}</value>
+  </data>
+  <data name="FileHealthScanQuarantineFailed" xml:space="preserve">
+    <value>Quarantine failed.</value>
+  </data>
+  <data name="FileHealthScanDetectedRenameHelpFormat" xml:space="preserve">
+    <value>Detected {0}; Rename extension will move this file to {1}.</value>
+  </data>
+  <data name="FileHealthScanNoRenameHelp" xml:space="preserve">
+    <value>Quarantine moves the file to app-local recovery storage. Mark reviewed hides this finding for the current window.</value>
+  </data>
+  <data name="FileHealthScanPreviewUnavailable" xml:space="preserve">
+    <value>Preview unavailable.</value>
+  </data>
+  <data name="SemanticSearchWindowTitle" xml:space="preserve">
+    <value>Images - Semantic search</value>
+  </data>
+  <data name="SemanticSearchHeading" xml:space="preserve">
+    <value>Semantic search</value>
+  </data>
+  <data name="SemanticSearchAddFolder" xml:space="preserve">
+    <value>Add folder</value>
+  </data>
+  <data name="SemanticSearchIndex" xml:space="preserve">
+    <value>Index</value>
+  </data>
+  <data name="SemanticSearchIndexedFolders" xml:space="preserve">
+    <value>Indexed folders</value>
+  </data>
+  <data name="SemanticSearchIndexedFoldersHint" xml:space="preserve">
+    <value>Indexing is explicit and local. The current MVP stores derived vectors in app-local SQLite and never contacts a network service.</value>
+  </data>
+  <data name="SemanticSearchUseSelectedAsFilter" xml:space="preserve">
+    <value>Use selected as filter</value>
+  </data>
+  <data name="SemanticSearchRemoveSelected" xml:space="preserve">
+    <value>Remove selected</value>
+  </data>
+  <data name="SemanticSearchClearRoots" xml:space="preserve">
+    <value>Clear roots</value>
+  </data>
+  <data name="SemanticSearchDeleteIndex" xml:space="preserve">
+    <value>Delete local index</value>
+  </data>
+  <data name="SemanticSearchQuery" xml:space="preserve">
+    <value>Query</value>
+  </data>
+  <data name="SemanticSearchFilter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="SemanticSearchSearch" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="SemanticSearchOpen" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="SemanticSearchReveal" xml:space="preserve">
+    <value>Reveal</value>
+  </data>
+  <data name="SemanticSearchEmptyState" xml:space="preserve">
+    <value>Build an index, then search for words from filenames, sidecar tags, formats, or orientation hints.</value>
+  </data>
+  <data name="SemanticSearchReadyStatus" xml:space="preserve">
+    <value>Ready.</value>
+  </data>
+  <data name="SemanticSearchAddFolderDialogTitle" xml:space="preserve">
+    <value>Add folder to semantic search</value>
+  </data>
+  <data name="SemanticSearchAddedRootFormat" xml:space="preserve">
+    <value>Added search root: {0}</value>
+  </data>
+  <data name="SemanticSearchAddFolderBeforeIndexing" xml:space="preserve">
+    <value>Add at least one folder before indexing.</value>
+  </data>
+  <data name="SemanticSearchBuildingIndex" xml:space="preserve">
+    <value>Building local semantic index...</value>
+  </data>
+  <data name="SemanticSearchIndexedResultFormat" xml:space="preserve">
+    <value>Indexed {0} of {1} cataloged asset{2}. {3} file{4} skipped.</value>
+  </data>
+  <data name="SemanticSearchIndexingCanceled" xml:space="preserve">
+    <value>Indexing canceled; previous semantic index remains usable.</value>
+  </data>
+  <data name="SemanticSearchCancelingIndexing" xml:space="preserve">
+    <value>Canceling semantic indexing...</value>
+  </data>
+  <data name="SemanticSearchIndexDeleted" xml:space="preserve">
+    <value>Deleted the local semantic search index.</value>
+  </data>
+  <data name="SemanticSearchFilterSet" xml:space="preserve">
+    <value>Search filter set to the selected root.</value>
+  </data>
+  <data name="SemanticSearchEnterQuery" xml:space="preserve">
+    <value>Enter a local search query first.</value>
+  </data>
+  <data name="SemanticSearchNoMatches" xml:space="preserve">
+    <value>No local semantic matches found.</value>
+  </data>
+  <data name="SemanticSearchFoundResultsFormat" xml:space="preserve">
+    <value>Found {0} local result{1}.</value>
+  </data>
+  <data name="SemanticSearchSelectBeforeOpening" xml:space="preserve">
+    <value>Select a search result before opening.</value>
+  </data>
+  <data name="SemanticSearchResultNoLongerExists" xml:space="preserve">
+    <value>The selected result no longer exists.</value>
+  </data>
+  <data name="SemanticSearchOpenedFormat" xml:space="preserve">
+    <value>Opened {0} in the viewer.</value>
+  </data>
+  <data name="SemanticSearchSelectBeforeRevealing" xml:space="preserve">
+    <value>Select a search result before revealing it.</value>
+  </data>
+  <data name="SemanticSearchRevealedFormat" xml:space="preserve">
+    <value>Revealed {0}.</value>
+  </data>
+  <data name="SemanticSearchCouldNotRevealFormat" xml:space="preserve">
+    <value>Could not reveal result: {0}</value>
+  </data>
+  <data name="SemanticSearchProviderStatusFormat" xml:space="preserve">
+    <value>{0} Model: {1}; provider: {2}; dimensions: {3}.</value>
+  </data>
+  <data name="SemanticSearchIndexStatusFormat" xml:space="preserve">
+    <value>{0} indexed asset{1} in {2}. Last indexed: {3}.</value>
+  </data>
+  <data name="SemanticSearchIndexStatusNever" xml:space="preserve">
+    <value>never</value>
+  </data>
+  <data name="SemanticSearchStorageUnavailable" xml:space="preserve">
+    <value>Semantic search storage is unavailable for this session.</value>
+  </data>
+  <data name="TagGraphWindowTitle" xml:space="preserve">
+    <value>Images - Tag relationships</value>
+  </data>
+  <data name="TagGraphHeading" xml:space="preserve">
+    <value>Tag relationships</value>
+  </data>
+  <data name="TagGraphSubtitle" xml:space="preserve">
+    <value>Private local namespaces, aliases, parents, and XMP sidecar import/export.</value>
+  </data>
+  <data name="TagGraphRefresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="TagGraphCurrentImage" xml:space="preserve">
+    <value>Current image</value>
+  </data>
+  <data name="TagGraphNoImageSelected" xml:space="preserve">
+    <value>No image selected</value>
+  </data>
+  <data name="TagGraphNoImageHint" xml:space="preserve">
+    <value>Open an image first to import or export its XMP sidecar tags.</value>
+  </data>
+  <data name="TagGraphTagInputHint" xml:space="preserve">
+    <value>One tag per line, or separate tags with commas. Aliases are resolved on export.</value>
+  </data>
+  <data name="TagGraphIncludeParents" xml:space="preserve">
+    <value>Include parent tags on export</value>
+  </data>
+  <data name="TagGraphImportSidecar" xml:space="preserve">
+    <value>Import sidecar</value>
+  </data>
+  <data name="TagGraphExportSidecar" xml:space="preserve">
+    <value>Export sidecar</value>
+  </data>
+  <data name="TagGraphNamespaces" xml:space="preserve">
+    <value>Namespaces</value>
+  </data>
+  <data name="TagGraphNamespacesHint" xml:space="preserve">
+    <value>Prefixes keep large tag sets readable, such as person:alice or place:seattle.</value>
+  </data>
+  <data name="TagGraphAddNamespace" xml:space="preserve">
+    <value>Add namespace</value>
+  </data>
+  <data name="TagGraphPreview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="TagGraphPreviewExpansion" xml:space="preserve">
+    <value>Preview expansion</value>
+  </data>
+  <data name="TagGraphAliasSibling" xml:space="preserve">
+    <value>Alias / sibling</value>
+  </data>
+  <data name="TagGraphAliasHint" xml:space="preserve">
+    <value>Use aliases for equivalent tags. Example: nyc -&gt; place:new-york.</value>
+  </data>
+  <data name="TagGraphAddAlias" xml:space="preserve">
+    <value>Add alias</value>
+  </data>
+  <data name="TagGraphParent" xml:space="preserve">
+    <value>Parent</value>
+  </data>
+  <data name="TagGraphParentHint" xml:space="preserve">
+    <value>Use parents to make searches broader. Example: person:alice -&gt; people.</value>
+  </data>
+  <data name="TagGraphAddParent" xml:space="preserve">
+    <value>Add parent</value>
+  </data>
+  <data name="TagGraphNamespacesAndAliases" xml:space="preserve">
+    <value>Namespaces and aliases</value>
+  </data>
+  <data name="TagGraphParentGraph" xml:space="preserve">
+    <value>Parent graph</value>
+  </data>
+  <data name="TagGraphLocalOnly" xml:space="preserve">
+    <value>Local only</value>
+  </data>
+  <data name="TagGraphOffline" xml:space="preserve">
+    <value>Offline</value>
+  </data>
+  <data name="TagGraphReadyStatus" xml:space="preserve">
+    <value>Ready. Tag relationships stay local on this device.</value>
+  </data>
+  <data name="TagGraphRefreshed" xml:space="preserve">
+    <value>Tag graph refreshed.</value>
+  </data>
+  <data name="TagGraphOpenImageBeforeImporting" xml:space="preserve">
+    <value>Open an image before importing sidecar tags.</value>
+  </data>
+  <data name="TagGraphOpenImageBeforeExporting" xml:space="preserve">
+    <value>Open an image before exporting sidecar tags.</value>
+  </data>
+  <data name="TagGraphNoNamespaceOrAlias" xml:space="preserve">
+    <value>No namespace or alias rules yet.</value>
+  </data>
+  <data name="TagGraphNoParentRelationships" xml:space="preserve">
+    <value>No parent relationships yet.</value>
+  </data>
+  <data name="TagGraphSummaryFormat" xml:space="preserve">
+    <value>{0} namespace{1}, {2} alias{3}, {4} parent{5}</value>
+  </data>
+  <data name="TagGraphEnterTagsToPreview" xml:space="preserve">
+    <value>Enter tags to preview.</value>
+  </data>
+  <data name="TagGraphEnterAtLeastOneTag" xml:space="preserve">
+    <value>Enter at least one tag to preview.</value>
+  </data>
+  <data name="TagGraphNoParents" xml:space="preserve">
+    <value>no parents</value>
+  </data>
+  <data name="TagGraphPreviewedTagsFormat" xml:space="preserve">
+    <value>Previewed {0} tag{1}.</value>
+  </data>
+  <data name="ReferenceBoardWindowTitle" xml:space="preserve">
+    <value>Images - Reference board</value>
+  </data>
+  <data name="ReferenceBoardHeading" xml:space="preserve">
+    <value>Reference board</value>
+  </data>
+  <data name="ReferenceBoardSubtitle" xml:space="preserve">
+    <value>Local canvas for arranging references, notes, and exportable groups.</value>
+  </data>
+  <data name="ReferenceBoardAddImages" xml:space="preserve">
+    <value>Add images</value>
+  </data>
+  <data name="ReferenceBoardAddImagesDialogTitle" xml:space="preserve">
+    <value>Add images to reference board</value>
+  </data>
+  <data name="ReferenceBoardNote" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="ReferenceBoardGroup" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="ReferenceBoardExport" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="ReferenceBoardResetButton" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="ReferenceBoardEmptyHeading" xml:space="preserve">
+    <value>Drop references here</value>
+  </data>
+  <data name="ReferenceBoardEmptyDescription" xml:space="preserve">
+    <value>Use Add images, drop files from Explorer, add note cards, or draw group frames. Nothing leaves this device.</value>
+  </data>
+  <data name="ReferenceBoardReadyStatus" xml:space="preserve">
+    <value>Ready. Drop supported files or add board elements.</value>
+  </data>
+  <data name="ReferenceBoardPinOnTop" xml:space="preserve">
+    <value>Pin on top</value>
+  </data>
+  <data name="ReferenceBoardAddedReferencesFormat" xml:space="preserve">
+    <value>Added {0} reference{1}.</value>
+  </data>
+  <data name="ReferenceBoardAddedAndSkippedFormat" xml:space="preserve">
+    <value>Added {0} reference{1}. Skipped {2} unsupported or unreadable file{3}.</value>
+  </data>
+  <data name="ReferenceBoardAddedNote" xml:space="preserve">
+    <value>Added note card.</value>
+  </data>
+  <data name="ReferenceBoardAddedGroup" xml:space="preserve">
+    <value>Added group frame. Drag the header to move it or use the corner handle to resize.</value>
+  </data>
+  <data name="ReferenceBoardAlreadyEmpty" xml:space="preserve">
+    <value>The board is already empty.</value>
+  </data>
+  <data name="ReferenceBoardCleared" xml:space="preserve">
+    <value>Board cleared.</value>
+  </data>
+  <data name="ReferenceBoardAddBeforeExporting" xml:space="preserve">
+    <value>Add at least one image, note, or group before exporting.</value>
+  </data>
+  <data name="ReferenceBoardNoVisibleContent" xml:space="preserve">
+    <value>There is no visible board content to export.</value>
+  </data>
+  <data name="ReferenceBoardExportDialogTitle" xml:space="preserve">
+    <value>Export reference board</value>
+  </data>
+  <data name="ReferenceBoardExportDialogFilter" xml:space="preserve">
+    <value>PNG image|*.png</value>
+  </data>
+  <data name="ReferenceBoardExportedFormat" xml:space="preserve">
+    <value>Exported board to {0}.</value>
+  </data>
+  <data name="ReferenceBoardExportFailedFormat" xml:space="preserve">
+    <value>Export failed: {0}</value>
+  </data>
+  <data name="ReferenceBoardViewReset" xml:space="preserve">
+    <value>Board view reset.</value>
+  </data>
+  <data name="ReferenceBoardPinned" xml:space="preserve">
+    <value>Reference board pinned on top.</value>
+  </data>
+  <data name="ReferenceBoardUnpinned" xml:space="preserve">
+    <value>Reference board no longer pinned.</value>
+  </data>
+  <data name="ReferenceBoardReferenceImageFormat" xml:space="preserve">
+    <value>Reference image {0}</value>
+  </data>
+  <data name="ReferenceBoardCopiedSampleFormat" xml:space="preserve">
+    <value>Copied sample from {0}: {1}</value>
+  </data>
+  <data name="ReferenceBoardCopyFailedFormat" xml:space="preserve">
+    <value>Copy failed: {0}</value>
+  </data>
 </root>
