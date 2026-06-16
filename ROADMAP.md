@@ -51,13 +51,6 @@ Evidence bundle for this refresh:
 | ID | Status | Effort | Item | Evidence | Dependency |
 | --- | --- | --- | --- | --- | --- |
 | V7-30 | [x] | XL | Local model/runtime manager. | `docs/inpaint-runtime-decision.md`; Windows ML; ONNX Runtime DirectML; Immich model settings; OpenCV/Carve LaMa ONNX model files. | Approved-model registry, manual ONNX import/delete/reveal UI, app-local `models\inpaint` storage, SHA-256 validation for pinned LaMa candidates, runtime status reporting, no automatic downloads, and About/CLI model provenance rows are shipped. |
-| V7-31 | [ ] | XL | Local semantic search MVP. | OpenCLIP, SigLIP, sqlite-vec, Immich CLIP search, `docs/design-product-differentiators.md`. | Requires catalog schema and model manager. Foundation shipped: explicit folder indexing, app-local `semantic-index.db`, embedding-provider seam, exact cosine search, deterministic local metadata embeddings, Qdrant CLIP text/vision ONNX plus tokenizer/preprocessor registry pins, search window, result open/reveal, cancellation, and delete-index controls. Closure still requires approved ONNX image/text embedding provider and runtime validation. |
-| V7-32 | [ ] | L | LaMa ONNX content-aware repair. | `docs/inpaint-runtime-decision.md`; LaMa ONNX model cards. | Requires model manager and non-destructive patch provenance. |
-| V7-33 | [ ] | L | Background removal. | BiRefNet, rembg, U-2-Net. | Requires model manager, mask preview, and export-copy default. |
-| V7-34 | [ ] | L | Super-resolution. | OpenModelDB, Real-ESRGAN, Upscayl. | Requires model manager, batch/export integration, hardware/time estimates. |
-| V7-35 | [ ] | XL | Deep-zoom/tile engine for huge images. | OpenSeadragon, OpenSlide, libvips, Bio-Formats. | Requires separate tile/cache architecture and large-file test corpus. |
-| V7-36 | [ ] | M | WinGet/Scoop and signing plan. | Existing release docs; distribution trust gap. | Best after release smoke and version/provenance metadata are stable. |
-| V7-37 | [ ] | M | C2PA/content provenance inspection. | C2PA 2.4 spec. | Best after metadata/catalog foundations. |
 
 ## Explicit Non-Goals For This Roadmap Window
 
@@ -383,7 +376,6 @@ Goal: mine adjacent viewers, editors, asset managers, scientific viewers, and im
 
 ### Extreme formats, huge images, and scientific workflows
 
-- [ ] **V80-20** *P0* — **Deep-zoom image engine**. Add a tile-pyramid cache for huge TIFF/PSD/EXR/JXL/WSI files so pan/zoom never requires full decode into memory. OpenSeadragon's DZI/IIIF/IIP/Zoomify model and OpenSlide's whole-slide tiling show the architecture: viewport requests tiles, background workers fill cache, UI remains responsive. Effort: XL. [[S-OPENSEADRAGON]](https://openseadragon.github.io/) [[S-OPENSLIDE]](https://openslide.org/)
 - [ ] **V80-21** *P1* — **OpenSlide Lab Pack evaluation**. Evaluate optional bundled support for Aperio SVS, Hamamatsu NDPI, Leica SCN, MIRAX, Philips TIFF, Sakura SVSLIDE, Ventana BIF, Zeiss CZI, DICOM WSI, and generic tiled TIFF. Treat as an optional "Lab Pack" because the UX, file sizes, licensing, and test corpus are different from consumer photos. Effort: L. [[S-OPENSLIDE]](https://openslide.org/) [[S-QUPATH]](https://qupath.github.io/)
 - [ ] **V80-22** *P2* — **Bio-Formats bridge spike**. Research a Java sidecar or service boundary for Bio-Formats to preview proprietary microscopy formats and normalize metadata to OME concepts. Must be opt-in and process-isolated: JVM startup cost, GPL/commercial licensing paths, and untrusted-file attack surface make in-process loading inappropriate for the main viewer. Effort: L. [[S-BIOFORMATS]](https://www.openmicroscopy.org/bio-formats/)
 - [ ] **V80-23** *P2* — **Multidimensional image navigator**. Add channel toggles, Z-stack slider, time slider, intensity range, and overlay/annotation layers for formats that expose multiple dimensions. napari is the interaction reference; Images should implement the smallest Windows-native subset that makes scientific stacks understandable. Effort: XL. [[S-NAPARI]](https://napari.org/stable/) [[S-BIOFORMATS]](https://www.openmicroscopy.org/bio-formats/)
@@ -412,12 +404,10 @@ Goal: mine adjacent viewers, editors, asset managers, scientific viewers, and im
 - [x] **V02-01** *P0* — Bump GitHub Actions: `actions/checkout@v4` → `@v6`, `actions/setup-dotnet@v4` → `@v5`. Closes Node 20 deprecation (2026-06-02).
 - [x] **V02-02** *P1* — 5-prompt logo brief at `assets/logo-prompt.md`; user generated `logo.png` + `banner.png`.
 - [x] **V02-03** *P1* — `<ApplicationIcon>` wired. 7-frame multi-res `icon.ico` + PNG-embedded `icon.svg` + bundled `logo.png` resource.
-- [ ] **V02-04** *P2* — Recapture main screenshot (DPI-aware, `PrintWindow(hwnd, hdc, 2)` per `screenshots.md`). Requires Windows GUI session.
-- [ ] **V02-05** *P2* — Human runtime smoke: prev/next/wrap, rename+undo, drag-drop, Del-to-recycle, external add/delete 250 ms roundtrip.
 - [x] **V02-06** *P2* — Serilog + `%LOCALAPPDATA%\Images\Logs\` rolling file behind `ILogger<T>`. Replaces the ad-hoc `crash.log` file. [O-01] *(shipped v0.1.6 — `Services/Log.cs` bridges Serilog 4.2 → Microsoft.Extensions.Logging 9.0 so call-sites use the abstract `ILogger<T>`; rolling file `images-yyyyMMdd.log`, 14-day retention.)*
 - [x] **V02-07** *P2* — "Copy crash details + open GitHub Issue" dialog on unhandled exception. No network call. [O-04] *(shipped v0.1.6 — `CrashLog.TryWriteMiniDump` P/Invokes `dbghelp!MiniDumpWriteDump`; new `CrashDialog.xaml` replaces the MessageBox with Copy-details / Open-log-folder / Open-GitHub-issue (pre-filled URL) / Close buttons.)*
 
-Promote `Unreleased` → `v0.1.2 — <date>` once V02-04 and V02-05 are complete.
+Promote `Unreleased` → `v0.1.2 — <date>` once blocked screenshot and runtime-smoke validation in `Roadmap_Blocked.md` are complete.
 
 ---
 
@@ -448,11 +438,9 @@ These span multiple versions. Items are referenced by tag (`A-01`, `S-03`, etc.)
 
 The current codebase inherits the full WIC + Magick.NET + (eventually) libheif/libavif/libwebp attack surface. Several 2024-2026 CVEs are load-bearing — including BLASTPASS-class exploitation of libwebp in the wild — so this track runs in parallel with every phase, not as a phase of its own.
 
-- [ ] **S-01** *P0* — **SharpCompress post-extract canonicalization**. Every entry path goes through `Path.GetFullPath` + `StartsWith(destRoot, StringComparison.Ordinal)` before write; reject symlinks/hardlinks; enforce per-entry uncompressed-size cap. Lands with V20-17 (archive browsing). Effort: S. [JFrog zip-slip catalogue; ConnectWise ScreenConnect CVE-2024-1708]
 - [x] **S-02** *P0* — **Argv-open hardening**. `Path.GetFullPath` + reject `..` pre-resolve + allowlist-root check; `Process.Start` for Reveal-in-Explorer uses `UseShellExecute=false` + `ArgumentList`. Lands in v0.1.2. Effort: S. [OWASP .NET Cheat Sheet] *(shipped 2026-04-24 — commit c812551)*
 - [x] **S-03** *P0* — **Pin Magick.NET ≥ 14.9.1** (baseline — we ship 14.13.0) and wire Dependabot/Renovate so a lagging pin surfaces next release. ImageGlass 9.4's note flags CVE-2025-53015 / 55004 / 55154 / 55298 / 62594 upstream. Effort: S. [ImageGlass 9.4 announce] *(shipped 2026-04-24 — commit b1c96db; Magick.NET bumped 14.12.0 → 14.13.0)*
 - [~] **S-04** *P0* — **CVE-delta CI gate** on release: query GHSA / NVD for every shipped native dep (WIC gated on OS version, Magick.NET, SharpCompress, later libheif/libavif/libwebp/libjxl) and fail the release if an unacknowledged advisory is open. **Initial pass shipped**: `.github/workflows/security.yml` runs `dotnet list package --vulnerable --include-transitive` on every dependency-touching push/PR, daily at 09:00 UTC, and on demand; release workflow runs the same scan as a pre-publish gate. **Remaining**: GHSA/NVD lookups for non-NuGet shipped natives (Ghostscript, future libheif/libavif/libwebp/libjxl/libde265). Effort: M.
-- [ ] **S-05** *P0* — **ExifTool safe-invocation wrapper**. `ProcessStartInfo.UseShellExecute=false` + `ArgumentList` + `-@ argfile.txt` UTF-8 argfile for paths/metadata; fuzz the filename channel with `\r\n`, `<`, `>`, `|`. Lands with v0.4 sidecar writes (V40-04). Effort: S. [exiftool docs]
 - [ ] **S-06** *P1* — **WIC JPEG re-encode gate**. On pre-patch `windowscodecs.dll` (< 10.0.26100.4946), thumbnails skip the 12-bit / 16-bit re-encode path that triggers CVE-2025-50165. Toast "Windows update recommended" once. Effort: M. [ESET CVE-2025-50165]
 - [ ] **S-07** *P1* — **MSIX + Win32 App Isolation** side-artifact. AppContainer, declare `picturesLibrary` + `broadFileSystemAccess` brokered. Unpackaged zip stays the primary artifact for file-association UX. Effort: L. [MS Learn AppContainer; Win32 App Isolation report]
 - [ ] **S-08** *P2* — **Wasmtime-hosted libheif / libavif / libwebp spike** — opt-in "Paranoid Mode" routes untrusted-source decode through a capability-only Wasm sandbox (~1.3× CPU cost). Research spike; prototype only until a proven libheif-in-wasmtime crate exists. Effort: L. [Wasmtime security model; Hyperlight Wasm; Gobi USENIX]
@@ -471,19 +459,15 @@ The current codebase inherits the full WIC + Magick.NET + (eventually) libheif/l
 No competitor in the OSS viewer space makes network egress auditable. That's the specific moat.
 
 - [x] **P-01** *P0* — **One-click "Strip location"** in the toolbar + right-click menu. Strips `GPSInfo`, `XMP-exif:GPS*`, IPTC location; preserves camera/date/copyright. Diff toast ("removed: GPS, IPTC-LocationCreated"). Effort: S. [ExifRemover pattern] *(shipped v0.1.9 — `MetadataEditService.StripGpsMetadata()` removes all Gps* EXIF tags using Magick.NET, writes atomically via temp-file swap, toasts "Removed N GPS fields" or "No GPS data found", reloads image + HUD after strip)*
-- [ ] **P-02** *P0* — **Default-off opt-in telemetry**. First-run banner, toggle in Settings, local JSON preview of what would be sent before enabling. No IP, no MAC, no hostname. VS Code is the reference pattern. Effort: S. [VS Code telemetry docs; TelemetryDeck privacy FAQ]
 - [ ] **P-03** *P1* — **Network-egress log panel**. Every call (update check, C2PA fetch, extension-install deep-link, crash-report upload if enabled) logs `{url, purpose, bytes, ms}` to a visible pane. No competitor ships this. Effort: M.
 - [x] **P-04** *P0* — **Update check is pull-only** to GitHub Releases API, no PII, opt-out switch. Store `last_checked` locally, no server-side record. Effort: S. *(shipped v0.1.6 — `UpdateCheckService` does a read-only GET against `/releases/latest`, 24-h throttle for silent startup check, manual "Check for updates" button in About dialog bypasses throttle. Every call logged with URL + bytes + duration. Last-checked persisted to `%LOCALAPPDATA%\Images\update-check.json`.)*
-- [ ] **P-05** *P0* — **C2PA read/verify** via `c2patool` CLI shellout (no .NET SDK exists as of April 2026). Toolbar badge: green (signed + verified + Trust List), amber (signed but cert unlisted), red (invalid/tampered). Effort: M. *Promoted P1 → P0 on the 2026-04-25 research pass: **C2PA v2.3** shipped Feb 2026; **EU AI Act Article 50** makes machine-readable AI-content marking mandatory **2026-08-02** [[S-C2PA]](https://contentcredentials.org/) [[S-C2PA-2026]](https://aiphotocheck.com/blog/c2pa-specification-latest-version-2026). Real-world signed files now ubiquitous via Pixel 10 (Titan M2 hw signing by default), Leica M11-P, Sony α9 III / α1 II (cloud opt-in), Samsung S25 (AI-edited only). Nikon Z6 III suspended C2PA after Sept 2025 cert-revocation incident — illustrates trust-list consequence.*
 - [ ] **P-06** *P2* — **C2PA P/Invoke spike** — bind directly to `c2pa-rs` C API for in-process verify instead of shelling out to `c2patool`. Eliminates ~30 ms per-file process spawn. Effort: L. [c2pa-rs README]
-- [ ] **P-07** *P2* — **C2PA write-on-export** — stamp "edited with Images v0.x" + operation list on every export from v0.3/v0.5. Requires signing identity (Azure Trusted Signing works). Defers until P-05 is stable. Effort: M.
 
 ### Accessibility (UIA / high-contrast / keyboard / Magnifier)
 
 No OSS Windows viewer publishes a documented UIA tree; that's a free differentiator.
 
 - [x] **A-01** *P0* — **Custom `ImageAutomationPeer`** on the main canvas. *(shipped v0.1.7 — `ImageCanvasAutomationPeer` overrides `GetNameCore` → "Image, W by H pixels", `GetHelpTextCore` explains arrow/wheel/drag/double-click semantics, `AutomationControlType.Image`. `ZoomPanImage.OnCreateAutomationPeer` returns it. No OSS Windows viewer publishes this UIA tree.)*
-- [ ] **A-02** *P0* — **High-contrast theme dictionary** keyed to `SystemColors.*BrushKey` / `SystemColors.ControlTextBrushKey` + `SystemEvents.UserPreferenceChanged` listener that swaps Catppuccin → HighContrast at runtime. Catppuccin hex fails WCAG 1.4.3 on white system backgrounds — don't guess, degrade properly. Lands with v0.2 settings UI. Effort: M. [MS Learn high-contrast-themes]
 - [x] **A-03** *P0* — **Keyboard focus + escape discipline**. Restore `FocusVisualStyle` on every templated control (our styles currently suppress the default ring — common regression), `KeyboardNavigation.DirectionalNavigation="Cycle"` on filmstrip, `Escape` bound to close every modal. Effort: S. [MS Learn keyboard-accessibility] *(shipped 2026-04-24 — commit 3fdae11; shared `FocusVisual` style in DarkTheme, DirectionalNavigation=Cycle on RecentRenames, Escape clears drop overlay)*
 - [ ] **A-04** *P1* — **Magnifier integration** via UIA `TextSelectionChanged` on the rename caret so the OS Magnifier follows the edit point. No hosting of `magnification.dll` — just raise the right UIA event. Effort: S. [Win32 magapi docs]
 - [ ] **A-05** *P1* — **Publish the UIA tree** in the README (`docs/accessibility.md`: "what Narrator will say on image load, rename, rating change"). No competitor does this. Effort: S.
@@ -496,12 +480,10 @@ XnView MP ships ~45 languages via plain `.lng` community text. ImageGlass crowd-
 - [ ] **I-01** *P0* — **Extract all user-visible strings** to `Strings.resx` (en default). CI check fails if any non-en locale is missing a key. Bind XAML via `{x:Static strings:Strings.MenuOpen}` or a `LocExtension`. Effort: M. [MS Learn WPF localization-overview]
 - [ ] **I-02** *P1* — **Crowdin for OSS** (free tier under 60k words) over GitHub. Ship en + de + fr + es + ja + pt-BR + zh-Hans as v1 locale set. Effort: M. [Crowdin OSS programme]
 - [ ] **I-03** *P2* — **RTL audit pass**. `FlowDirection="RightToLeft"` at window root mirrors layout, but `Canvas`, `Image`, custom `DrawingVisual`, negative-`X` `ScaleTransform`, and `DataGrid` column order need manual mirroring. Arabic + Hebrew test fixtures. Effort: L. [MS Learn localization-overview]
-- [ ] **I-04** *P0* — **`DateTime` → `DateTimeOffset` everywhere** metadata is displayed. EXIF `DateTimeOriginal` is local-time-string-no-TZ; EXIF `OffsetTimeOriginal` (2016+) carries the offset. Never assume UTC. MetadataExtractor.NET reads both. Effort: S. [ExifTool XMP tag names; drewnoakes/metadata-extractor-dotnet]
 - [ ] **I-05** *P2* — **Locale switcher** at runtime (no app restart). Swap `ResourceDictionary` on `LanguageChanged`. Effort: S.
 
 ### Observability (logging / crash reports / counters)
 
-- [ ] **O-01** *P0* — **Serilog behind `ILogger<T>`** with rolling file at `%LOCALAPPDATA%\Images\Logs\`. Lands in v0.1.2 as V02-06. [Serilog.net]
 - [ ] **O-02** *P2* — **Opt-in Sentry** (free tier 5k events/month) wired via `Sentry.Serilog` sink, gated on the default-off privacy toggle (P-02). Effort: S. [Sentry WPF guide]
 - [ ] **O-03** *P1* — **Custom `EventSource`** around `BitmapDecoder.Create`, Magick.NET boundary, and thumbnail writes so `dotnet-counters` sees the decode pipeline live. Ship a `docs/perf.md` with the recipe. Effort: M. [MS Learn dotnet-counters]
 - [ ] **O-04** *P1* — **Local minidump + "Open GitHub Issue" button** on fatal — `MiniDumpWriteDump`, copy to clipboard, do not upload. Paint.NET's pattern. Lands in v0.1.2 as V02-07. [Paint.NET CrashLogs doc]
@@ -523,11 +505,8 @@ Primary = GitHub Releases (source of truth). Secondary = winget + Scoop extras. 
 
 - [~] **D-01** *P0* — **Framework-dependent single-file win-x64** (~5 MB zip) as the primary artifact; self-contained non-trimmed (~70 MB zip) as the "no .NET runtime" fallback. Avoid trimming WPF until upstream warnings are resolved (tracked in dotnet/wpf#3070). Effort: S. [MS Learn single-file; dotnet/wpf#3070] *(partially shipped v0.1.4: portable framework-dependent `Images-vX.Y.Z-win-x64.zip` + a new Inno Setup installer `Images-vX.Y.Z-setup-win-x64.exe` ride alongside it on every release. Self-contained non-trimmed fallback still deferred.)*
 - [x] **D-01b** *P0* — **Inno Setup installer** at `installer/Images.iss`. Admin-default per-machine install with per-user override via UAC, stable AppId for clean upgrades, .NET 9 Desktop Runtime prerequisite check, optional non-destructive "Open with" registration for 16 image extensions (ProgID + `Applications\Images.exe` + `OpenWithProgids` + `RegisteredApplications\Capabilities\FileAssociations` so Images surfaces in Settings → Default Apps without hijacking any existing default). `.github/workflows/release.yml` builds it with the pre-installed Inno Setup on `windows-latest` and uploads it next to the portable zip. *(shipped v0.1.4)*
-- [ ] **D-02** *P0* — **`winget` publishing** via `WinGet Releaser` GitHub Action (`vedantmgoyal9/winget-releaser`). First submission manual via `wingetcreate new`; subsequent releases auto-fire on `release: [published]`. Requires classic PAT + forked `microsoft/winget-pkgs`. Effort: S. [WinGet Releaser action; Grafana k6 PR #5203]
 - [ ] **D-03** *P1* — **Scoop `extras` bucket manifest** with `autoupdate` section pointed at the GitHub release URL template. Effort: S. [ScoopInstaller/Extras]
 - [ ] **D-04** *P1* — **Microsoft Store via MSIX** for discovery, paired with S-07 AppContainer work. GitHub Releases stays primary. Effort: M. [MS Learn MSIX overview]
-- [ ] **D-05** *P0* — **Azure Artifact Signing** (rebrand of Azure Trusted Signing, now GA April 2026) via `azure/artifact-signing-action` in the release workflow. SmartScreen reputation warm-up still applies (since 2023 even EV is throttled for new publishers) — so no reason to pay for EV. Self-employed individuals now eligible (no 3-yr history requirement); restricted to US/CA/EU/UK businesses/individuals. Effort: M. [[S-ARTIFACT-SIGNING]](https://azure.microsoft.com/en-us/products/artifact-signing) [[S-SMARTSCREEN-REGRESSION]](https://learn.microsoft.com/en-us/answers/questions/5855708/trusted-signing-regression-in-smartscreen-reputati) *Risk flagged 2026-03/04: Microsoft silently rotated issuing CAs (EOC CA 02 → AOC CA 03 → EOC CA 04) which broke SmartScreen reputation for existing customers. Expect the first ~500 installs to trip "Unrecognized app" even with a valid cert. Hanselman has the working GitHub-Actions setup [[S-HANSELMAN-SIGN]](https://www.hanselman.com/blog/automatically-signing-a-windows-exe-with-azure-trusted-signing-dotnet-sign-and-github-actions).*
-- [ ] **D-05a** *P1* — **SignPath.io OSS code-signing evaluation** (new, 2026-04-25 research). Free certificate via SignPath Foundation for OSS projects (used by PicView). Pre-requisite: GitHub Actions integration + SignPath-approved project status. Evaluate in parallel with D-05 — whichever lands first wins; both are fine to keep running simultaneously (dual-signing is supported by Authenticode). Effort: S (application) + M (pipeline). [[S-PV]](https://github.com/Ruben2776/PicView)
 - [ ] **D-06** — **Chocolatey parked** until v1.x. Community-feed moderation runs days-to-weeks; low ROI for an OSS viewer with winget + Scoop already covered.
 - [ ] **D-07** *P2* — **Trim-warning audit spike** — enable `<PublishTrimmed>true</PublishTrimmed>` once, capture every IL2xxx warning, decide whether WPF is trimmable enough in .NET 9 to justify the ~50-70 MB saving. If net-negative, park. Effort: M. [MS Learn trim self-contained]
 
@@ -693,14 +672,12 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [ ] **V50-22** *P1* — **"Best-of" mode** — run N encoders in parallel, pick smallest under target SSIMULACRA2 score (FileOptimizer philosophy).
 - [ ] **V50-23** *P2* — **SSIMULACRA2 + Butteraugli** quality metric alongside raw slider (2026 codec-comp community standard).
 - [ ] **V50-24** *P2* — Send originals to Recycle Bin on replace (FileOptimizer rollback).
-- [ ] **V50-25** *P2* — **C2PA write-on-export** (P-07). Per-op, opt-in; embeds operation manifest + signing identity. Requires D-05 (Trusted Signing) for the cert.
 
 ### Exports
 - [ ] **V50-30** *P1* — **Contact sheets → PDF**: grid, header/footer, metadata captions (Bridge Output). [stack: PdfSharpCore MIT]
 - [ ] **V50-31** *P1* — **Print layout** — multi-image/page with margins + alignment (Lightroom Print module).
 - [ ] **V50-32** *P2* — **Web gallery** — static HTML + thumbs + lightbox (digiKam HTMLGallery).
 - [ ] **V50-33** *P2* — **Direct publish** — Flickr/Imgur/Pinterest/Dropbox/OneDrive/SMB/FTP (OAuth + known APIs). Every egress call is logged by P-03.
-- [ ] **V50-34** *P2* — **Configurable C2PA signing identity** — default to Azure Trusted Signing cert (D-05); allow user-supplied identity.
 
 ---
 
