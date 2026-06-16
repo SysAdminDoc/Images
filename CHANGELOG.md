@@ -10,6 +10,7 @@ All notable changes to **Images** are documented here.
 - **Color-channel isolation (V20-28)** — view individual R, G, B, or A channels as grayscale. Cycle through modes via the command palette or click the channel chip in the bottom toolbar. Mode persists across image navigation. Tile-pyramid (DZI) images skip channel filtering gracefully.
 - **Multi-monitor window placement (V20-27)** — window position is now remembered per-monitor so the viewer restores to the correct display across sessions. On multi-monitor setups, the command palette shows "Send to monitor N" commands to move the window between displays. Falls back to primary-monitor clamping when a saved monitor is disconnected.
 - **Viewer sort-mode switching (V20-30)** — the main viewer now persists the folder sort order across sessions. Nine sort modes (Name A-Z/Z-A, Modified newest/oldest, Created newest/oldest, Size largest/smallest, Type) are available through the command palette. The selected mode applies to all folder navigation and survives app restarts.
+- **Network-listen mode (V20-31)** — `Images.exe --listen <port>` opens the viewer in TCP listen mode on loopback (127.0.0.1). External tools send UTF-8 file paths to open/refresh images live. All received paths are logged in the network activity panel. A green status chip in the toolbar shows the active port.
 
 ### Security
 
