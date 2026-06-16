@@ -4099,5 +4099,35 @@ Details written to:
   <data name="CommandPalette_SendToMonitorFormat" xml:space="preserve">
     <value>Send to monitor {0}</value>
   </data>
+  <data name="CommandPalette_Category_Sort" xml:space="preserve">
+    <value>Sort</value>
+  </data>
+  <data name="CommandPalette_SortName" xml:space="preserve">
+    <value>Sort by name (natural)</value>
+  </data>
+  <data name="CommandPalette_SortNameDesc" xml:space="preserve">
+    <value>Sort by name (Z to A)</value>
+  </data>
+  <data name="CommandPalette_SortModifiedNewest" xml:space="preserve">
+    <value>Sort by modified (newest first)</value>
+  </data>
+  <data name="CommandPalette_SortModifiedOldest" xml:space="preserve">
+    <value>Sort by modified (oldest first)</value>
+  </data>
+  <data name="CommandPalette_SortCreatedNewest" xml:space="preserve">
+    <value>Sort by created (newest first)</value>
+  </data>
+  <data name="CommandPalette_SortCreatedOldest" xml:space="preserve">
+    <value>Sort by created (oldest first)</value>
+  </data>
+  <data name="CommandPalette_SortSizeLargest" xml:space="preserve">
+    <value>Sort by size (largest first)</value>
+  </data>
+  <data name="CommandPalette_SortSizeSmallest" xml:space="preserve">
+    <value>Sort by size (smallest first)</value>
+  </data>
+  <data name="CommandPalette_SortType" xml:space="preserve">
+    <value>Sort by type, then name</value>
+  </data>
 
 </root>
