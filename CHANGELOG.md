@@ -7,6 +7,7 @@ All notable changes to **Images** are documented here.
 ### Features
 
 - **Command palette (V20-29)** — `Ctrl+Shift+P` opens a VS Code-style fuzzy-search overlay listing 55 commands across 8 categories (Navigate, View, Edit, File, Tools, Review, Compare, Help). Type to filter by name, category, or shortcut; Up/Down to select; Enter or double-click to execute; Escape or click the dimmer to dismiss. No other Windows image viewer ships a command palette.
+- **Color-channel isolation (V20-28)** — view individual R, G, B, or A channels as grayscale. Cycle through modes via the command palette or click the channel chip in the bottom toolbar. Mode persists across image navigation. Tile-pyramid (DZI) images skip channel filtering gracefully.
 
 ### Security
 
