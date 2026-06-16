@@ -2915,4 +2915,5 @@ Details written to:
   <data name="ReferenceBoardCopyFailedFormat" xml:space="preserve">
     <value>Copy failed: {0}</value>
   </data>
+
 </root>

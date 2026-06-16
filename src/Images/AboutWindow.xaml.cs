@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using Images.Localization;
 using Images.Services;
 
 namespace Images;
@@ -32,7 +33,6 @@ public partial class AboutWindow : Window
 
         UpdateCheckCheckBox.IsChecked = UpdateCheckService.OptedIn;
 
-        // Dark native caption — same pattern as MainWindow so the About window matches.
         SourceInitialized += (_, _) =>
         {
             var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
@@ -48,7 +48,7 @@ public partial class AboutWindow : Window
         }
         catch (Exception ex)
         {
-            ShowUpdateStatus($"Could not open GitHub: {ex.Message}", "Warning");
+            ShowUpdateStatus(Strings.Format(nameof(Strings.AboutCouldNotOpenGitHubFormat), ex.Message), "Warning");
         }
     }
 
@@ -66,7 +66,7 @@ public partial class AboutWindow : Window
         }
         catch (Exception ex)
         {
-            ShowUpdateStatus($"Could not open crash logs: {ex.Message}", "Warning");
+            ShowUpdateStatus(Strings.Format(nameof(Strings.AboutCouldNotOpenCrashLogsFormat), ex.Message), "Warning");
         }
     }
 
@@ -75,11 +75,11 @@ public partial class AboutWindow : Window
         try
         {
             ClipboardService.SetText(CodecCapabilityService.BuildClipboardReport());
-            ShowUpdateStatus("Codec report copied to clipboard.", "Success");
+            ShowUpdateStatus(Strings.AboutCodecReportCopied, "Success");
         }
         catch (Exception ex)
         {
-            ShowUpdateStatus($"Could not copy codec report: {ex.Message}", "Warning");
+            ShowUpdateStatus(Strings.Format(nameof(Strings.AboutCouldNotCopyCodecReportFormat), ex.Message), "Warning");
         }
     }
 
@@ -88,11 +88,11 @@ public partial class AboutWindow : Window
         try
         {
             ClipboardService.SetText(CliReport.BuildSystemInfo());
-            ShowUpdateStatus("System info copied to clipboard.", "Success");
+            ShowUpdateStatus(Strings.AboutSystemInfoCopied, "Success");
         }
         catch (Exception ex)
         {
-            ShowUpdateStatus($"Could not copy system info: {ex.Message}", "Warning");
+            ShowUpdateStatus(Strings.Format(nameof(Strings.AboutCouldNotCopySystemInfoFormat), ex.Message), "Warning");
         }
     }
 
@@ -101,7 +101,7 @@ public partial class AboutWindow : Window
         var dir = AppStorage.TryGetAppDirectory("Logs") ?? Path.GetDirectoryName(CrashLog.LogPath);
         if (string.IsNullOrWhiteSpace(dir))
         {
-            ShowUpdateStatus("Log folder is unavailable.", "Warning");
+            ShowUpdateStatus(Strings.AboutLogFolderUnavailable, "Warning");
             return;
         }
 
@@ -111,16 +111,10 @@ public partial class AboutWindow : Window
         }
         catch (Exception ex)
         {
-            ShowUpdateStatus($"Could not open logs: {ex.Message}", "Warning");
+            ShowUpdateStatus(Strings.Format(nameof(Strings.AboutCouldNotOpenLogsFormat), ex.Message), "Warning");
         }
     }
 
-    /// <summary>
-    /// V20-37 / item 33: writes the same content as `Images.exe --system-info` to a temp
-    /// file (UTF-8 with BOM so Notepad opens it cleanly) and reveals it in Explorer.
-    /// Lets users attach a one-shot diagnostics dump to bug reports without dropping into a
-    /// terminal.
-    /// </summary>
     private void SaveSystemInfoButton_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -132,19 +126,14 @@ public partial class AboutWindow : Window
 
             ShellIntegration.RevealPathInExplorer(path);
 
-            ShowUpdateStatus($"Saved to {path}", "Success");
+            ShowUpdateStatus(Strings.Format(nameof(Strings.AboutSavedToFormat), path), "Success");
         }
         catch (Exception ex)
         {
-            ShowUpdateStatus($"Could not save system info: {ex.Message}", "Warning");
+            ShowUpdateStatus(Strings.Format(nameof(Strings.AboutCouldNotSaveSystemInfoFormat), ex.Message), "Warning");
         }
     }
 
-    /// <summary>
-    /// Item 33 (diagnostics viewer): opens %LOCALAPPDATA%\Images so users can reach Logs,
-    /// crash.log, settings.db, update-check.json, and thumbs in one click. Falls back to
-    /// the temp folder when the AppStorage helper can't reach LocalAppData.
-    /// </summary>
     private void OpenAppDataButton_Click(object sender, RoutedEventArgs e)
     {
         var dir = AppStorage.TryGetAppDirectory() ?? Path.GetTempPath();
@@ -154,7 +143,7 @@ public partial class AboutWindow : Window
         }
         catch (Exception ex)
         {
-            ShowUpdateStatus($"Could not open data folder: {ex.Message}", "Warning");
+            ShowUpdateStatus(Strings.Format(nameof(Strings.AboutCouldNotOpenDataFolderFormat), ex.Message), "Warning");
         }
     }
 
@@ -163,7 +152,7 @@ public partial class AboutWindow : Window
         var dir = ThumbnailCache.Instance.GetHealth().Root ?? AppStorage.TryGetAppDirectory("thumbs");
         if (string.IsNullOrWhiteSpace(dir))
         {
-            ShowUpdateStatus("Thumbnail cache folder is unavailable.", "Warning");
+            ShowUpdateStatus(Strings.AboutThumbnailCacheFolderUnavailable, "Warning");
             return;
         }
 
@@ -174,7 +163,7 @@ public partial class AboutWindow : Window
         }
         catch (Exception ex)
         {
-            ShowUpdateStatus($"Could not open thumbnail cache: {ex.Message}", "Warning");
+            ShowUpdateStatus(Strings.Format(nameof(Strings.AboutCouldNotOpenThumbnailCacheFormat), ex.Message), "Warning");
         }
     }
 
@@ -185,21 +174,21 @@ public partial class AboutWindow : Window
         var health = ThumbnailCache.Instance.GetHealth();
         if (!health.IsAvailable)
         {
-            ShowUpdateStatus("Thumbnail cache storage is unavailable.", "Warning");
+            ShowUpdateStatus(Strings.AboutThumbnailCacheStorageUnavailable, "Warning");
             return;
         }
 
         if (health.FileCount == 0 && health.TempFileCount == 0)
         {
-            ShowUpdateStatus("Thumbnail cache is already empty.", "Success");
+            ShowUpdateStatus(Strings.AboutThumbnailCacheAlreadyEmpty, "Success");
             return;
         }
 
-        var prompt = $"Clear {health.FileCount} cached thumbnails and {health.TempFileCount} temporary files? Images will rebuild thumbnails from the original files when folders are viewed again.";
+        var prompt = Strings.Format(nameof(Strings.AboutClearThumbnailCachePromptFormat), health.FileCount, health.TempFileCount);
         var answer = MessageBox.Show(
             this,
             prompt,
-            "Clear thumbnail cache",
+            Strings.AboutClearThumbnailCacheTitle,
             MessageBoxButton.YesNo,
             MessageBoxImage.Warning,
             MessageBoxResult.No);
@@ -207,7 +196,7 @@ public partial class AboutWindow : Window
             return;
 
         button.IsEnabled = false;
-        ShowUpdateStatus("Clearing thumbnail cache...", "Info");
+        ShowUpdateStatus(Strings.AboutClearingThumbnailCache, "Info");
 
         try
         {
@@ -218,24 +207,24 @@ public partial class AboutWindow : Window
 
             if (!result.IsAvailable)
             {
-                ShowUpdateStatus("Thumbnail cache storage is unavailable.", "Warning");
+                ShowUpdateStatus(Strings.AboutThumbnailCacheStorageUnavailable, "Warning");
             }
             else if (result.FailedCount > 0)
             {
                 ShowUpdateStatus(
-                    $"Cleared {result.DeletedCount} files ({FormatBytes(result.DeletedBytes)}). {result.FailedCount} files could not be removed because they may be in use.",
+                    Strings.Format(nameof(Strings.AboutThumbnailCacheClearedPartialFormat), result.DeletedCount, FormatBytes(result.DeletedBytes), result.FailedCount),
                     "Warning");
             }
             else
             {
                 ShowUpdateStatus(
-                    $"Cleared {result.DeletedCount} thumbnail files ({FormatBytes(result.DeletedBytes)}). Thumbnails will rebuild automatically.",
+                    Strings.Format(nameof(Strings.AboutThumbnailCacheClearedFormat), result.DeletedCount, FormatBytes(result.DeletedBytes)),
                     "Success");
             }
         }
         catch (Exception ex)
         {
-            ShowUpdateStatus($"Could not clear thumbnail cache: {ex.Message}", "Warning");
+            ShowUpdateStatus(Strings.Format(nameof(Strings.AboutCouldNotClearThumbnailCacheFormat), ex.Message), "Warning");
         }
         finally
         {
@@ -254,7 +243,7 @@ public partial class AboutWindow : Window
         DocumentCapabilityTitleText.Text = summary.DocumentTitle;
         DocumentCapabilityDetailText.Text = summary.DocumentDetail;
 
-        DocumentCapabilityIcon.Text = summary.DocumentReady ? "\uE73E" : "\uE783";
+        DocumentCapabilityIcon.Text = summary.DocumentReady ? "" : "";
         DocumentCapabilityIcon.Foreground = ThemeBrush(summary.DocumentReady ? "GreenBrush" : "YellowBrush");
         DocumentCapabilityCard.BorderBrush = ThemeBrush(summary.DocumentReady ? "GreenBrush" : "YellowBrush");
         DocumentCapabilityCard.Background = ThemeBrush(summary.DocumentReady ? "SurfacePanelBrush" : "WarningPanelBrush");
@@ -276,37 +265,36 @@ public partial class AboutWindow : Window
 
     private async void CheckUpdatesButton_Click(object sender, RoutedEventArgs e)
     {
-        // Manual check bypasses the 24-h throttle. Gate the button against concurrent clicks.
         if (sender is not System.Windows.Controls.Button btn) return;
         btn.IsEnabled = false;
-        CheckUpdatesButtonText.Text = "Checking...";
+        CheckUpdatesButtonText.Text = Strings.AboutChecking;
         _latestReleaseUrl = null;
         UpdateReleaseButton.Visibility = Visibility.Collapsed;
-        ShowUpdateStatus("Checking GitHub Releases...", "Info");
+        ShowUpdateStatus(Strings.AboutCheckingGitHubReleases, "Info");
         try
         {
             var result = await UpdateCheckService.CheckAsync();
             UpdateCheckService.RecordLastCheckedIfAppropriate(result);
             if (result.Error is not null)
             {
-                ShowUpdateStatus($"Update check failed: {result.Error}", "Warning");
+                ShowUpdateStatus(Strings.Format(nameof(Strings.AboutUpdateCheckFailedFormat), result.Error), "Warning");
             }
             else if (result.NewerAvailable && result.LatestHtmlUrl is not null)
             {
                 _latestReleaseUrl = result.LatestHtmlUrl;
                 UpdateReleaseButton.Visibility = Visibility.Visible;
-                ShowUpdateStatus($"A newer version is available: {result.LatestTag}.", "Update");
+                ShowUpdateStatus(Strings.Format(nameof(Strings.AboutNewerVersionAvailableFormat), result.LatestTag), "Update");
             }
             else
             {
-                ShowUpdateStatus("You're on the latest version.", "Success");
+                ShowUpdateStatus(Strings.AboutOnLatestVersion, "Success");
             }
         }
         finally
         {
             PopulateDiagnostics();
             btn.IsEnabled = true;
-            CheckUpdatesButtonText.Text = "Check updates";
+            CheckUpdatesButtonText.Text = Strings.AboutCheckUpdates;
         }
     }
 
@@ -319,7 +307,7 @@ public partial class AboutWindow : Window
         }
         catch (Exception ex)
         {
-            ShowUpdateStatus($"Could not open release page: {ex.Message}", "Warning");
+            ShowUpdateStatus(Strings.Format(nameof(Strings.AboutCouldNotOpenReleasePageFormat), ex.Message), "Warning");
         }
     }
 
@@ -331,25 +319,25 @@ public partial class AboutWindow : Window
         switch (tone)
         {
             case "Warning":
-                UpdateStatusIcon.Text = "\uE783";
+                UpdateStatusIcon.Text = "";
                 UpdateStatusIcon.Foreground = ThemeBrush("YellowBrush");
                 UpdateStatusCard.BorderBrush = ThemeBrush("YellowBrush");
                 UpdateStatusCard.Background = ThemeBrush("WarningPanelBrush");
                 break;
             case "Success":
-                UpdateStatusIcon.Text = "\uE73E";
+                UpdateStatusIcon.Text = "";
                 UpdateStatusIcon.Foreground = ThemeBrush("GreenBrush");
                 UpdateStatusCard.BorderBrush = ThemeBrush("GreenBrush");
                 UpdateStatusCard.Background = new SolidColorBrush(Color.FromArgb(0x1F, 0xA6, 0xE3, 0xA1));
                 break;
             case "Update":
-                UpdateStatusIcon.Text = "\uE895";
+                UpdateStatusIcon.Text = "";
                 UpdateStatusIcon.Foreground = ThemeBrush("AccentBrush");
                 UpdateStatusCard.BorderBrush = ThemeBrush("AccentBrush");
                 UpdateStatusCard.Background = new SolidColorBrush(Color.FromArgb(0x1F, 0x89, 0xB4, 0xFA));
                 break;
             default:
-                UpdateStatusIcon.Text = "\uE930";
+                UpdateStatusIcon.Text = "";
                 UpdateStatusIcon.Foreground = ThemeBrush("AccentBrush");
                 UpdateStatusCard.BorderBrush = ThemeBrush("HairlineBrush");
                 UpdateStatusCard.Background = ThemeBrush("SurfacePanelBrush");
@@ -383,9 +371,9 @@ public partial class AboutWindow : Window
             .Select(row => new
             {
                 Family = row.Family,
-                CountSummary = $"{row.OpenCount} open · {row.ExportCount} export",
-                Facets = $"Animation: {Tri(row.Animation)} · Multi-page: {Tri(row.MultiPage)} · Metadata: {Tri(row.Metadata)}",
-                RuntimeLine = $"Runtime: {row.Runtime}",
+                CountSummary = Strings.Format(nameof(Strings.AboutCapabilityMatrixCountSummaryFormat), row.OpenCount, row.ExportCount),
+                Facets = Strings.Format(nameof(Strings.AboutCapabilityMatrixFacetsFormat), Tri(row.Animation), Tri(row.MultiPage), Tri(row.Metadata)),
+                RuntimeLine = Strings.Format(nameof(Strings.AboutCapabilityMatrixRuntimeFormat), row.Runtime),
                 Notes = row.Notes
             })
             .ToArray();
@@ -393,23 +381,18 @@ public partial class AboutWindow : Window
 
     private static string Tri(bool? value) => value switch
     {
-        true => "yes",
-        false => "no",
-        _ => "n/a"
+        true => Strings.AboutTriYes,
+        false => Strings.AboutTriNo,
+        _ => Strings.AboutTriNA
     };
 
-    /// <summary>
-    /// Populates the provenance card with the live runtime snapshot and the structured
-    /// dependency rows used by <c>--codec-report</c>: source, version, path, SHA-256,
-    /// advisory status, and missing-runtime action copy.
-    /// </summary>
     private void PopulateProvenance()
     {
         ProvenancePanel.Children.Clear();
         var p = CodecCapabilityService.BuildProvenance();
 
-        AddProvenanceRow("App directory", p.AppDirectory);
-        AddProvenanceRow("Process arch", p.ProcessArchitecture);
+        AddProvenanceRow(Strings.AboutAppDirectoryLabel, p.AppDirectory);
+        AddProvenanceRow(Strings.AboutProcessArchLabel, p.ProcessArchitecture);
 
         foreach (var row in CodecCapabilityService.BuildDependencyProvenanceRows(p, OcrCapabilityService.GetStatus()))
             AddDependencyProvenanceRow(row);
@@ -456,13 +439,14 @@ public partial class AboutWindow : Window
         Grid.SetColumn(labelBlock, 0);
         grid.Children.Add(labelBlock);
 
+        var na = Strings.AboutProvenanceNotApplicable;
         var value = new StringBuilder()
-            .AppendLine($"{row.Kind} | Version: {row.Version}")
-            .AppendLine($"Source: {row.Source}")
-            .AppendLine($"Path: {row.Path ?? "(not applicable)"}")
-            .AppendLine($"SHA-256: {row.Sha256 ?? "(not applicable)"}")
-            .AppendLine($"Advisory: {row.AdvisoryStatus}")
-            .Append($"Action: {row.Action}")
+            .AppendLine(Strings.Format(nameof(Strings.AboutProvenanceDependencyKindVersionFormat), row.Kind, row.Version))
+            .AppendLine(Strings.Format(nameof(Strings.AboutProvenanceSourceFormat), row.Source))
+            .AppendLine(Strings.Format(nameof(Strings.AboutProvenancePathFormat), row.Path ?? na))
+            .AppendLine(Strings.Format(nameof(Strings.AboutProvenanceSha256Format), row.Sha256 ?? na))
+            .AppendLine(Strings.Format(nameof(Strings.AboutProvenanceAdvisoryFormat), row.AdvisoryStatus))
+            .Append(Strings.Format(nameof(Strings.AboutProvenanceActionFormat), row.Action))
             .ToString();
 
         var valueBlock = new TextBlock
