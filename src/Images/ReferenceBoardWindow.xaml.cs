@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
+using Images.Localization;
 using Images.Services;
 using Microsoft.Win32;
 
@@ -64,9 +65,9 @@ public partial class ReferenceBoardWindow : Window
         }
 
         if (added > 0 && skipped > 0)
-            SetStatus($"Added {added} reference{Plural(added)}. Skipped {skipped} unsupported or unreadable file{Plural(skipped)}.");
+            SetStatus(Strings.Format(nameof(Strings.ReferenceBoardAddedAndSkippedFormat), added, Plural(added), skipped, Plural(skipped)));
         else if (added > 0)
-            SetStatus($"Added {added} reference{Plural(added)}.");
+            SetStatus(Strings.Format(nameof(Strings.ReferenceBoardAddedReferencesFormat), added, Plural(added)));
         else if (skipped > 0)
             SetStatus(SupportedImageFormats.DropUnsupportedMessage);
 
@@ -77,7 +78,7 @@ public partial class ReferenceBoardWindow : Window
     {
         var dialog = new OpenFileDialog
         {
-            Title = "Add images to reference board",
+            Title = Strings.ReferenceBoardAddImagesDialogTitle,
             Filter = SupportedImageFormats.OpenDialogFilter,
             Multiselect = true,
             CheckFileExists = true
@@ -90,14 +91,14 @@ public partial class ReferenceBoardWindow : Window
     private void AddNoteButton_Click(object sender, RoutedEventArgs e)
     {
         AddNoteCard();
-        SetStatus("Added note card.");
+        SetStatus(Strings.ReferenceBoardAddedNote);
         UpdateEmptyState();
     }
 
     private void AddGroupButton_Click(object sender, RoutedEventArgs e)
     {
         AddGroupFrame();
-        SetStatus("Added group frame. Drag the header to move it or use the corner handle to resize.");
+        SetStatus(Strings.ReferenceBoardAddedGroup);
         UpdateEmptyState();
     }
 
@@ -105,7 +106,7 @@ public partial class ReferenceBoardWindow : Window
     {
         if (_itemCount == 0)
         {
-            SetStatus("The board is already empty.");
+            SetStatus(Strings.ReferenceBoardAlreadyEmpty);
             return;
         }
 
@@ -116,7 +117,7 @@ public partial class ReferenceBoardWindow : Window
         _itemCount = 0;
         _createdItemCount = 0;
         _selectedBorder = null;
-        SetStatus("Board cleared.");
+        SetStatus(Strings.ReferenceBoardCleared);
         UpdateEmptyState();
     }
 
@@ -124,7 +125,7 @@ public partial class ReferenceBoardWindow : Window
     {
         if (_itemCount == 0)
         {
-            SetStatus("Add at least one image, note, or group before exporting.");
+            SetStatus(Strings.ReferenceBoardAddBeforeExporting);
             return;
         }
 
@@ -132,14 +133,14 @@ public partial class ReferenceBoardWindow : Window
         var bounds = ReferenceBoardLayoutService.CalculateContentBounds(GetBoardItemBounds());
         if (bounds.IsEmpty)
         {
-            SetStatus("There is no visible board content to export.");
+            SetStatus(Strings.ReferenceBoardNoVisibleContent);
             return;
         }
 
         var dialog = new SaveFileDialog
         {
-            Title = "Export reference board",
-            Filter = "PNG image|*.png",
+            Title = Strings.ReferenceBoardExportDialogTitle,
+            Filter = Strings.ReferenceBoardExportDialogFilter,
             FileName = $"reference-board-{DateTime.Now:yyyyMMdd-HHmmss}.png",
             AddExtension = true,
             DefaultExt = ".png",
@@ -152,11 +153,11 @@ public partial class ReferenceBoardWindow : Window
         try
         {
             ExportBoard(dialog.FileName, bounds);
-            SetStatus($"Exported board to {Path.GetFileName(dialog.FileName)}.");
+            SetStatus(Strings.Format(nameof(Strings.ReferenceBoardExportedFormat), Path.GetFileName(dialog.FileName)));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
-            SetStatus($"Export failed: {ex.Message}");
+            SetStatus(Strings.Format(nameof(Strings.ReferenceBoardExportFailedFormat), ex.Message));
         }
     }
 
@@ -165,13 +166,13 @@ public partial class ReferenceBoardWindow : Window
         ZoomSlider.Value = 1;
         BoardScroller.ScrollToHorizontalOffset(0);
         BoardScroller.ScrollToVerticalOffset(0);
-        SetStatus("Board view reset.");
+        SetStatus(Strings.ReferenceBoardViewReset);
     }
 
     private void PinCheckBox_Changed(object sender, RoutedEventArgs e)
     {
         Topmost = PinCheckBox.IsChecked == true;
-        SetStatus(Topmost ? "Reference board pinned on top." : "Reference board no longer pinned.");
+        SetStatus(Topmost ? Strings.ReferenceBoardPinned : Strings.ReferenceBoardUnpinned);
     }
 
     private void ZoomSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -269,13 +270,13 @@ public partial class ReferenceBoardWindow : Window
             content: stack);
 
         card.ToolTip = path;
-        AutomationProperties.SetName(card, $"Reference image {fileName}");
+        AutomationProperties.SetName(card, Strings.Format(nameof(Strings.ReferenceBoardReferenceImageFormat), fileName));
         AddBoardElement(card, draggableHandle: card, zIndex: 20);
     }
 
     private void AddNoteCard()
     {
-        var header = CreateCardHeader("Note", "Drag note");
+        var header = CreateCardHeader(Strings.ReferenceBoardNote, Strings.ReferenceBoardNote);
         var editor = new TextBox
         {
             AcceptsReturn = true,
@@ -284,11 +285,10 @@ public partial class ReferenceBoardWindow : Window
             BorderThickness = new Thickness(0),
             Background = Brushes.Transparent,
             MinHeight = 110,
-            Text = string.Empty,
-            ToolTip = "Write a board note"
+            Text = string.Empty
         };
 
-        AutomationProperties.SetName(editor, "Reference board note text");
+        AutomationProperties.SetName(editor, Strings.ReferenceBoardNote);
 
         var grid = new Grid();
         grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -304,16 +304,16 @@ public partial class ReferenceBoardWindow : Window
             borderBrush: Brush("HairlineBrush"),
             content: grid);
 
-        AutomationProperties.SetName(card, "Reference board note");
+        AutomationProperties.SetName(card, Strings.ReferenceBoardNote);
         AddBoardElement(card, draggableHandle: header, zIndex: 30);
     }
 
     private void AddGroupFrame()
     {
-        var header = CreateCardHeader("Group", "Drag group");
+        var header = CreateCardHeader(Strings.ReferenceBoardGroup, Strings.ReferenceBoardGroup);
         var label = new TextBox
         {
-            Text = "Group",
+            Text = Strings.ReferenceBoardGroup,
             FontWeight = FontWeights.SemiBold,
             Background = Brushes.Transparent,
             BorderThickness = new Thickness(0),
@@ -321,8 +321,7 @@ public partial class ReferenceBoardWindow : Window
             Margin = new Thickness(14, 42, 14, 0),
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
-            MinWidth = 160,
-            ToolTip = "Rename this group"
+            MinWidth = 160
         };
 
         var resizeGrip = new Thumb
@@ -335,8 +334,7 @@ public partial class ReferenceBoardWindow : Window
             Margin = new Thickness(0, 0, 8, 8),
             Background = Brush("AccentBrush"),
             BorderBrush = Brush("CrustBrush"),
-            BorderThickness = new Thickness(1),
-            ToolTip = "Resize group"
+            BorderThickness = new Thickness(1)
         };
 
         resizeGrip.DragDelta += (_, e) =>
@@ -369,7 +367,7 @@ public partial class ReferenceBoardWindow : Window
 
         groupFrame.BorderThickness = new Thickness(1.5);
         resizeGrip.Tag = groupFrame;
-        AutomationProperties.SetName(groupFrame, "Reference board group frame");
+        AutomationProperties.SetName(groupFrame, Strings.ReferenceBoardGroup);
         AddBoardElement(groupFrame, draggableHandle: header, zIndex: 5);
     }
 
@@ -598,11 +596,11 @@ public partial class ReferenceBoardWindow : Window
             try
             {
                 ClipboardService.SetText(sample.Summary);
-                SetStatus($"Copied sample from {fileName}: {sample.Summary}");
+                SetStatus(Strings.Format(nameof(Strings.ReferenceBoardCopiedSampleFormat), fileName, sample.Summary));
             }
             catch (Exception ex)
             {
-                SetStatus($"Copy failed: {ex.Message}");
+                SetStatus(Strings.Format(nameof(Strings.ReferenceBoardCopyFailedFormat), ex.Message));
             }
 
             e.Handled = true;

@@ -1,7 +1,8 @@
 <Window x:Class="Images.ExportPreviewWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Images - Export workbench"
+        xmlns:loc="clr-namespace:Images.Localization"
+        Title="{x:Static loc:Strings.ExportPreviewWindowTitle}"
         Width="1160"
         Height="760"
         MinWidth="960"
@@ -25,7 +26,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel>
-                    <TextBlock Text="Export workbench" Style="{StaticResource Text.Title}" />
+                    <TextBlock Text="{x:Static loc:Strings.ExportPreviewHeading}" Style="{StaticResource Text.Title}" />
                     <TextBlock x:Name="SourceText"
                                Style="{StaticResource Text.Caption}"
                                Margin="0,3,0,0"
@@ -35,13 +36,13 @@
                     <Button x:Name="PreviewButton"
                             Style="{StaticResource ChromeButton}"
                             Click="PreviewButton_Click">
-                        <TextBlock Text="Preview" />
+                        <TextBlock Text="{x:Static loc:Strings.ExportPreviewPreviewButton}" />
                     </Button>
                     <Button x:Name="SaveCopyButton"
                             Style="{StaticResource PrimaryButton}"
                             Margin="8,0,0,0"
                             Click="SaveCopyButton_Click">
-                        <TextBlock Text="Save copy" />
+                        <TextBlock Text="{x:Static loc:Strings.ExportPreviewSaveCopy}" />
                     </Button>
                 </WrapPanel>
             </Grid>
@@ -61,20 +62,20 @@
                     Padding="16">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="Preset" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{x:Static loc:Strings.ExportPreviewPreset}" Style="{StaticResource SectionLabel}" />
                         <Border Style="{StaticResource Card}" Padding="12">
                             <StackPanel>
                                 <ComboBox x:Name="PresetCombo"
                                           SelectionChanged="PresetCombo_SelectionChanged"
-                                          AutomationProperties.Name="Export preview preset" />
-                                <TextBlock Text="Extension"
+                                          AutomationProperties.Name="{x:Static loc:Strings.ExportPreviewPreset}" />
+                                <TextBlock Text="{x:Static loc:Strings.ExportPreviewExtension}"
                                            FontWeight="SemiBold"
                                            Foreground="{StaticResource TextBrush}"
                                            Margin="0,12,0,0" />
                                 <TextBox x:Name="ExtensionBox"
                                          TextChanged="SettingsChanged"
-                                         AutomationProperties.Name="Export extension" />
-                                <TextBlock Text="Quality"
+                                         AutomationProperties.Name="{x:Static loc:Strings.ExportPreviewExtension}" />
+                                <TextBlock Text="{x:Static loc:Strings.ExportPreviewQuality}"
                                            FontWeight="SemiBold"
                                            Foreground="{StaticResource TextBrush}"
                                            Margin="0,10,0,0" />
@@ -85,7 +86,7 @@
                                         IsSnapToTickEnabled="True"
                                         ValueChanged="QualitySlider_ValueChanged" />
                                 <TextBlock x:Name="QualityText" Style="{StaticResource Text.Caption}" />
-                                <TextBlock Text="Max dimensions"
+                                <TextBlock Text="{x:Static loc:Strings.ExportPreviewMaxDimensions}"
                                            FontWeight="SemiBold"
                                            Foreground="{StaticResource TextBrush}"
                                            Margin="0,10,0,0" />
@@ -97,19 +98,17 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBox x:Name="MaxWidthBox"
                                              Grid.Column="0"
-                                             TextChanged="SettingsChanged"
-                                             AutomationProperties.Name="Export max width" />
+                                             TextChanged="SettingsChanged" />
                                     <TextBox x:Name="MaxHeightBox"
                                              Grid.Column="2"
-                                             TextChanged="SettingsChanged"
-                                             AutomationProperties.Name="Export max height" />
+                                             TextChanged="SettingsChanged" />
                                 </Grid>
                             </StackPanel>
                         </Border>
 
                         <Border Style="{StaticResource Divider}" />
 
-                        <TextBlock Text="Size" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{x:Static loc:Strings.ExportPreviewSize}" Style="{StaticResource SectionLabel}" />
                         <Border Style="{StaticResource Card}" Padding="12">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -123,25 +122,25 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Source" Style="{StaticResource Text.Hint}" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Static loc:Strings.ExportPreviewSource}" Style="{StaticResource Text.Hint}" Margin="0,0,12,6" />
                                 <TextBlock x:Name="SourceSizeText" Grid.Row="0" Grid.Column="1" Style="{StaticResource Text.Caption}" Margin="0,0,0,6" />
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Output" Style="{StaticResource Text.Hint}" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static loc:Strings.ExportPreviewOutput}" Style="{StaticResource Text.Hint}" Margin="0,0,12,6" />
                                 <TextBlock x:Name="OutputSizeText" Grid.Row="1" Grid.Column="1" Style="{StaticResource Text.Caption}" Margin="0,0,0,6" />
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Delta" Style="{StaticResource Text.Hint}" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static loc:Strings.ExportPreviewDelta}" Style="{StaticResource Text.Hint}" Margin="0,0,12,6" />
                                 <TextBlock x:Name="DeltaText" Grid.Row="2" Grid.Column="1" Style="{StaticResource Text.Caption}" Margin="0,0,0,6" />
-                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Pixels" Style="{StaticResource Text.Hint}" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static loc:Strings.ExportPreviewPixels}" Style="{StaticResource Text.Hint}" Margin="0,0,12,6" />
                                 <TextBlock x:Name="DimensionsText" Grid.Row="3" Grid.Column="1" Style="{StaticResource Text.Caption}" Margin="0,0,0,6" />
-                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Format" Style="{StaticResource Text.Hint}" Margin="0,0,12,0" />
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="{x:Static loc:Strings.ExportPreviewFormat}" Style="{StaticResource Text.Hint}" Margin="0,0,12,0" />
                                 <TextBlock x:Name="FormatText" Grid.Row="4" Grid.Column="1" Style="{StaticResource Text.Caption}" />
                             </Grid>
                         </Border>
 
                         <Border Style="{StaticResource Divider}" />
 
-                        <TextBlock Text="Warnings" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{x:Static loc:Strings.ExportPreviewWarnings}" Style="{StaticResource SectionLabel}" />
                         <Border Style="{StaticResource Card}" Padding="12">
                             <ItemsControl x:Name="WarningsList"
-                                          AutomationProperties.Name="Export preview warnings">
+                                          AutomationProperties.Name="{x:Static loc:Strings.ExportPreviewWarnings}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding}"
@@ -173,7 +172,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="Original" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{x:Static loc:Strings.ExportPreviewOriginal}" Style="{StaticResource SectionLabel}" />
                         <Border Grid.Row="1"
                                 Background="{StaticResource ViewportBrush}"
                                 BorderBrush="{StaticResource HairlineBrush}"
@@ -192,7 +191,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="Encoded preview" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{x:Static loc:Strings.ExportPreviewEncodedPreview}" Style="{StaticResource SectionLabel}" />
                         <Border Grid.Row="1"
                                 Background="{StaticResource ViewportBrush}"
                                 BorderBrush="{StaticResource HairlineBrush}"
@@ -220,7 +219,7 @@
                          Margin="0,0,9,0"
                          VerticalAlignment="Center" />
                 <TextBlock x:Name="StatusText"
-                           Text="Ready."
+                           Text="{x:Static loc:Strings.ExportPreviewReadyStatus}"
                            Style="{StaticResource Text.Caption}"
                            TextWrapping="Wrap"
                            VerticalAlignment="Center" />

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
+using Images.Localization;
 using Images.Services;
 
 namespace Images;
@@ -35,8 +36,8 @@ public partial class TagGraphWindow : Window
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
         {
             _currentImagePath = null;
-            CurrentImageText.Text = "No image selected";
-            CurrentImagePathText.Text = "Open an image first to import or export its XMP sidecar tags.";
+            CurrentImageText.Text = Strings.TagGraphNoImageSelected;
+            CurrentImagePathText.Text = Strings.TagGraphNoImageHint;
             CurrentImagePathText.ToolTip = null;
             return;
         }
@@ -50,7 +51,7 @@ public partial class TagGraphWindow : Window
     private void RefreshButton_Click(object sender, RoutedEventArgs e)
     {
         RefreshSnapshot();
-        SetStatus("Tag graph refreshed.", TagGraphStatus.Ready);
+        SetStatus(Strings.TagGraphRefreshed, TagGraphStatus.Ready);
     }
 
     private void AddNamespaceButton_Click(object sender, RoutedEventArgs e)
@@ -93,7 +94,7 @@ public partial class TagGraphWindow : Window
     {
         if (_currentImagePath is null)
         {
-            SetStatus("Open an image before importing sidecar tags.", TagGraphStatus.Warning);
+            SetStatus(Strings.TagGraphOpenImageBeforeImporting, TagGraphStatus.Warning);
             return;
         }
 
@@ -113,7 +114,7 @@ public partial class TagGraphWindow : Window
     {
         if (_currentImagePath is null)
         {
-            SetStatus("Open an image before exporting sidecar tags.", TagGraphStatus.Warning);
+            SetStatus(Strings.TagGraphOpenImageBeforeExporting, TagGraphStatus.Warning);
             return;
         }
 
@@ -146,18 +147,18 @@ public partial class TagGraphWindow : Window
         foreach (var item in snapshot.Aliases)
             _aliasRows.Add($"{item.Alias} -> {item.Target}");
         if (_aliasRows.Count == 0)
-            _aliasRows.Add("No namespace or alias rules yet.");
+            _aliasRows.Add(Strings.TagGraphNoNamespaceOrAlias);
 
         _parentRows.Clear();
         foreach (var item in snapshot.Parents)
             _parentRows.Add($"{item.Tag} -> {item.Parent}");
         if (_parentRows.Count == 0)
-            _parentRows.Add("No parent relationships yet.");
+            _parentRows.Add(Strings.TagGraphNoParentRelationships);
 
-        GraphSummaryText.Text =
-            $"{snapshot.Namespaces.Count} namespace{Plural(snapshot.Namespaces.Count)}, " +
-            $"{snapshot.Aliases.Count} alias{Plural(snapshot.Aliases.Count)}, " +
-            $"{snapshot.Parents.Count} parent{Plural(snapshot.Parents.Count)}";
+        GraphSummaryText.Text = Strings.Format(nameof(Strings.TagGraphSummaryFormat),
+            snapshot.Namespaces.Count, Plural(snapshot.Namespaces.Count),
+            snapshot.Aliases.Count, Plural(snapshot.Aliases.Count),
+            snapshot.Parents.Count, Plural(snapshot.Parents.Count));
     }
 
     private void PreviewExpansion()
@@ -170,20 +171,20 @@ public partial class TagGraphWindow : Window
 
         if (tags.Count == 0)
         {
-            _previewRows.Add("Enter tags to preview.");
-            SetStatus("Enter at least one tag to preview.", TagGraphStatus.Warning);
+            _previewRows.Add(Strings.TagGraphEnterTagsToPreview);
+            SetStatus(Strings.TagGraphEnterAtLeastOneTag, TagGraphStatus.Warning);
             return;
         }
 
         foreach (var expansion in _tagGraph.ExpandMany(tags))
         {
             var parents = expansion.Parents.Count == 0
-                ? "no parents"
+                ? Strings.TagGraphNoParents
                 : string.Join(", ", expansion.Parents);
             _previewRows.Add($"{expansion.Original} => {expansion.Canonical} ({parents})");
         }
 
-        SetStatus($"Previewed {tags.Count} tag{Plural(tags.Count)}.", TagGraphStatus.Ready);
+        SetStatus(Strings.Format(nameof(Strings.TagGraphPreviewedTagsFormat), tags.Count, Plural(tags.Count)), TagGraphStatus.Ready);
     }
 
     private void SetStatus(string message, TagGraphStatus status)

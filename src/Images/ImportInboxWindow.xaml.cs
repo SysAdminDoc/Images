@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Images.Localization;
 using Images.Services;
 using Images.ViewModels;
 using Microsoft.Win32;
@@ -51,7 +52,7 @@ public partial class ImportInboxWindow : Window
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
-            SetStatus("Could not add that import source.", ImportInboxStatus.Warning);
+            SetStatus(Strings.ImportInboxCouldNotAddSource, ImportInboxStatus.Warning);
         }
     }
 
@@ -59,7 +60,7 @@ public partial class ImportInboxWindow : Window
     {
         if (_sourceRoots.Count == 0)
         {
-            SetStatus("Add files or a folder before refreshing the import inbox.", ImportInboxStatus.Warning);
+            SetStatus(Strings.ImportInboxAddFolderBeforeRefresh, ImportInboxStatus.Warning);
             return;
         }
 
@@ -71,7 +72,7 @@ public partial class ImportInboxWindow : Window
         var destination = _destinationFolder;
 
         SetBusy(true);
-        SetStatus("Building import inbox...", ImportInboxStatus.Busy);
+        SetStatus(Strings.ImportInboxBuildingStatus, ImportInboxStatus.Busy);
 
         try
         {
@@ -90,12 +91,12 @@ public partial class ImportInboxWindow : Window
 
             UpdateCounts();
             SetStatus(
-                $"Staged {result.SourceCount} file{Plural(result.SourceCount)}. {result.DuplicateCount} inbox duplicate{Plural(result.DuplicateCount)}, {result.DestinationDuplicateCount} destination duplicate{Plural(result.DestinationDuplicateCount)}.",
+                Strings.Format(nameof(Strings.ImportInboxStagedResultFormat), result.SourceCount, Plural(result.SourceCount), result.DuplicateCount, Plural(result.DuplicateCount), result.DestinationDuplicateCount, Plural(result.DestinationDuplicateCount)),
                 result.SourceCount > 0 ? ImportInboxStatus.Ready : ImportInboxStatus.Warning);
         }
         catch (OperationCanceledException)
         {
-            SetStatus("Import inbox refresh canceled.", ImportInboxStatus.Warning);
+            SetStatus(Strings.ImportInboxRefreshCanceled, ImportInboxStatus.Warning);
         }
         finally
         {
@@ -109,7 +110,7 @@ public partial class ImportInboxWindow : Window
     {
         var dialog = new OpenFileDialog
         {
-            Title = "Add files to import inbox",
+            Title = Strings.ImportInboxAddFilesDialogTitle,
             Filter = SupportedImageFormats.OpenDialogFilter,
             Multiselect = true
         };
@@ -124,7 +125,7 @@ public partial class ImportInboxWindow : Window
 
     private async void AddFolderButton_Click(object sender, RoutedEventArgs e)
     {
-        var folder = PickFolder("Add folder to import inbox");
+        var folder = PickFolder(Strings.ImportInboxAddFolderDialogTitle);
         if (folder is null)
             return;
 
@@ -134,7 +135,7 @@ public partial class ImportInboxWindow : Window
 
     private async void ChooseDestinationButton_Click(object sender, RoutedEventArgs e)
     {
-        var folder = PickFolder("Choose import destination");
+        var folder = PickFolder(Strings.ImportInboxChooseDestinationDialogTitle);
         if (folder is null)
             return;
 
@@ -144,7 +145,7 @@ public partial class ImportInboxWindow : Window
         if (_sourceRoots.Count > 0)
             await ReloadAsync();
         else
-            SetStatus("Destination selected. Add files or a folder to stage imports.", ImportInboxStatus.Ready);
+            SetStatus(Strings.ImportInboxDestinationSelected, ImportInboxStatus.Ready);
     }
 
     private async void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -167,7 +168,7 @@ public partial class ImportInboxWindow : Window
             row.StripGps = selected.StripGps;
         }
 
-        SetStatus("Applied selected metadata to included inbox files.", ImportInboxStatus.Ready);
+        SetStatus(Strings.ImportInboxAppliedMetadata, ImportInboxStatus.Ready);
     }
 
     private void RecycleSelectedButton_Click(object sender, RoutedEventArgs e)
@@ -175,7 +176,7 @@ public partial class ImportInboxWindow : Window
         var selected = InboxList.SelectedItems.OfType<ImportInboxRow>().ToList();
         if (selected.Count == 0)
         {
-            SetStatus("Select one or more staged files before recycling.", ImportInboxStatus.Warning);
+            SetStatus(Strings.ImportInboxSelectBeforeRecycling, ImportInboxStatus.Warning);
             return;
         }
 
@@ -191,7 +192,7 @@ public partial class ImportInboxWindow : Window
                     _rows.Remove(row);
                     break;
                 case RecycleBinDeleteStatus.Canceled:
-                    SetStatus("Recycle canceled.", ImportInboxStatus.Warning);
+                    SetStatus(Strings.ImportInboxRecycleCanceled, ImportInboxStatus.Warning);
                     UpdateCounts();
                     return;
                 default:
@@ -205,8 +206,8 @@ public partial class ImportInboxWindow : Window
             SetDetail(null);
         SetStatus(
             failed == 0
-                ? $"Moved {deleted} staged file{Plural(deleted)} to Recycle Bin."
-                : $"Moved {deleted} staged file{Plural(deleted)} to Recycle Bin. {failed} failed.",
+                ? Strings.Format(nameof(Strings.ImportInboxRecycledFormat), deleted, Plural(deleted))
+                : Strings.Format(nameof(Strings.ImportInboxRecycledPartialFormat), deleted, Plural(deleted), failed),
             failed == 0 ? ImportInboxStatus.Ready : ImportInboxStatus.Warning);
     }
 
@@ -214,14 +215,14 @@ public partial class ImportInboxWindow : Window
     {
         if (string.IsNullOrWhiteSpace(_destinationFolder))
         {
-            SetStatus("Choose a destination folder before importing.", ImportInboxStatus.Warning);
+            SetStatus(Strings.ImportInboxChooseDestinationBeforeImporting, ImportInboxStatus.Warning);
             return;
         }
 
         var selected = _rows.Where(row => row.IsIncluded).ToList();
         if (selected.Count == 0)
         {
-            SetStatus("Check at least one staged file before importing.", ImportInboxStatus.Warning);
+            SetStatus(Strings.ImportInboxCheckBeforeImporting, ImportInboxStatus.Warning);
             return;
         }
 
@@ -237,7 +238,7 @@ public partial class ImportInboxWindow : Window
             .ToList();
 
         SetBusy(true);
-        SetStatus($"Importing {requests.Count} file{Plural(requests.Count)}...", ImportInboxStatus.Busy);
+        SetStatus(Strings.Format(nameof(Strings.ImportInboxImportingFormat), requests.Count, Plural(requests.Count)), ImportInboxStatus.Busy);
 
         try
         {
@@ -254,8 +255,8 @@ public partial class ImportInboxWindow : Window
 
             SetStatus(
                 result.FailedCount == 0
-                    ? $"Imported {result.ImportedCount} file{Plural(result.ImportedCount)}."
-                    : $"Imported {result.ImportedCount} file{Plural(result.ImportedCount)}. {result.FailedCount} failed.",
+                    ? Strings.Format(nameof(Strings.ImportInboxImportedFormat), result.ImportedCount, Plural(result.ImportedCount))
+                    : Strings.Format(nameof(Strings.ImportInboxImportedPartialFormat), result.ImportedCount, Plural(result.ImportedCount), result.FailedCount),
                 result.FailedCount == 0 ? ImportInboxStatus.Ready : ImportInboxStatus.Warning);
         }
         finally
@@ -278,8 +279,8 @@ public partial class ImportInboxWindow : Window
 
     private void SetDetail(ImportInboxRow? row)
     {
-        DetailTitle.Text = row?.FileName ?? "No staged file selected";
-        DetailSubtitle.Text = row?.StatusText ?? "Add files or folders, then select an item to tag, rate, strip GPS, or skip.";
+        DetailTitle.Text = row?.FileName ?? Strings.ImportInboxNoFileSelected;
+        DetailSubtitle.Text = row?.StatusText ?? Strings.ImportInboxNoFileSelectedHint;
         DetailSubtitle.ToolTip = row?.Path;
         MetadataEditorPanel.DataContext = row;
         TagsBox.DataContext = row;
@@ -305,7 +306,7 @@ public partial class ImportInboxWindow : Window
         catch
         {
             PreviewImage.Source = null;
-            PreviewImage.ToolTip = "Preview unavailable.";
+            PreviewImage.ToolTip = Strings.ImportInboxPreviewUnavailable;
         }
     }
 
@@ -325,8 +326,8 @@ public partial class ImportInboxWindow : Window
         var included = _rows.Count(row => row.IsIncluded);
         InboxCountText.Text = _rows.Count.ToString(CultureInfo.InvariantCulture);
         ImportSummaryText.Text = _rows.Count == 0
-            ? "Add files or a folder to begin staging imports."
-            : $"{included} of {_rows.Count} staged file{Plural(_rows.Count)} included. Destination duplicates are skipped by default.";
+            ? Strings.ImportInboxAddFilesBegin
+            : Strings.Format(nameof(Strings.ImportInboxIncludedSummaryFormat), included, _rows.Count, Plural(_rows.Count));
     }
 
     private void SetStatus(string message, ImportInboxStatus status)
@@ -412,8 +413,8 @@ public partial class ImportInboxWindow : Window
         }
 
         public string RatingText => RatingValue < 0
-            ? "Rejected (-1)"
-            : $"{RatingValue:0} star{(Math.Abs(RatingValue - 1) < 0.1 ? "" : "s")}";
+            ? Strings.ImportInboxRejectedText
+            : Strings.Format(nameof(Strings.ImportInboxStarFormat), $"{RatingValue:0}", Math.Abs(RatingValue - 1) < 0.1 ? "" : "s");
 
         public static ImportInboxRow FromItem(ImportInboxItem item)
         {

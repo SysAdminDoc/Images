@@ -1,7 +1,8 @@
 <Window x:Class="Images.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Settings"
+        xmlns:loc="clr-namespace:Images.Localization"
+        Title="{x:Static loc:Strings.SettingsWindowTitle}"
         Width="500"
         SizeToContent="Height"
         MinWidth="460"
@@ -26,9 +27,9 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
-                    <TextBlock Style="{StaticResource Text.Display}" Text="Settings" />
+                    <TextBlock Style="{StaticResource Text.Display}" Text="{x:Static loc:Strings.SettingsHeading}" />
                     <TextBlock Style="{StaticResource Text.Subtitle}"
-                               Text="Customize startup, appearance, accessibility, hotkeys, diagnostics, and privacy preferences."
+                               Text="{x:Static loc:Strings.SettingsSubtitle}"
                                Margin="0,5,0,0" />
                 </StackPanel>
                 <!-- Gear icon — decorative, reinforces context -->
@@ -42,7 +43,7 @@
             </Grid>
 
             <!-- ── General ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="General" Margin="1,0,0,10" />
+            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionGeneral}" Margin="1,0,0,10" />
             <Border Style="{StaticResource Card}" Margin="0,0,0,18">
                 <StackPanel>
                     <Grid>
@@ -51,10 +52,10 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="Remember window size and position"
+                            <TextBlock Text="{x:Static loc:Strings.SettingsRememberWindowTitle}"
                                        Style="{StaticResource Text.Body}"
                                        FontWeight="SemiBold" />
-                            <TextBlock Text="Restores the last normal window bounds unless Images was launched in peek mode."
+                            <TextBlock Text="{x:Static loc:Strings.SettingsRememberWindowDescription}"
                                        Style="{StaticResource Text.Hint}"
                                        Margin="0,3,0,0"
                                        TextWrapping="Wrap" />
@@ -62,13 +63,13 @@
                         <CheckBox Grid.Column="1"
                                   VerticalAlignment="Center"
                                   IsChecked="{Binding RememberWindowPlacement}"
-                                  AutomationProperties.Name="Remember window size and position" />
+                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsRememberWindowTitle}" />
                     </Grid>
                 </StackPanel>
             </Border>
 
             <!-- ── Appearance ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="Appearance" Margin="1,0,0,10" />
+            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionAppearance}" Margin="1,0,0,10" />
             <Border Style="{StaticResource Card}" Margin="0,0,0,18">
                 <StackPanel>
 
@@ -79,10 +80,10 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="Show filmstrip at startup"
+                            <TextBlock Text="{x:Static loc:Strings.SettingsFilmstripTitle}"
                                        Style="{StaticResource Text.Body}"
                                        FontWeight="SemiBold" />
-                            <TextBlock Text="Displays folder thumbnails below the viewer when a folder is opened."
+                            <TextBlock Text="{x:Static loc:Strings.SettingsFilmstripDescription}"
                                        Style="{StaticResource Text.Hint}"
                                        Margin="0,3,0,0"
                                        TextWrapping="Wrap" />
@@ -90,7 +91,7 @@
                         <CheckBox Grid.Column="1"
                                   VerticalAlignment="Center"
                                   IsChecked="{Binding FilmstripVisibleOnStartup}"
-                                  AutomationProperties.Name="Show filmstrip at startup" />
+                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsFilmstripTitle}" />
                     </Grid>
 
                     <Border Height="1"
@@ -104,10 +105,10 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="Show metadata overlay at startup"
+                            <TextBlock Text="{x:Static loc:Strings.SettingsMetadataHudTitle}"
                                        Style="{StaticResource Text.Body}"
                                        FontWeight="SemiBold" />
-                            <TextBlock Text="Floats camera, exposure, and location data over the image."
+                            <TextBlock Text="{x:Static loc:Strings.SettingsMetadataHudDescription}"
                                        Style="{StaticResource Text.Hint}"
                                        Margin="0,3,0,0"
                                        TextWrapping="Wrap" />
@@ -115,7 +116,7 @@
                         <CheckBox Grid.Column="1"
                                   VerticalAlignment="Center"
                                   IsChecked="{Binding MetadataHudVisibleOnStartup}"
-                                  AutomationProperties.Name="Show metadata overlay at startup" />
+                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsMetadataHudTitle}" />
                     </Grid>
 
                     <Border Height="1"
@@ -129,10 +130,10 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="Confirm before moving images to Recycle Bin"
+                            <TextBlock Text="{x:Static loc:Strings.SettingsConfirmRecycleBinTitle}"
                                        Style="{StaticResource Text.Body}"
                                        FontWeight="SemiBold" />
-                            <TextBlock Text="Turn this back on if you used 'don't ask again' on the delete confirmation."
+                            <TextBlock Text="{x:Static loc:Strings.SettingsConfirmRecycleBinDescription}"
                                        Style="{StaticResource Text.Hint}"
                                        Margin="0,3,0,0"
                                        TextWrapping="Wrap" />
@@ -140,14 +141,14 @@
                         <CheckBox Grid.Column="1"
                                   VerticalAlignment="Center"
                                   IsChecked="{Binding ConfirmRecycleBinDeletes}"
-                                  AutomationProperties.Name="Confirm before moving images to Recycle Bin" />
+                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsConfirmRecycleBinTitle}" />
                     </Grid>
 
                 </StackPanel>
             </Border>
 
             <!-- ── Accessibility ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="Accessibility" Margin="1,0,0,10" />
+            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionAccessibility}" Margin="1,0,0,10" />
             <Border Style="{StaticResource Card}" Margin="0,0,0,18">
                 <StackPanel>
                     <Grid>
@@ -156,10 +157,10 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="Reduce viewer motion"
+                            <TextBlock Text="{x:Static loc:Strings.SettingsReduceMotionTitle}"
                                        Style="{StaticResource Text.Body}"
                                        FontWeight="SemiBold" />
-                            <TextBlock Text="Disables hover fade animation for the edge navigation buttons."
+                            <TextBlock Text="{x:Static loc:Strings.SettingsReduceMotionDescription}"
                                        Style="{StaticResource Text.Hint}"
                                        Margin="0,3,0,0"
                                        TextWrapping="Wrap" />
@@ -167,7 +168,7 @@
                         <CheckBox Grid.Column="1"
                                   VerticalAlignment="Center"
                                   IsChecked="{Binding ReduceMotion}"
-                                  AutomationProperties.Name="Reduce viewer motion" />
+                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsReduceMotionTitle}" />
                     </Grid>
 
                     <Border Height="1"
@@ -180,10 +181,10 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="Prefer high-contrast surfaces"
+                            <TextBlock Text="{x:Static loc:Strings.SettingsHighContrastTitle}"
                                        Style="{StaticResource Text.Body}"
                                        FontWeight="SemiBold" />
-                            <TextBlock Text="Stores a contrast preference for settings, diagnostics, and future contrast-aware views."
+                            <TextBlock Text="{x:Static loc:Strings.SettingsHighContrastDescription}"
                                        Style="{StaticResource Text.Hint}"
                                        Margin="0,3,0,0"
                                        TextWrapping="Wrap" />
@@ -191,13 +192,13 @@
                         <CheckBox Grid.Column="1"
                                   VerticalAlignment="Center"
                                   IsChecked="{Binding HighContrastMode}"
-                                  AutomationProperties.Name="Prefer high-contrast surfaces" />
+                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsHighContrastTitle}" />
                     </Grid>
                 </StackPanel>
             </Border>
 
             <!-- ── Advanced ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="Advanced" Margin="1,0,0,10" />
+            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionAdvanced}" Margin="1,0,0,10" />
             <Border Style="{StaticResource Card}" Margin="0,0,0,18">
                 <StackPanel>
                     <Grid>
@@ -206,10 +207,10 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="Archive books turn right-to-left"
+                            <TextBlock Text="{x:Static loc:Strings.SettingsArchiveRtlTitle}"
                                        Style="{StaticResource Text.Body}"
                                        FontWeight="SemiBold" />
-                            <TextBlock Text="Uses manga-style page turn direction for supported archive books."
+                            <TextBlock Text="{x:Static loc:Strings.SettingsArchiveRtlDescription}"
                                        Style="{StaticResource Text.Hint}"
                                        Margin="0,3,0,0"
                                        TextWrapping="Wrap" />
@@ -217,7 +218,7 @@
                         <CheckBox Grid.Column="1"
                                   VerticalAlignment="Center"
                                   IsChecked="{Binding ArchiveRightToLeft}"
-                                  AutomationProperties.Name="Archive books turn right-to-left" />
+                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsArchiveRtlTitle}" />
                     </Grid>
 
                     <Border Height="1"
@@ -230,10 +231,10 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="Clean scanned archive pages"
+                            <TextBlock Text="{x:Static loc:Strings.SettingsArchiveCleanScanTitle}"
                                        Style="{StaticResource Text.Body}"
                                        FontWeight="SemiBold" />
-                            <TextBlock Text="Applies the preview-only old-scan filter when opening archive books."
+                            <TextBlock Text="{x:Static loc:Strings.SettingsArchiveCleanScanDescription}"
                                        Style="{StaticResource Text.Hint}"
                                        Margin="0,3,0,0"
                                        TextWrapping="Wrap" />
@@ -241,7 +242,7 @@
                         <CheckBox Grid.Column="1"
                                   VerticalAlignment="Center"
                                   IsChecked="{Binding ArchiveOldScanFilter}"
-                                  AutomationProperties.Name="Clean scanned archive pages" />
+                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsArchiveCleanScanTitle}" />
                     </Grid>
 
                     <Border Height="1"
@@ -254,10 +255,10 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="Open archive books in two-page spreads"
+                            <TextBlock Text="{x:Static loc:Strings.SettingsArchiveSpreadTitle}"
                                        Style="{StaticResource Text.Body}"
                                        FontWeight="SemiBold" />
-                            <TextBlock Text="Keeps explicit covers single and pairs interior pages where possible."
+                            <TextBlock Text="{x:Static loc:Strings.SettingsArchiveSpreadDescription}"
                                        Style="{StaticResource Text.Hint}"
                                        Margin="0,3,0,0"
                                        TextWrapping="Wrap" />
@@ -265,16 +266,16 @@
                         <CheckBox Grid.Column="1"
                                   VerticalAlignment="Center"
                                   IsChecked="{Binding ArchiveSpreadMode}"
-                                  AutomationProperties.Name="Open archive books in two-page spreads" />
+                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsArchiveSpreadTitle}" />
                     </Grid>
                 </StackPanel>
             </Border>
 
             <!-- ── Hotkeys ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="Hotkeys" Margin="1,0,0,10" />
+            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionHotkeys}" Margin="1,0,0,10" />
             <Border Style="{StaticResource Card}" Margin="0,0,0,18">
                 <StackPanel>
-                    <TextBlock Text="Keyboard shortcuts are fixed in this release."
+                    <TextBlock Text="{x:Static loc:Strings.SettingsHotkeysFixed}"
                                Style="{StaticResource Text.Body}"
                                FontWeight="SemiBold" />
                     <TextBlock Text="{Binding HotkeySummary}"
@@ -285,7 +286,7 @@
             </Border>
 
             <!-- ── Text extraction ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="Text extraction" Margin="1,0,0,10" />
+            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionTextExtraction}" Margin="1,0,0,10" />
             <Border Style="{StaticResource Card}" Margin="0,0,0,18">
                 <StackPanel>
                     <Grid>
@@ -357,15 +358,15 @@
                                     Padding="11,5"
                                     MinHeight="30"
                                     HorizontalAlignment="Stretch"
-                                    ToolTip="Open Windows Language &amp; region settings"
-                                    AutomationProperties.Name="Open Windows language settings">
+                                    ToolTip="{x:Static loc:Strings.SettingsOcrLanguagesTooltip}"
+                                    AutomationProperties.Name="{x:Static loc:Strings.SettingsOcrLanguagesAutomationName}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE713;"
                                                FontFamily="{StaticResource IconFontFamily}"
                                                FontSize="11"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Languages" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Static loc:Strings.SettingsOcrLanguagesButton}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Style="{StaticResource ChromeButton}"
@@ -374,14 +375,14 @@
                                     MinHeight="30"
                                     Margin="0,8,0,0"
                                     HorizontalAlignment="Stretch"
-                                    AutomationProperties.Name="Refresh text extraction status">
+                                    AutomationProperties.Name="{x:Static loc:Strings.SettingsOcrRefreshAutomationName}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE72C;"
                                                FontFamily="{StaticResource IconFontFamily}"
                                                FontSize="11"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Refresh" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Static loc:Strings.SettingsOcrRefreshButton}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                         </StackPanel>
@@ -398,7 +399,7 @@
                                    Foreground="{StaticResource OverlayBrush}"
                                    VerticalAlignment="Center"
                                    Margin="0,0,9,0" />
-                        <TextBlock Text="OCR is local to Windows. Images does not upload image data for text extraction."
+                        <TextBlock Text="{x:Static loc:Strings.SettingsOcrPrivacyNote}"
                                    Style="{StaticResource Text.Hint}"
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center" />
@@ -407,7 +408,7 @@
             </Border>
 
             <!-- ── Diagnostics ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="Diagnostics" Margin="1,0,0,10" />
+            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionDiagnostics}" Margin="1,0,0,10" />
             <Border Style="{StaticResource Card}" Margin="0,0,0,18">
                 <StackPanel>
                     <TextBlock Text="{Binding DiagnosticsStorageSummary}"
@@ -418,14 +419,14 @@
                                 Command="{Binding OpenAppDataCommand}"
                                 Padding="11,5"
                                 MinHeight="30"
-                                AutomationProperties.Name="Open app data folder">
+                                AutomationProperties.Name="{x:Static loc:Strings.SettingsAppDataAutomationName}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE838;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="11"
                                            Margin="0,0,7,0"
                                            VerticalAlignment="Center" />
-                                <TextBlock Text="App data" VerticalAlignment="Center" />
+                                <TextBlock Text="{x:Static loc:Strings.SettingsAppDataButton}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                         <Button Style="{StaticResource ChromeButton}"
@@ -433,14 +434,14 @@
                                 Padding="11,5"
                                 MinHeight="30"
                                 Margin="8,0,0,0"
-                                AutomationProperties.Name="Open logs folder">
+                                AutomationProperties.Name="{x:Static loc:Strings.SettingsLogsAutomationName}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE8A5;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="11"
                                            Margin="0,0,7,0"
                                            VerticalAlignment="Center" />
-                                <TextBlock Text="Logs" VerticalAlignment="Center" />
+                                <TextBlock Text="{x:Static loc:Strings.SettingsLogsButton}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -448,7 +449,7 @@
             </Border>
 
             <!-- ── Privacy ── -->
-            <TextBlock Style="{StaticResource SectionLabel}" Text="Privacy" Margin="1,0,0,10" />
+            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionPrivacy}" Margin="1,0,0,10" />
             <Border Style="{StaticResource Card}" Margin="0,0,0,0">
                 <StackPanel>
 
@@ -459,7 +460,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                            <TextBlock Text="Check for updates automatically"
+                            <TextBlock Text="{x:Static loc:Strings.SettingsUpdateCheckTitle}"
                                        Style="{StaticResource Text.Body}"
                                        FontWeight="SemiBold" />
                              <TextBlock Text="{Binding UpdateCheckDescription}"
@@ -470,7 +471,7 @@
                         <CheckBox Grid.Column="1"
                                   VerticalAlignment="Center"
                                   IsChecked="{Binding UpdateCheckEnabled}"
-                                  AutomationProperties.Name="Check for updates automatically" />
+                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsUpdateCheckTitle}" />
                     </Grid>
 
                 </StackPanel>

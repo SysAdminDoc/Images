@@ -1,7 +1,8 @@
 <Window x:Class="Images.SemanticSearchWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Images - Semantic search"
+        xmlns:loc="clr-namespace:Images.Localization"
+        Title="{x:Static loc:Strings.SemanticSearchWindowTitle}"
         Width="1180"
         Height="780"
         MinWidth="940"
@@ -25,7 +26,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel>
-                    <TextBlock Text="Semantic search" Style="{StaticResource Text.Title}" />
+                    <TextBlock Text="{x:Static loc:Strings.SemanticSearchHeading}" Style="{StaticResource Text.Title}" />
                     <TextBlock x:Name="ProviderStatusText"
                                Style="{StaticResource Text.Caption}"
                                TextWrapping="Wrap"
@@ -36,23 +37,23 @@
                             Style="{StaticResource ChromeButton}"
                             Margin="8,0,0,0"
                             Click="AddFolderButton_Click"
-                            AutomationProperties.Name="Add folder to semantic search">
-                        <TextBlock Text="Add folder" />
+                            AutomationProperties.Name="{x:Static loc:Strings.SemanticSearchAddFolder}">
+                        <TextBlock Text="{x:Static loc:Strings.SemanticSearchAddFolder}" />
                     </Button>
                     <Button x:Name="IndexButton"
                             Style="{StaticResource PrimaryButton}"
                             Margin="8,0,0,0"
                             Click="IndexButton_Click"
-                            AutomationProperties.Name="Build semantic search index">
-                        <TextBlock Text="Index" />
+                            AutomationProperties.Name="{x:Static loc:Strings.SemanticSearchIndex}">
+                        <TextBlock Text="{x:Static loc:Strings.SemanticSearchIndex}" />
                     </Button>
                     <Button x:Name="CancelButton"
                             Style="{StaticResource ChromeButton}"
                             Margin="8,0,0,0"
                             IsEnabled="False"
                             Click="CancelButton_Click"
-                            AutomationProperties.Name="Cancel semantic indexing">
-                        <TextBlock Text="Cancel" />
+                            AutomationProperties.Name="{x:Static loc:Strings.Cancel}">
+                        <TextBlock Text="{x:Static loc:Strings.Cancel}" />
                     </Button>
                 </WrapPanel>
             </Grid>
@@ -78,8 +79,8 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0">
-                        <TextBlock Text="Indexed folders" Style="{StaticResource SectionLabel}" />
-                        <TextBlock Text="Indexing is explicit and local. The current MVP stores derived vectors in app-local SQLite and never contacts a network service."
+                        <TextBlock Text="{x:Static loc:Strings.SemanticSearchIndexedFolders}" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{x:Static loc:Strings.SemanticSearchIndexedFoldersHint}"
                                    Style="{StaticResource Text.Caption}"
                                    TextWrapping="Wrap"
                                    Margin="0,5,0,12" />
@@ -87,35 +88,35 @@
 
                     <ListBox x:Name="RootsList"
                              Grid.Row="1"
-                             AutomationProperties.Name="Semantic search roots" />
+                             AutomationProperties.Name="{x:Static loc:Strings.SemanticSearchIndexedFolders}" />
 
                     <StackPanel Grid.Row="2" Margin="0,14,0,0">
                         <Button x:Name="UseSelectedRootButton"
                                 Style="{StaticResource ChromeButton}"
                                 Click="UseSelectedRootButton_Click"
-                                AutomationProperties.Name="Use selected root as search filter">
-                            <TextBlock Text="Use selected as filter" />
+                                AutomationProperties.Name="{x:Static loc:Strings.SemanticSearchUseSelectedAsFilter}">
+                            <TextBlock Text="{x:Static loc:Strings.SemanticSearchUseSelectedAsFilter}" />
                         </Button>
                         <Button x:Name="RemoveRootButton"
                                 Style="{StaticResource ChromeButton}"
                                 Margin="0,8,0,0"
                                 Click="RemoveRootButton_Click"
-                                AutomationProperties.Name="Remove selected semantic search root">
-                            <TextBlock Text="Remove selected" />
+                                AutomationProperties.Name="{x:Static loc:Strings.SemanticSearchRemoveSelected}">
+                            <TextBlock Text="{x:Static loc:Strings.SemanticSearchRemoveSelected}" />
                         </Button>
                         <Button x:Name="ClearRootsButton"
                                 Style="{StaticResource ChromeButton}"
                                 Margin="0,8,0,0"
                                 Click="ClearRootsButton_Click"
-                                AutomationProperties.Name="Clear semantic search roots">
-                            <TextBlock Text="Clear roots" />
+                                AutomationProperties.Name="{x:Static loc:Strings.SemanticSearchClearRoots}">
+                            <TextBlock Text="{x:Static loc:Strings.SemanticSearchClearRoots}" />
                         </Button>
                         <Button x:Name="ClearIndexButton"
                                 Style="{StaticResource DangerButton}"
                                 Margin="0,8,0,0"
                                 Click="ClearIndexButton_Click"
-                                AutomationProperties.Name="Delete semantic search index">
-                            <TextBlock Text="Delete local index" />
+                                AutomationProperties.Name="{x:Static loc:Strings.SemanticSearchDeleteIndex}">
+                            <TextBlock Text="{x:Static loc:Strings.SemanticSearchDeleteIndex}" />
                         </Button>
                     </StackPanel>
                 </Grid>
@@ -150,14 +151,14 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
-                                <TextBlock Text="Query" Style="{StaticResource MetaLabel}" VerticalAlignment="Center" />
+                                <TextBlock Text="{x:Static loc:Strings.SemanticSearchQuery}" Style="{StaticResource MetaLabel}" VerticalAlignment="Center" />
                                 <TextBox x:Name="QueryTextBox"
                                          Width="360"
                                          Margin="12,0,0,0"
                                          VerticalAlignment="Center"
-                                         AutomationProperties.Name="Semantic search query"
+                                         AutomationProperties.Name="{x:Static loc:Strings.SemanticSearchQuery}"
                                          KeyDown="QueryTextBox_KeyDown" />
-                                <TextBlock Text="Filter"
+                                <TextBlock Text="{x:Static loc:Strings.SemanticSearchFilter}"
                                            Style="{StaticResource MetaLabel}"
                                            Margin="18,0,0,0"
                                            VerticalAlignment="Center" />
@@ -165,29 +166,29 @@
                                          Width="300"
                                          Margin="12,0,0,0"
                                          VerticalAlignment="Center"
-                                         AutomationProperties.Name="Semantic search folder filter" />
+                                         AutomationProperties.Name="{x:Static loc:Strings.SemanticSearchFilter}" />
                             </StackPanel>
 
                             <WrapPanel Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
                                 <Button x:Name="SearchButton"
                                         Style="{StaticResource PrimaryButton}"
                                         Click="SearchButton_Click"
-                                        AutomationProperties.Name="Run semantic search">
-                                    <TextBlock Text="Search" />
+                                        AutomationProperties.Name="{x:Static loc:Strings.SemanticSearchSearch}">
+                                    <TextBlock Text="{x:Static loc:Strings.SemanticSearchSearch}" />
                                 </Button>
                                 <Button x:Name="OpenResultButton"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="8,0,0,0"
                                         Click="OpenResultButton_Click"
-                                        AutomationProperties.Name="Open selected semantic search result">
-                                    <TextBlock Text="Open" />
+                                        AutomationProperties.Name="{x:Static loc:Strings.SemanticSearchOpen}">
+                                    <TextBlock Text="{x:Static loc:Strings.SemanticSearchOpen}" />
                                 </Button>
                                 <Button x:Name="RevealResultButton"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="8,0,0,0"
                                         Click="RevealResultButton_Click"
-                                        AutomationProperties.Name="Reveal selected semantic search result">
-                                    <TextBlock Text="Reveal" />
+                                        AutomationProperties.Name="{x:Static loc:Strings.SemanticSearchReveal}">
+                                    <TextBlock Text="{x:Static loc:Strings.SemanticSearchReveal}" />
                                 </Button>
                             </WrapPanel>
 
@@ -202,7 +203,7 @@
 
                     <Grid Grid.Row="1">
                         <TextBlock x:Name="EmptyState"
-                                   Text="Build an index, then search for words from filenames, sidecar tags, formats, or orientation hints."
+                                   Text="{x:Static loc:Strings.SemanticSearchEmptyState}"
                                    Style="{StaticResource Text.Subtitle}"
                                    TextAlignment="Center"
                                    TextWrapping="Wrap"
@@ -213,7 +214,7 @@
                         <ListBox x:Name="ResultsList"
                                  Visibility="Collapsed"
                                  SelectionChanged="ResultsList_SelectionChanged"
-                                 AutomationProperties.Name="Semantic search results">
+                                 AutomationProperties.Name="{x:Static loc:Strings.SemanticSearchSearch}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Border Style="{StaticResource Card}" Padding="12" Margin="0,0,0,10">
@@ -264,7 +265,7 @@
                          Margin="0,0,9,0"
                          VerticalAlignment="Center" />
                 <TextBlock x:Name="StatusText"
-                           Text="Ready."
+                           Text="{x:Static loc:Strings.SemanticSearchReadyStatus}"
                            Style="{StaticResource Text.Caption}"
                            TextWrapping="Wrap"
                            VerticalAlignment="Center" />

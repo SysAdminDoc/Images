@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Images.Localization;
 using Images.Services;
 using Microsoft.Win32;
 
@@ -58,7 +59,7 @@ public partial class SemanticSearchWindow : Window
         {
             _roots.Add(normalized);
             RootsList.SelectedItem = normalized;
-            SetStatus($"Added search root: {normalized}", SearchStatus.Ready);
+            SetStatus(Strings.Format(nameof(Strings.SemanticSearchAddedRootFormat), normalized), SearchStatus.Ready);
         }
     }
 
@@ -66,7 +67,7 @@ public partial class SemanticSearchWindow : Window
 
     private void AddFolderButton_Click(object sender, RoutedEventArgs e)
     {
-        var folder = PickFolder("Add folder to semantic search");
+        var folder = PickFolder(Strings.SemanticSearchAddFolderDialogTitle);
         if (folder is not null)
             AddSearchRoot(folder);
     }
@@ -75,7 +76,7 @@ public partial class SemanticSearchWindow : Window
     {
         if (_roots.Count == 0)
         {
-            SetStatus("Add at least one folder before indexing.", SearchStatus.Warning);
+            SetStatus(Strings.SemanticSearchAddFolderBeforeIndexing, SearchStatus.Warning);
             return;
         }
 
@@ -86,19 +87,19 @@ public partial class SemanticSearchWindow : Window
         var roots = _roots.ToArray();
 
         SetBusy(true);
-        SetStatus("Building local semantic index...", SearchStatus.Busy);
+        SetStatus(Strings.SemanticSearchBuildingIndex, SearchStatus.Busy);
 
         try
         {
             var result = await Task.Run(() => _semanticSearch.Rebuild(roots, token), token);
             RefreshStatus();
             SetStatus(
-                $"Indexed {result.IndexedCount} of {result.CatalogedCount} cataloged asset{Plural(result.CatalogedCount)}. {result.FailedCount} file{Plural(result.FailedCount)} skipped.",
+                Strings.Format(nameof(Strings.SemanticSearchIndexedResultFormat), result.IndexedCount, result.CatalogedCount, Plural(result.CatalogedCount), result.FailedCount, Plural(result.FailedCount)),
                 result.IndexedCount > 0 ? SearchStatus.Ready : SearchStatus.Warning);
         }
         catch (OperationCanceledException)
         {
-            SetStatus("Indexing canceled; previous semantic index remains usable.", SearchStatus.Warning);
+            SetStatus(Strings.SemanticSearchIndexingCanceled, SearchStatus.Warning);
             RefreshStatus();
         }
         finally
@@ -112,7 +113,7 @@ public partial class SemanticSearchWindow : Window
     private void CancelButton_Click(object sender, RoutedEventArgs e)
     {
         _indexCancellation?.Cancel();
-        SetStatus("Canceling semantic indexing...", SearchStatus.Busy);
+        SetStatus(Strings.SemanticSearchCancelingIndexing, SearchStatus.Busy);
     }
 
     private void RemoveRootButton_Click(object sender, RoutedEventArgs e)
@@ -130,7 +131,7 @@ public partial class SemanticSearchWindow : Window
         _results.Clear();
         RefreshStatus();
         UpdateResultState();
-        SetStatus("Deleted the local semantic search index.", SearchStatus.Ready);
+        SetStatus(Strings.SemanticSearchIndexDeleted, SearchStatus.Ready);
     }
 
     private void UseSelectedRootButton_Click(object sender, RoutedEventArgs e)
@@ -138,7 +139,7 @@ public partial class SemanticSearchWindow : Window
         if (RootsList.SelectedItem is string folder)
         {
             FolderFilterTextBox.Text = folder;
-            SetStatus("Search filter set to the selected root.", SearchStatus.Ready);
+            SetStatus(Strings.SemanticSearchFilterSet, SearchStatus.Ready);
         }
     }
 
@@ -159,18 +160,18 @@ public partial class SemanticSearchWindow : Window
         var result = SelectedResult;
         if (result is null)
         {
-            SetStatus("Select a search result before opening.", SearchStatus.Warning);
+            SetStatus(Strings.SemanticSearchSelectBeforeOpening, SearchStatus.Warning);
             return;
         }
 
         if (!File.Exists(result.SourcePath))
         {
-            SetStatus("The selected result no longer exists.", SearchStatus.Warning);
+            SetStatus(Strings.SemanticSearchResultNoLongerExists, SearchStatus.Warning);
             return;
         }
 
         OpenRequested?.Invoke(this, new SemanticSearchOpenRequestedEventArgs(result.SourcePath));
-        SetStatus($"Opened {result.FileName} in the viewer.", SearchStatus.Ready);
+        SetStatus(Strings.Format(nameof(Strings.SemanticSearchOpenedFormat), result.FileName), SearchStatus.Ready);
     }
 
     private void RevealResultButton_Click(object sender, RoutedEventArgs e)
@@ -178,18 +179,18 @@ public partial class SemanticSearchWindow : Window
         var result = SelectedResult;
         if (result is null)
         {
-            SetStatus("Select a search result before revealing it.", SearchStatus.Warning);
+            SetStatus(Strings.SemanticSearchSelectBeforeRevealing, SearchStatus.Warning);
             return;
         }
 
         try
         {
             ShellIntegration.OpenShellTarget(result.SourcePath);
-            SetStatus($"Revealed {result.FileName}.", SearchStatus.Ready);
+            SetStatus(Strings.Format(nameof(Strings.SemanticSearchRevealedFormat), result.FileName), SearchStatus.Ready);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
-            SetStatus("Could not reveal result: " + ex.Message, SearchStatus.Error);
+            SetStatus(Strings.Format(nameof(Strings.SemanticSearchCouldNotRevealFormat), ex.Message), SearchStatus.Error);
         }
     }
 
@@ -204,7 +205,7 @@ public partial class SemanticSearchWindow : Window
         var query = QueryTextBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(query))
         {
-            SetStatus("Enter a local search query first.", SearchStatus.Warning);
+            SetStatus(Strings.SemanticSearchEnterQuery, SearchStatus.Warning);
             return;
         }
 
@@ -226,18 +227,18 @@ public partial class SemanticSearchWindow : Window
 
         SetStatus(
             _results.Count == 0
-                ? "No local semantic matches found."
-                : $"Found {_results.Count} local result{Plural(_results.Count)}.",
+                ? Strings.SemanticSearchNoMatches
+                : Strings.Format(nameof(Strings.SemanticSearchFoundResultsFormat), _results.Count, Plural(_results.Count)),
             _results.Count == 0 ? SearchStatus.Warning : SearchStatus.Ready);
     }
 
     private void RefreshStatus()
     {
         var status = _semanticSearch.GetStatus();
-        ProviderStatusText.Text = $"{status.ProviderStatus} Model: {status.ModelId}; provider: {status.ProviderId}; dimensions: {status.Dimensions}.";
+        ProviderStatusText.Text = Strings.Format(nameof(Strings.SemanticSearchProviderStatusFormat), status.ProviderStatus, status.ModelId, status.ProviderId, status.Dimensions);
         IndexStatusText.Text = status.IsAvailable
-            ? $"{status.IndexedCount} indexed asset{Plural(status.IndexedCount)} in {status.IndexPath}. Last indexed: {(status.LastIndexedUtc is null ? "never" : status.LastIndexedUtc.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture))}."
-            : "Semantic search storage is unavailable for this session.";
+            ? Strings.Format(nameof(Strings.SemanticSearchIndexStatusFormat), status.IndexedCount, Plural(status.IndexedCount), status.IndexPath, status.LastIndexedUtc is null ? Strings.SemanticSearchIndexStatusNever : status.LastIndexedUtc.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture))
+            : Strings.SemanticSearchStorageUnavailable;
     }
 
     private void SetBusy(bool busy)
