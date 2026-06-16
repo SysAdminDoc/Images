@@ -116,13 +116,40 @@ public partial class App : Application
             return;
         }
 
+        // V20-31: `--listen <port>` / `-l <port>` starts a loopback TCP listener that accepts
+        // file paths for live open/refresh. Parse before Show so the indicator is visible from
+        // the first paint. Remaining non-flag args still go through the normal OpenPath flow.
+        int? listenPort = null;
+        string? resolvedArgPath = null;
+        for (int i = 0; i < e.Args.Length; i++)
+        {
+            if ((string.Equals(e.Args[i], "-l", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(e.Args[i], "--listen", StringComparison.OrdinalIgnoreCase))
+                && i + 1 < e.Args.Length)
+            {
+                if (int.TryParse(e.Args[i + 1], out var port) && port > 0 && port <= 65535)
+                    listenPort = port;
+                i++; // skip the port value
+            }
+            else if (resolvedArgPath is null && TryResolveArgPath(e.Args[i], out var r))
+            {
+                resolvedArgPath = r;
+            }
+        }
+
         window.Show();
         LaunchTiming.Log(_log, "main-window-shown");
 
-        if (e.Args.Length > 0 && TryResolveArgPath(e.Args[0], out var resolved))
+        if (listenPort is not null)
         {
-            window.OpenPath(resolved);
-            LaunchTiming.Log(_log, "argv-open-complete", Path.GetFileName(resolved));
+            window.StartListenMode(listenPort.Value);
+            LaunchTiming.Log(_log, "listen-mode-started", $"port={listenPort.Value}");
+        }
+
+        if (resolvedArgPath is not null)
+        {
+            window.OpenPath(resolvedArgPath);
+            LaunchTiming.Log(_log, "argv-open-complete", Path.GetFileName(resolvedArgPath));
         }
     }
 

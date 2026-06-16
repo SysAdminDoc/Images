@@ -173,6 +173,11 @@ public static class CliReport
         sb.AppendLine("  Images.exe --peek <path>");
         sb.AppendLine("    Chromeless, topmost, maximized preview of <path>. Esc closes.");
         sb.AppendLine();
+        sb.AppendLine("  Images.exe --listen <port>  |  -l <port>");
+        sb.AppendLine("    Start the viewer with a loopback TCP listener on <port>.");
+        sb.AppendLine("    Send UTF-8 file paths (one per line) to tcp://127.0.0.1:<port>.");
+        sb.AppendLine("    The viewer opens or refreshes the sent image live.");
+        sb.AppendLine();
         sb.AppendLine("  Images.exe --system-info");
         sb.AppendLine("    Print runtime, OS, decoder, and storage-path information to stdout.");
         sb.AppendLine();

@@ -1212,6 +1212,10 @@ public static class Strings
     public static string MainCompareSameFile => Get(nameof(MainCompareSameFile));
     public static string MainChooseDifferentFilename => Get(nameof(MainChooseDifferentFilename));
 
+    // ---- Listen mode (V20-31) ----
+    public static string ListenMode_PortLabel => Get(nameof(ListenMode_PortLabel));
+    public static string ListenMode_Tooltip => Get(nameof(ListenMode_Tooltip));
+
     public static string Get(string key)
     {
         if (string.IsNullOrWhiteSpace(key))

@@ -4130,4 +4130,12 @@ Details written to:
     <value>Sort by type, then name</value>
   </data>
 
+  <!-- V20-31: listen mode -->
+  <data name="ListenMode_PortLabel" xml:space="preserve">
+    <value>Listening :{0}</value>
+  </data>
+  <data name="ListenMode_Tooltip" xml:space="preserve">
+    <value>Listen mode active on port {0}. Send UTF-8 file paths to tcp://127.0.0.1:{0}</value>
+  </data>
+
 </root>
