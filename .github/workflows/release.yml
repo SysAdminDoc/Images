@@ -53,6 +53,25 @@ jobs:
               exit 1
           }
 
+      # S-11 transitive-dep pinning: log the full resolved tree so the
+      # release artifact set includes an auditable NuGet dependency snapshot.
+      # When S-09 native decoder bundling lands, extend to verify version
+      # floors for transitive C deps (libde265, aom, LittleCMS, etc.).
+      - name: Log full transitive dependency tree
+        shell: pwsh
+        run: |
+          $tree = dotnet list Images.sln package --include-transitive 2>&1 | Out-String
+          Write-Host $tree
+          New-Item -ItemType Directory -Path transitive-deps -Force | Out-Null
+          $tree | Set-Content -Path transitive-deps\nuget-transitive-tree.txt -Encoding utf8
+
+      - name: Upload release transitive dependency tree
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-transitive-tree-${{ github.event.inputs.version }}
+          path: transitive-deps/nuget-transitive-tree.txt
+          if-no-files-found: warn
+
       - name: Build
         run: dotnet build Images.sln -c Release --no-restore
 
