@@ -100,6 +100,17 @@ public static class Strings
     public static string ImageAutomationNoImageName => Get(nameof(ImageAutomationNoImageName));
     public static string OcrSelectCopyTooltipFormat => Get(nameof(OcrSelectCopyTooltipFormat));
     public static string OcrTextTooltipFormat => Get(nameof(OcrTextTooltipFormat));
+    public static string EffectsChooseBeforeApplying => Get(nameof(EffectsChooseBeforeApplying));
+    public static string EffectsChoosePresetOrSlider => Get(nameof(EffectsChoosePresetOrSlider));
+    public static string EffectsImagePathRequired => Get(nameof(EffectsImagePathRequired));
+    public static string EffectsLabel => Get(nameof(EffectsLabel));
+    public static string EffectsNoChangesSummary => Get(nameof(EffectsNoChangesSummary));
+    public static string EffectsNoEffectActive => Get(nameof(EffectsNoEffectActive));
+    public static string EffectsPreviewQueued => Get(nameof(EffectsPreviewQueued));
+    public static string EffectsPreviewReadyEnter => Get(nameof(EffectsPreviewReadyEnter));
+    public static string EffectsPreviewUnavailableMissingFile => Get(nameof(EffectsPreviewUnavailableMissingFile));
+    public static string EffectsSummarySeparator => Get(nameof(EffectsSummarySeparator));
+    public static string EffectsUpdatingPreview => Get(nameof(EffectsUpdatingPreview));
 
     public static string Get(string key)
     {
