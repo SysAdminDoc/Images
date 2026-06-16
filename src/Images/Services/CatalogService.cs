@@ -43,6 +43,7 @@ public sealed record CatalogRebuildResult(
 public sealed class CatalogService
 {
     private const int CurrentSchemaVersion = 1;
+    private const int SchemaCanaryId = 1;
     private static readonly ILogger Log = Images.Services.Log.Get(nameof(CatalogService));
     private readonly string? _dbPath;
     private readonly string _connectionString;
@@ -206,7 +207,7 @@ public sealed class CatalogService
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
-            EnsureSchema();
+            EnsureSchema(dbPath);
             return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or InvalidOperationException or SqliteException)
@@ -216,28 +217,82 @@ public sealed class CatalogService
         }
     }
 
-    private void EnsureSchema()
+    private void EnsureSchema(string dbPath)
     {
+        var hadExistingDatabase = File.Exists(dbPath) && new FileInfo(dbPath).Length > 0;
+        var current = ReadSchemaVersion();
+
+        if (current > CurrentSchemaVersion)
+            throw new InvalidOperationException($"catalog.db schema v{current} is newer than this app supports (v{CurrentSchemaVersion}).");
+
+        for (var version = current; version < CurrentSchemaVersion; version++)
+            ApplyGuardedMigration(dbPath, version, version + 1, hadExistingDatabase || version > 0);
+
         using var conn = Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            PRAGMA busy_timeout = 5000;
-            PRAGMA journal_mode = WAL;
-            """;
-        cmd.ExecuteNonQuery();
-
-        cmd.CommandText = "PRAGMA user_version;";
-        var current = Convert.ToInt32(cmd.ExecuteScalar() ?? 0, CultureInfo.InvariantCulture);
-        if (current < 1)
-            Migrate_0_to_1(conn);
-
-        cmd.CommandText = $"PRAGMA user_version = {CurrentSchemaVersion};";
-        cmd.ExecuteNonQuery();
+        EnsureSchemaCanary(conn, CurrentSchemaVersion);
+        AssertSchemaCanary(conn, CurrentSchemaVersion);
+        ValidateIntegrity(conn);
     }
 
-    private static void Migrate_0_to_1(SqliteConnection conn)
+    private int ReadSchemaVersion()
     {
-        using var tx = conn.BeginTransaction();
+        using var conn = Open();
+        ConfigureCatalogPragmas(conn);
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "PRAGMA user_version;";
+        return Convert.ToInt32(cmd.ExecuteScalar() ?? 0, CultureInfo.InvariantCulture);
+    }
+
+    private void ApplyGuardedMigration(string dbPath, int fromVersion, int toVersion, bool createBackup)
+    {
+        string? backupPath = null;
+        try
+        {
+            using (var preflight = Open())
+            {
+                ConfigureCatalogPragmas(preflight);
+                ValidateIntegrity(preflight);
+                CheckpointWal(preflight);
+            }
+
+            SqliteConnection.ClearAllPools();
+            if (createBackup)
+                backupPath = CreateMigrationBackup(dbPath, fromVersion, toVersion);
+
+            using (var conn = Open())
+            {
+                ConfigureCatalogPragmas(conn);
+                using var tx = conn.BeginTransaction();
+                RunMigration(conn, tx, fromVersion, toVersion);
+                SetSchemaVersion(conn, tx, toVersion);
+                tx.Commit();
+
+                EnsureSchemaCanary(conn, toVersion);
+                AssertSchemaCanary(conn, toVersion);
+                ValidateIntegrity(conn);
+            }
+        }
+        catch
+        {
+            if (!string.IsNullOrWhiteSpace(backupPath))
+                RestoreMigrationBackup(dbPath, backupPath);
+            throw;
+        }
+    }
+
+    private static void RunMigration(SqliteConnection conn, SqliteTransaction tx, int fromVersion, int toVersion)
+    {
+        if (fromVersion == 0 && toVersion == 1)
+        {
+            Migrate_0_to_1(conn, tx);
+            return;
+        }
+
+        throw new InvalidOperationException($"No catalog migration exists for v{fromVersion} to v{toVersion}.");
+    }
+
+    private static void Migrate_0_to_1(SqliteConnection conn, SqliteTransaction tx)
+    {
         using var cmd = conn.CreateCommand();
         cmd.Transaction = tx;
         cmd.CommandText = """
@@ -274,21 +329,152 @@ public sealed class CatalogService
                 indexed_count    INTEGER NOT NULL,
                 failed_count     INTEGER NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS catalog_schema_canary (
+                id             INTEGER PRIMARY KEY CHECK (id = 1),
+                schema_version INTEGER NOT NULL,
+                created_utc    INTEGER NOT NULL
+            );
             """;
         cmd.ExecuteNonQuery();
+
+        EnsureSchemaCanary(conn, tx, 1);
+    }
+
+    private static void ConfigureCatalogPragmas(SqliteConnection conn)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            PRAGMA busy_timeout = 5000;
+            PRAGMA journal_mode = WAL;
+            PRAGMA foreign_keys = ON;
+            """;
+        cmd.ExecuteNonQuery();
+    }
+
+    private static void SetSchemaVersion(SqliteConnection conn, SqliteTransaction tx, int version)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = $"PRAGMA user_version = {version};";
+        cmd.ExecuteNonQuery();
+    }
+
+    private static void EnsureSchemaCanary(SqliteConnection conn, int schemaVersion)
+    {
+        using var tx = conn.BeginTransaction();
+        EnsureSchemaCanary(conn, tx, schemaVersion);
         tx.Commit();
+    }
+
+    private static void EnsureSchemaCanary(SqliteConnection conn, SqliteTransaction tx, int schemaVersion)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            CREATE TABLE IF NOT EXISTS catalog_schema_canary (
+                id             INTEGER PRIMARY KEY CHECK (id = 1),
+                schema_version INTEGER NOT NULL,
+                created_utc    INTEGER NOT NULL
+            );
+
+            INSERT INTO catalog_schema_canary (id, schema_version, created_utc)
+            VALUES (1, $schemaVersion, $createdUtc)
+            ON CONFLICT(id) DO UPDATE SET schema_version = excluded.schema_version;
+            """;
+        cmd.Parameters.AddWithValue("$schemaVersion", schemaVersion);
+        cmd.Parameters.AddWithValue("$createdUtc", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        cmd.ExecuteNonQuery();
+    }
+
+    private static void AssertSchemaCanary(SqliteConnection conn, int schemaVersion)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT schema_version
+            FROM catalog_schema_canary
+            WHERE id = $id
+            LIMIT 1;
+            """;
+        cmd.Parameters.AddWithValue("$id", SchemaCanaryId);
+        var canaryVersion = Convert.ToInt32(cmd.ExecuteScalar() ?? -1, CultureInfo.InvariantCulture);
+        if (canaryVersion != schemaVersion)
+            throw new InvalidOperationException($"catalog.db schema canary expected v{schemaVersion} but found v{canaryVersion}.");
+    }
+
+    private static void ValidateIntegrity(SqliteConnection conn)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "PRAGMA integrity_check;";
+        var result = Convert.ToString(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+        if (!string.Equals(result, "ok", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"catalog.db integrity check failed: {result}");
+    }
+
+    private static void CheckpointWal(SqliteConnection conn)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
+        cmd.ExecuteNonQuery();
+    }
+
+    private static string CreateMigrationBackup(string dbPath, int fromVersion, int toVersion)
+    {
+        var backupPath = UniqueBackupPath(dbPath, fromVersion, toVersion);
+        File.Copy(dbPath, backupPath);
+        return backupPath;
+    }
+
+    private static string UniqueBackupPath(string dbPath, int fromVersion, int toVersion)
+    {
+        var basePath = $"{dbPath}.bak.v{fromVersion}-{toVersion}";
+        if (!File.Exists(basePath))
+            return basePath;
+
+        for (var i = 2; i < 10_000; i++)
+        {
+            var candidate = $"{basePath}.{i}";
+            if (!File.Exists(candidate))
+                return candidate;
+        }
+
+        return $"{basePath}.{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
+    }
+
+    private static void RestoreMigrationBackup(string dbPath, string backupPath)
+    {
+        try
+        {
+            SqliteConnection.ClearAllPools();
+            TryDeleteSqliteSidecar(dbPath + "-wal");
+            TryDeleteSqliteSidecar(dbPath + "-shm");
+            File.Copy(backupPath, dbPath, overwrite: true);
+            SqliteConnection.ClearAllPools();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
+        {
+            Log.LogError(ex, "Could not restore catalog migration backup {BackupPath}", backupPath);
+        }
+    }
+
+    private static void TryDeleteSqliteSidecar(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
+        {
+            Log.LogDebug(ex, "Could not delete SQLite sidecar {Path}", path);
+        }
     }
 
     private SqliteConnection Open()
     {
         var conn = new SqliteConnection(_connectionString);
         conn.Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            PRAGMA busy_timeout = 5000;
-            PRAGMA foreign_keys = ON;
-            """;
-        cmd.ExecuteNonQuery();
+        ConfigureCatalogPragmas(conn);
         return conn;
     }
 

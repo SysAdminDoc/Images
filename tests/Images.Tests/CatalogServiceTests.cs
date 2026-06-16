@@ -1,6 +1,7 @@
 using System.IO;
 using ImageMagick;
 using Images.Services;
+using Microsoft.Data.Sqlite;
 
 namespace Images.Tests;
 
@@ -77,6 +78,68 @@ public sealed class CatalogServiceTests
         Assert.Equal(0, result.FailedCount);
     }
 
+    [Fact]
+    public void EnsureSchema_BackupsExistingVersionZeroCatalogBeforeMigration()
+    {
+        using var temp = TestDirectory.Create();
+        var dbPath = Path.Combine(temp.Path, "catalog.db");
+        ExecuteSql(
+            dbPath,
+            """
+            CREATE TABLE legacy_marker (
+                value TEXT NOT NULL
+            );
+            INSERT INTO legacy_marker (value) VALUES ('kept-before-migration');
+            PRAGMA user_version = 0;
+            """);
+
+        var service = new CatalogService(dbPath);
+
+        Assert.True(service.IsAvailable);
+        Assert.Equal(1, ReadInt(dbPath, "PRAGMA user_version;"));
+        Assert.Equal(1, ReadInt(dbPath, "SELECT schema_version FROM catalog_schema_canary WHERE id = 1;"));
+        var backupPath = dbPath + ".bak.v0-1";
+        Assert.True(File.Exists(backupPath));
+        Assert.Equal("kept-before-migration", ReadString(backupPath, "SELECT value FROM legacy_marker LIMIT 1;"));
+    }
+
+    [Fact]
+    public void EnsureSchema_RestoresBackupWhenMigrationFails()
+    {
+        using var temp = TestDirectory.Create();
+        var dbPath = Path.Combine(temp.Path, "catalog.db");
+        ExecuteSql(
+            dbPath,
+            """
+            CREATE TABLE catalog_schema_canary (
+                id INTEGER PRIMARY KEY
+            );
+            PRAGMA user_version = 0;
+            """);
+
+        var service = new CatalogService(dbPath);
+
+        Assert.False(service.IsAvailable);
+        Assert.Equal(0, ReadInt(dbPath, "PRAGMA user_version;"));
+        Assert.Equal(0, ReadInt(dbPath, "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'catalog_assets';"));
+        Assert.Equal(1, ReadInt(dbPath, "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'catalog_schema_canary';"));
+        Assert.True(File.Exists(dbPath + ".bak.v0-1"));
+    }
+
+    [Fact]
+    public void EnsureSchema_RejectsNewerSchemaWithoutDowngrading()
+    {
+        using var temp = TestDirectory.Create();
+        var dbPath = Path.Combine(temp.Path, "catalog.db");
+        ExecuteSql(dbPath, "PRAGMA user_version = 99;");
+
+        var service = new CatalogService(dbPath);
+
+        Assert.False(service.IsAvailable);
+        Assert.Equal(99, ReadInt(dbPath, "PRAGMA user_version;"));
+        Assert.False(File.Exists(dbPath + ".bak.v99-100"));
+    }
+
     private static string WriteImage(string folder, string name, uint width, uint height)
     {
         var path = Path.Combine(folder, name);
@@ -86,5 +149,37 @@ public sealed class CatalogServiceTests
         };
         image.Write(path);
         return path;
+    }
+
+    private static void ExecuteSql(string dbPath, string sql)
+    {
+        using var conn = new SqliteConnection(new SqliteConnectionStringBuilder
+        {
+            DataSource = dbPath,
+            Mode = SqliteOpenMode.ReadWriteCreate
+        }.ToString());
+        conn.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = sql;
+        cmd.ExecuteNonQuery();
+    }
+
+    private static int ReadInt(string dbPath, string sql)
+        => Convert.ToInt32(ReadScalar(dbPath, sql));
+
+    private static string ReadString(string dbPath, string sql)
+        => Convert.ToString(ReadScalar(dbPath, sql)) ?? "";
+
+    private static object? ReadScalar(string dbPath, string sql)
+    {
+        using var conn = new SqliteConnection(new SqliteConnectionStringBuilder
+        {
+            DataSource = dbPath,
+            Mode = SqliteOpenMode.ReadOnly
+        }.ToString());
+        conn.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = sql;
+        return cmd.ExecuteScalar();
     }
 }

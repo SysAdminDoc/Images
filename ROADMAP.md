@@ -514,9 +514,6 @@ Primary = GitHub Releases (source of truth). Secondary = winget + Scoop extras. 
 
 Set the philosophy before writing the first migration. Getting this wrong means the v5 user can't open their v1 library.
 
-- [ ] **SCH-01** *P0* — **XMP sidecars are authoritative**; SQLite catalog is a cache. "Delete `catalog.db`, we rebuild from `.xmp` + file scan" must always be a valid recovery step. darktable's philosophy; digiKam explicitly says the same via their "Write metadata to files" export. Effort: L (architecture decision, enforced across v0.4+). [darktable sidecar manual]
-- [ ] **SCH-02** *P0* — **EF Core migrations with guardrails**. Pre-bump: `PRAGMA integrity_check`, `PRAGMA wal_checkpoint(TRUNCATE)`, backup DB to `catalog.db.bak.v<old>-<new>`, close all connections. Post-bump: canary-row assertion. On failure: restore backup, surface actionable error. Effort: M. [MS Learn EF Core migrations]
-- [ ] **SCH-03** *P0* — **Forward-only migrations**. No downgrade path (no OSS DAM supports one). Document the "delete catalog, rebuild from sidecars" recovery in README. Effort: S. [darktable philosophy]
 - [ ] **SCH-04** *P1* — **Hop, don't jump**. A v1→v5 upgrade runs v1→v2→v3→v4→v5 with integrity check after each hop, not a direct-to-target diff. Effort: S.
 - [ ] **SCH-05** *P1* — **Snapshot fixtures under version control**. `tests/fixtures/catalog.v1.db`, `catalog.v2.db` etc. — every bump must roll every prior snapshot forward in CI. Effort: S (per version).
 
