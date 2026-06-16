@@ -534,7 +534,6 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [~] **V20-20** *P0* — **Six zoom modes** (ImageGlass): Auto, Lock-to-%, Fit-to-Width, Fit-to-Height, Fit (uniform), Fill. *(four of six shipped v0.1.6 — `ZoomPanImage.ZoomMode` enum exposes Fit / OneToOne / FitWidth / FitHeight / Fill; Ctrl+F cycles with toast. Auto + Lock-to-% deferred until V20-02 settings lands so the mode persists across sessions.)*
 - [x] **V20-21** *P0* — **Filmstrip** at bottom (togglable), virtualised, synced to current index. Shipped: cached full-folder thumbnail rail moved into the bottom viewer chrome; `T` + toolbar toggle persist visibility in settings; the old side-panel rail remains as the fallback when hidden; current thumbnail auto-centers after folder refreshes, navigation, and filmstrip toggles; thumbnail buttons expose position text to assistive tech and use the shared accent focus state; right-click thumbnail menus offer Open, Reveal in Explorer, and Copy path without changing the current image unless Open is chosen; recycling WPF virtualization plus loaded-item thumbnail requests avoid decoding every file in large folders.
 - [~] **V20-22** *P1* — **EXIF overlay** (togglable HUD) — camera/lens/ISO/shutter/aperture/date/GPS. Shipped slices: side-panel Details now reads EXIF locally via `ImageMetadataService`, formats captured date through I-04 (`MetadataDate` / `DateTimeOffset`), and shows camera, lens, exposure, focal length, and GPS coordinates with loading/empty states; a persisted viewport HUD can be toggled with `I`, the toolbar info button, or the viewport context menu and reuses the same local metadata rows. **Remaining**: tap-to-expand full metadata panel, ICC/histogram tie-in, and map actions behind explicit egress disclosure.
-- [ ] **V20-23** *P1* — **GPS coordinates overlay** with click-to-open-in-map (Honeyview). P-01 "Strip location" one click away.
 - [ ] **V20-24** *P1* — **Histogram overlay** per-channel + luminance (`0.299R + 0.587G + 0.114B`, log-scale toggle).
 - [ ] **V20-25** *P1* — **Color picker** eyedropper — hex + RGB + HSL + LAB readout (PixiEditor.ColorPicker MIT).
 - [ ] **V20-26** *P1* — **Hidden edge-triggered fullscreen toolbar** (FastStone pattern) — chromeless by default, reveal on edge approach.
@@ -569,14 +568,12 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [x] **V30-21** *P0* — Set as wallpaper (span/fill/fit/tile). Shipped 2026-05-14: the viewport context menu now exposes Fill, Fit, Span, and Tile wallpaper modes, writes the matching Windows `WallpaperStyle` / `TileWallpaper` registry values, then applies the stable app-data wallpaper copy through `SystemParametersInfo`.
 - [x] **V30-22** *P0* — Send to email / default print / copy to clipboard (image AND path). Shipped 2026-05-14: the viewport context menu can create and open a local unsent `.eml` draft with the current file attached, print the current rendered image directly to the default printer, copy the current image bitmap, and copy a combined bitmap/text/file-drop payload containing both image and source path.
 - [x] **V30-23** *P1* — **Send-to-app** integration *(first slice — open with default app shipped v0.1.8)*. Shipped: `Open with default app` context menu item opens the current image in the system-registered default application (`UseShellExecute = true`). Remaining: configurable external editors (ImageGlass-style "open in Photoshop / GIMP / Paint.NET" menu).
-- [ ] **V30-24** *P2* — Scan via TWAIN/WIA to image (IrfanView pattern — `Saraff.Twain.NET` NuGet). Breaks under MSIX AppContainer (S-07) — unpackaged build only.
 
 ### Comparison + slideshow
 - [x] **V30-30** *P1* — **Image compare** 2-up / 4-up with synchronized pan/zoom (XnView MP, FastStone). **CLOSED** 2026-05-17 under `V7-10`: 2-up compare mode ships for current+next, chosen local files, and duplicate-cleanup pairs, with linked pan/zoom/rotate/flip and regression coverage. 4-up remains a possible future expansion, but the accepted P1 local compare workflow is complete.
 - [x] **V30-31** *P1* — **Opacity-overlay compare** (nomacs) — slider blend two images for AB review. **CLOSED** 2026-05-17 under `V7-10`: opacity-overlay compare ships with B-opacity slider, keyboard opacity controls, A/B swap, shared transforms, and Escape exit behavior.
-- [ ] **V30-32** *P2* — **Multi-instance LAN sync** lite — optional "Compare mode" syncs pan/zoom across two open windows (local machine; network sync is a v1.0 item). [nomacs 3.22 pattern]
+
 - [ ] **V30-33** *P1* — Slideshow — configurable interval, transitions (fade/slide/wipe), background music (MP3/FLAC), loop/shuffle, pause on hover.
-- [ ] **V30-34** *P2* — **Standalone .exe slideshow export** (IrfanView — unique) — packs N images + runtime into a self-extracting viewer.
 
 ---
 
@@ -592,28 +589,17 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 ### Tagging + metadata
 - [x] **V40-10** *P0* — **1-5 star rating + color labels + pick/reject flags** (digiKam's three-axis). *(done in V7-13 — review mode with 1-5 rating, pick/reject flags, XMP sidecar persistence)*
 - [x] **V40-11** *P0* — **Hierarchical keywords** unlimited nesting. Incremental-search autocomplete. Keyboard-shortcut-per-tag ("P"=Portrait) — XnView triage pattern. *(done — V40-63 tag namespaces with parent-tag expansion, alias/sibling canonicalization, XMP import/export)*
-- [ ] **V40-12** *P1* — **Metadata templates** — save/apply IPTC copyright/creator blocks across N files atomically (Bridge pattern).
-- [ ] **V40-13** *P1* — **Category Sets** — saveable tag-panel layouts, swap per job type (XnView).
-- [ ] **V40-14** *P1* — Full IPTC / XMP / EXIF editor pane (dockable, XnView MP style).
 - [ ] **V40-15** *P1* — **Multi-token batch rename** — `{name}_{date:yyyy-MM-dd}_{seq:000}_{exif.iso}_{folder}`, live preview, "Preserve Current Filename in XMP" (Bridge).
 
 ### Dedup + similarity
 - [ ] **V40-20** *P0* — **Perceptual-hash duplicate finder** — pHash DCT + dHash + Haar wavelet (CoenM.ImageHash MIT). Reference-image strategy: "Older or Larger" / "Prefer selected folder" / "Prefer newer" (digiKam 8.1+).
 - [ ] **V40-21** *P1* — **Fuzzy-slider distance threshold** with live "N pairs detected" counter (Immich 0.001-0.1).
-- [ ] **V40-22** *P1* — **Near-duplicate stacking** — auto-stack by time+location+hash proximity (PhotoPrism, Google Photos Photo Stacks).
-- [ ] **V40-23** *P2* — **Sketch-based fuzzy search** — draw rough color blobs, match (digiKam Sketch tab — delightful differentiator).
 
 ### Geo
-- [ ] **V40-30** *P1* — **EXIF GPS read/write** (ExifTool shell-out S-05 for writes; MetadataExtractor for reads).
-- [ ] **V40-31** *P1* — **Interactive map pane** with clustering at zoom (Leaflet via WebView2, OpenStreetMap tiles). Egress logged by P-03.
-- [ ] **V40-32** *P2* — **Reverse geocoding** — local offline DB (GeoNames CC-BY) — privacy-first, no API calls.
-- [ ] **V40-33** *P2* — **GPX track-log sync** — match photo timestamps to GPS track, backfill EXIF.
+*All Geo items (V40-30 through V40-33) moved to `Roadmap_Blocked.md` — blocked on ExifTool S-05, WebView2, GeoNames DB, and predecessor features.*
 
 ### Smart albums
-- [ ] **V40-40** *P1* — **Smart Collections** criteria builder — date, rating, label, keyword, camera, lens, ISO, geo bbox, face count (Lightroom).
-- [ ] **V40-41** *P2* — **Auto-albums by pattern** — screenshots, receipts, notes, documents (Google Photos OCR+shape).
-- [ ] **V40-42** *P2* — **Trip detection** — contiguous days + distance >threshold from home (Apple Memories engine).
-- [ ] **V40-43** *P2* — **Events view** — date-based clusters with key-photo thumbnail (Shotwell).
+*All Smart album items (V40-40 through V40-43) moved to `Roadmap_Blocked.md` — blocked on V40-01 SQLite catalog.*
 
 ---
 
@@ -622,12 +608,10 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 **Theme**: XnConvert operation-chain UX + Squoosh visual-diff slider + FileOptimizer lossless chain. The batch tab most people will open daily. Cross-cutting: F-03 (cjpegli export), S-05 (metadata-write safety).
 
 - [ ] **V50-01** *P0* — **Operation-chain builder** — drag-orderable list, per-op enable/disable, live preview on first selected image (XnConvert tab 2 pattern).
-- [ ] **V50-02** *P0* — **Output formats** with per-format quality controls: JPEG (**MozJPEG + cjpegli** [F-03]), PNG (OxiPNG), WebP (cwebp), AVIF (avifenc), JXL (cjxl), HEIC (libheif, no-HEVC-bundle caveat [F-02]), TIFF, BMP, GIF. cjpegli ships with libjxl and delivers ~35% smaller JPEG at equal quality vs MozJPEG. [stack: bundled CLIs + Magick.NET core] [Google OSS blog Jpegli]
 - [ ] **V50-03** *P0* — **Resize policies** — %, px, long-edge, short-edge, canvas-fit, canvas-fill, DPI-only.
 - [ ] **V50-04** *P0* — **Presets** saveable/nameable/import-export (JSON). Default presets: "Web 1920 / Instagram 1080 / Email 2MB / Print 300 DPI".
 - [ ] **V50-05** *P0* — **Overwrite-vs-new-folder guardrails** — refuse overwrite originals without confirm (ImageMagick `mogrify` footgun lesson).
 - [ ] **V50-06** *P0* — **Drag-to-target** — drop folder on app, convert with last preset.
-- [ ] **V50-07** *P1* — **Watch-folder** auto-apply (XnConvert Watch).
 - [ ] **V50-08** *P1* — **Rename tokens** — `{name}_{date:yyyy-MM-dd}_{seq:000}_{exif.iso}` (Bridge engine).
 - [ ] **V50-09** *P1* — **Strip metadata** granular — all / keep GPS / keep copyright / keep XMP. P-01 "strip location only" is the single-file version of this.
 - [ ] **V50-10** *P1* — **Watermark** — text + image, opacity/position/rotation/tile (XnConvert).
@@ -635,20 +619,11 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 
 ### Compression pipelines (the differentiator)
 - [ ] **V50-20** *P0* — **Squoosh-style visual-diff slider** — draggable split-pane preview + live byte-delta + SSIM/Butteraugli readout. Nothing native on Windows does this.
-- [ ] **V50-21** *P1* — **Lossless re-pack chain** per format (bundled CLIs):
-  - PNG: OxiPNG → ECT → pngquant (opt-in lossy) — keep smallest
-  - JPEG: jpegtran-optimize → jpegoptim → **cjpegli** → MozJPEG re-encode (opt-in)
-  - GIF: gifsicle `-O3`
-  - WebP/AVIF/JXL: max-effort re-encode (`-m 6`, `--speed 0`, `-e 9`)
-- [ ] **V50-22** *P1* — **"Best-of" mode** — run N encoders in parallel, pick smallest under target SSIMULACRA2 score (FileOptimizer philosophy).
-- [ ] **V50-23** *P2* — **SSIMULACRA2 + Butteraugli** quality metric alongside raw slider (2026 codec-comp community standard).
+*V50-21 through V50-23 moved to `Roadmap_Blocked.md` — blocked on bundled CLI tools and quality metric library.*
 - [ ] **V50-24** *P2* — Send originals to Recycle Bin on replace (FileOptimizer rollback).
 
 ### Exports
-- [ ] **V50-30** *P1* — **Contact sheets → PDF**: grid, header/footer, metadata captions (Bridge Output). [stack: PdfSharpCore MIT]
-- [ ] **V50-31** *P1* — **Print layout** — multi-image/page with margins + alignment (Lightroom Print module).
-- [ ] **V50-32** *P2* — **Web gallery** — static HTML + thumbs + lightbox (digiKam HTMLGallery).
-- [ ] **V50-33** *P2* — **Direct publish** — Flickr/Imgur/Pinterest/Dropbox/OneDrive/SMB/FTP (OAuth + known APIs). Every egress call is logged by P-03.
+*All Export items (V50-30 through V50-33) moved to `Roadmap_Blocked.md` — blocked on layout engine and OAuth/API credentials.*
 
 ---
 
@@ -656,19 +631,9 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 
 **Theme**: on-device inference, no cloud, no telemetry. Adopt Windows ML on Win11 24H2+ so we don't ship our own ORT (saves ~150 MB); fall back to our own ORT + DirectML on older Windows. Models downloaded lazily to `%LOCALAPPDATA%\Images\models`; user can disable/delete. Every download logged by P-03.
 
-- [ ] **V60-01** *P0* — **Inference runtime — dual-path**. On **Win11 24H2+**: use **Windows ML** (`Microsoft.Windows.AI.MachineLearning.dll`), automatic EP selection (DirectML + CPU + OS-delivered QNN/OpenVINO/VitisAI/TensorRT-for-RTX). On older Windows: ship `Microsoft.ML.OnnxRuntime` + DirectML provider. Auto-detect at startup. UI label: "Running on NPU / GPU / CPU" (W-02). Effort: M. [MS Learn Windows ML EPs; Copilot+ dev guide]
-- [ ] **V60-02** *P0* — **CLIP semantic search** (KILLER FEATURE). `ElBruno.LocalEmbeddings.ImageEmbeddings` (Feb 2026, MIT). OpenCLIP ViT-B/32 ONNX ~300 MB. Embed all library images on ingest; store 512-d vectors in **sqlite-vec** table. Text query → encoder → cosine → ranked results. Windows Photos has NO text-to-image search — single biggest moat.
-- [ ] **V60-03** *P0* — **Face detection + recognition + clustering**. Pipeline: **YuNet** (detector, MIT) → **ArcFace/SFace** (recognizer, MIT upstream via Clearly.ML.Faces) → **FIQA gating** (digiKam 8.6 — FFT + Gaussian filters blurry training samples) → 512-d L2 embeddings → **HDBSCAN** (HdbscanSharp 3.0.1) → "confirm these suggestions" UX (Picasa orange-dot). Write `MWG-rs:Regions` XMP so tags survive reinstall.
-- [ ] **V60-04** *P0* — **Object detection auto-tagging**. YoloDotNet 4.2.0 MIT wrapper. YOLO-World or MIT-weighted older-gen to dodge Ultralytics AGPL weights trap. COCO 80 classes → tag sidebar. Cache per image hash.
+*V60-01 through V60-04 and V60-06 through V60-13 moved to `Roadmap_Blocked.md` — all blocked on V60-01 inference runtime (not built).*
+
 - [x] **V60-05** *P0* — **OCR-in-image indexing** (Phase 1 shipped v0.2.0). Default: `Windows.Media.Ocr` (zero deps, 25 langs) — press `E` to overlay semi-transparent boxes on detected text, click to copy; local/offline. **Phase 2** (Later): Optional Tesseract 5 (100+ langs incl. Asian) + Sdcb.PaddleOCR (94.5% on OmniDocBench v1.5) in Settings window "Advanced Mode". Index into SQLite FTS5 for full-text search across all images.
-- [ ] **V60-06** *P0* — **Background removal**. Four models, user picks by workload: **BiRefNet** (SOTA 2025, 1024²/2048²) for quality; **IS-Net** general-use middle; **U²-Net** fast; **silueta** 43 MB fallback. ONNX Runtime + ImageSharp pre/post. Edge refinement via guided filter.
-- [ ] **V60-07** *P1* — **AI upscaling**. Default **RealESRGAN 4x** (BSD, legal); downloadable options **HAT-L** (photo quality), **SPAN-S** (fast), **RealESRGAN Anime 6B** (anime). Model index from **OpenModelDB** JSON with SHA-256 verify before use; never bundle models in installer. Tile-wise inference (512² + 16 px overlap). [U-01/U-02; OpenModelDB]
-- [ ] **V60-08** *P1* — **Generative Erase (LaMa)**. Decision scoped 2026-05-14 in `docs/inpaint-runtime-decision.md`: opt-in local LaMa ONNX via Windows ML first, ONNX Runtime DirectML fallback, no bundled model or automatic download. Future implementation: 512 x 512 tile + dilated mask, model SHA-256 verification, visible backend/status, XMP edit-stack operation, and generated mask/render tests. [U-03; Carve/LaMa-ONNX; OpenCV PR #26736]
-- [ ] **V60-09** *P2* — **Restyle Image** (Copilot+ PCs only). Use Windows App SDK `ImageGenerator` API with `ImageFromImageGenerationStyle.Restyle` preset styles + custom prompt. Requires NPU; fall back to "not available" banner elsewhere. [U-04; MS Learn ImageGenerator]
-- [ ] **V60-10** *P2* — **Auto-rotate** — scene classifier detects upside-down orientation.
-- [ ] **V60-11** *P2* — **NIMA aesthetic quality score** — digiKam's Pick-label source. Surface "best of trip" auto-suggestions.
-- [ ] **V60-12** *P2* — **Scene classification** — Places365 or ANSA-style multi-task. Feed into smart-album auto-creation.
-- [ ] **V60-13** *P2* — **NSFW safety classifier** (opt-in) — open_nsfw2 ONNX, off by default.
 
 ---
 
@@ -676,10 +641,7 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 
 **Theme**: power-user extensibility without GPL contamination.
 
-- [ ] **V70-01** *P0* — **Roslyn C# scripting plugin API**. `Microsoft.CodeAnalysis.CSharp.Scripting` + Westwind.Scripting (MIT) wrapper. User writes snippets against `IImageContext` host API. Sandbox: whitelist namespaces, restrict reflection, target framework.
-- [ ] **V70-02** *P1* — **G'MIC shell-out** — bundle `gmic.exe` (CeCILL/LGPL, ships as exe = license-isolated). 640+ filters in plugin build, 4000+ CLI commands in 3.6. Stock set covers artistic effects, denoise (BM3D, DCT), sharpen, local contrast. Plugin pane lists filters, user picks + tweaks + applies.
-- [ ] **V70-03** *P2* — **Adobe 8BF filter host** — PICA suites + FilterRecord struct implementation. Unlocks Nik Collection, Topaz legacy, every Photoshop filter ever shipped. Tricky (Paint.NET's PSFilterShim shows pattern).
-- [ ] **V70-04** *P2* — **Explorer shell extension** — PSD/RAW/JXL/AVIF thumbnails in Explorer (Pictus pattern). Separate DLL, registers as IThumbnailProvider. Breaks under MSIX AppContainer (S-07) — unpackaged build only.
+*V70-01 through V70-04 moved to `Roadmap_Blocked.md` — all blocked on X-01 plugin boundary design doc.*
 
 ---
 
@@ -688,12 +650,7 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 **Theme**: RAW development, panorama, HDR, color-managed wide gamut, LAN sync. The "real app" bar.
 
 - [x] **V100-01** *P0* — **Non-destructive edit stack**. Shipped 2026-05-05: JSON-serialized `EditOperation[]` in XMP sidecars, reconstructible master/virtual-copy history, enable/disable controls, apply-on-export through Magick.NET, virtual copies that fork operations without duplicating pixels, and exported-copy provenance sidecars. Reinforces SCH-01.
-- [ ] **V100-02** *P0* — **RAW development pipeline** beyond LibRaw's "basic conversion". Demosaic (AHD/DCB/DHT/AMaZE) + WB + exposure + shadows/highlights + S-curve + clarity + lens correction (lensfun) + noise reduction (BM3D via G'MIC). Target RawTherapee parity.
-- [ ] **V100-03** *P1* — **Panorama stitching** via bundled Hugin CLI chain (`align_image_stack` → `autooptimiser` → `hugin_executor` → `enblend`). All GPL, all shell-out, all license-isolated. UI: select N → preview → stitch.
-- [ ] **V100-04** *P1* — **HDR merge** via bundled `enfuse` (Mertens-Kautz-Van Reeth exposure fusion, halo-free, no intermediate HDR file). RAW bracket set → LibRaw → linear float → enfuse → tone-mapped 16-bit output.
-- [ ] **V100-05** *P1* — **Color management** — lcms2 (MIT) P/Invoke or Magick.NET profile conversion. Embed source ICC in exports. Wide-gamut display support (Windows 11 ICC compat helper opt-in).
-- [ ] **V100-06** *P2* — **HDR display** (PQ/HLG) via SkiaSharp native HDR path or Direct2D interop swap chain. WPF itself doesn't render to HDR.
-- [ ] **V100-07** *P2* — **Multi-instance LAN sync** (nomacs moat, full version) — pan/zoom/image-send mirror between instances on same network. Per-client permissions. Builds on V30-32 local lite version. Egress logged by P-03.
+*V100-02 through V100-07 moved to `Roadmap_Blocked.md` — all blocked on multiple predecessors (RAW decode, G'MIC, color management, SkiaSharp canvas, bundled CLIs, local sync).*
 
 ---
 
