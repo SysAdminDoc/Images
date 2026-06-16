@@ -80,5 +80,11 @@ public sealed class CodecCapabilityServiceTests
             JpegTranSource: "Not found",
             JpegTranVersion: null,
             JpegTranSha256: null,
-            JpegTranStatus: "jpegtran not available");
+            JpegTranStatus: "jpegtran not available",
+            C2paToolAvailable: false,
+            C2paToolExecutablePath: null,
+            C2paToolSource: "Not found",
+            C2paToolVersion: null,
+            C2paToolSha256: null,
+            C2paToolStatus: "c2patool not available");
 }

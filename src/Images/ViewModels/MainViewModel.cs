@@ -23,6 +23,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly FolderPreviewController _folderPreview;
     private readonly PhotoMetadataController _photoMetadata;
     private readonly ColorAnalysisController _colorAnalysis;
+    private readonly C2paInspectionController _c2paInspection;
     private readonly OcrWorkflowController _ocrWorkflow;
     private readonly ExternalEditReloadController _externalEditReload;
     private readonly UpdateCheckController _updateCheck;
@@ -104,6 +105,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _photoMetadata.StateChanged += (_, _) => RaisePhotoMetadataState();
         _colorAnalysis = new ColorAnalysisController(_uiDispatcher, () => _isDisposed, () => CurrentPath);
         _colorAnalysis.StateChanged += (_, _) => RaiseColorAnalysisState();
+        _c2paInspection = new C2paInspectionController(_uiDispatcher, () => _isDisposed, () => CurrentPath);
+        _c2paInspection.StateChanged += (_, _) => RaiseC2paInspectionState();
         _ocrWorkflow = ocrWorkflow ?? new OcrWorkflowController(
             () => CurrentPath,
             () => HasImage,
@@ -1904,6 +1907,92 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(ShowColorAnalysisPanel));
     }
 
+    // -------------------- C2PA content credentials --------------------
+
+    public C2paInspectionResult? C2paResult => _c2paInspection.Result;
+
+    public bool IsC2paLoading => _c2paInspection.IsLoading;
+
+    public bool HasC2paCredentials => _c2paInspection.HasCredentials;
+
+    public string C2paTrustBadgeText => _c2paInspection.TrustBadgeText;
+
+    public string C2paTrustBadgeTooltip => _c2paInspection.TrustBadgeTooltip;
+
+    public string C2paStatusText => _c2paInspection.StatusText;
+
+    public bool ShowC2paPanel => HasC2paCredentials || IsC2paLoading;
+
+    public string C2paClaimGeneratorText
+    {
+        get
+        {
+            if (C2paResult?.Claims is not { Count: > 0 } claims) return "";
+            var active = C2paResult.ActiveManifestLabel is not null
+                ? claims.FirstOrDefault(c => c.Label == C2paResult.ActiveManifestLabel) ?? claims[^1]
+                : claims[^1];
+            return active.ClaimGenerator ?? "";
+        }
+    }
+
+    public string C2paSignatureDateText
+    {
+        get
+        {
+            if (C2paResult?.Claims is not { Count: > 0 } claims) return "";
+            var active = C2paResult.ActiveManifestLabel is not null
+                ? claims.FirstOrDefault(c => c.Label == C2paResult.ActiveManifestLabel) ?? claims[^1]
+                : claims[^1];
+            return active.SignatureDate ?? "";
+        }
+    }
+
+    public string C2paAssertionsSummaryText
+    {
+        get
+        {
+            if (C2paResult?.Claims is not { Count: > 0 } claims) return "";
+            var active = C2paResult.ActiveManifestLabel is not null
+                ? claims.FirstOrDefault(c => c.Label == C2paResult.ActiveManifestLabel) ?? claims[^1]
+                : claims[^1];
+            if (active.Assertions.Count == 0) return "";
+            return string.Join("; ", active.Assertions.Select(a => a.Summary).Distinct());
+        }
+    }
+
+    public string C2paIngredientsSummaryText
+    {
+        get
+        {
+            if (C2paResult?.Claims is not { Count: > 0 } claims) return "";
+            var active = C2paResult.ActiveManifestLabel is not null
+                ? claims.FirstOrDefault(c => c.Label == C2paResult.ActiveManifestLabel) ?? claims[^1]
+                : claims[^1];
+            if (active.Ingredients.Count == 0) return "";
+            return string.Join(", ", active.Ingredients.Select(i =>
+                $"{i.Title} ({i.Relationship})"));
+        }
+    }
+
+    private void RefreshC2paInspection(string path) => _c2paInspection.Refresh(path);
+
+    private void ClearC2paInspection() => _c2paInspection.Clear();
+
+    private void RaiseC2paInspectionState()
+    {
+        Raise(nameof(IsC2paLoading));
+        Raise(nameof(HasC2paCredentials));
+        Raise(nameof(C2paTrustBadgeText));
+        Raise(nameof(C2paTrustBadgeTooltip));
+        Raise(nameof(C2paStatusText));
+        Raise(nameof(ShowC2paPanel));
+        Raise(nameof(C2paResult));
+        Raise(nameof(C2paClaimGeneratorText));
+        Raise(nameof(C2paSignatureDateText));
+        Raise(nameof(C2paAssertionsSummaryText));
+        Raise(nameof(C2paIngredientsSummaryText));
+    }
+
     // -------------------- Folder preview strip --------------------
 
     public ObservableCollection<FolderPreviewItem> FolderPreviewItems => _folderPreview.Items;
@@ -3171,11 +3260,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             ClearPhotoMetadata();
             ClearColorAnalysis();
+            ClearC2paInspection();
         }
         else
         {
             RefreshPhotoMetadata(path);
             RefreshColorAnalysis(path);
+            RefreshC2paInspection(path);
         }
 
         if (loaded && !CurrentFormatSupportsCrop)
@@ -5751,6 +5842,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ResetPageState();
         ClearPhotoMetadata();
         ClearColorAnalysis();
+        ClearC2paInspection();
         _folderPreview.Clear();
         RenameStatus = RenameStatusKind.Idle;
         SyncRenameEditorFromDisk();
@@ -5819,6 +5911,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _ocrWorkflow.Dispose();
         _photoMetadata.Dispose();
         _colorAnalysis.Dispose();
+        _c2paInspection.Dispose();
         _folderPreview.Dispose();
         _preload.Dispose();
         _nav.Dispose();

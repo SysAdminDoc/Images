@@ -127,5 +127,11 @@ public sealed class DiagnosticsStatusServiceTests
             JpegTranSource: "app-local Codecs\\JpegTran",
             JpegTranVersion: "libjpeg-turbo 3.1.4.1",
             JpegTranSha256: "sha256:jpegtran-test",
-            JpegTranStatus: "jpegtran available via app-local Codecs\\JpegTran");
+            JpegTranStatus: "jpegtran available via app-local Codecs\\JpegTran",
+            C2paToolAvailable: false,
+            C2paToolExecutablePath: null,
+            C2paToolSource: "Not found",
+            C2paToolVersion: null,
+            C2paToolSha256: null,
+            C2paToolStatus: "c2patool not available");
 }
