@@ -111,6 +111,31 @@ public static class Strings
     public static string EffectsPreviewUnavailableMissingFile => Get(nameof(EffectsPreviewUnavailableMissingFile));
     public static string EffectsSummarySeparator => Get(nameof(EffectsSummarySeparator));
     public static string EffectsUpdatingPreview => Get(nameof(EffectsUpdatingPreview));
+    public static string AdjustmentsWindowTitle => Get(nameof(AdjustmentsWindowTitle));
+    public static string AdjustmentsHeading => Get(nameof(AdjustmentsHeading));
+    public static string AdjustmentsSubtitle => Get(nameof(AdjustmentsSubtitle));
+    public static string AdjustmentsEnterApplies => Get(nameof(AdjustmentsEnterApplies));
+    public static string AdjustmentsLevelsHeading => Get(nameof(AdjustmentsLevelsHeading));
+    public static string AdjustmentsBlackPoint => Get(nameof(AdjustmentsBlackPoint));
+    public static string AdjustmentsWhitePoint => Get(nameof(AdjustmentsWhitePoint));
+    public static string AdjustmentsGamma => Get(nameof(AdjustmentsGamma));
+    public static string AdjustmentsCurve => Get(nameof(AdjustmentsCurve));
+    public static string AdjustmentsCurveHint => Get(nameof(AdjustmentsCurveHint));
+    public static string AdjustmentsColorHeading => Get(nameof(AdjustmentsColorHeading));
+    public static string AdjustmentsHue => Get(nameof(AdjustmentsHue));
+    public static string AdjustmentsSaturation => Get(nameof(AdjustmentsSaturation));
+    public static string AdjustmentsLightness => Get(nameof(AdjustmentsLightness));
+    public static string AdjustmentsEditNotice => Get(nameof(AdjustmentsEditNotice));
+    public static string AdjustmentsReset => Get(nameof(AdjustmentsReset));
+    public static string AdjustmentsApply => Get(nameof(AdjustmentsApply));
+    public static string AdjustmentsNoAdjustmentActive => Get(nameof(AdjustmentsNoAdjustmentActive));
+    public static string AdjustmentsPreviewUnavailableMissingFile => Get(nameof(AdjustmentsPreviewUnavailableMissingFile));
+    public static string AdjustmentsUpdatingPreview => Get(nameof(AdjustmentsUpdatingPreview));
+    public static string AdjustmentsMoveSliderToPreview => Get(nameof(AdjustmentsMoveSliderToPreview));
+    public static string AdjustmentsPreviewReadyEnter => Get(nameof(AdjustmentsPreviewReadyEnter));
+    public static string AdjustmentsMoveSliderBeforeApplying => Get(nameof(AdjustmentsMoveSliderBeforeApplying));
+    public static string AdjustmentsPreviewQueued => Get(nameof(AdjustmentsPreviewQueued));
+    public static string AdjustmentsDegreeSuffix => Get(nameof(AdjustmentsDegreeSuffix));
 
     public static string Get(string key)
     {
