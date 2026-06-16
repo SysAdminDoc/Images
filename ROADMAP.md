@@ -496,7 +496,7 @@ User preference is "no tests unless explicitly requested" — but domain-logic t
 - [ ] **T-01** *P1* — **`Images.Domain` class library** — extract sort/filter, rename-conflict resolution, EXIF/XMP date parsing, thumbnail-cache eviction into a pure library with xUnit coverage. Effort: M.
 - [ ] **T-02** *P2* — **FlaUI smoke suite** — launch, open fixture folder, assert filmstrip count + title bar text. Runs as a gated CI job on windows-latest. Effort: M. [FlaUI repo + docs]
 - [ ] **T-03** *P2* — **Golden-image render tests** under `tests/render/`, DPI-pinned, per-pixel RGBA compare with tolerance via ImageSharp. Catches canvas-engine regressions when SkiaSharp lands in V20-01. Effort: M. [ImageSharp repo]
-- [ ] **T-04** *P1* — **Ship `images.v1.db` snapshot** in `tests/fixtures/` now, so every future catalog-schema bump gets a forward-migration regression test. Pattern borrowed from darktable / digiKam. Effort: S. [digiKam docs]
+- [x] **T-04** *P1* — **Ship `images.v1.db` snapshot** in `tests/fixtures/` now, so every future catalog-schema bump gets a forward-migration regression test. Pattern borrowed from darktable / digiKam. Effort: S. [digiKam docs] *(shipped: `tests/Images.Tests/Fixtures/catalog.v1.db` + 43-test `CatalogSchemaSnapshotTests` covering schema shape, seed data, and forward-migration regression through CatalogService)*
 - [ ] **T-05** — **Avoid WinAppDriver** (Microsoft's repo effectively frozen since 2022). Use FlaUI or `appium-windows-driver`. [microsoft/WinAppDriver; appium/appium-windows-driver]
 
 ### Distribution channels
@@ -515,7 +515,7 @@ Primary = GitHub Releases (source of truth). Secondary = winget + Scoop extras. 
 Set the philosophy before writing the first migration. Getting this wrong means the v5 user can't open their v1 library.
 
 - [ ] **SCH-04** *P1* — **Hop, don't jump**. A v1→v5 upgrade runs v1→v2→v3→v4→v5 with integrity check after each hop, not a direct-to-target diff. Effort: S.
-- [ ] **SCH-05** *P1* — **Snapshot fixtures under version control**. `tests/fixtures/catalog.v1.db`, `catalog.v2.db` etc. — every bump must roll every prior snapshot forward in CI. Effort: S (per version).
+- [x] **SCH-05** *P1* — **Snapshot fixtures under version control**. `tests/fixtures/catalog.v1.db`, `catalog.v2.db` etc. — every bump must roll every prior snapshot forward in CI. Effort: S (per version). *(shipped: v1 fixture checked in; csproj copies to output; migration regression tests verify CatalogService opens + preserves all data)*
 
 ### Migration from competing tools
 

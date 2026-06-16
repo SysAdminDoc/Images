@@ -23,4 +23,8 @@
     <ProjectReference Include="..\..\src\Images\Images.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Fixtures\catalog.v1.db" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
