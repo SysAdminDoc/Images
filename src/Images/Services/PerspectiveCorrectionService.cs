@@ -1,5 +1,6 @@
 using System.Globalization;
 using ImageMagick;
+using Images.Localization;
 
 namespace Images.Services;
 
@@ -13,12 +14,22 @@ public sealed record PerspectiveCorrectionPlan(
     int OutputWidth,
     int OutputHeight)
 {
-    public string Label => $"Perspective {OutputWidth}x{OutputHeight}";
+    public string Label => Strings.Format("PerspectiveLabelFormat", OutputWidth, OutputHeight);
 
     public string Summary =>
-        string.Create(
+        string.Format(
             CultureInfo.InvariantCulture,
-            $"{OutputWidth}x{OutputHeight}, TL {TopLeft.X:0.#},{TopLeft.Y:0.#}, TR {TopRight.X:0.#},{TopRight.Y:0.#}, BR {BottomRight.X:0.#},{BottomRight.Y:0.#}, BL {BottomLeft.X:0.#},{BottomLeft.Y:0.#}");
+            Strings.Get("PerspectiveSummaryFormat"),
+            OutputWidth,
+            OutputHeight,
+            TopLeft.X,
+            TopLeft.Y,
+            TopRight.X,
+            TopRight.Y,
+            BottomRight.X,
+            BottomRight.Y,
+            BottomLeft.X,
+            BottomLeft.Y);
 
     public IReadOnlyDictionary<string, string> ToEditParameters()
         => new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)

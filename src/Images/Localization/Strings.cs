@@ -56,6 +56,13 @@ public static class Strings
     public static string ResizePlanLabel => Get(nameof(ResizePlanLabel));
     public static string ResizeReadyStatus => Get(nameof(ResizeReadyStatus));
     public static string ResizeShortEdge => Get(nameof(ResizeShortEdge));
+    public static string PerspectiveDragCornerStatus => Get(nameof(PerspectiveDragCornerStatus));
+    public static string PerspectiveHandleBottomLeft => Get(nameof(PerspectiveHandleBottomLeft));
+    public static string PerspectiveHandleBottomRight => Get(nameof(PerspectiveHandleBottomRight));
+    public static string PerspectiveHandleTopLeft => Get(nameof(PerspectiveHandleTopLeft));
+    public static string PerspectiveHandleTopRight => Get(nameof(PerspectiveHandleTopRight));
+    public static string PerspectiveMoveCornerBeforeApplying => Get(nameof(PerspectiveMoveCornerBeforeApplying));
+    public static string PerspectiveUnavailableMissingFile => Get(nameof(PerspectiveUnavailableMissingFile));
 
     public static string Get(string key)
     {

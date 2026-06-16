@@ -281,4 +281,106 @@ Details written to:
   <data name="ResizeWidthAutomationName" xml:space="preserve">
     <value>Resize width</value>
   </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="EnterApplies" xml:space="preserve">
+    <value>Enter applies</value>
+  </data>
+  <data name="InsetPerspectiveCorners" xml:space="preserve">
+    <value>Inset perspective corners</value>
+  </data>
+  <data name="InsetPerspectiveHandles" xml:space="preserve">
+    <value>Inset handles</value>
+  </data>
+  <data name="NarrowBottomEdge" xml:space="preserve">
+    <value>Narrow bottom edge</value>
+  </data>
+  <data name="NarrowLeftEdge" xml:space="preserve">
+    <value>Shorten left edge</value>
+  </data>
+  <data name="NarrowRightEdge" xml:space="preserve">
+    <value>Shorten right edge</value>
+  </data>
+  <data name="NarrowTopEdge" xml:space="preserve">
+    <value>Narrow top edge</value>
+  </data>
+  <data name="PerspectiveApplyToEditHistory" xml:space="preserve">
+    <value>Apply perspective correction to edit history</value>
+  </data>
+  <data name="PerspectiveBottomIn" xml:space="preserve">
+    <value>Bottom in</value>
+  </data>
+  <data name="PerspectiveClose" xml:space="preserve">
+    <value>Close perspective correction</value>
+  </data>
+  <data name="PerspectiveCorners" xml:space="preserve">
+    <value>Corners</value>
+  </data>
+  <data name="PerspectiveDescription" xml:space="preserve">
+    <value>Drag the four source corners, then add a perspective correction edit.</value>
+  </data>
+  <data name="PerspectiveDragCornerStatus" xml:space="preserve">
+    <value>Drag a corner handle or use a keystone nudge.</value>
+  </data>
+  <data name="PerspectiveHandleBottomLeft" xml:space="preserve">
+    <value>BL</value>
+  </data>
+  <data name="PerspectiveHandleBottomRight" xml:space="preserve">
+    <value>BR</value>
+  </data>
+  <data name="PerspectiveHandleTopLeft" xml:space="preserve">
+    <value>TL</value>
+  </data>
+  <data name="PerspectiveHandleTopRight" xml:space="preserve">
+    <value>TR</value>
+  </data>
+  <data name="PerspectiveHeading" xml:space="preserve">
+    <value>Perspective</value>
+  </data>
+  <data name="PerspectiveKeystone" xml:space="preserve">
+    <value>Keystone</value>
+  </data>
+  <data name="PerspectiveLabelFormat" xml:space="preserve">
+    <value>Perspective {0}x{1}</value>
+  </data>
+  <data name="PerspectiveLeftIn" xml:space="preserve">
+    <value>Left in</value>
+  </data>
+  <data name="PerspectiveMoveCornerBeforeApplying" xml:space="preserve">
+    <value>Move at least one corner before applying.</value>
+  </data>
+  <data name="PerspectivePreviewNote" xml:space="preserve">
+    <value>This records an edit operation only. Use Save a copy to export pixels with the perspective correction applied.</value>
+  </data>
+  <data name="PerspectiveReadyStatusFormat" xml:space="preserve">
+    <value>Perspective ready. Output will be {0} x {1} px.</value>
+  </data>
+  <data name="PerspectiveResetCorners" xml:space="preserve">
+    <value>Reset corners</value>
+  </data>
+  <data name="PerspectiveRightIn" xml:space="preserve">
+    <value>Right in</value>
+  </data>
+  <data name="PerspectiveShape" xml:space="preserve">
+    <value>Shape</value>
+  </data>
+  <data name="PerspectiveSourcePreview" xml:space="preserve">
+    <value>Perspective source preview</value>
+  </data>
+  <data name="PerspectiveSummaryFormat" xml:space="preserve">
+    <value>{0}x{1}, TL {2:0.#},{3:0.#}, TR {4:0.#},{5:0.#}, BR {6:0.#},{7:0.#}, BL {8:0.#},{9:0.#}</value>
+  </data>
+  <data name="PerspectiveTitle" xml:space="preserve">
+    <value>Images - Perspective</value>
+  </data>
+  <data name="PerspectiveTopIn" xml:space="preserve">
+    <value>Top in</value>
+  </data>
+  <data name="PerspectiveUnavailableMissingFile" xml:space="preserve">
+    <value>Perspective unavailable: image file is no longer available.</value>
+  </data>
+  <data name="ResetPerspectiveCorners" xml:space="preserve">
+    <value>Reset perspective corners</value>
+  </data>
 </root>
