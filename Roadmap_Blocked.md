@@ -130,3 +130,227 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
 - [ ] **I-03** *P2* — **RTL audit pass**. `FlowDirection="RightToLeft"` at window root mirrors layout, but `Canvas`, `Image`, custom `DrawingVisual`, negative-`X` `ScaleTransform`, and `DataGrid` column order need manual mirroring. Arabic + Hebrew test fixtures. Effort: L. [MS Learn localization-overview]
   - **Blocked by**: locale infrastructure maturity — I-01 string extraction + I-02 Crowdin should be stable first.
   - **Unblock when**: I-01 fully complete and at least one RTL locale has translators.
+
+## Blocked On ExifTool S-05 Safe Write Wrapper
+
+- [ ] **V40-12** *P1* — **Metadata templates** — save/apply IPTC copyright/creator blocks across N files atomically (Bridge pattern). Effort: M.
+  - **Blocked by**: ExifTool S-05 safe write wrapper not yet implemented — atomic multi-file metadata writes depend on it.
+  - **Unblock when**: S-05 ExifTool safe write wrapper ships.
+
+- [ ] **V40-14** *P1* — Full IPTC / XMP / EXIF editor pane (dockable, XnView MP style). Effort: M.
+  - **Blocked by**: ExifTool S-05 safe write wrapper — write-back to embedded metadata requires S-05.
+  - **Unblock when**: S-05 ExifTool safe write wrapper ships.
+
+- [ ] **V40-30** *P1* — **EXIF GPS read/write** (ExifTool shell-out S-05 for writes; MetadataExtractor for reads). Effort: M.
+  - **Blocked by**: ExifTool S-05 safe write wrapper — GPS write-back requires S-05.
+  - **Unblock when**: S-05 ExifTool safe write wrapper ships.
+
+## Blocked On WebView2 Map + Egress Consent
+
+- [ ] **V20-23** *P1* — **GPS coordinates overlay** with click-to-open-in-map (Honeyview). P-01 "Strip location" one click away. Effort: M.
+  - **Blocked by**: WebView2 map integration + network egress consent UX — click-to-open-in-map requires a map surface and explicit egress disclosure.
+  - **Unblock when**: WebView2 Leaflet map pane and egress consent flow are implemented.
+
+- [ ] **V40-31** *P1* — **Interactive map pane** with clustering at zoom (Leaflet via WebView2, OpenStreetMap tiles). Egress logged by P-03. Effort: M.
+  - **Blocked by**: WebView2 Leaflet integration + OSM tile egress — map pane requires WebView2 hosting and network egress for tile loads.
+  - **Unblock when**: WebView2 hosting is implemented and OSM tile egress consent is designed.
+
+## Blocked On V40-01 SQLite Catalog
+
+- [ ] **V40-13** *P1* — **Category Sets** — saveable tag-panel layouts, swap per job type (XnView). Effort: M.
+  - **Blocked by**: V40-01 SQLite catalog — category sets need catalog-backed tag persistence.
+  - **Unblock when**: V40-01 catalog schema is stable and tag storage is operational.
+
+- [ ] **V40-22** *P1* — **Near-duplicate stacking** — auto-stack by time+location+hash proximity (PhotoPrism, Google Photos Photo Stacks). Effort: M.
+  - **Blocked by**: V40-01 catalog + time/location proximity model — stacking needs indexed metadata for time+location queries.
+  - **Unblock when**: V40-01 catalog ships with indexed timestamps and GPS coordinates.
+
+- [ ] **V40-23** *P2* — **Sketch-based fuzzy search** — draw rough color blobs, match (digiKam Sketch tab — delightful differentiator). Effort: L.
+  - **Blocked by**: V40-01 catalog + palette extraction engine — sketch search needs indexed color data to query against.
+  - **Unblock when**: V40-01 catalog and color palette indexing are operational.
+
+- [ ] **V40-40** *P1* — **Smart Collections** criteria builder — date, rating, label, keyword, camera, lens, ISO, geo bbox, face count (Lightroom). Effort: L.
+  - **Blocked by**: V40-01 SQLite catalog — smart collections query against catalog-indexed metadata.
+  - **Unblock when**: V40-01 catalog ships with indexed metadata fields.
+
+- [ ] **V40-41** *P2* — **Auto-albums by pattern** — screenshots, receipts, notes, documents (Google Photos OCR+shape). Effort: L.
+  - **Blocked by**: V40-01 catalog + OCR/shape classification — auto-album detection needs indexed content analysis.
+  - **Unblock when**: V40-01 catalog and content classification pipeline are operational.
+
+- [ ] **V40-42** *P2* — **Trip detection** — contiguous days + distance >threshold from home (Apple Memories engine). Effort: L.
+  - **Blocked by**: V40-01 catalog + GPS/date indexing — trip detection needs indexed geo+temporal data.
+  - **Unblock when**: V40-01 catalog ships with geo and date indexing.
+
+- [ ] **V40-43** *P2* — **Events view** — date-based clusters with key-photo thumbnail (Shotwell). Effort: M.
+  - **Blocked by**: V40-01 catalog — event clustering queries against catalog-indexed dates.
+  - **Unblock when**: V40-01 catalog ships with date indexing.
+
+## Blocked On GeoNames Offline Database
+
+- [ ] **V40-32** *P2* — **Reverse geocoding** — local offline DB (GeoNames CC-BY) — privacy-first, no API calls. Effort: M.
+  - **Blocked by**: GeoNames offline database bundling — needs download/staging strategy and CC-BY attribution.
+  - **Unblock when**: GeoNames DB packaging and attribution are designed.
+
+## Blocked On V40-30 GPS Write
+
+- [ ] **V40-33** *P2* — **GPX track-log sync** — match photo timestamps to GPS track, backfill EXIF. Effort: M.
+  - **Blocked by**: V40-30 GPS read/write — GPX sync writes GPS EXIF, which depends on V40-30.
+  - **Unblock when**: V40-30 GPS write capability ships.
+
+## Blocked On Bundled CLI Tools Not Yet Staged
+
+- [ ] **V50-02** *P0* — **Output formats** with per-format quality controls: JPEG (MozJPEG + cjpegli), PNG (OxiPNG), WebP (cwebp), AVIF (avifenc), JXL (cjxl), HEIC (libheif), TIFF, BMP, GIF. Effort: L. [stack: bundled CLIs + Magick.NET core]
+  - **Blocked by**: bundled CLI tools not yet staged — MozJPEG, cjpegli, OxiPNG, cwebp, avifenc, cjxl binaries need provenance/license/staging work.
+  - **Unblock when**: CLI binaries are staged with SHA-256 validation, license files, and provenance tracking (similar to jpegtran V7-06 pattern).
+
+- [ ] **V50-21** *P1* — **Lossless re-pack chain** per format (bundled CLIs): PNG (OxiPNG/ECT/pngquant), JPEG (jpegtran/jpegoptim/cjpegli/MozJPEG), GIF (gifsicle), WebP/AVIF/JXL max-effort. Effort: L.
+  - **Blocked by**: bundled CLI tools not yet staged — the full re-pack chain requires multiple CLI binaries with provenance.
+  - **Unblock when**: required CLI binaries are staged per the bundled-binary provenance policy.
+
+- [ ] **V50-22** *P1* — **"Best-of" mode** — run N encoders in parallel, pick smallest under target SSIMULACRA2 score (FileOptimizer philosophy). Effort: L.
+  - **Blocked by**: bundled CLI tools (V50-21 re-pack chain) + SSIMULACRA2 metric library (V50-23) — needs multiple encoders and quality metrics.
+  - **Unblock when**: V50-21 CLI chain and V50-23 metric library are available.
+
+## Blocked On Quality Metric Library
+
+- [ ] **V50-23** *P2* — **SSIMULACRA2 + Butteraugli** quality metric alongside raw slider (2026 codec-comp community standard). Effort: M.
+  - **Blocked by**: SSIMULACRA2/Butteraugli .NET binding or CLI — no production-ready .NET library exists; needs evaluation of native interop or bundled metric CLI.
+  - **Unblock when**: a .NET-compatible SSIMULACRA2 implementation or bundled metric CLI is identified and staged.
+
+## Blocked On Layout Engine
+
+- [ ] **V50-30** *P1* — **Contact sheets to PDF**: grid, header/footer, metadata captions (Bridge Output). Effort: M. [stack: PdfSharpCore MIT]
+  - **Blocked by**: layout engine — multi-image page composition with grid/header/footer/captions needs a layout subsystem.
+  - **Unblock when**: a PDF/page layout engine (PdfSharpCore or equivalent) is integrated.
+
+- [ ] **V50-31** *P1* — **Print layout** — multi-image/page with margins + alignment (Lightroom Print module). Effort: L.
+  - **Blocked by**: layout engine — multi-image print composition shares the same layout subsystem as contact sheets.
+  - **Unblock when**: layout engine from V50-30 is available.
+
+- [ ] **V50-32** *P2* — **Web gallery** — static HTML + thumbs + lightbox (digiKam HTMLGallery). Effort: M.
+  - **Blocked by**: layout/template engine — web gallery generation needs an HTML templating and thumbnail composition pipeline.
+  - **Unblock when**: gallery template engine is designed and thumbnail batch pipeline is mature.
+
+## Blocked On OAuth / External API Credentials
+
+- [ ] **V50-33** *P2* — **Direct publish** — Flickr/Imgur/Pinterest/Dropbox/OneDrive/SMB/FTP (OAuth + known APIs). Every egress call is logged by P-03. Effort: L.
+  - **Blocked by**: OAuth integration + external API credentials — each publish target needs OAuth flow, API keys, and consent UX.
+  - **Unblock when**: at least one OAuth publish target is designed with token storage and egress consent.
+
+## Blocked On Batch Pipeline Maturity
+
+- [ ] **V50-07** *P1* — **Watch-folder** auto-apply (XnConvert Watch). Effort: M.
+  - **Blocked by**: batch pipeline maturity — watch-folder needs a proven, resilient batch execution engine before auto-applying on file changes.
+  - **Unblock when**: V50-01 operation-chain builder and batch execution are stable and tested.
+
+## Blocked On V30-33 Slideshow
+
+- [ ] **V30-34** *P2* — **Standalone .exe slideshow export** (IrfanView — unique) — packs N images + runtime into a self-extracting viewer. Effort: L.
+  - **Blocked by**: V30-33 slideshow — export depends on the slideshow playback engine being built first.
+  - **Unblock when**: V30-33 slideshow feature ships.
+
+## Blocked On Window/Session Channel Design
+
+- [ ] **V30-32** *P2* — **Multi-instance LAN sync** lite — optional "Compare mode" syncs pan/zoom across two open windows (local machine; network sync is a v1.0 item). Effort: L. [nomacs 3.22 pattern]
+  - **Blocked by**: window/session communication channel — syncing state between instances requires a local IPC or shared-memory design.
+  - **Unblock when**: inter-instance communication channel is designed and implemented.
+
+## Blocked On TWAIN SDK + MSIX Compatibility
+
+- [ ] **V30-24** *P2* — Scan via TWAIN/WIA to image (IrfanView pattern — `Saraff.Twain.NET` NuGet). Breaks under MSIX AppContainer (S-07) — unpackaged build only. Effort: M.
+  - **Blocked by**: TWAIN SDK evaluation + MSIX AppContainer compatibility — `Saraff.Twain.NET` needs evaluation, and TWAIN breaks under MSIX sandbox.
+  - **Unblock when**: TWAIN SDK evaluated and MSIX compatibility path decided.
+
+## Blocked On V60-01 Inference Runtime
+
+- [ ] **V60-01** *P0* — **Inference runtime — dual-path**. On Win11 24H2+: use Windows ML; on older Windows: ship `Microsoft.ML.OnnxRuntime` + DirectML provider. Auto-detect at startup. UI label: "Running on NPU / GPU / CPU". Effort: M.
+  - **Blocked by**: major infrastructure work — dual-path ML runtime needs dedicated implementation run with Windows ML + ONNX Runtime DirectML integration.
+  - **Unblock when**: a dedicated implementation run is scheduled for the inference runtime.
+
+- [ ] **V60-02** *P0* — **CLIP semantic search** (KILLER FEATURE). `ElBruno.LocalEmbeddings.ImageEmbeddings` (MIT). OpenCLIP ViT-B/32 ONNX ~300 MB. Embed library images on ingest; 512-d vectors in sqlite-vec. Effort: XL.
+  - **Blocked by**: V60-01 inference runtime — CLIP embedding requires the ML runtime to be operational.
+  - **Unblock when**: V60-01 inference runtime ships.
+
+- [ ] **V60-03** *P0* — **Face detection + recognition + clustering**. YuNet + ArcFace/SFace + FIQA gating + HDBSCAN clustering + MWG-rs:Regions XMP. Effort: XL.
+  - **Blocked by**: V60-01 inference runtime — face detection/recognition models require the ML runtime.
+  - **Unblock when**: V60-01 inference runtime ships.
+
+- [ ] **V60-04** *P0* — **Object detection auto-tagging**. YoloDotNet + YOLO-World or MIT-weighted older-gen. COCO 80 classes. Effort: L.
+  - **Blocked by**: V60-01 inference runtime — object detection models require the ML runtime.
+  - **Unblock when**: V60-01 inference runtime ships.
+
+- [ ] **V60-06** *P0* — **Background removal**. BiRefNet / IS-Net / U2-Net / silueta ONNX models. Effort: L.
+  - **Blocked by**: V60-01 inference runtime — background removal models require the ML runtime.
+  - **Unblock when**: V60-01 inference runtime ships.
+
+- [ ] **V60-07** *P1* — **AI upscaling**. RealESRGAN 4x default + HAT-L/SPAN-S/Anime 6B downloadable options. OpenModelDB JSON index. Effort: L.
+  - **Blocked by**: V60-01 inference runtime — upscaling models require the ML runtime.
+  - **Unblock when**: V60-01 inference runtime ships.
+
+- [ ] **V60-08** *P1* — **Generative Erase (LaMa)**. Opt-in local LaMa ONNX via Windows ML first, ONNX Runtime DirectML fallback. Effort: L.
+  - **Blocked by**: V60-01 inference runtime — LaMa inpainting requires the ML runtime.
+  - **Unblock when**: V60-01 inference runtime ships.
+
+- [ ] **V60-09** *P2* — **Restyle Image** (Copilot+ PCs only). Windows App SDK `ImageGenerator` API. Requires NPU. Effort: M.
+  - **Blocked by**: V60-01 inference runtime + Copilot+ PC NPU — requires both ML runtime and NPU hardware path.
+  - **Unblock when**: V60-01 inference runtime ships and Copilot+ PC testing is available.
+
+- [ ] **V60-10** *P2* — **Auto-rotate** — scene classifier detects upside-down orientation. Effort: S.
+  - **Blocked by**: V60-01 inference runtime — scene classification model requires the ML runtime.
+  - **Unblock when**: V60-01 inference runtime ships.
+
+- [ ] **V60-11** *P2* — **NIMA aesthetic quality score** — digiKam's Pick-label source. "Best of trip" auto-suggestions. Effort: M.
+  - **Blocked by**: V60-01 inference runtime — NIMA model requires the ML runtime.
+  - **Unblock when**: V60-01 inference runtime ships.
+
+- [ ] **V60-12** *P2* — **Scene classification** — Places365 or ANSA-style multi-task. Feed into smart-album auto-creation. Effort: M.
+  - **Blocked by**: V60-01 inference runtime — scene classification model requires the ML runtime.
+  - **Unblock when**: V60-01 inference runtime ships.
+
+- [ ] **V60-13** *P2* — **NSFW safety classifier** (opt-in) — open_nsfw2 ONNX, off by default. Effort: S.
+  - **Blocked by**: V60-01 inference runtime — NSFW classification model requires the ML runtime.
+  - **Unblock when**: V60-01 inference runtime ships.
+
+## Blocked On X-01 Plugin Boundary Design Doc
+
+- [ ] **V70-01** *P0* — **Roslyn C# scripting plugin API**. `Microsoft.CodeAnalysis.CSharp.Scripting` + Westwind.Scripting wrapper. User writes snippets against `IImageContext` host API. Sandbox: whitelist namespaces, restrict reflection. Effort: L.
+  - **Blocked by**: X-01 plugin boundary design doc — plugin API needs stable extension points and trust model defined first.
+  - **Unblock when**: X-01 design doc ships with extension-point definitions and trust model.
+
+- [ ] **V70-02** *P1* — **G'MIC shell-out** — bundle `gmic.exe` (CeCILL/LGPL, license-isolated). 640+ filters. Effort: L.
+  - **Blocked by**: X-01 plugin boundary design doc — G'MIC integration needs the plugin/filter host boundary defined.
+  - **Unblock when**: X-01 design doc ships.
+
+- [ ] **V70-03** *P2* — **Adobe 8BF filter host** — PICA suites + FilterRecord struct. Unlocks Nik Collection, Topaz legacy. Effort: XL.
+  - **Blocked by**: X-01 plugin boundary design doc — 8BF hosting needs the plugin trust model and process isolation boundary.
+  - **Unblock when**: X-01 design doc ships.
+
+- [ ] **V70-04** *P2* — **Explorer shell extension** — PSD/RAW/JXL/AVIF thumbnails in Explorer (Pictus pattern). Separate DLL, IThumbnailProvider. Breaks under MSIX. Effort: M.
+  - **Blocked by**: X-01 plugin boundary design doc + MSIX compatibility (S-07) — shell extension is a plugin-class component that breaks under AppContainer.
+  - **Unblock when**: X-01 design doc ships and MSIX/unpackaged build strategy is decided.
+
+## Blocked On Multiple Predecessors (Lightroom-Class)
+
+- [ ] **V100-02** *P0* — **RAW development pipeline** beyond LibRaw basic conversion. Demosaic + WB + exposure + shadows/highlights + S-curve + clarity + lens correction (lensfun) + noise reduction (BM3D via G'MIC). Effort: XL.
+  - **Blocked by**: V20-14 RAW decode + V70-02 G'MIC integration + V100-05 color management — full RAW development needs the decode pipeline, filter bus, and color-managed rendering.
+  - **Unblock when**: V20-14 RAW decode, V70-02 G'MIC, and V100-05 color management are operational.
+
+- [ ] **V100-03** *P1* — **Panorama stitching** via bundled Hugin CLI chain. All GPL, all shell-out, all license-isolated. Effort: L.
+  - **Blocked by**: bundled Hugin CLI tools (`align_image_stack`, `autooptimiser`, `hugin_executor`, `enblend`) not yet staged — needs binary provenance and license-isolation staging.
+  - **Unblock when**: Hugin CLI binaries are staged with provenance tracking.
+
+- [ ] **V100-04** *P1* — **HDR merge** via bundled `enfuse` (Mertens-Kautz-Van Reeth). RAW bracket set needs LibRaw. Effort: L.
+  - **Blocked by**: V20-14 RAW decode + bundled `enfuse` CLI not yet staged — HDR merge from RAW brackets needs both.
+  - **Unblock when**: V20-14 RAW decode ships and enfuse binary is staged.
+
+- [ ] **V100-05** *P1* — **Color management** — lcms2 (MIT) P/Invoke or Magick.NET profile conversion. Wide-gamut display support. Effort: L.
+  - **Blocked by**: V80-26 OCIO/ACES color-management roadmap — color management needs the planning document produced first.
+  - **Unblock when**: V80-26 color pipeline plan document is produced.
+
+- [ ] **V100-06** *P2* — **HDR display** (PQ/HLG) via SkiaSharp native HDR path or Direct2D interop swap chain. Effort: XL.
+  - **Blocked by**: V20-01 SkiaSharp canvas + V100-05 color management — HDR display needs the new canvas engine and color pipeline.
+  - **Unblock when**: V20-01 SkiaSharp canvas and V100-05 color management ship.
+
+- [ ] **V100-07** *P2* — **Multi-instance LAN sync** (nomacs moat, full version) — pan/zoom/image-send mirror between instances on same network. Builds on V30-32 local lite. Effort: L.
+  - **Blocked by**: V30-32 local multi-instance sync — the full LAN version needs the local sync foundation first.
+  - **Unblock when**: V30-32 local multi-instance sync ships.
