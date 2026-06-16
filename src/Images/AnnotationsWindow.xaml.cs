@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Images.Localization;
 using Images.Services;
 
 namespace Images;
@@ -47,7 +48,7 @@ public partial class AnnotationsWindow : Window
     {
         if (!File.Exists(_imagePath))
         {
-            StatusText.Text = "Preview unavailable: image file is no longer available.";
+            StatusText.Text = Strings.AnnotationUnavailableMissingFile;
             ApplyButton.IsEnabled = false;
             return;
         }
@@ -202,7 +203,7 @@ public partial class AnnotationsWindow : Window
         var plan = ImageAnnotationService.Normalize(new ImageAnnotationPlan(_items.ToList()));
         if (plan.IsEmpty)
         {
-            StatusText.Text = "Add at least one annotation before applying.";
+            StatusText.Text = Strings.AnnotationApplyMissingItem;
             return;
         }
 
@@ -256,7 +257,7 @@ public partial class AnnotationsWindow : Window
             0,
             point.X,
             point.Y,
-            string.IsNullOrWhiteSpace(AnnotationTextBox.Text) ? "Note" : AnnotationTextBox.Text,
+            string.IsNullOrWhiteSpace(AnnotationTextBox.Text) ? Strings.AnnotationDefaultText : AnnotationTextBox.Text,
             _nextNumber,
             _color,
             StrokeSlider.Value,
@@ -564,22 +565,22 @@ public partial class AnnotationsWindow : Window
         if (StrokeText is null || FontText is null)
             return;
 
-        StrokeText.Text = StrokeSlider.Value.ToString("0", CultureInfo.InvariantCulture) + " px";
-        FontText.Text = FontSlider.Value.ToString("0", CultureInfo.InvariantCulture) + " px";
+        StrokeText.Text = Strings.Format("ValuePixelsFormat", StrokeSlider.Value.ToString("0", CultureInfo.InvariantCulture));
+        FontText.Text = Strings.Format("ValuePixelsFormat", FontSlider.Value.ToString("0", CultureInfo.InvariantCulture));
     }
 
     private void UpdateToolStatus()
     {
         ToolStatusText.Text = _tool switch
         {
-            ImageAnnotationKind.Text => "Text: click once to place the current text.",
-            ImageAnnotationKind.Number => "Step: click once to place the next numbered callout.",
-            ImageAnnotationKind.Freehand => "Pen: drag to draw a freehand line.",
-            ImageAnnotationKind.Blur => "Blur: drag over a region to redact with blur.",
-            ImageAnnotationKind.Pixelate => "Pixelate: drag over a region to redact with blocks.",
-            ImageAnnotationKind.Arrow => "Arrow: drag from tail to point.",
-            ImageAnnotationKind.Ellipse => "Circle: drag a bounding box.",
-            _ => "Box: drag a rectangle."
+            ImageAnnotationKind.Text => Strings.AnnotationTextToolStatus,
+            ImageAnnotationKind.Number => Strings.AnnotationStepToolStatus,
+            ImageAnnotationKind.Freehand => Strings.AnnotationPenToolStatus,
+            ImageAnnotationKind.Blur => Strings.AnnotationBlurToolStatus,
+            ImageAnnotationKind.Pixelate => Strings.AnnotationPixelateToolStatus,
+            ImageAnnotationKind.Arrow => Strings.AnnotationArrowToolStatus,
+            ImageAnnotationKind.Ellipse => Strings.AnnotationCircleToolStatus,
+            _ => Strings.AnnotationBoxToolStatus
         };
     }
 
@@ -587,8 +588,8 @@ public partial class AnnotationsWindow : Window
     {
         ApplyButton.IsEnabled = _items.Count > 0;
         StatusText.Text = _items.Count == 0
-            ? "No annotations yet."
-            : $"{_items.Count} annotation{(_items.Count == 1 ? "" : "s")} ready. Press Enter to apply.";
+            ? Strings.AnnotationNoItemsStatus
+            : Strings.Format("AnnotationReadyStatusFormat", _items.Count, _items.Count == 1 ? "" : "s");
     }
 
     private static Brush BrushFor(string color, double opacity)
