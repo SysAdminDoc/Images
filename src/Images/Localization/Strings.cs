@@ -25,6 +25,16 @@ public static class Strings
     public static string ConfirmReferenceBoardDetail => Get(nameof(ConfirmReferenceBoardDetail));
     public static string ConfirmReferenceBoardFootnote => Get(nameof(ConfirmReferenceBoardFootnote));
     public static string ConfirmReferenceBoardMessage => Get(nameof(ConfirmReferenceBoardMessage));
+    public static string Close => Get(nameof(Close));
+    public static string ClipboardBusyRetry => Get(nameof(ClipboardBusyRetry));
+    public static string CrashDetailsCopied => Get(nameof(CrashDetailsCopied));
+    public static string CrashDialogTitle => Get(nameof(CrashDialogTitle));
+    public static string CrashIssueBrowserAndCopyFailed => Get(nameof(CrashIssueBrowserAndCopyFailed));
+    public static string CrashIssueBrowserFailedCopied => Get(nameof(CrashIssueBrowserFailedCopied));
+    public static string CrashIssueOpened => Get(nameof(CrashIssueOpened));
+    public static string CrashLogFolderOpened => Get(nameof(CrashLogFolderOpened));
+    public static string InnerExceptionSeparator => Get(nameof(InnerExceptionSeparator));
+    public static string LogFolderUnavailable => Get(nameof(LogFolderUnavailable));
 
     public static string Get(string key)
     {
