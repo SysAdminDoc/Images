@@ -912,6 +912,23 @@
                                     <TextBlock Text="Codec details" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
+                            <Button Command="{Binding InstallStoreExtensionCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Margin="0,0,12,8"
+                                    Visibility="{Binding HasLoadErrorStoreAction, Converter={StaticResource BoolToVis}}"
+                                    AutomationProperties.Name="Open Microsoft Store to install codec extension">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="&#xE719;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="12"
+                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                               Margin="0,0,8,0"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding LoadErrorStoreActionLabel}"
+                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
                             <Button Command="{Binding RevealCommand}"
                                     Style="{StaticResource ChromeButton}"
                                     Margin="0,0,0,8"

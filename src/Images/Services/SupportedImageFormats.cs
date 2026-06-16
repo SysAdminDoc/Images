@@ -209,7 +209,7 @@ public static class SupportedImageFormats
                 => "GIMP's native XCF should usually open. If this file fails, save a flattened PNG/TIFF copy from GIMP and open that.",
 
             ".heif" or ".heic" or ".hif"
-                => "HEIC/HEIF should open through Magick.NET. If this file fails, install the Microsoft HEIF Image Extension or convert to PNG/JPG first.",
+                => "HEIC/HEIF should open through Magick.NET. If this file fails, install the HEIF Image Extensions from the Microsoft Store or convert to PNG/JPG first.",
 
             ".pdf" or ".ps" or ".ps2" or ".ps3" or ".eps" or ".epsf" or ".epsi" or ".ai"
                 => "Document previews require Ghostscript. Install Ghostscript or place an approved runtime in the app's Codecs\\Ghostscript folder.",
@@ -228,9 +228,13 @@ public static class SupportedImageFormats
         var ext = extension.TrimStart('.').ToLowerInvariant();
         return ext switch
         {
-            "heic" or "heif" or "hif" or "avif"
-                => "HEIC/AVIF files need a codec from the Microsoft Store. " +
-                   "Search for \"HEVC Video Extensions\" in the Microsoft Store and install it, then reload.",
+            "heic" or "heif" or "hif"
+                => "HEIC/HEIF files need the HEIF Image Extensions (and often HEVC Video Extensions) from the Microsoft Store. " +
+                   "Use the \"Get\" button above to install, then reload.",
+
+            "avif"
+                => "AVIF files need the AV1 Video Extension from the Microsoft Store. " +
+                   "Use the \"Get\" button above to install, then reload.",
 
             "jxl"
                 => "JPEG XL decoding requires Windows 11 24H2 or later. " +

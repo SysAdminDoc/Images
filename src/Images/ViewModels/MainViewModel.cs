@@ -299,6 +299,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         StripLocationCommand = new RelayCommand(async () => await StripLocationAsync(), () => CanUseImageCommands);
         SettingsCommand = new RelayCommand(ShowSettingsWindow);
         ExtractTextCommand = new RelayCommand(async () => await _ocrWorkflow.ToggleAsync(), () => HasImage && !IsOperationBusy && !IsCompareMode);
+        InstallStoreExtensionCommand = new RelayCommand(OpenStoreExtensionPage, () => _loadErrorStoreExtension is not null);
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
         // panel renders prior-session folders before the user opens anything.
@@ -1060,6 +1061,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         get => _loadErrorShowsCodecDetails;
         private set => Set(ref _loadErrorShowsCodecDetails, value);
     }
+
+    private string? _loadErrorStoreActionLabel;
+    public string? LoadErrorStoreActionLabel
+    {
+        get => _loadErrorStoreActionLabel;
+        private set
+        {
+            if (Set(ref _loadErrorStoreActionLabel, value))
+                Raise(nameof(HasLoadErrorStoreAction));
+        }
+    }
+
+    public bool HasLoadErrorStoreAction => !string.IsNullOrWhiteSpace(LoadErrorStoreActionLabel);
+
+    private StoreExtensionService.StoreExtensionInfo? _loadErrorStoreExtension;
+
+    public ICommand InstallStoreExtensionCommand { get; }
 
     public bool HasLoadError => !string.IsNullOrWhiteSpace(LoadErrorMessage);
 
@@ -3429,6 +3447,40 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return;
         }
 
+        // V20-18: Store extension detection for HEIC/AVIF/JXL.
+        if (!string.IsNullOrEmpty(ext))
+        {
+            var storeExt = StoreExtensionService.GetMissingExtension(ext);
+            if (storeExt is not null)
+            {
+                _loadErrorStoreExtension = storeExt;
+                LoadErrorStoreActionLabel = string.Format(
+                    Strings.MainLoadErrorStoreActionLabel, storeExt.DisplayName);
+                LoadErrorTitle = Strings.MainLoadErrorStoreExtensionTitle;
+                LoadErrorMessage = string.Format(
+                    Strings.MainLoadErrorStoreExtensionMessage,
+                    ext.TrimStart('.').ToUpperInvariant(),
+                    storeExt.DisplayName);
+                LoadErrorHelpText = Strings.MainLoadErrorStoreExtensionHelp;
+                LoadErrorShowsCodecDetails = false;
+                Toast(string.Format(Strings.MainToastStoreExtensionNeeded,
+                    ext.TrimStart('.').ToUpperInvariant()));
+                return;
+            }
+
+            if (StoreExtensionService.IsJxlFormat(ext))
+            {
+                _loadErrorStoreExtension = null;
+                LoadErrorStoreActionLabel = null;
+                LoadErrorTitle = Strings.MainLoadErrorStoreExtensionTitle;
+                LoadErrorMessage = Strings.MainLoadErrorJxlMessage;
+                LoadErrorHelpText = Strings.MainLoadErrorJxlHelp;
+                LoadErrorShowsCodecDetails = false;
+                Toast(Strings.MainToastJxlNeedsUpdate);
+                return;
+            }
+        }
+
         // Item 86 enhancement: format-specific decode hints for supported-but-failing types.
         var decodeHint = string.IsNullOrEmpty(ext)
             ? null
@@ -3442,11 +3494,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Toast(Strings.MainToastCouldNotDecode);
     }
 
+    private void OpenStoreExtensionPage()
+    {
+        if (_loadErrorStoreExtension is null) return;
+        _loadErrorStoreExtension.OpenStorePage();
+        Toast(string.Format(Strings.MainToastStoreExtensionOpened, _loadErrorStoreExtension.DisplayName));
+    }
+
     private void ClearLoadError()
     {
         LoadErrorTitle = "This image couldn't be displayed";
         LoadErrorHelpText = "";
         LoadErrorShowsCodecDetails = false;
+        _loadErrorStoreExtension = null;
+        LoadErrorStoreActionLabel = null;
         LoadErrorMessage = null;
     }
 
