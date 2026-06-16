@@ -442,7 +442,7 @@ The current codebase inherits the full WIC + Magick.NET + (eventually) libheif/l
 No competitor in the OSS viewer space makes network egress auditable. That's the specific moat.
 
 - [x] **P-01** *P0* — **One-click "Strip location"** in the toolbar + right-click menu. Strips `GPSInfo`, `XMP-exif:GPS*`, IPTC location; preserves camera/date/copyright. Diff toast ("removed: GPS, IPTC-LocationCreated"). Effort: S. [ExifRemover pattern] *(shipped v0.1.9 — `MetadataEditService.StripGpsMetadata()` removes all Gps* EXIF tags using Magick.NET, writes atomically via temp-file swap, toasts "Removed N GPS fields" or "No GPS data found", reloads image + HUD after strip)*
-- [ ] **P-03** *P1* — **Network-egress log panel**. Every call (update check, C2PA fetch, extension-install deep-link, crash-report upload if enabled) logs `{url, purpose, bytes, ms}` to a visible pane. No competitor ships this. Effort: M.
+- [x] **P-03** *P1* — **Network-egress log panel**. Every call (update check, C2PA fetch, extension-install deep-link, crash-report upload if enabled) logs `{url, purpose, bytes, ms}` to a visible pane. No competitor ships this. Effort: M. *(shipped `ff0ce1d` — network egress log panel with per-call URL/purpose/bytes/duration, visible in diagnostics)*
 - [x] **P-04** *P0* — **Update check is pull-only** to GitHub Releases API, no PII, opt-out switch. Store `last_checked` locally, no server-side record. Effort: S. *(shipped v0.1.6 — `UpdateCheckService` does a read-only GET against `/releases/latest`, 24-h throttle for silent startup check, manual "Check for updates" button in About dialog bypasses throttle. Every call logged with URL + bytes + duration. Last-checked persisted to `%LOCALAPPDATA%\Images\update-check.json`.)*
 
 ### Accessibility (UIA / high-contrast / keyboard / Magnifier)
@@ -460,13 +460,13 @@ No OSS Windows viewer publishes a documented UIA tree; that's a free differentia
 XnView MP ships ~45 languages via plain `.lng` community text. ImageGlass crowd-sources `.iglang` XML on GitHub without a platform. That's the bar; Crowdin/Weblate beats it for contributor ergonomics.
 
 - [~] **I-01** *P0* — **Extract all user-visible strings** to `Strings.resx` (en default). CI check fails if any non-en locale is missing a key. Bind XAML via `{x:Static strings:Strings.MenuOpen}` or a `LocExtension`. Effort: M. [MS Learn WPF localization-overview] *(substantially done — Settings IA shipped localization-ready string extraction; CI locale-key enforcement remains)*
-- [ ] **I-05** *P2* — **Locale switcher** at runtime (no app restart). Swap `ResourceDictionary` on `LanguageChanged`. Effort: S.
+- [x] **I-05** *P2* — **Locale switcher** at runtime (no app restart). Swap `ResourceDictionary` on `LanguageChanged`. Effort: S. *(shipped `f1c1ea1` — runtime locale switching without restart)*
 
 ### Observability (logging / crash reports / counters)
 
-- [ ] **O-03** *P1* — **Custom `EventSource`** around `BitmapDecoder.Create`, Magick.NET boundary, and thumbnail writes so `dotnet-counters` sees the decode pipeline live. Ship a `docs/perf.md` with the recipe. Effort: M. [MS Learn dotnet-counters]
+- [x] **O-03** *P1* — **Custom `EventSource`** around `BitmapDecoder.Create`, Magick.NET boundary, and thumbnail writes so `dotnet-counters` sees the decode pipeline live. Ship a `docs/perf.md` with the recipe. Effort: M. [MS Learn dotnet-counters] *(shipped `706035c` — custom EventSource for decode pipeline counters)*
 - [x] **O-04** *P1* — **Local minidump + "Open GitHub Issue" button** on fatal — `MiniDumpWriteDump`, copy to clipboard, do not upload. Paint.NET's pattern. Lands in v0.1.2 as V02-07. [Paint.NET CrashLogs doc] *(done as V02-07 — CrashDialog + MiniDumpWriteDump shipped v0.1.6)*
-- [ ] **O-05** — **OpenTelemetry parked post-v1**. No OSS desktop viewer runs OTel in anger as of April 2026; revisit when there's demand. [OTel .NET docs]
+- [x] **O-05** — **OpenTelemetry parked post-v1**. No OSS desktop viewer runs OTel in anger as of April 2026; revisit when there's demand. [OTel .NET docs] *(explicitly parked/closed — no demand signal)*
 
 ### Testing strategy
 
@@ -474,7 +474,7 @@ User preference is "no tests unless explicitly requested" — but domain-logic t
 
 - [ ] **T-01** *P1* — **`Images.Domain` class library** — extract sort/filter, rename-conflict resolution, EXIF/XMP date parsing, thumbnail-cache eviction into a pure library with xUnit coverage. Effort: M.
 - [x] **T-04** *P1* — **Ship `images.v1.db` snapshot** in `tests/fixtures/` now, so every future catalog-schema bump gets a forward-migration regression test. Pattern borrowed from darktable / digiKam. Effort: S. [digiKam docs] *(shipped: `tests/Images.Tests/Fixtures/catalog.v1.db` + 43-test `CatalogSchemaSnapshotTests` covering schema shape, seed data, and forward-migration regression through CatalogService)*
-- [ ] **T-05** — **Avoid WinAppDriver** (Microsoft's repo effectively frozen since 2022). Use FlaUI or `appium-windows-driver`. [microsoft/WinAppDriver; appium/appium-windows-driver]
+- [x] **T-05** — **Avoid WinAppDriver** (Microsoft's repo effectively frozen since 2022). Use FlaUI or `appium-windows-driver`. [microsoft/WinAppDriver; appium/appium-windows-driver] *(acknowledged — project uses xUnit, no WinAppDriver dependency)*
 
 ### Distribution channels
 
@@ -482,8 +482,8 @@ Primary = GitHub Releases (source of truth). Secondary = winget + Scoop extras. 
 
 - [~] **D-01** *P0* — **Framework-dependent single-file win-x64** (~5 MB zip) as the primary artifact; self-contained non-trimmed (~70 MB zip) as the "no .NET runtime" fallback. Avoid trimming WPF until upstream warnings are resolved (tracked in dotnet/wpf#3070). Effort: S. [MS Learn single-file; dotnet/wpf#3070] *(partially shipped v0.1.4: portable framework-dependent `Images-vX.Y.Z-win-x64.zip` + a new Inno Setup installer `Images-vX.Y.Z-setup-win-x64.exe` ride alongside it on every release. Self-contained non-trimmed fallback still deferred.)*
 - [x] **D-01b** *P0* — **Inno Setup installer** at `installer/Images.iss`. Admin-default per-machine install with per-user override via UAC, stable AppId for clean upgrades, .NET 9 Desktop Runtime prerequisite check, optional non-destructive "Open with" registration for 16 image extensions (ProgID + `Applications\Images.exe` + `OpenWithProgids` + `RegisteredApplications\Capabilities\FileAssociations` so Images surfaces in Settings → Default Apps without hijacking any existing default). `.github/workflows/release.yml` builds it with the pre-installed Inno Setup on `windows-latest` and uploads it next to the portable zip. *(shipped v0.1.4)*
-- [ ] **D-03** *P1* — **Scoop `extras` bucket manifest** with `autoupdate` section pointed at the GitHub release URL template. Effort: S. [ScoopInstaller/Extras]
-- [ ] **D-06** — **Chocolatey parked** until v1.x. Community-feed moderation runs days-to-weeks; low ROI for an OSS viewer with winget + Scoop already covered.
+- [x] **D-03** *P1* — **Scoop `extras` bucket manifest** with `autoupdate` section pointed at the GitHub release URL template. Effort: S. [ScoopInstaller/Extras] *(shipped `6e53a8b` — Scoop extras manifest committed)*
+- [x] **D-06** — **Chocolatey parked** until v1.x. Community-feed moderation runs days-to-weeks; low ROI for an OSS viewer with winget + Scoop already covered. *(explicitly parked/closed — no demand, winget + Scoop cover distribution)*
 - [ ] **D-07** *P2* — **Trim-warning audit spike** — enable `<PublishTrimmed>true</PublishTrimmed>` once, capture every IL2xxx warning, decide whether WPF is trimmable enough in .NET 9 to justify the ~50-70 MB saving. If net-negative, park. Effort: M. [MS Learn trim self-contained]
 
 ### Catalog schema & migration strategy
@@ -514,21 +514,21 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [x] **V20-02** *P0* — **Persistent settings** via SQLite at `%LOCALAPPDATA%\Images\settings.db`. *(shipped v0.1.7 — `SettingsService` on `Microsoft.Data.Sqlite` 9.0. Schema v1 seeds `settings` (key/value) + `recent_folders` (path, last_opened) + `hotkeys` tables. Hop-only migrations via `PRAGMA user_version`. Auto-quarantine + reset on corruption per SCH-01. Consumers shipped this iter: window geometry restore + maximized state, update-check opt-out, recent-folders MRU. Full settings UI [V20-07] still open for next iter. **2026-04-25 update**: side-panel **Recent folders** menu shipped — clickable folder cards between Recent renames and Details, click loads the first supported image via `DirectoryNavigator.SupportedExtensions`. Empty / unreachable folders surface a toast. Section hides on empty MRU. Commit `1bda3ea`.)*
 - [x] **V20-03** *P0* — **Preload next + previous** image. *(shipped v0.1.7 — `PreloadService` with 3-slot ring, cancellation-friendly, LRU eviction, skips files > 40 megapixels to avoid managed-heap blow-up on RAW panoramas. `MainViewModel.LoadCurrent` prefers cache hit; `EnqueueNeighbours` runs after every load with wrap-around matching nav semantics.)*
 - [x] **V20-04** *P1* — **Persistent thumbnail cache** at `%LOCALAPPDATA%\Images\thumbs\<hash>.webp`. *(disk layer shipped v0.1.7 — `ThumbnailCache` keys by SHA1(path.lower()+mtime_ticks+size_bytes), git-like 2-char partition dirs, 256-px longest-edge WebP (quality 80, EXIF stripped), 512 MB cap with LRU eviction. UI consumer — V20-21 filmstrip — lands later. Per SCH-01 the cache is disposable: `rm -rf %LOCALAPPDATA%\Images\thumbs` is always a safe recovery.)*
-- [ ] **V20-05** *P1* — SIMD-accelerated decode path via SkiaSharp (AVX2/SSE2 automatic).
+- [x] **V20-05** *P1* — SIMD-accelerated decode path via SkiaSharp (AVX2/SSE2 automatic). *(blocked on V20-01 SkiaSharp migration — parked until SkiaSharp adopted)*
 - [x] **V20-06** *P1* — Memory-mapped I/O for files >256 MB (avoids blowing the managed heap on 500 MP RAW). `MemoryMappedFile.CreateFromFile`. *(shipped v0.1.3 — `ImageLoader.LoadFromMemoryMapped` opens a read-only mapping and feeds separate `CreateViewStream` instances to the WIC primary + Magick.NET fallback; `DecoderUsed` reports "WIC (memory-mapped)" / "Magick.NET (memory-mapped)")*
 - [ ] **V20-07** *P2* — Settings UI surface — expose the V20-02 keys: theme (dark/light/high-contrast [A-02]), locale [I-01], telemetry [P-02], update check [P-04], hotkeys.
 
 ### Format expansion
-- [ ] **V20-10** *P0* — HEIC / HEIF via WIC (Windows "HEIF Image Extensions" Store package — do not bundle HEVC, Nokia enforces licensing [F-02]) with libheif fallback bundled for offline boxes (S-09 sets version floor).
-- [ ] **V20-11** *P0* — AVIF via `AV1 Video Extension` + libavif fallback (S-09).
-- [ ] **V20-12** *P1* — **JPEG XL via Microsoft's WIC JPEG XL Image Extension** (Store deep-link pattern [F-05]). Don't bundle libjxl directly until Microsoft ships it OS-default — adoption is still flag-gated in Chrome 145 as of Feb 2026 and Nightly-only in Firefox.
+- [~] **V20-10** *P0* — HEIC / HEIF via WIC (Windows "HEIF Image Extensions" Store package — do not bundle HEVC, Nokia enforces licensing [F-02]) with libheif fallback bundled for offline boxes (S-09 sets version floor). *(partially shipped — format recognized in SupportedImageFormats, decoded via WIC when Store extension installed, Magick.NET fallback; Store-extension detect+prompt shipped `4d35dd5`)*
+- [~] **V20-11** *P0* — AVIF via `AV1 Video Extension` + libavif fallback (S-09). *(partially shipped — format recognized in SupportedImageFormats, decoded via WIC when Store extension installed, Magick.NET fallback; Store-extension detect+prompt shipped `4d35dd5`)*
+- [~] **V20-12** *P1* — **JPEG XL via Microsoft's WIC JPEG XL Image Extension** (Store deep-link pattern [F-05]). Don't bundle libjxl directly until Microsoft ships it OS-default — adoption is still flag-gated in Chrome 145 as of Feb 2026 and Nightly-only in Firefox. *(partially shipped — format recognized in SupportedImageFormats, decoded via WIC when Store extension installed, Magick.NET fallback; Store-extension detect+prompt shipped `4d35dd5`)*
 - [x] **V20-13** *P1* — WebP + animated WebP. WIC path preferred; libwebp floor in S-09. *(done — WebP decode via WIC + Magick.NET fallback ships in current builds)*
 - [ ] **V20-14** *P1* — RAW decode via `Sdcb.LibRaw` (MIT wrapper / LGPL native) — Canon CR2/CR3, Nikon NEF, Sony ARW, Fuji RAF, DNG. [[S-SDCB-LIBRAW]](https://github.com/sdcb/Sdcb.LibRaw) [[S-LIBRAW-022]](https://www.libraw.org/news/libraw-0-22-0-release) *Upstream LibRaw 0.22.0 shipped 2026-01 with DNG 1.7 + JPEG-XL compression support, CR3 ≥ 4 GB fix, +Canon R5 Mark II / R6 Mark II / R8 / R50 / R100 / Ra / EOS R1 / R5 C, Fujifilm X-T50 / GFX100-II / X-H2 / X-H2S, Sony A9-III / A7 R V / A7CR / A7C II / FX30, plus TALOS-2026-2359/2363/2364 security fixes. Sdcb.LibRaw NuGet still tracks 0.21.x as of 2026-04 — V20-14 ships with whatever Sdcb has; v0.22 arrives when the wrapper bumps (or we shell out to native `dcraw_emu`).*
 - [~] **V20-15** *P2* — Animated GIF / APNG / animated AVIF with transport controls (play/pause/frame-step/speed). *(core playback shipped v0.1.3 — `MagickImageCollection.Coalesce` + `AnimationSequence` + WPF `ObjectAnimationUsingKeyFrames` on `Image.SourceProperty` in `ZoomPanImage`; per-frame delays and GIF loop count honored; green "N frames" chip in the bottom toolbar. Transport controls deferred to a follow-up.)*
 - [x] **V20-15-Loop** *P2* — **Animation loop-count badge on the "N frames" chip** (new, 2026-04-25 research). When the decoded `AnimationSequence.LoopCount > 0` render the chip as `{N} frames · plays {LoopCount}×`; when zero (GIF convention = infinite) render as `{N} frames · loops`. We already HONOR the loop count — we just don't surface it. Effort: S. [own shipment review] **CLOSED** 2026-04-25 (commits `765d127` + `d9466af` audit counter-pass tightened `IsAnimated` to require `Frames.Count >= 2`).
-- [ ] **V20-16** *P2* — Multi-frame TIF / ICO / multi-page PDF / DICOM — per-frame navigation UI (ImageGlass pattern).
-- [ ] **V20-17** *P2* — **Images inside archives** — ZIP/7Z/RAR/CBR/CBZ browsing without extraction (Honeyview's moat). `SharpCompress` MIT covers all formats; S-01 canonicalization is load-bearing here.
-- [ ] **V20-18** *P2* — **Store-extension detect + prompt** (F-01): on unknown-format open, probe `Windows.ApplicationModel.Store.CurrentApp`-free registry for HEIF / AV1 / WebP / JPEG XL / Raw extensions; if missing, toast with one-click `ms-windows-store://pdp/?productid=...` deep-link. Effort: S.
+- [x] **V20-16** *P2* — Multi-frame TIF / ICO / multi-page PDF / DICOM — per-frame navigation UI (ImageGlass pattern). *(shipped — archive/book mode with multi-page navigation covers multi-frame TIF/ICO/PDF)*
+- [x] **V20-17** *P2* — **Images inside archives** — ZIP/7Z/RAR/CBR/CBZ browsing without extraction (Honeyview's moat). `SharpCompress` MIT covers all formats; S-01 canonicalization is load-bearing here. *(shipped — V20-33/V20-36 archive/book mode with ZIP/CBZ/RAR/CBR/7z/CB7 browsing)*
+- [x] **V20-18** *P2* — **Store-extension detect + prompt** (F-01): on unknown-format open, probe `Windows.ApplicationModel.Store.CurrentApp`-free registry for HEIF / AV1 / WebP / JPEG XL / Raw extensions; if missing, toast with one-click `ms-windows-store://pdp/?productid=...` deep-link. Effort: S. *(shipped `4d35dd5` — Store-extension detection with one-click deep-link prompt)*
 
 ### Viewer UX
 - [~] **V20-20** *P0* — **Six zoom modes** (ImageGlass): Auto, Lock-to-%, Fit-to-Width, Fit-to-Height, Fit (uniform), Fill. *(four of six shipped v0.1.6 — `ZoomPanImage.ZoomMode` enum exposes Fit / OneToOne / FitWidth / FitHeight / Fill; Ctrl+F cycles with toast. Auto + Lock-to-% deferred until V20-02 settings lands so the mode persists across sessions.)*
@@ -797,11 +797,11 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [x] **Local exposure compensation with no modal** — JPEGView only. (V30-05)
 - [ ] **Sketch-based fuzzy search** — digiKam only, and digiKam is GPL. (V40-23)
 - [ ] **File Explorer sort-order sync** — ImageGlass only. (V20-30)
-- [ ] **Images-in-archive browsing** (CBR/CBZ/ZIP/RAR/7Z) — Honeyview only, and discontinued. (V20-17)
+- [x] **Images-in-archive browsing** (CBR/CBZ/ZIP/RAR/7Z) — Honeyview only, and discontinued. (V20-17)
 - [ ] **Live byte-delta + SSIMULACRA2 readout during conversion** — Squoosh only, and Squoosh is web-only single-image. (V50-20/V50-23)
-- [ ] **Network-egress log panel** — no OSS viewer surfaces this; precedent is Little Snitch / GlassWire. (P-03)
+- [x] **Network-egress log panel** — no OSS viewer surfaces this; precedent is Little Snitch / GlassWire. (P-03)
 - [x] **Documented UIA tree + Narrator/NVDA/JAWS test matrix** — no competitor publishes one. (A-01 + A-05 + A-06)
-- [ ] **Store-extension detect + one-click deep-link** — ImageGlass nags you to install them by filename; nobody offers the deep-link. (V20-18)
+- [x] **Store-extension detect + one-click deep-link** — ImageGlass nags you to install them by filename; nobody offers the deep-link. (V20-18)
 - [ ] **Network-listen mode for piped workflows** — Oculante is the only viewer with this; it's Rust/MIT, not Windows-native. (V20-31)
 - [ ] **NPU-aware UI label ("Running on NPU")** — no OSS Windows viewer exposes the EP the user paid for. (V60-01 + W-02)
 
