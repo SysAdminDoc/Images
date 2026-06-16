@@ -537,7 +537,6 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [ ] **V20-24** *P1* — **Histogram overlay** per-channel + luminance (`0.299R + 0.587G + 0.114B`, log-scale toggle).
 - [ ] **V20-25** *P1* — **Color picker** eyedropper — hex + RGB + HSL + LAB readout (PixiEditor.ColorPicker MIT).
 - [ ] **V20-26** *P1* — **Hidden edge-triggered fullscreen toolbar** (FastStone pattern) — chromeless by default, reveal on edge approach.
-- [ ] **V20-30** *P2* — **File Explorer sort-order sync** (ImageGlass v9.3+) — read Explorer's current sort, match it.
 - [ ] **V20-31** *P2* — **Network-listen mode** (`Images.exe -l <port>`) accepting paths on a local socket (borrow from Oculante). Unlocks pipelined workflows — "ImageMagick outputs to this pipe, viewer refreshes live." Egress log panel (P-03) surfaces it. Effort: M. [[S-OCULANTE]](https://github.com/woelper/oculante)
 - [x] **V20-32** *P1* — **`--peek <path>` CLI mode** (new, 2026-04-25 research). Same invocation PowerToys Peek uses (`PowerToys.Peek.UI.exe <file>`) — lets Images drop into any workflow that expects an external preview tool (File Explorer context menus, terminal previewers, editor integrations). Accept a single path, open it as a standalone chromeless window, exit on Escape. ~20 LOC on top of the existing argv path. Effort: S. [[S-PEEK]](https://learn.microsoft.com/en-us/windows/powertoys/peek) **CLOSED** 2026-04-25 (commits `a5cbd67` + `d9466af` audit counter-pass enforces exact two-token argv contract).
 
