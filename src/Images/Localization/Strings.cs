@@ -1216,6 +1216,22 @@ public static class Strings
     public static string ListenMode_PortLabel => Get(nameof(ListenMode_PortLabel));
     public static string ListenMode_Tooltip => Get(nameof(ListenMode_Tooltip));
 
+    // ---- Slideshow (V30-33) ----
+    public static string Slideshow_Playing => Get(nameof(Slideshow_Playing));
+    public static string Slideshow_Paused => Get(nameof(Slideshow_Paused));
+    public static string CommandPalette_ToggleSlideshow => Get(nameof(CommandPalette_ToggleSlideshow));
+    public static string CommandPalette_PauseSlideshow => Get(nameof(CommandPalette_PauseSlideshow));
+    public static string CommandPalette_StopSlideshow => Get(nameof(CommandPalette_StopSlideshow));
+    public static string CommandPalette_SlideshowShuffle => Get(nameof(CommandPalette_SlideshowShuffle));
+    public static string CommandPalette_SlideshowFaster => Get(nameof(CommandPalette_SlideshowFaster));
+    public static string CommandPalette_SlideshowSlower => Get(nameof(CommandPalette_SlideshowSlower));
+    public static string MainToastSlideshowStarted => Get(nameof(MainToastSlideshowStarted));
+    public static string MainToastSlideshowStopped => Get(nameof(MainToastSlideshowStopped));
+    public static string MainToastSlideshowPaused => Get(nameof(MainToastSlideshowPaused));
+    public static string MainToastSlideshowResumed => Get(nameof(MainToastSlideshowResumed));
+    public static string MainToastSlideshowShuffleOn => Get(nameof(MainToastSlideshowShuffleOn));
+    public static string MainToastSlideshowShuffleOff => Get(nameof(MainToastSlideshowShuffleOff));
+
     public static string Get(string key)
     {
         if (string.IsNullOrWhiteSpace(key))

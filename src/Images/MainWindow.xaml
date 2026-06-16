@@ -2609,6 +2609,37 @@
                                                    VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
+
+                                <!-- V30-33: slideshow indicator chip -->
+                                <Border x:Name="SlideshowChip"
+                                        Margin="10,0,0,0"
+                                        Padding="8,2"
+                                        CornerRadius="{StaticResource Radius.Sm.CR}"
+                                        Background="#2AA6E3A1"
+                                        BorderBrush="{StaticResource GreenBrush}"
+                                        BorderThickness="1"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding IsSlideshowActive, Converter={StaticResource BoolToVis}}"
+                                        ToolTip="Click to pause/resume, Escape to stop"
+                                        Cursor="Hand"
+                                        MouseEnter="SlideshowChip_MouseEnter"
+                                        MouseLeave="SlideshowChip_MouseLeave"
+                                        MouseLeftButtonDown="SlideshowChip_MouseLeftButtonDown"
+                                        AutomationProperties.Name="Slideshow active">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE768;"
+                                                   FontFamily="{StaticResource IconFontFamily}"
+                                                   FontSize="10"
+                                                   Foreground="{StaticResource GreenBrush}"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,4,0" />
+                                        <TextBlock Text="{Binding SlideshowStatusText}"
+                                                   FontSize="10.5"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{StaticResource GreenBrush}"
+                                                   VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal"

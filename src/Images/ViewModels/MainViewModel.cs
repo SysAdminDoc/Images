@@ -309,6 +309,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             else if (p is string s && Enum.TryParse<ChannelMode>(s, true, out var parsed)) ChannelMode = parsed;
         }, _ => HasDisplayImage);
 
+        // V30-33: slideshow commands
+        ToggleSlideshowCommand = new RelayCommand(ToggleSlideshow, () => HasImage);
+        StartSlideshowCommand = new RelayCommand(StartSlideshow, () => HasImage && !IsSlideshowActive);
+        StopSlideshowCommand = new RelayCommand(StopSlideshow, () => IsSlideshowActive);
+        PauseSlideshowCommand = new RelayCommand(PauseResumeSlideshow, () => IsSlideshowActive);
+        IncreaseSlideshowIntervalCommand = new RelayCommand(() => SlideshowIntervalSeconds++, () => IsSlideshowActive && SlideshowIntervalSeconds < 60);
+        DecreaseSlideshowIntervalCommand = new RelayCommand(() => SlideshowIntervalSeconds--, () => IsSlideshowActive && SlideshowIntervalSeconds > 1);
+        ToggleSlideshowShuffleCommand = new RelayCommand(ToggleSlideshowShuffle, () => IsSlideshowActive);
+
         _commandPaletteRegistry = BuildCommandPaletteRegistry();
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
@@ -1072,6 +1081,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             // Compare
             new() { Name = Strings.CommandPalette_Compare, Shortcut = "Ctrl+Alt+C", Category = compare, Command = StartCompareCommand },
             new() { Name = Strings.CommandPalette_CompareWith, Shortcut = "Ctrl+Alt+V", Category = compare, Command = CompareWithCommand },
+
+            // Slideshow
+            new() { Name = Strings.CommandPalette_ToggleSlideshow, Category = view, Command = ToggleSlideshowCommand },
+            new() { Name = Strings.CommandPalette_PauseSlideshow, Category = view, Command = PauseSlideshowCommand },
+            new() { Name = Strings.CommandPalette_StopSlideshow, Category = view, Command = StopSlideshowCommand },
+            new() { Name = Strings.CommandPalette_SlideshowShuffle, Category = view, Command = ToggleSlideshowShuffleCommand },
+            new() { Name = Strings.CommandPalette_SlideshowFaster, Category = view, Command = IncreaseSlideshowIntervalCommand },
+            new() { Name = Strings.CommandPalette_SlideshowSlower, Category = view, Command = DecreaseSlideshowIntervalCommand },
 
             // Sort
             new() { Name = Strings.CommandPalette_SortName, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.NaturalName)) },
@@ -2030,6 +2047,212 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool CanApplyRetouch => IsRetouchMode && HasRetouchStrokes && CanUseRetouch;
     public bool ShowRetouchOverlay => IsRetouchMode || HasRetouchStrokes;
     private double RetouchNormalizedStrength => Math.Clamp(RetouchStrength / 100, RetouchBrushService.MinStrength, RetouchBrushService.MaxStrength);
+
+    // -------------------- Slideshow (V30-33) --------------------
+
+    private DispatcherTimer? _slideshowTimer;
+    private Random? _slideshowRandom;
+    private bool _slideshowHoverPaused;
+
+    private bool _isSlideshowActive;
+    public bool IsSlideshowActive
+    {
+        get => _isSlideshowActive;
+        private set
+        {
+            if (Set(ref _isSlideshowActive, value))
+            {
+                Raise(nameof(SlideshowStatusText));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    private bool _isSlideshowPaused;
+    public bool IsSlideshowPaused
+    {
+        get => _isSlideshowPaused;
+        private set
+        {
+            if (Set(ref _isSlideshowPaused, value))
+                Raise(nameof(SlideshowStatusText));
+        }
+    }
+
+    private int _slideshowIntervalSeconds = 5;
+    public int SlideshowIntervalSeconds
+    {
+        get => _slideshowIntervalSeconds;
+        set
+        {
+            if (value < 1) value = 1;
+            if (value > 60) value = 60;
+            if (Set(ref _slideshowIntervalSeconds, value))
+            {
+                Raise(nameof(SlideshowStatusText));
+                if (IsSlideshowActive && !IsSlideshowPaused)
+                    RestartSlideshowTimer();
+            }
+        }
+    }
+
+    private bool _slideshowShuffle;
+    public bool SlideshowShuffle
+    {
+        get => _slideshowShuffle;
+        set => Set(ref _slideshowShuffle, value);
+    }
+
+    private bool _slideshowLoop = true;
+    public bool SlideshowLoop
+    {
+        get => _slideshowLoop;
+        set => Set(ref _slideshowLoop, value);
+    }
+
+    public string SlideshowStatusText => IsSlideshowActive
+        ? (IsSlideshowPaused
+            ? Strings.Slideshow_Paused
+            : string.Format(Strings.Slideshow_Playing, SlideshowIntervalSeconds))
+        : "";
+
+    public ICommand ToggleSlideshowCommand { get; }
+    public ICommand StartSlideshowCommand { get; }
+    public ICommand StopSlideshowCommand { get; }
+    public ICommand PauseSlideshowCommand { get; }
+    public ICommand IncreaseSlideshowIntervalCommand { get; }
+    public ICommand DecreaseSlideshowIntervalCommand { get; }
+    public ICommand ToggleSlideshowShuffleCommand { get; }
+
+    private void StartSlideshow()
+    {
+        if (!HasImage) return;
+        IsSlideshowActive = true;
+        IsSlideshowPaused = false;
+        _slideshowHoverPaused = false;
+        _slideshowRandom = SlideshowShuffle ? new Random() : null;
+        RestartSlideshowTimer();
+        Toast(Strings.MainToastSlideshowStarted);
+    }
+
+    public void StopSlideshow()
+    {
+        if (!IsSlideshowActive) return;
+        _slideshowTimer?.Stop();
+        _slideshowTimer = null;
+        IsSlideshowActive = false;
+        IsSlideshowPaused = false;
+        _slideshowHoverPaused = false;
+        Toast(Strings.MainToastSlideshowStopped);
+    }
+
+    private void ToggleSlideshow()
+    {
+        if (IsSlideshowActive) StopSlideshow();
+        else StartSlideshow();
+    }
+
+    public void PauseResumeSlideshow()
+    {
+        if (!IsSlideshowActive) return;
+        IsSlideshowPaused = !IsSlideshowPaused;
+        if (IsSlideshowPaused)
+        {
+            _slideshowTimer?.Stop();
+            Toast(Strings.MainToastSlideshowPaused);
+        }
+        else
+        {
+            RestartSlideshowTimer();
+            Toast(Strings.MainToastSlideshowResumed);
+        }
+    }
+
+    /// <summary>
+    /// V30-33: temporarily pauses the slideshow timer when the mouse hovers over the
+    /// slideshow indicator chip. Resumes on mouse leave only if the pause was hover-initiated.
+    /// </summary>
+    public void SlideshowHoverPause()
+    {
+        if (!IsSlideshowActive || IsSlideshowPaused) return;
+        _slideshowHoverPaused = true;
+        _slideshowTimer?.Stop();
+    }
+
+    public void SlideshowHoverResume()
+    {
+        if (!IsSlideshowActive || !_slideshowHoverPaused) return;
+        _slideshowHoverPaused = false;
+        if (!IsSlideshowPaused)
+            RestartSlideshowTimer();
+    }
+
+    private void ToggleSlideshowShuffle()
+    {
+        SlideshowShuffle = !SlideshowShuffle;
+        _slideshowRandom = SlideshowShuffle ? new Random() : null;
+        Toast(SlideshowShuffle ? Strings.MainToastSlideshowShuffleOn : Strings.MainToastSlideshowShuffleOff);
+    }
+
+    private void RestartSlideshowTimer()
+    {
+        _slideshowTimer?.Stop();
+        _slideshowTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(_slideshowIntervalSeconds)
+        };
+        _slideshowTimer.Tick += SlideshowTimer_Tick;
+        _slideshowTimer.Start();
+    }
+
+    private async void SlideshowTimer_Tick(object? sender, EventArgs e)
+    {
+        if (_isDisposed || !IsSlideshowActive || IsSlideshowPaused)
+            return;
+
+        if (_slideshowShuffle && _slideshowRandom is not null)
+        {
+            var count = _nav.Files.Count;
+            if (count > 1)
+            {
+                var nextIndex = _slideshowRandom.Next(count);
+                while (nextIndex == _nav.CurrentIndex && count > 1)
+                    nextIndex = _slideshowRandom.Next(count);
+
+                // Navigate by finding the path at the target index and opening it
+                var targetPath = _nav.Files[nextIndex];
+                _nav.Open(targetPath);
+                ResetPageState();
+                await LoadCurrentWithOperationStatusAsync(
+                    Strings.MainOpLoadingNext,
+                    BuildDecodeOperationDetail(targetPath));
+            }
+        }
+        else
+        {
+            if (_nav.CurrentIndex >= _nav.Files.Count - 1)
+            {
+                if (_slideshowLoop)
+                {
+                    if (!_nav.MoveFirst()) return;
+                }
+                else
+                {
+                    StopSlideshow();
+                    return;
+                }
+            }
+            else
+            {
+                if (!_nav.MoveNext()) return;
+            }
+
+            ResetPageState();
+            await LoadCurrentWithOperationStatusAsync(
+                Strings.MainOpLoadingNext,
+                BuildDecodeOperationDetail(_nav.CurrentPath ?? ""));
+        }
+    }
 
     // -------------------- Rename editor state --------------------
 
@@ -3455,6 +3678,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         FlushPendingRename();
         if (!move())
             return;
+
+        // V30-33: manual navigation during slideshow resets the timer countdown rather
+        // than stopping playback, so the user can nudge forward and the show continues.
+        if (IsSlideshowActive && !IsSlideshowPaused)
+            RestartSlideshowTimer();
 
         ResetPageState();
         await LoadCurrentWithOperationStatusAsync(title, BuildDecodeOperationDetail(_nav.CurrentPath ?? ""));
@@ -6501,6 +6729,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _toastTimer.Stop();
         _animationTimer.Stop();
         _hintTimer.Stop();
+        _slideshowTimer?.Stop();
+        _slideshowTimer = null;
         _listenService?.Dispose();
         _externalEditReload.Dispose();
 

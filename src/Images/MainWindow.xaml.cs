@@ -677,6 +677,14 @@ public partial class MainWindow : Window
                     e.Handled = true;
                     break;
                 }
+                if (Vm.IsSlideshowActive)
+                {
+                    Vm.StopSlideshow();
+                    Keyboard.ClearFocus();
+                    Focus();
+                    e.Handled = true;
+                    break;
+                }
                 if (Vm.IsGalleryOpen)
                 {
                     Vm.CloseGalleryCommand.Execute(null);
@@ -1533,6 +1541,23 @@ public partial class MainWindow : Window
     {
         if (Vm.CycleChannelModeCommand.CanExecute(null))
             Vm.CycleChannelModeCommand.Execute(null);
+        e.Handled = true;
+    }
+
+    // V30-33: slideshow chip interactions — hover pauses the timer, click toggles pause.
+    private void SlideshowChip_MouseEnter(object sender, MouseEventArgs e)
+    {
+        Vm.SlideshowHoverPause();
+    }
+
+    private void SlideshowChip_MouseLeave(object sender, MouseEventArgs e)
+    {
+        Vm.SlideshowHoverResume();
+    }
+
+    private void SlideshowChip_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        Vm.PauseResumeSlideshow();
         e.Handled = true;
     }
 }
