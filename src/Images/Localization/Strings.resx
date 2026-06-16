@@ -3882,4 +3882,201 @@ Details written to:
     <value>No network activity to copy.</value>
   </data>
 
+  <!-- V20-29: Command palette -->
+  <data name="CommandPalette_Category_Navigation" xml:space="preserve">
+    <value>Navigate</value>
+  </data>
+  <data name="CommandPalette_Category_View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="CommandPalette_Category_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="CommandPalette_Category_File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="CommandPalette_Category_Tools" xml:space="preserve">
+    <value>Tools</value>
+  </data>
+  <data name="CommandPalette_Category_Review" xml:space="preserve">
+    <value>Review</value>
+  </data>
+  <data name="CommandPalette_Category_Compare" xml:space="preserve">
+    <value>Compare</value>
+  </data>
+  <data name="CommandPalette_Category_Help" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="CommandPalette_Open" xml:space="preserve">
+    <value>Open file...</value>
+  </data>
+  <data name="CommandPalette_Next" xml:space="preserve">
+    <value>Next image</value>
+  </data>
+  <data name="CommandPalette_Previous" xml:space="preserve">
+    <value>Previous image</value>
+  </data>
+  <data name="CommandPalette_First" xml:space="preserve">
+    <value>First image</value>
+  </data>
+  <data name="CommandPalette_Last" xml:space="preserve">
+    <value>Last image</value>
+  </data>
+  <data name="CommandPalette_Refresh" xml:space="preserve">
+    <value>Refresh directory</value>
+  </data>
+  <data name="CommandPalette_Filmstrip" xml:space="preserve">
+    <value>Toggle filmstrip</value>
+  </data>
+  <data name="CommandPalette_MetadataHud" xml:space="preserve">
+    <value>Toggle metadata HUD</value>
+  </data>
+  <data name="CommandPalette_Gallery" xml:space="preserve">
+    <value>Toggle gallery</value>
+  </data>
+  <data name="CommandPalette_Inspector" xml:space="preserve">
+    <value>Toggle pixel inspector</value>
+  </data>
+  <data name="CommandPalette_ExtractText" xml:space="preserve">
+    <value>Extract text (OCR)</value>
+  </data>
+  <data name="CommandPalette_RotateCw" xml:space="preserve">
+    <value>Rotate clockwise</value>
+  </data>
+  <data name="CommandPalette_RotateCcw" xml:space="preserve">
+    <value>Rotate counter-clockwise</value>
+  </data>
+  <data name="CommandPalette_Rotate180" xml:space="preserve">
+    <value>Rotate 180</value>
+  </data>
+  <data name="CommandPalette_FlipH" xml:space="preserve">
+    <value>Flip horizontal</value>
+  </data>
+  <data name="CommandPalette_FlipV" xml:space="preserve">
+    <value>Flip vertical</value>
+  </data>
+  <data name="CommandPalette_CropMode" xml:space="preserve">
+    <value>Toggle crop mode</value>
+  </data>
+  <data name="CommandPalette_Resize" xml:space="preserve">
+    <value>Open resize dialog</value>
+  </data>
+  <data name="CommandPalette_Adjustments" xml:space="preserve">
+    <value>Open adjustments</value>
+  </data>
+  <data name="CommandPalette_Effects" xml:space="preserve">
+    <value>Open effects</value>
+  </data>
+  <data name="CommandPalette_AutoEnhance" xml:space="preserve">
+    <value>Auto enhance</value>
+  </data>
+  <data name="CommandPalette_Perspective" xml:space="preserve">
+    <value>Open perspective correction</value>
+  </data>
+  <data name="CommandPalette_ExposureBrush" xml:space="preserve">
+    <value>Toggle exposure brush</value>
+  </data>
+  <data name="CommandPalette_RedEye" xml:space="preserve">
+    <value>Toggle red-eye correction</value>
+  </data>
+  <data name="CommandPalette_Retouch" xml:space="preserve">
+    <value>Toggle clone/heal retouch</value>
+  </data>
+  <data name="CommandPalette_Annotations" xml:space="preserve">
+    <value>Open annotations</value>
+  </data>
+  <data name="CommandPalette_ExportWorkbench" xml:space="preserve">
+    <value>Open export workbench</value>
+  </data>
+  <data name="CommandPalette_Delete" xml:space="preserve">
+    <value>Delete to recycle bin</value>
+  </data>
+  <data name="CommandPalette_Reload" xml:space="preserve">
+    <value>Reload current image</value>
+  </data>
+  <data name="CommandPalette_Print" xml:space="preserve">
+    <value>Print</value>
+  </data>
+  <data name="CommandPalette_SaveCopy" xml:space="preserve">
+    <value>Save a copy</value>
+  </data>
+  <data name="CommandPalette_CopyPath" xml:space="preserve">
+    <value>Copy file path</value>
+  </data>
+  <data name="CommandPalette_CopyImage" xml:space="preserve">
+    <value>Copy image to clipboard</value>
+  </data>
+  <data name="CommandPalette_Reveal" xml:space="preserve">
+    <value>Reveal in Explorer</value>
+  </data>
+  <data name="CommandPalette_OpenDefault" xml:space="preserve">
+    <value>Open in default app</value>
+  </data>
+  <data name="CommandPalette_StripGps" xml:space="preserve">
+    <value>Strip GPS location</value>
+  </data>
+  <data name="CommandPalette_Wallpaper" xml:space="preserve">
+    <value>Set as wallpaper</value>
+  </data>
+  <data name="CommandPalette_CopyToFolder" xml:space="preserve">
+    <value>Copy to folder...</value>
+  </data>
+  <data name="CommandPalette_MoveToFolder" xml:space="preserve">
+    <value>Move to folder...</value>
+  </data>
+  <data name="CommandPalette_ReferenceBoard" xml:space="preserve">
+    <value>Reference board</value>
+  </data>
+  <data name="CommandPalette_DuplicateCleanup" xml:space="preserve">
+    <value>Duplicate cleanup</value>
+  </data>
+  <data name="CommandPalette_FileHealthScan" xml:space="preserve">
+    <value>File health scan</value>
+  </data>
+  <data name="CommandPalette_RecoveryCenter" xml:space="preserve">
+    <value>Recovery center</value>
+  </data>
+  <data name="CommandPalette_ModelManager" xml:space="preserve">
+    <value>Model manager</value>
+  </data>
+  <data name="CommandPalette_SemanticSearch" xml:space="preserve">
+    <value>Semantic search</value>
+  </data>
+  <data name="CommandPalette_TagGraph" xml:space="preserve">
+    <value>Tag relationships</value>
+  </data>
+  <data name="CommandPalette_ImportInbox" xml:space="preserve">
+    <value>Import inbox</value>
+  </data>
+  <data name="CommandPalette_MacroActions" xml:space="preserve">
+    <value>Macro actions</value>
+  </data>
+  <data name="CommandPalette_BatchProcessor" xml:space="preserve">
+    <value>Batch processor</value>
+  </data>
+  <data name="CommandPalette_EditStack" xml:space="preserve">
+    <value>Edit history</value>
+  </data>
+  <data name="CommandPalette_ReviewMode" xml:space="preserve">
+    <value>Toggle review mode</value>
+  </data>
+  <data name="CommandPalette_Compare" xml:space="preserve">
+    <value>Compare with next</value>
+  </data>
+  <data name="CommandPalette_CompareWith" xml:space="preserve">
+    <value>Compare with...</value>
+  </data>
+  <data name="CommandPalette_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="CommandPalette_About" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="CommandPalette_CheckUpdates" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="CommandPalette_Paste" xml:space="preserve">
+    <value>Paste from clipboard</value>
+  </data>
+
 </root>

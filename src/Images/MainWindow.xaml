@@ -1983,6 +1983,129 @@
                         </Border>
                     </Grid>
 
+                    <!-- V20-29: Command palette overlay — Ctrl+Shift+P opens. Type to filter, Enter to execute, Escape to dismiss. -->
+                    <Grid Visibility="{Binding ShowCommandPalette, Converter={StaticResource BoolToVis}}">
+                        <Rectangle Fill="#CC000000" IsHitTestVisible="True"
+                                   MouseDown="CommandPalette_DimmerClick" />
+                        <Border Style="{StaticResource ElevatedCard}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                Margin="0,80,0,0"
+                                Width="520"
+                                MaxHeight="460"
+                                Padding="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Search input -->
+                                <Border Grid.Row="0" Padding="14,12" BorderThickness="0,0,0,1"
+                                        BorderBrush="{StaticResource HairlineBrush}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="&#xE721;"
+                                                   FontFamily="{StaticResource IconFontFamily}"
+                                                   FontSize="14"
+                                                   Foreground="{StaticResource OverlayBrush}"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,10,0" />
+                                        <TextBox x:Name="CommandPaletteInput"
+                                                 Grid.Column="1"
+                                                 Text="{Binding CommandPaletteFilterText, UpdateSourceTrigger=PropertyChanged}"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 Foreground="{StaticResource TextBrush}"
+                                                 CaretBrush="{StaticResource AccentBrush}"
+                                                 FontSize="14"
+                                                 Padding="0,4"
+                                                 VerticalContentAlignment="Center"
+                                                 PreviewKeyDown="CommandPaletteInput_PreviewKeyDown"
+                                                 AutomationProperties.Name="Command palette search" />
+                                    </Grid>
+                                </Border>
+
+                                <!-- Filtered command list -->
+                                <ListBox Grid.Row="1"
+                                         x:Name="CommandPaletteList"
+                                         ItemsSource="{Binding FilteredCommandPaletteItems}"
+                                         SelectedIndex="{Binding SelectedCommandPaletteIndex, Mode=TwoWay}"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         VirtualizingStackPanel.IsVirtualizing="True"
+                                         MouseDoubleClick="CommandPaletteList_MouseDoubleClick"
+                                         MaxHeight="380"
+                                         Padding="4,4">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Padding" Value="12,8" />
+                                            <Setter Property="Margin" Value="2,1" />
+                                            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                        <Border x:Name="Bd"
+                                                                Background="{TemplateBinding Background}"
+                                                                CornerRadius="{StaticResource Radius.Sm.CR}"
+                                                                Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter />
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource Surface0Brush}" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource Surface0Brush}" />
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{Binding Category}"
+                                                           Foreground="{StaticResource SubtextBrush}"
+                                                           FontSize="11"
+                                                           VerticalAlignment="Center"
+                                                           Margin="0,0,8,0"
+                                                           MinWidth="60" />
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding Name}"
+                                                           Foreground="{StaticResource TextBrush}"
+                                                           FontSize="13"
+                                                           VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Grid.Column="2"
+                                                           Text="{Binding Shortcut}"
+                                                           Foreground="{StaticResource OverlayBrush}"
+                                                           FontSize="11"
+                                                           VerticalAlignment="Center"
+                                                           Margin="12,0,0,0" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
                     <!-- Operation status — short live-region feedback for reload/export/edit work. -->
                     <Border HorizontalAlignment="Center"
                             VerticalAlignment="Top"

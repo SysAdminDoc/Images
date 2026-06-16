@@ -457,6 +457,23 @@ public partial class MainWindow : Window
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+        // V20-29: Ctrl+Shift+P toggles command palette even when its TextBox has focus.
+        if (e.Key == Key.P
+            && (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift))
+        {
+            Vm.ShowCommandPalette = !Vm.ShowCommandPalette;
+            if (Vm.ShowCommandPalette)
+                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Input,
+                    () => CommandPaletteInput.Focus());
+            else
+            {
+                Keyboard.ClearFocus();
+                Focus();
+            }
+            e.Handled = true;
+            return;
+        }
+
         if (e.Key != Key.Enter ||
             !Vm.IsCropMode ||
             !Vm.ApplyCropCommand.CanExecute(null))
@@ -480,6 +497,15 @@ public partial class MainWindow : Window
         if (Vm.ShowCheatsheet && e.Key != Key.OemQuestion)
         {
             Vm.ShowCheatsheet = false;
+            e.Handled = true;
+            return;
+        }
+
+        // V20-29: when the command palette is open but focus is NOT in its TextBox, dismiss
+        // on any keypress so stray shortcuts don't fire through the overlay.
+        if (Vm.ShowCommandPalette && Keyboard.FocusedElement is not TextBox)
+        {
+            Vm.ShowCommandPalette = false;
             e.Handled = true;
             return;
         }
@@ -567,6 +593,14 @@ public partial class MainWindow : Window
                 if (Vm.IsCompareMode)
                 {
                     Vm.ExitCompareCommand.Execute(null);
+                    Keyboard.ClearFocus();
+                    Focus();
+                    e.Handled = true;
+                    break;
+                }
+                if (Vm.ShowCommandPalette)
+                {
+                    Vm.ShowCommandPalette = false;
                     Keyboard.ClearFocus();
                     Focus();
                     e.Handled = true;
@@ -699,6 +733,14 @@ public partial class MainWindow : Window
             case Key.R when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
                 // V15-04: Ctrl+Shift+R reload current image.
                 Vm.ReloadCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.P when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
+                // V20-29: Ctrl+Shift+P command palette.
+                Vm.ShowCommandPalette = !Vm.ShowCommandPalette;
+                if (Vm.ShowCommandPalette)
+                    Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Input,
+                        () => CommandPaletteInput.Focus());
                 e.Handled = true;
                 break;
             case Key.P when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
@@ -1337,5 +1379,58 @@ public partial class MainWindow : Window
         if (!File.Exists(first)) return null;
         var ext = Path.GetExtension(first);
         return Services.DirectoryNavigator.SupportedExtensions.Contains(ext) ? first : null;
+    }
+
+    // ---- V20-29: Command palette event handlers ----
+
+    private void CommandPalette_DimmerClick(object sender, MouseButtonEventArgs e)
+    {
+        Vm.ShowCommandPalette = false;
+    }
+
+    private void CommandPaletteInput_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case Key.Up:
+                if (Vm.SelectedCommandPaletteIndex > 0)
+                    Vm.SelectedCommandPaletteIndex--;
+                ScrollCommandPaletteIntoView();
+                e.Handled = true;
+                break;
+            case Key.Down:
+                if (Vm.SelectedCommandPaletteIndex < Vm.FilteredCommandPaletteItems.Count - 1)
+                    Vm.SelectedCommandPaletteIndex++;
+                ScrollCommandPaletteIntoView();
+                e.Handled = true;
+                break;
+            case Key.Enter:
+                Vm.ExecuteSelectedPaletteCommand();
+                Keyboard.ClearFocus();
+                Focus();
+                e.Handled = true;
+                break;
+            case Key.Escape:
+                Vm.ShowCommandPalette = false;
+                Keyboard.ClearFocus();
+                Focus();
+                e.Handled = true;
+                break;
+        }
+    }
+
+    private void CommandPaletteList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        Vm.ExecuteSelectedPaletteCommand();
+        Keyboard.ClearFocus();
+        Focus();
+    }
+
+    private void ScrollCommandPaletteIntoView()
+    {
+        if (Vm.SelectedCommandPaletteIndex >= 0 && Vm.SelectedCommandPaletteIndex < Vm.FilteredCommandPaletteItems.Count)
+        {
+            CommandPaletteList.ScrollIntoView(Vm.FilteredCommandPaletteItems[Vm.SelectedCommandPaletteIndex]);
+        }
     }
 }
