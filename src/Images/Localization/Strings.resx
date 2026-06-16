@@ -920,4 +920,643 @@ Details written to:
   <data name="AdjustmentsDegreeSuffix" xml:space="preserve">
     <value> deg</value>
   </data>
+  <data name="ModelManagerWindowTitle" xml:space="preserve">
+    <value>Images - Model manager</value>
+  </data>
+  <data name="ModelManagerHeading" xml:space="preserve">
+    <value>Model manager</value>
+  </data>
+  <data name="ModelManagerSubtitle" xml:space="preserve">
+    <value>Approved local model files stay under app data. Downloads are manual and SHA-256 verified before future AI tools can use them.</value>
+  </data>
+  <data name="ModelManagerRefreshAutomationName" xml:space="preserve">
+    <value>Refresh model status</value>
+  </data>
+  <data name="ModelManagerRefresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="ModelManagerRevealStorageAutomationName" xml:space="preserve">
+    <value>Reveal model storage</value>
+  </data>
+  <data name="ModelManagerRevealStorage" xml:space="preserve">
+    <value>Reveal storage</value>
+  </data>
+  <data name="ModelManagerImportAutomationName" xml:space="preserve">
+    <value>Import selected model file</value>
+  </data>
+  <data name="ModelManagerImportFile" xml:space="preserve">
+    <value>Import file</value>
+  </data>
+  <data name="ModelManagerRuntimeSection" xml:space="preserve">
+    <value>Runtime</value>
+  </data>
+  <data name="ModelManagerApprovedModels" xml:space="preserve">
+    <value>Approved models</value>
+  </data>
+  <data name="ModelManagerApprovedLocalModelsAutomationName" xml:space="preserve">
+    <value>Approved local models</value>
+  </data>
+  <data name="ModelManagerNoModelSelected" xml:space="preserve">
+    <value>No model selected</value>
+  </data>
+  <data name="ModelManagerNoModelSelectedSubtitle" xml:space="preserve">
+    <value>Select an approved model to inspect its source, hash, local status, and import requirements.</value>
+  </data>
+  <data name="ModelManagerOpenSourceAutomationName" xml:space="preserve">
+    <value>Open selected model source</value>
+  </data>
+  <data name="ModelManagerSourceButton" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="ModelManagerDeleteLocalAutomationName" xml:space="preserve">
+    <value>Delete selected local model</value>
+  </data>
+  <data name="ModelManagerDeleteLocal" xml:space="preserve">
+    <value>Delete local</value>
+  </data>
+  <data name="ModelManagerPurposeLabel" xml:space="preserve">
+    <value>Purpose</value>
+  </data>
+  <data name="ModelManagerLicenseLabel" xml:space="preserve">
+    <value>License</value>
+  </data>
+  <data name="ModelManagerRuntimeLabel" xml:space="preserve">
+    <value>Runtime</value>
+  </data>
+  <data name="ModelManagerSourceLabel" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="ModelManagerDownloadLabel" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="ModelManagerExpectedShaLabel" xml:space="preserve">
+    <value>Expected SHA-256</value>
+  </data>
+  <data name="ModelManagerLocalShaLabel" xml:space="preserve">
+    <value>Local SHA-256</value>
+  </data>
+  <data name="ModelManagerLocalPathLabel" xml:space="preserve">
+    <value>Local path</value>
+  </data>
+  <data name="ModelManagerImportedLabel" xml:space="preserve">
+    <value>Imported</value>
+  </data>
+  <data name="ModelManagerNotesSection" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="ModelManagerSecurityNotice" xml:space="preserve">
+    <value>Images never downloads models automatically. Import only model files you chose from an approved source; mismatched hashes stay disabled.</value>
+  </data>
+  <data name="ModelManagerReady" xml:space="preserve">
+    <value>Ready.</value>
+  </data>
+  <data name="ModelManagerSelectBeforeImporting" xml:space="preserve">
+    <value>Select an approved model before importing.</value>
+  </data>
+  <data name="ModelManagerImportDialogTitle" xml:space="preserve">
+    <value>Import approved model file</value>
+  </data>
+  <data name="ModelManagerImportDialogFilter" xml:space="preserve">
+    <value>Approved model files (*.onnx;*.json)|*.onnx;*.json|All files (*.*)|*.*</value>
+  </data>
+  <data name="ModelManagerSelectBeforeDeleting" xml:space="preserve">
+    <value>Select a model before deleting local files.</value>
+  </data>
+  <data name="ModelManagerStorageNotAvailable" xml:space="preserve">
+    <value>Model storage is not available.</value>
+  </data>
+  <data name="ModelManagerStorageOpened" xml:space="preserve">
+    <value>Opened model storage folder.</value>
+  </data>
+  <data name="ModelManagerStorageOpenFailedFormat" xml:space="preserve">
+    <value>Could not open model storage: {0}</value>
+  </data>
+  <data name="ModelManagerSelectFirst" xml:space="preserve">
+    <value>Select a model first.</value>
+  </data>
+  <data name="ModelManagerSourceOpened" xml:space="preserve">
+    <value>Opened approved model source.</value>
+  </data>
+  <data name="ModelManagerSourceOpenFailedFormat" xml:space="preserve">
+    <value>Could not open model source: {0}</value>
+  </data>
+  <data name="ModelManagerNotImported" xml:space="preserve">
+    <value>Not imported</value>
+  </data>
+  <data name="ModelManagerNotesExpectedSizeFormat" xml:space="preserve">
+    <value>{0} Expected size: {1}.</value>
+  </data>
+  <data name="ModelManagerRefreshed" xml:space="preserve">
+    <value>Model manager refreshed.</value>
+  </data>
+  <data name="RecoveryCenterTitle" xml:space="preserve">
+    <value>Images - Recovery center</value>
+  </data>
+  <data name="RecoveryCenterHeading" xml:space="preserve">
+    <value>Recovery center</value>
+  </data>
+  <data name="RecoveryCenterSubtitle" xml:space="preserve">
+    <value>Review recent moves, quarantines, writebacks, and Recycle Bin actions recorded locally.</value>
+  </data>
+  <data name="RecoveryCenterRefreshAutomationName" xml:space="preserve">
+    <value>Refresh recovery records</value>
+  </data>
+  <data name="RecoveryCenterRefresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="RecoveryCenterRevealAutomationName" xml:space="preserve">
+    <value>Reveal selected recovery path</value>
+  </data>
+  <data name="RecoveryCenterReveal" xml:space="preserve">
+    <value>Reveal</value>
+  </data>
+  <data name="RecoveryCenterRestoreAutomationName" xml:space="preserve">
+    <value>Restore selected recovery record</value>
+  </data>
+  <data name="RecoveryCenterRestore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="RecoveryCenterRecentOperations" xml:space="preserve">
+    <value>Recent operations</value>
+  </data>
+  <data name="RecoveryCenterRecordsAutomationName" xml:space="preserve">
+    <value>Recovery records</value>
+  </data>
+  <data name="RecoveryCenterEmptyHeading" xml:space="preserve">
+    <value>No recovery record selected</value>
+  </data>
+  <data name="RecoveryCenterEmptyDescription" xml:space="preserve">
+    <value>Destructive moves, quarantines, writebacks, and Recycle Bin sends will appear here after they are recorded.</value>
+  </data>
+  <data name="RecoveryCenterMetaType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="RecoveryCenterMetaCreated" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="RecoveryCenterMetaStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="RecoveryCenterMetaOriginal" xml:space="preserve">
+    <value>Original</value>
+  </data>
+  <data name="RecoveryCenterMetaCurrent" xml:space="preserve">
+    <value>Current</value>
+  </data>
+  <data name="RecoveryCenterMetaRestore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="RecoveryCenterMetaRetention" xml:space="preserve">
+    <value>Retention</value>
+  </data>
+  <data name="RecoveryCenterSidecars" xml:space="preserve">
+    <value>Sidecars</value>
+  </data>
+  <data name="RecoveryCenterReady" xml:space="preserve">
+    <value>Ready.</value>
+  </data>
+  <data name="RecoveryCenterSelectRecordFirst" xml:space="preserve">
+    <value>Select a recovery record first.</value>
+  </data>
+  <data name="RecoveryCenterNoRevealPath" xml:space="preserve">
+    <value>No existing path or parent folder is available for this record.</value>
+  </data>
+  <data name="RecoveryCenterRevealOpened" xml:space="preserve">
+    <value>Opened recovery location in Explorer.</value>
+  </data>
+  <data name="RecoveryCenterRevealFailedFormat" xml:space="preserve">
+    <value>Reveal failed: {0}</value>
+  </data>
+  <data name="RecoveryCenterSelectRestorableFirst" xml:space="preserve">
+    <value>Select a restorable recovery record first.</value>
+  </data>
+  <data name="RecoveryCenterNotRecorded" xml:space="preserve">
+    <value>Not recorded</value>
+  </data>
+  <data name="RecoveryCenterNoRecordsYet" xml:space="preserve">
+    <value>No recovery records yet.</value>
+  </data>
+  <data name="RecoveryCenterRefreshed" xml:space="preserve">
+    <value>Recovery records refreshed.</value>
+  </data>
+  <data name="BatchTitle" xml:space="preserve">
+    <value>Images - Batch processor</value>
+  </data>
+  <data name="BatchHeading" xml:space="preserve">
+    <value>Batch processor</value>
+  </data>
+  <data name="BatchSubtitle" xml:space="preserve">
+    <value>Preview resize/convert settings, save presets, and export collision-safe copies.</value>
+  </data>
+  <data name="BatchLoadPresetAutomationName" xml:space="preserve">
+    <value>Load batch preset</value>
+  </data>
+  <data name="BatchLoadPreset" xml:space="preserve">
+    <value>Load preset</value>
+  </data>
+  <data name="BatchSavePresetAutomationName" xml:space="preserve">
+    <value>Save batch preset</value>
+  </data>
+  <data name="BatchSavePreset" xml:space="preserve">
+    <value>Save preset</value>
+  </data>
+  <data name="BatchSourcesHeading" xml:space="preserve">
+    <value>Sources</value>
+  </data>
+  <data name="BatchAddFiles" xml:space="preserve">
+    <value>Add files</value>
+  </data>
+  <data name="BatchAddFolder" xml:space="preserve">
+    <value>Add folder</value>
+  </data>
+  <data name="BatchSourcesAutomationName" xml:space="preserve">
+    <value>Batch processor sources</value>
+  </data>
+  <data name="BatchClearSources" xml:space="preserve">
+    <value>Clear sources</value>
+  </data>
+  <data name="BatchPresetHeading" xml:space="preserve">
+    <value>Preset</value>
+  </data>
+  <data name="BatchPresetAutomationName" xml:space="preserve">
+    <value>Batch preset</value>
+  </data>
+  <data name="BatchPresetName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="BatchPresetExtension" xml:space="preserve">
+    <value>Extension</value>
+  </data>
+  <data name="BatchPresetQuality" xml:space="preserve">
+    <value>Quality</value>
+  </data>
+  <data name="BatchPresetMaxDimensions" xml:space="preserve">
+    <value>Max dimensions</value>
+  </data>
+  <data name="BatchMaxWidthAutomationName" xml:space="preserve">
+    <value>Batch max width</value>
+  </data>
+  <data name="BatchMaxHeightAutomationName" xml:space="preserve">
+    <value>Batch max height</value>
+  </data>
+  <data name="BatchOutputHeading" xml:space="preserve">
+    <value>Output</value>
+  </data>
+  <data name="BatchOutputFolderDefault" xml:space="preserve">
+    <value>Output folder: Images batch output beside each source</value>
+  </data>
+  <data name="BatchChooseOutput" xml:space="preserve">
+    <value>Choose output</value>
+  </data>
+  <data name="BatchDryRunOnly" xml:space="preserve">
+    <value>Dry run only</value>
+  </data>
+  <data name="BatchPreviewHint" xml:space="preserve">
+    <value>Build a preview to see output paths and dimensions.</value>
+  </data>
+  <data name="BatchBuildPreview" xml:space="preserve">
+    <value>Build preview</value>
+  </data>
+  <data name="BatchPreviewHeading" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="BatchPreviewItemsAutomationName" xml:space="preserve">
+    <value>Batch preview items</value>
+  </data>
+  <data name="BatchEstimatedOutputFormat" xml:space="preserve">
+    <value>Estimated output: {0}</value>
+  </data>
+  <data name="BatchDeltaFormat" xml:space="preserve">
+    <value>Delta: {0}</value>
+  </data>
+  <data name="BatchRunLogHeading" xml:space="preserve">
+    <value>Run log</value>
+  </data>
+  <data name="BatchRunLogAutomationName" xml:space="preserve">
+    <value>Batch processor run log</value>
+  </data>
+  <data name="BatchDryRunHint" xml:space="preserve">
+    <value>Dry run is on by default. Turn it off when the preview looks correct.</value>
+  </data>
+  <data name="BatchRunBatch" xml:space="preserve">
+    <value>Run batch</value>
+  </data>
+  <data name="BatchReadyStatus" xml:space="preserve">
+    <value>Ready. Add files or a folder to begin.</value>
+  </data>
+  <data name="BatchCouldNotAddSource" xml:space="preserve">
+    <value>Could not add that batch source.</value>
+  </data>
+  <data name="BatchAddFilesDialogTitle" xml:space="preserve">
+    <value>Add files to batch processor</value>
+  </data>
+  <data name="BatchAddedSourceFilesFormat" xml:space="preserve">
+    <value>Added {0} source file{1}.</value>
+  </data>
+  <data name="BatchAddFolderDialogTitle" xml:space="preserve">
+    <value>Add folder to batch processor</value>
+  </data>
+  <data name="BatchAddedSourceFolder" xml:space="preserve">
+    <value>Added source folder.</value>
+  </data>
+  <data name="BatchSourcesCleared" xml:space="preserve">
+    <value>Sources cleared.</value>
+  </data>
+  <data name="BatchChooseOutputFolderDialogTitle" xml:space="preserve">
+    <value>Choose batch output folder</value>
+  </data>
+  <data name="BatchOutputFolderFormat" xml:space="preserve">
+    <value>Output folder: {0}</value>
+  </data>
+  <data name="BatchSettingsChanged" xml:space="preserve">
+    <value>Settings changed. Build a new preview before running.</value>
+  </data>
+  <data name="BatchAddSourcesBeforeRunning" xml:space="preserve">
+    <value>Add supported source files before running a batch.</value>
+  </data>
+  <data name="BatchRunningFormat" xml:space="preserve">
+    <value>Running batch for {0} file{1}...</value>
+  </data>
+  <data name="BatchResultOkFormat" xml:space="preserve">
+    <value>OK: {0} -> {1}</value>
+  </data>
+  <data name="BatchResultFailedFormat" xml:space="preserve">
+    <value>Failed: {0} - {1}</value>
+  </data>
+  <data name="BatchCompleteFormat" xml:space="preserve">
+    <value>Batch complete: {0} succeeded, {1} failed.</value>
+  </data>
+  <data name="BatchAddSourcesBeforePreview" xml:space="preserve">
+    <value>Add supported source files before building a preview.</value>
+  </data>
+  <data name="BatchBuildingPreview" xml:space="preserve">
+    <value>Building batch preview...</value>
+  </data>
+  <data name="BatchPreviewSummaryFormat" xml:space="preserve">
+    <value>Preview: {0} file{1}, {2} skipped.</value>
+  </data>
+  <data name="BatchPreviewReady" xml:space="preserve">
+    <value>Batch preview ready.</value>
+  </data>
+  <data name="BatchLoadPresetDialogTitle" xml:space="preserve">
+    <value>Load batch preset</value>
+  </data>
+  <data name="BatchPresetFilterLabel" xml:space="preserve">
+    <value>Batch preset JSON</value>
+  </data>
+  <data name="BatchAllFilesFilterLabel" xml:space="preserve">
+    <value>All files</value>
+  </data>
+  <data name="BatchPresetLoaded" xml:space="preserve">
+    <value>Batch preset loaded.</value>
+  </data>
+  <data name="BatchCouldNotLoadPreset" xml:space="preserve">
+    <value>Could not load batch preset.</value>
+  </data>
+  <data name="BatchSavePresetDialogTitle" xml:space="preserve">
+    <value>Save batch preset</value>
+  </data>
+  <data name="BatchPresetSaved" xml:space="preserve">
+    <value>Batch preset saved.</value>
+  </data>
+  <data name="BatchCouldNotSavePreset" xml:space="preserve">
+    <value>Could not save batch preset.</value>
+  </data>
+  <data name="BatchPresetReady" xml:space="preserve">
+    <value>Preset ready. Build a preview to inspect output paths and dimensions.</value>
+  </data>
+  <data name="BatchSkippedSourceFormat" xml:space="preserve">
+    <value>Skipped source: {0}</value>
+  </data>
+  <data name="DuplicateCleanupWindowTitle" xml:space="preserve">
+    <value>Images - Duplicate cleanup</value>
+  </data>
+  <data name="DuplicateCleanupHeading" xml:space="preserve">
+    <value>Duplicate cleanup</value>
+  </data>
+  <data name="DuplicateCleanupSubtitle" xml:space="preserve">
+    <value>Local scan for exact duplicates and visually similar images. Nothing leaves this device.</value>
+  </data>
+  <data name="DuplicateCleanupAddFolderButton" xml:space="preserve">
+    <value>Add folder</value>
+  </data>
+  <data name="DuplicateCleanupAddFolderTooltip" xml:space="preserve">
+    <value>Add a folder to scan</value>
+  </data>
+  <data name="DuplicateCleanupAddFolderAutomationName" xml:space="preserve">
+    <value>Add scan folder</value>
+  </data>
+  <data name="DuplicateCleanupReferenceButton" xml:space="preserve">
+    <value>Reference</value>
+  </data>
+  <data name="DuplicateCleanupReferenceTooltip" xml:space="preserve">
+    <value>Add a folder whose files should be preferred as keep candidates</value>
+  </data>
+  <data name="DuplicateCleanupReferenceFolderAutomationName" xml:space="preserve">
+    <value>Add reference folder</value>
+  </data>
+  <data name="DuplicateCleanupScanButton" xml:space="preserve">
+    <value>Scan</value>
+  </data>
+  <data name="DuplicateCleanupScanTooltip" xml:space="preserve">
+    <value>Scan selected folders</value>
+  </data>
+  <data name="DuplicateCleanupScanAutomationName" xml:space="preserve">
+    <value>Scan for duplicates</value>
+  </data>
+  <data name="DuplicateCleanupCancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="DuplicateCleanupCancelTooltip" xml:space="preserve">
+    <value>Cancel the current scan</value>
+  </data>
+  <data name="DuplicateCleanupCancelAutomationName" xml:space="preserve">
+    <value>Cancel duplicate scan</value>
+  </data>
+  <data name="DuplicateCleanupFoldersToScan" xml:space="preserve">
+    <value>Folders to scan</value>
+  </data>
+  <data name="DuplicateCleanupScanFoldersAutomationName" xml:space="preserve">
+    <value>Scan folders</value>
+  </data>
+  <data name="DuplicateCleanupRemove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="DuplicateCleanupRemoveScanFolderAutomationName" xml:space="preserve">
+    <value>Remove selected scan folder</value>
+  </data>
+  <data name="DuplicateCleanupClear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="DuplicateCleanupClearScanFoldersAutomationName" xml:space="preserve">
+    <value>Clear scan folders</value>
+  </data>
+  <data name="DuplicateCleanupReferenceFolders" xml:space="preserve">
+    <value>Reference folders</value>
+  </data>
+  <data name="DuplicateCleanupReferenceFoldersHint" xml:space="preserve">
+    <value>Files in these folders are sorted first so cleanup actions keep them by default.</value>
+  </data>
+  <data name="DuplicateCleanupReferenceFoldersListAutomationName" xml:space="preserve">
+    <value>Reference folders</value>
+  </data>
+  <data name="DuplicateCleanupRemoveReferenceFolderAutomationName" xml:space="preserve">
+    <value>Remove selected reference folder</value>
+  </data>
+  <data name="DuplicateCleanupClearReferenceFoldersAutomationName" xml:space="preserve">
+    <value>Clear reference folders</value>
+  </data>
+  <data name="DuplicateCleanupSimilarityThreshold" xml:space="preserve">
+    <value>Similarity threshold</value>
+  </data>
+  <data name="DuplicateCleanupThresholdHint" xml:space="preserve">
+    <value>Lower values are stricter. Exact duplicates are always included.</value>
+  </data>
+  <data name="DuplicateCleanupFindings" xml:space="preserve">
+    <value>Findings</value>
+  </data>
+  <data name="DuplicateCleanupFindingsAutomationName" xml:space="preserve">
+    <value>Duplicate cleanup findings</value>
+  </data>
+  <data name="DuplicateCleanupEmptyStateHeading" xml:space="preserve">
+    <value>Choose folders, then scan</value>
+  </data>
+  <data name="DuplicateCleanupEmptyStateDescription" xml:space="preserve">
+    <value>Images will group byte-identical files and visually similar images. Review side by side before moving extras to quarantine or the Recycle Bin.</value>
+  </data>
+  <data name="DuplicateCleanupFinding" xml:space="preserve">
+    <value>Finding</value>
+  </data>
+  <data name="DuplicateCleanupCompareButton" xml:space="preserve">
+    <value>Compare</value>
+  </data>
+  <data name="DuplicateCleanupCompareAutomationName" xml:space="preserve">
+    <value>Compare selected duplicate pair in viewer</value>
+  </data>
+  <data name="DuplicateCleanupMarkNotDuplicateButton" xml:space="preserve">
+    <value>Mark not duplicate</value>
+  </data>
+  <data name="DuplicateCleanupMarkNotDuplicateAutomationName" xml:space="preserve">
+    <value>Mark selected finding not duplicate</value>
+  </data>
+  <data name="DuplicateCleanupQuarantineExtrasButton" xml:space="preserve">
+    <value>Quarantine extra(s)</value>
+  </data>
+  <data name="DuplicateCleanupQuarantineExtrasAutomationName" xml:space="preserve">
+    <value>Quarantine extra duplicate candidates</value>
+  </data>
+  <data name="DuplicateCleanupRecycleExtrasButton" xml:space="preserve">
+    <value>Recycle extra(s)</value>
+  </data>
+  <data name="DuplicateCleanupRecycleExtrasAutomationName" xml:space="preserve">
+    <value>Move extra duplicate candidates to Recycle Bin</value>
+  </data>
+  <data name="DuplicateCleanupKeepCandidate" xml:space="preserve">
+    <value>Keep candidate</value>
+  </data>
+  <data name="DuplicateCleanupExtraCandidate" xml:space="preserve">
+    <value>Extra candidate</value>
+  </data>
+  <data name="DuplicateCleanupReferenceCandidate" xml:space="preserve">
+    <value>Reference candidate</value>
+  </data>
+  <data name="DuplicateCleanupHelpText" xml:space="preserve">
+    <value>Cleanup actions target every candidate after the first one shown here.</value>
+  </data>
+  <data name="DuplicateCleanupReadyStatus" xml:space="preserve">
+    <value>Ready. Add one or more folders to scan.</value>
+  </data>
+  <data name="DuplicateCleanupAddedScanFolderFormat" xml:space="preserve">
+    <value>Added scan folder: {0}</value>
+  </data>
+  <data name="DuplicateCleanupAddedReferenceFolderFormat" xml:space="preserve">
+    <value>Added reference folder: {0}</value>
+  </data>
+  <data name="DuplicateCleanupAddFolderDialogTitle" xml:space="preserve">
+    <value>Add folder to scan</value>
+  </data>
+  <data name="DuplicateCleanupAddReferenceFolderDialogTitle" xml:space="preserve">
+    <value>Add reference folder</value>
+  </data>
+  <data name="DuplicateCleanupAddFolderBeforeScanning" xml:space="preserve">
+    <value>Add at least one folder before scanning.</value>
+  </data>
+  <data name="DuplicateCleanupScanningStatus" xml:space="preserve">
+    <value>Scanning folders for exact duplicates and similar images...</value>
+  </data>
+  <data name="DuplicateCleanupScanFailedSuffixFormat" xml:space="preserve">
+    <value> {0} file or folder issue{1} was skipped.</value>
+  </data>
+  <data name="DuplicateCleanupScanResultFormat" xml:space="preserve">
+    <value>Scanned {0} file{1}. Found {2} exact group{3} and {4} similar pair{5}.{6}</value>
+  </data>
+  <data name="DuplicateCleanupScanCanceled" xml:space="preserve">
+    <value>Scan canceled.</value>
+  </data>
+  <data name="DuplicateCleanupCancelingScan" xml:space="preserve">
+    <value>Canceling scan...</value>
+  </data>
+  <data name="DuplicateCleanupThresholdChanged" xml:space="preserve">
+    <value>Threshold changed. Scan again to recompute similar-image findings.</value>
+  </data>
+  <data name="DuplicateCleanupMarkedNotDuplicate" xml:space="preserve">
+    <value>Finding marked not duplicate for this session.</value>
+  </data>
+  <data name="DuplicateCleanupSelectFindingBeforeComparing" xml:space="preserve">
+    <value>Select a duplicate or similar-image finding before comparing.</value>
+  </data>
+  <data name="DuplicateCleanupCompareFileUnavailable" xml:space="preserve">
+    <value>One of the selected compare files is no longer available.</value>
+  </data>
+  <data name="DuplicateCleanupOpenedCompare" xml:space="preserve">
+    <value>Opened selected pair in viewer compare mode.</value>
+  </data>
+  <data name="DuplicateCleanupNoExtrasToQuarantine" xml:space="preserve">
+    <value>No extra files are available to quarantine.</value>
+  </data>
+  <data name="DuplicateCleanupMovingToQuarantineFormat" xml:space="preserve">
+    <value>Moving {0} extra file{1} to quarantine...</value>
+  </data>
+  <data name="DuplicateCleanupQuarantineRecoveryReason" xml:space="preserve">
+    <value>Duplicate cleanup quarantine</value>
+  </data>
+  <data name="DuplicateCleanupQuarantineRecoveryDetailFormat" xml:space="preserve">
+    <value>Moved duplicate candidate {0} to app-local quarantine batch {1}.</value>
+  </data>
+  <data name="DuplicateCleanupQuarantineUnavailable" xml:space="preserve">
+    <value>Quarantine storage is not available. No files were moved.</value>
+  </data>
+  <data name="DuplicateCleanupQuarantinePartialFormat" xml:space="preserve">
+    <value>Moved {0} file{1} to quarantine. {2} failed.</value>
+  </data>
+  <data name="DuplicateCleanupQuarantineSuccessFormat" xml:space="preserve">
+    <value>Moved {0} file{1} to quarantine: {2}</value>
+  </data>
+  <data name="DuplicateCleanupNoExtrasToRecycle" xml:space="preserve">
+    <value>No extra files are available to recycle.</value>
+  </data>
+  <data name="DuplicateCleanupRecycleRecoveryReason" xml:space="preserve">
+    <value>Duplicate cleanup Recycle Bin</value>
+  </data>
+  <data name="DuplicateCleanupRecycleRecoveryDetailFormat" xml:space="preserve">
+    <value>Sent duplicate candidate {0} to the Windows Recycle Bin.</value>
+  </data>
+  <data name="DuplicateCleanupRecycleCanceledFormat" xml:space="preserve">
+    <value>Recycle canceled after {0} file{1}.</value>
+  </data>
+  <data name="DuplicateCleanupRecyclePartialFormat" xml:space="preserve">
+    <value>Moved {0} file{1} to the Recycle Bin. {2} failed or was already missing.</value>
+  </data>
+  <data name="DuplicateCleanupRecycleSuccessFormat" xml:space="preserve">
+    <value>Moved {0} file{1} to the Recycle Bin.</value>
+  </data>
+  <data name="DuplicateCleanupHelpTextSingleExtra" xml:space="preserve">
+    <value>Cleanup actions target the extra candidate on the right.</value>
+  </data>
+  <data name="DuplicateCleanupHelpTextMultipleExtrasFormat" xml:space="preserve">
+    <value>Cleanup actions target {0} extra candidates after the keep candidate.</value>
+  </data>
+  <data name="DuplicateCleanupPreviewUnavailable" xml:space="preserve">
+    <value>Preview unavailable.</value>
+  </data>
 </root>

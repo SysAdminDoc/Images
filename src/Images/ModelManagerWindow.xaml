@@ -1,7 +1,8 @@
 <Window x:Class="Images.ModelManagerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Images - Model manager"
+        xmlns:loc="clr-namespace:Images.Localization"
+        Title="{x:Static loc:Strings.ModelManagerWindowTitle}"
         Width="1180"
         Height="780"
         MinWidth="940"
@@ -26,8 +27,8 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Model manager" Style="{StaticResource Text.Title}" />
-                    <TextBlock Text="Approved local model files stay under app data. Downloads are manual and SHA-256 verified before future AI tools can use them."
+                    <TextBlock Text="{x:Static loc:Strings.ModelManagerHeading}" Style="{StaticResource Text.Title}" />
+                    <TextBlock Text="{x:Static loc:Strings.ModelManagerSubtitle}"
                                Style="{StaticResource Text.Caption}"
                                Margin="0,3,0,0" />
                 </StackPanel>
@@ -36,42 +37,42 @@
                     <Button Style="{StaticResource ChromeButton}"
                             Margin="8,0,0,0"
                             Click="RefreshButton_Click"
-                            AutomationProperties.Name="Refresh model status">
+                            AutomationProperties.Name="{x:Static loc:Strings.ModelManagerRefreshAutomationName}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE72C;"
                                        FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="12"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center" />
-                            <TextBlock Text="Refresh" />
+                            <TextBlock Text="{x:Static loc:Strings.ModelManagerRefresh}" />
                         </StackPanel>
                     </Button>
                     <Button x:Name="RevealRootButton"
                             Style="{StaticResource ChromeButton}"
                             Margin="8,0,0,0"
                             Click="RevealRootButton_Click"
-                            AutomationProperties.Name="Reveal model storage">
+                            AutomationProperties.Name="{x:Static loc:Strings.ModelManagerRevealStorageAutomationName}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE8B7;"
                                        FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="12"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center" />
-                            <TextBlock Text="Reveal storage" />
+                            <TextBlock Text="{x:Static loc:Strings.ModelManagerRevealStorage}" />
                         </StackPanel>
                     </Button>
                     <Button x:Name="ImportButton"
                             Style="{StaticResource PrimaryButton}"
                             Margin="8,0,0,0"
                             Click="ImportButton_Click"
-                            AutomationProperties.Name="Import selected model file">
+                            AutomationProperties.Name="{x:Static loc:Strings.ModelManagerImportAutomationName}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE8B7;"
                                        FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="12"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center" />
-                            <TextBlock Text="Import file" />
+                            <TextBlock Text="{x:Static loc:Strings.ModelManagerImportFile}" />
                         </StackPanel>
                     </Button>
                 </WrapPanel>
@@ -99,7 +100,7 @@
 
                     <Border Grid.Row="0" Style="{StaticResource Card}" Padding="12" Margin="0,0,0,14">
                         <StackPanel>
-                            <TextBlock Text="Runtime" Style="{StaticResource SectionLabel}" />
+                            <TextBlock Text="{x:Static loc:Strings.ModelManagerRuntimeSection}" Style="{StaticResource SectionLabel}" />
                             <TextBlock x:Name="RuntimeStatusText"
                                        Style="{StaticResource Text.Caption}"
                                        TextWrapping="Wrap"
@@ -112,7 +113,7 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Approved models" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{x:Static loc:Strings.ModelManagerApprovedModels}" Style="{StaticResource SectionLabel}" />
                         <TextBlock x:Name="ModelCountText"
                                    Grid.Column="1"
                                    Text="0"
@@ -123,7 +124,7 @@
                     <ListBox x:Name="ModelsList"
                              Grid.Row="2"
                              SelectionChanged="ModelsList_SelectionChanged"
-                             AutomationProperties.Name="Approved local models">
+                             AutomationProperties.Name="{x:Static loc:Strings.ModelManagerApprovedLocalModelsAutomationName}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border Padding="12,10">
@@ -172,10 +173,10 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center">
                         <StackPanel>
-                            <TextBlock Text="No model selected"
+                            <TextBlock Text="{x:Static loc:Strings.ModelManagerNoModelSelected}"
                                        Style="{StaticResource Text.Display}"
                                        TextAlignment="Center" />
-                            <TextBlock Text="Select an approved model to inspect its source, hash, local status, and import requirements."
+                            <TextBlock Text="{x:Static loc:Strings.ModelManagerNoModelSelectedSubtitle}"
                                        Style="{StaticResource Text.Subtitle}"
                                        TextAlignment="Center"
                                        Margin="0,10,0,0" />
@@ -209,14 +210,14 @@
                                     <Button Style="{StaticResource ChromeButton}"
                                             Margin="0,0,8,0"
                                             Click="OpenSourceButton_Click"
-                                            AutomationProperties.Name="Open selected model source">
-                                        <TextBlock Text="Source" />
+                                            AutomationProperties.Name="{x:Static loc:Strings.ModelManagerOpenSourceAutomationName}">
+                                        <TextBlock Text="{x:Static loc:Strings.ModelManagerSourceButton}" />
                                     </Button>
                                     <Button x:Name="DeleteButton"
                                             Style="{StaticResource DangerButton}"
                                             Click="DeleteButton_Click"
-                                            AutomationProperties.Name="Delete selected local model">
-                                        <TextBlock Text="Delete local" />
+                                            AutomationProperties.Name="{x:Static loc:Strings.ModelManagerDeleteLocalAutomationName}">
+                                        <TextBlock Text="{x:Static loc:Strings.ModelManagerDeleteLocal}" />
                                     </Button>
                                 </WrapPanel>
                             </Grid>
@@ -242,30 +243,30 @@
                                             <RowDefinition />
                                         </Grid.RowDefinitions>
 
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Purpose" Style="{StaticResource MetaLabel}" />
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Static loc:Strings.ModelManagerPurposeLabel}" Style="{StaticResource MetaLabel}" />
                                         <TextBlock x:Name="PurposeText" Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" TextWrapping="Wrap" />
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="License" Style="{StaticResource MetaLabel}" />
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static loc:Strings.ModelManagerLicenseLabel}" Style="{StaticResource MetaLabel}" />
                                         <TextBlock x:Name="LicenseText" Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" TextWrapping="Wrap" />
-                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Runtime" Style="{StaticResource MetaLabel}" />
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static loc:Strings.ModelManagerRuntimeLabel}" Style="{StaticResource MetaLabel}" />
                                         <TextBlock x:Name="RuntimeText" Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" TextWrapping="Wrap" />
-                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Source" Style="{StaticResource MetaLabel}" />
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static loc:Strings.ModelManagerSourceLabel}" Style="{StaticResource MetaLabel}" />
                                         <TextBlock x:Name="SourceText" Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" TextWrapping="Wrap" />
-                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Download" Style="{StaticResource MetaLabel}" />
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="{x:Static loc:Strings.ModelManagerDownloadLabel}" Style="{StaticResource MetaLabel}" />
                                         <TextBlock x:Name="DownloadText" Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" TextWrapping="Wrap" />
-                                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Expected SHA-256" Style="{StaticResource MetaLabel}" />
+                                        <TextBlock Grid.Row="5" Grid.Column="0" Text="{x:Static loc:Strings.ModelManagerExpectedShaLabel}" Style="{StaticResource MetaLabel}" />
                                         <TextBlock x:Name="ExpectedShaText" Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" TextWrapping="Wrap" />
-                                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Local SHA-256" Style="{StaticResource MetaLabel}" />
+                                        <TextBlock Grid.Row="6" Grid.Column="0" Text="{x:Static loc:Strings.ModelManagerLocalShaLabel}" Style="{StaticResource MetaLabel}" />
                                         <TextBlock x:Name="LocalShaText" Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" TextWrapping="Wrap" />
-                                        <TextBlock Grid.Row="7" Grid.Column="0" Text="Local path" Style="{StaticResource MetaLabel}" />
+                                        <TextBlock Grid.Row="7" Grid.Column="0" Text="{x:Static loc:Strings.ModelManagerLocalPathLabel}" Style="{StaticResource MetaLabel}" />
                                         <TextBlock x:Name="LocalPathText" Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" TextWrapping="Wrap" />
-                                        <TextBlock Grid.Row="8" Grid.Column="0" Text="Imported" Style="{StaticResource MetaLabel}" />
+                                        <TextBlock Grid.Row="8" Grid.Column="0" Text="{x:Static loc:Strings.ModelManagerImportedLabel}" Style="{StaticResource MetaLabel}" />
                                         <TextBlock x:Name="ImportedText" Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" TextWrapping="Wrap" />
                                     </Grid>
                                 </Border>
 
                                 <Border Style="{StaticResource Card}" Padding="14" Margin="0,14,0,0">
                                     <StackPanel>
-                                        <TextBlock Text="Notes" Style="{StaticResource SectionLabel}" />
+                                        <TextBlock Text="{x:Static loc:Strings.ModelManagerNotesSection}" Style="{StaticResource SectionLabel}" />
                                         <TextBlock x:Name="NotesText"
                                                    Style="{StaticResource Text.Caption}"
                                                    TextWrapping="Wrap"
@@ -290,7 +291,7 @@
                                            Foreground="{StaticResource AccentBrush}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,9,0" />
-                                <TextBlock Text="Images never downloads models automatically. Import only model files you chose from an approved source; mismatched hashes stay disabled."
+                                <TextBlock Text="{x:Static loc:Strings.ModelManagerSecurityNotice}"
                                            Style="{StaticResource Text.Caption}"
                                            TextWrapping="Wrap"
                                            VerticalAlignment="Center" />
@@ -314,7 +315,7 @@
                          Margin="0,0,9,0"
                          VerticalAlignment="Center" />
                 <TextBlock x:Name="StatusText"
-                           Text="Ready."
+                           Text="{x:Static loc:Strings.ModelManagerReady}"
                            Style="{StaticResource Text.Caption}"
                            TextWrapping="Wrap"
                            VerticalAlignment="Center" />

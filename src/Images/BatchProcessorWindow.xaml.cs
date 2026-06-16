@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Images.Localization;
 using Images.Services;
 using Microsoft.Win32;
 
@@ -53,7 +54,7 @@ public partial class BatchProcessorWindow : Window
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
-            SetStatus("Could not add that batch source.", BatchProcessorStatus.Warning);
+            SetStatus(Strings.BatchCouldNotAddSource, BatchProcessorStatus.Warning);
         }
     }
 
@@ -61,7 +62,7 @@ public partial class BatchProcessorWindow : Window
     {
         var dialog = new OpenFileDialog
         {
-            Title = "Add files to batch processor",
+            Title = Strings.BatchAddFilesDialogTitle,
             Filter = SupportedImageFormats.OpenDialogFilter,
             Multiselect = true
         };
@@ -71,34 +72,34 @@ public partial class BatchProcessorWindow : Window
 
         foreach (var path in dialog.FileNames)
             AddSource(path);
-        SetStatus($"Added {dialog.FileNames.Length} source file{Plural(dialog.FileNames.Length)}.", BatchProcessorStatus.Ready);
+        SetStatus(Strings.Format("BatchAddedSourceFilesFormat", dialog.FileNames.Length, Plural(dialog.FileNames.Length)), BatchProcessorStatus.Ready);
     }
 
     private void AddFolderButton_Click(object sender, RoutedEventArgs e)
     {
-        var folder = PickFolder("Add folder to batch processor");
+        var folder = PickFolder(Strings.BatchAddFolderDialogTitle);
         if (folder is null)
             return;
 
         AddSource(folder);
-        SetStatus("Added source folder.", BatchProcessorStatus.Ready);
+        SetStatus(Strings.BatchAddedSourceFolder, BatchProcessorStatus.Ready);
     }
 
     private void ClearSourcesButton_Click(object sender, RoutedEventArgs e)
     {
         _sourceRows.Clear();
         _previewRows.Clear();
-        SetStatus("Sources cleared.", BatchProcessorStatus.Ready);
+        SetStatus(Strings.BatchSourcesCleared, BatchProcessorStatus.Ready);
     }
 
     private void ChooseOutputButton_Click(object sender, RoutedEventArgs e)
     {
-        var folder = PickFolder("Choose batch output folder");
+        var folder = PickFolder(Strings.BatchChooseOutputFolderDialogTitle);
         if (folder is null)
             return;
 
         _outputFolder = folder;
-        OutputFolderText.Text = "Output folder: " + folder;
+        OutputFolderText.Text = Strings.Format("BatchOutputFolderFormat", folder);
         OutputFolderText.ToolTip = folder;
     }
 
@@ -121,7 +122,7 @@ public partial class BatchProcessorWindow : Window
     {
         if (_loadingPreset)
             return;
-        PreviewSummaryText.Text = "Settings changed. Build a new preview before running.";
+        PreviewSummaryText.Text = Strings.BatchSettingsChanged;
     }
 
     private async void PreviewButton_Click(object sender, RoutedEventArgs e)
@@ -132,7 +133,7 @@ public partial class BatchProcessorWindow : Window
         var sources = CollectSourceFiles();
         if (sources.Count == 0)
         {
-            SetStatus("Add supported source files before running a batch.", BatchProcessorStatus.Warning);
+            SetStatus(Strings.BatchAddSourcesBeforeRunning, BatchProcessorStatus.Warning);
             return;
         }
 
@@ -140,7 +141,7 @@ public partial class BatchProcessorWindow : Window
         _resultRows.Clear();
         var preset = ReadPreset();
         var dryRun = DryRunCheckBox.IsChecked == true;
-        SetStatus($"Running batch for {sources.Count} file{Plural(sources.Count)}...", BatchProcessorStatus.Busy);
+        SetStatus(Strings.Format("BatchRunningFormat", sources.Count, Plural(sources.Count)), BatchProcessorStatus.Busy);
 
         try
         {
@@ -148,14 +149,14 @@ public partial class BatchProcessorWindow : Window
             foreach (var item in result.Items)
             {
                 _resultRows.Add(item.Success
-                    ? $"OK: {Path.GetFileName(item.SourcePath)} -> {item.FinalPath}"
-                    : $"Failed: {Path.GetFileName(item.SourcePath)} - {item.Error}");
+                    ? Strings.Format("BatchResultOkFormat", Path.GetFileName(item.SourcePath), item.FinalPath)
+                    : Strings.Format("BatchResultFailedFormat", Path.GetFileName(item.SourcePath), item.Error));
                 foreach (var message in item.Messages)
                     _resultRows.Add("  " + message);
             }
 
             SetStatus(
-                $"Batch complete: {result.SuccessCount} succeeded, {result.FailedCount} failed.",
+                Strings.Format("BatchCompleteFormat", result.SuccessCount, result.FailedCount),
                 result.FailedCount == 0 ? BatchProcessorStatus.Ready : BatchProcessorStatus.Warning);
         }
         finally
@@ -169,12 +170,12 @@ public partial class BatchProcessorWindow : Window
         var sources = CollectSourceFiles();
         if (sources.Count == 0)
         {
-            SetStatus("Add supported source files before building a preview.", BatchProcessorStatus.Warning);
+            SetStatus(Strings.BatchAddSourcesBeforePreview, BatchProcessorStatus.Warning);
             return;
         }
 
         SetBusy(true);
-        SetStatus("Building batch preview...", BatchProcessorStatus.Busy);
+        SetStatus(Strings.BatchBuildingPreview, BatchProcessorStatus.Busy);
         try
         {
             var preset = ReadPreset();
@@ -183,8 +184,8 @@ public partial class BatchProcessorWindow : Window
             foreach (var item in result.Items)
                 _previewRows.Add(item);
 
-            PreviewSummaryText.Text = $"Preview: {result.Items.Count} file{Plural(result.Items.Count)}, {result.FailedCount} skipped.";
-            SetStatus("Batch preview ready.", BatchProcessorStatus.Ready);
+            PreviewSummaryText.Text = Strings.Format("BatchPreviewSummaryFormat", result.Items.Count, Plural(result.Items.Count), result.FailedCount);
+            SetStatus(Strings.BatchPreviewReady, BatchProcessorStatus.Ready);
         }
         finally
         {
@@ -196,8 +197,8 @@ public partial class BatchProcessorWindow : Window
     {
         var dialog = new OpenFileDialog
         {
-            Title = "Load batch preset",
-            Filter = "Batch preset JSON|*.json|All files|*.*"
+            Title = Strings.BatchLoadPresetDialogTitle,
+            Filter = $"{Strings.BatchPresetFilterLabel}|*.json|{Strings.BatchAllFilesFilterLabel}|*.*"
         };
 
         if (dialog.ShowDialog(this) != true)
@@ -206,11 +207,11 @@ public partial class BatchProcessorWindow : Window
         try
         {
             ApplyPreset(BatchProcessorService.ParsePreset(File.ReadAllText(dialog.FileName)));
-            SetStatus("Batch preset loaded.", BatchProcessorStatus.Ready);
+            SetStatus(Strings.BatchPresetLoaded, BatchProcessorStatus.Ready);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException or System.Text.Json.JsonException)
         {
-            SetStatus("Could not load batch preset.", BatchProcessorStatus.Error);
+            SetStatus(Strings.BatchCouldNotLoadPreset, BatchProcessorStatus.Error);
         }
     }
 
@@ -218,8 +219,8 @@ public partial class BatchProcessorWindow : Window
     {
         var dialog = new SaveFileDialog
         {
-            Title = "Save batch preset",
-            Filter = "Batch preset JSON|*.json|All files|*.*",
+            Title = Strings.BatchSavePresetDialogTitle,
+            Filter = $"{Strings.BatchPresetFilterLabel}|*.json|{Strings.BatchAllFilesFilterLabel}|*.*",
             FileName = "images-batch-preset.json"
         };
 
@@ -229,11 +230,11 @@ public partial class BatchProcessorWindow : Window
         try
         {
             File.WriteAllText(dialog.FileName, BatchProcessorService.SerializePreset(ReadPreset()));
-            SetStatus("Batch preset saved.", BatchProcessorStatus.Ready);
+            SetStatus(Strings.BatchPresetSaved, BatchProcessorStatus.Ready);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
         {
-            SetStatus("Could not save batch preset.", BatchProcessorStatus.Error);
+            SetStatus(Strings.BatchCouldNotSavePreset, BatchProcessorStatus.Error);
         }
     }
 
@@ -248,7 +249,7 @@ public partial class BatchProcessorWindow : Window
         MaxWidthBox.Text = preset.MaxWidth.ToString(CultureInfo.InvariantCulture);
         MaxHeightBox.Text = preset.MaxHeight.ToString(CultureInfo.InvariantCulture);
         _loadingPreset = false;
-        PreviewSummaryText.Text = "Preset ready. Build a preview to inspect output paths and dimensions.";
+        PreviewSummaryText.Text = Strings.BatchPresetReady;
     }
 
     private BatchProcessorPreset ReadPreset()
@@ -284,7 +285,7 @@ public partial class BatchProcessorWindow : Window
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
             {
-                _resultRows.Add($"Skipped source: {row}");
+                _resultRows.Add(Strings.Format("BatchSkippedSourceFormat", row));
             }
         }
 

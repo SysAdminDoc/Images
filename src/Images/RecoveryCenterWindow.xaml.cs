@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Images.Localization;
 using Images.Services;
 
 namespace Images;
@@ -46,25 +47,25 @@ public partial class RecoveryCenterWindow : Window
         var record = SelectedRecord;
         if (record is null)
         {
-            SetStatus("Select a recovery record first.", RecoveryStatus.Warning);
+            SetStatus(Strings.RecoveryCenterSelectRecordFirst, RecoveryStatus.Warning);
             return;
         }
 
         var path = _recoveryCenter.ResolveRevealPath(record.Id);
         if (string.IsNullOrWhiteSpace(path))
         {
-            SetStatus("No existing path or parent folder is available for this record.", RecoveryStatus.Warning);
+            SetStatus(Strings.RecoveryCenterNoRevealPath, RecoveryStatus.Warning);
             return;
         }
 
         try
         {
             ShellIntegration.RevealPathInExplorer(path);
-            SetStatus("Opened recovery location in Explorer.", RecoveryStatus.Ready);
+            SetStatus(Strings.RecoveryCenterRevealOpened, RecoveryStatus.Ready);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
-            SetStatus("Reveal failed: " + ex.Message, RecoveryStatus.Error);
+            SetStatus(Strings.Format(nameof(Strings.RecoveryCenterRevealFailedFormat), ex.Message), RecoveryStatus.Error);
         }
     }
 
@@ -73,7 +74,7 @@ public partial class RecoveryCenterWindow : Window
         var record = SelectedRecord;
         if (record is null)
         {
-            SetStatus("Select a restorable recovery record first.", RecoveryStatus.Warning);
+            SetStatus(Strings.RecoveryCenterSelectRestorableFirst, RecoveryStatus.Warning);
             return;
         }
 
@@ -110,7 +111,7 @@ public partial class RecoveryCenterWindow : Window
             RecordsList.SelectedIndex = 0;
 
         RenderSelectedRecord();
-        SetStatus(_records.Count == 0 ? "No recovery records yet." : "Recovery records refreshed.", RecoveryStatus.Ready);
+        SetStatus(_records.Count == 0 ? Strings.RecoveryCenterNoRecordsYet : Strings.RecoveryCenterRefreshed, RecoveryStatus.Ready);
     }
 
     private void RenderSelectedRecord()
@@ -130,8 +131,8 @@ public partial class RecoveryCenterWindow : Window
         KindText.Text = record.KindText;
         CreatedText.Text = record.CreatedText;
         StatusValueText.Text = record.RestoreStateText;
-        OriginalPathText.Text = string.IsNullOrWhiteSpace(record.OriginalPath) ? "Not recorded" : record.OriginalPath;
-        CurrentPathText.Text = string.IsNullOrWhiteSpace(record.CurrentPath) ? "Not recorded" : record.CurrentPath;
+        OriginalPathText.Text = string.IsNullOrWhiteSpace(record.OriginalPath) ? Strings.RecoveryCenterNotRecorded : record.OriginalPath;
+        CurrentPathText.Text = string.IsNullOrWhiteSpace(record.CurrentPath) ? Strings.RecoveryCenterNotRecorded : record.CurrentPath;
         RestoreHintText.Text = record.RestoreHint;
         ExpirationText.Text = record.ExpirationText;
         SidecarsList.ItemsSource = record.Sidecars;

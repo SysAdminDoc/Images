@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Images.Localization;
 using Images.Services;
 using Microsoft.Win32;
 
@@ -51,7 +52,7 @@ public partial class DuplicateCleanupWindow : Window
             !_scanFolders.Contains(normalized, StringComparer.OrdinalIgnoreCase))
         {
             _scanFolders.Add(normalized);
-            SetStatus($"Added scan folder: {normalized}", CleanupStatus.Ready);
+            SetStatus(Strings.Format(nameof(Strings.DuplicateCleanupAddedScanFolderFormat), normalized), CleanupStatus.Ready);
         }
     }
 
@@ -61,20 +62,20 @@ public partial class DuplicateCleanupWindow : Window
             !_referenceFolders.Contains(normalized, StringComparer.OrdinalIgnoreCase))
         {
             _referenceFolders.Add(normalized);
-            SetStatus($"Added reference folder: {normalized}", CleanupStatus.Ready);
+            SetStatus(Strings.Format(nameof(Strings.DuplicateCleanupAddedReferenceFolderFormat), normalized), CleanupStatus.Ready);
         }
     }
 
     private void AddFolderButton_Click(object sender, RoutedEventArgs e)
     {
-        var folder = PickFolder("Add folder to scan");
+        var folder = PickFolder(Strings.DuplicateCleanupAddFolderDialogTitle);
         if (folder is not null)
             AddScanFolder(folder);
     }
 
     private void AddReferenceFolderButton_Click(object sender, RoutedEventArgs e)
     {
-        var folder = PickFolder("Add reference folder");
+        var folder = PickFolder(Strings.DuplicateCleanupAddReferenceFolderDialogTitle);
         if (folder is not null)
             AddReferenceFolder(folder);
     }
@@ -83,7 +84,7 @@ public partial class DuplicateCleanupWindow : Window
     {
         if (_scanFolders.Count == 0)
         {
-            SetStatus("Add at least one folder before scanning.", CleanupStatus.Warning);
+            SetStatus(Strings.DuplicateCleanupAddFolderBeforeScanning, CleanupStatus.Warning);
             return;
         }
 
@@ -98,7 +99,7 @@ public partial class DuplicateCleanupWindow : Window
         SetBusy(true);
         _findings.Clear();
         ResetDetail();
-        SetStatus("Scanning folders for exact duplicates and similar images...", CleanupStatus.Busy);
+        SetStatus(Strings.DuplicateCleanupScanningStatus, CleanupStatus.Busy);
 
         try
         {
@@ -117,16 +118,16 @@ public partial class DuplicateCleanupWindow : Window
                 ResetDetail();
 
             var failedText = result.FailedCount > 0
-                ? $" {result.FailedCount} file or folder issue{Plural(result.FailedCount)} was skipped."
+                ? Strings.Format(nameof(Strings.DuplicateCleanupScanFailedSuffixFormat), result.FailedCount, Plural(result.FailedCount))
                 : string.Empty;
 
             SetStatus(
-                $"Scanned {result.FileCount} file{Plural(result.FileCount)}. Found {result.ExactGroupCount} exact group{Plural(result.ExactGroupCount)} and {result.SimilarPairCount} similar pair{Plural(result.SimilarPairCount)}.{failedText}",
+                Strings.Format(nameof(Strings.DuplicateCleanupScanResultFormat), result.FileCount, Plural(result.FileCount), result.ExactGroupCount, Plural(result.ExactGroupCount), result.SimilarPairCount, Plural(result.SimilarPairCount), failedText),
                 _findings.Count > 0 ? CleanupStatus.Ready : CleanupStatus.Warning);
         }
         catch (OperationCanceledException)
         {
-            SetStatus("Scan canceled.", CleanupStatus.Warning);
+            SetStatus(Strings.DuplicateCleanupScanCanceled, CleanupStatus.Warning);
         }
         finally
         {
@@ -139,7 +140,7 @@ public partial class DuplicateCleanupWindow : Window
     private void CancelScanButton_Click(object sender, RoutedEventArgs e)
     {
         _scanCancellation?.Cancel();
-        SetStatus("Canceling scan...", CleanupStatus.Busy);
+        SetStatus(Strings.DuplicateCleanupCancelingScan, CleanupStatus.Busy);
     }
 
     private void RemoveScanFolderButton_Click(object sender, RoutedEventArgs e)
@@ -167,7 +168,7 @@ public partial class DuplicateCleanupWindow : Window
 
         ThresholdText.Text = ((int)Math.Round(e.NewValue)).ToString(System.Globalization.CultureInfo.InvariantCulture);
         if (_findings.Count > 0)
-            SetStatus("Threshold changed. Scan again to recompute similar-image findings.", CleanupStatus.Warning);
+            SetStatus(Strings.DuplicateCleanupThresholdChanged, CleanupStatus.Warning);
     }
 
     private void FindingsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -180,7 +181,7 @@ public partial class DuplicateCleanupWindow : Window
             return;
 
         RemoveFinding(finding);
-        SetStatus("Finding marked not duplicate for this session.", CleanupStatus.Ready);
+        SetStatus(Strings.DuplicateCleanupMarkedNotDuplicate, CleanupStatus.Ready);
     }
 
     private void CompareSelectedButton_Click(object sender, RoutedEventArgs e)
@@ -188,13 +189,13 @@ public partial class DuplicateCleanupWindow : Window
         var finding = SelectedFinding;
         if (finding?.PrimaryCandidate is null || finding.SecondaryCandidate is null)
         {
-            SetStatus("Select a duplicate or similar-image finding before comparing.", CleanupStatus.Warning);
+            SetStatus(Strings.DuplicateCleanupSelectFindingBeforeComparing, CleanupStatus.Warning);
             return;
         }
 
         if (!File.Exists(finding.PrimaryCandidate.Path) || !File.Exists(finding.SecondaryCandidate.Path))
         {
-            SetStatus("One of the selected compare files is no longer available.", CleanupStatus.Warning);
+            SetStatus(Strings.DuplicateCleanupCompareFileUnavailable, CleanupStatus.Warning);
             return;
         }
 
@@ -203,7 +204,7 @@ public partial class DuplicateCleanupWindow : Window
             new DuplicateCompareRequestedEventArgs(
                 finding.PrimaryCandidate.Path,
                 finding.SecondaryCandidate.Path));
-        SetStatus("Opened selected pair in viewer compare mode.", CleanupStatus.Ready);
+        SetStatus(Strings.DuplicateCleanupOpenedCompare, CleanupStatus.Ready);
     }
 
     private async void QuarantineExtrasButton_Click(object sender, RoutedEventArgs e)
@@ -212,12 +213,12 @@ public partial class DuplicateCleanupWindow : Window
         var paths = ExtraExistingPaths(finding);
         if (paths.Count == 0)
         {
-            SetStatus("No extra files are available to quarantine.", CleanupStatus.Warning);
+            SetStatus(Strings.DuplicateCleanupNoExtrasToQuarantine, CleanupStatus.Warning);
             return;
         }
 
         SetBusy(true);
-        SetStatus($"Moving {paths.Count} extra file{Plural(paths.Count)} to quarantine...", CleanupStatus.Busy);
+        SetStatus(Strings.Format(nameof(Strings.DuplicateCleanupMovingToQuarantineFormat), paths.Count, Plural(paths.Count)), CleanupStatus.Busy);
 
         try
         {
@@ -227,8 +228,8 @@ public partial class DuplicateCleanupWindow : Window
                 _recoveryCenter.RecordQuarantine(
                     moved.SourcePath,
                     moved.DestinationPath,
-                    "Duplicate cleanup quarantine",
-                    $"Moved duplicate candidate {Path.GetFileName(moved.SourcePath)} to app-local quarantine batch {Path.GetFileName(result.BatchDirectory ?? string.Empty)}.");
+                    Strings.DuplicateCleanupQuarantineRecoveryReason,
+                    Strings.Format(nameof(Strings.DuplicateCleanupQuarantineRecoveryDetailFormat), Path.GetFileName(moved.SourcePath), Path.GetFileName(result.BatchDirectory ?? string.Empty)));
             }
 
             if (result.MovedCount > 0 && finding is not null)
@@ -236,15 +237,15 @@ public partial class DuplicateCleanupWindow : Window
 
             if (!result.IsAvailable)
             {
-                SetStatus("Quarantine storage is not available. No files were moved.", CleanupStatus.Error);
+                SetStatus(Strings.DuplicateCleanupQuarantineUnavailable, CleanupStatus.Error);
             }
             else if (result.FailedCount > 0)
             {
-                SetStatus($"Moved {result.MovedCount} file{Plural(result.MovedCount)} to quarantine. {result.FailedCount} failed.", CleanupStatus.Warning);
+                SetStatus(Strings.Format(nameof(Strings.DuplicateCleanupQuarantinePartialFormat), result.MovedCount, Plural(result.MovedCount), result.FailedCount), CleanupStatus.Warning);
             }
             else
             {
-                SetStatus($"Moved {result.MovedCount} file{Plural(result.MovedCount)} to quarantine: {result.BatchDirectory}", CleanupStatus.Ready);
+                SetStatus(Strings.Format(nameof(Strings.DuplicateCleanupQuarantineSuccessFormat), result.MovedCount, Plural(result.MovedCount), result.BatchDirectory), CleanupStatus.Ready);
             }
         }
         finally
@@ -259,7 +260,7 @@ public partial class DuplicateCleanupWindow : Window
         var paths = ExtraExistingPaths(finding);
         if (paths.Count == 0)
         {
-            SetStatus("No extra files are available to recycle.", CleanupStatus.Warning);
+            SetStatus(Strings.DuplicateCleanupNoExtrasToRecycle, CleanupStatus.Warning);
             return;
         }
 
@@ -273,12 +274,12 @@ public partial class DuplicateCleanupWindow : Window
                 case RecycleBinDeleteStatus.Deleted:
                     _recoveryCenter.RecordRecycleBin(
                         path,
-                        "Duplicate cleanup Recycle Bin",
-                        $"Sent duplicate candidate {Path.GetFileName(path)} to the Windows Recycle Bin.");
+                        Strings.DuplicateCleanupRecycleRecoveryReason,
+                        Strings.Format(nameof(Strings.DuplicateCleanupRecycleRecoveryDetailFormat), Path.GetFileName(path)));
                     deleted++;
                     break;
                 case RecycleBinDeleteStatus.Canceled:
-                    SetStatus($"Recycle canceled after {deleted} file{Plural(deleted)}.", CleanupStatus.Warning);
+                    SetStatus(Strings.Format(nameof(Strings.DuplicateCleanupRecycleCanceledFormat), deleted, Plural(deleted)), CleanupStatus.Warning);
                     if (deleted > 0 && finding is not null)
                         RemoveFinding(finding);
                     return;
@@ -294,8 +295,8 @@ public partial class DuplicateCleanupWindow : Window
 
         SetStatus(
             failed > 0
-                ? $"Moved {deleted} file{Plural(deleted)} to the Recycle Bin. {failed} failed or was already missing."
-                : $"Moved {deleted} file{Plural(deleted)} to the Recycle Bin.",
+                ? Strings.Format(nameof(Strings.DuplicateCleanupRecyclePartialFormat), deleted, Plural(deleted), failed)
+                : Strings.Format(nameof(Strings.DuplicateCleanupRecycleSuccessFormat), deleted, Plural(deleted)),
             failed > 0 ? CleanupStatus.Warning : CleanupStatus.Ready);
     }
 
@@ -315,11 +316,11 @@ public partial class DuplicateCleanupWindow : Window
         DetailTitle.Text = finding.Title;
         DetailSummary.Text = finding.Summary;
         DetailHelpText.Text = finding.ExtraCandidates.Count == 1
-            ? "Cleanup actions target the extra candidate on the right."
-            : $"Cleanup actions target {finding.ExtraCandidates.Count} extra candidates after the keep candidate.";
+            ? Strings.DuplicateCleanupHelpTextSingleExtra
+            : Strings.Format(nameof(Strings.DuplicateCleanupHelpTextMultipleExtrasFormat), finding.ExtraCandidates.Count);
 
-        RenderCandidate(finding.PrimaryCandidate, PrimaryPreview, PrimaryNameText, PrimaryFolderText, PrimarySizeText, PrimaryReferenceBadge, "Keep candidate");
-        RenderCandidate(finding.SecondaryCandidate, SecondaryPreview, SecondaryNameText, SecondaryFolderText, SecondarySizeText, SecondaryReferenceBadge, "Extra candidate");
+        RenderCandidate(finding.PrimaryCandidate, PrimaryPreview, PrimaryNameText, PrimaryFolderText, PrimarySizeText, PrimaryReferenceBadge, Strings.DuplicateCleanupKeepCandidate);
+        RenderCandidate(finding.SecondaryCandidate, SecondaryPreview, SecondaryNameText, SecondaryFolderText, SecondarySizeText, SecondaryReferenceBadge, Strings.DuplicateCleanupExtraCandidate);
     }
 
     private static void RenderCandidate(
@@ -336,12 +337,12 @@ public partial class DuplicateCleanupWindow : Window
         folderText.Text = candidate.Folder;
         folderText.ToolTip = candidate.Folder;
         sizeText.Text = $"{candidate.SizeText} - {candidate.ReferenceText} - SHA {candidate.ShortHash}";
-        badge.Visibility = candidate.IsReference || role == "Keep candidate"
+        badge.Visibility = candidate.IsReference || role == Strings.DuplicateCleanupKeepCandidate
             ? Visibility.Visible
             : Visibility.Collapsed;
 
         if (badge.Child is TextBlock badgeText)
-            badgeText.Text = candidate.IsReference ? "Reference candidate" : role;
+            badgeText.Text = candidate.IsReference ? Strings.DuplicateCleanupReferenceCandidate : role;
 
         try
         {
@@ -351,7 +352,7 @@ public partial class DuplicateCleanupWindow : Window
         catch
         {
             preview.Source = null;
-            preview.ToolTip = "Preview unavailable.";
+            preview.ToolTip = Strings.DuplicateCleanupPreviewUnavailable;
         }
     }
 

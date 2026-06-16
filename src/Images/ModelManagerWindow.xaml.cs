@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Images.Localization;
 using Images.Services;
 using Microsoft.Win32;
 
@@ -47,14 +48,14 @@ public partial class ModelManagerWindow : Window
         var model = SelectedModel;
         if (model is null)
         {
-            SetStatus("Select an approved model before importing.", ModelStatusTone.Warning);
+            SetStatus(Strings.ModelManagerSelectBeforeImporting, ModelStatusTone.Warning);
             return;
         }
 
         var dialog = new OpenFileDialog
         {
-            Title = "Import approved model file",
-            Filter = "Approved model files (*.onnx;*.json)|*.onnx;*.json|All files (*.*)|*.*",
+            Title = Strings.ModelManagerImportDialogTitle,
+            Filter = Strings.ModelManagerImportDialogFilter,
             CheckFileExists = true,
             Multiselect = false
         };
@@ -78,7 +79,7 @@ public partial class ModelManagerWindow : Window
         var model = SelectedModel;
         if (model is null)
         {
-            SetStatus("Select a model before deleting local files.", ModelStatusTone.Warning);
+            SetStatus(Strings.ModelManagerSelectBeforeDeleting, ModelStatusTone.Warning);
             return;
         }
 
@@ -92,18 +93,18 @@ public partial class ModelManagerWindow : Window
         var root = _modelManager.GetModelRoot();
         if (string.IsNullOrWhiteSpace(root))
         {
-            SetStatus("Model storage is not available.", ModelStatusTone.Warning);
+            SetStatus(Strings.ModelManagerStorageNotAvailable, ModelStatusTone.Warning);
             return;
         }
 
         try
         {
             ShellIntegration.OpenFolder(root);
-            SetStatus("Opened model storage folder.", ModelStatusTone.Ready);
+            SetStatus(Strings.ModelManagerStorageOpened, ModelStatusTone.Ready);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
-            SetStatus("Could not open model storage: " + ex.Message, ModelStatusTone.Error);
+            SetStatus(Strings.Format("ModelManagerStorageOpenFailedFormat", ex.Message), ModelStatusTone.Error);
         }
     }
 
@@ -112,18 +113,18 @@ public partial class ModelManagerWindow : Window
         var model = SelectedModel;
         if (model is null)
         {
-            SetStatus("Select a model first.", ModelStatusTone.Warning);
+            SetStatus(Strings.ModelManagerSelectFirst, ModelStatusTone.Warning);
             return;
         }
 
         try
         {
             ShellIntegration.OpenShellTarget(model.Definition.SourceUrl);
-            SetStatus("Opened approved model source.", ModelStatusTone.Ready);
+            SetStatus(Strings.ModelManagerSourceOpened, ModelStatusTone.Ready);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
-            SetStatus("Could not open model source: " + ex.Message, ModelStatusTone.Error);
+            SetStatus(Strings.Format("ModelManagerSourceOpenFailedFormat", ex.Message), ModelStatusTone.Error);
         }
     }
 
@@ -149,7 +150,7 @@ public partial class ModelManagerWindow : Window
             ModelsList.SelectedIndex = 0;
 
         RenderSelectedModel();
-        SetStatus("Model manager refreshed.", ModelStatusTone.Ready);
+        SetStatus(Strings.ModelManagerRefreshed, ModelStatusTone.Ready);
     }
 
     private void RenderSelectedModel()
@@ -172,10 +173,10 @@ public partial class ModelManagerWindow : Window
         SourceText.Text = model.Definition.SourceUrl;
         DownloadText.Text = model.Definition.DownloadUrl;
         ExpectedShaText.Text = model.Definition.ExpectedSha256;
-        LocalShaText.Text = model.Sha256 ?? "Not imported";
-        LocalPathText.Text = model.InstalledPath ?? "Not imported";
+        LocalShaText.Text = model.Sha256 ?? Strings.ModelManagerNotImported;
+        LocalPathText.Text = model.InstalledPath ?? Strings.ModelManagerNotImported;
         ImportedText.Text = model.ImportedText;
-        NotesText.Text = $"{model.Definition.Notes} Expected size: {model.Definition.ExpectedSizeText}.";
+        NotesText.Text = Strings.Format("ModelManagerNotesExpectedSizeFormat", model.Definition.Notes, model.Definition.ExpectedSizeText);
         ActionText.Text = model.ActionText;
     }
 
