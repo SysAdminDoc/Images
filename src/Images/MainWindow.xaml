@@ -2563,6 +2563,26 @@
                                                    VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
+
+                                <!-- Channel-isolation chip (V20-28) — shows the active R/G/B/A filter.
+                                     Click cycles to the next channel mode. -->
+                                <Border Margin="10,0,0,0"
+                                        Padding="8,2"
+                                        CornerRadius="{StaticResource Radius.Sm.CR}"
+                                        Background="#2A89B4FA"
+                                        BorderBrush="{StaticResource AccentBrush}"
+                                        BorderThickness="1"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding IsChannelIsolated, Converter={StaticResource BoolToVis}}"
+                                        AutomationProperties.Name="Channel isolation active"
+                                        Cursor="Hand"
+                                        MouseLeftButtonUp="ChannelChip_Click">
+                                    <TextBlock Text="{Binding ChannelModeLabel}"
+                                               FontSize="10.5"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource AccentBrush}"
+                                               VerticalAlignment="Center" />
+                                </Border>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal"

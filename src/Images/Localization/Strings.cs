@@ -595,6 +595,11 @@ public static class Strings
     public static string CommandPalette_About => Get(nameof(CommandPalette_About));
     public static string CommandPalette_CheckUpdates => Get(nameof(CommandPalette_CheckUpdates));
     public static string CommandPalette_Paste => Get(nameof(CommandPalette_Paste));
+    public static string CommandPalette_ChannelNormal => Get(nameof(CommandPalette_ChannelNormal));
+    public static string CommandPalette_ChannelRed => Get(nameof(CommandPalette_ChannelRed));
+    public static string CommandPalette_ChannelGreen => Get(nameof(CommandPalette_ChannelGreen));
+    public static string CommandPalette_ChannelBlue => Get(nameof(CommandPalette_ChannelBlue));
+    public static string CommandPalette_ChannelAlpha => Get(nameof(CommandPalette_ChannelAlpha));
 
     // ---- Macro action window ----
     public static string MacroWindowTitle => Get(nameof(MacroWindowTitle));
