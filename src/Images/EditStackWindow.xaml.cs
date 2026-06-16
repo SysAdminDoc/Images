@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using Images.Localization;
 using Images.Services;
 using Microsoft.Win32;
 
@@ -22,7 +23,7 @@ public partial class EditStackWindow : Window
         InitializeComponent();
         CopyList.ItemsSource = _copyRows;
         OperationList.ItemsSource = _operationRows;
-        SetStatus("Open an image to inspect its edit history.");
+        SetStatus(Strings.EditHistoryInitialStatus);
 
         SourceInitialized += (_, _) =>
         {
@@ -47,18 +48,18 @@ public partial class EditStackWindow : Window
     {
         if (_snapshot is null)
         {
-            SetStatus("No edit sidecar is available.");
+            SetStatus(Strings.EditNoSidecarAvailable);
             return;
         }
 
         try
         {
             ShellIntegration.RevealPathInExplorer(_snapshot.SidecarPath);
-            SetStatus("Sidecar location opened.");
+            SetStatus(Strings.EditSidecarLocationOpened);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
-            SetStatus("Sidecar has not been written yet.");
+            SetStatus(Strings.EditSidecarNotWritten);
         }
     }
 
@@ -66,12 +67,12 @@ public partial class EditStackWindow : Window
     {
         if (_snapshot is null)
         {
-            SetStatus("No edit history to copy.");
+            SetStatus(Strings.EditNoHistoryToCopy);
             return;
         }
 
         Clipboard.SetText(BuildSummary(_snapshot));
-        SetStatus("Edit history summary copied.");
+        SetStatus(Strings.EditHistorySummaryCopied);
     }
 
     private void CreateVirtualCopyButton_Click(object sender, RoutedEventArgs e)
@@ -92,7 +93,7 @@ public partial class EditStackWindow : Window
 
         if (OperationList.SelectedItem is not EditOperationRow operation)
         {
-            SetStatus("Select an operation first.");
+            SetStatus(Strings.EditSelectOperationFirst);
             return;
         }
 
@@ -119,7 +120,7 @@ public partial class EditStackWindow : Window
 
         var dialog = new SaveFileDialog
         {
-            Title = "Export edited copy",
+            Title = Strings.ExportEditedCopyDialogTitle,
             FileName = Path.GetFileNameWithoutExtension(imagePath) + suffix + sourceExtension,
             Filter = ImageExportService.ExportFilter,
             DefaultExt = sourceExtension.TrimStart('.'),
@@ -130,13 +131,13 @@ public partial class EditStackWindow : Window
         if (dialog.ShowDialog(this) != true)
             return;
 
-        SetBusy(true, "Exporting selected edit copy...");
+        SetBusy(true, Strings.ExportEditedCopyStatus);
         try
         {
             var result = await Task.Run(() => _editStack.Export(_imagePath!, dialog.FileName, SelectedCopyId));
             SetStatus(result.Success
-                ? $"{result.Message} Output: {Path.GetFileName(result.OutputPath)}"
-                : "Export failed: " + result.Message);
+                ? Strings.Format("ExportEditedCopySuccessFormat", result.Message, Path.GetFileName(result.OutputPath))
+                : Strings.Format("ExportEditedCopyFailedFormat", result.Message));
         }
         finally
         {
@@ -152,31 +153,31 @@ public partial class EditStackWindow : Window
         if (string.IsNullOrWhiteSpace(_imagePath) || !File.Exists(_imagePath))
         {
             _snapshot = null;
-            ImagePathText.Text = "No image selected.";
+            ImagePathText.Text = Strings.EditNoImageSelected;
             SidecarPathText.Text = "";
-            OperationTitleText.Text = "Operations";
+            OperationTitleText.Text = Strings.EditOperationsHeading;
             EmptyHintText.Text = "";
-            SetStatus("Open an image before using edit history.");
+            SetStatus(Strings.EditOpenImageBeforeUsing);
             return;
         }
 
         try
         {
             _snapshot = _editStack.LoadSnapshot(_imagePath);
-            ImagePathText.Text = "Image: " + _imagePath;
-            SidecarPathText.Text = "Sidecar: " + _snapshot.SidecarPath;
+            ImagePathText.Text = Strings.Format("EditImagePathFormat", _imagePath);
+            SidecarPathText.Text = Strings.Format("EditSidecarPathFormat", _snapshot.SidecarPath);
 
             _copyRows.Add(new EditCopyRow(
                 NonDestructiveEditService.MasterCopyId,
-                "Master",
-                $"{_snapshot.Operations.Count} operation{Plural(_snapshot.Operations.Count)}"));
+                Strings.MasterCopyName,
+                Strings.Format("EditOperationCountFormat", _snapshot.Operations.Count, Plural(_snapshot.Operations.Count))));
 
             foreach (var copy in _snapshot.VirtualCopies)
             {
                 _copyRows.Add(new EditCopyRow(
                     copy.Id,
                     copy.Name,
-                    $"{copy.Operations.Count} operation{Plural(copy.Operations.Count)} · {copy.CreatedUtc.LocalDateTime:g}"));
+                    Strings.Format("EditVirtualCopyWithDateFormat", copy.Operations.Count, Plural(copy.Operations.Count), copy.CreatedUtc.LocalDateTime)));
             }
 
             CopyList.SelectedItem = _copyRows.FirstOrDefault(row =>
@@ -184,12 +185,12 @@ public partial class EditStackWindow : Window
 
             RefreshOperations();
             SetStatus(File.Exists(_snapshot.SidecarPath)
-                ? "Edit history loaded."
-                : "No sidecar exists yet. Future edits will create one.");
+                ? Strings.EditHistoryLoaded
+                : Strings.EditNoSidecarYet);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
-            SetStatus("Could not read edit history: " + ex.Message);
+            SetStatus(Strings.Format("EditReadFailedFormat", ex.Message));
         }
     }
 
@@ -200,15 +201,18 @@ public partial class EditStackWindow : Window
             return;
 
         var selectedCopyId = SelectedCopyId;
-        var selectedName = SelectedCopy?.Name ?? "Master";
+        var selectedName = SelectedCopy?.Name ?? Strings.MasterCopyName;
         var operations = NonDestructiveEditService.GetOperations(_snapshot, selectedCopyId);
         foreach (var operation in operations)
             _operationRows.Add(EditOperationRow.From(operation));
 
-        OperationTitleText.Text = $"{selectedName} operations";
+        OperationTitleText.Text = Strings.Format("EditOperationsHeadingFormat", selectedName);
         EmptyHintText.Text = operations.Count == 0
-            ? "No edit operations yet. Crop, selection, and adjustment tools will add operations here instead of changing the source file."
-            : $"{operations.Count(operation => operation.Enabled)} enabled operation{Plural(operations.Count(operation => operation.Enabled))} will apply when this copy is exported.";
+            ? Strings.EditNoOperationsYet
+            : Strings.Format(
+                "EditOperationEnabledExportFormat",
+                operations.Count(operation => operation.Enabled),
+                Plural(operations.Count(operation => operation.Enabled)));
     }
 
     private bool CanMutate()
@@ -217,7 +221,7 @@ public partial class EditStackWindow : Window
             return false;
         if (string.IsNullOrWhiteSpace(_imagePath) || !File.Exists(_imagePath))
         {
-            SetStatus("Open an image before changing edit history.");
+            SetStatus(Strings.EditOpenImageBeforeChanging);
             return false;
         }
 
@@ -241,10 +245,10 @@ public partial class EditStackWindow : Window
     private static string BuildSummary(EditStackSnapshot snapshot)
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"Image: {snapshot.SourceFileName}");
-        sb.AppendLine($"Sidecar: {snapshot.SidecarPath}");
-        sb.AppendLine($"Updated: {snapshot.UpdatedUtc.LocalDateTime:g}");
-        sb.AppendLine($"Master operations: {snapshot.Operations.Count}");
+        sb.AppendLine(Strings.Format("EditSummaryImageFormat", snapshot.SourceFileName));
+        sb.AppendLine(Strings.Format("EditSummarySidecarFormat", snapshot.SidecarPath));
+        sb.AppendLine(Strings.Format("EditSummaryUpdatedFormat", snapshot.UpdatedUtc.LocalDateTime));
+        sb.AppendLine(Strings.Format("EditSummaryMasterOperationsFormat", snapshot.Operations.Count));
         foreach (var operation in snapshot.Operations)
             sb.AppendLine("- " + NonDestructiveEditService.FormatOperation(operation));
 
@@ -263,7 +267,7 @@ public partial class EditStackWindow : Window
     {
         var invalid = Path.GetInvalidFileNameChars();
         var cleaned = new string(value.Select(ch => invalid.Contains(ch) ? '-' : ch).ToArray()).Trim('-', ' ');
-        return string.IsNullOrWhiteSpace(cleaned) ? "virtual-copy" : cleaned;
+        return string.IsNullOrWhiteSpace(cleaned) ? Strings.EditVirtualCopyFileNameFallback : cleaned;
     }
 
     private static string Plural(int count) => count == 1 ? "" : "s";
@@ -282,7 +286,7 @@ public partial class EditStackWindow : Window
             => new(
                 operation.Id,
                 operation.Enabled,
-                operation.Enabled ? "Enabled" : "Disabled",
+                operation.Enabled ? Strings.EditOperationEnabledState : Strings.EditOperationDisabledState,
                 string.IsNullOrWhiteSpace(operation.Label) ? operation.Kind : operation.Label,
                 operation.Parameters.Count == 0
                     ? ""

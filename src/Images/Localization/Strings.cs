@@ -63,6 +63,26 @@ public static class Strings
     public static string PerspectiveHandleTopRight => Get(nameof(PerspectiveHandleTopRight));
     public static string PerspectiveMoveCornerBeforeApplying => Get(nameof(PerspectiveMoveCornerBeforeApplying));
     public static string PerspectiveUnavailableMissingFile => Get(nameof(PerspectiveUnavailableMissingFile));
+    public static string EditHistoryInitialStatus => Get(nameof(EditHistoryInitialStatus));
+    public static string EditHistoryLoaded => Get(nameof(EditHistoryLoaded));
+    public static string EditHistorySummaryCopied => Get(nameof(EditHistorySummaryCopied));
+    public static string EditNoHistoryToCopy => Get(nameof(EditNoHistoryToCopy));
+    public static string EditNoImageSelected => Get(nameof(EditNoImageSelected));
+    public static string EditNoOperationsYet => Get(nameof(EditNoOperationsYet));
+    public static string EditNoSidecarAvailable => Get(nameof(EditNoSidecarAvailable));
+    public static string EditNoSidecarYet => Get(nameof(EditNoSidecarYet));
+    public static string EditOperationDisabledState => Get(nameof(EditOperationDisabledState));
+    public static string EditOperationEnabledState => Get(nameof(EditOperationEnabledState));
+    public static string EditOperationsHeading => Get(nameof(EditOperationsHeading));
+    public static string EditOpenImageBeforeChanging => Get(nameof(EditOpenImageBeforeChanging));
+    public static string EditOpenImageBeforeUsing => Get(nameof(EditOpenImageBeforeUsing));
+    public static string EditSelectOperationFirst => Get(nameof(EditSelectOperationFirst));
+    public static string EditSidecarLocationOpened => Get(nameof(EditSidecarLocationOpened));
+    public static string EditSidecarNotWritten => Get(nameof(EditSidecarNotWritten));
+    public static string EditVirtualCopyFileNameFallback => Get(nameof(EditVirtualCopyFileNameFallback));
+    public static string ExportEditedCopyDialogTitle => Get(nameof(ExportEditedCopyDialogTitle));
+    public static string ExportEditedCopyStatus => Get(nameof(ExportEditedCopyStatus));
+    public static string MasterCopyName => Get(nameof(MasterCopyName));
 
     public static string Get(string key)
     {

@@ -383,4 +383,175 @@ Details written to:
   <data name="ResetPerspectiveCorners" xml:space="preserve">
     <value>Reset perspective corners</value>
   </data>
+  <data name="CopyEditHistorySummary" xml:space="preserve">
+    <value>Copy edit history summary</value>
+  </data>
+  <data name="CopySummary" xml:space="preserve">
+    <value>Copy summary</value>
+  </data>
+  <data name="CreateVirtualEditCopy" xml:space="preserve">
+    <value>Create virtual edit copy</value>
+  </data>
+  <data name="EditCopyAutomationName" xml:space="preserve">
+    <value>Edit copies</value>
+  </data>
+  <data name="EditCopiesHeading" xml:space="preserve">
+    <value>Copies</value>
+  </data>
+  <data name="EditHistoryDescription" xml:space="preserve">
+    <value>Inspect sidecar edits, fork virtual copies, and export with provenance.</value>
+  </data>
+  <data name="EditHistoryHeading" xml:space="preserve">
+    <value>Edit history</value>
+  </data>
+  <data name="EditHistoryInitialStatus" xml:space="preserve">
+    <value>Open an image to inspect its edit history.</value>
+  </data>
+  <data name="EditHistoryLoaded" xml:space="preserve">
+    <value>Edit history loaded.</value>
+  </data>
+  <data name="EditHistorySummaryCopied" xml:space="preserve">
+    <value>Edit history summary copied.</value>
+  </data>
+  <data name="EditHistoryTitle" xml:space="preserve">
+    <value>Images - Edit history</value>
+  </data>
+  <data name="EditImagePathFormat" xml:space="preserve">
+    <value>Image: {0}</value>
+  </data>
+  <data name="EditNoHistoryToCopy" xml:space="preserve">
+    <value>No edit history to copy.</value>
+  </data>
+  <data name="EditNoImageSelected" xml:space="preserve">
+    <value>No image selected.</value>
+  </data>
+  <data name="EditNoOperationsYet" xml:space="preserve">
+    <value>No edit operations yet. Crop, selection, and adjustment tools will add operations here instead of changing the source file.</value>
+  </data>
+  <data name="EditNoSidecarAvailable" xml:space="preserve">
+    <value>No edit sidecar is available.</value>
+  </data>
+  <data name="EditNoSidecarYet" xml:space="preserve">
+    <value>No sidecar exists yet. Future edits will create one.</value>
+  </data>
+  <data name="EditOperationCountFormat" xml:space="preserve">
+    <value>{0} operation{1}</value>
+  </data>
+  <data name="EditOperationEnabledState" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="EditOperationDisabledState" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="EditOperationEnabledExportFormat" xml:space="preserve">
+    <value>{0} enabled operation{1} will apply when this copy is exported.</value>
+  </data>
+  <data name="EditOperationHeaderCreated" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="EditOperationHeaderOperation" xml:space="preserve">
+    <value>Operation</value>
+  </data>
+  <data name="EditOperationHeaderParameters" xml:space="preserve">
+    <value>Parameters</value>
+  </data>
+  <data name="EditOperationHeaderState" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="EditOperationListAutomationName" xml:space="preserve">
+    <value>Edit operations</value>
+  </data>
+  <data name="EditOperationsHeading" xml:space="preserve">
+    <value>Operations</value>
+  </data>
+  <data name="EditOperationsHeadingFormat" xml:space="preserve">
+    <value>{0} operations</value>
+  </data>
+  <data name="EditOpenImageBeforeChanging" xml:space="preserve">
+    <value>Open an image before changing edit history.</value>
+  </data>
+  <data name="EditOpenImageBeforeUsing" xml:space="preserve">
+    <value>Open an image before using edit history.</value>
+  </data>
+  <data name="EditReadFailedFormat" xml:space="preserve">
+    <value>Could not read edit history: {0}</value>
+  </data>
+  <data name="EditSelectOperationFirst" xml:space="preserve">
+    <value>Select an operation first.</value>
+  </data>
+  <data name="EditSidecarPathFormat" xml:space="preserve">
+    <value>Sidecar: {0}</value>
+  </data>
+  <data name="EditSidecarLocationOpened" xml:space="preserve">
+    <value>Sidecar location opened.</value>
+  </data>
+  <data name="EditSidecarNotWritten" xml:space="preserve">
+    <value>Sidecar has not been written yet.</value>
+  </data>
+  <data name="EditSource" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="EditSummaryImageFormat" xml:space="preserve">
+    <value>Image: {0}</value>
+  </data>
+  <data name="EditSummaryMasterOperationsFormat" xml:space="preserve">
+    <value>Master operations: {0}</value>
+  </data>
+  <data name="EditSummarySidecarFormat" xml:space="preserve">
+    <value>Sidecar: {0}</value>
+  </data>
+  <data name="EditSummaryUpdatedFormat" xml:space="preserve">
+    <value>Updated: {0:g}</value>
+  </data>
+  <data name="EditToggleSelected" xml:space="preserve">
+    <value>Toggle selected</value>
+  </data>
+  <data name="EditToggleSelectedAutomationName" xml:space="preserve">
+    <value>Enable or disable selected edit operation</value>
+  </data>
+  <data name="EditVirtualCopyFileNameFallback" xml:space="preserve">
+    <value>virtual-copy</value>
+  </data>
+  <data name="EditVirtualCopyWithDateFormat" xml:space="preserve">
+    <value>{0} operation{1} - {2:g}</value>
+  </data>
+  <data name="ExportEditedCopyDialogTitle" xml:space="preserve">
+    <value>Export edited copy</value>
+  </data>
+  <data name="ExportEditedCopyFailedFormat" xml:space="preserve">
+    <value>Export failed: {0}</value>
+  </data>
+  <data name="ExportEditedCopyStatus" xml:space="preserve">
+    <value>Exporting selected edit copy...</value>
+  </data>
+  <data name="ExportEditedCopySuccessFormat" xml:space="preserve">
+    <value>{0} Output: {1}</value>
+  </data>
+  <data name="ExportSelectedEditCopy" xml:space="preserve">
+    <value>Export selected edit copy</value>
+  </data>
+  <data name="ExportCopy" xml:space="preserve">
+    <value>Export copy</value>
+  </data>
+  <data name="MasterCopyName" xml:space="preserve">
+    <value>Master</value>
+  </data>
+  <data name="NewVirtualCopy" xml:space="preserve">
+    <value>New virtual copy</value>
+  </data>
+  <data name="Reload" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="ReloadEditHistory" xml:space="preserve">
+    <value>Reload edit history</value>
+  </data>
+  <data name="RevealEditSidecar" xml:space="preserve">
+    <value>Reveal edit sidecar</value>
+  </data>
+  <data name="RevealSidecar" xml:space="preserve">
+    <value>Reveal sidecar</value>
+  </data>
+  <data name="SidecarDisabledOperationNote" xml:space="preserve">
+    <value>Disabled operations remain in history but are skipped on export.</value>
+  </data>
 </root>
