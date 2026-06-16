@@ -27,7 +27,8 @@ public static class ImageLoader
         int PixelHeight,
         string DecoderUsed,
         AnimationSequence? Animation = null,
-        PageSequence? Pages = null);
+        PageSequence? Pages = null,
+        TilePyramidInfo? TilePyramid = null);
 
     // Extensions worth probing for animated content. Pure-photo formats (JPEG, RAW, etc.) skip the
     // MagickImageCollection path so we don't pay for a second decoder on every single-frame image.
@@ -50,6 +51,7 @@ public static class ImageLoader
     private const int StableReadRetryCount = 3;
     private const int StableReadRetryDelayMs = 80;
     private const int MaxRenderableDimension = 30000;
+    private static readonly BitmapSource TilePlaceholder = CreateTilePlaceholder();
 
     public static LoadResult Load(
         string path,
@@ -68,6 +70,9 @@ public static class ImageLoader
 
         if (SupportedImageFormats.RequiresGhostscript(path))
             return LoadDocumentPreview(path, pageIndex);
+
+        if (TileService.ShouldUseTileEngine(path))
+            return LoadTilePyramid(path, pageIndex);
 
         if (PagedRasterExtensions.Contains(Path.GetExtension(path)))
         {
@@ -364,6 +369,24 @@ public static class ImageLoader
         }
     }
 
+    private static LoadResult LoadTilePyramid(string path, int requestedPageIndex)
+    {
+        var pageCount = PagedRasterExtensions.Contains(Path.GetExtension(path))
+            ? CountImageFrames(path)
+            : 1;
+        var pageIndex = ClampPageIndex(requestedPageIndex, pageCount);
+        var pyramid = TileService.BuildPyramid(path, pageIndex: pageIndex);
+        var pageSuffix = pageCount > 1 ? $", page {pageIndex + 1} of {pageCount}" : "";
+
+        return new LoadResult(
+            TilePlaceholder,
+            pyramid.SourceWidth,
+            pyramid.SourceHeight,
+            $"Magick.NET tile pyramid (DZI/WebP, {pyramid.TotalTiles} tiles{pageSuffix})",
+            Pages: pageCount > 1 ? new PageSequence(pageIndex, pageCount, PageLabelFor(path)) : null,
+            TilePyramid: pyramid);
+    }
+
     private static MagickReadSettings CreateDocumentReadSettings(bool countOnly)
         => new()
         {
@@ -583,6 +606,23 @@ public static class ImageLoader
         {
             wb.Unlock();
         }
+        wb.Freeze();
+        return wb;
+    }
+
+    private static BitmapSource CreateTilePlaceholder()
+    {
+        var wb = new WriteableBitmap(1, 1, 96, 96, PixelFormats.Bgra32, null);
+        wb.Lock();
+        try
+        {
+            wb.AddDirtyRect(new Int32Rect(0, 0, 1, 1));
+        }
+        finally
+        {
+            wb.Unlock();
+        }
+
         wb.Freeze();
         return wb;
     }

@@ -356,6 +356,34 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    private TilePyramidInfo? _currentTilePyramid;
+    public TilePyramidInfo? CurrentTilePyramid
+    {
+        get => _currentTilePyramid;
+        private set
+        {
+            if (Set(ref _currentTilePyramid, value))
+            {
+                Raise(nameof(IsTilePyramidActive));
+                Raise(nameof(HasDisplayImage));
+                Raise(nameof(CanUseInspector));
+                Raise(nameof(CanUseSelection));
+                Raise(nameof(CanUseCrop));
+                Raise(nameof(CanApplyRotationToFile));
+                Raise(nameof(CanUseExposureBrush));
+                Raise(nameof(CanUseRedEyeCorrection));
+                Raise(nameof(CanUseRetouch));
+                Raise(nameof(CanUseOverlayMode));
+                RaiseCompareState();
+                Raise(nameof(CanToggleMetadataHud));
+                Raise(nameof(ShowMetadataHud));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public bool IsTilePyramidActive => CurrentTilePyramid is not null;
+
     // Animated-frame payload. Non-null when the current file is a multi-frame GIF / APNG /
     // animated WebP. ZoomPanImage renders the selected frame through view-model state so the
     // side-panel timeline, shortcuts, and copy/export actions share one source of truth.
@@ -641,11 +669,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     public bool HasImage => !string.IsNullOrEmpty(CurrentPath) && File.Exists(CurrentPath);
-    public bool HasDisplayImage => CurrentImage is not null;
-    public bool CanUseInspector => HasDisplayImage && !IsOperationBusy && !IsCompareMode;
-    public bool CanUseSelection => HasDisplayImage && !IsOperationBusy && !IsCompareMode;
+    public bool HasDisplayImage => CurrentImage is not null || IsTilePyramidActive;
+    public bool CanUseInspector => CurrentImage is not null && !IsTilePyramidActive && !IsOperationBusy && !IsCompareMode;
+    public bool CanUseSelection => CurrentImage is not null && !IsTilePyramidActive && !IsOperationBusy && !IsCompareMode;
     public bool CurrentFormatSupportsCrop => CurrentPath is not null && SupportedImageFormats.IsCropWritableRaster(CurrentPath);
-    private bool CanUsePixelEditTools => HasImage && HasDisplayImage && !IsOperationBusy && !IsArchiveBook && !IsPeekMode && !IsCompareMode;
+    private bool CanUsePixelEditTools => HasImage && CurrentImage is not null && !IsTilePyramidActive && !IsOperationBusy && !IsArchiveBook && !IsPeekMode && !IsCompareMode;
     public bool CanUseCrop => CanUsePixelEditTools && CurrentFormatSupportsCrop;
     public bool CanApplyRotationToFile =>
         CanUsePixelEditTools &&
@@ -665,7 +693,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool CanRefreshFolder => (CurrentPath is not null || _nav.Count > 0) && !IsOperationBusy;
 
     private bool CanUseImageCommands => HasImage && !IsOperationBusy;
-    private bool CanUseDisplayImageCommands => HasDisplayImage && !IsOperationBusy;
+    private bool CanUseDisplayImageCommands => CurrentImage is not null && !IsTilePyramidActive && !IsOperationBusy;
 
     private string _operationStatusTitle = "";
     public string OperationStatusTitle
@@ -884,7 +912,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private bool _overlayExitHotKeyAvailable = true;
     public bool OverlayExitHotKeyAvailable => _overlayExitHotKeyAvailable;
-    public bool CanUseOverlayMode => HasDisplayImage && !IsOperationBusy && !IsPeekMode && !IsCompareMode;
+    public bool CanUseOverlayMode => CurrentImage is not null && !IsTilePyramidActive && !IsOperationBusy && !IsPeekMode && !IsCompareMode;
     public bool ShowOverlayBanner => IsPinnedOverlayMode;
     public string OverlayModeText => IsPinnedOverlayMode ? "Overlay on" : "Overlay off";
     public string OverlayToggleText => IsPinnedOverlayMode ? "Turn off" : "Turn on";
@@ -975,10 +1003,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    public bool CanUseCompareMode => HasImage && HasDisplayImage && !IsOperationBusy && !IsPeekMode;
+    public bool CanUseCompareMode => HasImage && CurrentImage is not null && !IsTilePyramidActive && !IsOperationBusy && !IsPeekMode;
     public bool CanStartCompareWithNext => CanUseCompareMode && TryGetNextComparePath() is not null;
     public bool CanSwapComparePair => IsCompareMode && CurrentPath is not null && ComparePath is not null && File.Exists(ComparePath);
-    public bool ShowCompareMode => IsCompareMode && HasDisplayImage && CompareImage is not null && !IsPeekMode;
+    public bool ShowCompareMode => IsCompareMode && CurrentImage is not null && !IsTilePyramidActive && CompareImage is not null && !IsPeekMode;
     public string CompareModeText => IsCompareMode ? "Compare on" : "Compare with next";
     public string CompareLayoutText => IsCompareOverlayMode ? "Overlay" : "2-up";
     public string CompareLayoutToggleText => IsCompareOverlayMode ? "2-up" : "Overlay";
@@ -3198,13 +3226,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             try
             {
                 var isArchiveBookPage = SupportedImageFormats.IsArchive(path);
-                var image = ApplyArchiveDisplayFilters(result.Image, isArchiveBookPage, ArchiveOldScanFilterEnabled);
-                var animation = isArchiveBookPage && ArchiveOldScanFilterEnabled ? null : result.Animation;
+                var tilePyramid = result.TilePyramid;
+                ImageSource? image = tilePyramid is null
+                    ? ApplyArchiveDisplayFilters(result.Image, isArchiveBookPage, ArchiveOldScanFilterEnabled)
+                    : null;
+                var animation = tilePyramid is null && !(isArchiveBookPage && ArchiveOldScanFilterEnabled) ? result.Animation : null;
                 var decoderUsed = isArchiveBookPage && ArchiveOldScanFilterEnabled
                     ? $"{result.DecoderUsed} + clean scan filter"
                     : result.DecoderUsed;
                 var editOperations = GetEnabledDisplayEditOperations(path, isArchiveBookPage);
-                if (editOperations.Count > 0 && image is BitmapSource bitmap)
+                if (tilePyramid is null && editOperations.Count > 0 && image is BitmapSource bitmap)
                 {
                     image = ImageExportService.RenderPreview(bitmap, editOperations);
                     animation = null;
@@ -3214,10 +3245,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 // Order matters: CurrentImage first so ZoomPanImage.OnSourceChanged runs and clears
                 // any animation from the previous file; then CurrentAnimation, which either applies
                 // new keyframes or stays null for a static image.
+                CurrentTilePyramid = tilePyramid;
                 CurrentImage = image;
                 CurrentAnimation = animation;
-                PixelWidth = image is BitmapSource displayedBitmap ? displayedBitmap.PixelWidth : result.PixelWidth;
-                PixelHeight = image is BitmapSource displayedBitmapHeight ? displayedBitmapHeight.PixelHeight : result.PixelHeight;
+                PixelWidth = tilePyramid?.SourceWidth ?? (image is BitmapSource displayedBitmap ? displayedBitmap.PixelWidth : result.PixelWidth);
+                PixelHeight = tilePyramid?.SourceHeight ?? (image is BitmapSource displayedBitmapHeight ? displayedBitmapHeight.PixelHeight : result.PixelHeight);
                 DecoderUsed = decoderUsed;
                 ClearInspectorState();
                 IsSelectionMode = false;
@@ -3264,7 +3296,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         try { _fileSize = new FileInfo(path).Length; } catch { _fileSize = 0; }
         Raise(nameof(FileSizeText));
         RefreshFolderPreview();
-        if (CurrentImage is null)
+        if (!HasDisplayImage)
         {
             ClearPhotoMetadata();
             ClearColorAnalysis();
@@ -3273,14 +3305,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         else
         {
             RefreshPhotoMetadata(path);
-            RefreshColorAnalysis(path);
+            if (IsTilePyramidActive)
+                ClearColorAnalysis();
+            else
+                RefreshColorAnalysis(path);
             RefreshC2paInspection(path);
         }
 
-        if (loaded && !CurrentFormatSupportsCrop)
+        if (loaded && (IsTilePyramidActive || !CurrentFormatSupportsCrop))
             CropStatusText = CropUnavailableStatusText;
 
-        if (loaded && startCropMode)
+        if (loaded && startCropMode && !IsTilePyramidActive)
             StartFreehandCropModeForCurrentImage();
 
         SyncRenameEditorFromDisk();
@@ -3314,6 +3349,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         IsPinnedOverlayMode = false;
         ClearCompareMode(showToast: false);
+        CurrentTilePyramid = null;
         CurrentImage = null;
         CurrentAnimation = null;
         PixelWidth = PixelHeight = 0;
@@ -5946,6 +5982,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _externalEditReload.Disarm();
         IsPinnedOverlayMode = false;
         ClearCompareMode(showToast: false);
+        CurrentTilePyramid = null;
         CurrentImage = null;
         CurrentAnimation = null;
         CurrentPath = null;

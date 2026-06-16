@@ -60,6 +60,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Pixel inspector** — enable Inspector in the side panel to sample coordinates and HEX/RGB/HSV/alpha values, copy color values, Shift-drag pixel measurements, and switch to nearest-neighbor preview scaling for pixel art.
 - **Animation frame workbench** — animated GIF/APNG/WebP files get a side-panel timeline with a scrubber, frame stepping, playback-speed control, copy-current-frame, PNG frame export, and drag-out selected frames.
 - **Photo metadata and color at a glance** — the Details panel and optional `I` metadata HUD surface embedded EXIF date, camera, lens, exposure, focal length, and GPS coordinates when present. The side panel also reports embedded ICC/profile status, decoded color space, luma/RGB histogram basics, alpha transparency stats, and unmanaged-color warnings without transforming pixels or sending data anywhere.
+- **Deep-zoom huge-image viewing** — images over 256 MB or 50 megapixels are rendered through a local DZI-style WebP tile pyramid, so pan and zoom request cached visible tiles instead of treating the full source as one WPF bitmap.
 - **Zoom + pan** — mouse wheel to zoom in/out about the cursor, drag to pan, double-click to toggle fit/1:1.
 - **Export a copy** to JPEG, PNG, WebP, AVIF, JXL, TIFF, BMP, GIF/APNG, PSD/PSB, PDF/EPS/SVG, TGA, DDS, QOI, EXR, HDR, JPEG 2000, X11/Magick, production/scientific, and portable bitmap formats.
 - **Rotate**, **delete-to-Recycle-Bin**, **Reveal in Explorer**, **Copy path**.
