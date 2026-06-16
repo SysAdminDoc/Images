@@ -83,6 +83,19 @@ public static class Strings
     public static string ExportEditedCopyDialogTitle => Get(nameof(ExportEditedCopyDialogTitle));
     public static string ExportEditedCopyStatus => Get(nameof(ExportEditedCopyStatus));
     public static string MasterCopyName => Get(nameof(MasterCopyName));
+    public static string AnnotationApplyMissingItem => Get(nameof(AnnotationApplyMissingItem));
+    public static string AnnotationArrowToolStatus => Get(nameof(AnnotationArrowToolStatus));
+    public static string AnnotationBlurToolStatus => Get(nameof(AnnotationBlurToolStatus));
+    public static string AnnotationBoxToolStatus => Get(nameof(AnnotationBoxToolStatus));
+    public static string AnnotationCircleToolStatus => Get(nameof(AnnotationCircleToolStatus));
+    public static string AnnotationDefaultText => Get(nameof(AnnotationDefaultText));
+    public static string AnnotationNoItemsStatus => Get(nameof(AnnotationNoItemsStatus));
+    public static string AnnotationPenToolStatus => Get(nameof(AnnotationPenToolStatus));
+    public static string AnnotationPixelateToolStatus => Get(nameof(AnnotationPixelateToolStatus));
+    public static string AnnotationStepToolStatus => Get(nameof(AnnotationStepToolStatus));
+    public static string AnnotationTextToolStatus => Get(nameof(AnnotationTextToolStatus));
+    public static string AnnotationUnavailableMissingFile => Get(nameof(AnnotationUnavailableMissingFile));
+    public static string NoAnnotationLabel => Get(nameof(NoAnnotationLabel));
 
     public static string Get(string key)
     {

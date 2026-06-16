@@ -1,7 +1,8 @@
 <Window x:Class="Images.AnnotationsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Images - Annotations"
+        xmlns:loc="clr-namespace:Images.Localization"
+        Title="{loc:Loc AnnotationTitle}"
         Width="1040"
         Height="720"
         MinWidth="860"
@@ -21,8 +22,8 @@
                 BorderThickness="0,0,0,1"
                 Padding="18,14">
             <StackPanel>
-                <TextBlock Text="Annotations" Style="{StaticResource Text.Title}" />
-                <TextBlock Text="Draw markup or redaction regions, then add them to the edit history."
+                <TextBlock Text="{loc:Loc AnnotationHeading}" Style="{StaticResource Text.Title}" />
+                <TextBlock Text="{loc:Loc AnnotationDescription}"
                            Style="{StaticResource Text.Caption}"
                            Margin="0,3,0,0" />
             </StackPanel>
@@ -37,49 +38,49 @@
 
             <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
-                    <TextBlock Text="Tool" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc AnnotationTool}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}" Padding="14">
                         <UniformGrid Columns="2">
                             <Button Style="{StaticResource ChromeButton}" Tag="Arrow" Click="ToolButton_Click" Margin="0,0,8,8">
-                                <TextBlock Text="Arrow" />
+                                <TextBlock Text="{loc:Loc AnnotationArrowTool}" />
                             </Button>
                             <Button Style="{StaticResource ChromeButton}" Tag="Rectangle" Click="ToolButton_Click" Margin="0,0,0,8">
-                                <TextBlock Text="Box" />
+                                <TextBlock Text="{loc:Loc AnnotationBoxTool}" />
                             </Button>
                             <Button Style="{StaticResource ChromeButton}" Tag="Ellipse" Click="ToolButton_Click" Margin="0,0,8,8">
-                                <TextBlock Text="Circle" />
+                                <TextBlock Text="{loc:Loc AnnotationCircleTool}" />
                             </Button>
                             <Button Style="{StaticResource ChromeButton}" Tag="Text" Click="ToolButton_Click" Margin="0,0,0,8">
-                                <TextBlock Text="Text" />
+                                <TextBlock Text="{loc:Loc AnnotationTextTool}" />
                             </Button>
                             <Button Style="{StaticResource ChromeButton}" Tag="Number" Click="ToolButton_Click" Margin="0,0,8,8">
-                                <TextBlock Text="Step" />
+                                <TextBlock Text="{loc:Loc AnnotationStepTool}" />
                             </Button>
                             <Button Style="{StaticResource ChromeButton}" Tag="Freehand" Click="ToolButton_Click" Margin="0,0,0,8">
-                                <TextBlock Text="Pen" />
+                                <TextBlock Text="{loc:Loc AnnotationPenTool}" />
                             </Button>
                             <Button Style="{StaticResource ChromeButton}" Tag="Blur" Click="ToolButton_Click" Margin="0,0,8,0">
-                                <TextBlock Text="Blur" />
+                                <TextBlock Text="{loc:Loc AnnotationBlurTool}" />
                             </Button>
                             <Button Style="{StaticResource ChromeButton}" Tag="Pixelate" Click="ToolButton_Click">
-                                <TextBlock Text="Pixelate" />
+                                <TextBlock Text="{loc:Loc AnnotationPixelateTool}" />
                             </Button>
                         </UniformGrid>
                     </Border>
 
                     <Border Style="{StaticResource Divider}" />
 
-                    <TextBlock Text="Text" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc AnnotationTextTool}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}" Padding="14">
                         <TextBox x:Name="AnnotationTextBox"
-                                 Text="Note"
+                                 Text="{loc:Loc AnnotationDefaultText}"
                                  MinHeight="34"
-                                 AutomationProperties.Name="Annotation text" />
+                                 AutomationProperties.Name="{loc:Loc AnnotationTextAutomationName}" />
                     </Border>
 
                     <Border Style="{StaticResource Divider}" />
 
-                    <TextBlock Text="Style" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc Style}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}" Padding="14">
                         <StackPanel>
                             <Grid>
@@ -87,7 +88,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Stroke" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                <TextBlock Text="{loc:Loc Stroke}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
                                 <TextBlock x:Name="StrokeText" Grid.Column="1" Style="{StaticResource Text.Caption}" />
                             </Grid>
                             <Slider x:Name="StrokeSlider"
@@ -98,14 +99,14 @@
                                     SmallChange="1"
                                     LargeChange="4"
                                     ValueChanged="StyleSlider_ValueChanged"
-                                    AutomationProperties.Name="Annotation stroke width" />
+                                    AutomationProperties.Name="{loc:Loc AnnotationStrokeWidthAutomationName}" />
 
                             <Grid Margin="0,12,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Text size" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                <TextBlock Text="{loc:Loc AnnotationTextSize}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
                                 <TextBlock x:Name="FontText" Grid.Column="1" Style="{StaticResource Text.Caption}" />
                             </Grid>
                             <Slider x:Name="FontSlider"
@@ -116,7 +117,7 @@
                                     SmallChange="1"
                                     LargeChange="8"
                                     ValueChanged="StyleSlider_ValueChanged"
-                                    AutomationProperties.Name="Annotation text size" />
+                                    AutomationProperties.Name="{loc:Loc AnnotationFontSizeAutomationName}" />
 
                             <WrapPanel Margin="0,14,0,0">
                                 <Button Tag="#F38BA8" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#F38BA8" BorderBrush="{StaticResource HairlineBrush}" />
@@ -152,7 +153,7 @@
                     <Image x:Name="PreviewImage"
                            Stretch="Uniform"
                            RenderOptions.BitmapScalingMode="HighQuality"
-                           AutomationProperties.Name="Annotation preview" />
+                           AutomationProperties.Name="{loc:Loc AnnotationPreview}" />
                 </Canvas>
             </Border>
         </Grid>
@@ -174,16 +175,16 @@
                            AutomationProperties.LiveSetting="Polite" />
                 <WrapPanel Grid.Column="1" Margin="12,0,0,0">
                     <Button Style="{StaticResource ChromeButton}" MinWidth="82" Click="UndoButton_Click">
-                        <TextBlock Text="Undo" />
+                        <TextBlock Text="{loc:Loc Undo}" />
                     </Button>
                     <Button Style="{StaticResource ChromeButton}" MinWidth="82" Margin="8,0,0,0" Click="ResetButton_Click">
-                        <TextBlock Text="Reset" />
+                        <TextBlock Text="{loc:Loc Reset}" />
                     </Button>
                     <Button Style="{StaticResource ChromeButton}" MinWidth="82" Margin="8,0,0,0" Click="CloseButton_Click">
-                        <TextBlock Text="Close" />
+                        <TextBlock Text="{loc:Loc Close}" />
                     </Button>
                     <Button x:Name="ApplyButton" Style="{StaticResource PrimaryButton}" MinWidth="118" Margin="8,0,0,0" Click="ApplyButton_Click">
-                        <TextBlock Text="Apply" />
+                        <TextBlock Text="{loc:Loc Apply}" />
                     </Button>
                 </WrapPanel>
             </Grid>

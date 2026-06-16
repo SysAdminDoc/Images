@@ -554,4 +554,115 @@ Details written to:
   <data name="SidecarDisabledOperationNote" xml:space="preserve">
     <value>Disabled operations remain in history but are skipped on export.</value>
   </data>
+  <data name="AnnotationApplyMissingItem" xml:space="preserve">
+    <value>Add at least one annotation before applying.</value>
+  </data>
+  <data name="AnnotationArrowTool" xml:space="preserve">
+    <value>Arrow</value>
+  </data>
+  <data name="AnnotationArrowToolStatus" xml:space="preserve">
+    <value>Arrow: drag from tail to point.</value>
+  </data>
+  <data name="AnnotationBlurTool" xml:space="preserve">
+    <value>Blur</value>
+  </data>
+  <data name="AnnotationBlurToolStatus" xml:space="preserve">
+    <value>Blur: drag over a region to redact with blur.</value>
+  </data>
+  <data name="AnnotationBoxTool" xml:space="preserve">
+    <value>Box</value>
+  </data>
+  <data name="AnnotationBoxToolStatus" xml:space="preserve">
+    <value>Box: drag a rectangle.</value>
+  </data>
+  <data name="AnnotationCircleTool" xml:space="preserve">
+    <value>Circle</value>
+  </data>
+  <data name="AnnotationCircleToolStatus" xml:space="preserve">
+    <value>Circle: drag a bounding box.</value>
+  </data>
+  <data name="AnnotationDefaultText" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="AnnotationDescription" xml:space="preserve">
+    <value>Draw markup or redaction regions, then add them to the edit history.</value>
+  </data>
+  <data name="AnnotationFontSizeAutomationName" xml:space="preserve">
+    <value>Annotation text size</value>
+  </data>
+  <data name="AnnotationHeading" xml:space="preserve">
+    <value>Annotations</value>
+  </data>
+  <data name="AnnotationLabelFormat" xml:space="preserve">
+    <value>Annotations ({0})</value>
+  </data>
+  <data name="AnnotationNoItemsStatus" xml:space="preserve">
+    <value>No annotations yet.</value>
+  </data>
+  <data name="AnnotationPenTool" xml:space="preserve">
+    <value>Pen</value>
+  </data>
+  <data name="AnnotationPenToolStatus" xml:space="preserve">
+    <value>Pen: drag to draw a freehand line.</value>
+  </data>
+  <data name="AnnotationPixelateTool" xml:space="preserve">
+    <value>Pixelate</value>
+  </data>
+  <data name="AnnotationPixelateToolStatus" xml:space="preserve">
+    <value>Pixelate: drag over a region to redact with blocks.</value>
+  </data>
+  <data name="AnnotationPreview" xml:space="preserve">
+    <value>Annotation preview</value>
+  </data>
+  <data name="AnnotationReadyStatusFormat" xml:space="preserve">
+    <value>{0} annotation{1} ready. Press Enter to apply.</value>
+  </data>
+  <data name="AnnotationStepTool" xml:space="preserve">
+    <value>Step</value>
+  </data>
+  <data name="AnnotationStepToolStatus" xml:space="preserve">
+    <value>Step: click once to place the next numbered callout.</value>
+  </data>
+  <data name="AnnotationStrokeWidthAutomationName" xml:space="preserve">
+    <value>Annotation stroke width</value>
+  </data>
+  <data name="AnnotationTextAutomationName" xml:space="preserve">
+    <value>Annotation text</value>
+  </data>
+  <data name="AnnotationTextSize" xml:space="preserve">
+    <value>Text size</value>
+  </data>
+  <data name="AnnotationTextTool" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="AnnotationTextToolStatus" xml:space="preserve">
+    <value>Text: click once to place the current text.</value>
+  </data>
+  <data name="AnnotationTitle" xml:space="preserve">
+    <value>Images - Annotations</value>
+  </data>
+  <data name="AnnotationTool" xml:space="preserve">
+    <value>Tool</value>
+  </data>
+  <data name="AnnotationUnavailableMissingFile" xml:space="preserve">
+    <value>Preview unavailable: image file is no longer available.</value>
+  </data>
+  <data name="NoAnnotationLabel" xml:space="preserve">
+    <value>Annotations</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Stroke" xml:space="preserve">
+    <value>Stroke</value>
+  </data>
+  <data name="Style" xml:space="preserve">
+    <value>Style</value>
+  </data>
+  <data name="Undo" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="ValuePixelsFormat" xml:space="preserve">
+    <value>{0} px</value>
+  </data>
 </root>

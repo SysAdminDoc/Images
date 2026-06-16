@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using ImageMagick;
 using ImageMagick.Drawing;
+using Images.Localization;
 
 namespace Images.Services;
 
@@ -42,8 +43,8 @@ public sealed record ImageAnnotationPlan(IReadOnlyList<ImageAnnotationItem> Item
     public bool IsEmpty => Items.Count == 0;
 
     public string Label => IsEmpty
-        ? "Annotations"
-        : $"Annotations ({Items.Count})";
+        ? Strings.NoAnnotationLabel
+        : Strings.Format("AnnotationLabelFormat", Items.Count);
 
     public IReadOnlyDictionary<string, string> ToEditParameters()
         => new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
