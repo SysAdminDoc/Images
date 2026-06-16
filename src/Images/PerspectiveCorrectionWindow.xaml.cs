@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Images.Localization;
 using Images.Services;
 
 namespace Images;
@@ -39,7 +40,7 @@ public partial class PerspectiveCorrectionWindow : Window
     {
         if (!File.Exists(_imagePath))
         {
-            StatusText.Text = "Perspective unavailable: image file is no longer available.";
+            StatusText.Text = Strings.PerspectiveUnavailableMissingFile;
             ApplyButton.IsEnabled = false;
             return;
         }
@@ -167,7 +168,7 @@ public partial class PerspectiveCorrectionWindow : Window
         var plan = CurrentPlan();
         if (PerspectiveCorrectionService.IsIdentity(plan, _imageWidth, _imageHeight))
         {
-            StatusText.Text = "Move at least one corner before applying.";
+            StatusText.Text = Strings.PerspectiveMoveCornerBeforeApplying;
             return;
         }
 
@@ -256,7 +257,13 @@ public partial class PerspectiveCorrectionWindow : Window
         };
         PreviewCanvas.Children.Add(polygon);
 
-        var labels = new[] { "TL", "TR", "BR", "BL" };
+        var labels = new[]
+        {
+            Strings.PerspectiveHandleTopLeft,
+            Strings.PerspectiveHandleTopRight,
+            Strings.PerspectiveHandleBottomRight,
+            Strings.PerspectiveHandleBottomLeft
+        };
         for (var i = 0; i < canvasPoints.Count; i++)
         {
             AddHandle(canvasPoints[i], labels[i], i);
@@ -267,8 +274,8 @@ public partial class PerspectiveCorrectionWindow : Window
         ApplyButton.IsEnabled = !isIdentity;
         CornerText.Text = plan.Summary;
         StatusText.Text = isIdentity
-            ? "Drag a corner handle or use a keystone nudge."
-            : $"Perspective ready. Output will be {plan.OutputWidth} x {plan.OutputHeight} px.";
+            ? Strings.PerspectiveDragCornerStatus
+            : Strings.Format("PerspectiveReadyStatusFormat", plan.OutputWidth, plan.OutputHeight);
     }
 
     private void AddHandle(Point point, string label, int index)
