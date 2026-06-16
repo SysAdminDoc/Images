@@ -59,6 +59,7 @@ All notable changes to **Images** are documented here.
 ### Accessibility
 
 - **A-04 Magnifier caret tracking** — the rename stem TextBox now explicitly raises `TextPatternOnTextSelectionChanged` on every caret move so the Windows Magnifier follows the edit point when "Follow the text insertion point" is active. `AutomationId="StemEditor"` added for reliable UIA element identification.
+- **A-06 Screen reader manual test matrix** — `docs/narrator-test-matrix.md` documents a pre-release test script for Narrator, NVDA, and JAWS covering 10 core scenarios (image load, navigation, rename, rating, pick/reject, delete confirmation, gallery, settings, about, toasts) and 5 supplementary checks (filmstrip, OCR overlay, cheatsheet, crop, compare) with expected announcements and per-reader result columns.
 
 ### Testing
 
