@@ -55,6 +55,7 @@ All notable changes to **Images** are documented here.
 - **Wallpaper layout modes** — Set as desktop wallpaper now offers Fill, Fit, Span, and Tile modes and writes the matching Windows wallpaper style before applying the stable app-data wallpaper copy.
 - **Send/print/copy actions** — the viewport context menu now supports no-dialog printing to the default printer, local `.eml` email drafts with the current file attached, Copy image, and Copy image and path clipboard payloads.
 - **ExifTool safe invocation wrapper** — future metadata-write workflows now have a process-boundary helper that runs ExifTool without shell invocation, sends arguments and target paths through a UTF-8 `-@` argfile, rejects line-break and shell-metacharacter path channels, and cleans temporary argfiles after execution.
+- **XMP sidecar import service (M-03, M-04)** — a new `XmpSidecarImportService` reads standard `.xmp` sidecar files and extracts `xmp:Rating` (1-5 or -1 reject), `xmp:Label` (color labels), `dc:subject` (flat keywords), `lr:hierarchicalSubject` (Lightroom/XnView pipe-separated paths), `digiKam:TagsList` (digiKam slash-separated paths), and IPTC/Photoshop location fields. Covers both digiKam "Write metadata to files" and XnView MP "Export to XMP" workflows without reading either app's native database.
 
 ### Accessibility
 
