@@ -471,7 +471,7 @@ No OSS Windows viewer publishes a documented UIA tree; that's a free differentia
 - [x] **A-03** *P0* — **Keyboard focus + escape discipline**. Restore `FocusVisualStyle` on every templated control (our styles currently suppress the default ring — common regression), `KeyboardNavigation.DirectionalNavigation="Cycle"` on filmstrip, `Escape` bound to close every modal. Effort: S. [MS Learn keyboard-accessibility] *(shipped 2026-04-24 — commit 3fdae11; shared `FocusVisual` style in DarkTheme, DirectionalNavigation=Cycle on RecentRenames, Escape clears drop overlay)*
 - [x] **A-04** *P1* — **Magnifier integration** via UIA `TextSelectionChanged` on the rename caret so the OS Magnifier follows the edit point. No hosting of `magnification.dll` — just raise the right UIA event. Effort: S. [Win32 magapi docs] *(shipped — `StemEditor_SelectionChanged` raises `TextPatternOnTextSelectionChanged` via the TextBox automation peer on every caret move; `AutomationId="StemEditor"` set for reliable UIA identification; Magnifier limitation removed from `docs/accessibility.md`.)*
 - [x] **A-05** *P1* — **Publish the UIA tree** in the README (`docs/accessibility.md`: "what Narrator will say on image load, rename, rating change"). No competitor does this. Effort: S. *(shipped — `docs/accessibility.md` documents the full UIA tree: canvas peer, navigation, rename, review/rating, dialogs, overlays, keyboard focus, known limitations.)*
-- [ ] **A-06** *P2* — **Narrator + NVDA + JAWS manual test matrix** before each release: image load, rename, rating change, Del-to-recycle. Documented test script, not automation. Effort: S.
+- [x] **A-06** *P2* — **Narrator + NVDA + JAWS manual test matrix** before each release: image load, rename, rating change, Del-to-recycle. Documented test script, not automation. Effort: S. *(shipped -- `docs/narrator-test-matrix.md` covers Narrator/NVDA/JAWS across 10 core scenarios + 5 supplementary checks with expected announcements, per-reader result columns, and process notes.)*
 
 ### i18n / l10n
 
@@ -826,7 +826,7 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [ ] **Images-in-archive browsing** (CBR/CBZ/ZIP/RAR/7Z) — Honeyview only, and discontinued. (V20-17)
 - [ ] **Live byte-delta + SSIMULACRA2 readout during conversion** — Squoosh only, and Squoosh is web-only single-image. (V50-20/V50-23)
 - [ ] **Network-egress log panel** — no OSS viewer surfaces this; precedent is Little Snitch / GlassWire. (P-03)
-- [ ] **Documented UIA tree + Narrator/NVDA/JAWS test matrix** — no competitor publishes one. (A-01 + A-05 + A-06)
+- [x] **Documented UIA tree + Narrator/NVDA/JAWS test matrix** — no competitor publishes one. (A-01 + A-05 + A-06)
 - [ ] **Store-extension detect + one-click deep-link** — ImageGlass nags you to install them by filename; nobody offers the deep-link. (V20-18)
 - [ ] **Network-listen mode for piped workflows** — Oculante is the only viewer with this; it's Rust/MIT, not Windows-native. (V20-31)
 - [ ] **NPU-aware UI label ("Running on NPU")** — no OSS Windows viewer exposes the EP the user paid for. (V60-01 + W-02)
