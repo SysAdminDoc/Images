@@ -1,4 +1,5 @@
 using System.Globalization;
+using Images.Localization;
 
 namespace Images.Services;
 
@@ -44,8 +45,8 @@ public sealed record ResizePlan(
     string Error)
 {
     public string Label => IsValid
-        ? $"Resize {OutputWidth}x{OutputHeight} ({Filter.Label})"
-        : "Resize";
+        ? Strings.Format("ResizePlanLabelFormat", OutputWidth, OutputHeight, Filter.Label)
+        : Strings.ResizePlanLabel;
 
     public IReadOnlyDictionary<string, string> ToEditParameters()
         => new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -66,22 +67,22 @@ public static class ResizePlanService
 
     public static readonly ResizeFilterPreset Lanczos3Filter = new(
         "lanczos3",
-        "Lanczos-3",
-        "Crisp detail for high-quality downscaling.");
+        Strings.ResizeFilterLanczos3Label,
+        Strings.ResizeFilterLanczos3Description);
 
     public static readonly IReadOnlyList<ResizeFilterPreset> FilterPresets =
     [
         Lanczos3Filter,
-        new("mitchell", "Mitchell", "Balanced resize with fewer halos."),
-        new("bicubic", "Bicubic", "Smooth general-purpose interpolation.")
+        new("mitchell", Strings.ResizeFilterMitchellLabel, Strings.ResizeFilterMitchellDescription),
+        new("bicubic", Strings.ResizeFilterBicubicLabel, Strings.ResizeFilterBicubicDescription)
     ];
 
     public static readonly IReadOnlyList<ResizeDimensionModeOption> ModeOptions =
     [
-        new(ResizeDimensionMode.Percent, "Percent", "Scale both dimensions by a percentage."),
-        new(ResizeDimensionMode.Pixels, "Pixels", "Enter target width and height."),
-        new(ResizeDimensionMode.LongEdge, "Long edge", "Set the longest side and preserve the source ratio."),
-        new(ResizeDimensionMode.ShortEdge, "Short edge", "Set the shortest side and preserve the source ratio.")
+        new(ResizeDimensionMode.Percent, Strings.ResizePercent, Strings.ResizeModePercentDescription),
+        new(ResizeDimensionMode.Pixels, Strings.ResizePixelSize, Strings.ResizeModePixelsDescription),
+        new(ResizeDimensionMode.LongEdge, Strings.ResizeLongEdge, Strings.ResizeModeLongEdgeDescription),
+        new(ResizeDimensionMode.ShortEdge, Strings.ResizeShortEdge, Strings.ResizeModeShortEdgeDescription)
     ];
 
     public static ResizeFilterPreset FindFilter(string? id)
@@ -91,10 +92,10 @@ public static class ResizePlanService
     public static ResizePlan CreatePlan(ResizePlanRequest request)
     {
         if (request.SourceWidth <= 0 || request.SourceHeight <= 0)
-            return Invalid(request, "Open an image with valid pixel dimensions before resizing.");
+            return Invalid(request, Strings.ResizeOpenValidImageError);
 
         if (request.Filter is null)
-            return Invalid(request, "Choose a resize filter.");
+            return Invalid(request, Strings.ResizePlanChooseFilterError);
 
         var dimensions = request.Mode switch
         {
@@ -106,18 +107,25 @@ public static class ResizePlanService
         };
 
         if (dimensions is not { } target)
-            return Invalid(request, "Enter positive resize values.");
+            return Invalid(request, Strings.ResizePlanEnterPositiveValuesError);
 
         if (target.Width <= 0 || target.Height <= 0)
-            return Invalid(request, "Resize output must be at least 1 x 1 pixels.");
+            return Invalid(request, Strings.ResizeOutputMinimumError);
 
         if (target.Width > MaxDimension || target.Height > MaxDimension)
-            return Invalid(request, $"Resize output cannot exceed {MaxDimension} pixels on either edge.");
+            return Invalid(request, Strings.Format("ResizeOutputTooLargeFormat", MaxDimension));
 
         var scaleX = target.Width / (double)request.SourceWidth;
         var scaleY = target.Height / (double)request.SourceHeight;
-        var summary = $"{request.SourceWidth} x {request.SourceHeight} -> {target.Width} x {target.Height} " +
-                      $"({FormatPercent(scaleX)} x {FormatPercent(scaleY)}, {request.Filter.Label})";
+        var summary = Strings.Format(
+            "ResizePlanSummaryFormat",
+            request.SourceWidth,
+            request.SourceHeight,
+            target.Width,
+            target.Height,
+            FormatPercent(scaleX),
+            FormatPercent(scaleY),
+            request.Filter.Label);
 
         return new ResizePlan(
             IsValid: true,
