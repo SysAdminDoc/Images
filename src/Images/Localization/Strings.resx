@@ -4093,5 +4093,11 @@ Details written to:
   <data name="CommandPalette_ChannelAlpha" xml:space="preserve">
     <value>Show alpha channel only</value>
   </data>
+  <data name="CommandPalette_Category_Window" xml:space="preserve">
+    <value>Window</value>
+  </data>
+  <data name="CommandPalette_SendToMonitorFormat" xml:space="preserve">
+    <value>Send to monitor {0}</value>
+  </data>
 
 </root>

@@ -997,7 +997,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var compare = Strings.CommandPalette_Category_Compare;
         var help = Strings.CommandPalette_Category_Help;
 
-        return new List<CommandPaletteItem>
+        var items = new List<CommandPaletteItem>
         {
             // Navigation
             new() { Name = Strings.CommandPalette_Open, Shortcut = "Ctrl+O", Category = nav, Command = OpenCommand },
@@ -1077,6 +1077,45 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             new() { Name = Strings.CommandPalette_CheckUpdates, Category = help, Command = CheckForUpdatesCommand },
             new() { Name = Strings.CommandPalette_Paste, Shortcut = "Ctrl+V", Category = help, Command = PasteFromClipboardCommand },
         };
+
+        // V20-27: append dynamic "Send to monitor N" entries for each connected display.
+        var monitors = MonitorService.GetAllMonitors();
+        if (monitors.Count > 1)
+        {
+            var window = Strings.CommandPalette_Category_Window;
+            for (var i = 0; i < monitors.Count; i++)
+            {
+                var idx = i;
+                var m = monitors[i];
+                var label = Strings.Format(
+                    nameof(Strings.CommandPalette_SendToMonitorFormat),
+                    m.DisplayNumber);
+                items.Add(new CommandPaletteItem
+                {
+                    Name = label,
+                    Category = window,
+                    Command = new RelayCommand(
+                        () => RequestSendToMonitor?.Invoke(idx),
+                        () => RequestSendToMonitor is not null),
+                });
+            }
+        }
+
+        return items;
+    }
+
+    // V20-27: delegate set by MainWindow after construction so the VM can request a window move
+    // to a specific monitor index. Null until the window wires it up.
+    public Action<int>? RequestSendToMonitor { get; set; }
+
+    /// <summary>
+    /// V20-27: rebuilds the palette registry, e.g. after the window wires up the send-to-monitor
+    /// delegate so the dynamic monitor entries get a live callback.
+    /// </summary>
+    public void RefreshCommandPalette()
+    {
+        _commandPaletteRegistry = BuildCommandPaletteRegistry();
+        RefreshCommandPaletteItems();
     }
 
     // V15-07: fullscreen toggled by F11. The view collapses the side panel + floats the toolbar

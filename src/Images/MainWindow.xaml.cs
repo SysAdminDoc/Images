@@ -34,6 +34,11 @@ public partial class MainWindow : Window
         // correctly; save on Closing.
         RestoreWindowState();
         Closing += SaveWindowState;
+
+        // V20-27: wire the send-to-monitor callback and rebuild the palette so dynamic
+        // "Send to monitor N" entries get a live delegate.
+        Vm.RequestSendToMonitor = SendToMonitor;
+        Vm.RefreshCommandPalette();
         Closed += (_, _) =>
         {
             UnregisterOverlayExitHotKey();
@@ -352,38 +357,80 @@ public partial class MainWindow : Window
     private void ResetActiveCanvas() => ActiveImageCanvas().ResetView();
     private void OneToOneActiveCanvas() => ActiveImageCanvas().OneToOne();
 
-    // V20-02: restore saved window geometry; clamp to current working area so a window that
-    // was last on a now-disconnected second monitor doesn't land offscreen.
+    // V20-02 + V20-27: restore saved window geometry with per-monitor awareness. When the app
+    // was last on monitor X, we try to restore that monitor's saved geometry. Falls back to the
+    // generic (legacy) keys, then to the primary work area clamp so nothing lands offscreen.
     private void RestoreWindowState()
     {
         var settings = SettingsService.Instance;
         if (!settings.GetBool(Keys.RememberWindowPlacement, true)) return;
 
-        var w = settings.GetDouble(Keys.WindowWidth, Width);
-        var h = settings.GetDouble(Keys.WindowHeight, Height);
-        var l = settings.GetDouble(Keys.WindowLeft, double.NaN);
-        var t = settings.GetDouble(Keys.WindowTop, double.NaN);
-        var maximized = settings.GetBool(Keys.WindowMaximized, false);
+        // V20-27: try per-monitor keys first. On first launch (before SourceInitialized) the
+        // hwnd is 0, so GetCurrentMonitorDeviceName returns null; that's fine — we just use the
+        // generic fallback, which is the same behaviour as before V20-27.
+        var monitorId = MonitorService.GetCurrentMonitorDeviceName(this);
+        var suffix = monitorId is not null ? "." + MonitorService.SanitizeDeviceName(monitorId) : null;
+
+        var (w, h, l, t, maximized) = LoadWindowGeometry(settings, suffix);
 
         // Sanity clamp: width/height must be at least MinWidth/MinHeight; position must be
-        // at least partially on-screen (≥ 120 px of the window visible on any work area).
-        var wa = System.Windows.SystemParameters.WorkArea;
-        if (w >= MinWidth && h >= MinHeight && w <= wa.Width * 4 && h <= wa.Height * 4)
+        // at least partially on-screen (>= 120 px of the window visible on any work area).
+        // V20-27: use the actual monitor work area (physical -> logical) instead of just primary.
+        var wa = monitorId is not null
+            ? MonitorService.GetCurrentMonitorWorkArea(this)
+            : SystemParameters.WorkArea;
+
+        // Convert physical work-area to logical units for clamping (only when we got real
+        // monitor data — the fallback WorkArea is already in logical units).
+        var waForClamp = monitorId is not null
+            ? PhysicalToLogical(wa)
+            : wa;
+
+        if (w >= MinWidth && h >= MinHeight && w <= waForClamp.Width * 4 && h <= waForClamp.Height * 4)
         {
             Width = w; Height = h;
         }
 
         if (!double.IsNaN(l) && !double.IsNaN(t))
         {
-            // 120-px visibility check against the primary work area (multi-monitor check is
-            // possible but involves P/Invoke into User32; primary is good enough).
-            var visibleL = Math.Max(wa.Left, Math.Min(l, wa.Right - 120));
-            var visibleT = Math.Max(wa.Top, Math.Min(t, wa.Bottom - 120));
+            var visibleL = Math.Max(waForClamp.Left, Math.Min(l, waForClamp.Right - 120));
+            var visibleT = Math.Max(waForClamp.Top, Math.Min(t, waForClamp.Bottom - 120));
             Left = visibleL; Top = visibleT;
-            WindowStartupLocation = System.Windows.WindowStartupLocation.Manual;
+            WindowStartupLocation = WindowStartupLocation.Manual;
         }
 
-        if (maximized) WindowState = System.Windows.WindowState.Maximized;
+        if (maximized) WindowState = WindowState.Maximized;
+    }
+
+    /// <summary>
+    /// Loads window geometry from per-monitor keys (if suffix is non-null), falling back to
+    /// the generic (legacy) keys.
+    /// </summary>
+    private static (double w, double h, double l, double t, bool maximized) LoadWindowGeometry(
+        SettingsService settings, string? monitorSuffix)
+    {
+        // Try monitor-specific keys first.
+        if (monitorSuffix is not null)
+        {
+            var mw = settings.GetDouble(Keys.WindowWidth + monitorSuffix, double.NaN);
+            if (!double.IsNaN(mw))
+            {
+                return (
+                    mw,
+                    settings.GetDouble(Keys.WindowHeight + monitorSuffix, 600),
+                    settings.GetDouble(Keys.WindowLeft + monitorSuffix, double.NaN),
+                    settings.GetDouble(Keys.WindowTop + monitorSuffix, double.NaN),
+                    settings.GetBool(Keys.WindowMaximized + monitorSuffix, false));
+            }
+        }
+
+        // Fall back to generic (legacy) keys.
+        return (
+            settings.GetDouble(Keys.WindowWidth, double.NaN),
+            settings.GetDouble(Keys.WindowHeight, double.NaN),
+            settings.GetDouble(Keys.WindowLeft, double.NaN),
+            settings.GetDouble(Keys.WindowTop, double.NaN),
+            settings.GetBool(Keys.WindowMaximized, false));
     }
 
     private void SaveWindowState(object? sender, System.ComponentModel.CancelEventArgs e)
@@ -395,12 +442,54 @@ public partial class MainWindow : Window
 
         // Only record non-maximized geometry; if the user's maximized, the RestoreBounds holds
         // what they'd get back after unmaximize, so that's what we want to persist.
-        var bounds = WindowState == System.Windows.WindowState.Maximized ? RestoreBounds : new Rect(Left, Top, Width, Height);
+        var bounds = WindowState == WindowState.Maximized ? RestoreBounds : new Rect(Left, Top, Width, Height);
+
+        // V20-27: save both generic (legacy) keys and per-monitor keys.
         settings.SetDouble(Keys.WindowLeft, bounds.Left);
         settings.SetDouble(Keys.WindowTop, bounds.Top);
         settings.SetDouble(Keys.WindowWidth, bounds.Width);
         settings.SetDouble(Keys.WindowHeight, bounds.Height);
-        settings.SetBool(Keys.WindowMaximized, WindowState == System.Windows.WindowState.Maximized);
+        settings.SetBool(Keys.WindowMaximized, WindowState == WindowState.Maximized);
+
+        var monitorId = MonitorService.GetCurrentMonitorDeviceName(this);
+        if (monitorId is not null)
+        {
+            var suffix = "." + MonitorService.SanitizeDeviceName(monitorId);
+            settings.SetDouble(Keys.WindowLeft + suffix, bounds.Left);
+            settings.SetDouble(Keys.WindowTop + suffix, bounds.Top);
+            settings.SetDouble(Keys.WindowWidth + suffix, bounds.Width);
+            settings.SetDouble(Keys.WindowHeight + suffix, bounds.Height);
+            settings.SetBool(Keys.WindowMaximized + suffix, WindowState == WindowState.Maximized);
+        }
+    }
+
+    /// <summary>
+    /// V20-27: move the window to the monitor at the given zero-based index. Called from the
+    /// VM via <see cref="MainViewModel.RequestSendToMonitor"/>.
+    /// </summary>
+    public void SendToMonitor(int monitorIndex)
+    {
+        var monitors = MonitorService.GetAllMonitors();
+        if (monitorIndex < 0 || monitorIndex >= monitors.Count) return;
+        MonitorService.MoveWindowToMonitor(this, monitors[monitorIndex]);
+    }
+
+    /// <summary>
+    /// Converts a physical-pixel rect to WPF logical units using the current DPI.
+    /// </summary>
+    private Rect PhysicalToLogical(Rect physical)
+    {
+        var source = PresentationSource.FromVisual(this);
+        if (source?.CompositionTarget is null)
+            return physical;
+
+        var dpiX = source.CompositionTarget.TransformFromDevice.M11;
+        var dpiY = source.CompositionTarget.TransformFromDevice.M22;
+        return new Rect(
+            physical.Left * dpiX,
+            physical.Top * dpiY,
+            physical.Width * dpiX,
+            physical.Height * dpiY);
     }
 
     // V15-07: F11 toggles fullscreen. Borderless maximized, side panel collapses via the
