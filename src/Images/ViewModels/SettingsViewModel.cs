@@ -113,9 +113,10 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         set
         {
             _settings.SetBool(Keys.AccessibilityHighContrast, value);
+            ThemeService.ApplyFromSettings(_settings);
             Raise(nameof(HighContrastMode));
             SetStatus(
-                value ? "High-contrast preference saved for contrast-aware surfaces." : "High-contrast preference disabled.",
+                value ? "High-contrast surfaces enabled." : "High-contrast preference disabled.",
                 SettingsStatusToneKind.Success);
         }
     }
