@@ -92,7 +92,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             _settings.SetBool(Keys.RememberWindowPlacement, value);
             Raise(nameof(RememberWindowPlacement));
             SetStatus(
-                value ? "Window size and position will be restored at startup." : "Images will use its default window placement at startup.",
+                value ? Strings.SettingsRememberWindowOnStatus : Strings.SettingsRememberWindowOffStatus,
                 SettingsStatusToneKind.Success);
         }
     }
@@ -105,7 +105,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             _settings.SetBool(Keys.FilmstripVisible, value);
             Raise(nameof(FilmstripVisibleOnStartup));
             SetStatus(
-                value ? "Filmstrip will be shown at startup." : "Filmstrip will stay hidden at startup.",
+                value ? Strings.SettingsFilmstripOnStatus : Strings.SettingsFilmstripOffStatus,
                 SettingsStatusToneKind.Success);
         }
     }
@@ -118,7 +118,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             _settings.SetBool(Keys.MetadataHudVisible, value);
             Raise(nameof(MetadataHudVisibleOnStartup));
             SetStatus(
-                value ? "Metadata overlay will be shown at startup." : "Metadata overlay will stay hidden at startup.",
+                value ? Strings.SettingsMetadataHudOnStatus : Strings.SettingsMetadataHudOffStatus,
                 SettingsStatusToneKind.Success);
         }
     }
@@ -132,8 +132,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             Raise(nameof(ConfirmRecycleBinDeletes));
             SetStatus(
                 value
-                    ? "Recycle Bin confirmation enabled."
-                    : "Recycle Bin confirmation disabled. Delete will move images immediately.",
+                    ? Strings.SettingsRecycleBinConfirmOnStatus
+                    : Strings.SettingsRecycleBinConfirmOffStatus,
                 SettingsStatusToneKind.Success);
         }
     }
@@ -146,7 +146,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             _settings.SetBool(Keys.AccessibilityReduceMotion, value);
             Raise(nameof(ReduceMotion));
             SetStatus(
-                value ? "Motion reduction enabled for viewer chrome animations." : "Viewer chrome animations enabled.",
+                value ? Strings.SettingsReduceMotionOnStatus : Strings.SettingsReduceMotionOffStatus,
                 SettingsStatusToneKind.Success);
         }
     }
@@ -160,7 +160,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             ThemeService.ApplyFromSettings(_settings);
             Raise(nameof(HighContrastMode));
             SetStatus(
-                value ? "High-contrast surfaces enabled." : "High-contrast preference disabled.",
+                value ? Strings.SettingsHighContrastOnStatus : Strings.SettingsHighContrastOffStatus,
                 SettingsStatusToneKind.Success);
         }
     }
@@ -173,7 +173,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             _settings.SetBool(Keys.ArchiveRightToLeft, value);
             Raise(nameof(ArchiveRightToLeft));
             SetStatus(
-                value ? "Archive books will use right-to-left page turns." : "Archive books will use left-to-right page turns.",
+                value ? Strings.SettingsArchiveRtlOnStatus : Strings.SettingsArchiveRtlOffStatus,
                 SettingsStatusToneKind.Success);
         }
     }
@@ -186,7 +186,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             _settings.SetBool(Keys.ArchiveOldScanFilter, value);
             Raise(nameof(ArchiveOldScanFilter));
             SetStatus(
-                value ? "Archive clean-scan preview filter enabled by default." : "Archive clean-scan preview filter disabled by default.",
+                value ? Strings.SettingsArchiveCleanScanOnStatus : Strings.SettingsArchiveCleanScanOffStatus,
                 SettingsStatusToneKind.Success);
         }
     }
@@ -199,7 +199,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             _settings.SetBool(Keys.ArchiveSpreadMode, value);
             Raise(nameof(ArchiveSpreadMode));
             SetStatus(
-                value ? "Archive two-page spreads enabled by default." : "Archive two-page spreads disabled by default.",
+                value ? Strings.SettingsArchiveSpreadOnStatus : Strings.SettingsArchiveSpreadOffStatus,
                 SettingsStatusToneKind.Success);
         }
     }
@@ -215,14 +215,14 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             Raise(nameof(UpdateCheckEnabled));
             SetStatus(
                 value
-                    ? "Automatic update checks enabled. Images only contacts GitHub Releases."
-                    : "Automatic update checks disabled.",
+                    ? Strings.SettingsUpdateCheckOnStatus
+                    : Strings.SettingsUpdateCheckOffStatus,
                 SettingsStatusToneKind.Success);
         }
     }
 
     public string UpdateCheckDescription =>
-        "Off by default. When enabled, Images pings github.com/SysAdminDoc/Images at startup. No usage data is sent.";
+        Strings.SettingsUpdateCheckDescription;
 
     // ---- Text extraction ----
 
@@ -245,10 +245,10 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public ICommand OpenLogsCommand { get; }
 
     public string HotkeySummary =>
-        "Ctrl+, Settings; Ctrl+Shift+B Batch; Ctrl+Shift+D Duplicate cleanup; Ctrl+Shift+H File health; Ctrl+Shift+E Edit history; Ctrl+Alt+A Adjustments; Ctrl+Alt+F Effects; Ctrl+Alt+P Perspective; C Crop; S Selection.";
+        Strings.SettingsHotkeySummary;
 
     public string DiagnosticsStorageSummary =>
-        "Diagnostics and support files stay under the local Images app data folder. Use About for the full codec report, system info, logs, and cache controls.";
+        Strings.SettingsDiagnosticsStorageSummary;
 
     public string? SettingsStatusText
     {
@@ -294,7 +294,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         Raise(nameof(OcrStatusDescription));
         Raise(nameof(OcrLanguageSummary));
         Raise(nameof(OcrStatusBadge));
-        SetStatus("Text extraction status refreshed.", SettingsStatusToneKind.Success);
+        SetStatus(Strings.SettingsOcrRefreshedStatus, SettingsStatusToneKind.Success);
     }
 
     private void OpenOcrLanguageSettings()
@@ -302,22 +302,24 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         try
         {
             ShellIntegration.OpenShellTarget("ms-settings:regionlanguage");
-            SetStatus("Windows language settings opened.", SettingsStatusToneKind.Success);
+            SetStatus(Strings.SettingsLanguageSettingsOpenedStatus, SettingsStatusToneKind.Success);
         }
         catch (Exception ex)
         {
-            SetStatus($"Could not open Windows language settings: {ex.Message}", SettingsStatusToneKind.Warning);
+            SetStatus(
+                string.Format(CultureInfo.CurrentCulture, Strings.SettingsLanguageSettingsFailedFormat, ex.Message),
+                SettingsStatusToneKind.Warning);
         }
     }
 
     private void OpenAppData()
     {
-        OpenStoragePath(AppStorage.TryGetAppDirectory(), "App data folder opened.");
+        OpenStoragePath(AppStorage.TryGetAppDirectory(), Strings.SettingsAppDataOpenedStatus);
     }
 
     private void OpenLogs()
     {
-        OpenStoragePath(AppStorage.TryGetAppDirectory("Logs"), "Logs folder opened.");
+        OpenStoragePath(AppStorage.TryGetAppDirectory("Logs"), Strings.SettingsLogsOpenedStatus);
     }
 
     private void OpenStoragePath(string? path, string successMessage)
@@ -326,7 +328,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         {
             if (string.IsNullOrWhiteSpace(path))
             {
-                SetStatus("Storage path is unavailable in this session.", SettingsStatusToneKind.Warning);
+                SetStatus(Strings.SettingsStorageUnavailableStatus, SettingsStatusToneKind.Warning);
                 return;
             }
 
@@ -336,7 +338,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            SetStatus($"Could not open storage folder: {ex.Message}", SettingsStatusToneKind.Warning);
+            SetStatus(
+                string.Format(CultureInfo.CurrentCulture, Strings.SettingsStorageOpenFailedFormat, ex.Message),
+                SettingsStatusToneKind.Warning);
         }
     }
 }

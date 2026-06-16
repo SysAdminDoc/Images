@@ -11,6 +11,13 @@ internal static class WindowChrome
     // From dwmapi.h. Immersive-dark-mode is stable from Windows 10 20H1 (build 19041).
     // DWMWA_USE_IMMERSIVE_DARK_MODE_OLD was 19 during preview; 20 is the stable name shipped builds honor.
     private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+    private const int DWMWA_BORDER_COLOR = 34;
+    private const int DWMWA_CAPTION_COLOR = 35;
+    private const int DWMWA_TEXT_COLOR = 36;
+
+    private const int MochaBaseColorRef = 0x002E1E1E;
+    private const int MochaSurfaceColorRef = 0x00443231;
+    private const int MochaTextColorRef = 0x00F4D6CD;
 
     // DWMWA_SYSTEMBACKDROP_TYPE landed with Windows 11 22H2 (build 22621). Values:
     //   1 = DWMSBT_DISABLE, 2 = DWMSBT_MAINWINDOW (Mica), 3 = DWMSBT_TRANSIENTWINDOW (Acrylic), 4 = DWMSBT_TABBEDWINDOW
@@ -31,5 +38,15 @@ internal static class WindowChrome
         int value = 1;
         try { DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref value, sizeof(int)); }
         catch { /* pre-20H1 silently no-ops */ }
+
+        SetAttribute(hwnd, DWMWA_CAPTION_COLOR, MochaBaseColorRef);
+        SetAttribute(hwnd, DWMWA_TEXT_COLOR, MochaTextColorRef);
+        SetAttribute(hwnd, DWMWA_BORDER_COLOR, MochaSurfaceColorRef);
+    }
+
+    private static void SetAttribute(IntPtr hwnd, int attribute, int value)
+    {
+        try { DwmSetWindowAttribute(hwnd, attribute, ref value, sizeof(int)); }
+        catch { /* unsupported DWM attribute */ }
     }
 }

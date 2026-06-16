@@ -25,6 +25,7 @@ public sealed class JpegTranRuntimeTests
         var runtimeDir = Directory.CreateDirectory(Path.Combine(temp.Path, "Codecs", "JpegTran")).FullName;
         var exe = Path.Combine(runtimeDir, "jpegtran.exe");
         File.WriteAllText(exe, "fake jpegtran");
+        File.WriteAllText(Path.Combine(runtimeDir, "jpeg62.dll"), "fake jpeg62");
 
         var status = JpegTranRuntime.Inspect(
             temp.Path,
@@ -36,6 +37,28 @@ public sealed class JpegTranRuntimeTests
         Assert.Equal("app-local Codecs\\JpegTran", status.Source);
         Assert.Equal("libjpeg-turbo 3.1.4.1", status.Version);
         Assert.Equal(JpegTranRuntime.GetSha256(exe), status.Sha256);
+    }
+
+    [Fact]
+    public void Inspect_AppLocalRuntimeMissingJpeg62Dll_DoesNotStartJpegTran()
+    {
+        using var temp = TestDirectory.Create();
+        var runtimeDir = Directory.CreateDirectory(Path.Combine(temp.Path, "Codecs", "JpegTran")).FullName;
+        File.WriteAllText(Path.Combine(runtimeDir, "jpegtran.exe"), "fake jpegtran");
+
+        var versionReaderCalled = false;
+        var status = JpegTranRuntime.Inspect(
+            temp.Path,
+            environmentExecutablePath: null,
+            versionReader: _ =>
+            {
+                versionReaderCalled = true;
+                return "should not run";
+            });
+
+        Assert.False(status.Available);
+        Assert.False(versionReaderCalled);
+        Assert.Contains("jpeg62.dll", status.StatusText, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

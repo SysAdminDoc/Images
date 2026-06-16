@@ -5,8 +5,8 @@
         xmlns:ctl="clr-namespace:Images.Controls"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         Title="{Binding WindowTitle}"
-        Width="1280" Height="820"
-        MinWidth="860" MinHeight="560"
+        Width="1180" Height="820"
+        MinWidth="760" MinHeight="560"
         WindowStartupLocation="CenterScreen"
         AllowDrop="True"
         DragEnter="Window_DragEnter"
@@ -1558,8 +1558,8 @@
                             AutomationProperties.Name="Next image"
                             AutomationProperties.HelpText="Right arrow or Space" />
 
-                    <!-- Position chip — elevated pill -->
-                    <Border Style="{StaticResource FloatingPill}"
+                    <!-- Position chip — elevated floating chrome -->
+                    <Border Style="{StaticResource FloatingChrome}"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Top"
                             Margin="0,20,0,0"
@@ -1571,7 +1571,7 @@
                                    FontWeight="SemiBold" />
                     </Border>
 
-                    <Border Style="{StaticResource FloatingPill}"
+                    <Border Style="{StaticResource FloatingChrome}"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Top"
                             Margin="0,62,0,0"
@@ -1619,7 +1619,7 @@
                     </Border>
 
                     <!-- V20-22: optional EXIF HUD. Reads from the same local metadata rows as the side panel. -->
-                    <Border Style="{StaticResource FloatingPill}"
+                    <Border Style="{StaticResource FloatingChrome}"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top"
                             Margin="22,22,0,0"
@@ -1719,7 +1719,7 @@
                             AutomationProperties.Name="Text extraction status"
                             AutomationProperties.LiveSetting="Polite">
                         <Border.Style>
-                            <Style TargetType="Border" BasedOn="{StaticResource FloatingPill}">
+                            <Style TargetType="Border" BasedOn="{StaticResource FloatingChrome}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsOcrBusy}" Value="True">
                                         <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
@@ -1803,7 +1803,7 @@
                             IsHitTestVisible="False"
                             AutomationProperties.LiveSetting="Polite">
                         <Border.Style>
-                            <Style TargetType="Border" BasedOn="{StaticResource FloatingPill}">
+                            <Style TargetType="Border" BasedOn="{StaticResource FloatingChrome}">
                                 <Setter Property="Opacity" Value="0" />
                                 <Style.Triggers>
                                     <Trigger Property="IsVisible" Value="True">
@@ -2116,7 +2116,7 @@
                             AutomationProperties.LiveSetting="Polite"
                             IsHitTestVisible="False">
                         <Border.Style>
-                            <Style TargetType="Border" BasedOn="{StaticResource FloatingPill}">
+                            <Style TargetType="Border" BasedOn="{StaticResource FloatingChrome}">
                                 <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
                                 <Setter Property="Opacity" Value="0" />
                                 <Style.Triggers>
@@ -2174,7 +2174,7 @@
                         </Grid>
                     </Border>
 
-                    <!-- Toast notification — elevated pill, fades on show via Opacity trigger -->
+                    <!-- Toast notification — elevated floating chrome, fades on show via Opacity trigger -->
                     <Border x:Name="ToastHost"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Bottom"
@@ -2538,7 +2538,7 @@
                                 </Border>
 
                                 <!-- Animated-image chip — only surfaces when CurrentAnimation is non-null.
-                                     Small green pill so the GIF/APNG/animated-WebP state reads at a glance
+                                     Small green status chip so the GIF/APNG/animated-WebP state reads at a glance
                                      without competing with the primary command row. -->
                                 <Border Margin="10,0,0,0"
                                         Padding="8,2"
@@ -2783,13 +2783,13 @@
 
         <!-- ============ RIGHT: Rename + Recent + Details panel ============ -->
         <Border Grid.Column="1"
-                Width="360"
+                Width="320"
                 Visibility="{Binding IsFullscreen, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}"
                 Background="{StaticResource MantleBrush}"
                 BorderBrush="{StaticResource HairlineBrush}"
                 BorderThickness="1,0,0,0">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
-                <StackPanel Margin="22,22,22,28">
+                <StackPanel Margin="18,22,18,28">
 
                     <!-- Panel header -->
                     <Grid Margin="0,0,0,22">
@@ -2802,6 +2802,7 @@
                                        Text="Images" />
                             <TextBlock Style="{StaticResource Text.Subtitle}"
                                        Text="Review, rename, and move through a folder without breaking flow."
+                                       TextWrapping="Wrap"
                                        Margin="0,6,0,0" />
                         </StackPanel>
                         <!-- V15-06: click the info icon for the About dialog. Keeps the header

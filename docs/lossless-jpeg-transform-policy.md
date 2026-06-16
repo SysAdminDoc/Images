@@ -5,9 +5,9 @@ Date: 2026-05-17
 
 ## Decision
 
-Images may support lossless JPEG rotate and crop only through an app-local `jpegtran.exe` sidecar after the exact binary passes the optional-runtime review gate in `docs/integration-policy.md`.
+Images may support lossless JPEG rotate and crop only through an app-local `jpegtran.exe` sidecar after the exact runtime files pass the optional-runtime review gate in `docs/integration-policy.md`.
 
-No runtime binary is committed to source control. The shipped code contains deterministic MCU-alignment planning, an optional runtime resolver that recognizes only `Codecs\JpegTran\jpegtran.exe` or the explicit `IMAGES_JPEGTRAN_EXE` developer override, guarded writeback paths for a single exact or confirmed-trim JPEG crop/right-angle rotation, and an interactive choice between trimmed lossless writeback and exact raster re-encode. About, `--system-info`, and `--codec-report` report path, source, version, and SHA-256 when a runtime is present. Official release packaging stages the reviewed libjpeg-turbo artifact with `scripts\Prepare-JpegTranBundle.ps1` before publish.
+No runtime binary is committed to source control. The shipped code contains deterministic MCU-alignment planning, an optional runtime resolver that recognizes only `Codecs\JpegTran\jpegtran.exe` with its adjacent `jpeg62.dll` or the explicit `IMAGES_JPEGTRAN_EXE` developer override, guarded writeback paths for a single exact or confirmed-trim JPEG crop/right-angle rotation, and an interactive choice between trimmed lossless writeback and exact raster re-encode. About, `--system-info`, and `--codec-report` report path, source, version, and SHA-256 when a runtime is present. Official release packaging stages the reviewed libjpeg-turbo artifact with `scripts\Prepare-JpegTranBundle.ps1` before publish.
 
 ## User contract
 
@@ -41,6 +41,7 @@ Required before enabling the feature:
 - Release artifact: `libjpeg-turbo-3.1.4.1-vc-x64.exe` from https://github.com/libjpeg-turbo/libjpeg-turbo/releases/tag/3.1.4.1
 - Release artifact SHA-256: `2bb347f106473c12635bdd414b1f289de9f4d6dea4a496d3f9dd212db9eda0dc`.
 - Extracted `jpegtran.exe` SHA-256: `2000c205ed99fe2409e42a6cb87c19d88e33e516d5d40ff11bb19b7830e3ee33`.
+- Extracted `jpeg62.dll` SHA-256: `fc55317c9dee01f0f04a2a669824429086c5d55aa13ad901e2a3bbab33c80853`.
 - Source archive: `libjpeg-turbo-3.1.4.1.tar.gz`, SHA-256 `ecae8008e2cc9ade2f2c1bb9d5e6d4fb73e7c433866a056bd82980741571a022`.
 - Official binaries documentation: https://libjpeg-turbo.org/Documentation/OfficialBinaries
 - License: BSD-style libjpeg-turbo license, with license text from https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/LICENSE.md.
@@ -48,7 +49,7 @@ Required before enabling the feature:
 - Source-use boundary: child-process shell-out only; no in-process native linking and no source copied into Images.
 - Update cadence: monitor libjpeg-turbo GitHub releases and security advisories before each Images release that bundles jpegtran.
 - CVE/advisory tracking: GitHub security advisories for `libjpeg-turbo/libjpeg-turbo`.
-- Binary provenance: `src\Images\Codecs\JpegTran\PROVENANCE.md` records artifact URL, artifact SHA-256, source archive SHA-256, extracted executable path, and extracted executable SHA-256. Release diagnostics must show the same executable hash.
+- Binary provenance: `src\Images\Codecs\JpegTran\PROVENANCE.md` records artifact URL, artifact SHA-256, source archive SHA-256, extracted executable/dependency paths, and extracted executable/dependency SHA-256 values. Release diagnostics must show the same executable hash.
 - Process boundary: child process through `CreateProcess` / `ProcessStartInfo.ArgumentList`.
 - File access boundary: source JPEG plus same-volume temp output and rollback files only.
 - Network behavior: no network access; Images never downloads the runtime automatically.
@@ -60,7 +61,7 @@ Required before enabling the feature:
 
 ## Shell-out rules
 
-- Resolve only app-local `Codecs\JpegTran\jpegtran.exe` or an explicit developer override. Do not auto-download.
+- Resolve only app-local `Codecs\JpegTran\jpegtran.exe` with adjacent `jpeg62.dll`, or an explicit developer override. Do not auto-download.
 - If `IMAGES_JPEGTRAN_EXE` is set but invalid, report the override as unavailable instead of silently falling back to an app-local binary.
 - Use a temp output file in the same volume as the target when replacing originals.
 - Pass arguments through `ProcessStartInfo.ArgumentList`; never build a shell string.
@@ -77,7 +78,7 @@ The actual runtime path must replace the conservative default with the MCU size 
 
 ## Completion criteria for `V30-02`
 
-- Approved and bundled `jpegtran.exe` artifact with license and SHA-256 provenance. Shipped 2026-05-17 through release staging script and tracked provenance/license files.
+- Approved and bundled `jpegtran.exe` artifact plus required `jpeg62.dll` with license and SHA-256 provenance. Shipped 2026-05-17 through release staging script and tracked provenance/license files.
 - Diagnostics surface for runtime path, version, and hash. Shipped 2026-05-14 for app-local/override detection.
 - Exact MCU-aligned JPEG crop shell-out, output validation, same-volume atomic replacement, rollback cleanup, and fake-process tests. Shipped 2026-05-14.
 - UI command for right-angle rotation writeback with exact aligned JPEG shell-out, output validation, same-volume atomic replacement, rollback cleanup, and fake-process tests. Shipped 2026-05-14.

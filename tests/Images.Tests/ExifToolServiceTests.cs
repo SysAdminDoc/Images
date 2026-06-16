@@ -41,8 +41,9 @@ public sealed class ExifToolServiceTests
         Assert.True(start.RedirectStandardOutput);
         Assert.True(start.RedirectStandardError);
         Assert.Equal(Path.GetFullPath(executable), start.FileName);
-        Assert.Equal(["-@", capturedArgFile], start.ArgumentList);
-        Assert.False(File.Exists(capturedArgFile));
+        var argFile = Assert.IsType<string>(capturedArgFile);
+        Assert.Equal(["-@", argFile], start.ArgumentList);
+        Assert.False(File.Exists(argFile));
     }
 
     [Theory]

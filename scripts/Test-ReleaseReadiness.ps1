@@ -82,7 +82,9 @@ foreach ($relativePath in $requiredRuntimeFiles) {
 $jpegTranProvenance = Read-RepoText "src\Images\Codecs\JpegTran\PROVENANCE.md"
 if ($jpegTranProvenance -notmatch "libjpeg-turbo-3\.1\.4\.1-vc-x64\.exe" -or
     $jpegTranProvenance -notmatch "2bb347f106473c12635bdd414b1f289de9f4d6dea4a496d3f9dd212db9eda0dc" -or
-    $jpegTranProvenance -notmatch "2000c205ed99fe2409e42a6cb87c19d88e33e516d5d40ff11bb19b7830e3ee33") {
+    $jpegTranProvenance -notmatch "2000c205ed99fe2409e42a6cb87c19d88e33e516d5d40ff11bb19b7830e3ee33" -or
+    $jpegTranProvenance -notmatch "jpeg62\.dll" -or
+    $jpegTranProvenance -notmatch "fc55317c9dee01f0f04a2a669824429086c5d55aa13ad901e2a3bbab33c80853") {
     throw "jpegtran provenance must include the approved artifact URL and SHA-256 values."
 }
 

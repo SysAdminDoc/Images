@@ -5,6 +5,7 @@ param(
     [string] $ArtifactUrl = "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.4.1/libjpeg-turbo-3.1.4.1-vc-x64.exe",
     [string] $ArtifactSha256 = "2bb347f106473c12635bdd414b1f289de9f4d6dea4a496d3f9dd212db9eda0dc",
     [string] $ExpectedJpegTranSha256 = "2000c205ed99fe2409e42a6cb87c19d88e33e516d5d40ff11bb19b7830e3ee33",
+    [string] $ExpectedJpeg62Sha256 = "fc55317c9dee01f0f04a2a669824429086c5d55aa13ad901e2a3bbab33c80853",
     [switch] $Force
 )
 
@@ -121,24 +122,29 @@ function Find-RequiredFile {
 
 $sourceRoot = Resolve-JpegTranSourceRoot
 $jpegTran = Find-RequiredFile -Root $sourceRoot -Name "jpegtran.exe"
+$jpeg62 = Find-RequiredFile -Root $sourceRoot -Name "jpeg62.dll"
 $license = Find-RequiredFile -Root $sourceRoot -Name "LICENSE.md"
 $readmeIjg = Find-RequiredFile -Root $sourceRoot -Name "README.ijg"
 
 $stagedHash = Assert-Sha256 -Path $jpegTran -Expected $ExpectedJpegTranSha256 -Label "jpegtran.exe"
+$jpeg62Hash = Assert-Sha256 -Path $jpeg62 -Expected $ExpectedJpeg62Sha256 -Label "jpeg62.dll"
 
 $destinationFull = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Destination)
 New-Item -ItemType Directory -Path $destinationFull -Force | Out-Null
 
 $runtimeDestination = Join-Path $destinationFull "jpegtran.exe"
-if ((Test-Path -LiteralPath $runtimeDestination) -and -not $Force) {
-    throw "Destination already contains jpegtran.exe. Re-run with -Force to overwrite it."
+$jpeg62Destination = Join-Path $destinationFull "jpeg62.dll"
+if (((Test-Path -LiteralPath $runtimeDestination) -or (Test-Path -LiteralPath $jpeg62Destination)) -and -not $Force) {
+    throw "Destination already contains jpegtran runtime files. Re-run with -Force to overwrite them."
 }
 
 Copy-Item -LiteralPath $jpegTran -Destination $runtimeDestination -Force
+Copy-Item -LiteralPath $jpeg62 -Destination $jpeg62Destination -Force
 Copy-Item -LiteralPath $license -Destination (Join-Path $destinationFull "LICENSE.md") -Force
 Copy-Item -LiteralPath $readmeIjg -Destination (Join-Path $destinationFull "README.ijg") -Force
 
 Assert-Sha256 -Path $runtimeDestination -Expected $ExpectedJpegTranSha256 -Label "staged jpegtran.exe" | Out-Null
+Assert-Sha256 -Path $jpeg62Destination -Expected $ExpectedJpeg62Sha256 -Label "staged jpeg62.dll" | Out-Null
 
 Write-Host "jpegtran runtime copied."
 Write-Host "Source root:       $sourceRoot"
@@ -146,4 +152,5 @@ Write-Host "Destination:       $destinationFull"
 Write-Host "Artifact URL:      $ArtifactUrl"
 Write-Host "Artifact SHA-256:  $($ArtifactSha256.ToLowerInvariant())"
 Write-Host "jpegtran SHA-256:  $stagedHash"
+Write-Host "jpeg62 SHA-256:    $jpeg62Hash"
 Write-Host "Next: dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish"

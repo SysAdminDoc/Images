@@ -15,6 +15,8 @@ namespace Images;
 
 public partial class MainWindow : Window
 {
+    private const double WorkAreaMargin = 24;
+
     private MainViewModel Vm => (MainViewModel)DataContext;
     private PixelCoordinate? _inspectorSelectionStart;
     private PixelCoordinate? _canvasSelectionStart;
@@ -33,6 +35,7 @@ public partial class MainWindow : Window
         // V20-02: window-state persistence. Restore BEFORE Show so WPF positions first-paint
         // correctly; save on Closing.
         RestoreWindowState();
+        ClampWindowToWorkArea();
         Closing += SaveWindowState;
 
         // V20-27: wire the send-to-monitor callback and rebuild the palette so dynamic
@@ -406,6 +409,29 @@ public partial class MainWindow : Window
         }
 
         if (maximized) WindowState = WindowState.Maximized;
+    }
+
+    private void ClampWindowToWorkArea()
+    {
+        if (WindowState == WindowState.Maximized)
+            return;
+
+        var workArea = SystemParameters.WorkArea;
+        if (workArea.Width <= 0 || workArea.Height <= 0)
+            return;
+
+        var maxWidth = Math.Max(MinWidth, workArea.Width - WorkAreaMargin);
+        var maxHeight = Math.Max(MinHeight, workArea.Height - WorkAreaMargin);
+        Width = Math.Clamp(Width, MinWidth, maxWidth);
+        Height = Math.Clamp(Height, MinHeight, maxHeight);
+
+        if (WindowStartupLocation != WindowStartupLocation.Manual)
+            return;
+
+        var maxLeft = Math.Max(workArea.Left, workArea.Right - Width);
+        var maxTop = Math.Max(workArea.Top, workArea.Bottom - Height);
+        Left = Math.Clamp(Left, workArea.Left, maxLeft);
+        Top = Math.Clamp(Top, workArea.Top, maxTop);
     }
 
     /// <summary>
