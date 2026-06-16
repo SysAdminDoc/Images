@@ -19,6 +19,10 @@ public readonly record struct ZoomPanViewState(double Scale, double TranslateX, 
 public sealed class ZoomPanImage : ContentControl
 {
     private readonly Image _image = new() { Stretch = Stretch.Uniform };
+    private readonly Grid _visual = new();
+    private readonly Viewbox _tileViewbox = new() { Stretch = Stretch.Uniform, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
+    private readonly Canvas _tileCanvas = new() { IsHitTestVisible = false };
+    private readonly Dictionary<TileKey, Image> _tileImages = new();
     // Flip lives BEFORE rotate in the transform stack so a horizontal flip flips the image in
     // its own canvas frame rather than the post-rotation frame — that's what users expect.
     // Order: flip → rotate → zoom-scale → pan-translate (TransformGroup applies children in order).
@@ -29,6 +33,8 @@ public sealed class ZoomPanImage : ContentControl
     private readonly Grid _root = new();
     private Point? _dragStart;
     private Point _dragOrigin;
+    private int? _renderedTileLevel;
+    private bool _tileRefreshQueued;
     public event EventHandler? ViewChanged;
 
     public static readonly DependencyProperty SourceProperty = DependencyProperty.Register(
@@ -62,6 +68,16 @@ public sealed class ZoomPanImage : ContentControl
     {
         get => (AnimationSequence?)GetValue(AnimationProperty);
         set => SetValue(AnimationProperty, value);
+    }
+
+    public static readonly DependencyProperty TilePyramidProperty = DependencyProperty.Register(
+        nameof(TilePyramid), typeof(TilePyramidInfo), typeof(ZoomPanImage),
+        new PropertyMetadata(null, (d, e) => ((ZoomPanImage)d).OnTilePyramidChanged((TilePyramidInfo?)e.NewValue)));
+
+    public TilePyramidInfo? TilePyramid
+    {
+        get => (TilePyramidInfo?)GetValue(TilePyramidProperty);
+        set => SetValue(TilePyramidProperty, value);
     }
 
     public static readonly DependencyProperty AnimationFrameIndexProperty = DependencyProperty.Register(
@@ -140,8 +156,8 @@ public sealed class ZoomPanImage : ContentControl
         group.Children.Add(_rotate);
         group.Children.Add(_scale);
         group.Children.Add(_translate);
-        _image.RenderTransformOrigin = new Point(0.5, 0.5);
-        _image.RenderTransform = group;
+        _visual.RenderTransformOrigin = new Point(0.5, 0.5);
+        _visual.RenderTransform = group;
         ApplyScalingMode(UseNearestNeighborScaling);
         _flip.Changed += (_, _) => RaiseViewChanged();
         _rotate.Changed += (_, _) => RaiseViewChanged();
@@ -149,7 +165,10 @@ public sealed class ZoomPanImage : ContentControl
         _translate.Changed += (_, _) => RaiseViewChanged();
 
         _root.ClipToBounds = true;
-        _root.Children.Add(_image);
+        _tileViewbox.Child = _tileCanvas;
+        _visual.Children.Add(_image);
+        _visual.Children.Add(_tileViewbox);
+        _root.Children.Add(_visual);
         Content = _root;
 
         MouseWheel += OnWheel;
@@ -157,9 +176,11 @@ public sealed class ZoomPanImage : ContentControl
         MouseMove += OnMove;
         MouseLeftButtonUp += OnUp;
         MouseDoubleClick += OnDouble;
+        Loaded += (_, _) => QueueTileRefresh();
         SizeChanged += (_, _) =>
         {
             ResetView();
+            QueueTileRefresh();
             RaiseViewChanged();
         };
     }
@@ -173,8 +194,19 @@ public sealed class ZoomPanImage : ContentControl
         _image.BeginAnimation(Image.SourceProperty, null);
         _image.Source = src;
         ResetView();
+        QueueTileRefresh();
         RaiseViewChanged();
         Dispatcher.BeginInvoke(new Action(RaiseViewChanged), System.Windows.Threading.DispatcherPriority.Loaded);
+    }
+
+    private void OnTilePyramidChanged(TilePyramidInfo? pyramid)
+    {
+        ClearTileImages();
+        _renderedTileLevel = null;
+        _tileViewbox.Visibility = pyramid is null ? Visibility.Collapsed : Visibility.Visible;
+        if (pyramid is not null)
+            QueueTileRefresh();
+        RaiseViewChanged();
     }
 
     private void OnAnimationChanged(AnimationSequence? seq)
@@ -205,16 +237,17 @@ public sealed class ZoomPanImage : ContentControl
     {
         _scale.ScaleX = _scale.ScaleY = 1;
         _translate.X = _translate.Y = 0;
+        QueueTileRefresh();
     }
 
     public Matrix GetImageToViewportMatrix()
     {
-        if (_image.Source is not BitmapSource bs)
+        if (!TryGetRenderedPixelSize(out var pixelWidth, out var pixelHeight))
             return Matrix.Identity;
 
         return ImageViewportTransform.Calculate(
-            bs.PixelWidth,
-            bs.PixelHeight,
+            pixelWidth,
+            pixelHeight,
             ActualWidth,
             ActualHeight,
             _scale.ScaleX,
@@ -244,6 +277,7 @@ public sealed class ZoomPanImage : ContentControl
         _scale.ScaleX = _scale.ScaleY = scale;
         _translate.X = translateX;
         _translate.Y = translateY;
+        QueueTileRefresh();
         RaiseViewChanged();
     }
 
@@ -256,37 +290,39 @@ public sealed class ZoomPanImage : ContentControl
 
     public void SetZoomMode(ZoomMode mode)
     {
-        if (_image.Source is not BitmapSource bs) return;
+        if (!TryGetRenderedPixelSize(out var pixelWidth, out var pixelHeight)) return;
         var w = ActualWidth;
         var h = ActualHeight;
         if (w <= 0 || h <= 0) return;
-        var baselineFit = Math.Min(w / bs.PixelWidth, h / bs.PixelHeight);
+        var baselineFit = Math.Min(w / pixelWidth, h / pixelHeight);
         if (baselineFit <= 0) return;
 
         double s = mode switch
         {
             ZoomMode.Fit       => 1.0,
             ZoomMode.OneToOne  => 1.0 / baselineFit,
-            ZoomMode.FitWidth  => (w / bs.PixelWidth) / baselineFit,
-            ZoomMode.FitHeight => (h / bs.PixelHeight) / baselineFit,
-            ZoomMode.Fill      => Math.Max(w / bs.PixelWidth, h / bs.PixelHeight) / baselineFit,
+            ZoomMode.FitWidth  => (w / pixelWidth) / baselineFit,
+            ZoomMode.FitHeight => (h / pixelHeight) / baselineFit,
+            ZoomMode.Fill      => Math.Max(w / pixelWidth, h / pixelHeight) / baselineFit,
             _ => 1.0,
         };
         _scale.ScaleX = _scale.ScaleY = s;
         _translate.X = _translate.Y = 0;
+        QueueTileRefresh();
         RaiseViewChanged();
     }
 
     public void OneToOne()
     {
-        if (_image.Source is not BitmapSource bs) return;
+        if (!TryGetRenderedPixelSize(out var pixelWidth, out var pixelHeight)) return;
         var w = ActualWidth;
         var h = ActualHeight;
         if (w <= 0 || h <= 0) return;
-        var fitScale = Math.Min(w / bs.PixelWidth, h / bs.PixelHeight);
+        var fitScale = Math.Min(w / pixelWidth, h / pixelHeight);
         if (fitScale <= 0) return;
         _scale.ScaleX = _scale.ScaleY = 1.0 / fitScale;
         _translate.X = _translate.Y = 0;
+        QueueTileRefresh();
         RaiseViewChanged();
     }
 
@@ -299,6 +335,7 @@ public sealed class ZoomPanImage : ContentControl
         if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
         {
             _translate.X += e.Delta > 0 ? 80 : -80;
+            QueueTileRefresh();
             RaiseViewChanged();
             e.Handled = true;
             return;
@@ -314,6 +351,7 @@ public sealed class ZoomPanImage : ContentControl
         _translate.X -= dx;
         _translate.Y -= dy;
         _scale.ScaleX = _scale.ScaleY = newScale;
+        QueueTileRefresh();
         RaiseViewChanged();
         e.Handled = true;
     }
@@ -345,6 +383,7 @@ public sealed class ZoomPanImage : ContentControl
         var p = e.GetPosition(this);
         _translate.X = _dragOrigin.X + (p.X - _dragStart.Value.X);
         _translate.Y = _dragOrigin.Y + (p.Y - _dragStart.Value.Y);
+        QueueTileRefresh();
         RaiseViewChanged();
     }
 
@@ -368,10 +407,15 @@ public sealed class ZoomPanImage : ContentControl
     {
         var n = Math.Clamp(_scale.ScaleX * factor, 0.1, 20);
         _scale.ScaleX = _scale.ScaleY = n;
+        QueueTileRefresh();
         RaiseViewChanged();
     }
 
-    private void RaiseViewChanged() => ViewChanged?.Invoke(this, EventArgs.Empty);
+    private void RaiseViewChanged()
+    {
+        QueueTileRefresh();
+        ViewChanged?.Invoke(this, EventArgs.Empty);
+    }
 
     private void OnInspectorModeChanged(bool enabled)
     {
@@ -386,6 +430,108 @@ public sealed class ZoomPanImage : ContentControl
         RenderOptions.SetBitmapScalingMode(
             _image,
             nearestNeighbor ? BitmapScalingMode.NearestNeighbor : BitmapScalingMode.HighQuality);
+        RenderOptions.SetBitmapScalingMode(
+            _tileViewbox,
+            nearestNeighbor ? BitmapScalingMode.NearestNeighbor : BitmapScalingMode.HighQuality);
+    }
+
+    private bool TryGetRenderedPixelSize(out int pixelWidth, out int pixelHeight)
+    {
+        if (TilePyramid is { } pyramid)
+        {
+            pixelWidth = pyramid.SourceWidth;
+            pixelHeight = pyramid.SourceHeight;
+            return true;
+        }
+
+        if (_image.Source is BitmapSource bs)
+        {
+            pixelWidth = bs.PixelWidth;
+            pixelHeight = bs.PixelHeight;
+            return true;
+        }
+
+        pixelWidth = 0;
+        pixelHeight = 0;
+        return false;
+    }
+
+    private void QueueTileRefresh()
+    {
+        if (TilePyramid is null || _tileRefreshQueued || !IsLoaded)
+            return;
+
+        _tileRefreshQueued = true;
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+            _tileRefreshQueued = false;
+            RefreshTileLayer();
+        }), System.Windows.Threading.DispatcherPriority.Background);
+    }
+
+    private void RefreshTileLayer()
+    {
+        if (TilePyramid is not { } pyramid || ActualWidth <= 0 || ActualHeight <= 0)
+            return;
+
+        var level = TileService.ChooseLevel(pyramid, ActualWidth, ActualHeight, _scale.ScaleX);
+        if (_renderedTileLevel != level)
+        {
+            ClearTileImages();
+            _renderedTileLevel = level;
+            var (levelWidth, levelHeight) = TileService.GetLevelPixelSize(pyramid, level);
+            _tileCanvas.Width = levelWidth;
+            _tileCanvas.Height = levelHeight;
+        }
+
+        var visibleTiles = TileService.GetVisibleTiles(
+            pyramid,
+            level,
+            ActualWidth,
+            ActualHeight,
+            _scale.ScaleX,
+            _translate.X,
+            _translate.Y,
+            _rotate.Angle,
+            FlipHorizontal,
+            FlipVertical);
+
+        var visibleSet = visibleTiles.ToHashSet();
+        foreach (var existing in _tileImages.Keys.Where(key => !visibleSet.Contains(key)).ToList())
+        {
+            _tileCanvas.Children.Remove(_tileImages[existing]);
+            _tileImages.Remove(existing);
+        }
+
+        foreach (var key in visibleTiles)
+        {
+            if (_tileImages.ContainsKey(key))
+                continue;
+
+            var bitmap = TileService.LoadTileBitmap(pyramid, key);
+            if (bitmap is null)
+                continue;
+
+            var tile = new Image
+            {
+                Source = bitmap,
+                Width = bitmap.PixelWidth,
+                Height = bitmap.PixelHeight,
+                Stretch = Stretch.None,
+                IsHitTestVisible = false,
+            };
+
+            Canvas.SetLeft(tile, key.Column * pyramid.TileSize - (key.Column > 0 ? pyramid.Overlap : 0));
+            Canvas.SetTop(tile, key.Row * pyramid.TileSize - (key.Row > 0 ? pyramid.Overlap : 0));
+            _tileImages[key] = tile;
+            _tileCanvas.Children.Add(tile);
+        }
+    }
+
+    private void ClearTileImages()
+    {
+        _tileCanvas.Children.Clear();
+        _tileImages.Clear();
     }
 
     // A-01: surface custom UIA peer so screen readers announce "Image, W by H pixels" on focus

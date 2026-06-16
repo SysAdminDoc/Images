@@ -3,6 +3,7 @@ bin/
 obj/
 out/
 publish/
+src/Images/*_wpftmp.csproj
 *.user
 *.suo
 *.userosscache
@@ -72,6 +73,7 @@ Desktop.ini
 
 ## AI agent working files — never commit
 CLAUDE.md
+AGENTS.md
 CODEX_CHANGELOG.md
 .claude/
 .claude-octopus/

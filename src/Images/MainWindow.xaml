@@ -431,6 +431,7 @@
 
                 <ctl:ZoomPanImage x:Name="Canvas"
                                    Source="{Binding CurrentImage}"
+                                   TilePyramid="{Binding CurrentTilePyramid}"
                                    Animation="{Binding CurrentAnimation}"
                                    AnimationFrameIndex="{Binding CurrentAnimationFrameIndex}"
                                    Rotation="{Binding Rotation}"

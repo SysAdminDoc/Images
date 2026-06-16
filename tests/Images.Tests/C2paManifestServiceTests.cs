@@ -140,8 +140,11 @@ public sealed class C2paManifestServiceTests
     [Fact]
     public void Read_UnsupportedExtension_ReturnsNoManifest()
     {
+        using var temp = TestDirectory.Create();
+        var path = temp.WriteFile("test.bmp", "not a c2pa-supported file");
+
         var result = C2paManifestService.Read(
-            "test.bmp",
+            path,
             executableOverride: null,
             processRunner: null);
 
