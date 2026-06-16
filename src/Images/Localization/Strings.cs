@@ -600,6 +600,8 @@ public static class Strings
     public static string CommandPalette_ChannelGreen => Get(nameof(CommandPalette_ChannelGreen));
     public static string CommandPalette_ChannelBlue => Get(nameof(CommandPalette_ChannelBlue));
     public static string CommandPalette_ChannelAlpha => Get(nameof(CommandPalette_ChannelAlpha));
+    public static string CommandPalette_Category_Window => Get(nameof(CommandPalette_Category_Window));
+    public static string CommandPalette_SendToMonitorFormat => Get(nameof(CommandPalette_SendToMonitorFormat));
 
     // ---- Macro action window ----
     public static string MacroWindowTitle => Get(nameof(MacroWindowTitle));
