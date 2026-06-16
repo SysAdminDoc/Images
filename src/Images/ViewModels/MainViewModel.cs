@@ -299,7 +299,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         StripLocationCommand = new RelayCommand(async () => await StripLocationAsync(), () => CanUseImageCommands);
         SettingsCommand = new RelayCommand(ShowSettingsWindow);
         ExtractTextCommand = new RelayCommand(async () => await _ocrWorkflow.ToggleAsync(), () => HasImage && !IsOperationBusy && !IsCompareMode);
+        ToggleCommandPaletteCommand = new RelayCommand(() => ShowCommandPalette = !ShowCommandPalette);
         InstallStoreExtensionCommand = new RelayCommand(OpenStoreExtensionPage, () => _loadErrorStoreExtension is not null);
+
+        _commandPaletteRegistry = BuildCommandPaletteRegistry();
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
         // panel renders prior-session folders before the user opens anything.
@@ -818,6 +821,176 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         get => _showCheatsheet;
         set => Set(ref _showCheatsheet, value);
+    }
+
+    // V20-29: command palette overlay — Ctrl+Shift+P opens, Escape/Enter/click dismisses.
+    private List<CommandPaletteItem> _commandPaletteRegistry = new();
+
+    private bool _showCommandPalette;
+    public bool ShowCommandPalette
+    {
+        get => _showCommandPalette;
+        set
+        {
+            if (Set(ref _showCommandPalette, value))
+            {
+                if (value)
+                {
+                    CommandPaletteFilterText = "";
+                    SelectedCommandPaletteIndex = 0;
+                    RefreshCommandPaletteItems();
+                }
+            }
+        }
+    }
+
+    private string _commandPaletteFilterText = "";
+    public string CommandPaletteFilterText
+    {
+        get => _commandPaletteFilterText;
+        set
+        {
+            if (Set(ref _commandPaletteFilterText, value))
+            {
+                RefreshCommandPaletteItems();
+                SelectedCommandPaletteIndex = 0;
+            }
+        }
+    }
+
+    private int _selectedCommandPaletteIndex;
+    public int SelectedCommandPaletteIndex
+    {
+        get => _selectedCommandPaletteIndex;
+        set => Set(ref _selectedCommandPaletteIndex, value);
+    }
+
+    private List<CommandPaletteItem> _filteredCommandPaletteItems = new();
+    public List<CommandPaletteItem> FilteredCommandPaletteItems
+    {
+        get => _filteredCommandPaletteItems;
+        private set => Set(ref _filteredCommandPaletteItems, value);
+    }
+
+    public ICommand ToggleCommandPaletteCommand { get; }
+
+    private void RefreshCommandPaletteItems()
+    {
+        var filter = _commandPaletteFilterText?.Trim() ?? "";
+        if (string.IsNullOrEmpty(filter))
+        {
+            FilteredCommandPaletteItems = _commandPaletteRegistry
+                .Where(c => c.Command?.CanExecute(null) != false)
+                .ToList();
+            return;
+        }
+
+        var words = filter.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        FilteredCommandPaletteItems = _commandPaletteRegistry
+            .Where(c => c.Command?.CanExecute(null) != false)
+            .Where(c => words.All(w =>
+                c.Name.Contains(w, StringComparison.OrdinalIgnoreCase) ||
+                c.Category.Contains(w, StringComparison.OrdinalIgnoreCase) ||
+                c.Shortcut.Contains(w, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+    }
+
+    public void ExecuteSelectedPaletteCommand()
+    {
+        if (SelectedCommandPaletteIndex >= 0 && SelectedCommandPaletteIndex < FilteredCommandPaletteItems.Count)
+        {
+            var item = FilteredCommandPaletteItems[SelectedCommandPaletteIndex];
+            ShowCommandPalette = false;
+            item.Command?.Execute(null);
+        }
+    }
+
+    private List<CommandPaletteItem> BuildCommandPaletteRegistry()
+    {
+        var nav = Strings.CommandPalette_Category_Navigation;
+        var view = Strings.CommandPalette_Category_View;
+        var edit = Strings.CommandPalette_Category_Edit;
+        var file = Strings.CommandPalette_Category_File;
+        var tools = Strings.CommandPalette_Category_Tools;
+        var review = Strings.CommandPalette_Category_Review;
+        var compare = Strings.CommandPalette_Category_Compare;
+        var help = Strings.CommandPalette_Category_Help;
+
+        return new List<CommandPaletteItem>
+        {
+            // Navigation
+            new() { Name = Strings.CommandPalette_Open, Shortcut = "Ctrl+O", Category = nav, Command = OpenCommand },
+            new() { Name = Strings.CommandPalette_Next, Shortcut = "Right", Category = nav, Command = NextCommand },
+            new() { Name = Strings.CommandPalette_Previous, Shortcut = "Left", Category = nav, Command = PrevCommand },
+            new() { Name = Strings.CommandPalette_First, Shortcut = "Home", Category = nav, Command = FirstCommand },
+            new() { Name = Strings.CommandPalette_Last, Shortcut = "End", Category = nav, Command = LastCommand },
+            new() { Name = Strings.CommandPalette_Refresh, Shortcut = "F5", Category = nav, Command = RefreshCommand },
+
+            // View
+            new() { Name = Strings.CommandPalette_Filmstrip, Shortcut = "T", Category = view, Command = ToggleFilmstripCommand },
+            new() { Name = Strings.CommandPalette_MetadataHud, Shortcut = "I", Category = view, Command = ToggleMetadataHudCommand },
+            new() { Name = Strings.CommandPalette_Gallery, Shortcut = "G", Category = view, Command = ToggleGalleryCommand },
+            new() { Name = Strings.CommandPalette_Inspector, Category = view, Command = ToggleInspectorCommand },
+            new() { Name = Strings.CommandPalette_ExtractText, Shortcut = "E", Category = view, Command = ExtractTextCommand },
+
+            // Edit
+            new() { Name = Strings.CommandPalette_RotateCw, Category = edit, Command = RotateCwCommand },
+            new() { Name = Strings.CommandPalette_RotateCcw, Category = edit, Command = RotateCcwCommand },
+            new() { Name = Strings.CommandPalette_Rotate180, Category = edit, Command = Rotate180Command },
+            new() { Name = Strings.CommandPalette_FlipH, Category = edit, Command = FlipHorizontalCommand },
+            new() { Name = Strings.CommandPalette_FlipV, Category = edit, Command = FlipVerticalCommand },
+            new() { Name = Strings.CommandPalette_CropMode, Shortcut = "C", Category = edit, Command = ToggleCropModeCommand },
+            new() { Name = Strings.CommandPalette_Resize, Shortcut = "Ctrl+Alt+R", Category = edit, Command = OpenResizeDialogCommand },
+            new() { Name = Strings.CommandPalette_Adjustments, Shortcut = "Ctrl+Alt+A", Category = edit, Command = OpenAdjustmentsCommand },
+            new() { Name = Strings.CommandPalette_Effects, Shortcut = "Ctrl+Alt+F", Category = edit, Command = OpenEffectsCommand },
+            new() { Name = Strings.CommandPalette_AutoEnhance, Shortcut = "Ctrl+Alt+E", Category = edit, Command = AutoEnhanceCommand },
+            new() { Name = Strings.CommandPalette_Perspective, Shortcut = "Ctrl+Alt+P", Category = edit, Command = OpenPerspectiveCommand },
+            new() { Name = Strings.CommandPalette_ExposureBrush, Shortcut = "Ctrl+Alt+D", Category = edit, Command = ToggleExposureBrushModeCommand },
+            new() { Name = Strings.CommandPalette_RedEye, Shortcut = "Ctrl+Alt+Y", Category = edit, Command = ToggleRedEyeModeCommand },
+            new() { Name = Strings.CommandPalette_Retouch, Shortcut = "Ctrl+Alt+H", Category = edit, Command = ToggleRetouchModeCommand },
+            new() { Name = Strings.CommandPalette_Annotations, Category = edit, Command = OpenAnnotationsCommand },
+            new() { Name = Strings.CommandPalette_ExportWorkbench, Shortcut = "Ctrl+Alt+W", Category = edit, Command = OpenExportWorkbenchCommand },
+
+            // File
+            new() { Name = Strings.CommandPalette_Delete, Shortcut = "Del", Category = file, Command = DeleteCommand },
+            new() { Name = Strings.CommandPalette_Reload, Shortcut = "Ctrl+Shift+R", Category = file, Command = ReloadCommand },
+            new() { Name = Strings.CommandPalette_Print, Shortcut = "Ctrl+P", Category = file, Command = PrintCommand },
+            new() { Name = Strings.CommandPalette_SaveCopy, Shortcut = "Ctrl+Shift+S", Category = file, Command = SaveAsCopyCommand },
+            new() { Name = Strings.CommandPalette_CopyPath, Category = file, Command = CopyPathCommand },
+            new() { Name = Strings.CommandPalette_CopyImage, Category = file, Command = CopyImageCommand },
+            new() { Name = Strings.CommandPalette_Reveal, Category = file, Command = RevealCommand },
+            new() { Name = Strings.CommandPalette_OpenDefault, Category = file, Command = OpenInDefaultAppCommand },
+            new() { Name = Strings.CommandPalette_StripGps, Category = file, Command = StripLocationCommand },
+            new() { Name = Strings.CommandPalette_Wallpaper, Category = file, Command = SetAsWallpaperCommand },
+            new() { Name = Strings.CommandPalette_CopyToFolder, Category = file, Command = CopyToFolderCommand },
+            new() { Name = Strings.CommandPalette_MoveToFolder, Category = file, Command = MoveToFolderCommand },
+
+            // Tools
+            new() { Name = Strings.CommandPalette_ReferenceBoard, Shortcut = "Ctrl+B", Category = tools, Command = OpenReferenceBoardCommand },
+            new() { Name = Strings.CommandPalette_DuplicateCleanup, Shortcut = "Ctrl+Shift+D", Category = tools, Command = OpenDuplicateCleanupCommand },
+            new() { Name = Strings.CommandPalette_FileHealthScan, Shortcut = "Ctrl+Shift+H", Category = tools, Command = OpenFileHealthScanCommand },
+            new() { Name = Strings.CommandPalette_RecoveryCenter, Category = tools, Command = OpenRecoveryCenterCommand },
+            new() { Name = Strings.CommandPalette_ModelManager, Category = tools, Command = OpenModelManagerCommand },
+            new() { Name = Strings.CommandPalette_SemanticSearch, Category = tools, Command = OpenSemanticSearchCommand },
+            new() { Name = Strings.CommandPalette_TagGraph, Shortcut = "Ctrl+Shift+T", Category = tools, Command = OpenTagGraphCommand },
+            new() { Name = Strings.CommandPalette_ImportInbox, Shortcut = "Ctrl+Shift+I", Category = tools, Command = OpenImportInboxCommand },
+            new() { Name = Strings.CommandPalette_MacroActions, Shortcut = "Ctrl+Shift+M", Category = tools, Command = OpenMacroActionsCommand },
+            new() { Name = Strings.CommandPalette_BatchProcessor, Shortcut = "Ctrl+Shift+B", Category = tools, Command = OpenBatchProcessorCommand },
+            new() { Name = Strings.CommandPalette_EditStack, Shortcut = "Ctrl+Shift+E", Category = tools, Command = OpenEditStackCommand },
+
+            // Review
+            new() { Name = Strings.CommandPalette_ReviewMode, Shortcut = "L", Category = review, Command = ToggleReviewModeCommand },
+
+            // Compare
+            new() { Name = Strings.CommandPalette_Compare, Shortcut = "Ctrl+Alt+C", Category = compare, Command = StartCompareCommand },
+            new() { Name = Strings.CommandPalette_CompareWith, Shortcut = "Ctrl+Alt+V", Category = compare, Command = CompareWithCommand },
+
+            // Help
+            new() { Name = Strings.CommandPalette_Settings, Shortcut = "Ctrl+,", Category = help, Command = SettingsCommand },
+            new() { Name = Strings.CommandPalette_About, Category = help, Command = AboutCommand },
+            new() { Name = Strings.CommandPalette_CheckUpdates, Category = help, Command = CheckForUpdatesCommand },
+            new() { Name = Strings.CommandPalette_Paste, Shortcut = "Ctrl+V", Category = help, Command = PasteFromClipboardCommand },
+        };
     }
 
     // V15-07: fullscreen toggled by F11. The view collapses the side panel + floats the toolbar
