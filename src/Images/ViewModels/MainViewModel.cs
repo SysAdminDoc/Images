@@ -301,6 +301,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ExtractTextCommand = new RelayCommand(async () => await _ocrWorkflow.ToggleAsync(), () => HasImage && !IsOperationBusy && !IsCompareMode);
         ToggleCommandPaletteCommand = new RelayCommand(() => ShowCommandPalette = !ShowCommandPalette);
         InstallStoreExtensionCommand = new RelayCommand(OpenStoreExtensionPage, () => _loadErrorStoreExtension is not null);
+        CycleChannelModeCommand = new RelayCommand(CycleChannelMode, () => HasDisplayImage);
+        SetChannelModeCommand = new RelayCommand(p =>
+        {
+            if (p is ChannelMode mode) ChannelMode = mode;
+            else if (p is string s && Enum.TryParse<ChannelMode>(s, true, out var parsed)) ChannelMode = parsed;
+        }, _ => HasDisplayImage);
 
         _commandPaletteRegistry = BuildCommandPaletteRegistry();
 
@@ -359,6 +365,81 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 CommandManager.InvalidateRequerySuggested();
             }
         }
+    }
+
+    // -------------------- Channel isolation (V20-28) --------------------
+    // Stores the unfiltered image so channel mode changes can reapply without reloading.
+    private ImageSource? _rawImage;
+
+    private ChannelMode _channelMode = ChannelMode.Normal;
+    public ChannelMode ChannelMode
+    {
+        get => _channelMode;
+        set
+        {
+            if (Set(ref _channelMode, value))
+            {
+                Raise(nameof(ChannelModeLabel));
+                Raise(nameof(IsChannelIsolated));
+                ReapplyChannelIsolation();
+            }
+        }
+    }
+
+    public string ChannelModeLabel => _channelMode switch
+    {
+        ChannelMode.Red => "R",
+        ChannelMode.Green => "G",
+        ChannelMode.Blue => "B",
+        ChannelMode.Alpha => "A",
+        _ => ""
+    };
+
+    public bool IsChannelIsolated => _channelMode != ChannelMode.Normal;
+
+    public ICommand CycleChannelModeCommand { get; }
+    public ICommand SetChannelModeCommand { get; }
+
+    private void CycleChannelMode()
+    {
+        ChannelMode = _channelMode switch
+        {
+            ChannelMode.Normal => ChannelMode.Red,
+            ChannelMode.Red => ChannelMode.Green,
+            ChannelMode.Green => ChannelMode.Blue,
+            ChannelMode.Blue => ChannelMode.Alpha,
+            ChannelMode.Alpha => ChannelMode.Normal,
+            _ => ChannelMode.Normal
+        };
+    }
+
+    /// <summary>
+    /// Sets the raw image and applies the current channel isolation filter.
+    /// All code paths that load or clear the displayed image should call this
+    /// instead of assigning <see cref="CurrentImage"/> directly.
+    /// </summary>
+    private void SetCurrentImageWithChannel(ImageSource? image)
+    {
+        _rawImage = image;
+        if (image is BitmapSource bitmap && _channelMode != ChannelMode.Normal)
+            CurrentImage = ChannelIsolationService.Isolate(bitmap, _channelMode) ?? image;
+        else
+            CurrentImage = image;
+    }
+
+    /// <summary>
+    /// Re-applies channel isolation to the cached raw image when the user
+    /// changes <see cref="ChannelMode"/> without navigating to a new file.
+    /// </summary>
+    private void ReapplyChannelIsolation()
+    {
+        if (_rawImage is null)
+            return;
+
+        if (_rawImage is BitmapSource bitmap && _channelMode != ChannelMode.Normal)
+            CurrentImage = ChannelIsolationService.Isolate(bitmap, _channelMode) ?? _rawImage;
+        else
+            CurrentImage = _rawImage;
     }
 
     private TilePyramidInfo? _currentTilePyramid;
@@ -932,6 +1013,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             new() { Name = Strings.CommandPalette_Gallery, Shortcut = "G", Category = view, Command = ToggleGalleryCommand },
             new() { Name = Strings.CommandPalette_Inspector, Category = view, Command = ToggleInspectorCommand },
             new() { Name = Strings.CommandPalette_ExtractText, Shortcut = "E", Category = view, Command = ExtractTextCommand },
+            new() { Name = Strings.CommandPalette_ChannelNormal, Category = view, Command = new RelayCommand(() => ChannelMode = ChannelMode.Normal) },
+            new() { Name = Strings.CommandPalette_ChannelRed, Category = view, Command = new RelayCommand(() => ChannelMode = ChannelMode.Red) },
+            new() { Name = Strings.CommandPalette_ChannelGreen, Category = view, Command = new RelayCommand(() => ChannelMode = ChannelMode.Green) },
+            new() { Name = Strings.CommandPalette_ChannelBlue, Category = view, Command = new RelayCommand(() => ChannelMode = ChannelMode.Blue) },
+            new() { Name = Strings.CommandPalette_ChannelAlpha, Category = view, Command = new RelayCommand(() => ChannelMode = ChannelMode.Alpha) },
 
             // Edit
             new() { Name = Strings.CommandPalette_RotateCw, Category = edit, Command = RotateCwCommand },
@@ -3437,7 +3523,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 // any animation from the previous file; then CurrentAnimation, which either applies
                 // new keyframes or stays null for a static image.
                 CurrentTilePyramid = tilePyramid;
-                CurrentImage = image;
+                SetCurrentImageWithChannel(image);
                 CurrentAnimation = animation;
                 PixelWidth = tilePyramid?.SourceWidth ?? (image is BitmapSource displayedBitmap ? displayedBitmap.PixelWidth : result.PixelWidth);
                 PixelHeight = tilePyramid?.SourceHeight ?? (image is BitmapSource displayedBitmapHeight ? displayedBitmapHeight.PixelHeight : result.PixelHeight);
@@ -3541,7 +3627,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         IsPinnedOverlayMode = false;
         ClearCompareMode(showToast: false);
         CurrentTilePyramid = null;
-        CurrentImage = null;
+        SetCurrentImageWithChannel(null);
         CurrentAnimation = null;
         PixelWidth = PixelHeight = 0;
         DecoderUsed = Strings.MainDecoderUnavailable;
@@ -6217,7 +6303,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         IsPinnedOverlayMode = false;
         ClearCompareMode(showToast: false);
         CurrentTilePyramid = null;
-        CurrentImage = null;
+        SetCurrentImageWithChannel(null);
         CurrentAnimation = null;
         CurrentPath = null;
         PixelWidth = PixelHeight = 0;

@@ -1433,4 +1433,11 @@ public partial class MainWindow : Window
             CommandPaletteList.ScrollIntoView(Vm.FilteredCommandPaletteItems[Vm.SelectedCommandPaletteIndex]);
         }
     }
+
+    private void ChannelChip_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (Vm.CycleChannelModeCommand.CanExecute(null))
+            Vm.CycleChannelModeCommand.Execute(null);
+        e.Handled = true;
+    }
 }

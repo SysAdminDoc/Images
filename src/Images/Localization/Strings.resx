@@ -4078,5 +4078,20 @@ Details written to:
   <data name="CommandPalette_Paste" xml:space="preserve">
     <value>Paste from clipboard</value>
   </data>
+  <data name="CommandPalette_ChannelNormal" xml:space="preserve">
+    <value>Show all channels</value>
+  </data>
+  <data name="CommandPalette_ChannelRed" xml:space="preserve">
+    <value>Show red channel only</value>
+  </data>
+  <data name="CommandPalette_ChannelGreen" xml:space="preserve">
+    <value>Show green channel only</value>
+  </data>
+  <data name="CommandPalette_ChannelBlue" xml:space="preserve">
+    <value>Show blue channel only</value>
+  </data>
+  <data name="CommandPalette_ChannelAlpha" xml:space="preserve">
+    <value>Show alpha channel only</value>
+  </data>
 
 </root>
