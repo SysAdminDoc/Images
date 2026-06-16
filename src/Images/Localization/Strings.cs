@@ -873,6 +873,12 @@ public static class Strings
     public static string MainLoadErrorOomMessage => Get(nameof(MainLoadErrorOomMessage));
     public static string MainLoadErrorOomHelp => Get(nameof(MainLoadErrorOomHelp));
     public static string MainLoadErrorDecodeHelp => Get(nameof(MainLoadErrorDecodeHelp));
+    public static string MainLoadErrorStoreExtensionTitle => Get(nameof(MainLoadErrorStoreExtensionTitle));
+    public static string MainLoadErrorStoreExtensionMessage => Get(nameof(MainLoadErrorStoreExtensionMessage));
+    public static string MainLoadErrorStoreExtensionHelp => Get(nameof(MainLoadErrorStoreExtensionHelp));
+    public static string MainLoadErrorStoreActionLabel => Get(nameof(MainLoadErrorStoreActionLabel));
+    public static string MainLoadErrorJxlMessage => Get(nameof(MainLoadErrorJxlMessage));
+    public static string MainLoadErrorJxlHelp => Get(nameof(MainLoadErrorJxlHelp));
     public static string MainDropAcceptedTitle => Get(nameof(MainDropAcceptedTitle));
     public static string MainDropRejectedTitle => Get(nameof(MainDropRejectedTitle));
     public static string MainDropAcceptedMessage => Get(nameof(MainDropAcceptedMessage));
@@ -1073,6 +1079,9 @@ public static class Strings
     public static string MainToastImageTooLarge => Get(nameof(MainToastImageTooLarge));
     public static string MainToastCouldNotDecode => Get(nameof(MainToastCouldNotDecode));
     public static string MainToastGhostscriptNeeded => Get(nameof(MainToastGhostscriptNeeded));
+    public static string MainToastStoreExtensionNeeded => Get(nameof(MainToastStoreExtensionNeeded));
+    public static string MainToastStoreExtensionOpened => Get(nameof(MainToastStoreExtensionOpened));
+    public static string MainToastJxlNeedsUpdate => Get(nameof(MainToastJxlNeedsUpdate));
     public static string MainToastFilenameInvalid => Get(nameof(MainToastFilenameInvalid));
     public static string MainToastTransferUnsupported => Get(nameof(MainToastTransferUnsupported));
     public static string MainToastTransferFolderGone => Get(nameof(MainToastTransferFolderGone));

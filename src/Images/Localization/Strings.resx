@@ -3084,6 +3084,24 @@ Details written to:
   <data name="MainLoadErrorDecodeHelp" xml:space="preserve">
     <value>Try another file, reveal the file in Explorer, or reload after another app finishes writing it.</value>
   </data>
+  <data name="MainLoadErrorStoreExtensionTitle" xml:space="preserve">
+    <value>Codec extension needed</value>
+  </data>
+  <data name="MainLoadErrorStoreExtensionMessage" xml:space="preserve">
+    <value>{0} decoding needs the {1} from the Microsoft Store.</value>
+  </data>
+  <data name="MainLoadErrorStoreExtensionHelp" xml:space="preserve">
+    <value>Install the extension, then reload this file. The built-in fallback decoder could not handle this file either.</value>
+  </data>
+  <data name="MainLoadErrorStoreActionLabel" xml:space="preserve">
+    <value>Get {0}</value>
+  </data>
+  <data name="MainLoadErrorJxlMessage" xml:space="preserve">
+    <value>JPEG XL decoding is not available on this version of Windows.</value>
+  </data>
+  <data name="MainLoadErrorJxlHelp" xml:space="preserve">
+    <value>JPEG XL support requires Windows 11 24H2 or later. Update Windows or convert the file to PNG or WebP first.</value>
+  </data>
   <data name="MainDropAcceptedTitle" xml:space="preserve">
     <value>Drop to open file</value>
   </data>
@@ -3683,6 +3701,15 @@ Details written to:
   </data>
   <data name="MainToastGhostscriptNeeded" xml:space="preserve">
     <value>Document preview needs Ghostscript</value>
+  </data>
+  <data name="MainToastStoreExtensionNeeded" xml:space="preserve">
+    <value>{0} needs a codec extension from the Microsoft Store</value>
+  </data>
+  <data name="MainToastStoreExtensionOpened" xml:space="preserve">
+    <value>Opening Microsoft Store for {0}</value>
+  </data>
+  <data name="MainToastJxlNeedsUpdate" xml:space="preserve">
+    <value>JPEG XL needs Windows 11 24H2 or later</value>
   </data>
   <data name="MainToastFilenameInvalid" xml:space="preserve">
     <value>Filename needs at least one valid character</value>
