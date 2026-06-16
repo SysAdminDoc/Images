@@ -7,11 +7,18 @@ All notable changes to **Images** are documented here.
 ### Security
 
 - **Archive reader dependency** — upgraded SharpCompress from 0.47.4 to 0.48.1, clearing the GHSA-6c8g-7p36-r338 / CVE-2026-44788 NuGet vulnerability gate. Images still uses SharpCompress only for read-only archive page streams and does not call the affected `WriteToDirectory()` extraction API.
+- **Magick.NET 14.13.0 → 14.14.0** — resolves 12 upstream advisories (2 high, 10 moderate severity) including GHSA-36wm-hprc-mcf5 and GHSA-7gg8-qqx7-92g5. Zero vulnerable NuGet packages remain.
+- **Transitive dependency audit** — CI security and release workflows now log the full NuGet transitive dependency tree as an uploadable artifact alongside the vulnerable-package gate, with documented S-09 native decoder floor requirements for future bundled runtimes.
 
 ### Changed
 
 - **High-contrast runtime theme** — the accessibility high-contrast preference now installs a `SystemColors`-backed theme dictionary immediately, Windows high-contrast mode is honored automatically at startup, and Windows preference/color changes refresh the active dictionary at runtime.
-- **Localization foundation** — the app now has a default English `Strings.resx`, a WPF `LocExtension`, Confirm, crash, resize, perspective, edit-history, annotation, effects, selection/crop overlay, OCR overlay, and image-canvas UIA strings routed through resources, and a CI localization parity check that fails when future non-English resource files have missing or extra keys.
+- **Localization foundation** — all user-visible strings across the entire app are now routed through `Strings.resx` resources: MainViewModel (300+ toast/status/error strings), Settings, About, Effects, Adjustments, Model Manager, Duplicate Cleanup, Recovery Center, Batch Processor, Export Preview, File Health Scan, Semantic Search, Tag Graph, Reference Board, Import Inbox, Macro Actions, and all overlays/dialogs. A runtime locale switcher in Settings persists the language preference and applies it on restart.
+- **Network egress transparency (P-03)** — every outbound HTTP call now records URL, purpose, bytes, and duration through `NetworkEgressService`. The About window shows a scrollable "Network activity" panel with per-entry cards, copy-to-clipboard, and clear actions. History persists across sessions in a local JSONL file. No competitor ships this.
+- **Decode pipeline observability (O-03)** — a custom `Images-Decode` EventSource exposes `images-decoded`, `decode-duration-ms`, `wic-decodes`, `magick-fallback-decodes`, `thumbnail-writes`, and `decode-failures` counters plus `DecodeStarted`/`DecodeCompleted`/`DecodeFailed` events for live `dotnet-counters` monitoring. Recipe in `docs/perf.md`.
+- **Store codec extension detection (V20-18)** — when HEIC, AVIF, or JXL decode fails because the Windows Store extension is missing, the load-error panel now names the required extension and shows a one-click "Get" button that opens the Microsoft Store deep-link.
+- **Scoop extras manifest (D-03)** — `packaging/scoop/images.json` provides a ready-to-submit Scoop manifest with `checkver` and `autoupdate` sections pointing at GitHub Releases.
+- **Migration guide** — `docs/migration-guide.md` documents actionable import steps for digiKam, XnView MP, Apple Photos (via osxphotos), Lightroom Classic, and Picasa users.
 - **Metadata capture dates** — EXIF `OffsetTimeOriginal` is now covered by regression tests and rendered with an explicit signed UTC offset when present, while offset-free EXIF dates continue to display without inventing one.
 - **WinGet release publisher** — published GitHub releases now have a dedicated WinGet workflow wired to `vedantmgoyal9/winget-releaser@v2`, matching the setup installer asset and cleanly skipping until the required classic `WINGET_TOKEN` secret and `winget-pkgs` fork are configured.
 - **Settings information architecture** — Settings now has first-class General, Appearance, Accessibility, Advanced, Hotkeys, Diagnostics, Text extraction, and Privacy sections. New persisted controls cover window-placement restore, reduced viewer motion, high-contrast preference, and archive-book defaults; reduced motion now disables the main viewer's edge-arrow fade animation.
@@ -59,6 +66,7 @@ All notable changes to **Images** are documented here.
 
 ### Accessibility
 
+- **A-05 Published UIA tree documentation** — `docs/accessibility.md` documents the full UI Automation tree structure (image canvas, navigation, rename, rating/review, toolbars, editing overlays, dialogs) so screen reader users and accessibility testers know exactly what Narrator, NVDA, and JAWS will announce.
 - **A-04 Magnifier caret tracking** — the rename stem TextBox now explicitly raises `TextPatternOnTextSelectionChanged` on every caret move so the Windows Magnifier follows the edit point when "Follow the text insertion point" is active. `AutomationId="StemEditor"` added for reliable UIA element identification.
 - **A-06 Screen reader manual test matrix** — `docs/narrator-test-matrix.md` documents a pre-release test script for Narrator, NVDA, and JAWS covering 10 core scenarios (image load, navigation, rename, rating, pick/reject, delete confirmation, gallery, settings, about, toasts) and 5 supplementary checks (filmstrip, OCR overlay, cheatsheet, crop, compare) with expected announcements and per-reader result columns.
 
