@@ -1,5 +1,6 @@
 using System.IO;
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -1274,6 +1275,23 @@ public partial class MainWindow : Window
                 Focus();
                 e.Handled = true;
                 break;
+        }
+    }
+
+    /// <summary>
+    /// A-04: Raise UIA TextPatternOnTextSelectionChanged so the Windows Magnifier
+    /// tracks the caret position when "Follow the text insertion point" is active.
+    /// WPF's TextBoxAutomationPeer raises this internally, but an explicit raise
+    /// ensures the event fires on every caret move including mouse clicks and
+    /// programmatic selection changes.
+    /// </summary>
+    private void StemEditor_SelectionChanged(object sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox tb)
+        {
+            var peer = UIElementAutomationPeer.FromElement(tb)
+                       ?? UIElementAutomationPeer.CreatePeerForElement(tb);
+            peer?.RaiseAutomationEvent(AutomationEvents.TextPatternOnTextSelectionChanged);
         }
     }
 

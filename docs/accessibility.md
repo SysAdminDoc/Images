@@ -75,7 +75,7 @@ The rename section in the right panel:
 
 | Element | AutomationProperties.Name | Notes |
 |---|---|---|
-| Stem TextBox | `"File name without extension"` | `PreviewKeyDown` handler stops arrow propagation so caret moves within text |
+| Stem TextBox | `"File name without extension"` | `AutomationId="StemEditor"`. `PreviewKeyDown` handler stops arrow propagation so caret moves within text. `SelectionChanged` raises `TextPatternOnTextSelectionChanged` so the Windows Magnifier follows the caret (A-04). |
 | Extension chip/button | `Name="{ExtensionLockText}"` | Dynamic: locked vs unlocked state |
 | Extension chip | `HelpText="{ExtensionLockHelpText}"` | Explains the lock/unlock behavior |
 | Extension TextBox (unlocked) | `"File extension"` | Only visible when extension editing is unlocked |
@@ -174,7 +174,6 @@ Window-level `Escape` dismisses toasts, overlays, or closes peek-mode windows.
 
 - **No live-region on rename status**: The rename status dot color changes (Pending/Saved/Conflict/Error) are not raised as UIA `LiveRegionChanged` events. Screen reader users must Tab to the status area to hear the current rename state.
 - **Pixel inspector values**: Color values under the cursor (HEX/RGB/HSV) update on mouse move but do not raise live-region events; they must be explicitly focused.
-- **Magnifier integration**: The OS Magnifier does not track the rename TextBox caret via UIA `TextSelectionChanged` events (roadmap item A-04).
 - **No NVDA/JAWS test matrix**: Automated screen reader testing is not yet part of the release checklist (roadmap item A-06). Testing has been done manually with Windows Narrator.
 - **Gallery item count**: The gallery status text is exposed via `HelpText` on the ListBox but does not auto-announce item count changes.
 - **Filmstrip thumbnail labels**: Filmstrip items expose the filename but not the image dimensions or file size.

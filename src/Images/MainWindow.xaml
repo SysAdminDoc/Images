@@ -3025,6 +3025,8 @@
                                  FontSize="15"
                                  IsEnabled="{Binding HasImage}"
                                  PreviewKeyDown="StemEditor_PreviewKeyDown"
+                                 SelectionChanged="StemEditor_SelectionChanged"
+                                 AutomationProperties.AutomationId="StemEditor"
                                  AutomationProperties.Name="File name without extension" />
                         <Button Grid.Column="1"
                                 Margin="10,0,0,0"

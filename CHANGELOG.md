@@ -56,6 +56,10 @@ All notable changes to **Images** are documented here.
 - **Send/print/copy actions** — the viewport context menu now supports no-dialog printing to the default printer, local `.eml` email drafts with the current file attached, Copy image, and Copy image and path clipboard payloads.
 - **ExifTool safe invocation wrapper** — future metadata-write workflows now have a process-boundary helper that runs ExifTool without shell invocation, sends arguments and target paths through a UTF-8 `-@` argfile, rejects line-break and shell-metacharacter path channels, and cleans temporary argfiles after execution.
 
+### Accessibility
+
+- **A-04 Magnifier caret tracking** — the rename stem TextBox now explicitly raises `TextPatternOnTextSelectionChanged` on every caret move so the Windows Magnifier follows the edit point when "Follow the text insertion point" is active. `AutomationId="StemEditor"` added for reliable UIA element identification.
+
 ### Testing
 
 - **Catalog v1 schema snapshot fixture** — `tests/Images.Tests/Fixtures/catalog.v1.db` is a checked-in SQLite v1 catalog with 3 seeded assets, 5 tags, 1 root, and a schema canary. `CatalogSchemaSnapshotTests` (43 tests) verify the fixture's table/column/index shape, seed data integrity, and that `CatalogService` opens the snapshot via forward migration without data loss. Every future schema bump adds a `catalog.vN.db` and must roll all prior snapshots forward in CI.
