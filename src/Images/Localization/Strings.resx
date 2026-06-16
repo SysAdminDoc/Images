@@ -1571,6 +1571,18 @@ Details written to:
   <data name="SettingsSectionGeneral" xml:space="preserve">
     <value>General</value>
   </data>
+  <data name="SettingsLanguageTitle" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="SettingsLanguageDescription" xml:space="preserve">
+    <value>Choose the display language for menus and labels.</value>
+  </data>
+  <data name="SettingsLanguageSystemDefault" xml:space="preserve">
+    <value>System default</value>
+  </data>
+  <data name="SettingsLanguageRestartNotice" xml:space="preserve">
+    <value>Language changed. Restart Images to apply everywhere.</value>
+  </data>
   <data name="SettingsRememberWindowTitle" xml:space="preserve">
     <value>Remember window size and position</value>
   </data>

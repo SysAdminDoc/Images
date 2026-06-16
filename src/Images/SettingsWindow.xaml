@@ -46,6 +46,35 @@
             <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static loc:Strings.SettingsSectionGeneral}" Margin="1,0,0,10" />
             <Border Style="{StaticResource Card}" Margin="0,0,0,18">
                 <StackPanel>
+
+                    <!-- Language row -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="{x:Static loc:Strings.SettingsLanguageTitle}"
+                                       Style="{StaticResource Text.Body}"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Static loc:Strings.SettingsLanguageDescription}"
+                                       Style="{StaticResource Text.Hint}"
+                                       Margin="0,3,0,0"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ComboBox Grid.Column="1"
+                                  VerticalAlignment="Center"
+                                  MinWidth="140"
+                                  ItemsSource="{Binding AvailableLocales}"
+                                  SelectedItem="{Binding SelectedLocale}"
+                                  AutomationProperties.Name="{x:Static loc:Strings.SettingsLanguageTitle}" />
+                    </Grid>
+
+                    <Border Height="1"
+                            Background="{StaticResource HairlineBrush}"
+                            Margin="0,14" />
+
+                    <!-- Remember window row -->
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
