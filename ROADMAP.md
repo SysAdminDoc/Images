@@ -577,7 +577,7 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 
 ## v0.3.0 — Light editor + lossless (M, 3-4 weeks)
 
-**Theme**: edits-inside-viewer, no modal dialogs. JPEGView's real-time-inline pattern. FastStone's clone/heal/red-eye. Windows-Photos-class AI generative erase. Cross-cutting: S-05 (ExifTool wrapper), P-07 (C2PA write-on-export once P-05 stable).
+**Theme**: edits-inside-viewer, no modal dialogs. JPEGView's real-time-inline pattern. FastStone's clone/heal/red-eye. Windows-Photos-class AI generative erase. Cross-cutting: S-05 (ExifTool wrapper).
 
 ### Edits
 - [x] **V30-01** *P0* — Crop. Shipped 2026-05-05: `C` opens a non-destructive on-canvas crop mode with a draggable pixel-accurate rectangle, free/square/3:2/4:3/16:9/custom aspect presets, rule-of-thirds guides, side-panel and keyboard apply/cancel, XMP edit-stack storage, and Save-a-copy application without modifying the source file.
@@ -648,7 +648,7 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 
 ## v0.5.0 — Converter / Batch (M, 3-4 weeks)
 
-**Theme**: XnConvert operation-chain UX + Squoosh visual-diff slider + FileOptimizer lossless chain. The batch tab most people will open daily. Cross-cutting: F-03 (cjpegli export), P-07 (C2PA write), S-05 (metadata-write safety).
+**Theme**: XnConvert operation-chain UX + Squoosh visual-diff slider + FileOptimizer lossless chain. The batch tab most people will open daily. Cross-cutting: F-03 (cjpegli export), S-05 (metadata-write safety).
 
 - [ ] **V50-01** *P0* — **Operation-chain builder** — drag-orderable list, per-op enable/disable, live preview on first selected image (XnConvert tab 2 pattern).
 - [ ] **V50-02** *P0* — **Output formats** with per-format quality controls: JPEG (**MozJPEG + cjpegli** [F-03]), PNG (OxiPNG), WebP (cwebp), AVIF (avifenc), JXL (cjxl), HEIC (libheif, no-HEVC-bundle caveat [F-02]), TIFF, BMP, GIF. cjpegli ships with libjxl and delivers ~35% smaller JPEG at equal quality vs MozJPEG. [stack: bundled CLIs + Magick.NET core] [Google OSS blog Jpegli]
@@ -827,7 +827,6 @@ Import once, never re-type tags. This is the friction every DAM user complains a
 - [ ] **Sketch-based fuzzy search** — digiKam only, and digiKam is GPL. (V40-23)
 - [ ] **File Explorer sort-order sync** — ImageGlass only. (V20-30)
 - [ ] **Images-in-archive browsing** (CBR/CBZ/ZIP/RAR/7Z) — Honeyview only, and discontinued. (V20-17)
-- [ ] **C2PA Content Credentials read badge + write-on-export** — nobody in the OSS viewer space does this yet. (P-05/P-07)
 - [ ] **Live byte-delta + SSIMULACRA2 readout during conversion** — Squoosh only, and Squoosh is web-only single-image. (V50-20/V50-23)
 - [ ] **Network-egress log panel** — no OSS viewer surfaces this; precedent is Little Snitch / GlassWire. (P-03)
 - [ ] **Documented UIA tree + Narrator/NVDA/JAWS test matrix** — no competitor publishes one. (A-01 + A-05 + A-06)
@@ -854,7 +853,7 @@ Cross-cutting tracks (Security, Privacy, A11y, i18n, Observability, Testing, Dis
 Adjacent cleanup that falls out naturally:
 - Keyboard-shortcut surface documented in-app (fold into V20-07 settings UI).
 - Optional Catppuccin Latte light theme (V20-07 settings UI lands it for free).
-- DPI-aware screenshot recapture (V02-04) — fold into each phase's release smoke.
+- Release screenshots and human smoke stay in `Roadmap_Blocked.md` until a GUI/manual validation slot is available.
 - CHANGELOG + README badge synced on every release (non-negotiable per project rules).
 
 ---
