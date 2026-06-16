@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text;
 using System.Windows;
+using Images.Localization;
 using Images.Services;
 
 namespace Images;
@@ -14,22 +15,22 @@ public partial class CrashDialog : Window
         InitializeComponent();
 
         var info = AppInfo.Current;
-        HeadlineText.Text = ex.Message.Length > 180 ? ex.Message[..180] + "…" : ex.Message;
+        HeadlineText.Text = ex.Message.Length > 180 ? ex.Message[..180] + "..." : ex.Message;
 
         var sb = new StringBuilder();
-        sb.AppendLine($"Images {info.DisplayVersion} (build {info.ProductVersion})");
-        sb.AppendLine($"Runtime: {info.RuntimeDescription}");
-        sb.AppendLine($"OS:      {info.OsDescription}");
-        sb.AppendLine($"Time:    {DateTime.Now:yyyy-MM-dd HH:mm:ss zzz}");
-        sb.AppendLine($"Log:     {CrashLog.LogPath}");
+        sb.AppendLine(Strings.Format("CrashDetailsAppFormat", info.DisplayVersion, info.ProductVersion));
+        sb.AppendLine(Strings.Format("CrashDetailsRuntimeFormat", info.RuntimeDescription));
+        sb.AppendLine(Strings.Format("CrashDetailsOsFormat", info.OsDescription));
+        sb.AppendLine(Strings.Format("CrashDetailsTimeFormat", DateTime.Now));
+        sb.AppendLine(Strings.Format("CrashDetailsLogFormat", CrashLog.LogPath));
         if (!string.IsNullOrEmpty(minidumpPath))
-            sb.AppendLine($"Dump:    {minidumpPath}");
+            sb.AppendLine(Strings.Format("CrashDetailsDumpFormat", minidumpPath));
         sb.AppendLine();
         for (var cur = ex; cur is not null; cur = cur.InnerException)
         {
             sb.AppendLine($"{cur.GetType().FullName}: {cur.Message}");
             if (cur.StackTrace is not null) sb.AppendLine(cur.StackTrace);
-            if (cur.InnerException is not null) sb.AppendLine("--- caused by ---");
+            if (cur.InnerException is not null) sb.AppendLine(Strings.InnerExceptionSeparator);
         }
         _detailsText = sb.ToString();
         DetailsBox.Text = _detailsText;
@@ -62,8 +63,8 @@ public partial class CrashDialog : Window
                 // If even the dialog construction fails — fall back to the old MessageBox
                 // path so the user sees SOMETHING. Log path is still written.
                 MessageBox.Show(
-                    $"{ex.Message}\n\nDetails written to:\n{CrashLog.LogPath}",
-                    "Images — unexpected error",
+                    Strings.Format("CrashMessageBoxDetailsFormat", ex.Message, CrashLog.LogPath),
+                    Strings.CrashDialogTitle,
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -77,11 +78,11 @@ public partial class CrashDialog : Window
         try
         {
             ClipboardService.SetText(_detailsText);
-            ShowStatus("Copied crash details to the clipboard.", "Success");
+            ShowStatus(Strings.CrashDetailsCopied, "Success");
         }
         catch
         {
-            ShowStatus("Clipboard is busy. Try again in a moment.", "Warning");
+            ShowStatus(Strings.ClipboardBusyRetry, "Warning");
         }
     }
 
@@ -90,18 +91,18 @@ public partial class CrashDialog : Window
         var dir = Path.GetDirectoryName(CrashLog.LogPath);
         if (dir is null || !Directory.Exists(dir))
         {
-            ShowStatus("The log folder is not available yet.", "Warning");
+            ShowStatus(Strings.LogFolderUnavailable, "Warning");
             return;
         }
 
         try
         {
             ShellIntegration.OpenFolder(dir);
-            ShowStatus("Opened the crash log folder.", "Success");
+            ShowStatus(Strings.CrashLogFolderOpened, "Success");
         }
         catch (Exception ex)
         {
-            ShowStatus($"Could not open the log folder: {ex.Message}", "Warning");
+            ShowStatus(Strings.Format("CrashLogFolderOpenFailedFormat", ex.Message), "Warning");
         }
     }
 
@@ -110,8 +111,8 @@ public partial class CrashDialog : Window
         // Pre-fill the issue body with the collected details. Keep the URL under the ~8 KB
         // safe cap that GitHub's issue-new endpoint respects — truncate stacks if needed.
         var info = AppInfo.Current;
-        var body = _detailsText.Length > 5500 ? _detailsText[..5500] + "\n\n…truncated — see crash log for full details…" : _detailsText;
-        var title = $"[crash] {info.DisplayVersion}";
+        var body = _detailsText.Length > 5500 ? _detailsText[..5500] + Strings.Get("CrashIssueTruncatedMarker") : _detailsText;
+        var title = Strings.Format("CrashIssueTitleFormat", info.DisplayVersion);
 
         var url =
             "https://github.com/SysAdminDoc/Images/issues/new"
@@ -121,18 +122,18 @@ public partial class CrashDialog : Window
         try
         {
             ShellIntegration.OpenShellTarget(url);
-            ShowStatus("Opened a pre-filled GitHub issue.", "Success");
+            ShowStatus(Strings.CrashIssueOpened, "Success");
         }
         catch
         {
             try
             {
                 ClipboardService.SetText(url);
-                ShowStatus("Could not open the browser. The issue URL was copied to the clipboard.", "Warning");
+                ShowStatus(Strings.CrashIssueBrowserFailedCopied, "Warning");
             }
             catch
             {
-                ShowStatus("Could not open the browser or copy the issue URL.", "Warning");
+                ShowStatus(Strings.CrashIssueBrowserAndCopyFailed, "Warning");
             }
         }
     }

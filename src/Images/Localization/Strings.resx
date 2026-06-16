@@ -60,4 +60,93 @@
   <data name="ConfirmReferenceBoardSubjectFormat" xml:space="preserve">
     <value>{0} board item{1}</value>
   </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="CloseCrashDialog" xml:space="preserve">
+    <value>Close crash dialog</value>
+  </data>
+  <data name="CopyCrashDetails" xml:space="preserve">
+    <value>Copy crash details</value>
+  </data>
+  <data name="CopyDetails" xml:space="preserve">
+    <value>Copy details</value>
+  </data>
+  <data name="CrashDetailsAppFormat" xml:space="preserve">
+    <value>Images {0} (build {1})</value>
+  </data>
+  <data name="CrashDetailsCopied" xml:space="preserve">
+    <value>Copied crash details to the clipboard.</value>
+  </data>
+  <data name="CrashDetailsDescription" xml:space="preserve">
+    <value>Full details are written to the crash log. Use the buttons below to copy a shareable summary, open the log folder, or open a GitHub issue with the context pre-filled.</value>
+  </data>
+  <data name="CrashDetailsDumpFormat" xml:space="preserve">
+    <value>Dump:    {0}</value>
+  </data>
+  <data name="CrashDetailsLogFormat" xml:space="preserve">
+    <value>Log:     {0}</value>
+  </data>
+  <data name="CrashDetailsOsFormat" xml:space="preserve">
+    <value>OS:      {0}</value>
+  </data>
+  <data name="CrashDetailsRuntimeFormat" xml:space="preserve">
+    <value>Runtime: {0}</value>
+  </data>
+  <data name="CrashDetailsTimeFormat" xml:space="preserve">
+    <value>Time:    {0:yyyy-MM-dd HH:mm:ss zzz}</value>
+  </data>
+  <data name="CrashDialogTitle" xml:space="preserve">
+    <value>Images - unexpected error</value>
+  </data>
+  <data name="CrashIssueBrowserAndCopyFailed" xml:space="preserve">
+    <value>Could not open the browser or copy the issue URL.</value>
+  </data>
+  <data name="CrashIssueBrowserFailedCopied" xml:space="preserve">
+    <value>Could not open the browser. The issue URL was copied to the clipboard.</value>
+  </data>
+  <data name="CrashIssueOpened" xml:space="preserve">
+    <value>Opened a pre-filled GitHub issue.</value>
+  </data>
+  <data name="CrashIssueTitleFormat" xml:space="preserve">
+    <value>[crash] {0}</value>
+  </data>
+  <data name="CrashIssueTruncatedMarker" xml:space="preserve">
+    <value>
+
+...truncated - see crash log for full details...</value>
+  </data>
+  <data name="CrashLogFolderOpenFailedFormat" xml:space="preserve">
+    <value>Could not open the log folder: {0}</value>
+  </data>
+  <data name="CrashLogFolderOpened" xml:space="preserve">
+    <value>Opened the crash log folder.</value>
+  </data>
+  <data name="CrashMessageBoxDetailsFormat" xml:space="preserve">
+    <value>{0}
+
+Details written to:
+{1}</value>
+  </data>
+  <data name="CrashUnexpectedHeading" xml:space="preserve">
+    <value>Images hit an unexpected error</value>
+  </data>
+  <data name="InnerExceptionSeparator" xml:space="preserve">
+    <value>--- caused by ---</value>
+  </data>
+  <data name="LogFolderUnavailable" xml:space="preserve">
+    <value>The log folder is not available yet.</value>
+  </data>
+  <data name="OpenCrashLogFolder" xml:space="preserve">
+    <value>Open crash log folder</value>
+  </data>
+  <data name="OpenGitHubIssue" xml:space="preserve">
+    <value>Open GitHub issue</value>
+  </data>
+  <data name="OpenLogFolder" xml:space="preserve">
+    <value>Open log folder</value>
+  </data>
+  <data name="ClipboardBusyRetry" xml:space="preserve">
+    <value>Clipboard is busy. Try again in a moment.</value>
+  </data>
 </root>
