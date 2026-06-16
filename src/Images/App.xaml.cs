@@ -75,6 +75,7 @@ public partial class App : Application
         };
 
         Exit += (_, _) => Log.Shutdown();
+        ThemeService.Initialize(this, SettingsService.Instance);
 
         var window = new MainWindow();
         LaunchTiming.Log(_log, "main-window-created");

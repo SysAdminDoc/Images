@@ -1,0 +1,58 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="Images.Theme.Name">HighContrast</sys:String>
+
+    <x:Static x:Key="BaseColor" Member="SystemColors.WindowColor" />
+    <x:Static x:Key="MantleColor" Member="SystemColors.ControlColor" />
+    <x:Static x:Key="CrustColor" Member="SystemColors.HighlightTextColor" />
+    <x:Static x:Key="Surface0Color" Member="SystemColors.ControlColor" />
+    <x:Static x:Key="Surface1Color" Member="SystemColors.ActiveBorderColor" />
+    <x:Static x:Key="Surface2Color" Member="SystemColors.ControlDarkColor" />
+    <x:Static x:Key="OverlayColor" Member="SystemColors.ControlTextColor" />
+    <x:Static x:Key="TextColor" Member="SystemColors.ControlTextColor" />
+    <x:Static x:Key="SubtextColor" Member="SystemColors.ControlTextColor" />
+    <x:Static x:Key="BlueColor" Member="SystemColors.HighlightColor" />
+    <x:Static x:Key="LavenderColor" Member="SystemColors.HotTrackColor" />
+    <x:Static x:Key="MauveColor" Member="SystemColors.HighlightColor" />
+    <x:Static x:Key="RedColor" Member="SystemColors.HighlightColor" />
+    <x:Static x:Key="RedHoverColor" Member="SystemColors.HotTrackColor" />
+    <x:Static x:Key="GreenColor" Member="SystemColors.ControlTextColor" />
+    <x:Static x:Key="YellowColor" Member="SystemColors.ControlTextColor" />
+
+    <SolidColorBrush x:Key="BaseBrush" Color="{StaticResource BaseColor}" />
+    <SolidColorBrush x:Key="MantleBrush" Color="{StaticResource MantleColor}" />
+    <SolidColorBrush x:Key="CrustBrush" Color="{StaticResource CrustColor}" />
+    <SolidColorBrush x:Key="Surface0Brush" Color="{StaticResource Surface0Color}" />
+    <SolidColorBrush x:Key="Surface1Brush" Color="{StaticResource Surface1Color}" />
+    <SolidColorBrush x:Key="Surface2Brush" Color="{StaticResource Surface2Color}" />
+    <SolidColorBrush x:Key="OverlayBrush" Color="{StaticResource OverlayColor}" />
+    <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
+    <SolidColorBrush x:Key="SubtextBrush" Color="{StaticResource SubtextColor}" />
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource BlueColor}" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource LavenderColor}" />
+    <SolidColorBrush x:Key="MauveBrush" Color="{StaticResource MauveColor}" />
+    <SolidColorBrush x:Key="RedBrush" Color="{StaticResource RedColor}" />
+    <SolidColorBrush x:Key="RedHoverBrush" Color="{StaticResource RedHoverColor}" />
+    <SolidColorBrush x:Key="GreenBrush" Color="{StaticResource GreenColor}" />
+    <SolidColorBrush x:Key="YellowBrush" Color="{StaticResource YellowColor}" />
+
+    <SolidColorBrush x:Key="ViewportBrush" Color="{StaticResource BaseColor}" />
+    <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource MantleColor}" />
+    <SolidColorBrush x:Key="SurfacePanelBrush" Color="{StaticResource Surface0Color}" />
+    <SolidColorBrush x:Key="HairlineBrush" Color="{StaticResource Surface1Color}" />
+    <SolidColorBrush x:Key="DividerBrush" Color="{StaticResource Surface1Color}" />
+    <SolidColorBrush x:Key="FloatingChromeBrush" Color="{StaticResource BaseColor}" />
+    <SolidColorBrush x:Key="FloatingChromeBorderBrush" Color="{StaticResource Surface1Color}" />
+    <SolidColorBrush x:Key="FloatingChromeTextBrush" Color="{StaticResource TextColor}" />
+    <SolidColorBrush x:Key="ToastBrush" Color="{StaticResource BaseColor}" />
+    <SolidColorBrush x:Key="WarningPanelBrush" Color="{StaticResource BaseColor}" />
+    <SolidColorBrush x:Key="DangerPanelBrush" Color="{StaticResource BaseColor}" />
+    <SolidColorBrush x:Key="FocusRingBrush" Color="{StaticResource BlueColor}" />
+    <SolidColorBrush x:Key="DropOverlayBrush" Color="{StaticResource BaseColor}" />
+    <SolidColorBrush x:Key="DropOverlayPanelBrush" Color="{StaticResource BaseColor}" />
+    <SolidColorBrush x:Key="OcrRegionBrush" Color="{StaticResource BlueColor}" />
+    <SolidColorBrush x:Key="OcrRegionFocusBrush" Color="{StaticResource BlueColor}" />
+</ResourceDictionary>

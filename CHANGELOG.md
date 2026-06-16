@@ -10,6 +10,7 @@ All notable changes to **Images** are documented here.
 
 ### Changed
 
+- **High-contrast runtime theme** — the accessibility high-contrast preference now installs a `SystemColors`-backed theme dictionary immediately, Windows high-contrast mode is honored automatically at startup, and Windows preference/color changes refresh the active dictionary at runtime.
 - **Settings information architecture** — Settings now has first-class General, Appearance, Accessibility, Advanced, Hotkeys, Diagnostics, Text extraction, and Privacy sections. New persisted controls cover window-placement restore, reduced viewer motion, high-contrast preference, and archive-book defaults; reduced motion now disables the main viewer's edge-arrow fade animation.
 - **Runtime dependency provenance dashboard** — About, `--system-info`, and `--codec-report` now share structured NuGet/runtime/model rows that show source URLs, version, path, SHA-256 where available, advisory status, and setup/release action copy for Magick.NET, SharpCompress, Ghostscript, jpegtran, Windows OCR, and future model runtimes.
 - **Local model/runtime manager** — the app now has a Model manager surface and service for approved local model definitions, app-local grouped storage, manual import/delete/reveal actions, pinned SHA-256 validation for OpenCV/Carve LaMa and Qdrant CLIP ViT-B/32 model/tokenizer/preprocessor candidates, Windows ML versus ONNX Runtime DirectML readiness copy, and diagnostics provenance rows without automatic model downloads.
