@@ -2,6 +2,7 @@ using System.Globalization;
 using System.IO;
 using System.Windows.Media.Imaging;
 using ImageMagick;
+using Images.Localization;
 
 namespace Images.Services;
 
@@ -18,18 +19,18 @@ public sealed record ImageEffectsPlan(
         Near(Vignette, 0);
 
     public string Label => IsIdentity
-        ? "Effects"
-        : $"Effects ({Summary})";
+        ? Strings.EffectsLabel
+        : Strings.Format("EffectsLabelWithSummaryFormat", Summary);
 
     public string Summary
     {
         get
         {
             var parts = new List<string>(3);
-            if (!Near(Sharpen, 0)) parts.Add($"sharpen {Sharpen:0.#}%");
-            if (!Near(NoiseReduction, 0)) parts.Add($"noise {NoiseReduction:0.#}%");
-            if (!Near(Vignette, 0)) parts.Add($"vignette {Vignette:0.#}%");
-            return parts.Count == 0 ? "no changes" : string.Join(", ", parts);
+            if (!Near(Sharpen, 0)) parts.Add(Strings.Format("EffectsSummarySharpenFormat", Sharpen));
+            if (!Near(NoiseReduction, 0)) parts.Add(Strings.Format("EffectsSummaryNoiseFormat", NoiseReduction));
+            if (!Near(Vignette, 0)) parts.Add(Strings.Format("EffectsSummaryVignetteFormat", Vignette));
+            return parts.Count == 0 ? Strings.EffectsNoChangesSummary : string.Join(Strings.EffectsSummarySeparator, parts);
         }
     }
 
@@ -89,7 +90,7 @@ public static class ImageEffectsService
     public static BitmapSource CreatePreview(string imagePath, ImageEffectsPlan plan, int maxEdge = 820)
     {
         if (string.IsNullOrWhiteSpace(imagePath))
-            throw new ArgumentException("An image path is required.", nameof(imagePath));
+            throw new ArgumentException(Strings.EffectsImagePathRequired, nameof(imagePath));
 
         using var image = new MagickImage(imagePath);
         image.AutoOrient();

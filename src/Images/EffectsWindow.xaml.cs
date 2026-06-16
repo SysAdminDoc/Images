@@ -1,8 +1,8 @@
-using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Images.Localization;
 using Images.Services;
 
 namespace Images;
@@ -67,27 +67,27 @@ public partial class EffectsWindow : Window
         var version = ++_previewVersion;
         ApplyButton.IsEnabled = !plan.IsIdentity;
         SummaryText.Text = plan.IsIdentity
-            ? "No effect is active."
+            ? Strings.EffectsNoEffectActive
             : plan.Summary;
 
         if (!File.Exists(_imagePath))
         {
-            StatusText.Text = "Preview unavailable: image file is no longer available.";
+            StatusText.Text = Strings.EffectsPreviewUnavailableMissingFile;
             PreviewImage.Source = null;
             return;
         }
 
         try
         {
-            StatusText.Text = "Updating preview...";
+            StatusText.Text = Strings.EffectsUpdatingPreview;
             var preview = await Task.Run(() => ImageEffectsService.CreatePreview(_imagePath, plan));
             if (version != _previewVersion)
                 return;
 
             PreviewImage.Source = preview;
             StatusText.Text = plan.IsIdentity
-                ? "Choose a preset or move a slider to preview effects."
-                : "Preview ready. Press Enter to apply.";
+                ? Strings.EffectsChoosePresetOrSlider
+                : Strings.EffectsPreviewReadyEnter;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
         {
@@ -95,7 +95,7 @@ public partial class EffectsWindow : Window
                 return;
 
             PreviewImage.Source = null;
-            StatusText.Text = "Preview failed: " + ex.Message;
+            StatusText.Text = Strings.Format("EffectsPreviewFailedFormat", ex.Message);
         }
     }
 
@@ -125,7 +125,7 @@ public partial class EffectsWindow : Window
         var plan = CurrentPlan();
         if (plan.IsIdentity)
         {
-            StatusText.Text = "Choose a preset or move a slider before applying.";
+            StatusText.Text = Strings.EffectsChooseBeforeApplying;
             return;
         }
 
@@ -156,7 +156,7 @@ public partial class EffectsWindow : Window
         }
 
         _previewVersion++;
-        StatusText.Text = "Preview queued...";
+        StatusText.Text = Strings.EffectsPreviewQueued;
         _previewTimer.Start();
     }
 
@@ -192,5 +192,5 @@ public partial class EffectsWindow : Window
     }
 
     private static string Percent(double value)
-        => value.ToString("0.#", CultureInfo.InvariantCulture) + "%";
+        => Strings.Format("EffectsPercentFormat", value);
 }

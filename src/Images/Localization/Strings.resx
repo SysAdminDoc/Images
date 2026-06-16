@@ -707,4 +707,127 @@ Details written to:
   <data name="OcrTextTooltipFormat" xml:space="preserve">
     <value>OCR text: {0}</value>
   </data>
+  <data name="EffectsApplyAutomationName" xml:space="preserve">
+    <value>Apply effects to edit history</value>
+  </data>
+  <data name="EffectsApplyCleanPreset" xml:space="preserve">
+    <value>Apply clean preset</value>
+  </data>
+  <data name="EffectsApplyCrispPreset" xml:space="preserve">
+    <value>Apply crisp preset</value>
+  </data>
+  <data name="EffectsApplyFocusPreset" xml:space="preserve">
+    <value>Apply focus preset</value>
+  </data>
+  <data name="EffectsChooseBeforeApplying" xml:space="preserve">
+    <value>Choose a preset or move a slider before applying.</value>
+  </data>
+  <data name="EffectsChoosePresetOrSlider" xml:space="preserve">
+    <value>Choose a preset or move a slider to preview effects.</value>
+  </data>
+  <data name="EffectsCloseAutomationName" xml:space="preserve">
+    <value>Close effects</value>
+  </data>
+  <data name="EffectsDetailHeading" xml:space="preserve">
+    <value>Detail</value>
+  </data>
+  <data name="EffectsEdgesHeading" xml:space="preserve">
+    <value>Edges</value>
+  </data>
+  <data name="EffectsEditNotice" xml:space="preserve">
+    <value>This records an edit operation only. Use Save a copy to export pixels with the effects applied.</value>
+  </data>
+  <data name="EffectsEnterApplies" xml:space="preserve">
+    <value>Enter applies</value>
+  </data>
+  <data name="EffectsHeading" xml:space="preserve">
+    <value>Effects</value>
+  </data>
+  <data name="EffectsImagePathRequired" xml:space="preserve">
+    <value>An image path is required.</value>
+  </data>
+  <data name="EffectsLabel" xml:space="preserve">
+    <value>Effects</value>
+  </data>
+  <data name="EffectsLabelWithSummaryFormat" xml:space="preserve">
+    <value>Effects ({0})</value>
+  </data>
+  <data name="EffectsNoChangesSummary" xml:space="preserve">
+    <value>no changes</value>
+  </data>
+  <data name="EffectsNoEffectActive" xml:space="preserve">
+    <value>No effect is active.</value>
+  </data>
+  <data name="EffectsNoiseReductionAmountAutomationName" xml:space="preserve">
+    <value>Noise reduction amount</value>
+  </data>
+  <data name="EffectsNoiseReductionLabel" xml:space="preserve">
+    <value>Noise reduction</value>
+  </data>
+  <data name="EffectsPercentFormat" xml:space="preserve">
+    <value>{0:0.#}%</value>
+  </data>
+  <data name="EffectsPresetClean" xml:space="preserve">
+    <value>Clean</value>
+  </data>
+  <data name="EffectsPresetCrisp" xml:space="preserve">
+    <value>Crisp</value>
+  </data>
+  <data name="EffectsPresetFocus" xml:space="preserve">
+    <value>Focus</value>
+  </data>
+  <data name="EffectsPresetsHeading" xml:space="preserve">
+    <value>Presets</value>
+  </data>
+  <data name="EffectsPreviewAutomationName" xml:space="preserve">
+    <value>Effects preview</value>
+  </data>
+  <data name="EffectsPreviewFailedFormat" xml:space="preserve">
+    <value>Preview failed: {0}</value>
+  </data>
+  <data name="EffectsPreviewQueued" xml:space="preserve">
+    <value>Preview queued...</value>
+  </data>
+  <data name="EffectsPreviewReadyEnter" xml:space="preserve">
+    <value>Preview ready. Press Enter to apply.</value>
+  </data>
+  <data name="EffectsPreviewUnavailableMissingFile" xml:space="preserve">
+    <value>Preview unavailable: image file is no longer available.</value>
+  </data>
+  <data name="EffectsResetAutomationName" xml:space="preserve">
+    <value>Reset effects</value>
+  </data>
+  <data name="EffectsSharpenAmountAutomationName" xml:space="preserve">
+    <value>Sharpen amount</value>
+  </data>
+  <data name="EffectsSharpenLabel" xml:space="preserve">
+    <value>Sharpen</value>
+  </data>
+  <data name="EffectsSubtitle" xml:space="preserve">
+    <value>Preview sharpen, noise reduction, and vignette before adding an edit.</value>
+  </data>
+  <data name="EffectsSummaryNoiseFormat" xml:space="preserve">
+    <value>noise {0:0.#}%</value>
+  </data>
+  <data name="EffectsSummarySeparator" xml:space="preserve">
+    <value>, </value>
+  </data>
+  <data name="EffectsSummarySharpenFormat" xml:space="preserve">
+    <value>sharpen {0:0.#}%</value>
+  </data>
+  <data name="EffectsSummaryVignetteFormat" xml:space="preserve">
+    <value>vignette {0:0.#}%</value>
+  </data>
+  <data name="EffectsUpdatingPreview" xml:space="preserve">
+    <value>Updating preview...</value>
+  </data>
+  <data name="EffectsVignetteAmountAutomationName" xml:space="preserve">
+    <value>Vignette amount</value>
+  </data>
+  <data name="EffectsVignetteLabel" xml:space="preserve">
+    <value>Vignette</value>
+  </data>
+  <data name="EffectsWindowTitle" xml:space="preserve">
+    <value>Images - Effects</value>
+  </data>
 </root>
