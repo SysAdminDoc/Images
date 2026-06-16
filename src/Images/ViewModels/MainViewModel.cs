@@ -211,6 +211,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClearRetouchCommand = new RelayCommand(ClearRetouchStrokes, () => HasRetouchStrokes);
         SetRetouchModeCommand = new RelayCommand(SetRetouchMode, parameter => parameter is string);
         ClearRetouchSourceCommand = new RelayCommand(ClearRetouchSource, () => HasRetouchSource);
+        ToggleInpaintModeCommand = new RelayCommand(ToggleInpaintMode, () => CanUseInpaint);
+        ApplyInpaintCommand = new RelayCommand(ApplyInpaint, () => HasInpaintMaskRegions);
+        CancelInpaintCommand = new RelayCommand(CancelInpaintMode, () => IsInpaintMode || HasInpaintMaskRegions);
+        ClearInpaintMaskCommand = new RelayCommand(ClearInpaintMask, () => HasInpaintMaskRegions);
         CopyInspectorHexCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hex, "HEX"), () => HasInspectorSample);
         CopyInspectorRgbCommand = new RelayCommand(() => CopyInspectorValue(s => s.Rgb, "RGB"), () => HasInspectorSample);
         CopyInspectorHsvCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hsv, "HSV"), () => HasInspectorSample);
@@ -2586,6 +2590,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand ClearRetouchCommand { get; }
     public ICommand SetRetouchModeCommand { get; }
     public ICommand ClearRetouchSourceCommand { get; }
+    public ICommand ToggleInpaintModeCommand { get; }
+    public ICommand ApplyInpaintCommand { get; }
+    public ICommand CancelInpaintCommand { get; }
+    public ICommand ClearInpaintMaskCommand { get; }
     public ICommand CopyInspectorHexCommand { get; }
     public ICommand CopyInspectorRgbCommand { get; }
     public ICommand CopyInspectorHsvCommand { get; }
@@ -4920,6 +4928,126 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         if (showToast)
             Toast("Retouch cleared");
+    }
+
+    // -------------------- AI content-aware repair (LaMa inpaint) --------------------
+
+    private readonly System.Collections.ObjectModel.ObservableCollection<InpaintMaskRegion> _inpaintMaskRegions = new();
+    private bool _isInpaintMode;
+    private double _inpaintBrushRadius = 30;
+
+    public bool IsInpaintMode
+    {
+        get => _isInpaintMode;
+        set { _isInpaintMode = value; Raise(); Raise(nameof(InpaintStatusText)); }
+    }
+
+    public double InpaintBrushRadius
+    {
+        get => _inpaintBrushRadius;
+        set { _inpaintBrushRadius = Math.Clamp(value, LaMaInpaintService.MinBrushRadius, LaMaInpaintService.MaxBrushRadius); Raise(); }
+    }
+
+    public System.Collections.ObjectModel.ObservableCollection<InpaintMaskRegion> InpaintMaskRegions => _inpaintMaskRegions;
+
+    public bool HasInpaintMaskRegions => _inpaintMaskRegions.Count > 0;
+
+    public bool CanUseInpaint => HasImage && !IsArchiveBook && CurrentFormatSupportsCrop;
+
+    public string InpaintStatusText => IsInpaintMode
+        ? HasInpaintMaskRegions
+            ? "Paint to add mask regions. Enter or Apply runs AI repair; Esc cancels."
+            : "Paint over areas to repair. The AI model fills painted regions from surrounding content."
+        : "";
+
+    public void AddInpaintMaskRegion(double x, double y)
+    {
+        _inpaintMaskRegions.Add(new InpaintMaskRegion(x, y, InpaintBrushRadius));
+        Raise(nameof(HasInpaintMaskRegions));
+    }
+
+    private void ToggleInpaintMode()
+    {
+        if (IsInpaintMode)
+        {
+            CancelInpaintMode();
+            return;
+        }
+
+        if (!LaMaInpaintService.IsAvailable())
+        {
+            Toast("No LaMa model imported — open Model Manager first");
+            return;
+        }
+
+        IsCropMode = false;
+        IsSelectionMode = false;
+        IsInspectorMode = false;
+        IsExposureBrushMode = false;
+        IsRedEyeCorrectionMode = false;
+        IsRetouchMode = false;
+        ClearCropSelection();
+
+        IsInpaintMode = true;
+        Toast("AI repair mode — paint areas to fill");
+    }
+
+    private async void ApplyInpaint()
+    {
+        if (!HasInpaintMaskRegions || CurrentPath is null) return;
+
+        var path = CurrentPath;
+        var regions = _inpaintMaskRegions.ToList();
+        var width = PixelWidth;
+        var height = PixelHeight;
+        if (width <= 0 || height <= 0) return;
+
+        Toast("Running AI repair...");
+
+        InpaintResult result;
+        try
+        {
+            result = await Task.Run(() =>
+                LaMaInpaintService.Inpaint(path, regions, width, height));
+        }
+        catch (Exception ex)
+        {
+            Toast($"Repair failed: {ex.Message}");
+            return;
+        }
+
+        if (!result.Success || result.RepairedImage is null)
+        {
+            Toast(result.ErrorMessage ?? "Repair failed");
+            return;
+        }
+
+        try
+        {
+            using var repaired = result.RepairedImage;
+            repaired.Write(path);
+            ShellChangeNotificationService.NotifyFileUpdated(path);
+            await ReloadCurrentAsync();
+            ClearInpaintMask();
+            Toast("AI repair applied");
+        }
+        catch (Exception ex)
+        {
+            Toast($"Failed to save repair: {ex.Message}");
+        }
+    }
+
+    private void CancelInpaintMode()
+    {
+        IsInpaintMode = false;
+        ClearInpaintMask();
+        Toast("AI repair canceled");
+    }
+
+    private void ClearInpaintMask()
+    {
+        _inpaintMaskRegions.Clear();
+        Raise(nameof(HasInpaintMaskRegions));
     }
 
     private void CancelCropMode()
