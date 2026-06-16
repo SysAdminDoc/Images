@@ -3808,4 +3808,39 @@ Details written to:
     <value>Choose a different filename for the copy</value>
   </data>
 
+  <!-- P-03: Network egress logging -->
+  <data name="AboutNetworkActivityHeading" xml:space="preserve">
+    <value>Network activity</value>
+  </data>
+  <data name="AboutNetworkActivityAutomationName" xml:space="preserve">
+    <value>Network activity log</value>
+  </data>
+  <data name="AboutNetworkActivityEmpty" xml:space="preserve">
+    <value>No outbound network calls recorded. Images only connects to check for updates — nothing else.</value>
+  </data>
+  <data name="AboutNetworkActivitySummaryFormat" xml:space="preserve">
+    <value>{0} call(s), {1} total</value>
+  </data>
+  <data name="AboutNetworkActivityCopyAutomationName" xml:space="preserve">
+    <value>Copy network activity log to clipboard</value>
+  </data>
+  <data name="AboutNetworkActivityCopy" xml:space="preserve">
+    <value>Copy log</value>
+  </data>
+  <data name="AboutNetworkActivityClearAutomationName" xml:space="preserve">
+    <value>Clear network activity log</value>
+  </data>
+  <data name="AboutNetworkActivityClear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="AboutNetworkActivityCopied" xml:space="preserve">
+    <value>Network activity log copied to clipboard.</value>
+  </data>
+  <data name="AboutNetworkActivityCleared" xml:space="preserve">
+    <value>Network activity log cleared.</value>
+  </data>
+  <data name="AboutNetworkActivityNothingToCopy" xml:space="preserve">
+    <value>No network activity to copy.</value>
+  </data>
+
 </root>
