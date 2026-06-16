@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Images.Localization;
 using Images.Services;
 
 namespace Images;
@@ -58,27 +59,27 @@ public partial class AdjustmentsWindow : Window
         var version = ++_previewVersion;
         ApplyButton.IsEnabled = !plan.IsIdentity;
         SummaryText.Text = plan.IsIdentity
-            ? "No adjustment is active."
+            ? Strings.AdjustmentsNoAdjustmentActive
             : plan.Summary;
 
         if (!File.Exists(_imagePath))
         {
-            StatusText.Text = "Preview unavailable: image file is no longer available.";
+            StatusText.Text = Strings.AdjustmentsPreviewUnavailableMissingFile;
             PreviewImage.Source = null;
             return;
         }
 
         try
         {
-            StatusText.Text = "Updating preview...";
+            StatusText.Text = Strings.AdjustmentsUpdatingPreview;
             var preview = await Task.Run(() => ImageAdjustmentService.CreatePreview(_imagePath, plan));
             if (version != _previewVersion)
                 return;
 
             PreviewImage.Source = preview;
             StatusText.Text = plan.IsIdentity
-                ? "Move a slider to preview an adjustment."
-                : "Preview ready. Press Enter to apply.";
+                ? Strings.AdjustmentsMoveSliderToPreview
+                : Strings.AdjustmentsPreviewReadyEnter;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
         {
@@ -86,7 +87,7 @@ public partial class AdjustmentsWindow : Window
                 return;
 
             PreviewImage.Source = null;
-            StatusText.Text = "Preview failed: " + ex.Message;
+            StatusText.Text = Strings.Format("AdjustmentsPreviewFailedFormat", ex.Message);
         }
     }
 
@@ -120,7 +121,7 @@ public partial class AdjustmentsWindow : Window
         var plan = CurrentPlan();
         if (plan.IsIdentity)
         {
-            StatusText.Text = "Move a slider before applying.";
+            StatusText.Text = Strings.AdjustmentsMoveSliderBeforeApplying;
             return;
         }
 
@@ -138,7 +139,7 @@ public partial class AdjustmentsWindow : Window
         }
 
         _previewVersion++;
-        StatusText.Text = "Preview queued...";
+        StatusText.Text = Strings.AdjustmentsPreviewQueued;
         _previewTimer.Start();
     }
 
@@ -171,7 +172,7 @@ public partial class AdjustmentsWindow : Window
         WhitePointText.Text = Percent(WhitePointSlider.Value);
         GammaText.Text = GammaSlider.Value.ToString("0.00", CultureInfo.InvariantCulture);
         CurveText.Text = Signed(CurveSlider.Value);
-        HueText.Text = Signed(HueSlider.Value) + " deg";
+        HueText.Text = Signed(HueSlider.Value) + Strings.AdjustmentsDegreeSuffix;
         SaturationText.Text = Percent(SaturationSlider.Value);
         LightnessText.Text = Percent(LightnessSlider.Value);
     }

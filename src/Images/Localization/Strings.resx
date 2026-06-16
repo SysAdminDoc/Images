@@ -830,4 +830,94 @@ Details written to:
   <data name="EffectsWindowTitle" xml:space="preserve">
     <value>Images - Effects</value>
   </data>
+  <data name="AdjustmentsWindowTitle" xml:space="preserve">
+    <value>Images - Adjustments</value>
+  </data>
+  <data name="AdjustmentsHeading" xml:space="preserve">
+    <value>Adjustments</value>
+  </data>
+  <data name="AdjustmentsSubtitle" xml:space="preserve">
+    <value>Preview levels, curve, and HSL before adding an edit.</value>
+  </data>
+  <data name="AdjustmentsEnterApplies" xml:space="preserve">
+    <value>Enter applies</value>
+  </data>
+  <data name="AdjustmentsLevelsHeading" xml:space="preserve">
+    <value>Levels</value>
+  </data>
+  <data name="AdjustmentsBlackPoint" xml:space="preserve">
+    <value>Black point</value>
+  </data>
+  <data name="AdjustmentsWhitePoint" xml:space="preserve">
+    <value>White point</value>
+  </data>
+  <data name="AdjustmentsGamma" xml:space="preserve">
+    <value>Gamma</value>
+  </data>
+  <data name="AdjustmentsCurve" xml:space="preserve">
+    <value>Curve</value>
+  </data>
+  <data name="AdjustmentsCurveHint" xml:space="preserve">
+    <value>Negative softens contrast; positive adds contrast.</value>
+  </data>
+  <data name="AdjustmentsColorHeading" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="AdjustmentsHue" xml:space="preserve">
+    <value>Hue</value>
+  </data>
+  <data name="AdjustmentsSaturation" xml:space="preserve">
+    <value>Saturation</value>
+  </data>
+  <data name="AdjustmentsLightness" xml:space="preserve">
+    <value>Lightness</value>
+  </data>
+  <data name="AdjustmentsEditNotice" xml:space="preserve">
+    <value>This records an edit operation only. Use Save a copy to export pixels with the adjustment applied.</value>
+  </data>
+  <data name="AdjustmentsReset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="AdjustmentsApply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="AdjustmentsResetAutomationName" xml:space="preserve">
+    <value>Reset adjustments</value>
+  </data>
+  <data name="AdjustmentsCloseAutomationName" xml:space="preserve">
+    <value>Close adjustments</value>
+  </data>
+  <data name="AdjustmentsApplyAutomationName" xml:space="preserve">
+    <value>Apply adjustment to edit history</value>
+  </data>
+  <data name="AdjustmentsPreviewAutomationName" xml:space="preserve">
+    <value>Adjustment preview</value>
+  </data>
+  <data name="AdjustmentsNoAdjustmentActive" xml:space="preserve">
+    <value>No adjustment is active.</value>
+  </data>
+  <data name="AdjustmentsPreviewUnavailableMissingFile" xml:space="preserve">
+    <value>Preview unavailable: image file is no longer available.</value>
+  </data>
+  <data name="AdjustmentsUpdatingPreview" xml:space="preserve">
+    <value>Updating preview...</value>
+  </data>
+  <data name="AdjustmentsMoveSliderToPreview" xml:space="preserve">
+    <value>Move a slider to preview an adjustment.</value>
+  </data>
+  <data name="AdjustmentsPreviewReadyEnter" xml:space="preserve">
+    <value>Preview ready. Press Enter to apply.</value>
+  </data>
+  <data name="AdjustmentsPreviewFailedFormat" xml:space="preserve">
+    <value>Preview failed: {0}</value>
+  </data>
+  <data name="AdjustmentsMoveSliderBeforeApplying" xml:space="preserve">
+    <value>Move a slider before applying.</value>
+  </data>
+  <data name="AdjustmentsPreviewQueued" xml:space="preserve">
+    <value>Preview queued...</value>
+  </data>
+  <data name="AdjustmentsDegreeSuffix" xml:space="preserve">
+    <value> deg</value>
+  </data>
 </root>
