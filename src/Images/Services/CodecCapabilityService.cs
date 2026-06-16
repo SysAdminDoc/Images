@@ -67,7 +67,13 @@ public static class CodecCapabilityService
         string JpegTranSource,
         string? JpegTranVersion,
         string? JpegTranSha256,
-        string JpegTranStatus);
+        string JpegTranStatus,
+        bool C2paToolAvailable,
+        string? C2paToolExecutablePath,
+        string C2paToolSource,
+        string? C2paToolVersion,
+        string? C2paToolSha256,
+        string C2paToolStatus);
 
     public static string BuildOverviewText()
         => $"WIC + bundled Magick.NET + archive readers; {SupportedImageFormats.Extensions.Count} open extensions; " +
@@ -104,6 +110,7 @@ public static class CodecCapabilityService
         var info = AppInfo.Current;
         var status = CodecRuntime.Status;
         var jpegTran = JpegTranRuntime.Inspect();
+        var c2paTool = C2paToolRuntime.Inspect();
         return new RuntimeProvenance(
             AppVersion: $"Images {info.DisplayVersion} ({info.ProductVersion})",
             Runtime: info.RuntimeDescription,
@@ -125,7 +132,13 @@ public static class CodecCapabilityService
             JpegTranSource: jpegTran.Source,
             JpegTranVersion: jpegTran.Version,
             JpegTranSha256: jpegTran.Sha256,
-            JpegTranStatus: jpegTran.StatusText);
+            JpegTranStatus: jpegTran.StatusText,
+            C2paToolAvailable: c2paTool.Available,
+            C2paToolExecutablePath: c2paTool.ExecutablePath,
+            C2paToolSource: c2paTool.Source,
+            C2paToolVersion: c2paTool.Version,
+            C2paToolSha256: c2paTool.Sha256,
+            C2paToolStatus: c2paTool.StatusText);
     }
 
     public static IReadOnlyList<DependencyProvenanceRow> BuildDependencyProvenanceRows()
@@ -202,6 +215,20 @@ public static class CodecCapabilityService
                 Action: provenance.JpegTranAvailable
                     ? "Match this binary to the approved libjpeg-turbo artifact before release."
                     : "Stage approved libjpeg-turbo jpegtran.exe under Codecs\\JpegTran or set IMAGES_JPEGTRAN_EXE."),
+
+            new(
+                Name: "c2patool",
+                Kind: "Optional runtime",
+                Source: "C2PA content credentials CLI: https://github.com/contentauth/c2patool; spec: https://c2pa.org",
+                Version: provenance.C2paToolVersion ?? (provenance.C2paToolAvailable ? "version unavailable" : "not loaded"),
+                Path: provenance.C2paToolExecutablePath,
+                Sha256: provenance.C2paToolSha256,
+                AdvisoryStatus: provenance.C2paToolAvailable
+                    ? "Runtime present; C2PA content credential inspection is available for supported image formats."
+                    : "Optional child-process runtime is not installed; C2PA inspection is unavailable.",
+                Action: provenance.C2paToolAvailable
+                    ? "C2PA provenance shows who created or edited a file, not whether the content is truthful."
+                    : "Install c2patool (cargo install c2patool), place under Codecs\\C2paTool, or set IMAGES_C2PATOOL_EXE."),
 
             new(
                 Name: "Windows.Media.Ocr",
@@ -365,6 +392,12 @@ public static class CodecCapabilityService
             sb.AppendLine($"- jpegtran version: {provenance.JpegTranVersion}");
         if (provenance.JpegTranSha256 is not null)
             sb.AppendLine($"- jpegtran SHA-256: {provenance.JpegTranSha256}");
+        sb.AppendLine($"- c2patool: {(provenance.C2paToolAvailable ? "available" : "not available")}");
+        sb.AppendLine($"- c2patool source: {provenance.C2paToolExecutablePath ?? provenance.C2paToolSource}");
+        if (provenance.C2paToolVersion is not null)
+            sb.AppendLine($"- c2patool version: {provenance.C2paToolVersion}");
+        if (provenance.C2paToolSha256 is not null)
+            sb.AppendLine($"- c2patool SHA-256: {provenance.C2paToolSha256}");
         sb.AppendLine();
 
         AppendDependencyProvenance(sb, dependencyRows);

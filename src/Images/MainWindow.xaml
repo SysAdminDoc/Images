@@ -4858,6 +4858,61 @@
                         </Border>
                     </StackPanel>
 
+                    <StackPanel Visibility="{Binding ShowC2paPanel, Converter={StaticResource BoolToVis}}">
+                        <Border Style="{StaticResource Divider}" />
+                        <TextBlock Text="content credentials" Style="{StaticResource SectionLabel}" />
+
+                        <Border Style="{StaticResource Card}" Margin="0,4,0,0"
+                                ToolTip="{Binding C2paTrustBadgeTooltip}"
+                                Visibility="{Binding HasC2paCredentials, Converter={StaticResource BoolToVis}}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                    <TextBlock Text="&#xE72E;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="14"
+                                               Foreground="{StaticResource AccentBrush}"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,8,0" />
+                                    <TextBlock Text="{Binding C2paTrustBadgeText}"
+                                               Style="{StaticResource Text.Body}"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+
+                                <TextBlock Text="{Binding C2paClaimGeneratorText}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           Visibility="{Binding C2paClaimGeneratorText, Converter={StaticResource BoolToVis}}"
+                                           Margin="0,0,0,2" />
+
+                                <TextBlock Text="{Binding C2paSignatureDateText}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           Visibility="{Binding C2paSignatureDateText, Converter={StaticResource BoolToVis}}"
+                                           Margin="0,0,0,2" />
+
+                                <TextBlock Text="{Binding C2paAssertionsSummaryText}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           Visibility="{Binding C2paAssertionsSummaryText, Converter={StaticResource BoolToVis}}"
+                                           Margin="0,0,0,2" />
+
+                                <TextBlock Text="{Binding C2paIngredientsSummaryText}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           Visibility="{Binding C2paIngredientsSummaryText, Converter={StaticResource BoolToVis}}" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}"
+                                Margin="0,4,0,0"
+                                Visibility="{Binding IsC2paLoading, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="Checking content credentials..."
+                                       Style="{StaticResource Text.Hint}"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                    </StackPanel>
+
                     <Border Style="{StaticResource Card}"
                             Margin="0,4,0,0"
                             Visibility="{Binding MetadataStatusText, Converter={StaticResource BoolToVis}}">
