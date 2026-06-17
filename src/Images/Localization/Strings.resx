@@ -4181,5 +4181,8 @@ Details written to:
   <data name="MainToastSlideshowShuffleOff" xml:space="preserve">
     <value>Slideshow shuffle off</value>
   </data>
+  <data name="MainFormatMismatch" xml:space="preserve">
+    <value>File content is {0} but extension is {1} — expected {2}</value>
+  </data>
 
 </root>

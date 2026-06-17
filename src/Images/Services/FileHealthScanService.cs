@@ -204,7 +204,7 @@ public sealed class FileHealthScanService
                 "The file is empty. It cannot decode as an image and is usually safe to quarantine after review.");
         }
 
-        var signature = TryDetectSignature(info.FullName);
+        var signature = FormatSignatureDetector.Detect(info.FullName);
         if (signature is not null && !signature.MatchesExtension(info.Extension))
         {
             return CreateFinding(
@@ -363,77 +363,6 @@ public sealed class FileHealthScanService
             files.Add(fullPath);
     }
 
-    private static SignatureMatch? TryDetectSignature(string path)
-    {
-        Span<byte> buffer = stackalloc byte[32];
-        int read;
-        try
-        {
-            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-            read = stream.Read(buffer);
-        }
-        catch
-        {
-            return null;
-        }
-
-        var bytes = buffer[..read];
-        if (StartsWith(bytes, [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]))
-            return Signatures.Png;
-        if (bytes.Length >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF)
-            return Signatures.Jpeg;
-        if (StartsWithAscii(bytes, "GIF87a") || StartsWithAscii(bytes, "GIF89a"))
-            return Signatures.Gif;
-        if (bytes.Length >= 12 && StartsWithAscii(bytes, "RIFF") && AsciiEquals(bytes[8..12], "WEBP"))
-            return Signatures.WebP;
-        if (StartsWith(bytes, [0x49, 0x49, 0x2A, 0x00]) || StartsWith(bytes, [0x4D, 0x4D, 0x00, 0x2A]))
-            return Signatures.Tiff;
-        if (StartsWithAscii(bytes, "BM"))
-            return Signatures.Bmp;
-        if (StartsWith(bytes, [0x00, 0x00, 0x01, 0x00]))
-            return Signatures.Ico;
-        if (StartsWithAscii(bytes, "%PDF"))
-            return Signatures.Pdf;
-        if (StartsWithAscii(bytes, "8BPS"))
-            return Signatures.Psd;
-        if (StartsWithAscii(bytes, "qoif"))
-            return Signatures.Qoi;
-        if (StartsWith(bytes, [0xFF, 0x0A]) || (bytes.Length >= 12 && StartsWith(bytes, [0x00, 0x00, 0x00, 0x0C]) && AsciiEquals(bytes[4..12], "JXL \r\n\x87\n")))
-            return Signatures.Jxl;
-        if (bytes.Length >= 12 && AsciiEquals(bytes[4..8], "ftyp"))
-        {
-            var brand = Encoding.ASCII.GetString(bytes[8..12]);
-            if (brand.StartsWith("avif", StringComparison.OrdinalIgnoreCase) || brand.StartsWith("avis", StringComparison.OrdinalIgnoreCase))
-                return Signatures.Avif;
-            if (brand.StartsWith("heic", StringComparison.OrdinalIgnoreCase) ||
-                brand.StartsWith("heix", StringComparison.OrdinalIgnoreCase) ||
-                brand.StartsWith("hevc", StringComparison.OrdinalIgnoreCase) ||
-                brand.StartsWith("mif1", StringComparison.OrdinalIgnoreCase))
-                return Signatures.Heic;
-        }
-
-        return null;
-    }
-
-    private static bool StartsWith(ReadOnlySpan<byte> bytes, ReadOnlySpan<byte> prefix)
-        => bytes.Length >= prefix.Length && bytes[..prefix.Length].SequenceEqual(prefix);
-
-    private static bool StartsWithAscii(ReadOnlySpan<byte> bytes, string text)
-        => bytes.Length >= text.Length && AsciiEquals(bytes[..text.Length], text);
-
-    private static bool AsciiEquals(ReadOnlySpan<byte> bytes, string text)
-    {
-        if (bytes.Length != text.Length)
-            return false;
-
-        for (var i = 0; i < text.Length; i++)
-        {
-            if (bytes[i] != (byte)text[i])
-                return false;
-        }
-
-        return true;
-    }
 
     private static string ResolveUniquePath(string directory, string stem, string extension)
     {
@@ -506,29 +435,4 @@ public sealed class FileHealthScanService
         ".tmp", ".temp", ".part", ".partial", ".crdownload", ".download"
     };
 
-    private sealed record SignatureMatch(
-        string FormatName,
-        string SuggestedExtension,
-        IReadOnlyList<string> AcceptedExtensions)
-    {
-        public bool MatchesExtension(string extension)
-            => AcceptedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
-    }
-
-    private static class Signatures
-    {
-        public static readonly SignatureMatch Png = new("PNG", ".png", [".png", ".apng"]);
-        public static readonly SignatureMatch Jpeg = new("JPEG", ".jpg", [".jpg", ".jpeg", ".jpe", ".jfif", ".jif"]);
-        public static readonly SignatureMatch Gif = new("GIF", ".gif", [".gif"]);
-        public static readonly SignatureMatch WebP = new("WebP", ".webp", [".webp"]);
-        public static readonly SignatureMatch Tiff = new("TIFF", ".tif", [".tif", ".tiff"]);
-        public static readonly SignatureMatch Bmp = new("BMP", ".bmp", [".bmp", ".dib"]);
-        public static readonly SignatureMatch Ico = new("ICO", ".ico", [".ico"]);
-        public static readonly SignatureMatch Pdf = new("PDF", ".pdf", [".pdf", ".pdfa"]);
-        public static readonly SignatureMatch Psd = new("Photoshop", ".psd", [".psd"]);
-        public static readonly SignatureMatch Qoi = new("QOI", ".qoi", [".qoi"]);
-        public static readonly SignatureMatch Jxl = new("JPEG XL", ".jxl", [".jxl"]);
-        public static readonly SignatureMatch Avif = new("AVIF", ".avif", [".avif"]);
-        public static readonly SignatureMatch Heic = new("HEIC/HEIF", ".heic", [".heic", ".heif", ".hif"]);
-    }
 }

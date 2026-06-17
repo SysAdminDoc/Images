@@ -20,6 +20,7 @@ All notable changes to **Images** are documented here.
 - **Transitive dependency audit** — CI security and release workflows now log the full NuGet transitive dependency tree as an uploadable artifact alongside the vulnerable-package gate, with documented S-09 native decoder floor requirements for future bundled runtimes.
 - **ONNX Runtime 1.24.4 → 1.26.0** — resolves heap OOB read/write, integer truncation, Pad Reflect vulnerability, and CPU attention overflow fixes shipped in 1.25.0.
 - **.NET 10 LTS migration** — moved from .NET 9 STS (EOL November 2026) to .NET 10 LTS (supported through November 2028). All Microsoft.* NuGet packages updated to the 10.0.x track. CI, security, and release workflows updated.
+- **Content-based format validation** — files are now probed by magic bytes on open, not just by extension. When the detected content format doesn't match the file extension, an informational toast alerts the user. The same signature detection logic is shared with the file health scanner, eliminating duplicated code.
 
 ### Dependencies
 
