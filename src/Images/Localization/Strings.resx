@@ -4193,6 +4193,12 @@ Details written to:
   <data name="MainToastSlideshowShuffleOff" xml:space="preserve">
     <value>Slideshow shuffle off</value>
   </data>
+  <data name="ArchivePasswordTitle" xml:space="preserve">
+    <value>Archive password</value>
+  </data>
+  <data name="ArchivePasswordPrompt" xml:space="preserve">
+    <value>Enter password for {0}:</value>
+  </data>
   <data name="MainFormatMismatch" xml:space="preserve">
     <value>File content is {0} but extension is {1} — expected {2}</value>
   </data>

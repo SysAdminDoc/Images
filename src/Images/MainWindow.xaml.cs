@@ -41,6 +41,7 @@ public partial class MainWindow : Window
         // V20-27: wire the send-to-monitor callback and rebuild the palette so dynamic
         // "Send to monitor N" entries get a live delegate.
         Vm.RequestSendToMonitor = SendToMonitor;
+        Vm.RequestArchivePassword = PromptArchivePassword;
         Vm.RefreshCommandPalette();
         Closed += (_, _) =>
         {
@@ -504,6 +505,84 @@ public partial class MainWindow : Window
         var monitors = MonitorService.GetAllMonitors();
         if (monitorIndex < 0 || monitorIndex >= monitors.Count) return;
         MonitorService.MoveWindowToMonitor(this, monitors[monitorIndex]);
+    }
+
+    private string? PromptArchivePassword(string archiveName)
+    {
+        var dialog = new Window
+        {
+            Title = Localization.Strings.ArchivePasswordTitle,
+            Width = 420,
+            SizeToContent = System.Windows.SizeToContent.Height,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            ShowInTaskbar = false,
+            ResizeMode = ResizeMode.NoResize,
+            Background = (System.Windows.Media.Brush)FindResource("BaseBrush"),
+            Owner = this
+        };
+
+        var hwnd = default(IntPtr);
+        dialog.SourceInitialized += (_, _) =>
+        {
+            hwnd = new System.Windows.Interop.WindowInteropHelper(dialog).Handle;
+            Services.WindowChrome.ApplyDarkCaption(hwnd);
+        };
+
+        string? result = null;
+        var passwordBox = new System.Windows.Controls.PasswordBox
+        {
+            FontSize = 14,
+            Padding = new Thickness(8, 6, 8, 6)
+        };
+
+        var okButton = new System.Windows.Controls.Button
+        {
+            Content = "OK",
+            IsDefault = true,
+            MinWidth = 80,
+            Margin = new Thickness(8, 0, 0, 0),
+            Style = (Style)FindResource("ChromeButton")
+        };
+        okButton.Click += (_, _) => { result = passwordBox.Password; dialog.DialogResult = true; };
+
+        var cancelButton = new System.Windows.Controls.Button
+        {
+            Content = Localization.Strings.Cancel,
+            IsCancel = true,
+            MinWidth = 80,
+            Style = (Style)FindResource("ChromeButton")
+        };
+
+        var buttonsPanel = new System.Windows.Controls.StackPanel
+        {
+            Orientation = System.Windows.Controls.Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Margin = new Thickness(0, 16, 0, 0)
+        };
+        buttonsPanel.Children.Add(cancelButton);
+        buttonsPanel.Children.Add(okButton);
+
+        var labelText = new System.Windows.Controls.TextBlock
+        {
+            Text = string.Format(
+                System.Globalization.CultureInfo.InvariantCulture,
+                Localization.Strings.ArchivePasswordPrompt,
+                archiveName),
+            TextWrapping = TextWrapping.Wrap,
+            Foreground = (System.Windows.Media.Brush)FindResource("TextBrush"),
+            FontSize = 13,
+            Margin = new Thickness(0, 0, 0, 12)
+        };
+
+        var panel = new System.Windows.Controls.StackPanel { Margin = new Thickness(24) };
+        panel.Children.Add(labelText);
+        panel.Children.Add(passwordBox);
+        panel.Children.Add(buttonsPanel);
+
+        dialog.Content = panel;
+        passwordBox.Focus();
+
+        return dialog.ShowDialog() == true ? result : null;
     }
 
     /// <summary>

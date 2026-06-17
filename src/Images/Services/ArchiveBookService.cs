@@ -46,7 +46,7 @@ public static class ArchiveBookService
     public static bool IsSupportedArchive(string path)
         => SupportedImageFormats.IsArchive(path);
 
-    public static ArchivePage LoadPage(string path, int requestedPageIndex)
+    public static ArchivePage LoadPage(string path, int requestedPageIndex, string? password = null)
     {
         if (!IsSupportedArchive(path))
             throw new InvalidOperationException("This file is not a supported archive book.");
@@ -55,13 +55,17 @@ public static class ArchiveBookService
 
         try
         {
-            using var reader = OpenReader(path);
+            using var reader = OpenReader(path, password);
             var entries = GetSortedPageEntries(reader);
             if (entries.Count == 0)
                 throw new InvalidOperationException($"'{fileName}' does not contain supported image pages.");
 
             var pageIndex = Math.Clamp(requestedPageIndex, 0, entries.Count - 1);
-            return ReadPage(entries[pageIndex], pageIndex, entries.Count);
+            return ReadPage(entries[pageIndex], pageIndex, entries.Count, hasPassword: password is not null);
+        }
+        catch (ArchivePasswordRequiredException)
+        {
+            throw;
         }
         catch (Exception ex) when (IsArchiveReadException(ex))
         {
@@ -69,7 +73,7 @@ public static class ArchiveBookService
         }
     }
 
-    public static ArchiveSpread LoadSpread(string path, int requestedPageIndex)
+    public static ArchiveSpread LoadSpread(string path, int requestedPageIndex, string? password = null)
     {
         if (!IsSupportedArchive(path))
             throw new InvalidOperationException("This file is not a supported archive book.");
@@ -78,7 +82,7 @@ public static class ArchiveBookService
 
         try
         {
-            using var reader = OpenReader(path);
+            using var reader = OpenReader(path, password);
             var entries = GetSortedPageEntries(reader);
             if (entries.Count == 0)
                 throw new InvalidOperationException($"'{fileName}' does not contain supported image pages.");
@@ -90,10 +94,14 @@ public static class ArchiveBookService
             for (var i = 0; i < pageCount; i++)
             {
                 var pageIndex = startIndex + i;
-                pages.Add(ReadPage(entries[pageIndex], pageIndex, entries.Count));
+                pages.Add(ReadPage(entries[pageIndex], pageIndex, entries.Count, hasPassword: password is not null));
             }
 
             return new ArchiveSpread(pages, startIndex, entries.Count);
+        }
+        catch (ArchivePasswordRequiredException)
+        {
+            throw;
         }
         catch (Exception ex) when (IsArchiveReadException(ex))
         {
@@ -101,14 +109,14 @@ public static class ArchiveBookService
         }
     }
 
-    public static IReadOnlyList<string> ListPageNames(string path)
+    public static IReadOnlyList<string> ListPageNames(string path, string? password = null)
     {
         if (!IsSupportedArchive(path))
             return [];
 
         try
         {
-            using var reader = OpenReader(path);
+            using var reader = OpenReader(path, password);
             return GetSortedPageEntries(reader)
                 .Select(entry => entry.Name)
                 .ToList();
@@ -119,9 +127,12 @@ public static class ArchiveBookService
         }
     }
 
-    private static IArchiveReader OpenReader(string path)
+    private static IArchiveReader OpenReader(string path, string? password = null)
     {
         var ext = Path.GetExtension(path);
+        if (password is not null)
+            return new ManagedArchiveReader(path, password);
+
         return ext.Equals(".zip", StringComparison.OrdinalIgnoreCase) ||
                ext.Equals(".cbz", StringComparison.OrdinalIgnoreCase)
             ? new ZipArchiveReader(path)
@@ -178,11 +189,16 @@ public static class ArchiveBookService
         return true;
     }
 
-    private static ArchivePage ReadPage(ArchiveEntrySource entry, int pageIndex, int pageCount)
+    public sealed class ArchivePasswordRequiredException : InvalidOperationException
     {
-        if (entry.IsEncrypted)
-            throw new InvalidOperationException(
-                $"Archive page '{entry.Name}' is encrypted and cannot be previewed.");
+        public ArchivePasswordRequiredException(string entryName)
+            : base($"Archive page '{entryName}' is encrypted. A password is required to preview this archive.") { }
+    }
+
+    private static ArchivePage ReadPage(ArchiveEntrySource entry, int pageIndex, int pageCount, bool hasPassword = false)
+    {
+        if (entry.IsEncrypted && !hasPassword)
+            throw new ArchivePasswordRequiredException(entry.Name);
 
         if (entry.DeclaredSize > MaxArchivePageBytes)
             throw new InvalidOperationException(
@@ -335,19 +351,19 @@ public static class ArchiveBookService
         private readonly FileStream _stream;
         private readonly IArchive _archive;
 
-        public ManagedArchiveReader(string path)
+        public ManagedArchiveReader(string path, string? password = null)
         {
             _stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
             try
             {
-                _archive = ArchiveFactory.OpenArchive(
-                    _stream,
-                    new ReaderOptions
-                    {
-                        LeaveStreamOpen = true,
-                        LookForHeader = true,
-                        ExtensionHint = Path.GetExtension(path)
-                    });
+                var options = new ReaderOptions
+                {
+                    LeaveStreamOpen = true,
+                    LookForHeader = true,
+                    ExtensionHint = Path.GetExtension(path),
+                    Password = password
+                };
+                _archive = ArchiveFactory.OpenArchive(_stream, options);
             }
             catch
             {
