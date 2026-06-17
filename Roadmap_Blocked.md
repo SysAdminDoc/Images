@@ -197,6 +197,25 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
   - **Blocked by**: V40-30 GPS read/write — GPX sync writes GPS EXIF, which depends on V40-30.
   - **Unblock when**: V40-30 GPS write capability ships.
 
+## Blocked On ONNX Model Downloads And Validation
+
+- [ ] P1 — **Upgrade semantic search from CLIP ViT-B/32 to SigLIP 2**
+  Why: SigLIP 2 base (~350 MB, 768-dim) outperforms CLIP ViT-B/32 on zero-shot image-text retrieval. The embedding provider seam already exists.
+  - **Blocked by**: requires downloading SigLIP 2 ONNX models from HuggingFace, computing SHA-256 hashes, and pinning them in Model Manager.
+  - **Unblock when**: SigLIP 2 base ONNX models are downloaded and SHA-256 values are validated.
+
+- [ ] P1 — **AI-assisted culling quality signals**
+  Why: Adobe LrC and Capture One ship AI-assisted review that flags closed eyes and out-of-focus shots. SCRFD face detection models (2-15 MB ONNX) make this feasible locally.
+  - **Blocked by**: requires downloading SCRFD ONNX models, validating SHA-256 hashes, pinning in Model Manager, and designing the review-mode quality signal UX.
+  - **Unblock when**: SCRFD face detection ONNX models are downloaded and validated for local inference.
+
+## Blocked On External Binary Downloads
+
+- [ ] P1 — **Update bundled Ghostscript 10.07.0 → 10.07.1**
+  Why: 10.07.1 removed the `.tempfile` PostScript operator and restricted temp directory permissions, reducing attack surface for crafted PS/PDF files.
+  - **Blocked by**: requires downloading Ghostscript 10.07.1 binaries from ghostscript.com and re-running `Prepare-GhostscriptBundle.ps1` with updated SHA-256 hashes.
+  - **Unblock when**: the Ghostscript 10.07.1 archive is downloaded and staged locally.
+
 ## Blocked On Bundled CLI Tools Not Yet Staged
 
 - [ ] **V50-02** *P0* — **Output formats** with per-format quality controls: JPEG (MozJPEG + cjpegli), PNG (OxiPNG), WebP (cwebp), AVIF (avifenc), JXL (cjxl), HEIC (libheif), TIFF, BMP, GIF. Effort: L. [stack: bundled CLIs + Magick.NET core]
