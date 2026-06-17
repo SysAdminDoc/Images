@@ -21,6 +21,7 @@ All notable changes to **Images** are documented here.
 - **ONNX Runtime 1.24.4 → 1.26.0** — resolves heap OOB read/write, integer truncation, Pad Reflect vulnerability, and CPU attention overflow fixes shipped in 1.25.0.
 - **.NET 10 LTS migration** — moved from .NET 9 STS (EOL November 2026) to .NET 10 LTS (supported through November 2028). All Microsoft.* NuGet packages updated to the 10.0.x track. CI, security, and release workflows updated.
 - **Content-based format validation** — files are now probed by magic bytes on open, not just by extension. When the detected content format doesn't match the file extension, an informational toast alerts the user. The same signature detection logic is shared with the file health scanner, eliminating duplicated code.
+- **Granular EXIF metadata removal** — the viewport context menu now offers a "Strip metadata" submenu with category choices: device info (make, model, serial numbers), timestamps, software and comments, or all metadata at once. Each category previews what will be removed and writes atomically. The existing GPS-only strip remains as a separate quick action. All strip operations are available through the command palette.
 
 ### Dependencies
 

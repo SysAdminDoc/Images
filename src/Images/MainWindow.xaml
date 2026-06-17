@@ -336,6 +336,16 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE707;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Strip metadata">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8AC;" />
+                            </MenuItem.Icon>
+                            <MenuItem Header="Device info (make, model, serial)" Command="{Binding StripDeviceInfoCommand}" />
+                            <MenuItem Header="Timestamps" Command="{Binding StripTimestampsCommand}" />
+                            <MenuItem Header="Software and comments" Command="{Binding StripSoftwareCommand}" />
+                            <Separator />
+                            <MenuItem Header="All metadata" Command="{Binding StripAllMetadataCommand}" />
+                        </MenuItem>
                         <MenuItem Header="Metadata HUD"
                                   Command="{Binding ToggleMetadataHudCommand}"
                                   InputGestureText="I"
