@@ -4202,6 +4202,21 @@ Details written to:
   <data name="MainFormatMismatch" xml:space="preserve">
     <value>File content is {0} but extension is {1} — expected {2}</value>
   </data>
+  <data name="MainToastMotionVideoExtracted" xml:space="preserve">
+    <value>Motion video extracted: {0}</value>
+  </data>
+  <data name="MainToastMotionVideoFailed" xml:space="preserve">
+    <value>Could not extract the embedded motion video</value>
+  </data>
+  <data name="MainToastCompanionVideoOpened" xml:space="preserve">
+    <value>Opened companion video: {0}</value>
+  </data>
+  <data name="MainToastCompanionVideoFailed" xml:space="preserve">
+    <value>Could not open the companion video file</value>
+  </data>
+  <data name="CommandPalette_ExtractMotionVideo" xml:space="preserve">
+    <value>Extract motion video</value>
+  </data>
   <data name="MainOpStrippingMetadata" xml:space="preserve">
     <value>Removing {0} metadata…</value>
   </data>

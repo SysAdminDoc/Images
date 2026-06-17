@@ -32,7 +32,8 @@ public static class ImageLoader
         AnimationSequence? Animation = null,
         PageSequence? Pages = null,
         TilePyramidInfo? TilePyramid = null,
-        FormatMismatchInfo? FormatMismatch = null);
+        FormatMismatchInfo? FormatMismatch = null,
+        MotionPhotoInfo? MotionPhoto = null);
 
     // Extensions worth probing for animated content. Pure-photo formats (JPEG, RAW, etc.) skip the
     // MagickImageCollection path so we don't pay for a second decoder on every single-frame image.
@@ -91,12 +92,12 @@ public static class ImageLoader
         // too — a 256 MB+ GIF is a pathological edge case and multi-frame decode needs random
         // access to frame offsets that MMF serves fine from a single view.
         if (fi.Length >= MemoryMapThreshold)
-            return WithMismatch(LoadFromMemoryMapped(path), mismatch);
+            return WithMotionPhoto(WithMismatch(LoadFromMemoryMapped(path), mismatch), path);
 
         // Load the file into memory first so we never hold a lock on the original (rename/delete must work).
         var bytes = ReadStableFileBytes(path);
 
-        return WithMismatch(LoadRasterBytes(bytes, Path.GetFileName(path), Path.GetExtension(path)), mismatch);
+        return WithMotionPhoto(WithMismatch(LoadRasterBytes(bytes, Path.GetFileName(path), Path.GetExtension(path)), mismatch), path);
     }
 
     private static FormatMismatchInfo? DetectFormatMismatch(string path)
@@ -109,6 +110,12 @@ public static class ImageLoader
 
     private static LoadResult WithMismatch(LoadResult result, FormatMismatchInfo? mismatch)
         => mismatch is null ? result : result with { FormatMismatch = mismatch };
+
+    private static LoadResult WithMotionPhoto(LoadResult result, string path)
+    {
+        var info = MotionPhotoService.Detect(path);
+        return info is null ? result : result with { MotionPhoto = info };
+    }
 
     private static LoadResult LoadRasterBytes(byte[] bytes, string displayName, string extension)
     {
