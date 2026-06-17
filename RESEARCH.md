@@ -1,13 +1,13 @@
 # Research - Images
 
 ## Executive Summary
-Images is a local-first Windows WPF image viewer and editor with unusually strong privacy, metadata, archive, slideshow, format-validation, and AI-search foundations for a small desktop app. Its strongest current shape is "power-user Windows Photos replacement": fast viewing, local file control, metadata safety, batch operations, and optional local AI. The highest-value direction is not a broad rewrite; it is making the already ambitious Windows-native product reliable enough to ship. Top opportunities, in order: fix the invalid ONNX Runtime DirectML package pin that currently prevents restore; make dependency and release-readiness checks mechanically catch that failure; centralize the AI runtime/provider boundary around Windows ML plus valid ONNX fallbacks; add automated WPF smoke coverage for open, navigation, rename, export, settings, and batch flows; turn the batch/export system into an operation-chain workflow; add Squoosh/FastStone-style A/B export preview without blocked quality-metric dependencies; keep public docs aligned with .NET 10 and actual package state; add a Catppuccin Latte/system light theme; improve folder/book history navigation.
+Images is a local-first Windows WPF image viewer and editor with unusually strong privacy, metadata, archive, slideshow, format-validation, and AI-search foundations for a small desktop app. Its strongest current shape is "power-user Windows Photos replacement": fast viewing, local file control, metadata safety, batch operations, and optional local AI. The highest-value direction is not a broad rewrite; it is making the already ambitious Windows-native product reliable enough to ship. Top opportunities, in order: fix the invalid ONNX Runtime DirectML package pin that currently prevents restore; make dependency and release-readiness checks mechanically catch that failure; centralize the AI runtime/provider boundary; add automated WPF smoke coverage; harden loopback listen mode and network-log retention; wire the documented XMP migration importer into a real guided flow; add explicit destructive-writeback confirmation/backup policy; add tile-pyramid cache quotas; turn batch/export into operation-chain and synchronized inspection workflows; keep public docs aligned with .NET 10 and actual package state; add light/system themes and command/shortcut consistency.
 
 ## Product Map
 - Core workflows: open and navigate local image folders; inspect and edit metadata; rename and organize files; compare, crop, rotate, resize, export, batch process, and strip metadata; view archives/books and extract Motion Photo/Live Photo embedded video.
 - User personas: privacy-conscious Windows photographers; technical users managing large local image sets; users replacing slow default viewers; archivists/comic readers; local-AI users who want semantic search without cloud upload.
 - Platforms and distribution: Windows desktop WPF on `net10.0-windows10.0.22621.0`; local builds via `dotnet`; docs mention future WinGet/MSIX/signing tracks that remain blocked in `Roadmap_Blocked.md`.
-- Key integrations and data flows: WIC and Magick.NET for image decoding; ExifTool-style metadata workflows; SQLite catalog/cache storage; SharpCompress archives; Ghostscript helper path for PDF/PS-family formats; ONNX Runtime/DirectML references for local AI; Serilog file logging; XMP sidecars as recoverable metadata state.
+- Key integrations and data flows: WIC and Magick.NET for image decoding; ExifTool-style metadata workflows; SQLite catalog/cache storage; SharpCompress archives; Ghostscript helper path for PDF/PS-family formats; ONNX Runtime/DirectML references for local AI; Serilog file logging; XMP sidecars as recoverable metadata state; optional loopback listen mode for local tool integration.
 
 ## Competitive Landscape
 - ImageGlass: Does well at format breadth, HDR/SVG parity, signed installers, MSIX/Flatpak/DMG distribution, Motion Photos, and plugin boundaries. Images should learn from its capability matrix, plugin separation, and installer trust posture. Avoid copying its broad platform/distribution scope before the Windows restore/build path is dependable.
@@ -27,6 +27,9 @@ Images is a local-first Windows WPF image viewer and editor with unusually stron
 - [Verified] ONNX Runtime 1.25 and 1.26 release notes include memory-safety fixes and hardening, but DirectML package availability lags base ONNX Runtime. Images needs an explicit version policy instead of silently pinning unavailable versions.
 - [Verified] Ghostscript 10.07.1 includes sandbox and temporary-file permission hardening; the repo already tracks Ghostscript staging as blocked, so it should remain a blocked distribution item until the binary provenance path is solved.
 - [Likely] Minor package drift exists after the .NET 10 migration (`Microsoft.Data.Sqlite 10.0.0` vs newer 10.0.x, `Serilog.Sinks.File 6.0.0` vs 7.0.0). Refresh only after restore is green, because current package commands cannot complete.
+- [Verified] `ListenService` binds to `127.0.0.1` and rejects UNC/nonexistent paths, but any local client can send file paths without a per-session token, identity check, max-line cap, or command-rate cap; it records inbound local control through `NetworkEgressService`, which blurs inbound control with outbound egress.
+- [Verified] `NetworkEgressService.Clear()` clears only in-memory entries and does not delete persisted `network-egress.jsonl`; `LoadPersistedEntries()` reads the first 500 lines, not the newest 500, and there is no retention/rotation policy.
+- [Verified] Flat-raster crop/rotation writeback can overwrite source files, while `RecoveryCenterService` records writebacks as review-only/non-restorable. This conflicts with the repo's own "originals protected by default" design principle unless the confirmation/backup policy is made more explicit.
 - Missing guardrails: package-version resolution before dependency claims; UI smoke tests for core flows; runtime-provider diagnostics for local AI; visual regression coverage for themes and export preview; rollback notes for runtime package changes.
 - Recovery and rollback needs: keep XMP sidecars authoritative for metadata edits; ensure catalog/search caches can rebuild after schema/runtime changes; make AI model/runtime failures degrade to non-AI viewing without breaking open/navigation/export.
 
@@ -37,6 +40,9 @@ Images is a local-first Windows WPF image viewer and editor with unusually stron
 - Export preview should evolve before adding blocked quality metrics: a split A/B preview with file-size and format deltas is code-ready and matches Squoosh/FastStone patterns without requiring SSIMULACRA2 or external metric binaries.
 - Tests cover many service-level concerns, but gaps remain for WPF launch/open/navigation/settings/export smoke tests, real runtime-provider reporting, theme contrast snapshots, and restore/package availability checks.
 - Localization infrastructure exists through `Strings.resx`, `LocExtension`, locale settings, and archive right-to-left page-turn support; the next gap is missing-key prevention, hard-coded-string detection, and RTL visual smoke coverage rather than basic i18n research.
+- `XmpSidecarImportService` is documented and tested but has no production caller; `docs/migration-guide.md` currently implies automatic XMP migration that the running app does not yet provide as a guided workflow.
+- `TileService` builds deep-zoom pyramids under `%LOCALAPPDATA%\Images\tiles` without the quota, health, clear, or LRU eviction behavior already present in `ThumbnailCache`.
+- Commands, labels, and shortcuts are duplicated across `MainWindow.xaml`, the command palette, README, settings summary text, and the unused `hotkeys` table; this blocks reliable shortcut remapping and increases localization drift.
 - Documentation gaps are currently operational: `RESEARCH.md` had stale missing-feature claims for features now shipped, and `ROADMAP.md` retained completed historical work. Research and roadmap files must stay short, active, and mechanically tied to current repo state.
 
 ## Rejected Ideas
@@ -57,14 +63,10 @@ Competitors and adjacent projects:
 - https://imageglass.org/docs/features
 - https://github.com/neelabo/NeeView/releases
 - https://github.com/qarmin/czkawka/releases/tag/11.0.1
-- https://github.com/qarmin/czkawka
-- https://github.com/Ruben2776/PicView/releases
 - https://picview.org/
-- https://github.com/nomacs/nomacs/releases
 - https://photodemon.org/
 - https://www.faststone.org/FSViewerDetail.htm
 - https://www.irfanview.com/main_history.htm
-- https://www.irfanview.com/64bit.htm
 
 Commercial and product research:
 - https://www.adobe.com/learn/lightroom-cc/web/ai-assisted-culling-lightroom
@@ -79,9 +81,12 @@ Platform, standards, and dependencies:
 - https://github.com/microsoft/onnxruntime/releases/tag/v1.26.0
 - https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview
 - https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/supported-execution-providers
-- https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core
 - https://learn.microsoft.com/en-us/lifecycle/products/microsoft-net-and-net-core
 - https://learn.microsoft.com/en-us/dotnet/desktop/wpf/whats-new/net100
+- https://learn.microsoft.com/en-us/windows/win32/ipc/named-pipes
+- https://learn.microsoft.com/en-us/windows/win32/ipc/named-pipe-security-and-access-rights
+- https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/commanding-overview
+- https://developer.chrome.com/blog/local-network-access
 - https://github.com/dlemstra/Magick.NET/releases
 - https://ghostscript.readthedocs.io/en/gs10.07.1/News.html
 - https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html
@@ -89,6 +94,7 @@ Platform, standards, and dependencies:
 Community and ecosystem signal:
 - https://github.com/ibaaj/awesome-OpenSourcePhotography
 - https://github.com/meichthys/foss_photo_libraries
+- https://github.com/RhetTbull/osxphotos
 
 ## Open Questions
 - Which runtime policy should Images choose now: keep DirectML at the latest available package, switch local AI to Windows ML plus base ONNX Runtime, or ship CPU-only until DirectML catches up?
