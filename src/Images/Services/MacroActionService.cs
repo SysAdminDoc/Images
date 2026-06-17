@@ -151,6 +151,9 @@ public sealed class MacroActionService
                     case "strip-gps":
                         messages.Add(StripGps(currentPath, options.DryRun));
                         break;
+                    case "strip-metadata":
+                        messages.Add(StripMetadata(currentPath, action.Parameters, options.DryRun));
+                        break;
                     case "export-copy":
                         currentPath = ExportCopy(currentPath, action.Parameters, options, messages);
                         break;
@@ -187,6 +190,49 @@ public sealed class MacroActionService
         return removed == 0
             ? $"No GPS metadata found in {Path.GetFileName(path)}."
             : $"Removed {removed} GPS field{Plural(removed)} from {Path.GetFileName(path)}.";
+    }
+
+    private static string StripMetadata(string path, IReadOnlyDictionary<string, string> parameters, bool dryRun)
+    {
+        if (!SupportsGpsStrip(path))
+            return $"Metadata strip skipped for {Path.GetFileName(path)}.";
+
+        var categories = ParseCategories(GetParameter(parameters, "categories", "all"));
+        if (categories == MetadataStripCategory.None)
+            return $"No metadata categories selected for {Path.GetFileName(path)}.";
+
+        var label = MetadataEditService.CategoryLabel(categories);
+
+        if (dryRun)
+        {
+            var preview = MetadataEditService.PreviewStrip(path, categories);
+            return preview.RemovedCount == 0
+                ? $"No {label} metadata to strip from {Path.GetFileName(path)}."
+                : $"Would strip {preview.RemovedCount} {label} field{Plural(preview.RemovedCount)} from {Path.GetFileName(path)}.";
+        }
+
+        var result = MetadataEditService.StripMetadata(path, categories);
+        return result.RemovedCount == 0
+            ? $"No {label} metadata found in {Path.GetFileName(path)}."
+            : $"Removed {result.RemovedCount} {label} field{Plural(result.RemovedCount)} from {Path.GetFileName(path)}.";
+    }
+
+    private static MetadataStripCategory ParseCategories(string value)
+    {
+        var result = MetadataStripCategory.None;
+        foreach (var part in value.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+        {
+            result |= part.ToLowerInvariant() switch
+            {
+                "gps" => MetadataStripCategory.Gps,
+                "device" or "deviceinfo" => MetadataStripCategory.DeviceInfo,
+                "timestamps" or "time" => MetadataStripCategory.Timestamps,
+                "software" => MetadataStripCategory.Software,
+                "all" => MetadataStripCategory.All,
+                _ => MetadataStripCategory.None
+            };
+        }
+        return result;
     }
 
     private static string ExportCopy(
