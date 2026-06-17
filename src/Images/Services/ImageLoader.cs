@@ -61,7 +61,8 @@ public static class ImageLoader
         string path,
         int pageIndex = 0,
         bool archiveSpreadMode = false,
-        bool archiveRightToLeft = false)
+        bool archiveRightToLeft = false,
+        string? archivePassword = null)
     {
         var fi = new FileInfo(path);
         if (!fi.Exists)
@@ -72,7 +73,7 @@ public static class ImageLoader
         var mismatch = DetectFormatMismatch(path);
 
         if (SupportedImageFormats.IsArchive(path))
-            return WithMismatch(LoadArchivePreview(path, pageIndex, archiveSpreadMode, archiveRightToLeft), mismatch);
+            return WithMismatch(LoadArchivePreview(path, pageIndex, archiveSpreadMode, archiveRightToLeft, archivePassword), mismatch);
 
         if (SupportedImageFormats.RequiresGhostscript(path))
             return WithMismatch(LoadDocumentPreview(path, pageIndex), mismatch);
@@ -182,12 +183,13 @@ public static class ImageLoader
         string path,
         int requestedPageIndex,
         bool spreadMode,
-        bool rightToLeft)
+        bool rightToLeft,
+        string? password = null)
     {
         if (spreadMode)
-            return LoadArchiveSpreadPreview(path, requestedPageIndex, rightToLeft);
+            return LoadArchiveSpreadPreview(path, requestedPageIndex, rightToLeft, password);
 
-        var page = ArchiveBookService.LoadPage(path, requestedPageIndex);
+        var page = ArchiveBookService.LoadPage(path, requestedPageIndex, password);
         var loaded = LoadRasterBytes(page.Bytes, page.EntryName, Path.GetExtension(page.EntryName));
         var pageDescription = page.IsCover
             ? $"archive cover, page {page.PageIndex + 1} of {page.PageCount}"
@@ -202,9 +204,10 @@ public static class ImageLoader
     private static LoadResult LoadArchiveSpreadPreview(
         string path,
         int requestedPageIndex,
-        bool rightToLeft)
+        bool rightToLeft,
+        string? password = null)
     {
-        var spread = ArchiveBookService.LoadSpread(path, requestedPageIndex);
+        var spread = ArchiveBookService.LoadSpread(path, requestedPageIndex, password);
         if (spread.Pages.Count == 0)
             throw new InvalidOperationException("The archive spread did not produce a preview page.");
 

@@ -1145,6 +1145,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     // V20-27: delegate set by MainWindow after construction so the VM can request a window move
     // to a specific monitor index. Null until the window wires it up.
     public Action<int>? RequestSendToMonitor { get; set; }
+    public Func<string, string?>? RequestArchivePassword { get; set; }
 
     /// <summary>
     /// V20-27: rebuilds the palette registry, e.g. after the window wires up the send-to-monitor
@@ -3377,6 +3378,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         resumedArchivePage = 0;
         FlushPendingRename();
+        if (!SupportedImageFormats.IsArchive(path))
+            _currentArchivePassword = null;
 
         if (!SupportedImageFormats.IsSupported(path))
         {
@@ -3803,13 +3806,26 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         return true;
     }
 
+    private string? _currentArchivePassword;
+
     private ImageLoader.LoadResult DecodeCurrentPath(string path)
     {
         var isArchiveBookPage = SupportedImageFormats.IsArchive(path);
         var usePreload = ShouldUsePreloadForCurrentPage(isArchiveBookPage);
-        return usePreload
-            ? _preload.TryGet(path) ?? ImageLoader.Load(path, PageIndex, ArchiveSpreadModeEnabled, ArchiveRightToLeft)
-            : ImageLoader.Load(path, PageIndex, ArchiveSpreadModeEnabled, ArchiveRightToLeft);
+        try
+        {
+            return usePreload
+                ? _preload.TryGet(path) ?? ImageLoader.Load(path, PageIndex, ArchiveSpreadModeEnabled, ArchiveRightToLeft, _currentArchivePassword)
+                : ImageLoader.Load(path, PageIndex, ArchiveSpreadModeEnabled, ArchiveRightToLeft, _currentArchivePassword);
+        }
+        catch (ArchiveBookService.ArchivePasswordRequiredException)
+        {
+            var password = RequestArchivePassword?.Invoke(Path.GetFileName(path));
+            if (string.IsNullOrEmpty(password))
+                throw;
+            _currentArchivePassword = password;
+            return ImageLoader.Load(path, PageIndex, ArchiveSpreadModeEnabled, ArchiveRightToLeft, password);
+        }
     }
 
     private async Task<ImageLoader.LoadResult> DecodeCurrentPathAsync(string path)
@@ -3833,9 +3849,22 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
 
         var taskName = $"foreground-decode:{Path.GetFileName(path)}";
-        return await BackgroundTaskTracker.Run(
-            taskName,
-            () => ImageLoader.Load(path, pageIndex, archiveSpreadMode, archiveRightToLeft));
+        try
+        {
+            return await BackgroundTaskTracker.Run(
+                taskName,
+                () => ImageLoader.Load(path, pageIndex, archiveSpreadMode, archiveRightToLeft, _currentArchivePassword));
+        }
+        catch (ArchiveBookService.ArchivePasswordRequiredException)
+        {
+            var password = RequestArchivePassword?.Invoke(Path.GetFileName(path));
+            if (string.IsNullOrEmpty(password))
+                throw;
+            _currentArchivePassword = password;
+            return await BackgroundTaskTracker.Run(
+                $"{taskName}-retry",
+                () => ImageLoader.Load(path, pageIndex, archiveSpreadMode, archiveRightToLeft, password));
+        }
     }
 
     private bool ShouldUsePreloadForCurrentPage(bool isArchiveBookPage)
