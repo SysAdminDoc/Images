@@ -22,6 +22,8 @@ public static class ImageLoader
     /// build supports them). The <see cref="Image"/> always carries the first frame so static
     /// metadata/size readouts keep working.
     /// </summary>
+    public sealed record FormatMismatchInfo(string DetectedFormat, string FileExtension, string SuggestedExtension);
+
     public sealed record LoadResult(
         ImageSource Image,
         int PixelWidth,
@@ -29,7 +31,8 @@ public static class ImageLoader
         string DecoderUsed,
         AnimationSequence? Animation = null,
         PageSequence? Pages = null,
-        TilePyramidInfo? TilePyramid = null);
+        TilePyramidInfo? TilePyramid = null,
+        FormatMismatchInfo? FormatMismatch = null);
 
     // Extensions worth probing for animated content. Pure-photo formats (JPEG, RAW, etc.) skip the
     // MagickImageCollection path so we don't pay for a second decoder on every single-frame image.
@@ -66,32 +69,45 @@ public static class ImageLoader
         if (fi.Length == 0)
             throw new InvalidOperationException($"'{Path.GetFileName(path)}' is empty.");
 
+        var mismatch = DetectFormatMismatch(path);
+
         if (SupportedImageFormats.IsArchive(path))
-            return LoadArchivePreview(path, pageIndex, archiveSpreadMode, archiveRightToLeft);
+            return WithMismatch(LoadArchivePreview(path, pageIndex, archiveSpreadMode, archiveRightToLeft), mismatch);
 
         if (SupportedImageFormats.RequiresGhostscript(path))
-            return LoadDocumentPreview(path, pageIndex);
+            return WithMismatch(LoadDocumentPreview(path, pageIndex), mismatch);
 
         if (TileService.ShouldUseTileEngine(path))
-            return LoadTilePyramid(path, pageIndex);
+            return WithMismatch(LoadTilePyramid(path, pageIndex), mismatch);
 
         if (PagedRasterExtensions.Contains(Path.GetExtension(path)))
         {
             var paged = TryLoadPagedRaster(path, pageIndex);
-            if (paged is not null) return paged;
+            if (paged is not null) return WithMismatch(paged, mismatch);
         }
 
         // V20-06: large files bypass the byte[] round-trip entirely. Animation probe is skipped
         // too — a 256 MB+ GIF is a pathological edge case and multi-frame decode needs random
         // access to frame offsets that MMF serves fine from a single view.
         if (fi.Length >= MemoryMapThreshold)
-            return LoadFromMemoryMapped(path);
+            return WithMismatch(LoadFromMemoryMapped(path), mismatch);
 
         // Load the file into memory first so we never hold a lock on the original (rename/delete must work).
         var bytes = ReadStableFileBytes(path);
 
-        return LoadRasterBytes(bytes, Path.GetFileName(path), Path.GetExtension(path));
+        return WithMismatch(LoadRasterBytes(bytes, Path.GetFileName(path), Path.GetExtension(path)), mismatch);
     }
+
+    private static FormatMismatchInfo? DetectFormatMismatch(string path)
+    {
+        var result = FormatSignatureDetector.DetectMismatch(path);
+        if (result is null) return null;
+        var (sig, ext) = result.Value;
+        return new FormatMismatchInfo(sig.FormatName, ext, sig.SuggestedExtension);
+    }
+
+    private static LoadResult WithMismatch(LoadResult result, FormatMismatchInfo? mismatch)
+        => mismatch is null ? result : result with { FormatMismatch = mismatch };
 
     private static LoadResult LoadRasterBytes(byte[] bytes, string displayName, string extension)
     {

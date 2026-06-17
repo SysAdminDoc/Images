@@ -3888,6 +3888,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 ClearLoadError();
                 loaded = true;
 
+                if (result.FormatMismatch is { } fm)
+                    Toast(string.Format(
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        Strings.MainFormatMismatch,
+                        fm.DetectedFormat,
+                        fm.FileExtension,
+                        fm.SuggestedExtension));
+
                 // First-run only — surface the gesture hint the first time an image lands.
                 if (!_hasShownGestureHint)
                 {
