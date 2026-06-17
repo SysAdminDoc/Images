@@ -4015,6 +4015,18 @@ Details written to:
   <data name="CommandPalette_StripGps" xml:space="preserve">
     <value>Strip GPS location</value>
   </data>
+  <data name="CommandPalette_StripDeviceInfo" xml:space="preserve">
+    <value>Strip device info metadata</value>
+  </data>
+  <data name="CommandPalette_StripTimestamps" xml:space="preserve">
+    <value>Strip timestamp metadata</value>
+  </data>
+  <data name="CommandPalette_StripSoftware" xml:space="preserve">
+    <value>Strip software and comments metadata</value>
+  </data>
+  <data name="CommandPalette_StripAll" xml:space="preserve">
+    <value>Strip all metadata</value>
+  </data>
   <data name="CommandPalette_Wallpaper" xml:space="preserve">
     <value>Set as wallpaper</value>
   </data>
@@ -4183,6 +4195,21 @@ Details written to:
   </data>
   <data name="MainFormatMismatch" xml:space="preserve">
     <value>File content is {0} but extension is {1} — expected {2}</value>
+  </data>
+  <data name="MainOpStrippingMetadata" xml:space="preserve">
+    <value>Removing {0} metadata…</value>
+  </data>
+  <data name="MainToastNoMetadataFound" xml:space="preserve">
+    <value>No {0} metadata found</value>
+  </data>
+  <data name="MainMetadataWriteback" xml:space="preserve">
+    <value>{0} metadata writeback</value>
+  </data>
+  <data name="MainToastMetadataStripped" xml:space="preserve">
+    <value>{0} removed ({1} {2})</value>
+  </data>
+  <data name="MainToastMetadataStripFailed" xml:space="preserve">
+    <value>Could not strip {0}: {1}</value>
   </data>
 
 </root>

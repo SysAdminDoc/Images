@@ -298,6 +298,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard, () => !IsOperationBusy);
         OpenInDefaultAppCommand = new RelayCommand(OpenInDefaultApp, () => HasImage);
         StripLocationCommand = new RelayCommand(async () => await StripLocationAsync(), () => CanUseImageCommands);
+        StripDeviceInfoCommand = new RelayCommand(async () => await StripMetadataAsync(MetadataStripCategory.DeviceInfo), () => CanUseImageCommands);
+        StripTimestampsCommand = new RelayCommand(async () => await StripMetadataAsync(MetadataStripCategory.Timestamps), () => CanUseImageCommands);
+        StripSoftwareCommand = new RelayCommand(async () => await StripMetadataAsync(MetadataStripCategory.Software), () => CanUseImageCommands);
+        StripAllMetadataCommand = new RelayCommand(async () => await StripMetadataAsync(MetadataStripCategory.All), () => CanUseImageCommands);
         SettingsCommand = new RelayCommand(ShowSettingsWindow);
         ExtractTextCommand = new RelayCommand(async () => await _ocrWorkflow.ToggleAsync(), () => HasImage && !IsOperationBusy && !IsCompareMode);
         ToggleCommandPaletteCommand = new RelayCommand(() => ShowCommandPalette = !ShowCommandPalette);
@@ -1058,6 +1062,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             new() { Name = Strings.CommandPalette_Reveal, Category = file, Command = RevealCommand },
             new() { Name = Strings.CommandPalette_OpenDefault, Category = file, Command = OpenInDefaultAppCommand },
             new() { Name = Strings.CommandPalette_StripGps, Category = file, Command = StripLocationCommand },
+            new() { Name = Strings.CommandPalette_StripDeviceInfo, Category = file, Command = StripDeviceInfoCommand },
+            new() { Name = Strings.CommandPalette_StripTimestamps, Category = file, Command = StripTimestampsCommand },
+            new() { Name = Strings.CommandPalette_StripSoftware, Category = file, Command = StripSoftwareCommand },
+            new() { Name = Strings.CommandPalette_StripAll, Category = file, Command = StripAllMetadataCommand },
             new() { Name = Strings.CommandPalette_Wallpaper, Category = file, Command = SetAsWallpaperCommand },
             new() { Name = Strings.CommandPalette_CopyToFolder, Category = file, Command = CopyToFolderCommand },
             new() { Name = Strings.CommandPalette_MoveToFolder, Category = file, Command = MoveToFolderCommand },
@@ -3312,6 +3320,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand PasteFromClipboardCommand { get; }
     public ICommand OpenInDefaultAppCommand { get; }
     public ICommand StripLocationCommand { get; }
+    public ICommand StripDeviceInfoCommand { get; }
+    public ICommand StripTimestampsCommand { get; }
+    public ICommand StripSoftwareCommand { get; }
+    public ICommand StripAllMetadataCommand { get; }
     public ICommand SettingsCommand { get; }
     public ICommand ExtractTextCommand { get; }
 
@@ -6605,6 +6617,47 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         catch (Exception ex)
         {
             Toast($"Could not strip GPS data: {ex.Message}");
+        }
+        finally
+        {
+            EndOperationStatus();
+        }
+    }
+
+    private async Task StripMetadataAsync(MetadataStripCategory categories)
+    {
+        if (CurrentPath is null || IsOperationBusy) return;
+        var path = CurrentPath;
+        var label = MetadataEditService.CategoryLabel(categories);
+
+        BeginOperationStatus(
+            string.Format(System.Globalization.CultureInfo.InvariantCulture, Strings.MainOpStrippingMetadata, label),
+            $"Updating {Path.GetFileName(path)}.");
+        try
+        {
+            var result = await Task.Run(() => MetadataEditService.StripMetadata(path, categories));
+            if (result.RemovedCount == 0)
+            {
+                Toast(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                    Strings.MainToastNoMetadataFound, label));
+            }
+            else
+            {
+                _recoveryCenter.RecordWriteback(
+                    path,
+                    string.Format(System.Globalization.CultureInfo.InvariantCulture, Strings.MainMetadataWriteback, label),
+                    $"Removed {result.RemovedCount} {label} field{(result.RemovedCount == 1 ? "" : "s")} from {Path.GetFileName(path)}.");
+                _preload.Reset();
+                LoadCurrent();
+                Toast(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                    Strings.MainToastMetadataStripped, label, result.RemovedCount,
+                    result.RemovedCount == 1 ? "field" : "fields"));
+            }
+        }
+        catch (Exception ex)
+        {
+            Toast(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                Strings.MainToastMetadataStripFailed, label, ex.Message));
         }
         finally
         {
