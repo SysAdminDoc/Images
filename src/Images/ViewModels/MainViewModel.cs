@@ -302,6 +302,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         StripTimestampsCommand = new RelayCommand(async () => await StripMetadataAsync(MetadataStripCategory.Timestamps), () => CanUseImageCommands);
         StripSoftwareCommand = new RelayCommand(async () => await StripMetadataAsync(MetadataStripCategory.Software), () => CanUseImageCommands);
         StripAllMetadataCommand = new RelayCommand(async () => await StripMetadataAsync(MetadataStripCategory.All), () => CanUseImageCommands);
+        ExtractMotionVideoCommand = new RelayCommand(async () => await ExtractMotionVideoAsync(), () => IsMotionPhoto || CompanionVideoPath is not null);
         SettingsCommand = new RelayCommand(ShowSettingsWindow);
         ExtractTextCommand = new RelayCommand(async () => await _ocrWorkflow.ToggleAsync(), () => HasImage && !IsOperationBusy && !IsCompareMode);
         ToggleCommandPaletteCommand = new RelayCommand(() => ShowCommandPalette = !ShowCommandPalette);
@@ -508,6 +509,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     // actually playing. ImageLoader.TryLoadAnimated already returns null for <2 frames; this
     // guards future code paths that bypass the loader.
     public bool IsAnimated => CurrentAnimation is { Frames.Count: >= 2 };
+
+    private MotionPhotoInfo? _motionPhoto;
+    public bool IsMotionPhoto => _motionPhoto is not null;
+    public string? CompanionVideoPath { get; private set; }
 
     // V20-15-Loop: surface LoopCount on the existing animated chip. GIF convention is
     // LoopCount=0 → infinite (rendered as "loops"); any positive value is the exact iteration
@@ -1066,6 +1071,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             new() { Name = Strings.CommandPalette_StripTimestamps, Category = file, Command = StripTimestampsCommand },
             new() { Name = Strings.CommandPalette_StripSoftware, Category = file, Command = StripSoftwareCommand },
             new() { Name = Strings.CommandPalette_StripAll, Category = file, Command = StripAllMetadataCommand },
+            new() { Name = Strings.CommandPalette_ExtractMotionVideo, Category = file, Command = ExtractMotionVideoCommand },
             new() { Name = Strings.CommandPalette_Wallpaper, Category = file, Command = SetAsWallpaperCommand },
             new() { Name = Strings.CommandPalette_CopyToFolder, Category = file, Command = CopyToFolderCommand },
             new() { Name = Strings.CommandPalette_MoveToFolder, Category = file, Command = MoveToFolderCommand },
@@ -3325,6 +3331,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand StripTimestampsCommand { get; }
     public ICommand StripSoftwareCommand { get; }
     public ICommand StripAllMetadataCommand { get; }
+    public ICommand ExtractMotionVideoCommand { get; }
     public ICommand SettingsCommand { get; }
     public ICommand ExtractTextCommand { get; }
 
@@ -3927,6 +3934,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 FlipHorizontal = false;
                 FlipVertical = false;
                 ClearLoadError();
+                _motionPhoto = result.MotionPhoto;
+                CompanionVideoPath = MotionPhotoService.FindCompanionVideo(path);
+                Raise(nameof(IsMotionPhoto));
+                Raise(nameof(CompanionVideoPath));
+
                 loaded = true;
 
                 if (result.FormatMismatch is { } fm)
@@ -6691,6 +6703,39 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         finally
         {
             EndOperationStatus();
+        }
+    }
+
+    private async Task ExtractMotionVideoAsync()
+    {
+        if (CurrentPath is null) return;
+        var path = CurrentPath;
+
+        if (_motionPhoto is not null)
+        {
+            var output = await Task.Run(() => MotionPhotoService.ExtractEmbeddedVideo(path, _motionPhoto));
+            if (output is not null)
+                Toast(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                    Strings.MainToastMotionVideoExtracted, Path.GetFileName(output)));
+            else
+                Toast(Strings.MainToastMotionVideoFailed);
+        }
+        else if (CompanionVideoPath is not null)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = CompanionVideoPath,
+                    UseShellExecute = true
+                });
+                Toast(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                    Strings.MainToastCompanionVideoOpened, Path.GetFileName(CompanionVideoPath)));
+            }
+            catch
+            {
+                Toast(Strings.MainToastCompanionVideoFailed);
+            }
         }
     }
 

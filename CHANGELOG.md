@@ -23,6 +23,7 @@ All notable changes to **Images** are documented here.
 - **Content-based format validation** — files are now probed by magic bytes on open, not just by extension. When the detected content format doesn't match the file extension, an informational toast alerts the user. The same signature detection logic is shared with the file health scanner, eliminating duplicated code.
 - **Granular EXIF metadata removal** — the viewport context menu now offers a "Strip metadata" submenu with category choices: device info (make, model, serial numbers), timestamps, software and comments, or all metadata at once. Each category previews what will be removed and writes atomically. The existing GPS-only strip remains as a separate quick action. All strip operations are available through the command palette.
 - **Archive password prompt** — password-protected ZIP/CBZ, RAR/CBR, and 7z/CB7 archives now prompt for a password instead of failing with a generic error. The password is cached for the current archive session and cleared when navigating to a non-archive file. SharpCompress handles decryption transparently.
+- **Motion Photo / Live Photo detection** — JPEG and HEIC files containing embedded MP4 video segments (Samsung Motion Photos, Google Pixel) are detected by scanning for ftyp boxes near the end of the file. When detected, a context menu and command palette action lets users extract the embedded video to a separate file. Apple Live Photos (.mov companion files alongside JPEGs) are also detected and can be opened directly.
 
 ### Dependencies
 
