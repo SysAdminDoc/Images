@@ -1124,3 +1124,58 @@ These are the short keys used in the inline citations elsewhere in this document
 - **[S-WINML-EPS]** — Windows ML supported execution providers: DirectML, NPU (QNN), OpenVINO, TensorRT, automatic EP selection on Win11 24H2+: https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/supported-execution-providers
 - **[S-DIRECTML-NVIDIA]** — NVIDIA blog: Deploy AI models faster with Windows ML on RTX PCs: https://developer.nvidia.com/blog/deploy-ai-models-faster-with-windows-ml-on-rtx-pcs/
 
+---
+
+## Research-Driven Additions — 2026-06-16
+
+Evidence: `RESEARCH.md` (2026-06-16 research pass). 30+ external sources across OSS competitors, commercial tools, standards, security advisories, and community signal. See RESEARCH.md Sources section for full URLs.
+
+### P1 — Next
+
+### P2 — Later
+
+- [ ] P2 — **Squoosh-style visual-diff converter with quality metrics**
+  Why: No native Windows tool offers a draggable split-pane preview with live byte-delta and quality metric readout. The export workbench (V7-11) is the foundation; this adds the split-pane comparison and SSIMULACRA2/SSIM scoring.
+  Evidence: Squoosh (GoogleChromeLabs); https://giannirosato.com/blog/post/image-comparison/ (quality metrics); no Windows desktop equivalent exists
+  Touches: `src/Images/ExportPreviewWindow.xaml` (add split-pane layout), new `ImageQualityMetricService.cs` (SSIM calculation via Magick.NET `Compare`)
+  Acceptance: Export workbench shows a draggable split-pane original/encoded view; byte-delta and SSIM score update live on quality/format changes; user can toggle between overlay and split views.
+  Complexity: L
+
+- [ ] P2 — **Operation-chain batch converter**
+  Why: XnView MP ships drag-orderable operation chains with per-op enable/disable and live preview. The macro/batch foundation exists but lacks the operation-chain UX that makes XnConvert/XnView the power-user standard.
+  Evidence: XnView MP v1.11.2 batch converter; V50-01 through V50-11 planned in existing roadmap but no chain builder shipped
+  Touches: `src/Images/Services/BatchProcessorService.cs` (extend operation model), `src/Images/BatchProcessorWindow.xaml` (drag-orderable list UI)
+  Acceptance: Users can build ordered operation chains (resize → adjust → convert → rename); operations are individually enable/disable; live preview on first selected image; presets save/load as JSON.
+  Complexity: L
+
+- [ ] P2 — **HDR tone-mapping display**
+  Why: ImageGlass v10 Beta ships HDR tone-mapping for AVIF/JXL/HDR/EXR files. Windows 11 HDR display is increasingly common. Images currently decodes HDR formats but doesn't tone-map for SDR displays.
+  Evidence: ImageGlass v10 Beta 1 (HDR tone-mapping with processing settings); libvips 8.18 (UltraHDR/gainmap JPEG support)
+  Touches: `src/Images/Services/ImageLoader.cs` (detect HDR content), `src/Images/Controls/ZoomPanImage.cs` (apply tone-map transform), new `HdrToneMappingService.cs`
+  Acceptance: HDR images display correctly on SDR monitors with adjustable exposure; HDR badge in toolbar when HDR content detected; no change for standard images.
+  Complexity: L
+
+- [ ] P2 — **Light theme (Catppuccin Latte)**
+  Why: While dark mode is baseline, some users work in bright environments. ImageGlass and PicView both offer light themes. The high-contrast theme infrastructure already exists.
+  Evidence: Community threads noting light-theme demand; existing `ThemeService.cs` and `HighContrastTheme.xaml` infrastructure
+  Touches: new `src/Images/Themes/LightTheme.xaml` (Catppuccin Latte tokens), `src/Images/Services/ThemeService.cs` (add Latte option), Settings Appearance section
+  Acceptance: Settings > Appearance offers Dark/Light/System/High Contrast; Light theme uses Catppuccin Latte palette; all controls readable; system preference auto-switch works.
+  Complexity: M
+
+### Under Consideration
+
+- [ ] UC — **Breadcrumb address bar for folder navigation**
+  Why: NeeView v44.0 shipped a breadcrumb address bar that improves folder discovery. Could replace or augment the current folder path display.
+  Evidence: NeeView v44.0 release notes
+  Complexity: M
+
+- [ ] UC — **NPU execution label in AI tool UI**
+  Why: Capture One 16.8 ships Snapdragon NPU acceleration labels. Images planned this (V60-01 + W-02) but hasn't shipped. "Running on NPU/GPU/CPU" transparency is a differentiator.
+  Evidence: Capture One 16.8.1 (Snapdragon NPU); Windows ML EP documentation
+  Complexity: S
+
+- [ ] UC — **MCP server integration for AI assistants**
+  Why: Eagle 5.0 ships MCP integration for Claude/ChatGPT. CLIP MCP servers (Eventual-Inc/local-image-search, semantic-image-search-mcp) are emerging. Images could expose its semantic search and catalog as an MCP resource.
+  Evidence: Eagle 5.0 beta MCP; https://github.com/Eventual-Inc/local-image-search (CLIP MCP server)
+  Complexity: L
+
