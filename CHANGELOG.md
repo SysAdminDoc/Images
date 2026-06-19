@@ -23,6 +23,7 @@ All notable changes to **Images** are documented here.
 - **Background jobs center** — `BackgroundJobsService` tracks running and recent async tasks with name, state, duration, error, and affected count. The About window surfaces a Jobs panel with session summary and per-job details.
 - **Workflow modes** — Viewer, Review, Organize, Edit, Book, and Diagnostics modes switch between chrome presets (filmstrip, metadata HUD, gallery, review labels). Modes are accessible via the command palette ("Mode: Review", etc.), persisted across sessions, and respect peek/fullscreen isolation.
 
+- **Quick keyword sets** — `KeywordSetService` persists named keyword presets to `keyword-sets.json`, supports add/remove/rename/apply to image sidecars via `TagGraphService`, and exports/imports definitions as portable JSON. 7 regression tests.
 - **Performance budget CLI** — `Images.exe --perf-report` measures process-to-CLI time, directory scan, thumbnail cache health, settings DB access, and memory working set against configurable thresholds with pass/warn status.
 
 ### Infrastructure
