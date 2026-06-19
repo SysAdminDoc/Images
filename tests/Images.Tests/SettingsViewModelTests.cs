@@ -37,9 +37,39 @@ public sealed class SettingsViewModelTests
         var settings = new SettingsService(Path.Combine(temp.Path, "settings.db"));
         var viewModel = new SettingsViewModel(settings);
 
+        Assert.Contains(viewModel.ShortcutRows, r => r.Id == CommandIds.BatchProcessor);
         Assert.Contains("Ctrl+Shift+B", viewModel.HotkeySummary, StringComparison.Ordinal);
         Assert.Contains("Ctrl+Alt+P", viewModel.HotkeySummary, StringComparison.Ordinal);
         Assert.Contains("Diagnostics", viewModel.DiagnosticsStorageSummary, StringComparison.Ordinal);
         Assert.Contains("codec report", viewModel.DiagnosticsStorageSummary, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ShortcutRowsApplyRejectConflictsAndReset()
+    {
+        using var temp = TestDirectory.Create();
+        var settings = new SettingsService(Path.Combine(temp.Path, "settings.db"));
+        var viewModel = new SettingsViewModel(settings);
+        var open = Assert.Single(viewModel.ShortcutRows, r => r.Id == CommandIds.Open);
+
+        open.ShortcutText = "Ctrl+Shift+O";
+        viewModel.ApplyShortcutCommand.Execute(open);
+
+        Assert.Equal("O", settings.GetHotkey(CommandIds.Open)?.Key);
+        Assert.Equal(SettingsViewModel.SettingsStatusToneKind.Success, viewModel.SettingsStatusTone);
+        Assert.Contains(viewModel.ShortcutRows, r => r.Id == CommandIds.Open && r.ShortcutText == "Ctrl+Shift+O");
+
+        var paste = Assert.Single(viewModel.ShortcutRows, r => r.Id == CommandIds.Paste);
+        paste.ShortcutText = "Ctrl+Shift+O";
+        viewModel.ApplyShortcutCommand.Execute(paste);
+
+        Assert.Equal(SettingsViewModel.SettingsStatusToneKind.Warning, viewModel.SettingsStatusTone);
+        Assert.Contains("already uses", viewModel.SettingsStatusText, StringComparison.Ordinal);
+
+        open = Assert.Single(viewModel.ShortcutRows, r => r.Id == CommandIds.Open);
+        viewModel.ResetShortcutCommand.Execute(open);
+
+        Assert.Null(settings.GetHotkey(CommandIds.Open));
+        Assert.Contains(viewModel.ShortcutRows, r => r.Id == CommandIds.Open && r.ShortcutText == "Ctrl+O");
     }
 }
