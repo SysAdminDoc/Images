@@ -62,4 +62,6 @@
     <SolidColorBrush x:Key="MauvePanelBrush" Color="{StaticResource BaseColor}" />
     <SolidColorBrush x:Key="OverlayGuideBrush" Color="{StaticResource TextColor}" />
     <SolidColorBrush x:Key="OverlayGuideStrongBrush" Color="{StaticResource TextColor}" />
+    <SolidColorBrush x:Key="OverlayDimmerBrush" Color="#CC000000" />
+    <SolidColorBrush x:Key="SubtleSurfaceBrush" Color="{StaticResource BaseColor}" />
 </ResourceDictionary>

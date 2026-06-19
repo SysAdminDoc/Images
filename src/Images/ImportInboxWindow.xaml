@@ -130,7 +130,7 @@
                                         <Style TargetType="Border" BasedOn="{StaticResource InteractiveCard}">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                    <Setter Property="Background" Value="#2489B4FA" />
+                                                    <Setter Property="Background" Value="{DynamicResource AccentSelectionBrush}" />
                                                     <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                 </DataTrigger>
                                             </Style.Triggers>

@@ -75,6 +75,8 @@
     <SolidColorBrush x:Key="MauvePanelBrush" Color="#20CBA6F7" />
     <SolidColorBrush x:Key="OverlayGuideBrush" Color="#8CF5F5F8" />
     <SolidColorBrush x:Key="OverlayGuideStrongBrush" Color="#B8F5F5F8" />
+    <SolidColorBrush x:Key="OverlayDimmerBrush" Color="#CC000000" />
+    <SolidColorBrush x:Key="SubtleSurfaceBrush" Color="#10313244" />
 
     <!-- ============ Radius scale ============ -->
     <!-- Restrained geometry keeps dense tool surfaces professional and compact. -->

@@ -331,7 +331,7 @@
                         <Border Width="34"
                                 Height="34"
                                 CornerRadius="{StaticResource Radius.Md.CR}"
-                                Background="#1FF9E2AF"
+                                Background="{DynamicResource WarningPanelBrush}"
                                 BorderBrush="{StaticResource YellowBrush}"
                                 BorderThickness="1"
                                 Margin="0,0,12,0"

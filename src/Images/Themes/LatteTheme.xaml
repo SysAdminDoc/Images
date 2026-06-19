@@ -70,5 +70,7 @@
     <SolidColorBrush x:Key="MauvePanelBrush" Color="#228839EF" />
     <SolidColorBrush x:Key="OverlayGuideBrush" Color="#8C4C4F69" />
     <SolidColorBrush x:Key="OverlayGuideStrongBrush" Color="#B84C4F69" />
+    <SolidColorBrush x:Key="OverlayDimmerBrush" Color="#99000000" />
+    <SolidColorBrush x:Key="SubtleSurfaceBrush" Color="#0DACE0F9" />
 
 </ResourceDictionary>

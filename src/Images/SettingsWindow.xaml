@@ -521,7 +521,7 @@
                                                     <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsOcrAvailable}" Value="True">
-                                                            <Setter Property="Background" Value="#22A6E3A1" />
+                                                            <Setter Property="Background" Value="{DynamicResource SuccessPanelBrush}" />
                                                             <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -586,7 +586,7 @@
                         </Border>
 
                         <Border Style="{StaticResource SettingsCard}"
-                                Background="#14181825">
+                                Background="{DynamicResource SubtleSurfaceBrush}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE72E;"
                                            FontFamily="{StaticResource IconFontFamily}"
