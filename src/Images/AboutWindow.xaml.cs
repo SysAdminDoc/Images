@@ -34,12 +34,19 @@ public partial class AboutWindow : Window
         UpdateCheckCheckBox.IsChecked = UpdateCheckService.OptedIn;
 
         PopulateNetworkActivity();
+        PopulateJobs();
 
         SourceInitialized += (_, _) =>
         {
             var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
             WindowChrome.ApplyDarkCaption(hwnd);
         };
+    }
+
+    private void PopulateJobs()
+    {
+        JobsSummaryText.Text = BackgroundJobsService.BuildSummaryText();
+        JobsList.ItemsSource = BackgroundJobsService.GetAll();
     }
 
     private void GitHubButton_Click(object sender, RoutedEventArgs e)

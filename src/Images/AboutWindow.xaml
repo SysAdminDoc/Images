@@ -684,6 +684,54 @@
                 </StackPanel>
             </Button>
 
+            <Border Style="{StaticResource SettingsCard}"
+                    Margin="0,14,0,0"
+                    AutomationProperties.Name="Background jobs">
+                <StackPanel>
+                    <TextBlock Text="Background jobs"
+                               Style="{StaticResource Text.Body}"
+                               FontWeight="SemiBold" />
+                    <TextBlock x:Name="JobsSummaryText"
+                               Style="{StaticResource Text.Hint}"
+                               TextWrapping="Wrap"
+                               Margin="0,6,0,0" />
+                    <ItemsControl x:Name="JobsList"
+                                  Margin="0,8,0,0"
+                                  MaxHeight="200">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="6,4" Margin="0,0,0,2"
+                                        Background="{DynamicResource SubtleSurfaceBrush}"
+                                        CornerRadius="4">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Name}"
+                                                   Style="{StaticResource Text.Caption}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding DurationText}"
+                                                   Style="{StaticResource Text.Caption}"
+                                                   Foreground="{StaticResource SubtextBrush}"
+                                                   Margin="8,0"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2"
+                                                   Text="{Binding StateText}"
+                                                   Style="{StaticResource Text.Caption}"
+                                                   Foreground="{StaticResource SubtextBrush}"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
             <Button Style="{StaticResource PrimaryButton}"
                     Click="CloseButton_Click"
                     Margin="0,14,0,0"
