@@ -654,6 +654,72 @@
                         </Border>
 
                         <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <TextBlock Text="Local storage"
+                                           Style="{StaticResource Text.Body}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding StorageDetail}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,8,0,0" />
+
+                                <WrapPanel Margin="0,14,0,0">
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            Command="{Binding ClearThumbnailCacheCommand}"
+                                            Padding="12,6"
+                                            MinHeight="32"
+                                            Margin="0,0,8,8"
+                                            AutomationProperties.Name="Clear thumbnail cache">
+                                        <TextBlock Text="Clear thumbnails" VerticalAlignment="Center" />
+                                    </Button>
+
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            Command="{Binding ClearLogsCommand}"
+                                            Padding="12,6"
+                                            MinHeight="32"
+                                            Margin="0,0,8,8"
+                                            AutomationProperties.Name="Clear log files">
+                                        <TextBlock Text="Clear logs" VerticalAlignment="Center" />
+                                    </Button>
+
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            Command="{Binding ClearRecoveryLogCommand}"
+                                            Padding="12,6"
+                                            MinHeight="32"
+                                            Margin="0,0,8,8"
+                                            AutomationProperties.Name="Clear recovery action log">
+                                        <TextBlock Text="Clear recovery log" VerticalAlignment="Center" />
+                                    </Button>
+
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            Command="{Binding ClearNetworkLogCommand}"
+                                            Padding="12,6"
+                                            MinHeight="32"
+                                            Margin="0,0,8,8"
+                                            AutomationProperties.Name="Clear network activity log">
+                                        <TextBlock Text="Clear network log" VerticalAlignment="Center" />
+                                    </Button>
+
+                                    <Button Style="{StaticResource ChromeButton}"
+                                            Command="{Binding RefreshStorageDetailCommand}"
+                                            Padding="12,6"
+                                            MinHeight="32"
+                                            Margin="0,0,8,8"
+                                            AutomationProperties.Name="Refresh storage sizes">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE72C;"
+                                                       FontFamily="{StaticResource IconFontFamily}"
+                                                       FontSize="11"
+                                                       Margin="0,0,7,0"
+                                                       VerticalAlignment="Center" />
+                                            <TextBlock Text="Refresh" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource SettingsCard}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
