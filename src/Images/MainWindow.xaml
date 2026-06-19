@@ -46,32 +46,32 @@
                      this Grid, not to descendants. -->
                 <Grid.ContextMenu>
                     <ContextMenu Style="{StaticResource ViewportContextMenu}">
-                        <MenuItem Header="Open…" Command="{Binding OpenCommand}" InputGestureText="Ctrl+O">
+                        <MenuItem Header="Open…" Command="{Binding OpenCommand}" InputGestureText="{Binding ShortcutTexts[open]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Paste from clipboard" Command="{Binding PasteFromClipboardCommand}" InputGestureText="Ctrl+V">
+                        <MenuItem Header="Paste from clipboard" Command="{Binding PasteFromClipboardCommand}" InputGestureText="{Binding ShortcutTexts[paste]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE77F;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Reference board" Command="{Binding OpenReferenceBoardCommand}" InputGestureText="Ctrl+B">
+                        <MenuItem Header="Reference board" Command="{Binding OpenReferenceBoardCommand}" InputGestureText="{Binding ShortcutTexts[reference-board]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Duplicate cleanup" Command="{Binding OpenDuplicateCleanupCommand}" InputGestureText="Ctrl+Shift+D">
+                        <MenuItem Header="Duplicate cleanup" Command="{Binding OpenDuplicateCleanupCommand}" InputGestureText="{Binding ShortcutTexts[duplicate-cleanup]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="{Binding CompareModeText}" Command="{Binding StartCompareCommand}" InputGestureText="Ctrl+Alt+C">
+                        <MenuItem Header="{Binding CompareModeText}" Command="{Binding StartCompareCommand}" InputGestureText="{Binding ShortcutTexts[compare]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8AB;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Compare with..." Command="{Binding CompareWithCommand}" InputGestureText="Ctrl+Alt+V">
+                        <MenuItem Header="Compare with..." Command="{Binding CompareWithCommand}" InputGestureText="{Binding ShortcutTexts[compare-with]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
                             </MenuItem.Icon>
@@ -81,7 +81,7 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE711;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="File health scan" Command="{Binding OpenFileHealthScanCommand}" InputGestureText="Ctrl+Shift+H">
+                        <MenuItem Header="File health scan" Command="{Binding OpenFileHealthScanCommand}" InputGestureText="{Binding ShortcutTexts[file-health-scan]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE946;" />
                             </MenuItem.Icon>
@@ -101,61 +101,61 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE721;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Tag relationships" Command="{Binding OpenTagGraphCommand}" InputGestureText="Ctrl+Shift+T">
+                        <MenuItem Header="Tag relationships" Command="{Binding OpenTagGraphCommand}" InputGestureText="{Binding ShortcutTexts[tag-graph]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EC;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Import inbox" Command="{Binding OpenImportInboxCommand}" InputGestureText="Ctrl+Shift+I">
+                        <MenuItem Header="Import inbox" Command="{Binding OpenImportInboxCommand}" InputGestureText="{Binding ShortcutTexts[import-inbox]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Macro actions" Command="{Binding OpenMacroActionsCommand}" InputGestureText="Ctrl+Shift+M">
+                        <MenuItem Header="Macro actions" Command="{Binding OpenMacroActionsCommand}" InputGestureText="{Binding ShortcutTexts[macro-actions]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE945;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Batch processor" Command="{Binding OpenBatchProcessorCommand}" InputGestureText="Ctrl+Shift+B">
+                        <MenuItem Header="Batch processor" Command="{Binding OpenBatchProcessorCommand}" InputGestureText="{Binding ShortcutTexts[batch-processor]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EF;" />
                             </MenuItem.Icon>
                         </MenuItem>
                         <MenuItem Header="{Binding ReviewModeText}"
                                   Command="{Binding ToggleReviewModeCommand}"
-                                  InputGestureText="L"
+                                  InputGestureText="{Binding ShortcutTexts[review-mode]}"
                                   IsCheckable="True"
                                   IsChecked="{Binding IsReviewMode, Mode=OneWay}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EC;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Edit history" Command="{Binding OpenEditStackCommand}" InputGestureText="Ctrl+Shift+E">
+                        <MenuItem Header="Edit history" Command="{Binding OpenEditStackCommand}" InputGestureText="{Binding ShortcutTexts[edit-stack]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE81C;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Resize..." Command="{Binding OpenResizeDialogCommand}" InputGestureText="Ctrl+Alt+R">
+                        <MenuItem Header="Resize..." Command="{Binding OpenResizeDialogCommand}" InputGestureText="{Binding ShortcutTexts[resize]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8A1;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Adjustments..." Command="{Binding OpenAdjustmentsCommand}" InputGestureText="Ctrl+Alt+A">
+                        <MenuItem Header="Adjustments..." Command="{Binding OpenAdjustmentsCommand}" InputGestureText="{Binding ShortcutTexts[adjustments]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE790;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Effects..." Command="{Binding OpenEffectsCommand}" InputGestureText="Ctrl+Alt+F">
+                        <MenuItem Header="Effects..." Command="{Binding OpenEffectsCommand}" InputGestureText="{Binding ShortcutTexts[effects]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE945;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Auto Enhance" Command="{Binding AutoEnhanceCommand}" InputGestureText="Ctrl+Alt+E">
+                        <MenuItem Header="Auto Enhance" Command="{Binding AutoEnhanceCommand}" InputGestureText="{Binding ShortcutTexts[auto-enhance]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE950;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Perspective..." Command="{Binding OpenPerspectiveCommand}" InputGestureText="Ctrl+Alt+P">
+                        <MenuItem Header="Perspective..." Command="{Binding OpenPerspectiveCommand}" InputGestureText="{Binding ShortcutTexts[perspective]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7A8;" />
                             </MenuItem.Icon>
@@ -167,7 +167,7 @@
                         </MenuItem>
                         <MenuItem Header="{Binding ExposureBrushModeText}"
                                   Command="{Binding ToggleExposureBrushModeCommand}"
-                                  InputGestureText="Ctrl+Alt+D"
+                                  InputGestureText="{Binding ShortcutTexts[exposure-brush]}"
                                   IsCheckable="True"
                                   IsChecked="{Binding IsExposureBrushMode, Mode=OneWay}">
                             <MenuItem.Icon>
@@ -176,7 +176,7 @@
                         </MenuItem>
                         <MenuItem Header="{Binding RedEyeCorrectionModeText}"
                                   Command="{Binding ToggleRedEyeModeCommand}"
-                                  InputGestureText="Ctrl+Alt+Y"
+                                  InputGestureText="{Binding ShortcutTexts[red-eye]}"
                                   IsCheckable="True"
                                   IsChecked="{Binding IsRedEyeCorrectionMode, Mode=OneWay}">
                             <MenuItem.Icon>
@@ -185,7 +185,7 @@
                         </MenuItem>
                         <MenuItem Header="{Binding RetouchModeText}"
                                   Command="{Binding ToggleRetouchModeCommand}"
-                                  InputGestureText="Ctrl+Alt+H"
+                                  InputGestureText="{Binding ShortcutTexts[retouch]}"
                                   IsCheckable="True"
                                   IsChecked="{Binding IsRetouchMode, Mode=OneWay}">
                             <MenuItem.Icon>
@@ -194,7 +194,7 @@
                         </MenuItem>
                         <MenuItem Header="{Binding SelectionModeText}"
                                   Command="{Binding ToggleSelectionModeCommand}"
-                                  InputGestureText="S"
+                                  InputGestureText="{Binding ShortcutTexts[selection-mode]}"
                                   IsCheckable="True"
                                   IsChecked="{Binding IsSelectionMode, Mode=OneWay}">
                             <MenuItem.Icon>
@@ -203,7 +203,7 @@
                         </MenuItem>
                         <MenuItem Header="{Binding CropModeText}"
                                   Command="{Binding ToggleCropModeCommand}"
-                                  InputGestureText="C"
+                                  InputGestureText="{Binding ShortcutTexts[crop-mode]}"
                                   IsCheckable="True"
                                   IsChecked="{Binding IsCropMode, Mode=OneWay}">
                             <MenuItem.Icon>
@@ -225,7 +225,7 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE711;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Reload" Command="{Binding ReloadCommand}" InputGestureText="Ctrl+Shift+R">
+                        <MenuItem Header="Reload" Command="{Binding ReloadCommand}" InputGestureText="{Binding ShortcutTexts[reload]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE72C;" />
                             </MenuItem.Icon>
@@ -240,17 +240,17 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE76C;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Save a copy…" Command="{Binding SaveAsCopyCommand}" InputGestureText="Ctrl+Shift+S">
+                        <MenuItem Header="Save a copy…" Command="{Binding SaveAsCopyCommand}" InputGestureText="{Binding ShortcutTexts[save-copy]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE74E;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Export workbench…" Command="{Binding OpenExportWorkbenchCommand}" InputGestureText="Ctrl+Alt+W">
+                        <MenuItem Header="Export workbench…" Command="{Binding OpenExportWorkbenchCommand}" InputGestureText="{Binding ShortcutTexts[export-workbench]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EF;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Print…" Command="{Binding PrintCommand}" InputGestureText="Ctrl+P">
+                        <MenuItem Header="Print…" Command="{Binding PrintCommand}" InputGestureText="{Binding ShortcutTexts[print]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE749;" />
                             </MenuItem.Icon>
@@ -355,7 +355,7 @@
                         </MenuItem>
                         <MenuItem Header="Metadata HUD"
                                   Command="{Binding ToggleMetadataHudCommand}"
-                                  InputGestureText="I"
+                                  InputGestureText="{Binding ShortcutTexts[metadata-hud]}"
                                   IsCheckable="True"
                                   IsChecked="{Binding IsMetadataHudVisible, Mode=OneWay}">
                             <MenuItem.Icon>
@@ -432,13 +432,13 @@
                                       CommandParameter="Tile" />
                         </MenuItem>
                         <Separator />
-                        <MenuItem Header="Move to Recycle Bin…" Command="{Binding DeleteCommand}" InputGestureText="Del">
+                        <MenuItem Header="Move to Recycle Bin…" Command="{Binding DeleteCommand}" InputGestureText="{Binding ShortcutTexts[delete]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE74D;" />
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator />
-                        <MenuItem Header="Settings…" Command="{Binding SettingsCommand}" InputGestureText="Ctrl+,">
+                        <MenuItem Header="Settings…" Command="{Binding SettingsCommand}" InputGestureText="{Binding ShortcutTexts[settings]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE713;" />
                             </MenuItem.Icon>
