@@ -99,14 +99,7 @@ public static class LaMaInpaintService
         var imageTensor = ImageToTensor(resizedImage, inputSize);
         var maskTensor = MaskToTensor(maskRegions, inputSize, scaleX, scaleY);
 
-        var options = new SessionOptions
-        {
-            GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL,
-            LogSeverityLevel = OrtLoggingLevel.ORT_LOGGING_LEVEL_WARNING,
-        };
-        try { options.AppendExecutionProvider_DML(0); } catch { }
-
-        using var session = new InferenceSession(modelPath, options);
+        using var session = OnnxRuntimeService.CreateSession(modelPath);
 
         var inputs = new List<NamedOnnxValue>();
         var inputNames = session.InputNames;

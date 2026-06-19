@@ -348,17 +348,25 @@ public sealed class ModelManagerService
         var onnxDirectMlReferenced = IsAssemblyLoaded("Microsoft.ML.OnnxRuntime.DirectML") ||
                                      IsAssemblyLoaded("Microsoft.ML.OnnxRuntime");
 
+        var probedProvider = OnnxRuntimeService.Provider;
+        var providerLabel = OnnxRuntimeService.ProviderLabel;
+
         var preferred = windowsMlOsCandidate
             ? "Windows ML candidate"
-            : "ONNX Runtime DirectML fallback required";
+            : probedProvider == OnnxProvider.DirectML
+                ? "ONNX Runtime DirectML"
+                : probedProvider == OnnxProvider.Cpu
+                    ? "ONNX Runtime CPU"
+                    : "ONNX Runtime DirectML fallback required";
         var status = windowsMlReferenced
             ? "Windows ML package/runtime is referenced by this build."
-            : windowsMlOsCandidate
-                ? "Windows 11 24H2+ detected; Windows ML is the preferred future runtime, but this build has not enabled inference packages yet."
-                : "This OS needs the ONNX Runtime DirectML fallback path for future local model features.";
+            : $"Active provider: {providerLabel}. " + (windowsMlOsCandidate
+                ? "Windows 11 24H2+ detected; Windows ML is the preferred future runtime."
+                : "This OS uses the ONNX Runtime path for local model features.");
 
         var rows = new[]
         {
+            new MetadataFact("Active provider", providerLabel),
             new MetadataFact("Preferred", preferred),
             new MetadataFact("Windows ML OS", windowsMlOsCandidate ? "Windows 11 24H2+ candidate" : "Not a Windows ML 24H2+ candidate"),
             new MetadataFact("Windows ML reference", windowsMlReferenced ? "Referenced" : "Not referenced"),
