@@ -419,4 +419,5 @@ public static class Keys
     public const string ViewerSortMode = "viewer.sort-mode";
     public const string WritebackBackupPolicy = "writeback.backup-policy";
     public const string WritebackConfirmFirst = "writeback.confirm-first";
+    public const string ThemeMode = "appearance.theme";
 }
