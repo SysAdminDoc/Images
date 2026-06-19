@@ -8,11 +8,13 @@ public sealed class CommandShortcutService
 {
     private readonly SettingsService _settings;
     private readonly IReadOnlyList<CommandShortcutDefinition> _definitions;
+    private readonly IReadOnlyList<CommandShortcutDefinition> _reservedDefinitions;
 
     public CommandShortcutService(SettingsService settings)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _definitions = CreateDefinitions();
+        _reservedDefinitions = CreateReservedDefinitions();
     }
 
     public IReadOnlyList<CommandShortcutDefinition> Definitions => _definitions;
@@ -81,6 +83,15 @@ public sealed class CommandShortcutService
 
             if (TryGetEffectiveGesture(other.Id, out var otherGesture) && otherGesture.Equals(gesture))
                 return ShortcutUpdateResult.Conflict(other);
+        }
+
+        foreach (var reserved in _reservedDefinitions)
+        {
+            if (ShortcutGesture.TryParse(reserved.DefaultShortcut, out var reservedGesture)
+                && reservedGesture.Equals(gesture))
+            {
+                return ShortcutUpdateResult.Conflict(reserved);
+            }
         }
 
         var definition = GetDefinition(id);
@@ -173,6 +184,23 @@ public sealed class CommandShortcutService
             new(CommandIds.CommandPalette, Strings.CommandPalette_ToggleCommandPalette, help, "Ctrl+Shift+P"),
         ];
     }
+
+    private static IReadOnlyList<CommandShortcutDefinition> CreateReservedDefinitions()
+        =>
+        [
+            new("reserved.escape", "Dismiss overlays", "Reserved", "Esc"),
+            new("reserved.enter", "Apply active edit", "Reserved", "Enter"),
+            new("reserved.fullscreen", "Toggle fullscreen", "Reserved", "F11"),
+            new("reserved.cheatsheet", "Toggle shortcut help", "Reserved", "/"),
+            new("reserved.overlay-exit", "Exit overlay mode", "Reserved", "Ctrl+Alt+O"),
+            new("reserved.zoom-mode", "Cycle zoom mode", "Reserved", "Ctrl+F"),
+            new("reserved.back", "Previous image with Backspace", "Reserved", "Back"),
+            new("reserved.space", "Next image with Space", "Reserved", "Space"),
+            new("reserved.zoom-in", "Zoom in", "Reserved", "Plus"),
+            new("reserved.zoom-out", "Zoom out", "Reserved", "Minus"),
+            new("reserved.fit", "Fit to viewport", "Reserved", "D0"),
+            new("reserved.one-to-one", "One-to-one zoom", "Reserved", "D1"),
+        ];
 }
 
 public static class CommandIds

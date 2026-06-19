@@ -934,6 +934,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         private set => Set(ref _shortcutTexts, value);
     }
 
+    public string PreviousNextShortcutText => ShortcutPairText(CommandIds.Previous, CommandIds.Next);
+    public string FirstLastShortcutText => ShortcutPairText(CommandIds.First, CommandIds.Last);
+
     private List<CommandPaletteItem> _commandPaletteRegistry = new();
 
     private bool _showCommandPalette;
@@ -1324,9 +1327,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public void RefreshCommandPalette()
     {
         ShortcutTexts = _commandShortcuts.GetShortcutTextMap();
+        Raise(nameof(PreviousNextShortcutText));
+        Raise(nameof(FirstLastShortcutText));
         _commandPaletteRegistry = BuildCommandPaletteRegistry();
         RefreshCommandPaletteItems();
     }
+
+    private string ShortcutPairText(string firstId, string secondId)
+        => string.Format(CultureInfo.CurrentCulture, "{0} / {1}", ShortcutText(firstId), ShortcutText(secondId));
+
+    private string ShortcutText(string id)
+        => ShortcutTexts.TryGetValue(id, out var shortcut) ? shortcut : string.Empty;
 
     // V15-07: fullscreen toggled by F11. The view collapses the side panel + floats the toolbar
     // when fullscreen, restores everything on exit.

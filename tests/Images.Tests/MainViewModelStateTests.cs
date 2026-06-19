@@ -72,6 +72,24 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void CommandPalette_UsesPersistedShortcutOverrides()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var settings = CreateSettings(temp);
+            settings.SetHotkey(CommandIds.BatchProcessor, "B", "Control, Alt");
+
+            using var viewModel = new MainViewModel(settings);
+            viewModel.CommandPaletteFilterText = "batch";
+
+            var item = Assert.Single(viewModel.FilteredCommandPaletteItems, i => i.CommandId == CommandIds.BatchProcessor);
+            Assert.Equal("Ctrl+Alt+B", viewModel.ShortcutTexts[CommandIds.BatchProcessor]);
+            Assert.Equal("Ctrl+Alt+B", item.Shortcut);
+        });
+    }
+
+    [Fact]
     public void ToggleFilmstrip_PersistsPreferenceAndSwitchesPreviewSurface()
     {
         RunOnSta(() =>

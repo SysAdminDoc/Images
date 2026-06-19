@@ -169,6 +169,26 @@ public sealed class SettingsServiceTests
     }
 
     [Fact]
+    public void HotkeyOverrides_RoundTripAndRemove()
+    {
+        using var temp = TestDirectory.Create();
+        var service = new SettingsService(Path.Combine(temp.Path, "settings.db"));
+
+        service.SetHotkey("open", "O", "Control, Shift");
+
+        var hotkey = Assert.Single(service.GetHotkeys());
+        Assert.Equal("open", hotkey.Action);
+        Assert.Equal("O", hotkey.Key);
+        Assert.Equal("Control, Shift", hotkey.Modifiers);
+        Assert.Equal(hotkey, service.GetHotkey("open"));
+
+        service.RemoveHotkey("open");
+
+        Assert.Null(service.GetHotkey("open"));
+        Assert.Empty(service.GetHotkeys());
+    }
+
+    [Fact]
     public void CreateDefault_WhenStorageRootIsUnavailable_DisablesPersistenceSafely()
     {
         var service = SettingsService.CreateDefault(() => null);

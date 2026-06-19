@@ -803,9 +803,9 @@
                             <Button Command="{Binding OpenCommand}"
                                     Style="{StaticResource PrimaryButton}"
                                     Margin="0,0,10,8"
-                                    ToolTip="Open image (Ctrl+O)"
+                                    ToolTip="{Binding ShortcutTexts[open], StringFormat=Open image ({0})}"
                                     AutomationProperties.Name="Open image"
-                                    AutomationProperties.HelpText="Choose an image file from disk. Shortcut: Ctrl+O.">
+                                    AutomationProperties.HelpText="{Binding ShortcutTexts[open], StringFormat=Choose an image file from disk. Shortcut: {0}.}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE8E5;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -821,9 +821,9 @@
                             <Button Command="{Binding PasteFromClipboardCommand}"
                                     Style="{StaticResource ChromeButton}"
                                     Margin="0,0,10,8"
-                                    ToolTip="Paste image or supported file from clipboard (Ctrl+V)"
+                                    ToolTip="{Binding ShortcutTexts[paste], StringFormat=Paste image or supported file from clipboard ({0})}"
                                     AutomationProperties.Name="Paste from clipboard"
-                                    AutomationProperties.HelpText="Open a supported image file from the clipboard, or save and open clipboard bitmap data. Shortcut: Ctrl+V.">
+                                    AutomationProperties.HelpText="{Binding ShortcutTexts[paste], StringFormat=Open a supported image file from the clipboard or save and open clipboard bitmap data. Shortcut: {0}.}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE77F;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -836,7 +836,7 @@
                             <Button Command="{Binding SettingsCommand}"
                                     Style="{StaticResource ChromeButton}"
                                     Margin="0,0,10,8"
-                                    ToolTip="Open Settings (Ctrl+,)"
+                                    ToolTip="{Binding ShortcutTexts[settings], StringFormat=Open Settings ({0})}"
                                     AutomationProperties.Name="Open settings">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE713;"
@@ -1886,15 +1886,15 @@
                                         <Grid.RowDefinitions>
                                             <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="← / →" />
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding PreviousNextShortcutText}" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Previous / next image or book page" />
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Home / End" />
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding FirstLastShortcutText}" />
                                         <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="First / last image or book page" />
                                         <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Space / Bksp" />
                                         <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Next / previous image or book page" />
                                         <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Mouse X1 / X2" />
                                         <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Previous / next image (5-button mouse)" />
-                                        <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="F5" />
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[refresh]}" />
                                         <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Rescan folder" />
                                     </Grid>
 
@@ -1917,27 +1917,27 @@
                                         <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Fit to viewport / 1:1 pixel" />
                                         <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="F11" />
                                         <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle fullscreen" />
-                                        <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="T" />
+                                        <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[filmstrip]}" />
                                         <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle filmstrip" />
-                                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="I" />
+                                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[metadata-hud]}" />
                                         <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle metadata HUD" />
-                                        <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="C" />
+                                        <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[crop-mode]}" />
                                         <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle crop mode" />
-                                        <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="S" />
+                                        <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[selection-mode]}" />
                                         <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle pixel selection" />
-                                        <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+D" />
+                                        <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[exposure-brush]}" />
                                         <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle exposure brush" />
-                                        <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+Y" />
+                                        <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[red-eye]}" />
                                         <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle red-eye correction" />
-                                        <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+H" />
+                                        <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[retouch]}" />
                                         <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle clone/heal retouch" />
-                                        <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+C" />
+                                        <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[compare]}" />
                                         <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Compare with next image" />
                                         <TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="O / X" />
                                         <TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle compare overlay / swap A-B" />
                                         <TextBlock Grid.Row="14" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="[ / ]" />
                                         <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Adjust compare overlay opacity" />
-                                        <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+V" />
+                                        <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[compare-with]}" />
                                         <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Compare with chosen image" />
                                     </Grid>
 
@@ -1950,45 +1950,45 @@
                                         <Grid.RowDefinitions>
                                             <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+O" />
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[open]}" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open image" />
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+V" />
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[paste]}" />
                                         <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Paste image from clipboard" />
-                                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+S" />
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[save-copy]}" />
                                         <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Save a copy" />
-                                        <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+P" />
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[print]}" />
                                         <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Print current image" />
-                                        <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Del" />
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[delete]}" />
                                         <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Send to Recycle Bin" />
-                                        <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+R" />
+                                        <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[reload]}" />
                                         <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Reload current image" />
-                                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+," />
+                                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[settings]}" />
                                         <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Settings" />
-                                        <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+B" />
+                                        <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[reference-board]}" />
                                         <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open reference board" />
-                                        <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+D" />
+                                        <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[duplicate-cleanup]}" />
                                         <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open duplicate cleanup" />
-                                        <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+H" />
+                                        <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[file-health-scan]}" />
                                         <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open file health scan" />
-                                        <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+T" />
+                                        <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[tag-graph]}" />
                                         <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open tag relationships" />
-                                        <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+I" />
+                                        <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[import-inbox]}" />
                                         <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open import inbox" />
-                                        <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+M" />
+                                        <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[macro-actions]}" />
                                         <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open macro actions" />
-                                        <TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+B" />
+                                        <TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[batch-processor]}" />
                                         <TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open batch processor" />
-                                        <TextBlock Grid.Row="14" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+E" />
+                                        <TextBlock Grid.Row="14" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[edit-stack]}" />
                                         <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open edit history" />
-                                        <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+R" />
+                                        <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[resize]}" />
                                         <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open resize dialog" />
-                                        <TextBlock Grid.Row="16" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+A" />
+                                        <TextBlock Grid.Row="16" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[adjustments]}" />
                                         <TextBlock Grid.Row="16" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open adjustments" />
-                                        <TextBlock Grid.Row="17" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+F" />
+                                        <TextBlock Grid.Row="17" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[effects]}" />
                                         <TextBlock Grid.Row="17" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open effects" />
-                                        <TextBlock Grid.Row="18" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+E" />
+                                        <TextBlock Grid.Row="18" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[auto-enhance]}" />
                                         <TextBlock Grid.Row="18" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Apply Auto Enhance" />
-                                        <TextBlock Grid.Row="19" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Alt+P" />
+                                        <TextBlock Grid.Row="19" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[perspective]}" />
                                         <TextBlock Grid.Row="19" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open perspective correction" />
                                         <TextBlock Grid.Row="20" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
                                         <TextBlock Grid.Row="20" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Apply crop / commit rename" />
@@ -2822,14 +2822,14 @@
                             <Border Width="1" Height="22" Background="{StaticResource HairlineBrush}" Margin="12,6" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding DeleteCommand}" Content="&#xE74D;" ToolTip="Delete (Recycle Bin)" AutomationProperties.Name="Send image to Recycle Bin" />
                             <Border Width="1" Height="22" Background="{StaticResource HairlineBrush}" Margin="12,6" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding SaveAsCopyCommand}" Content="&#xE74E;" ToolTip="Save a copy (Ctrl+Shift+S)" AutomationProperties.Name="Save a copy" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenExportWorkbenchCommand}" Content="&#xE8EF;" ToolTip="Export workbench (Ctrl+Alt+W)" Margin="4,0,0,0" AutomationProperties.Name="Export workbench" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrintCommand}" Content="&#xE749;" ToolTip="Print (Ctrl+P)" Margin="4,0,0,0" AutomationProperties.Name="Print image" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding SaveAsCopyCommand}" Content="&#xE74E;" ToolTip="{Binding ShortcutTexts[save-copy], StringFormat=Save a copy ({0})}" AutomationProperties.Name="Save a copy" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenExportWorkbenchCommand}" Content="&#xE8EF;" ToolTip="{Binding ShortcutTexts[export-workbench], StringFormat=Export workbench ({0})}" Margin="4,0,0,0" AutomationProperties.Name="Export workbench" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrintCommand}" Content="&#xE749;" ToolTip="{Binding ShortcutTexts[print], StringFormat=Print ({0})}" Margin="4,0,0,0" AutomationProperties.Name="Print image" />
                             <Border Width="1" Height="22" Background="{StaticResource HairlineBrush}" Margin="12,6" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}" Content="&#xE838;" ToolTip="Reveal in Explorer" AutomationProperties.Name="Reveal image in Explorer" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="Copy path" Margin="4,0,0,0" AutomationProperties.Name="Copy file path" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding StripLocationCommand}" Content="&#xE707;" ToolTip="Strip GPS location from file" Margin="4,0,0,0" AutomationProperties.Name="Strip GPS location" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RefreshCommand}" Content="&#xE72C;" ToolTip="Refresh folder (F5)" Margin="4,0,0,0" AutomationProperties.Name="Refresh folder" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RefreshCommand}" Content="&#xE72C;" ToolTip="{Binding ShortcutTexts[refresh], StringFormat=Refresh folder ({0})}" Margin="4,0,0,0" AutomationProperties.Name="Refresh folder" />
                         </WrapPanel>
                     </Grid>
                 </Border>
@@ -2866,7 +2866,7 @@
                             <Button Command="{Binding SettingsCommand}"
                                     Style="{StaticResource ToolbarButton}"
                                     Content="&#xE713;"
-                                    ToolTip="Settings (Ctrl+,)"
+                                    ToolTip="{Binding ShortcutTexts[settings], StringFormat=Settings ({0})}"
                                     AutomationProperties.Name="Settings" />
                             <Button Command="{Binding AboutCommand}"
                                     Style="{StaticResource ToolbarButton}"
