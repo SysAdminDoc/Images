@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
@@ -18,6 +19,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public enum SettingsStatusToneKind { Info, Success, Warning }
 
     private readonly SettingsService _settings;
+    private readonly CommandShortcutService _shortcutService;
     private OcrCapabilityService.OcrCapabilityStatus _ocrStatus = OcrCapabilityService.GetStatus();
     private string? _settingsStatusText;
     private SettingsStatusToneKind _settingsStatusTone = SettingsStatusToneKind.Info;
@@ -30,10 +32,14 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     internal SettingsViewModel(SettingsService settings)
     {
         _settings = settings;
+        _shortcutService = new CommandShortcutService(settings);
         RefreshOcrStatusCommand = new RelayCommand(RefreshOcrStatus);
         OpenOcrLanguageSettingsCommand = new RelayCommand(OpenOcrLanguageSettings);
         OpenAppDataCommand = new RelayCommand(OpenAppData);
         OpenLogsCommand = new RelayCommand(OpenLogs);
+        ApplyShortcutCommand = new RelayCommand(ApplyShortcut, p => p is ShortcutSettingRow);
+        ResetShortcutCommand = new RelayCommand(ResetShortcut, p => p is ShortcutSettingRow);
+        RefreshShortcutRows();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -244,8 +250,21 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     public ICommand OpenLogsCommand { get; }
 
+    public ICommand ApplyShortcutCommand { get; }
+
+    public ICommand ResetShortcutCommand { get; }
+
+    public ObservableCollection<ShortcutSettingRow> ShortcutRows { get; } = new();
+
     public string HotkeySummary =>
-        Strings.SettingsHotkeySummary;
+        string.Join(
+            "; ",
+            _shortcutService.GetSnapshots()
+                .Where(s => s.Id is CommandIds.Settings or CommandIds.BatchProcessor or CommandIds.DuplicateCleanup
+                    or CommandIds.FileHealthScan or CommandIds.EditStack or CommandIds.Adjustments
+                    or CommandIds.Effects or CommandIds.Perspective or CommandIds.CropMode
+                    or CommandIds.SelectionMode)
+                .Select(s => string.Format(CultureInfo.CurrentCulture, "{0} {1}", s.Shortcut, s.Name)));
 
     public string DiagnosticsStorageSummary =>
         Strings.SettingsDiagnosticsStorageSummary;
@@ -284,6 +303,79 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     {
         SettingsStatusTone = tone;
         SettingsStatusText = message;
+    }
+
+    private void RefreshShortcutRows()
+    {
+        ShortcutRows.Clear();
+        foreach (var item in _shortcutService.GetSnapshots())
+        {
+            ShortcutRows.Add(new ShortcutSettingRow(
+                item.Id,
+                item.Name,
+                item.Category,
+                item.Shortcut,
+                item.DefaultShortcut,
+                item.IsCustomized));
+        }
+
+        Raise(nameof(HotkeySummary));
+    }
+
+    private void ApplyShortcut(object? parameter)
+    {
+        if (parameter is not ShortcutSettingRow row)
+            return;
+
+        var result = _shortcutService.SetShortcut(row.Id, row.ShortcutText);
+        switch (result.Kind)
+        {
+            case ShortcutUpdateResultKind.Saved:
+            case ShortcutUpdateResultKind.Reset:
+                RefreshShortcutRows();
+                var refreshed = _shortcutService.GetDefinition(row.Id);
+                SetStatus(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        result.Kind == ShortcutUpdateResultKind.Saved
+                            ? Strings.SettingsHotkeySavedFormat
+                            : Strings.SettingsHotkeyResetFormat,
+                        refreshed.Name,
+                        _shortcutService.GetShortcutText(row.Id)),
+                    SettingsStatusToneKind.Success);
+                break;
+            case ShortcutUpdateResultKind.Conflict:
+                SetStatus(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        Strings.SettingsHotkeyConflictFormat,
+                        result.ConflictDefinition?.Name ?? row.ActionName,
+                        row.ShortcutText),
+                    SettingsStatusToneKind.Warning);
+                break;
+            case ShortcutUpdateResultKind.Invalid:
+            case ShortcutUpdateResultKind.UnknownCommand:
+                SetStatus(
+                    string.Format(CultureInfo.CurrentCulture, Strings.SettingsHotkeyInvalidFormat, row.ActionName),
+                    SettingsStatusToneKind.Warning);
+                break;
+        }
+    }
+
+    private void ResetShortcut(object? parameter)
+    {
+        if (parameter is not ShortcutSettingRow row)
+            return;
+
+        _shortcutService.ResetShortcut(row.Id);
+        RefreshShortcutRows();
+        SetStatus(
+            string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.SettingsHotkeyResetFormat,
+                row.ActionName,
+                _shortcutService.GetShortcutText(row.Id)),
+            SettingsStatusToneKind.Success);
     }
 
     private void RefreshOcrStatus()
@@ -351,4 +443,43 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 public sealed record LocaleOption(string DisplayName, string Tag)
 {
     public override string ToString() => DisplayName;
+}
+
+public sealed class ShortcutSettingRow : ObservableObject
+{
+    private string _shortcutText;
+    private bool _isCustomized;
+
+    public ShortcutSettingRow(
+        string id,
+        string actionName,
+        string category,
+        string shortcutText,
+        string defaultShortcutText,
+        bool isCustomized)
+    {
+        Id = id;
+        ActionName = actionName;
+        Category = category;
+        _shortcutText = shortcutText;
+        DefaultShortcutText = defaultShortcutText;
+        _isCustomized = isCustomized;
+    }
+
+    public string Id { get; }
+    public string ActionName { get; }
+    public string Category { get; }
+    public string DefaultShortcutText { get; }
+
+    public string ShortcutText
+    {
+        get => _shortcutText;
+        set => Set(ref _shortcutText, value);
+    }
+
+    public bool IsCustomized
+    {
+        get => _isCustomized;
+        set => Set(ref _isCustomized, value);
+    }
 }

@@ -371,10 +371,79 @@
                                 <TextBlock Text="{x:Static loc:Strings.SettingsHotkeysFixed}"
                                            Style="{StaticResource Text.Body}"
                                            FontWeight="SemiBold" />
-                                <TextBlock Text="{Binding HotkeySummary}"
+                                <TextBlock Text="{x:Static loc:Strings.SettingsHotkeysDescription}"
                                            Style="{StaticResource Text.Hint}"
                                            Margin="0,5,0,0"
                                            TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding HotkeySummary}"
+                                           Style="{StaticResource Text.Hint}"
+                                           Margin="0,8,0,0"
+                                           TextWrapping="Wrap" />
+                                <DataGrid ItemsSource="{Binding ShortcutRows}"
+                                          AutoGenerateColumns="False"
+                                          CanUserAddRows="False"
+                                          CanUserDeleteRows="False"
+                                          HeadersVisibility="Column"
+                                          GridLinesVisibility="None"
+                                          MinHeight="240"
+                                          MaxHeight="320"
+                                          Margin="0,14,0,0"
+                                          Background="Transparent"
+                                          BorderBrush="{StaticResource HairlineBrush}"
+                                          Foreground="{StaticResource TextBrush}"
+                                          RowBackground="Transparent"
+                                          AlternatingRowBackground="#10181825"
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          SelectionMode="Single"
+                                          AutomationProperties.Name="{x:Static loc:Strings.SettingsSectionHotkeys}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="{x:Static loc:Strings.SettingsHotkeyColumnCategory}"
+                                                            Binding="{Binding Category}"
+                                                            IsReadOnly="True"
+                                                            Width="110" />
+                                        <DataGridTextColumn Header="{x:Static loc:Strings.SettingsHotkeyColumnAction}"
+                                                            Binding="{Binding ActionName}"
+                                                            IsReadOnly="True"
+                                                            Width="*" />
+                                        <DataGridTemplateColumn Header="{x:Static loc:Strings.SettingsHotkeyColumnShortcut}"
+                                                                Width="120">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBox Text="{Binding ShortcutText, UpdateSourceTrigger=PropertyChanged}"
+                                                             MinWidth="92"
+                                                             Padding="6,3"
+                                                             AutomationProperties.Name="{Binding ActionName}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="{x:Static loc:Strings.SettingsHotkeyColumnDefault}"
+                                                            Binding="{Binding DefaultShortcutText}"
+                                                            IsReadOnly="True"
+                                                            Width="96" />
+                                        <DataGridTemplateColumn Header="{x:Static loc:Strings.SettingsHotkeyColumnActions}"
+                                                                Width="116">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Button Style="{StaticResource ChromeButton}"
+                                                                Command="{Binding DataContext.ApplyShortcutCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                CommandParameter="{Binding}"
+                                                                Padding="8,3"
+                                                                MinHeight="26"
+                                                                Margin="0,0,6,0"
+                                                                Content="{x:Static loc:Strings.SettingsHotkeyApply}" />
+                                                        <Button Style="{StaticResource ChromeButton}"
+                                                                Command="{Binding DataContext.ResetShortcutCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                CommandParameter="{Binding}"
+                                                                Padding="8,3"
+                                                                MinHeight="26"
+                                                                Content="{x:Static loc:Strings.SettingsHotkeyReset}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
                             </StackPanel>
                         </Border>
                     </StackPanel>

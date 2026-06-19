@@ -2123,6 +2123,44 @@
                         </Border>
                     </Grid>
 
+                    <!-- Loading indicator — centered pill while image is decoding -->
+                    <Border HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding IsImageLoading, Converter={StaticResource BoolToVis}}"
+                            IsHitTestVisible="False"
+                            AutomationProperties.Name="Loading image">
+                        <Border Style="{StaticResource FloatingChrome}" Padding="14,8">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="6" Height="6"
+                                         Fill="{StaticResource AccentBrush}"
+                                         Margin="0,0,8,0"
+                                         VerticalAlignment="Center">
+                                    <Ellipse.Style>
+                                        <Style TargetType="Ellipse">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsImageLoading}" Value="True">
+                                                    <DataTrigger.EnterActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard RepeatBehavior="Forever">
+                                                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                                 From="0.3" To="1" AutoReverse="True"
+                                                                                 Duration="0:0:0.6" />
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </DataTrigger.EnterActions>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Ellipse.Style>
+                                </Ellipse>
+                                <TextBlock Text="Loading..."
+                                           Style="{StaticResource Text.Caption}"
+                                           Foreground="{StaticResource FloatingChromeTextBrush}"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </Border>
+
                     <!-- Operation status — short live-region feedback for reload/export/edit work. -->
                     <Border HorizontalAlignment="Center"
                             VerticalAlignment="Top"

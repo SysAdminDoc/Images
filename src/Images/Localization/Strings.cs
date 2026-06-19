@@ -388,6 +388,14 @@ public static class Strings
     public static string SettingsArchiveSpreadDescription => Get(nameof(SettingsArchiveSpreadDescription));
     public static string SettingsSectionHotkeys => Get(nameof(SettingsSectionHotkeys));
     public static string SettingsHotkeysFixed => Get(nameof(SettingsHotkeysFixed));
+    public static string SettingsHotkeysDescription => Get(nameof(SettingsHotkeysDescription));
+    public static string SettingsHotkeyColumnAction => Get(nameof(SettingsHotkeyColumnAction));
+    public static string SettingsHotkeyColumnCategory => Get(nameof(SettingsHotkeyColumnCategory));
+    public static string SettingsHotkeyColumnShortcut => Get(nameof(SettingsHotkeyColumnShortcut));
+    public static string SettingsHotkeyColumnDefault => Get(nameof(SettingsHotkeyColumnDefault));
+    public static string SettingsHotkeyColumnActions => Get(nameof(SettingsHotkeyColumnActions));
+    public static string SettingsHotkeyApply => Get(nameof(SettingsHotkeyApply));
+    public static string SettingsHotkeyReset => Get(nameof(SettingsHotkeyReset));
     public static string SettingsSectionTextExtraction => Get(nameof(SettingsSectionTextExtraction));
     public static string SettingsOcrLanguagesButton => Get(nameof(SettingsOcrLanguagesButton));
     public static string SettingsOcrLanguagesTooltip => Get(nameof(SettingsOcrLanguagesTooltip));
@@ -426,6 +434,10 @@ public static class Strings
     public static string SettingsUpdateCheckOffStatus => Get(nameof(SettingsUpdateCheckOffStatus));
     public static string SettingsUpdateCheckDescription => Get(nameof(SettingsUpdateCheckDescription));
     public static string SettingsHotkeySummary => Get(nameof(SettingsHotkeySummary));
+    public static string SettingsHotkeySavedFormat => Get(nameof(SettingsHotkeySavedFormat));
+    public static string SettingsHotkeyResetFormat => Get(nameof(SettingsHotkeyResetFormat));
+    public static string SettingsHotkeyInvalidFormat => Get(nameof(SettingsHotkeyInvalidFormat));
+    public static string SettingsHotkeyConflictFormat => Get(nameof(SettingsHotkeyConflictFormat));
     public static string SettingsDiagnosticsStorageSummary => Get(nameof(SettingsDiagnosticsStorageSummary));
     public static string SettingsOcrRefreshedStatus => Get(nameof(SettingsOcrRefreshedStatus));
     public static string SettingsLanguageSettingsOpenedStatus => Get(nameof(SettingsLanguageSettingsOpenedStatus));
@@ -564,6 +576,7 @@ public static class Strings
     public static string CommandPalette_FlipH => Get(nameof(CommandPalette_FlipH));
     public static string CommandPalette_FlipV => Get(nameof(CommandPalette_FlipV));
     public static string CommandPalette_CropMode => Get(nameof(CommandPalette_CropMode));
+    public static string CommandPalette_SelectionMode => Get(nameof(CommandPalette_SelectionMode));
     public static string CommandPalette_Resize => Get(nameof(CommandPalette_Resize));
     public static string CommandPalette_Adjustments => Get(nameof(CommandPalette_Adjustments));
     public static string CommandPalette_Effects => Get(nameof(CommandPalette_Effects));
@@ -601,6 +614,7 @@ public static class Strings
     public static string CommandPalette_Compare => Get(nameof(CommandPalette_Compare));
     public static string CommandPalette_CompareWith => Get(nameof(CommandPalette_CompareWith));
     public static string CommandPalette_Settings => Get(nameof(CommandPalette_Settings));
+    public static string CommandPalette_ToggleCommandPalette => Get(nameof(CommandPalette_ToggleCommandPalette));
     public static string CommandPalette_About => Get(nameof(CommandPalette_About));
     public static string CommandPalette_CheckUpdates => Get(nameof(CommandPalette_CheckUpdates));
     public static string CommandPalette_Paste => Get(nameof(CommandPalette_Paste));
@@ -1285,6 +1299,9 @@ public static class Strings
 
     // ---- Format mismatch ----
     public static string MainFormatMismatch => Get(nameof(MainFormatMismatch));
+
+    // ---- Loading state ----
+    public static string MainImageLoading => Get(nameof(MainImageLoading));
 
     // ---- XMP migration import ----
     public static string CommandPalette_ImportXmpSidecars => Get(nameof(CommandPalette_ImportXmpSidecars));

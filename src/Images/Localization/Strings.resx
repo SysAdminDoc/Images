@@ -1677,7 +1677,31 @@ Details written to:
     <value>Hotkeys</value>
   </data>
   <data name="SettingsHotkeysFixed" xml:space="preserve">
-    <value>Keyboard shortcuts are fixed in this release.</value>
+    <value>Keyboard shortcuts</value>
+  </data>
+  <data name="SettingsHotkeysDescription" xml:space="preserve">
+    <value>Edit supported shortcuts with names such as Ctrl+O, Ctrl+Shift+B, F5, Del, or C.</value>
+  </data>
+  <data name="SettingsHotkeyColumnAction" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="SettingsHotkeyColumnCategory" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="SettingsHotkeyColumnShortcut" xml:space="preserve">
+    <value>Shortcut</value>
+  </data>
+  <data name="SettingsHotkeyColumnDefault" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="SettingsHotkeyColumnActions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="SettingsHotkeyApply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="SettingsHotkeyReset" xml:space="preserve">
+    <value>Reset</value>
   </data>
   <data name="SettingsSectionTextExtraction" xml:space="preserve">
     <value>Text extraction</value>
@@ -1792,6 +1816,18 @@ Details written to:
   </data>
   <data name="SettingsHotkeySummary" xml:space="preserve">
     <value>Ctrl+, Settings; Ctrl+Shift+B Batch; Ctrl+Shift+D Duplicate cleanup; Ctrl+Shift+H File health; Ctrl+Shift+E Edit history; Ctrl+Alt+A Adjustments; Ctrl+Alt+F Effects; Ctrl+Alt+P Perspective; C Crop; S Selection.</value>
+  </data>
+  <data name="SettingsHotkeySavedFormat" xml:space="preserve">
+    <value>Shortcut saved for {0}: {1}.</value>
+  </data>
+  <data name="SettingsHotkeyResetFormat" xml:space="preserve">
+    <value>Shortcut reset for {0}: {1}.</value>
+  </data>
+  <data name="SettingsHotkeyInvalidFormat" xml:space="preserve">
+    <value>Shortcut for {0} is not valid. Use forms such as Ctrl+O, Ctrl+Shift+B, F5, Del, or C.</value>
+  </data>
+  <data name="SettingsHotkeyConflictFormat" xml:space="preserve">
+    <value>{0} already uses {1}. Choose a different shortcut first.</value>
   </data>
   <data name="SettingsDiagnosticsStorageSummary" xml:space="preserve">
     <value>Diagnostics and support files stay under the local Images app data folder. Use About for the full codec report, system info, logs, and cache controls.</value>
@@ -4063,6 +4099,9 @@ Details written to:
   <data name="CommandPalette_CropMode" xml:space="preserve">
     <value>Toggle crop mode</value>
   </data>
+  <data name="CommandPalette_SelectionMode" xml:space="preserve">
+    <value>Toggle selection mode</value>
+  </data>
   <data name="CommandPalette_Resize" xml:space="preserve">
     <value>Open resize dialog</value>
   </data>
@@ -4186,6 +4225,9 @@ Details written to:
   <data name="CommandPalette_Settings" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="CommandPalette_ToggleCommandPalette" xml:space="preserve">
+    <value>Toggle command palette</value>
+  </data>
   <data name="CommandPalette_About" xml:space="preserve">
     <value>About</value>
   </data>
@@ -4306,6 +4348,9 @@ Details written to:
   </data>
   <data name="MainFormatMismatch" xml:space="preserve">
     <value>File content is {0} but extension is {1} — expected {2}</value>
+  </data>
+  <data name="MainImageLoading" xml:space="preserve">
+    <value>Loading...</value>
   </data>
   <data name="MainToastMotionVideoExtracted" xml:space="preserve">
     <value>Motion video extracted: {0}</value>

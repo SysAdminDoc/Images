@@ -245,6 +245,99 @@ public sealed class SettingsService
     public void SetDouble(string key, double value)
         => SetString(key, value.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
+    // ---------------- Hotkey overrides ----------------
+
+    public HotkeyOverride? GetHotkey(string action)
+    {
+        if (string.IsNullOrWhiteSpace(action)) return null;
+        if (!_isAvailable) return null;
+
+        try
+        {
+            using var conn = Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT action, key, modifiers FROM hotkeys WHERE action = $a LIMIT 1;";
+            cmd.Parameters.AddWithValue("$a", action);
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read())
+                return null;
+
+            return new HotkeyOverride(reader.GetString(0), reader.GetString(1), reader.GetString(2));
+        }
+        catch (Exception ex) when (IsRecoverableStorageFailure(ex))
+        {
+            _log.LogWarning(ex, "GetHotkey({Action}) failed", action);
+            return null;
+        }
+    }
+
+    public IReadOnlyList<HotkeyOverride> GetHotkeys()
+    {
+        var result = new List<HotkeyOverride>();
+        if (!_isAvailable) return result;
+
+        try
+        {
+            using var conn = Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT action, key, modifiers FROM hotkeys ORDER BY action;";
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+                result.Add(new HotkeyOverride(reader.GetString(0), reader.GetString(1), reader.GetString(2)));
+        }
+        catch (Exception ex) when (IsRecoverableStorageFailure(ex))
+        {
+            _log.LogWarning(ex, "GetHotkeys failed");
+        }
+
+        return result;
+    }
+
+    public void SetHotkey(string action, string key, string modifiers)
+    {
+        if (string.IsNullOrWhiteSpace(action) || string.IsNullOrWhiteSpace(key)) return;
+        if (!_isAvailable) return;
+
+        try
+        {
+            using var conn = Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
+                INSERT INTO hotkeys (action, key, modifiers) VALUES ($a, $k, $m)
+                ON CONFLICT(action) DO UPDATE SET
+                    key = excluded.key,
+                    modifiers = excluded.modifiers;
+                """;
+            cmd.Parameters.AddWithValue("$a", action);
+            cmd.Parameters.AddWithValue("$k", key);
+            cmd.Parameters.AddWithValue("$m", modifiers ?? string.Empty);
+            cmd.ExecuteNonQuery();
+        }
+        catch (Exception ex) when (IsRecoverableStorageFailure(ex))
+        {
+            _log.LogWarning(ex, "SetHotkey({Action}) failed", action);
+        }
+    }
+
+    public void RemoveHotkey(string action)
+    {
+        if (string.IsNullOrWhiteSpace(action)) return;
+        if (!_isAvailable) return;
+
+        try
+        {
+            using var conn = Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "DELETE FROM hotkeys WHERE action = $a;";
+            cmd.Parameters.AddWithValue("$a", action);
+            cmd.ExecuteNonQuery();
+        }
+        catch (Exception ex) when (IsRecoverableStorageFailure(ex))
+        {
+            _log.LogWarning(ex, "RemoveHotkey({Action}) failed", action);
+        }
+    }
+
     // ---------------- Recent folders MRU ----------------
 
     public void TouchRecentFolder(string path)
@@ -388,6 +481,8 @@ public sealed class SettingsService
     private static bool IsRecoverableStorageFailure(Exception ex)
         => ex is SqliteException or IOException or UnauthorizedAccessException or InvalidOperationException;
 }
+
+public sealed record HotkeyOverride(string Action, string Key, string Modifiers);
 
 /// <summary>
 /// Strongly-typed setting keys so callers don't pass raw strings. Add keys here as new

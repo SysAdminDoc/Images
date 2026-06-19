@@ -2,6 +2,7 @@ namespace Images.ViewModels;
 
 public sealed class CommandPaletteItem
 {
+    public string CommandId { get; init; } = "";
     public string Name { get; init; } = "";
     public string Shortcut { get; init; } = "";
     public string Category { get; init; } = "";

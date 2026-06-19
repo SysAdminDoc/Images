@@ -42,6 +42,22 @@ public sealed class ExportPreviewServiceTests
     }
 
     [Fact]
+    public void BuildDifference_ReturnsEncodedPreviewDimensions()
+    {
+        var bitmap = CreateBitmap(16, 8);
+        var service = new ExportPreviewService();
+        var preview = service.BuildPreview(
+            bitmap,
+            sourcePath: null,
+            new ExportPreviewRequest(".jpg", 80, 8, 8));
+
+        var difference = service.BuildDifference(bitmap, preview.PreviewImage);
+
+        Assert.Equal(preview.PreviewImage.PixelWidth, difference.PixelWidth);
+        Assert.Equal(preview.PreviewImage.PixelHeight, difference.PixelHeight);
+    }
+
+    [Fact]
     public void NormalizeRequest_WhenFormatCannotBeWritten_FallsBackToPng()
     {
         var request = ExportPreviewService.NormalizeRequest(new ExportPreviewRequest(".not-real", 200, -4, 320));
