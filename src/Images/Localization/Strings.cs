@@ -1232,6 +1232,31 @@ public static class Strings
     public static string MainToastSlideshowShuffleOn => Get(nameof(MainToastSlideshowShuffleOn));
     public static string MainToastSlideshowShuffleOff => Get(nameof(MainToastSlideshowShuffleOff));
 
+    // ---- Archive password ----
+    public static string ArchivePasswordTitle => Get(nameof(ArchivePasswordTitle));
+    public static string ArchivePasswordPrompt => Get(nameof(ArchivePasswordPrompt));
+
+    // ---- Granular metadata strip ----
+    public static string CommandPalette_StripDeviceInfo => Get(nameof(CommandPalette_StripDeviceInfo));
+    public static string CommandPalette_StripTimestamps => Get(nameof(CommandPalette_StripTimestamps));
+    public static string CommandPalette_StripSoftware => Get(nameof(CommandPalette_StripSoftware));
+    public static string CommandPalette_StripAll => Get(nameof(CommandPalette_StripAll));
+    public static string CommandPalette_ExtractMotionVideo => Get(nameof(CommandPalette_ExtractMotionVideo));
+    public static string MainOpStrippingMetadata => Get(nameof(MainOpStrippingMetadata));
+    public static string MainToastNoMetadataFound => Get(nameof(MainToastNoMetadataFound));
+    public static string MainMetadataWriteback => Get(nameof(MainMetadataWriteback));
+    public static string MainToastMetadataStripped => Get(nameof(MainToastMetadataStripped));
+    public static string MainToastMetadataStripFailed => Get(nameof(MainToastMetadataStripFailed));
+
+    // ---- Format mismatch ----
+    public static string MainFormatMismatch => Get(nameof(MainFormatMismatch));
+
+    // ---- Motion Photo / Live Photo ----
+    public static string MainToastMotionVideoExtracted => Get(nameof(MainToastMotionVideoExtracted));
+    public static string MainToastMotionVideoFailed => Get(nameof(MainToastMotionVideoFailed));
+    public static string MainToastCompanionVideoOpened => Get(nameof(MainToastCompanionVideoOpened));
+    public static string MainToastCompanionVideoFailed => Get(nameof(MainToastCompanionVideoFailed));
+
     public static string Get(string key)
     {
         if (string.IsNullOrWhiteSpace(key))
