@@ -28,10 +28,17 @@ All notable changes to **Images** are documented here.
 
 ### Dependencies
 
-- Microsoft.Data.Sqlite 9.0.0 → 10.0.0
-- Microsoft.Extensions.Logging 9.0.0 → 10.0.0
+- Microsoft.Data.Sqlite 9.0.0 → 10.0.9
+- Microsoft.Extensions.Logging 9.0.0 → 10.0.9
 - Microsoft.ML.OnnxRuntime.DirectML pinned at 1.24.4 (latest available)
 - Serilog 4.2.0 → 4.3.1
+- Serilog.Extensions.Logging 9.0.0 → 10.0.0
+- Serilog.Sinks.File 6.0.0 → 7.0.0
+- SharpCompress 0.48.1 → 0.49.1
+- SQLitePCLRaw.bundle_e_sqlite3 pinned at 3.0.3 (clears GHSA-2m69-gcr7-jv3q High)
+- coverlet.collector 6.0.2 → 10.0.1
+- Microsoft.NET.Test.Sdk 17.12.0 → 18.6.0
+- xunit 2.9.2 → 2.9.3
 - Target framework net9.0 → net10.0
 
 ### Changed
