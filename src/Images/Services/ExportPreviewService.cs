@@ -79,6 +79,29 @@ public sealed class ExportPreviewService
         return CreateSummary(image, encoded, sourceBytes, request, normalizedPath);
     }
 
+    public BitmapSource BuildDifference(BitmapSource source, BitmapSource encodedPreview)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(encodedPreview);
+
+        using var sourceImage = ImageExportService.CreateMagickImage(source);
+        using var encodedImage = ImageExportService.CreateMagickImage(encodedPreview);
+        using var sourceComparable = (MagickImage)sourceImage.Clone();
+        using var difference = (MagickImage)encodedImage.Clone();
+
+        if (sourceComparable.Width != difference.Width || sourceComparable.Height != difference.Height)
+        {
+            sourceComparable.Resize(new MagickGeometry(difference.Width, difference.Height)
+            {
+                IgnoreAspectRatio = false
+            });
+        }
+
+        difference.Composite(sourceComparable, CompositeOperator.Difference);
+        difference.AutoLevel();
+        return ImageExportService.CreateBitmapSource(difference);
+    }
+
     public static ExportPreviewRequest NormalizeRequest(ExportPreviewRequest request)
     {
         var extension = RenameService.NormalizeExtension(request.Extension);

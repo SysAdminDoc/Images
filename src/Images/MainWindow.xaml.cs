@@ -657,24 +657,17 @@ public partial class MainWindow : Window
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        // V20-29: Ctrl+Shift+P toggles command palette even when its TextBox has focus.
-        if (e.Key == Key.P
-            && (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift))
+        var shortcutKey = GetShortcutKey(e);
+
+        // V20-29: the command palette shortcut toggles even when its TextBox has focus.
+        if (Vm.IsCommandShortcut(CommandIds.CommandPalette, shortcutKey, Keyboard.Modifiers))
         {
-            Vm.ShowCommandPalette = !Vm.ShowCommandPalette;
-            if (Vm.ShowCommandPalette)
-                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Input,
-                    () => CommandPaletteInput.Focus());
-            else
-            {
-                Keyboard.ClearFocus();
-                Focus();
-            }
+            ToggleCommandPaletteFocus();
             e.Handled = true;
             return;
         }
 
-        if (e.Key != Key.Enter ||
+        if (shortcutKey != Key.Enter ||
             !Vm.IsCropMode ||
             !Vm.ApplyCropCommand.CanExecute(null))
         {
@@ -687,8 +680,34 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
+    private static Key GetShortcutKey(KeyEventArgs e)
+        => e.Key switch
+        {
+            Key.System => e.SystemKey,
+            Key.ImeProcessed => e.ImeProcessedKey,
+            _ => e.Key
+        };
+
+    private void ToggleCommandPaletteFocus()
+    {
+        Vm.ShowCommandPalette = !Vm.ShowCommandPalette;
+        if (Vm.ShowCommandPalette)
+        {
+            Dispatcher.BeginInvoke(
+                System.Windows.Threading.DispatcherPriority.Input,
+                () => CommandPaletteInput.Focus());
+        }
+        else
+        {
+            Keyboard.ClearFocus();
+            Focus();
+        }
+    }
+
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
+        var shortcutKey = GetShortcutKey(e);
+
         // Don't steal keys from the rename editor.
         if (Keyboard.FocusedElement is TextBox) return;
 
@@ -717,6 +736,19 @@ public partial class MainWindow : Window
         if (Vm.IsPeekMode && e.Key == Key.Escape)
         {
             Close();
+            e.Handled = true;
+            return;
+        }
+
+        if (Vm.IsCommandShortcut(CommandIds.CommandPalette, shortcutKey, Keyboard.Modifiers))
+        {
+            ToggleCommandPaletteFocus();
+            e.Handled = true;
+            return;
+        }
+
+        if (Vm.TryExecuteCommandShortcut(shortcutKey, Keyboard.Modifiers))
+        {
             e.Handled = true;
             return;
         }
@@ -850,117 +882,6 @@ public partial class MainWindow : Window
                 Vm.ExitOverlayModeCommand.Execute(null);
                 e.Handled = true;
                 break;
-            case Key.O when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
-                Vm.OpenCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.C when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
-                Vm.StartCompareCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.V when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
-                Vm.CompareWithCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.V when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
-                Vm.PasteFromClipboardCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.B when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == ModifierKeys.Control:
-                Vm.OpenReferenceBoardCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.D when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
-                Vm.OpenDuplicateCleanupCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.H when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
-                Vm.OpenFileHealthScanCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.T when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
-                Vm.OpenTagGraphCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.I when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
-                Vm.OpenImportInboxCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.M when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
-                Vm.OpenMacroActionsCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.B when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
-                Vm.OpenBatchProcessorCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.E when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
-                Vm.OpenEditStackCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.R when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
-                Vm.OpenResizeDialogCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.A when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
-                Vm.OpenAdjustmentsCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.F when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
-                Vm.OpenEffectsCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.E when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
-                Vm.AutoEnhanceCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.P when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
-                Vm.OpenPerspectiveCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.D when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
-                Vm.ToggleExposureBrushModeCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.Y when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
-                Vm.ToggleRedEyeModeCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.H when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
-                Vm.ToggleRetouchModeCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.W when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == (ModifierKeys.Control | ModifierKeys.Alt):
-                Vm.OpenExportWorkbenchCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.OemComma when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
-                Vm.SettingsCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.R when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
-                // V15-04: Ctrl+Shift+R reload current image.
-                Vm.ReloadCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.P when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
-                // V20-29: Ctrl+Shift+P command palette.
-                Vm.ShowCommandPalette = !Vm.ShowCommandPalette;
-                if (Vm.ShowCommandPalette)
-                    Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Input,
-                        () => CommandPaletteInput.Focus());
-                e.Handled = true;
-                break;
-            case Key.P when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
-                // V15-10: Ctrl+P print.
-                Vm.PrintCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.S when (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift):
-                // E6: Ctrl+Shift+S save-as-copy.
-                Vm.SaveAsCopyCommand.Execute(null);
-                e.Handled = true;
-                break;
             case Key.F when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
                 // V20-20: Ctrl+F cycles zoom modes Fit → 1:1 → FitWidth → FitHeight → Fill → Fit.
                 SetActiveZoomMode(NextZoomMode());
@@ -980,10 +901,6 @@ public partial class MainWindow : Window
                 break;
             case Key.OemCloseBrackets when Vm.IsCompareMode && Keyboard.Modifiers == ModifierKeys.None:
                 Vm.IncreaseCompareOpacityCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.L when Keyboard.Modifiers == ModifierKeys.None:
-                Vm.ToggleReviewModeCommand.Execute(null);
                 e.Handled = true;
                 break;
             case Key.P when Vm.IsReviewMode && Keyboard.Modifiers == ModifierKeys.None:
@@ -1022,25 +939,9 @@ public partial class MainWindow : Window
                 Vm.SetReviewRatingCommand.Execute(5);
                 e.Handled = true;
                 break;
-            case Key.T:
-                Vm.ToggleFilmstripCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.C when Keyboard.Modifiers == ModifierKeys.None:
-                Vm.ToggleCropModeCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.S when Keyboard.Modifiers == ModifierKeys.None:
-                Vm.ToggleSelectionModeCommand.Execute(null);
-                e.Handled = true;
-                break;
             case Key.C when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control
                 && Vm.CopySelectionCommand.CanExecute(null):
                 Vm.CopySelectionCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.G:
-                Vm.ToggleGalleryCommand.Execute(null);
                 e.Handled = true;
                 break;
             case Key.Enter when Vm.IsCropMode && Vm.ApplyCropCommand.CanExecute(null):
@@ -1063,15 +964,6 @@ public partial class MainWindow : Window
                 Vm.OpenSelectedGalleryItemCommand.Execute(null);
                 e.Handled = true;
                 break;
-            case Key.I:
-                Vm.ToggleMetadataHudCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.E:
-                // OCR text extraction toggle
-                Vm.ExtractTextCommand.Execute(null);
-                e.Handled = true;
-                break;
             case Key.Left when Vm.IsAnimated && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
                 Vm.PreviousAnimationFrameCommand.Execute(null);
                 e.Handled = true;
@@ -1084,14 +976,6 @@ public partial class MainWindow : Window
                 Vm.ToggleAnimationPlaybackCommand.Execute(null);
                 e.Handled = true;
                 break;
-            case Key.Left:
-                if (Vm.IsArchiveBook) Vm.LeftBookPageTurnCommand.Execute(null);
-                else Vm.PrevCommand.Execute(null);
-                e.Handled = true; break;
-            case Key.Right:
-                if (Vm.IsArchiveBook) Vm.RightBookPageTurnCommand.Execute(null);
-                else Vm.NextCommand.Execute(null);
-                e.Handled = true; break;
             case Key.Back:
                 if (Vm.IsArchiveBook) Vm.PrevPageCommand.Execute(null);
                 else Vm.PrevCommand.Execute(null);
@@ -1100,18 +984,6 @@ public partial class MainWindow : Window
                 if (Vm.IsArchiveBook) Vm.NextPageCommand.Execute(null);
                 else Vm.NextCommand.Execute(null);
                 e.Handled = true; break;
-            case Key.Home:
-                if (Vm.IsArchiveBook) Vm.FirstPageCommand.Execute(null);
-                else Vm.FirstCommand.Execute(null);
-                e.Handled = true; break;
-            case Key.End:
-                if (Vm.IsArchiveBook) Vm.LastPageCommand.Execute(null);
-                else Vm.LastCommand.Execute(null);
-                e.Handled = true; break;
-            case Key.Delete:
-                Vm.DeleteCommand.Execute(null); e.Handled = true; break;
-            case Key.F5:
-                Vm.RefreshCommand.Execute(null); e.Handled = true; break;
             case Key.OemPlus:
             case Key.Add:
                 ZoomActiveCanvasBy(1.2); e.Handled = true; break;

@@ -28,6 +28,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly OcrWorkflowController _ocrWorkflow;
     private readonly ExternalEditReloadController _externalEditReload;
     private readonly UpdateCheckController _updateCheck;
+    private readonly CommandShortcutService _commandShortcuts;
     private readonly RecycleBinDeleteService _recycleBinDelete;
     private readonly NonDestructiveEditService _editStack = new();
     private readonly ImageFileTransferService _fileTransfer = new();
@@ -97,6 +98,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Func<string?>? pickCompareFile = null)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        _commandShortcuts = new CommandShortcutService(_settings);
         _clipboardImport = clipboardImport ?? new ClipboardImportService();
         _nav = navigator ?? new DirectoryNavigator();
         _recycleBinDelete = recycleBinDelete ?? new RecycleBinDeleteService(_settings);
@@ -324,7 +326,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         DecreaseSlideshowIntervalCommand = new RelayCommand(() => SlideshowIntervalSeconds--, () => IsSlideshowActive && SlideshowIntervalSeconds > 1);
         ToggleSlideshowShuffleCommand = new RelayCommand(ToggleSlideshowShuffle, () => IsSlideshowActive);
 
-        _commandPaletteRegistry = BuildCommandPaletteRegistry();
+        RefreshCommandPalette();
 
         // V20-02 UI consumer: seed RecentFolders from SettingsService at startup so the side
         // panel renders prior-session folders before the user opens anything.
@@ -925,6 +927,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     // V20-29: command palette overlay — Ctrl+Shift+P opens, Escape/Enter/click dismisses.
+    private IReadOnlyDictionary<string, string> _shortcutTexts = new Dictionary<string, string>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, string> ShortcutTexts
+    {
+        get => _shortcutTexts;
+        private set => Set(ref _shortcutTexts, value);
+    }
+
     private List<CommandPaletteItem> _commandPaletteRegistry = new();
 
     private bool _showCommandPalette;
@@ -1006,34 +1015,185 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    public bool IsCommandShortcut(string id, Key key, ModifierKeys modifiers)
+        => _commandShortcuts.IsShortcut(id, key, modifiers);
+
+    public bool TryExecuteCommandShortcut(Key key, ModifierKeys modifiers)
+    {
+        if (!_commandShortcuts.TryMatch(key, modifiers, out var definition)
+            || definition.Id == CommandIds.CommandPalette)
+        {
+            return false;
+        }
+
+        return ExecuteCommandShortcut(definition.Id);
+    }
+
+    private bool ExecuteCommandShortcut(string id)
+    {
+        switch (id)
+        {
+            case CommandIds.Open:
+                OpenCommand.Execute(null);
+                return true;
+            case CommandIds.Previous:
+                if (IsArchiveBook) LeftBookPageTurnCommand.Execute(null);
+                else PrevCommand.Execute(null);
+                return true;
+            case CommandIds.Next:
+                if (IsArchiveBook) RightBookPageTurnCommand.Execute(null);
+                else NextCommand.Execute(null);
+                return true;
+            case CommandIds.First:
+                if (IsArchiveBook) FirstPageCommand.Execute(null);
+                else FirstCommand.Execute(null);
+                return true;
+            case CommandIds.Last:
+                if (IsArchiveBook) LastPageCommand.Execute(null);
+                else LastCommand.Execute(null);
+                return true;
+            case CommandIds.Refresh:
+                RefreshCommand.Execute(null);
+                return true;
+            case CommandIds.Filmstrip:
+                ToggleFilmstripCommand.Execute(null);
+                return true;
+            case CommandIds.MetadataHud:
+                ToggleMetadataHudCommand.Execute(null);
+                return true;
+            case CommandIds.Gallery:
+                ToggleGalleryCommand.Execute(null);
+                return true;
+            case CommandIds.ExtractText:
+                ExtractTextCommand.Execute(null);
+                return true;
+            case CommandIds.CropMode:
+                ToggleCropModeCommand.Execute(null);
+                return true;
+            case CommandIds.SelectionMode:
+                ToggleSelectionModeCommand.Execute(null);
+                return true;
+            case CommandIds.Resize:
+                OpenResizeDialogCommand.Execute(null);
+                return true;
+            case CommandIds.Adjustments:
+                OpenAdjustmentsCommand.Execute(null);
+                return true;
+            case CommandIds.Effects:
+                OpenEffectsCommand.Execute(null);
+                return true;
+            case CommandIds.AutoEnhance:
+                AutoEnhanceCommand.Execute(null);
+                return true;
+            case CommandIds.Perspective:
+                OpenPerspectiveCommand.Execute(null);
+                return true;
+            case CommandIds.ExposureBrush:
+                ToggleExposureBrushModeCommand.Execute(null);
+                return true;
+            case CommandIds.RedEye:
+                ToggleRedEyeModeCommand.Execute(null);
+                return true;
+            case CommandIds.Retouch:
+                ToggleRetouchModeCommand.Execute(null);
+                return true;
+            case CommandIds.ExportWorkbench:
+                OpenExportWorkbenchCommand.Execute(null);
+                return true;
+            case CommandIds.Delete:
+                DeleteCommand.Execute(null);
+                return true;
+            case CommandIds.Reload:
+                ReloadCommand.Execute(null);
+                return true;
+            case CommandIds.Print:
+                PrintCommand.Execute(null);
+                return true;
+            case CommandIds.SaveCopy:
+                SaveAsCopyCommand.Execute(null);
+                return true;
+            case CommandIds.Paste:
+                PasteFromClipboardCommand.Execute(null);
+                return true;
+            case CommandIds.ReferenceBoard:
+                OpenReferenceBoardCommand.Execute(null);
+                return true;
+            case CommandIds.DuplicateCleanup:
+                OpenDuplicateCleanupCommand.Execute(null);
+                return true;
+            case CommandIds.FileHealthScan:
+                OpenFileHealthScanCommand.Execute(null);
+                return true;
+            case CommandIds.TagGraph:
+                OpenTagGraphCommand.Execute(null);
+                return true;
+            case CommandIds.ImportInbox:
+                OpenImportInboxCommand.Execute(null);
+                return true;
+            case CommandIds.MacroActions:
+                OpenMacroActionsCommand.Execute(null);
+                return true;
+            case CommandIds.BatchProcessor:
+                OpenBatchProcessorCommand.Execute(null);
+                return true;
+            case CommandIds.EditStack:
+                OpenEditStackCommand.Execute(null);
+                return true;
+            case CommandIds.ReviewMode:
+                ToggleReviewModeCommand.Execute(null);
+                return true;
+            case CommandIds.Compare:
+                StartCompareCommand.Execute(null);
+                return true;
+            case CommandIds.CompareWith:
+                CompareWithCommand.Execute(null);
+                return true;
+            case CommandIds.Settings:
+                SettingsCommand.Execute(null);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private CommandPaletteItem PaletteCommand(string id, ICommand command)
+    {
+        var definition = _commandShortcuts.GetDefinition(id);
+        return new CommandPaletteItem
+        {
+            CommandId = id,
+            Name = definition.Name,
+            Shortcut = _commandShortcuts.GetShortcutText(id),
+            Category = definition.Category,
+            Command = command,
+        };
+    }
+
     private List<CommandPaletteItem> BuildCommandPaletteRegistry()
     {
-        var nav = Strings.CommandPalette_Category_Navigation;
         var view = Strings.CommandPalette_Category_View;
         var edit = Strings.CommandPalette_Category_Edit;
         var file = Strings.CommandPalette_Category_File;
         var tools = Strings.CommandPalette_Category_Tools;
-        var review = Strings.CommandPalette_Category_Review;
-        var compare = Strings.CommandPalette_Category_Compare;
         var sort = Strings.CommandPalette_Category_Sort;
         var help = Strings.CommandPalette_Category_Help;
 
         var items = new List<CommandPaletteItem>
         {
             // Navigation
-            new() { Name = Strings.CommandPalette_Open, Shortcut = "Ctrl+O", Category = nav, Command = OpenCommand },
-            new() { Name = Strings.CommandPalette_Next, Shortcut = "Right", Category = nav, Command = NextCommand },
-            new() { Name = Strings.CommandPalette_Previous, Shortcut = "Left", Category = nav, Command = PrevCommand },
-            new() { Name = Strings.CommandPalette_First, Shortcut = "Home", Category = nav, Command = FirstCommand },
-            new() { Name = Strings.CommandPalette_Last, Shortcut = "End", Category = nav, Command = LastCommand },
-            new() { Name = Strings.CommandPalette_Refresh, Shortcut = "F5", Category = nav, Command = RefreshCommand },
+            PaletteCommand(CommandIds.Open, OpenCommand),
+            PaletteCommand(CommandIds.Next, NextCommand),
+            PaletteCommand(CommandIds.Previous, PrevCommand),
+            PaletteCommand(CommandIds.First, FirstCommand),
+            PaletteCommand(CommandIds.Last, LastCommand),
+            PaletteCommand(CommandIds.Refresh, RefreshCommand),
 
             // View
-            new() { Name = Strings.CommandPalette_Filmstrip, Shortcut = "T", Category = view, Command = ToggleFilmstripCommand },
-            new() { Name = Strings.CommandPalette_MetadataHud, Shortcut = "I", Category = view, Command = ToggleMetadataHudCommand },
-            new() { Name = Strings.CommandPalette_Gallery, Shortcut = "G", Category = view, Command = ToggleGalleryCommand },
+            PaletteCommand(CommandIds.Filmstrip, ToggleFilmstripCommand),
+            PaletteCommand(CommandIds.MetadataHud, ToggleMetadataHudCommand),
+            PaletteCommand(CommandIds.Gallery, ToggleGalleryCommand),
             new() { Name = Strings.CommandPalette_Inspector, Category = view, Command = ToggleInspectorCommand },
-            new() { Name = Strings.CommandPalette_ExtractText, Shortcut = "E", Category = view, Command = ExtractTextCommand },
+            PaletteCommand(CommandIds.ExtractText, ExtractTextCommand),
             new() { Name = Strings.CommandPalette_ChannelNormal, Category = view, Command = new RelayCommand(() => ChannelMode = ChannelMode.Normal) },
             new() { Name = Strings.CommandPalette_ChannelRed, Category = view, Command = new RelayCommand(() => ChannelMode = ChannelMode.Red) },
             new() { Name = Strings.CommandPalette_ChannelGreen, Category = view, Command = new RelayCommand(() => ChannelMode = ChannelMode.Green) },
@@ -1046,23 +1206,24 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             new() { Name = Strings.CommandPalette_Rotate180, Category = edit, Command = Rotate180Command },
             new() { Name = Strings.CommandPalette_FlipH, Category = edit, Command = FlipHorizontalCommand },
             new() { Name = Strings.CommandPalette_FlipV, Category = edit, Command = FlipVerticalCommand },
-            new() { Name = Strings.CommandPalette_CropMode, Shortcut = "C", Category = edit, Command = ToggleCropModeCommand },
-            new() { Name = Strings.CommandPalette_Resize, Shortcut = "Ctrl+Alt+R", Category = edit, Command = OpenResizeDialogCommand },
-            new() { Name = Strings.CommandPalette_Adjustments, Shortcut = "Ctrl+Alt+A", Category = edit, Command = OpenAdjustmentsCommand },
-            new() { Name = Strings.CommandPalette_Effects, Shortcut = "Ctrl+Alt+F", Category = edit, Command = OpenEffectsCommand },
-            new() { Name = Strings.CommandPalette_AutoEnhance, Shortcut = "Ctrl+Alt+E", Category = edit, Command = AutoEnhanceCommand },
-            new() { Name = Strings.CommandPalette_Perspective, Shortcut = "Ctrl+Alt+P", Category = edit, Command = OpenPerspectiveCommand },
-            new() { Name = Strings.CommandPalette_ExposureBrush, Shortcut = "Ctrl+Alt+D", Category = edit, Command = ToggleExposureBrushModeCommand },
-            new() { Name = Strings.CommandPalette_RedEye, Shortcut = "Ctrl+Alt+Y", Category = edit, Command = ToggleRedEyeModeCommand },
-            new() { Name = Strings.CommandPalette_Retouch, Shortcut = "Ctrl+Alt+H", Category = edit, Command = ToggleRetouchModeCommand },
+            PaletteCommand(CommandIds.CropMode, ToggleCropModeCommand),
+            PaletteCommand(CommandIds.SelectionMode, ToggleSelectionModeCommand),
+            PaletteCommand(CommandIds.Resize, OpenResizeDialogCommand),
+            PaletteCommand(CommandIds.Adjustments, OpenAdjustmentsCommand),
+            PaletteCommand(CommandIds.Effects, OpenEffectsCommand),
+            PaletteCommand(CommandIds.AutoEnhance, AutoEnhanceCommand),
+            PaletteCommand(CommandIds.Perspective, OpenPerspectiveCommand),
+            PaletteCommand(CommandIds.ExposureBrush, ToggleExposureBrushModeCommand),
+            PaletteCommand(CommandIds.RedEye, ToggleRedEyeModeCommand),
+            PaletteCommand(CommandIds.Retouch, ToggleRetouchModeCommand),
             new() { Name = Strings.CommandPalette_Annotations, Category = edit, Command = OpenAnnotationsCommand },
-            new() { Name = Strings.CommandPalette_ExportWorkbench, Shortcut = "Ctrl+Alt+W", Category = edit, Command = OpenExportWorkbenchCommand },
+            PaletteCommand(CommandIds.ExportWorkbench, OpenExportWorkbenchCommand),
 
             // File
-            new() { Name = Strings.CommandPalette_Delete, Shortcut = "Del", Category = file, Command = DeleteCommand },
-            new() { Name = Strings.CommandPalette_Reload, Shortcut = "Ctrl+Shift+R", Category = file, Command = ReloadCommand },
-            new() { Name = Strings.CommandPalette_Print, Shortcut = "Ctrl+P", Category = file, Command = PrintCommand },
-            new() { Name = Strings.CommandPalette_SaveCopy, Shortcut = "Ctrl+Shift+S", Category = file, Command = SaveAsCopyCommand },
+            PaletteCommand(CommandIds.Delete, DeleteCommand),
+            PaletteCommand(CommandIds.Reload, ReloadCommand),
+            PaletteCommand(CommandIds.Print, PrintCommand),
+            PaletteCommand(CommandIds.SaveCopy, SaveAsCopyCommand),
             new() { Name = Strings.CommandPalette_CopyPath, Category = file, Command = CopyPathCommand },
             new() { Name = Strings.CommandPalette_CopyImage, Category = file, Command = CopyImageCommand },
             new() { Name = Strings.CommandPalette_Reveal, Category = file, Command = RevealCommand },
@@ -1078,25 +1239,25 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             new() { Name = Strings.CommandPalette_MoveToFolder, Category = file, Command = MoveToFolderCommand },
 
             // Tools
-            new() { Name = Strings.CommandPalette_ReferenceBoard, Shortcut = "Ctrl+B", Category = tools, Command = OpenReferenceBoardCommand },
-            new() { Name = Strings.CommandPalette_DuplicateCleanup, Shortcut = "Ctrl+Shift+D", Category = tools, Command = OpenDuplicateCleanupCommand },
-            new() { Name = Strings.CommandPalette_FileHealthScan, Shortcut = "Ctrl+Shift+H", Category = tools, Command = OpenFileHealthScanCommand },
+            PaletteCommand(CommandIds.ReferenceBoard, OpenReferenceBoardCommand),
+            PaletteCommand(CommandIds.DuplicateCleanup, OpenDuplicateCleanupCommand),
+            PaletteCommand(CommandIds.FileHealthScan, OpenFileHealthScanCommand),
             new() { Name = Strings.CommandPalette_RecoveryCenter, Category = tools, Command = OpenRecoveryCenterCommand },
             new() { Name = Strings.CommandPalette_ModelManager, Category = tools, Command = OpenModelManagerCommand },
             new() { Name = Strings.CommandPalette_SemanticSearch, Category = tools, Command = OpenSemanticSearchCommand },
-            new() { Name = Strings.CommandPalette_TagGraph, Shortcut = "Ctrl+Shift+T", Category = tools, Command = OpenTagGraphCommand },
-            new() { Name = Strings.CommandPalette_ImportInbox, Shortcut = "Ctrl+Shift+I", Category = tools, Command = OpenImportInboxCommand },
+            PaletteCommand(CommandIds.TagGraph, OpenTagGraphCommand),
+            PaletteCommand(CommandIds.ImportInbox, OpenImportInboxCommand),
             new() { Name = Strings.CommandPalette_ImportXmpSidecars, Category = tools, Command = ImportXmpSidecarsCommand },
-            new() { Name = Strings.CommandPalette_MacroActions, Shortcut = "Ctrl+Shift+M", Category = tools, Command = OpenMacroActionsCommand },
-            new() { Name = Strings.CommandPalette_BatchProcessor, Shortcut = "Ctrl+Shift+B", Category = tools, Command = OpenBatchProcessorCommand },
-            new() { Name = Strings.CommandPalette_EditStack, Shortcut = "Ctrl+Shift+E", Category = tools, Command = OpenEditStackCommand },
+            PaletteCommand(CommandIds.MacroActions, OpenMacroActionsCommand),
+            PaletteCommand(CommandIds.BatchProcessor, OpenBatchProcessorCommand),
+            PaletteCommand(CommandIds.EditStack, OpenEditStackCommand),
 
             // Review
-            new() { Name = Strings.CommandPalette_ReviewMode, Shortcut = "L", Category = review, Command = ToggleReviewModeCommand },
+            PaletteCommand(CommandIds.ReviewMode, ToggleReviewModeCommand),
 
             // Compare
-            new() { Name = Strings.CommandPalette_Compare, Shortcut = "Ctrl+Alt+C", Category = compare, Command = StartCompareCommand },
-            new() { Name = Strings.CommandPalette_CompareWith, Shortcut = "Ctrl+Alt+V", Category = compare, Command = CompareWithCommand },
+            PaletteCommand(CommandIds.Compare, StartCompareCommand),
+            PaletteCommand(CommandIds.CompareWith, CompareWithCommand),
 
             // Slideshow
             new() { Name = Strings.CommandPalette_ToggleSlideshow, Category = view, Command = ToggleSlideshowCommand },
@@ -1118,10 +1279,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             new() { Name = Strings.CommandPalette_SortType, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ExtensionThenName)) },
 
             // Help
-            new() { Name = Strings.CommandPalette_Settings, Shortcut = "Ctrl+,", Category = help, Command = SettingsCommand },
+            PaletteCommand(CommandIds.Settings, SettingsCommand),
+            PaletteCommand(CommandIds.CommandPalette, ToggleCommandPaletteCommand),
             new() { Name = Strings.CommandPalette_About, Category = help, Command = AboutCommand },
             new() { Name = Strings.CommandPalette_CheckUpdates, Category = help, Command = CheckForUpdatesCommand },
-            new() { Name = Strings.CommandPalette_Paste, Shortcut = "Ctrl+V", Category = help, Command = PasteFromClipboardCommand },
+            PaletteCommand(CommandIds.Paste, PasteFromClipboardCommand),
         };
 
         // V20-27: append dynamic "Send to monitor N" entries for each connected display.
@@ -1161,6 +1323,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     /// </summary>
     public void RefreshCommandPalette()
     {
+        ShortcutTexts = _commandShortcuts.GetShortcutTextMap();
         _commandPaletteRegistry = BuildCommandPaletteRegistry();
         RefreshCommandPaletteItems();
     }
@@ -3791,17 +3954,30 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             var result = await DecodeCurrentPathAsync(path!);
             if (!string.Equals(_nav.CurrentPath, path, StringComparison.OrdinalIgnoreCase))
+            {
+                IsImageLoading = false;
                 return false;
+            }
 
             return CompleteCurrentLoad(path!, result, startCropMode: startCropMode);
         }
         catch (Exception ex)
         {
             if (!string.Equals(_nav.CurrentPath, path, StringComparison.OrdinalIgnoreCase))
+            {
+                IsImageLoading = false;
                 return false;
+            }
 
             return CompleteCurrentLoad(path!, error: ex, startCropMode: startCropMode);
         }
+    }
+
+    private bool _isImageLoading;
+    public bool IsImageLoading
+    {
+        get => _isImageLoading;
+        private set => Set(ref _isImageLoading, value);
     }
 
     private bool PrepareCurrentLoad(string? path)
@@ -3812,6 +3988,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return false;
         }
 
+        IsImageLoading = true;
+        SetCurrentImageWithChannel(null);
         _ocrWorkflow.Clear(cancelExtraction: true);
         return true;
     }
@@ -4002,6 +4180,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         // V20-03: after loading, enqueue neighbours so the next arrow-press is instant.
         // The preload itself runs off the UI thread.
+        IsImageLoading = false;
         EnqueueNeighbours();
         return loaded;
     }
@@ -6638,6 +6817,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         };
         settings.ShowDialog();
         RefreshSettingsFromStore();
+        RefreshCommandPalette();
     }
 
     private void RefreshSettingsFromStore()

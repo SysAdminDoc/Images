@@ -440,7 +440,7 @@ public sealed class BatchProcessorService
                 stem = ApplyPattern(GetParameter(operation.Parameters, "pattern", "{name}"), sourcePath, sourceIndex, stem);
         }
 
-        return stem + ExportRequestFromPreset(preset).Extension;
+        return SanitizeFileNameStem(stem) + ExportRequestFromPreset(preset).Extension;
     }
 
     private static string ApplyPattern(string pattern, string path, int index, string currentStem)
@@ -456,6 +456,19 @@ public sealed class BatchProcessorService
             .Replace("{index}", index.ToString("000", CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase)
             .Replace("{date}", date, StringComparison.OrdinalIgnoreCase)
             .Replace("{ext}", Path.GetExtension(path).TrimStart('.'), StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string SanitizeFileNameStem(string stem)
+    {
+        if (string.IsNullOrWhiteSpace(stem))
+            return "image";
+
+        var invalid = Path.GetInvalidFileNameChars();
+        var chars = stem.Trim()
+            .Select(ch => invalid.Contains(ch) ? '_' : ch)
+            .ToArray();
+        var sanitized = new string(chars).Trim('.', ' ');
+        return string.IsNullOrWhiteSpace(sanitized) ? "image" : sanitized;
     }
 
     private static IReadOnlyList<string> NormalizeSourcePaths(IEnumerable<string> sourcePaths)

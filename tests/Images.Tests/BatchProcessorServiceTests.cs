@@ -103,6 +103,40 @@ public sealed class BatchProcessorServiceTests
     }
 
     [Fact]
+    public void BuildPreview_WithRenamePattern_SanitizesInvalidOutputCharacters()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteImage(temp.Path, "source.png", 4, 4);
+        var output = Directory.CreateDirectory(Path.Combine(temp.Path, "out")).FullName;
+        var preset = new BatchProcessorPreset(
+            "Rename",
+            ".png",
+            92,
+            0,
+            0,
+            [
+                new BatchOperationStep(
+                    BatchOperationKinds.RenamePattern,
+                    new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        ["pattern"] = "bad:name:{index}"
+                    }),
+                new BatchOperationStep(
+                    BatchOperationKinds.ExportCopy,
+                    new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        ["extension"] = ".png",
+                        ["quality"] = "92"
+                    })
+            ]);
+
+        var result = new BatchProcessorService().BuildPreview([source], preset, output);
+
+        var item = Assert.Single(result.Items);
+        Assert.EndsWith("bad_name_001.png", item.OutputPath, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void PresetJson_NormalizesUnsupportedExtension()
     {
         var preset = BatchProcessorService.ParsePreset(
