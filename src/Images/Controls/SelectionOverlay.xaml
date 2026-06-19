@@ -11,10 +11,10 @@
                     BorderBrush="{StaticResource AccentBrush}"
                     BorderThickness="2"
                     CornerRadius="2"
-                    Background="#1F89B4FA"
+                    Background="{DynamicResource AccentPanelBrush}"
                     SnapsToDevicePixels="True">
                 <Grid>
-                    <Rectangle Stroke="#B8F5F5F8"
+                    <Rectangle Stroke="{DynamicResource OverlayGuideStrongBrush}"
                                StrokeThickness="1"
                                StrokeDashArray="3 3"
                                Fill="Transparent"

@@ -46,4 +46,29 @@
     <SolidColorBrush x:Key="GreenBrush" Color="{StaticResource GreenColor}" />
     <SolidColorBrush x:Key="YellowBrush" Color="{StaticResource YellowColor}" />
 
+    <!-- ============ Semantic surfaces + chrome ============ -->
+    <SolidColorBrush x:Key="ViewportBrush" Color="#FFF8FAFC" />
+    <SolidColorBrush x:Key="PanelBrush" Color="#FAEFF1F5" />
+    <SolidColorBrush x:Key="SurfacePanelBrush" Color="#DDE6E9EF" />
+    <SolidColorBrush x:Key="HairlineBrush" Color="#7CBCC0CC" />
+    <SolidColorBrush x:Key="DividerBrush" Color="#596C6F85" />
+    <SolidColorBrush x:Key="FloatingChromeBrush" Color="#FBEFF1F5" />
+    <SolidColorBrush x:Key="FloatingChromeBorderBrush" Color="#7C7C7F93" />
+    <SolidColorBrush x:Key="FloatingChromeTextBrush" Color="{StaticResource TextColor}" />
+    <SolidColorBrush x:Key="ToastBrush" Color="#FBEFF1F5" />
+    <SolidColorBrush x:Key="WarningPanelBrush" Color="#26DF8E1D" />
+    <SolidColorBrush x:Key="DangerPanelBrush" Color="#22D20F39" />
+    <SolidColorBrush x:Key="FocusRingBrush" Color="#CC1E66F5" />
+    <SolidColorBrush x:Key="DropOverlayBrush" Color="#DDEFF1F5" />
+    <SolidColorBrush x:Key="DropOverlayPanelBrush" Color="#FBEFF1F5" />
+    <SolidColorBrush x:Key="OcrRegionBrush" Color="#451E66F5" />
+    <SolidColorBrush x:Key="OcrRegionFocusBrush" Color="#881E66F5" />
+    <SolidColorBrush x:Key="AccentPanelBrush" Color="#1F1E66F5" />
+    <SolidColorBrush x:Key="AccentSelectionBrush" Color="#2E1E66F5" />
+    <SolidColorBrush x:Key="StatusPanelBrush" Color="#DDE6E9EF" />
+    <SolidColorBrush x:Key="SuccessPanelBrush" Color="#2640A02B" />
+    <SolidColorBrush x:Key="MauvePanelBrush" Color="#228839EF" />
+    <SolidColorBrush x:Key="OverlayGuideBrush" Color="#8C4C4F69" />
+    <SolidColorBrush x:Key="OverlayGuideStrongBrush" Color="#B84C4F69" />
+
 </ResourceDictionary>

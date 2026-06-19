@@ -11,7 +11,7 @@
                     BorderBrush="{StaticResource AccentBrush}"
                     BorderThickness="2"
                     CornerRadius="2"
-                    Background="#2689B4FA"
+                    Background="{DynamicResource AccentSelectionBrush}"
                     SnapsToDevicePixels="True">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -26,11 +26,11 @@
                     </Grid.ColumnDefinitions>
                     <Border Grid.RowSpan="3"
                             Grid.Column="1"
-                            BorderBrush="#8CF5F5F8"
+                            BorderBrush="{DynamicResource OverlayGuideBrush}"
                             BorderThickness="1,0,1,0" />
                     <Border Grid.Row="1"
                             Grid.ColumnSpan="3"
-                            BorderBrush="#8CF5F5F8"
+                            BorderBrush="{DynamicResource OverlayGuideBrush}"
                             BorderThickness="0,1,0,1" />
                     <TextBlock x:Name="SelectionLabel"
                                Grid.RowSpan="3"

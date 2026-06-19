@@ -55,4 +55,11 @@
     <SolidColorBrush x:Key="DropOverlayPanelBrush" Color="{StaticResource BaseColor}" />
     <SolidColorBrush x:Key="OcrRegionBrush" Color="{StaticResource BlueColor}" />
     <SolidColorBrush x:Key="OcrRegionFocusBrush" Color="{StaticResource BlueColor}" />
+    <SolidColorBrush x:Key="AccentPanelBrush" Color="{StaticResource BaseColor}" />
+    <SolidColorBrush x:Key="AccentSelectionBrush" Color="{StaticResource BlueColor}" />
+    <SolidColorBrush x:Key="StatusPanelBrush" Color="{StaticResource BaseColor}" />
+    <SolidColorBrush x:Key="SuccessPanelBrush" Color="{StaticResource BaseColor}" />
+    <SolidColorBrush x:Key="MauvePanelBrush" Color="{StaticResource BaseColor}" />
+    <SolidColorBrush x:Key="OverlayGuideBrush" Color="{StaticResource TextColor}" />
+    <SolidColorBrush x:Key="OverlayGuideStrongBrush" Color="{StaticResource TextColor}" />
 </ResourceDictionary>

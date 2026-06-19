@@ -638,7 +638,7 @@
                         <Border Width="28"
                                 Height="28"
                                 CornerRadius="{StaticResource Radius.Sm.CR}"
-                                Background="#1F89B4FA"
+                                Background="{DynamicResource AccentPanelBrush}"
                                 BorderBrush="{StaticResource HairlineBrush}"
                                 BorderThickness="1"
                                 Margin="0,0,11,0">
@@ -1036,7 +1036,7 @@
                             <Border Width="34"
                                     Height="34"
                                     CornerRadius="{StaticResource Radius.Lg.CR}"
-                                    Background="#1F89B4FA"
+                                    Background="{DynamicResource AccentPanelBrush}"
                                     BorderBrush="{StaticResource HairlineBrush}"
                                     BorderThickness="1"
                                     VerticalAlignment="Center">
@@ -1139,7 +1139,7 @@
                                     <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding CurrentSortMode, Converter={StaticResource SortModeMatches}, ConverterParameter=NaturalName}" Value="True">
-                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -1164,7 +1164,7 @@
                                     <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding CurrentSortMode, Converter={StaticResource SortModeMatches}, ConverterParameter=ModifiedNewest}" Value="True">
-                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -1189,7 +1189,7 @@
                                     <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding CurrentSortMode, Converter={StaticResource SortModeMatches}, ConverterParameter=ExtensionThenName}" Value="True">
-                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -1214,7 +1214,7 @@
                                     <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding CurrentSortMode, Converter={StaticResource SortModeMatches}, ConverterParameter=SizeLargest}" Value="True">
-                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -1402,15 +1402,15 @@
                                                 <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                                                        <Setter Property="Background" Value="#1F89B4FA" />
+                                                        <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                                         <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                        <Setter Property="Background" Value="#2689B4FA" />
+                                                        <Setter Property="Background" Value="{DynamicResource AccentSelectionBrush}" />
                                                         <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                     </DataTrigger>
                                                     <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                                        <Setter Property="Background" Value="#2689B4FA" />
+                                                        <Setter Property="Background" Value="{DynamicResource AccentSelectionBrush}" />
                                                         <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                     </Trigger>
                                                 </Style.Triggers>
@@ -1761,7 +1761,7 @@
                                     Margin="0,0,12,0">
                                 <Border.Style>
                                     <Style TargetType="Border">
-                                        <Setter Property="Background" Value="#1F89B4FA" />
+                                        <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                         <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsOcrBusy}" Value="True">
@@ -2412,11 +2412,11 @@
                                                         <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                                <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                             </DataTrigger>
                                                             <Trigger Property="IsKeyboardFocused" Value="True">
-                                                                <Setter Property="Background" Value="#2689B4FA" />
+                                                                <Setter Property="Background" Value="{DynamicResource AccentSelectionBrush}" />
                                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                             </Trigger>
                                                         </Style.Triggers>
@@ -2736,7 +2736,7 @@
                                     <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsFilmstripVisible}" Value="True">
-                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                 <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
                                             </DataTrigger>
@@ -2754,7 +2754,7 @@
                                     <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsMetadataHudVisible}" Value="True">
-                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                 <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
                                             </DataTrigger>
@@ -2772,7 +2772,7 @@
                                     <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsCompareMode}" Value="True">
-                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                 <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
                                             </DataTrigger>
@@ -2790,7 +2790,7 @@
                                     <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsOcrMode}" Value="True">
-                                                <Setter Property="Background" Value="#1F89B4FA" />
+                                                <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                                 <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                 <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
                                             </DataTrigger>
@@ -2880,7 +2880,7 @@
                     </Grid>
 
                     <Border Style="{StaticResource Card}"
-                            Background="#1F89B4FA"
+                            Background="{DynamicResource AccentPanelBrush}"
                             BorderBrush="{StaticResource AccentBrush}"
                             Margin="0,0,0,20"
                             Visibility="{Binding HasUpdateAvailable, Converter={StaticResource BoolToVis}}">
@@ -2942,7 +2942,7 @@
                                     Height="32"
                                     CornerRadius="{StaticResource Radius.Sm.CR}"
                                     BorderThickness="1"
-                                    Background="#1F89B4FA"
+                                    Background="{DynamicResource AccentPanelBrush}"
                                     BorderBrush="{StaticResource AccentBrush}"
                                     VerticalAlignment="Top"
                                     Margin="0,0,12,0">
@@ -3008,7 +3008,7 @@
                                     Margin="0,0,12,0">
                                 <Border.Style>
                                     <Style TargetType="{x:Type Border}">
-                                        <Setter Property="Background" Value="#1F89B4FA" />
+                                        <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                         <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Success">
@@ -3111,7 +3111,7 @@
                                         <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsReviewPick}" Value="True">
-                                                    <Setter Property="Background" Value="#1FA6E3A1" />
+                                                    <Setter Property="Background" Value="{DynamicResource SuccessPanelBrush}" />
                                                     <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
                                                     <Setter Property="Foreground" Value="{StaticResource GreenBrush}" />
                                                 </DataTrigger>
@@ -3226,11 +3226,11 @@
                                                     <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                                                            <Setter Property="Background" Value="#1F89B4FA" />
+                                                            <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                                             <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                         </DataTrigger>
                                                         <Trigger Property="IsKeyboardFocused" Value="True">
-                                                            <Setter Property="Background" Value="#2689B4FA" />
+                                                            <Setter Property="Background" Value="{DynamicResource AccentSelectionBrush}" />
                                                             <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                         </Trigger>
                                                     </Style.Triggers>
@@ -4299,7 +4299,7 @@
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsSelected}" Value="True">
                                                                         <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
-                                                                        <Setter Property="Background" Value="#1F89B4FA" />
+                                                                        <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>

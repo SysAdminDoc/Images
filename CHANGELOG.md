@@ -59,6 +59,8 @@ All notable changes to **Images** are documented here.
 
 ### Changed
 
+- **Theme semantic brush hardening** - Latte now overrides the semantic surface/chrome brushes used by shared controls, high-contrast mode now suppresses Latte overlays when active, and selected/accent/status overlays across the viewer resolve through theme tokens instead of dark-only hex values.
+
 - **Settings and collection chrome polish** — shared WPF `DataGrid` and `ListBoxItem` styles now provide intentional row rhythm, hover, selected, focused, and disabled states instead of default Windows chrome. The Hotkeys settings editor now shows quieter shortcut summary copy, inline Default/Custom badges, clearer shortcut edit help text, and a localized live loading indicator in the viewer.
 - **Premium desktop polish pass** — refreshed the shared WPF chrome with tighter 8 px radii, calmer elevation, solid accessible focus rings, consistent ComboBox/Tab styles, refined button states, and a tabbed Settings dialog that groups General, Appearance, Accessibility, Advanced, Text extraction, and Diagnostics into a cleaner resizable surface. The main viewer now uses a more forgiving startup size/work-area clamp and a viewport measure guard so large images do not push tool chrome off-screen.
 - **Complete jpegtran sidecar staging** — libjpeg-turbo release staging now copies and verifies the required adjacent `jpeg62.dll` alongside `jpegtran.exe`, and the runtime resolver marks incomplete app-local jpegtran bundles unavailable before launching them. This prevents the Windows "jpeg62.dll was not found" loader dialog during diagnostics, startup probing, and release smoke tests.

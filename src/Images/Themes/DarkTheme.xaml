@@ -68,6 +68,13 @@
     <SolidColorBrush x:Key="DropOverlayPanelBrush" Color="#F211111B" />
     <SolidColorBrush x:Key="OcrRegionBrush" Color="#4D89B4FA" />
     <SolidColorBrush x:Key="OcrRegionFocusBrush" Color="#9989B4FA" />
+    <SolidColorBrush x:Key="AccentPanelBrush" Color="#1F89B4FA" />
+    <SolidColorBrush x:Key="AccentSelectionBrush" Color="#2689B4FA" />
+    <SolidColorBrush x:Key="StatusPanelBrush" Color="#66313244" />
+    <SolidColorBrush x:Key="SuccessPanelBrush" Color="#1FA6E3A1" />
+    <SolidColorBrush x:Key="MauvePanelBrush" Color="#20CBA6F7" />
+    <SolidColorBrush x:Key="OverlayGuideBrush" Color="#8CF5F5F8" />
+    <SolidColorBrush x:Key="OverlayGuideStrongBrush" Color="#B8F5F5F8" />
 
     <!-- ============ Radius scale ============ -->
     <!-- Restrained geometry keeps dense tool surfaces professional and compact. -->
@@ -353,8 +360,8 @@
         <Setter Property="Width" Value="58" />
         <Setter Property="Height" Value="58" />
         <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="Background" Value="#A611111B" />
-        <Setter Property="BorderBrush" Value="#59CDD6F4" />
+        <Setter Property="Background" Value="{DynamicResource FloatingChromeBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource FloatingChromeBorderBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource FloatingChromeTextBrush}" />
         <Setter Property="FontSize" Value="24" />
         <Setter Property="FontFamily" Value="{StaticResource IconFontFamily}" />
@@ -382,11 +389,11 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bg" Property="Fill" Value="#D911111B" />
+                            <Setter TargetName="Bg" Property="Fill" Value="{DynamicResource DropOverlayBrush}" />
                             <Setter TargetName="Bg" Property="Stroke" Value="{DynamicResource AccentBrush}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Bg" Property="Fill" Value="#F211111B" />
+                            <Setter TargetName="Bg" Property="Fill" Value="{DynamicResource DropOverlayPanelBrush}" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Bg" Property="Stroke" Value="{DynamicResource FocusRingBrush}" />
@@ -702,11 +709,11 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="#1F89B4FA" />
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="#2689B4FA" />
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentSelectionBrush}" />
                             <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
@@ -782,7 +789,7 @@
                             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="#1F89B4FA" />
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                             <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                         </Trigger>
@@ -975,7 +982,7 @@
                 <Setter Property="Background" Value="{DynamicResource Surface0Brush}" />
             </Trigger>
             <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="#2689B4FA" />
+                <Setter Property="Background" Value="{DynamicResource AccentSelectionBrush}" />
                 <Setter Property="Foreground" Value="{DynamicResource FloatingChromeTextBrush}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
@@ -1142,7 +1149,7 @@
                             <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="ItemBorder" Property="Background" Value="#2689B4FA" />
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource AccentSelectionBrush}" />
                             <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                             <Setter Property="Foreground" Value="{DynamicResource FloatingChromeTextBrush}" />
                         </Trigger>
@@ -1179,18 +1186,18 @@
     </Style>
 
     <Style x:Key="StatusCard" TargetType="Border" BasedOn="{StaticResource Card}">
-        <Setter Property="Background" Value="#66313244" />
+        <Setter Property="Background" Value="{DynamicResource StatusPanelBrush}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding RenameStatus}" Value="Pending">
                 <Setter Property="Background" Value="{DynamicResource WarningPanelBrush}" />
                 <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding RenameStatus}" Value="Saved">
-                <Setter Property="Background" Value="#1FA6E3A1" />
+                <Setter Property="Background" Value="{DynamicResource SuccessPanelBrush}" />
                 <Setter Property="BorderBrush" Value="{DynamicResource GreenBrush}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding RenameStatus}" Value="Conflict">
-                <Setter Property="Background" Value="#20CBA6F7" />
+                <Setter Property="Background" Value="{DynamicResource MauvePanelBrush}" />
                 <Setter Property="BorderBrush" Value="{DynamicResource MauveBrush}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding RenameStatus}" Value="Error">

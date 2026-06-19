@@ -90,7 +90,7 @@
                                 <Style TargetType="Border" BasedOn="{StaticResource Card}">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Tone}" Value="Ready">
-                                            <Setter Property="Background" Value="#1FA6E3A1" />
+                                            <Setter Property="Background" Value="{DynamicResource SuccessPanelBrush}" />
                                             <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Tone}" Value="Warning">
@@ -256,7 +256,7 @@
                         <Border Width="34"
                                 Height="34"
                                 CornerRadius="{StaticResource Radius.Md.CR}"
-                                Background="#1F89B4FA"
+                                Background="{DynamicResource AccentPanelBrush}"
                                 BorderBrush="{StaticResource AccentBrush}"
                                 BorderThickness="1"
                                 Margin="0,0,12,0"
@@ -293,7 +293,7 @@
                         <Border Width="34"
                                 Height="34"
                                 CornerRadius="{StaticResource Radius.Md.CR}"
-                                Background="#1FA6E3A1"
+                                Background="{DynamicResource SuccessPanelBrush}"
                                 BorderBrush="{StaticResource GreenBrush}"
                                 BorderThickness="1"
                                 Margin="0,0,12,0"

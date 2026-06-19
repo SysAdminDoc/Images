@@ -30,7 +30,7 @@
             <Setter Property="Width" Value="38" />
             <Setter Property="Height" Value="38" />
             <Setter Property="CornerRadius" Value="{StaticResource Radius.Md.CR}" />
-            <Setter Property="Background" Value="#1F89B4FA" />
+            <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
             <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="VerticalAlignment" Value="Top" />
@@ -422,7 +422,7 @@
                                                                 <Style TargetType="Border" BasedOn="{StaticResource Badge}">
                                                                     <Style.Triggers>
                                                                         <DataTrigger Binding="{Binding IsCustomized}" Value="True">
-                                                                            <Setter Property="Background" Value="#1F89B4FA" />
+                                                                            <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                                                             <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                                                         </DataTrigger>
                                                                     </Style.Triggers>
@@ -702,7 +702,7 @@
                     <Style TargetType="Border" BasedOn="{StaticResource Card}">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding SettingsStatusTone}" Value="Success">
-                                <Setter Property="Background" Value="#1FA6E3A1" />
+                                <Setter Property="Background" Value="{DynamicResource SuccessPanelBrush}" />
                                 <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding SettingsStatusTone}" Value="Warning">
