@@ -11,10 +11,16 @@ All notable changes to **Images** are documented here.
 - **Stale version references corrected** — release support policy updated from `0.1.x`/`net9.0` to `0.2.x`/`net10.0`; release checklist updated to match current roadmap hygiene rules.
 - **23 hardcoded XAML hex colors replaced with semantic theme tokens** — status chips, selected-item highlights, overlay dimmers, and subtle surface backgrounds across 8 windows now consume `DynamicResource` brushes from the theme dictionaries. New tokens: `OverlayDimmerBrush`, `SubtleSurfaceBrush`. Light/dark/high-contrast themes all updated.
 
+### Features
+
+- **Redacted support bundle export** — About window now offers a one-click "Export support bundle" that writes a ZIP containing system info, codec report, network activity summary, diagnostics status, recent logs, crash log, recovery records, redacted settings, and cache health. No image bytes or private paths are included.
+- **Local data management panel** — Settings Diagnostics now shows per-store sizes (thumbnails, logs, recovery, semantic index, models, network log, settings DB) and offers individual clear actions for thumbnails, logs, recovery log, and network activity with a refresh button.
+
 ### Infrastructure
 
 - **WPF smoke tests split into required gate and exploratory tiers** — `LaunchAndClose` and `OpenFixtureImage` now run as a required CI gate (`SmokeGate` category); keyboard-driven interactive tests remain `continue-on-error`.
 - **Migrated xUnit v2.9.3 → v3.2.2** — dropped deprecated `Xunit.SkippableFact` in favor of native `Assert.Skip()`; updated test runner to v3.1.5.
+- **Deprecated/outdated package CI reporting** — CI and daily security workflows now report deprecated and outdated NuGet packages alongside existing CVE gates, uploading maintenance reports as workflow artifacts.
 
 ### Features
 
