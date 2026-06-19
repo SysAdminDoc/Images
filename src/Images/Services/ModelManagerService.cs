@@ -104,6 +104,19 @@ public sealed record LocalModelImportResult(
     LocalModelStatus? Model,
     string Message);
 
+public sealed record ModelValidationResult(
+    bool Success,
+    string Summary,
+    IReadOnlyList<ModelValidationStep> Steps)
+{
+    public string? FirstFailureReason => Steps.FirstOrDefault(s => !s.Passed)?.Reason;
+}
+
+public sealed record ModelValidationStep(
+    string Name,
+    bool Passed,
+    string Reason);
+
 public sealed class ModelManagerService
 {
     private const string ManifestFileName = "model-manifest.json";
@@ -339,6 +352,94 @@ public sealed class ModelManagerService
     }
 
     public string? GetModelRoot() => TryGetModelRoot();
+
+    public ModelValidationResult ValidateClipPipeline()
+    {
+        var steps = new List<ModelValidationStep>();
+
+        var root = TryGetModelRoot();
+        var textDef = _definitions.FirstOrDefault(d => d.Id == "qdrant-clip-vit-b32-text");
+        var visionDef = _definitions.FirstOrDefault(d => d.Id == "qdrant-clip-vit-b32-vision");
+        var tokenizerDef = _definitions.FirstOrDefault(d => d.Id == "qdrant-clip-vit-b32-tokenizer");
+        var preprocessorDef = _definitions.FirstOrDefault(d => d.Id == "qdrant-clip-vit-b32-preprocessor");
+
+        if (textDef is null || visionDef is null || tokenizerDef is null || preprocessorDef is null)
+            return new ModelValidationResult(false, "CLIP model definitions not found in approved registry.", steps);
+
+        var textModel = InspectModel(root, textDef);
+        steps.Add(new("Text model file", textModel.IsReady,
+            textModel.IsReady ? "Ready" : $"Not available: {textModel.StatusText}"));
+
+        var visionModel = InspectModel(root, visionDef);
+        steps.Add(new("Vision model file", visionModel.IsReady,
+            visionModel.IsReady ? "Ready" : $"Not available: {visionModel.StatusText}"));
+
+        var tokenizer = InspectModel(root, tokenizerDef);
+        steps.Add(new("Tokenizer file", tokenizer.IsReady,
+            tokenizer.IsReady ? "Ready" : $"Not available: {tokenizer.StatusText}"));
+
+        var preprocessor = InspectModel(root, preprocessorDef);
+        steps.Add(new("Preprocessor config", preprocessor.IsReady,
+            preprocessor.IsReady ? "Ready" : $"Not available: {preprocessor.StatusText}"));
+
+        if (steps.Any(s => !s.Passed))
+        {
+            return new ModelValidationResult(false,
+                $"Missing model files: {steps.Count(s => !s.Passed)} of 4 unavailable.",
+                steps);
+        }
+
+        try
+        {
+            var tokenizerObj = ClipTokenizer.Load(tokenizer.InstalledPath!);
+            var tokens = tokenizerObj.Encode("test validation input");
+            steps.Add(new("Tokenizer load + encode", tokens.Length > 0,
+                tokens.Length > 0 ? $"Encoded to {tokens.Length} tokens" : "Tokenizer returned empty"));
+        }
+        catch (Exception ex)
+        {
+            steps.Add(new("Tokenizer load + encode", false, $"Failed: {ex.Message}"));
+            return new ModelValidationResult(false, $"Tokenizer validation failed: {ex.Message}", steps);
+        }
+
+        try
+        {
+            ClipImagePreprocessor.Load(preprocessor.InstalledPath!);
+            steps.Add(new("Preprocessor config load", true, "Config parsed"));
+        }
+        catch (Exception ex)
+        {
+            steps.Add(new("Preprocessor config load", false, $"Failed: {ex.Message}"));
+            return new ModelValidationResult(false, $"Preprocessor config failed: {ex.Message}", steps);
+        }
+
+        try
+        {
+            var provider = ClipEmbeddingProvider.TryCreate(this);
+            if (provider is null)
+            {
+                steps.Add(new("ONNX session creation", false, "Provider returned null — ONNX Runtime or model load failure"));
+                return new ModelValidationResult(false, "CLIP provider creation failed.", steps);
+            }
+
+            steps.Add(new("ONNX session creation", true, "Sessions created"));
+
+            var textEmbed = provider.EmbedText("test");
+            var textOk = textEmbed.Count > 0 && textEmbed.Any(v => Math.Abs(v) > 0.000001f);
+            steps.Add(new("Text embedding smoke", textOk,
+                textOk ? $"{textEmbed.Count}-dim non-zero vector" : "Zero or empty embedding"));
+
+            provider.Dispose();
+        }
+        catch (Exception ex)
+        {
+            steps.Add(new("ONNX inference smoke", false, $"Failed: {ex.Message}"));
+            return new ModelValidationResult(false, $"Inference failed: {ex.Message}", steps);
+        }
+
+        return new ModelValidationResult(true,
+            $"CLIP pipeline validated: all {steps.Count} checks passed.", steps);
+    }
 
     private LocalModelRuntimeStatus InspectRuntime()
     {

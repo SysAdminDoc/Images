@@ -74,7 +74,11 @@ public sealed class SemanticSearchService
             ? CreateDefaultPath()
             : Path.GetFullPath(dbPath);
         _catalog = catalog ?? new CatalogService();
-        _provider = provider ?? TryCreateClipProvider() ?? new DeterministicSemanticEmbeddingProvider();
+        string? clipFallbackReason = null;
+        _provider = provider ?? TryCreateClipProvider(out clipFallbackReason) ?? new DeterministicSemanticEmbeddingProvider();
+        ClipFallbackReason = _provider is DeterministicSemanticEmbeddingProvider
+            ? (clipFallbackReason ?? "CLIP models not available; using deterministic metadata embeddings.")
+            : null;
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
 
         if (string.IsNullOrWhiteSpace(_dbPath))
@@ -97,6 +101,8 @@ public sealed class SemanticSearchService
     public string? IndexPath => _dbPath;
     public bool IsAvailable => _isAvailable;
     public ISemanticEmbeddingProvider Provider => _provider;
+
+    public string? ClipFallbackReason { get; }
 
     public SemanticSearchIndexResult Rebuild(
         IEnumerable<string> roots,
@@ -555,14 +561,19 @@ public sealed class SemanticSearchService
         string MatchedText,
         DateTimeOffset IndexedUtc);
 
-    private static ISemanticEmbeddingProvider? TryCreateClipProvider()
+    private static ISemanticEmbeddingProvider? TryCreateClipProvider(out string? fallbackReason)
     {
+        fallbackReason = null;
         try
         {
-            return ClipEmbeddingProvider.TryCreate();
+            var provider = ClipEmbeddingProvider.TryCreate();
+            if (provider is null)
+                fallbackReason = "CLIP model files not ready or ONNX session creation failed.";
+            return provider;
         }
-        catch
+        catch (Exception ex)
         {
+            fallbackReason = $"CLIP provider creation failed: {ex.Message}";
             return null;
         }
     }
