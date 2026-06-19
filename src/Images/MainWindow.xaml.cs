@@ -250,6 +250,8 @@ public partial class MainWindow : Window
 
     public void OpenPath(string path) => Vm.OpenFile(path);
 
+    public void OpenPathList(IReadOnlyList<string> paths) => Vm.OpenFileList(paths);
+
     /// <summary>
     /// V20-31: start listen mode on the specified loopback TCP port.
     /// Called by App.xaml.cs when the launch argv contains <c>--listen &lt;port&gt;</c>.
