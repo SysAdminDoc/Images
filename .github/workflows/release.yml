@@ -17,6 +17,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   build:
@@ -200,6 +202,15 @@ jobs:
             Set-Content -Path $checksum -Encoding ascii
           "CHECKSUM=$checksum" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+      - name: Generate CycloneDX SBOM
+        shell: pwsh
+        run: |
+          dotnet tool install --global CycloneDX
+          $sbom = "Images-v${{ github.event.inputs.version }}-sbom.cdx.json"
+          dotnet CycloneDX Images.sln -o . -f $sbom -sv "${{ github.event.inputs.version }}" -j
+          if (-not (Test-Path $sbom)) { throw "SBOM not produced" }
+          "SBOM=$sbom" | Out-File -FilePath $env:GITHUB_ENV -Append
+
       - name: Generate package manifests
         shell: pwsh
         run: |
@@ -226,3 +237,20 @@ jobs:
           gh release upload $tag $env:ZIP --clobber
           gh release upload $tag $env:SETUP --clobber
           gh release upload $tag $env:CHECKSUM --clobber
+          gh release upload $tag $env:SBOM --clobber
+
+      - name: Attest portable ZIP
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ${{ env.ZIP }}
+
+      - name: Attest installer
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ${{ env.SETUP }}
+
+      - name: Attest SBOM
+        uses: actions/attest-sbom@v2
+        with:
+          subject-path: ${{ env.ZIP }}
+          sbom-path: ${{ env.SBOM }}

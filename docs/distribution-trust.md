@@ -11,6 +11,8 @@ The only official distribution channel today is GitHub Releases:
 - `Images-vX.Y.Z-win-x64.zip`
 - `Images-vX.Y.Z-setup-win-x64.exe`
 - `Images-vX.Y.Z-checksums.txt`
+- `Images-vX.Y.Z-sbom.cdx.json` (CycloneDX SBOM)
+- GitHub artifact attestations (build provenance for ZIP + installer, SBOM attestation for ZIP)
 
 Both artifacts are produced by `.github/workflows/release.yml` from the same source checkout. The release workflow already validates version sync, scans vulnerable packages, builds the solution, publishes self-contained win-x64 output, builds the Inno Setup installer, and uploads SHA-256 checksums.
 
