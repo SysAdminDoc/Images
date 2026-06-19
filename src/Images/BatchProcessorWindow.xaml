@@ -144,6 +144,83 @@
 
                         <Border Style="{StaticResource Divider}" />
 
+                        <TextBlock Text="{x:Static loc:Strings.BatchOperationsHeading}" Style="{StaticResource SectionLabel}" />
+                        <Border Style="{StaticResource Card}" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="{x:Static loc:Strings.BatchOperationsHint}"
+                                           Style="{StaticResource Text.Caption}"
+                                           TextWrapping="Wrap" />
+                                <ComboBox x:Name="OperationKindCombo"
+                                          Margin="0,10,0,0"
+                                          DisplayMemberPath="Name"
+                                          SelectionChanged="OperationKindCombo_SelectionChanged"
+                                          AutomationProperties.Name="{x:Static loc:Strings.BatchOperationKindAutomationName}" />
+                                <Grid x:Name="OperationParameterGrid" Margin="0,10,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <TextBlock x:Name="OperationParamOneLabel"
+                                               Grid.Row="0"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrush}" />
+                                    <TextBox x:Name="OperationParamOneBox"
+                                             Grid.Row="1"
+                                             Margin="0,4,0,8" />
+                                    <TextBlock x:Name="OperationParamTwoLabel"
+                                               Grid.Row="2"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrush}" />
+                                    <TextBox x:Name="OperationParamTwoBox"
+                                             Grid.Row="3"
+                                             Margin="0,4,0,0" />
+                                </Grid>
+                                <Button x:Name="AddOperationButton"
+                                        Style="{StaticResource ChromeButton}"
+                                        Margin="0,10,0,0"
+                                        HorizontalAlignment="Left"
+                                        Click="AddOperationButton_Click">
+                                    <TextBlock Text="{x:Static loc:Strings.BatchAddOperation}" />
+                                </Button>
+                                <ListBox x:Name="OperationList"
+                                         MinHeight="120"
+                                         Margin="0,10,0,0"
+                                         AutomationProperties.Name="{x:Static loc:Strings.BatchOperationListAutomationName}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="0,4">
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                                <TextBlock Text="{Binding Summary}" Style="{StaticResource Text.Hint}" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <WrapPanel Margin="0,10,0,0">
+                                    <Button x:Name="MoveOperationUpButton"
+                                            Style="{StaticResource ChromeButton}"
+                                            Margin="0,0,8,0"
+                                            Click="MoveOperationUpButton_Click">
+                                        <TextBlock Text="{x:Static loc:Strings.BatchMoveOperationUp}" />
+                                    </Button>
+                                    <Button x:Name="MoveOperationDownButton"
+                                            Style="{StaticResource ChromeButton}"
+                                            Margin="0,0,8,0"
+                                            Click="MoveOperationDownButton_Click">
+                                        <TextBlock Text="{x:Static loc:Strings.BatchMoveOperationDown}" />
+                                    </Button>
+                                    <Button x:Name="RemoveOperationButton"
+                                            Style="{StaticResource ChromeButton}"
+                                            Click="RemoveOperationButton_Click">
+                                        <TextBlock Text="{x:Static loc:Strings.BatchRemoveOperation}" />
+                                    </Button>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Divider}" />
+
                         <TextBlock Text="{x:Static loc:Strings.BatchOutputHeading}" Style="{StaticResource SectionLabel}" />
                         <Border Style="{StaticResource Card}" Padding="12">
                             <StackPanel>
@@ -269,13 +346,22 @@
                                    Style="{StaticResource Text.Caption}"
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center" />
-                        <Button x:Name="RunButton"
-                                Grid.Column="1"
-                                Style="{StaticResource PrimaryButton}"
-                                Margin="14,0,0,0"
-                                Click="RunButton_Click">
-                            <TextBlock Text="{x:Static loc:Strings.BatchRunBatch}" />
-                        </Button>
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    Margin="14,0,0,0">
+                            <Button x:Name="RunButton"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Click="RunButton_Click">
+                                <TextBlock Text="{x:Static loc:Strings.BatchRunBatch}" />
+                            </Button>
+                            <Button x:Name="CancelButton"
+                                    Style="{StaticResource ChromeButton}"
+                                    Margin="8,0,0,0"
+                                    IsEnabled="False"
+                                    Click="CancelButton_Click">
+                                <TextBlock Text="{x:Static loc:Strings.Cancel}" />
+                            </Button>
+                        </StackPanel>
                     </Grid>
                 </Border>
             </Grid>

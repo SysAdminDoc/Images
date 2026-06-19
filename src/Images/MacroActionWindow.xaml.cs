@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -13,7 +14,9 @@ public partial class MacroActionWindow : Window
     private readonly MacroActionService _macro = new();
     private readonly ObservableCollection<string> _sourceRows = [];
     private readonly ObservableCollection<string> _resultRows = [];
+    private readonly ObservableCollection<PipelineStepViewModel> _steps = [];
     private string? _outputFolder;
+    private CancellationTokenSource? _cts;
 
     public MacroActionWindow()
     {
@@ -21,7 +24,13 @@ public partial class MacroActionWindow : Window
 
         SourceList.ItemsSource = _sourceRows;
         ResultList.ItemsSource = _resultRows;
-        MacroJsonBox.Text = MacroActionService.Serialize(MacroActionPlan.Default);
+        StepList.ItemsSource = _steps;
+
+        // Seed with the default plan's actions.
+        foreach (var action in MacroActionPlan.Default.Actions)
+            _steps.Add(PipelineStepViewModel.From(action, _steps.Count + 1));
+
+        RefreshEmptyState();
         RefreshSummary();
 
         SourceInitialized += (_, _) =>
@@ -30,6 +39,16 @@ public partial class MacroActionWindow : Window
             WindowChrome.ApplyDarkCaption(hwnd);
         };
     }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
+        base.OnClosing(e);
+    }
+
+    // ---- Source management (unchanged logic) ----
 
     public void AddSource(string path)
     {
@@ -95,11 +114,21 @@ public partial class MacroActionWindow : Window
         OutputFolderText.ToolTip = folder;
     }
 
-    private void AddStripGpsButton_Click(object sender, RoutedEventArgs e)
-        => AppendAction(new MacroActionStep("strip-gps", new Dictionary<string, string>()));
+    // ---- Pipeline step management ----
 
-    private void AddExportPngButton_Click(object sender, RoutedEventArgs e)
-        => AppendAction(new MacroActionStep(
+    private void AddStripGpsStep_Click(object sender, RoutedEventArgs e)
+        => AddStep(new MacroActionStep("strip-gps", new Dictionary<string, string>()));
+
+    private void AddStripMetadataStep_Click(object sender, RoutedEventArgs e)
+        => AddStep(new MacroActionStep(
+            "strip-metadata",
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["categories"] = "all"
+            }));
+
+    private void AddExportCopyStep_Click(object sender, RoutedEventArgs e)
+        => AddStep(new MacroActionStep(
             "export-copy",
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -109,25 +138,61 @@ public partial class MacroActionWindow : Window
                 ["maxHeight"] = "0"
             }));
 
-    private void AddRenamePatternButton_Click(object sender, RoutedEventArgs e)
-        => AppendAction(new MacroActionStep(
+    private void AddRenamePatternStep_Click(object sender, RoutedEventArgs e)
+        => AddStep(new MacroActionStep(
             "rename-pattern",
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 ["pattern"] = "{date}-{index}-{name}"
             }));
 
-    private void ValidatePlanButton_Click(object sender, RoutedEventArgs e)
+    private void AddStep(MacroActionStep action)
     {
-        if (!MacroActionService.TryParse(MacroJsonBox.Text, out var plan, out var error))
-        {
-            SetStatus(error, MacroActionStatus.Error);
-            return;
-        }
-
-        SetStatus(Strings.Format(nameof(Strings.MacroValidResultFormat), plan.Actions.Count, Plural(plan.Actions.Count)), MacroActionStatus.Ready);
-        RefreshSummary(plan);
+        _steps.Add(PipelineStepViewModel.From(action, _steps.Count + 1));
+        RefreshStepNumbers();
+        RefreshEmptyState();
+        RefreshSummary();
+        SetStatus(Strings.Format(nameof(Strings.MacroAddedActionFormat), action.Kind), MacroActionStatus.Ready);
     }
+
+    private void RemoveStep_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: PipelineStepViewModel vm })
+            return;
+
+        _steps.Remove(vm);
+        RefreshStepNumbers();
+        RefreshEmptyState();
+        RefreshSummary();
+    }
+
+    private void MoveStepUp_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: PipelineStepViewModel vm })
+            return;
+
+        var index = _steps.IndexOf(vm);
+        if (index <= 0)
+            return;
+
+        _steps.Move(index, index - 1);
+        RefreshStepNumbers();
+    }
+
+    private void MoveStepDown_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: PipelineStepViewModel vm })
+            return;
+
+        var index = _steps.IndexOf(vm);
+        if (index < 0 || index >= _steps.Count - 1)
+            return;
+
+        _steps.Move(index, index + 1);
+        RefreshStepNumbers();
+    }
+
+    // ---- JSON import/export ----
 
     private void LoadPlanButton_Click(object sender, RoutedEventArgs e)
     {
@@ -142,8 +207,21 @@ public partial class MacroActionWindow : Window
 
         try
         {
-            MacroJsonBox.Text = File.ReadAllText(dialog.FileName);
-            ValidatePlanButton_Click(sender, e);
+            var json = File.ReadAllText(dialog.FileName);
+            if (!MacroActionService.TryParse(json, out var plan, out var error))
+            {
+                SetStatus(error, MacroActionStatus.Error);
+                return;
+            }
+
+            _steps.Clear();
+            foreach (var action in plan.Actions)
+                _steps.Add(PipelineStepViewModel.From(action, _steps.Count + 1));
+
+            RefreshStepNumbers();
+            RefreshEmptyState();
+            RefreshSummary();
+            SetStatus(Strings.Format(nameof(Strings.MacroValidResultFormat), plan.Actions.Count, Plural(plan.Actions.Count)), MacroActionStatus.Ready);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
         {
@@ -153,11 +231,9 @@ public partial class MacroActionWindow : Window
 
     private void SavePlanButton_Click(object sender, RoutedEventArgs e)
     {
-        if (!MacroActionService.TryParse(MacroJsonBox.Text, out var plan, out var error))
-        {
-            SetStatus(error, MacroActionStatus.Error);
+        var plan = BuildPlanFromSteps();
+        if (plan is null)
             return;
-        }
 
         var dialog = new SaveFileDialog
         {
@@ -180,13 +256,63 @@ public partial class MacroActionWindow : Window
         }
     }
 
-    private async void RunButton_Click(object sender, RoutedEventArgs e)
+    // ---- Preview ----
+
+    private async void PreviewButton_Click(object sender, RoutedEventArgs e)
     {
-        if (!MacroActionService.TryParse(MacroJsonBox.Text, out var plan, out var error))
+        var plan = BuildPlanFromSteps();
+        if (plan is null)
+            return;
+
+        var sources = CollectSourceFiles();
+        if (sources.Count == 0)
         {
-            SetStatus(error, MacroActionStatus.Error);
+            SetStatus(Strings.MacroAddSourcesBeforeRunning, MacroActionStatus.Warning);
             return;
         }
+
+        var options = new MacroRunOptions(_outputFolder, DryRun: true);
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
+        SetBusy(true);
+        SetStatus(Strings.Format(nameof(Strings.MacroPreviewRunningFormat), sources.Count, Plural(sources.Count)), MacroActionStatus.Busy);
+        PreviewHeading.Text = Strings.MacroPreviewResults;
+        _resultRows.Clear();
+
+        try
+        {
+            var result = await Task.Run(() => _macro.Run(plan, sources, options, token), token);
+            foreach (var item in result.Items)
+            {
+                _resultRows.Add(item.Success
+                    ? Strings.Format(nameof(Strings.MacroPreviewItemFormat), Path.GetFileName(item.SourcePath), item.FinalPath)
+                    : Strings.Format(nameof(Strings.MacroPreviewItemFailedFormat), Path.GetFileName(item.SourcePath), item.Error));
+                foreach (var message in item.Messages)
+                    _resultRows.Add("  " + message);
+            }
+
+            SetStatus(Strings.Format(nameof(Strings.MacroPreviewCompleteFormat), result.Items.Count, Plural(result.Items.Count)), MacroActionStatus.Ready);
+        }
+        catch (OperationCanceledException)
+        {
+            SetStatus(Strings.MacroCancelled, MacroActionStatus.Warning);
+        }
+        finally
+        {
+            SetBusy(false);
+        }
+    }
+
+    // ---- Run ----
+
+    private async void RunButton_Click(object sender, RoutedEventArgs e)
+    {
+        var plan = BuildPlanFromSteps();
+        if (plan is null)
+            return;
 
         var sources = CollectSourceFiles();
         if (sources.Count == 0)
@@ -196,13 +322,19 @@ public partial class MacroActionWindow : Window
         }
 
         var options = new MacroRunOptions(_outputFolder, DryRunCheckBox.IsChecked == true);
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
         SetBusy(true);
         SetStatus(Strings.Format(nameof(Strings.MacroRunningFormat), plan.Actions.Count, Plural(plan.Actions.Count), sources.Count, Plural(sources.Count)), MacroActionStatus.Busy);
+        PreviewHeading.Text = Strings.MacroRunLog;
         _resultRows.Clear();
 
         try
         {
-            var result = await Task.Run(() => _macro.Run(plan, sources, options));
+            var result = await Task.Run(() => _macro.Run(plan, sources, options, token), token);
             foreach (var item in result.Items)
             {
                 _resultRows.Add(item.Success
@@ -216,23 +348,38 @@ public partial class MacroActionWindow : Window
                 Strings.Format(nameof(Strings.MacroCompleteFormat), result.SuccessCount, result.FailedCount),
                 result.FailedCount == 0 ? MacroActionStatus.Ready : MacroActionStatus.Warning);
         }
+        catch (OperationCanceledException)
+        {
+            SetStatus(Strings.MacroCancelled, MacroActionStatus.Warning);
+        }
         finally
         {
             SetBusy(false);
         }
     }
 
-    private void AppendAction(MacroActionStep action)
+    // ---- Cancel ----
+
+    private void CancelButton_Click(object sender, RoutedEventArgs e)
     {
-        var plan = MacroActionService.TryParse(MacroJsonBox.Text, out var parsed, out _)
-            ? parsed
-            : MacroActionPlan.Default;
-        var actions = plan.Actions.ToList();
-        actions.Add(action);
-        var updated = new MacroActionPlan(plan.Name, actions);
-        MacroJsonBox.Text = MacroActionService.Serialize(updated);
-        RefreshSummary(updated);
-        SetStatus(Strings.Format(nameof(Strings.MacroAddedActionFormat), action.Kind), MacroActionStatus.Ready);
+        _cts?.Cancel();
+    }
+
+    // ---- Helpers ----
+
+    private MacroActionPlan? BuildPlanFromSteps()
+    {
+        if (_steps.Count == 0)
+        {
+            SetStatus(Strings.MacroAddStepsFirst, MacroActionStatus.Warning);
+            return null;
+        }
+
+        var actions = new List<MacroActionStep>(_steps.Count);
+        foreach (var vm in _steps)
+            actions.Add(vm.ToStep());
+
+        return new MacroActionPlan("Images macro", actions);
     }
 
     private List<string> CollectSourceFiles()
@@ -267,15 +414,20 @@ public partial class MacroActionWindow : Window
         return files.OrderBy(path => path, StringComparer.OrdinalIgnoreCase).ToList();
     }
 
-    private void RefreshSummary()
+    private void RefreshStepNumbers()
     {
-        if (MacroActionService.TryParse(MacroJsonBox.Text, out var plan, out _))
-            RefreshSummary(plan);
+        for (var i = 0; i < _steps.Count; i++)
+            _steps[i].StepNumber = i + 1;
     }
 
-    private void RefreshSummary(MacroActionPlan plan)
+    private void RefreshEmptyState()
     {
-        PlanSummaryText.Text = Strings.Format(nameof(Strings.MacroPlanSummaryFormat), plan.Name, plan.Actions.Count, Plural(plan.Actions.Count));
+        NoStepsText.Visibility = _steps.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void RefreshSummary()
+    {
+        PlanSummaryText.Text = Strings.Format(nameof(Strings.MacroPlanSummaryFormat), "Images macro", _steps.Count, Plural(_steps.Count));
     }
 
     private void SetBusy(bool busy)
@@ -283,8 +435,9 @@ public partial class MacroActionWindow : Window
         AddFilesButton.IsEnabled = !busy;
         AddFolderButton.IsEnabled = !busy;
         RunButton.IsEnabled = !busy;
-        MacroJsonBox.IsEnabled = !busy;
+        PreviewButton.IsEnabled = !busy;
         DryRunCheckBox.IsEnabled = !busy;
+        CancelButton.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void SetStatus(string message, MacroActionStatus status)
@@ -321,4 +474,92 @@ public partial class MacroActionWindow : Window
         Warning,
         Error
     }
+}
+
+/// <summary>
+/// Lightweight view-model for a single pipeline step displayed in the step list.
+/// </summary>
+public sealed class PipelineStepViewModel : INotifyPropertyChanged
+{
+    private int _stepNumber;
+
+    public string Kind { get; }
+    public Dictionary<string, string> Parameters { get; }
+
+    public int StepNumber
+    {
+        get => _stepNumber;
+        set
+        {
+            if (_stepNumber == value) return;
+            _stepNumber = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StepNumber)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StepLabel)));
+        }
+    }
+
+    public string StepLabel => _stepNumber.ToString();
+
+    public string KindLabel => Kind switch
+    {
+        "strip-gps" => Strings.MacroStripGps,
+        "strip-metadata" => Strings.MacroStripMetadata,
+        "export-copy" => Strings.MacroExportCopy,
+        "rename-pattern" => Strings.MacroRenamePattern,
+        _ => Kind
+    };
+
+    public string ParameterSummary
+    {
+        get
+        {
+            if (Parameters.Count == 0)
+                return "";
+
+            return Kind switch
+            {
+                "strip-metadata" => FormatParam(Strings.MacroStripMetadataCategories, "categories", "all"),
+                "export-copy" => string.Join(", ",
+                    NonEmpty(
+                        FormatParam(Strings.MacroExportExtension, "extension", ".png"),
+                        FormatParam(Strings.MacroExportQuality, "quality", ""),
+                        FormatMaxDimensions())),
+                "rename-pattern" => FormatParam(Strings.MacroRenamePatternLabel, "pattern", ""),
+                _ => string.Join(", ", Parameters.Select(p => $"{p.Key}: {p.Value}"))
+            };
+        }
+    }
+
+    private PipelineStepViewModel(string kind, Dictionary<string, string> parameters, int stepNumber)
+    {
+        Kind = kind;
+        Parameters = parameters;
+        _stepNumber = stepNumber;
+    }
+
+    public static PipelineStepViewModel From(MacroActionStep action, int stepNumber)
+        => new(action.Kind, new Dictionary<string, string>(action.Parameters, StringComparer.OrdinalIgnoreCase), stepNumber);
+
+    public MacroActionStep ToStep()
+        => new(Kind, new Dictionary<string, string>(Parameters, StringComparer.OrdinalIgnoreCase));
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private string FormatParam(string label, string key, string fallback)
+    {
+        var value = Parameters.TryGetValue(key, out var v) && !string.IsNullOrWhiteSpace(v) ? v : fallback;
+        return string.IsNullOrWhiteSpace(value) ? "" : $"{label}: {value}";
+    }
+
+    private string FormatMaxDimensions()
+    {
+        var w = Parameters.TryGetValue("maxWidth", out var wv) ? wv : "0";
+        var h = Parameters.TryGetValue("maxHeight", out var hv) ? hv : "0";
+        if (w is "0" or "" && h is "0" or "")
+            return "";
+        return $"max {w}x{h}";
+    }
+
+    private static IEnumerable<string> NonEmpty(params string[] values)
+        => values.Where(v => !string.IsNullOrWhiteSpace(v));
 }

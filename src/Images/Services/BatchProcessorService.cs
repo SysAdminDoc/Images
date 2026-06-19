@@ -8,12 +8,28 @@ using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
 
+public static class BatchOperationKinds
+{
+    public const string Resize = "resize";
+    public const string Rotate = "rotate";
+    public const string FlipHorizontal = "flip-horizontal";
+    public const string FlipVertical = "flip-vertical";
+    public const string StripMetadata = "strip-metadata";
+    public const string RenamePattern = "rename-pattern";
+    public const string ExportCopy = "export-copy";
+}
+
+public sealed record BatchOperationStep(
+    string Kind,
+    IReadOnlyDictionary<string, string> Parameters);
+
 public sealed record BatchProcessorPreset(
     string Name,
     string Extension,
     int Quality,
     int MaxWidth,
-    int MaxHeight)
+    int MaxHeight,
+    IReadOnlyList<BatchOperationStep>? Operations = null)
 {
     public static IReadOnlyList<BatchProcessorPreset> Defaults { get; } =
     [
@@ -57,19 +73,8 @@ public sealed class BatchProcessorService
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    private readonly MacroActionService _macroActionService;
-    private readonly ExportPreviewService _exportPreviewService;
-
-    public BatchProcessorService(
-        MacroActionService? macroActionService = null,
-        ExportPreviewService? exportPreviewService = null)
-    {
-        _macroActionService = macroActionService ?? new MacroActionService();
-        _exportPreviewService = exportPreviewService ?? new ExportPreviewService();
-    }
-
     public static string SerializePreset(BatchProcessorPreset preset)
-        => JsonSerializer.Serialize(preset, JsonOptions);
+        => JsonSerializer.Serialize(NormalizePreset(preset), JsonOptions);
 
     public static BatchProcessorPreset ParsePreset(string json)
         => NormalizePreset(
@@ -82,13 +87,18 @@ public sealed class BatchProcessorService
         if (string.IsNullOrWhiteSpace(extension) || ImageExportService.TryResolveFormat(extension) is null)
             extension = ".png";
 
+        var quality = Math.Clamp(preset.Quality, 1, 100);
+        var maxWidth = Math.Max(0, preset.MaxWidth);
+        var maxHeight = Math.Max(0, preset.MaxHeight);
+
         return preset with
         {
             Name = string.IsNullOrWhiteSpace(preset.Name) ? "Batch preset" : preset.Name.Trim(),
             Extension = extension,
-            Quality = Math.Clamp(preset.Quality, 1, 100),
-            MaxWidth = Math.Max(0, preset.MaxWidth),
-            MaxHeight = Math.Max(0, preset.MaxHeight)
+            Quality = quality,
+            MaxWidth = maxWidth,
+            MaxHeight = maxHeight,
+            Operations = NormalizeOperations(preset.Operations, extension, quality, maxWidth, maxHeight)
         };
     }
 
@@ -103,41 +113,21 @@ public sealed class BatchProcessorService
 
         var failed = 0;
         var items = new List<BatchPreviewItem>();
-        foreach (var path in NormalizeSourcePaths(sourcePaths))
+        var paths = NormalizeSourcePaths(sourcePaths);
+        for (var index = 0; index < paths.Count; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            var path = paths[index];
             try
             {
-                var info = new FileInfo(path);
-                if (!info.Exists)
-                {
-                    failed++;
-                    continue;
-                }
-
-                using var image = new MagickImage();
-                image.Ping(info);
-                var preview = _exportPreviewService.EstimateFile(
-                    info.FullName,
-                    new ExportPreviewRequest(preset.Extension, preset.Quality, preset.MaxWidth, preset.MaxHeight));
-                items.Add(new BatchPreviewItem(
-                    info.FullName,
-                    info.Name,
-                    ResolveUniqueDestination(ResolveOutputFolder(info.FullName, outputFolder), Path.GetFileNameWithoutExtension(info.Name) + preset.Extension),
-                    preset.Extension.TrimStart('.').ToUpperInvariant(),
-                    FormatDimensions(image.Width, image.Height),
-                    preview.DimensionsText,
-                    FormatBytes(info.Length),
-                    preview.EstimatedSizeText,
-                    preview.DeltaText,
-                    preview.WarningText,
-                    StatusFor(image.Width, image.Height, preview.Width, preview.Height)));
+                var item = BuildPreviewItem(path, index + 1, preset, outputFolder, cancellationToken);
+                items.Add(item);
             }
             catch (OperationCanceledException)
             {
                 throw;
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException or MagickException)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or MagickException)
             {
                 failed++;
                 Log.LogDebug(ex, "Could not preview batch item {Path}", path);
@@ -157,26 +147,315 @@ public sealed class BatchProcessorService
         ArgumentNullException.ThrowIfNull(sourcePaths);
         preset = NormalizePreset(preset);
 
-        var plan = new MacroActionPlan(
-            "Batch export",
-            [
-                new MacroActionStep(
-                    "export-copy",
+        var paths = NormalizeSourcePaths(sourcePaths);
+        var results = new List<MacroRunItemResult>(paths.Count);
+        for (var index = 0; index < paths.Count; index++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            results.Add(RunOne(paths[index], index + 1, preset, outputFolder, dryRun, cancellationToken));
+        }
+
+        return new BatchRunResult(results);
+    }
+
+    private static BatchPreviewItem BuildPreviewItem(
+        string sourcePath,
+        int sourceIndex,
+        BatchProcessorPreset preset,
+        string? outputFolder,
+        CancellationToken cancellationToken)
+    {
+        var info = new FileInfo(sourcePath);
+        if (!info.Exists)
+            throw new IOException("Source file no longer exists.");
+
+        using var image = new MagickImage(info.FullName);
+        var originalWidth = image.Width;
+        var originalHeight = image.Height;
+        var messages = new List<string>();
+        var outputName = BuildOutputFileName(info.FullName, sourceIndex, preset);
+        ApplyPipelineOperations(image, info.FullName, preset, messages, cancellationToken);
+
+        var request = ExportRequestFromPreset(preset);
+        var extension = request.Extension;
+        var format = ImageExportService.TryResolveFormat(extension) ?? MagickFormat.Png;
+        using var encodedImage = (MagickImage)image.Clone();
+        ImageExportService.PrepareForExport(encodedImage, format, (uint)request.Quality);
+        var encodedBytes = encodedImage.ToByteArray(format);
+
+        var outputPath = ResolveUniqueDestination(
+            ResolveOutputFolder(info.FullName, outputFolder),
+            Path.ChangeExtension(outputName, extension));
+        var warnings = ExportCapabilityWarningService.BuildWarnings(image, info.FullName, extension, format);
+        var status = BuildStatusText(preset, messages);
+
+        return new BatchPreviewItem(
+            info.FullName,
+            info.Name,
+            outputPath,
+            extension.TrimStart('.').ToUpperInvariant(),
+            FormatDimensions(originalWidth, originalHeight),
+            FormatDimensions(encodedImage.Width, encodedImage.Height),
+            FormatBytes(info.Length),
+            FormatBytes(encodedBytes.LongLength),
+            FormatDelta(encodedBytes.LongLength - info.Length),
+            warnings.Count == 0 ? "No format warnings." : string.Join(" ", warnings),
+            status);
+    }
+
+    private static MacroRunItemResult RunOne(
+        string sourcePath,
+        int sourceIndex,
+        BatchProcessorPreset preset,
+        string? outputFolder,
+        bool dryRun,
+        CancellationToken cancellationToken)
+    {
+        var messages = new List<string>();
+        var currentPath = sourcePath;
+
+        try
+        {
+            if (!File.Exists(sourcePath))
+                return new MacroRunItemResult(sourcePath, sourcePath, messages, "Source file no longer exists.");
+
+            var outputName = BuildOutputFileName(sourcePath, sourceIndex, preset);
+            var request = ExportRequestFromPreset(preset);
+            var outputPath = ResolveUniqueDestination(
+                ResolveOutputFolder(sourcePath, outputFolder),
+                Path.ChangeExtension(outputName, request.Extension));
+            currentPath = outputPath;
+
+            if (dryRun)
+            {
+                var preview = BuildPreviewItem(sourcePath, sourceIndex, preset, outputFolder, cancellationToken);
+                messages.Add($"Would run {preset.Operations?.Count ?? 0} operation{Plural(preset.Operations?.Count ?? 0)} on {Path.GetFileName(sourcePath)}.");
+                messages.Add($"Would write {preview.OutputDimensions} {preview.Format} to {preview.OutputPath}.");
+                return new MacroRunItemResult(sourcePath, outputPath, messages, null);
+            }
+
+            using var image = new MagickImage(sourcePath);
+            ApplyPipelineOperations(image, sourcePath, preset, messages, cancellationToken);
+            var format = ImageExportService.TryResolveFormat(request.Extension) ?? MagickFormat.Png;
+            ImageExportService.PrepareForExport(image, format, (uint)request.Quality);
+            WriteAtomically(image, outputPath);
+            messages.Add($"Wrote {Path.GetFileName(outputPath)}.");
+            return new MacroRunItemResult(sourcePath, outputPath, messages, null);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or MagickException)
+        {
+            Log.LogWarning(ex, "Batch operation chain failed for {Path}", sourcePath);
+            return new MacroRunItemResult(sourcePath, currentPath, messages, ex.Message);
+        }
+    }
+
+    private static void ApplyPipelineOperations(
+        MagickImage image,
+        string sourcePath,
+        BatchProcessorPreset preset,
+        List<string> messages,
+        CancellationToken cancellationToken)
+    {
+        foreach (var operation in preset.Operations ?? [])
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            switch (NormalizeKind(operation.Kind))
+            {
+                case BatchOperationKinds.Resize:
+                    ApplyResize(image, operation.Parameters);
+                    messages.Add(DescribeOperation(operation));
+                    break;
+                case BatchOperationKinds.Rotate:
+                    var degrees = ParseDouble(GetParameter(operation.Parameters, "degrees", "90"), 0);
+                    if (Math.Abs(degrees) > double.Epsilon)
+                        image.Rotate(degrees);
+                    messages.Add(DescribeOperation(operation));
+                    break;
+                case BatchOperationKinds.FlipHorizontal:
+                    image.Flop();
+                    messages.Add(DescribeOperation(operation));
+                    break;
+                case BatchOperationKinds.FlipVertical:
+                    image.Flip();
+                    messages.Add(DescribeOperation(operation));
+                    break;
+                case BatchOperationKinds.StripMetadata:
+                    var categories = ParseCategories(GetParameter(operation.Parameters, "categories", "all"));
+                    var result = MetadataEditService.StripMetadata(image, categories);
+                    messages.Add(result.RemovedCount == 0
+                        ? $"No {MetadataEditService.CategoryLabel(categories)} metadata to strip"
+                        : $"Strip {result.RemovedCount} {MetadataEditService.CategoryLabel(categories)} field{Plural(result.RemovedCount)}");
+                    break;
+                case BatchOperationKinds.RenamePattern:
+                case BatchOperationKinds.ExportCopy:
+                    messages.Add(DescribeOperation(operation));
+                    break;
+                default:
+                    Log.LogDebug("Skipping unsupported batch operation {Kind} for {Path}", operation.Kind, sourcePath);
+                    break;
+            }
+        }
+    }
+
+    private static void ApplyResize(MagickImage image, IReadOnlyDictionary<string, string> parameters)
+    {
+        var maxWidth = ParseInt(GetParameter(parameters, "maxWidth", ""), 0, int.MaxValue, 0);
+        var maxHeight = ParseInt(GetParameter(parameters, "maxHeight", ""), 0, int.MaxValue, 0);
+        if (maxWidth <= 0 && maxHeight <= 0)
+            return;
+
+        image.Resize(new MagickGeometry(
+            maxWidth > 0 ? (uint)maxWidth : image.Width,
+            maxHeight > 0 ? (uint)maxHeight : image.Height)
+        {
+            IgnoreAspectRatio = false
+        });
+    }
+
+    private static IReadOnlyList<BatchOperationStep> NormalizeOperations(
+        IReadOnlyList<BatchOperationStep>? operations,
+        string extension,
+        int quality,
+        int maxWidth,
+        int maxHeight)
+    {
+        var normalized = new List<BatchOperationStep>();
+        if (operations is not null)
+        {
+            foreach (var operation in operations)
+            {
+                var step = NormalizeOperation(operation);
+                if (step is not null)
+                    normalized.Add(step);
+            }
+        }
+
+        if (normalized.Count == 0)
+        {
+            if (maxWidth > 0 || maxHeight > 0)
+            {
+                normalized.Add(new BatchOperationStep(
+                    BatchOperationKinds.Resize,
                     new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                     {
-                        ["extension"] = preset.Extension,
-                        ["quality"] = preset.Quality.ToString(CultureInfo.InvariantCulture),
-                        ["maxWidth"] = preset.MaxWidth.ToString(CultureInfo.InvariantCulture),
-                        ["maxHeight"] = preset.MaxHeight.ToString(CultureInfo.InvariantCulture)
-                    })
-            ]);
+                        ["maxWidth"] = maxWidth.ToString(CultureInfo.InvariantCulture),
+                        ["maxHeight"] = maxHeight.ToString(CultureInfo.InvariantCulture)
+                    }));
+            }
 
-        return new BatchRunResult(
-            _macroActionService.Run(
-                plan,
-                NormalizeSourcePaths(sourcePaths),
-                new MacroRunOptions(outputFolder, dryRun),
-                cancellationToken).Items);
+            normalized.Add(new BatchOperationStep(
+                BatchOperationKinds.ExportCopy,
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["extension"] = extension,
+                    ["quality"] = quality.ToString(CultureInfo.InvariantCulture)
+                }));
+        }
+
+        if (!normalized.Any(operation => NormalizeKind(operation.Kind) == BatchOperationKinds.ExportCopy))
+        {
+            normalized.Add(new BatchOperationStep(
+                BatchOperationKinds.ExportCopy,
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["extension"] = extension,
+                    ["quality"] = quality.ToString(CultureInfo.InvariantCulture)
+                }));
+        }
+
+        return normalized;
+    }
+
+    private static BatchOperationStep? NormalizeOperation(BatchOperationStep operation)
+    {
+        var kind = NormalizeKind(operation.Kind);
+        if (kind is not (
+            BatchOperationKinds.Resize or
+            BatchOperationKinds.Rotate or
+            BatchOperationKinds.FlipHorizontal or
+            BatchOperationKinds.FlipVertical or
+            BatchOperationKinds.StripMetadata or
+            BatchOperationKinds.RenamePattern or
+            BatchOperationKinds.ExportCopy))
+        {
+            return null;
+        }
+
+        var parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var item in operation.Parameters ?? new Dictionary<string, string>())
+        {
+            if (!string.IsNullOrWhiteSpace(item.Key))
+                parameters[item.Key.Trim()] = item.Value?.Trim() ?? "";
+        }
+
+        if (kind == BatchOperationKinds.ExportCopy)
+        {
+            var extension = RenameService.NormalizeExtension(GetParameter(parameters, "extension", ".png"));
+            if (ImageExportService.TryResolveFormat(extension) is null)
+                extension = ".png";
+            parameters["extension"] = extension;
+            parameters["quality"] = ParseInt(GetParameter(parameters, "quality", "92"), 1, 100, 92).ToString(CultureInfo.InvariantCulture);
+        }
+
+        if (kind == BatchOperationKinds.Resize)
+        {
+            parameters["maxWidth"] = ParseInt(GetParameter(parameters, "maxWidth", "0"), 0, int.MaxValue, 0).ToString(CultureInfo.InvariantCulture);
+            parameters["maxHeight"] = ParseInt(GetParameter(parameters, "maxHeight", "0"), 0, int.MaxValue, 0).ToString(CultureInfo.InvariantCulture);
+        }
+
+        if (kind == BatchOperationKinds.Rotate)
+            parameters["degrees"] = ParseDouble(GetParameter(parameters, "degrees", "90"), 90).ToString(CultureInfo.InvariantCulture);
+
+        if (kind == BatchOperationKinds.StripMetadata)
+            parameters["categories"] = GetParameter(parameters, "categories", "all").Trim();
+
+        if (kind == BatchOperationKinds.RenamePattern)
+            parameters["pattern"] = string.IsNullOrWhiteSpace(GetParameter(parameters, "pattern", "")) ? "{name}" : GetParameter(parameters, "pattern", "{name}");
+
+        return new BatchOperationStep(kind, parameters);
+    }
+
+    private static ExportPreviewRequest ExportRequestFromPreset(BatchProcessorPreset preset)
+    {
+        var export = preset.Operations?
+            .LastOrDefault(operation => NormalizeKind(operation.Kind) == BatchOperationKinds.ExportCopy);
+        if (export is null)
+            return ExportPreviewService.NormalizeRequest(new ExportPreviewRequest(preset.Extension, preset.Quality));
+
+        return ExportPreviewService.NormalizeRequest(new ExportPreviewRequest(
+            GetParameter(export.Parameters, "extension", preset.Extension),
+            ParseInt(GetParameter(export.Parameters, "quality", preset.Quality.ToString(CultureInfo.InvariantCulture)), 1, 100, preset.Quality)));
+    }
+
+    private static string BuildOutputFileName(string sourcePath, int sourceIndex, BatchProcessorPreset preset)
+    {
+        var stem = Path.GetFileNameWithoutExtension(sourcePath);
+        foreach (var operation in preset.Operations ?? [])
+        {
+            if (NormalizeKind(operation.Kind) == BatchOperationKinds.RenamePattern)
+                stem = ApplyPattern(GetParameter(operation.Parameters, "pattern", "{name}"), sourcePath, sourceIndex, stem);
+        }
+
+        return stem + ExportRequestFromPreset(preset).Extension;
+    }
+
+    private static string ApplyPattern(string pattern, string path, int index, string currentStem)
+    {
+        var info = new FileInfo(path);
+        var date = info.Exists
+            ? info.LastWriteTime.ToString("yyyyMMdd", CultureInfo.InvariantCulture)
+            : DateTime.Now.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+
+        return pattern
+            .Replace("{name}", currentStem, StringComparison.OrdinalIgnoreCase)
+            .Replace("{sourceName}", Path.GetFileNameWithoutExtension(path), StringComparison.OrdinalIgnoreCase)
+            .Replace("{index}", index.ToString("000", CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase)
+            .Replace("{date}", date, StringComparison.OrdinalIgnoreCase)
+            .Replace("{ext}", Path.GetExtension(path).TrimStart('.'), StringComparison.OrdinalIgnoreCase);
     }
 
     private static IReadOnlyList<string> NormalizeSourcePaths(IEnumerable<string> sourcePaths)
@@ -215,29 +494,67 @@ public sealed class BatchProcessorService
         return Path.Combine(folder, stem + "-" + Guid.NewGuid().ToString("N")[..8] + extension);
     }
 
-    private static (uint Width, uint Height) OutputDimensions(uint width, uint height, BatchProcessorPreset preset)
+    private static void WriteAtomically(MagickImage image, string targetPath)
     {
-        if (width == 0 || height == 0)
-            return (width, height);
+        var directory = Path.GetDirectoryName(targetPath);
+        if (string.IsNullOrWhiteSpace(directory))
+            throw new IOException("Batch export destination has no directory.");
 
-        var ratio = 1d;
-        if (preset.MaxWidth > 0 && width > preset.MaxWidth)
-            ratio = Math.Min(ratio, preset.MaxWidth / (double)width);
-        if (preset.MaxHeight > 0 && height > preset.MaxHeight)
-            ratio = Math.Min(ratio, preset.MaxHeight / (double)height);
-
-        if (ratio >= 1d)
-            return (width, height);
-
-        return (
-            Math.Max(1, (uint)Math.Round(width * ratio)),
-            Math.Max(1, (uint)Math.Round(height * ratio)));
+        Directory.CreateDirectory(directory);
+        var tempPath = Path.Combine(directory, $".images-batch-{Guid.NewGuid():N}{Path.GetExtension(targetPath)}.tmp");
+        try
+        {
+            image.Write(tempPath);
+            if (File.Exists(targetPath))
+                File.Replace(tempPath, targetPath, null);
+            else
+                File.Move(tempPath, targetPath);
+        }
+        finally
+        {
+            TryDeleteFile(tempPath);
+        }
     }
 
-    private static string StatusFor(uint width, uint height, uint outputWidth, uint outputHeight)
-        => width == outputWidth && height == outputHeight
-            ? "Convert/export only"
-            : $"Resize to {FormatDimensions(outputWidth, outputHeight)}";
+    private static string BuildStatusText(BatchProcessorPreset preset, IReadOnlyList<string> messages)
+    {
+        if (messages.Count > 0)
+            return string.Join(" -> ", messages.Distinct(StringComparer.OrdinalIgnoreCase));
+
+        return $"{preset.Operations?.Count ?? 0} operation{Plural(preset.Operations?.Count ?? 0)}";
+    }
+
+    public static string DescribeOperation(BatchOperationStep operation)
+        => NormalizeKind(operation.Kind) switch
+        {
+            BatchOperationKinds.Resize => $"Resize max {GetParameter(operation.Parameters, "maxWidth", "0")} x {GetParameter(operation.Parameters, "maxHeight", "0")}",
+            BatchOperationKinds.Rotate => $"Rotate {GetParameter(operation.Parameters, "degrees", "90")} degrees",
+            BatchOperationKinds.FlipHorizontal => "Flip horizontal",
+            BatchOperationKinds.FlipVertical => "Flip vertical",
+            BatchOperationKinds.StripMetadata => $"Strip {GetParameter(operation.Parameters, "categories", "all")} metadata",
+            BatchOperationKinds.RenamePattern => $"Rename pattern {GetParameter(operation.Parameters, "pattern", "{name}")}",
+            BatchOperationKinds.ExportCopy => $"Export {GetParameter(operation.Parameters, "extension", ".png").TrimStart('.').ToUpperInvariant()} q{GetParameter(operation.Parameters, "quality", "92")}",
+            _ => operation.Kind
+        };
+
+    private static MetadataStripCategory ParseCategories(string value)
+    {
+        var result = MetadataStripCategory.None;
+        foreach (var part in value.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+        {
+            result |= part.ToLowerInvariant() switch
+            {
+                "gps" => MetadataStripCategory.Gps,
+                "device" or "deviceinfo" => MetadataStripCategory.DeviceInfo,
+                "timestamps" or "time" => MetadataStripCategory.Timestamps,
+                "software" => MetadataStripCategory.Software,
+                "all" => MetadataStripCategory.All,
+                _ => MetadataStripCategory.None
+            };
+        }
+
+        return result == MetadataStripCategory.None ? MetadataStripCategory.All : result;
+    }
 
     private static string FormatDimensions(uint width, uint height)
         => width == 0 || height == 0
@@ -247,7 +564,7 @@ public sealed class BatchProcessorService
     private static string FormatBytes(long bytes)
     {
         string[] units = ["B", "KB", "MB", "GB", "TB"];
-        double value = bytes;
+        double value = Math.Max(0, bytes);
         var unit = 0;
         while (value >= 1024 && unit < units.Length - 1)
         {
@@ -259,4 +576,49 @@ public sealed class BatchProcessorService
             ? $"{bytes} B"
             : $"{value:0.#} {units[unit]}";
     }
+
+    private static string FormatDelta(long bytes)
+    {
+        if (bytes == 0)
+            return "same size";
+
+        var sign = bytes > 0 ? "+" : "-";
+        return sign + FormatBytes(Math.Abs(bytes));
+    }
+
+    private static void TryDeleteFile(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        catch
+        {
+            // Best-effort cleanup.
+        }
+    }
+
+    private static string GetParameter(
+        IReadOnlyDictionary<string, string> parameters,
+        string key,
+        string fallback)
+        => parameters.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value)
+            ? value
+            : fallback;
+
+    private static int ParseInt(string value, int minimum, int maximum, int fallback)
+        => int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
+            ? Math.Clamp(parsed, minimum, maximum)
+            : fallback;
+
+    private static double ParseDouble(string value, double fallback)
+        => double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed)
+            ? parsed
+            : fallback;
+
+    private static string NormalizeKind(string kind)
+        => (kind ?? "").Trim().ToLowerInvariant().Replace("_", "-", StringComparison.OrdinalIgnoreCase);
+
+    private static string Plural(int count) => count == 1 ? "" : "s";
 }

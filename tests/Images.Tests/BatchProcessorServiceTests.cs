@@ -25,7 +25,8 @@ public sealed class BatchProcessorServiceTests
         Assert.False(string.IsNullOrWhiteSpace(item.EstimatedOutputSizeText));
         Assert.False(string.IsNullOrWhiteSpace(item.DeltaText));
         Assert.Contains("lossy", item.WarningsText, StringComparison.OrdinalIgnoreCase);
-        Assert.Equal("Resize to 8 x 4", item.StatusText);
+        Assert.Contains("Resize max 8 x 8", item.StatusText, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Export JPG", item.StatusText, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -43,6 +44,62 @@ public sealed class BatchProcessorServiceTests
 
         Assert.Equal(1, result.SuccessCount);
         Assert.Empty(Directory.EnumerateFiles(output));
+    }
+
+    [Fact]
+    public void Run_WithOperationChain_AppliesOrderedStepsAndRenamePattern()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteImage(temp.Path, "source.png", 16, 8);
+        var output = Directory.CreateDirectory(Path.Combine(temp.Path, "out")).FullName;
+        var preset = new BatchProcessorPreset(
+            "Chain",
+            ".png",
+            92,
+            0,
+            0,
+            [
+                new BatchOperationStep(
+                    BatchOperationKinds.Rotate,
+                    new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        ["degrees"] = "90"
+                    }),
+                new BatchOperationStep(
+                    BatchOperationKinds.Resize,
+                    new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        ["maxWidth"] = "8",
+                        ["maxHeight"] = "8"
+                    }),
+                new BatchOperationStep(
+                    BatchOperationKinds.RenamePattern,
+                    new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        ["pattern"] = "processed-{index}-{name}"
+                    }),
+                new BatchOperationStep(
+                    BatchOperationKinds.ExportCopy,
+                    new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        ["extension"] = ".png",
+                        ["quality"] = "92"
+                    })
+            ]);
+
+        var result = new BatchProcessorService().Run(
+            [source],
+            preset,
+            output,
+            dryRun: false);
+
+        var item = Assert.Single(result.Items);
+        Assert.True(item.Success);
+        Assert.EndsWith("processed-001-source.png", item.FinalPath, StringComparison.OrdinalIgnoreCase);
+        Assert.True(File.Exists(item.FinalPath));
+        using var image = new MagickImage(item.FinalPath);
+        Assert.Equal(4u, image.Width);
+        Assert.Equal(8u, image.Height);
     }
 
     [Fact]
