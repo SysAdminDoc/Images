@@ -46,4 +46,13 @@ public sealed class LaunchModeTests
         Assert.Equal(42, snapshot.AppElapsedMs);
         Assert.Null(snapshot.Detail);
     }
+
+    [Fact]
+    public void HelpText_ExplainsListenModeSessionToken()
+    {
+        var help = CliReport.BuildHelpText();
+
+        Assert.Contains("session token as the first line", help, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("tcp://127.0.0.1:<port>", help, StringComparison.Ordinal);
+    }
 }

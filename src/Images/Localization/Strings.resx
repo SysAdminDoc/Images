@@ -4309,7 +4309,10 @@ Details written to:
     <value>Listening :{0}</value>
   </data>
   <data name="ListenMode_Tooltip" xml:space="preserve">
-    <value>Listen mode active on port {0}. Send UTF-8 file paths to tcp://127.0.0.1:{0}</value>
+    <value>Listen mode active on port {0}. Send this session token as the first line, then UTF-8 file paths to tcp://127.0.0.1:{0}. Token: {1}</value>
+  </data>
+  <data name="ListenMode_StartedToast" xml:space="preserve">
+    <value>Listen mode active on port {0}. Use the toolbar tooltip for the session token.</value>
   </data>
 
   <!-- V30-33: slideshow -->
