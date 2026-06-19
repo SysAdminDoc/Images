@@ -227,6 +227,7 @@ Images carries its own diagnostics surface — no terminal required for the comm
 - **About → Open data folder** opens `%LOCALAPPDATA%\Images\` so logs (`Logs\images-<date>.log`), crash records (`crash.log`, `crash-*.dmp`), settings (`settings.db`), and caches (`thumbs/`, `update-check.json`) are reachable in one click.
 - **About → Codec report** copies the per-format capability matrix, supported-extension list, and runtime/dependency provenance rows to the clipboard.
 - `Images.exe --system-info` and `Images.exe --codec-report` print the same provenance rows to stdout for support tickets and CI smoke tests.
+- `Images.exe --perf-report` measures cold-start time, directory scan, cache health, settings access, and memory against budgeted thresholds for regression tracking.
 
 ## Policies
 

@@ -23,6 +23,8 @@ All notable changes to **Images** are documented here.
 - **Background jobs center** — `BackgroundJobsService` tracks running and recent async tasks with name, state, duration, error, and affected count. The About window surfaces a Jobs panel with session summary and per-job details.
 - **Workflow modes** — Viewer, Review, Organize, Edit, Book, and Diagnostics modes switch between chrome presets (filmstrip, metadata HUD, gallery, review labels). Modes are accessible via the command palette ("Mode: Review", etc.), persisted across sessions, and respect peek/fullscreen isolation.
 
+- **Performance budget CLI** — `Images.exe --perf-report` measures process-to-CLI time, directory scan, thumbnail cache health, settings DB access, and memory working set against configurable thresholds with pass/warn status.
+
 ### Infrastructure
 
 - **WinGet and Scoop manifest validation** — the release workflow now validates generated Scoop JSON (version, URL, SHA-256 fields) and WinGet YAML (PackageIdentifier, version match) before uploading, with optional `wingetcreate validate` when available.
