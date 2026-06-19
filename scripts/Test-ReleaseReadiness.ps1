@@ -77,22 +77,9 @@ foreach ($section in $requiredChecklistSections) {
     }
 }
 
-$roadmap = Read-RepoText "ROADMAP.md"
-if ($roadmap -notmatch [regex]::Escape("PROJECT_CONTEXT.md")) {
-    throw "ROADMAP.md must point release reviewers at PROJECT_CONTEXT.md."
-}
-if ($roadmap -match "No editor, no organizer, no batch processor") {
-    $historicalHeading = "Historical V6 Roadmap And Source Appendix"
-    $historicalIndex = $roadmap.IndexOf($historicalHeading, [StringComparison]::Ordinal)
-    $staleIndex = $roadmap.IndexOf("No editor, no organizer, no batch processor", [StringComparison]::Ordinal)
-    if ($historicalIndex -lt 0 -or $staleIndex -lt $historicalIndex) {
-        throw "ROADMAP.md contains stale shipped-state copy above the historical appendix."
-    }
-}
-
-$projectContext = Read-RepoText "PROJECT_CONTEXT.md"
-if ($projectContext -notmatch "Recommended Next Work") {
-    throw "PROJECT_CONTEXT.md must include a Recommended Next Work section before release."
+$roadmapBlockedPath = Resolve-RepoPath "Roadmap_Blocked.md"
+if (-not (Test-Path -LiteralPath $roadmapBlockedPath)) {
+    throw "Roadmap_Blocked.md is missing. Blocked items must be tracked separately from ROADMAP.md."
 }
 
 $requiredRuntimeFiles = @(
