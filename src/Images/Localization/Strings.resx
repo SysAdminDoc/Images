@@ -4232,5 +4232,17 @@ Details written to:
   <data name="MainToastMetadataStripFailed" xml:space="preserve">
     <value>Could not strip {0}: {1}</value>
   </data>
+  <data name="CommandPalette_ImportXmpSidecars" xml:space="preserve">
+    <value>Import XMP sidecars from folder</value>
+  </data>
+  <data name="MainToastXmpImportResult" xml:space="preserve">
+    <value>XMP import: {0} imported, {1} failed</value>
+  </data>
+  <data name="MainToastXmpImportFailed" xml:space="preserve">
+    <value>XMP import failed: {0}</value>
+  </data>
+  <data name="MainToastXmpNoSidecars" xml:space="preserve">
+    <value>No XMP sidecar files found in that folder</value>
+  </data>
 
 </root>

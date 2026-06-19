@@ -270,6 +270,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenSemanticSearchCommand = new RelayCommand(OpenSemanticSearch);
         OpenTagGraphCommand = new RelayCommand(OpenTagGraph);
         OpenImportInboxCommand = new RelayCommand(OpenImportInbox);
+        ImportXmpSidecarsCommand = new RelayCommand(ImportXmpSidecars);
         OpenMacroActionsCommand = new RelayCommand(OpenMacroActions);
         OpenBatchProcessorCommand = new RelayCommand(OpenBatchProcessor);
         OpenEditStackCommand = new RelayCommand(OpenEditStack, () => HasImage);
@@ -1085,6 +1086,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             new() { Name = Strings.CommandPalette_SemanticSearch, Category = tools, Command = OpenSemanticSearchCommand },
             new() { Name = Strings.CommandPalette_TagGraph, Shortcut = "Ctrl+Shift+T", Category = tools, Command = OpenTagGraphCommand },
             new() { Name = Strings.CommandPalette_ImportInbox, Shortcut = "Ctrl+Shift+I", Category = tools, Command = OpenImportInboxCommand },
+            new() { Name = Strings.CommandPalette_ImportXmpSidecars, Category = tools, Command = ImportXmpSidecarsCommand },
             new() { Name = Strings.CommandPalette_MacroActions, Shortcut = "Ctrl+Shift+M", Category = tools, Command = OpenMacroActionsCommand },
             new() { Name = Strings.CommandPalette_BatchProcessor, Shortcut = "Ctrl+Shift+B", Category = tools, Command = OpenBatchProcessorCommand },
             new() { Name = Strings.CommandPalette_EditStack, Shortcut = "Ctrl+Shift+E", Category = tools, Command = OpenEditStackCommand },
@@ -3301,6 +3303,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenSemanticSearchCommand { get; }
     public ICommand OpenTagGraphCommand { get; }
     public ICommand OpenImportInboxCommand { get; }
+    public ICommand ImportXmpSidecarsCommand { get; }
     public ICommand OpenMacroActionsCommand { get; }
     public ICommand OpenBatchProcessorCommand { get; }
     public ICommand OpenEditStackCommand { get; }
@@ -6509,6 +6512,67 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         inbox.Show();
         if (!string.IsNullOrWhiteSpace(CurrentPath) && File.Exists(CurrentPath))
             _ = inbox.ReloadAsync();
+    }
+
+    private void ImportXmpSidecars()
+    {
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = "Select folder containing XMP sidecars",
+        };
+
+        if (dialog.ShowDialog() != true || string.IsNullOrWhiteSpace(dialog.FolderName))
+            return;
+
+        try
+        {
+            var importer = new XmpSidecarImportService();
+            var result = importer.ScanFolder(dialog.FolderName);
+
+            if (result.TotalScanned == 0)
+            {
+                Toast(Strings.MainToastXmpNoSidecars);
+                return;
+            }
+
+            var applied = 0;
+            foreach (var r in result.Results)
+            {
+                if (!r.Success) continue;
+
+                var imagePath = FindImageForSidecar(r.SidecarPath);
+                if (imagePath is null) continue;
+
+                if (r.Rating is int rating)
+                {
+                    _reviewLabels.SetRating(imagePath, rating);
+                    applied++;
+                }
+            }
+
+            Toast(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                Strings.MainToastXmpImportResult, result.SuccessCount, result.FailedCount));
+        }
+        catch (Exception ex)
+        {
+            Toast(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                Strings.MainToastXmpImportFailed, ex.Message));
+        }
+    }
+
+    private static string? FindImageForSidecar(string sidecarPath)
+    {
+        var dir = Path.GetDirectoryName(sidecarPath);
+        if (dir is null) return null;
+
+        var stem = Path.GetFileNameWithoutExtension(sidecarPath);
+        foreach (var ext in DirectoryNavigator.SupportedExtensions)
+        {
+            var candidate = Path.Combine(dir, stem + ext);
+            if (File.Exists(candidate)) return candidate;
+        }
+
+        return null;
     }
 
     private void OpenMacroActions()
