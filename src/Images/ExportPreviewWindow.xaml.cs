@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Images.Controls;
 using Images.Localization;
 using Images.Services;
 using Microsoft.Win32;
@@ -19,6 +20,9 @@ public partial class ExportPreviewWindow : Window
     private readonly ObservableCollection<string> _warnings = [];
     private bool _loadingPreset;
     private bool _hasPreview;
+    private bool _syncingCanvases;
+    private bool _differenceMode;
+    private BitmapSource? _previewImage;
 
     public ExportPreviewWindow(BitmapSource source, string? sourcePath, string initialExtension)
     {
@@ -27,7 +31,7 @@ public partial class ExportPreviewWindow : Window
         _source = source ?? throw new ArgumentNullException(nameof(source));
         _sourcePath = string.IsNullOrWhiteSpace(sourcePath) ? null : sourcePath;
 
-        OriginalImage.Source = _source;
+        OriginalCanvas.Source = _source;
         WarningsList.ItemsSource = _warnings;
         PresetCombo.ItemsSource = ExportPreviewPreset.Defaults;
         PresetCombo.DisplayMemberPath = nameof(ExportPreviewPreset.Name);
@@ -132,6 +136,9 @@ public partial class ExportPreviewWindow : Window
             return;
 
         _hasPreview = false;
+        _previewImage = null;
+        _differenceMode = false;
+        ApplyInspectionMode();
         SetStatus(Strings.ExportPreviewSettingsChanged, ExportPreviewStatus.Warning);
     }
 
@@ -146,6 +153,9 @@ public partial class ExportPreviewWindow : Window
         MaxHeightBox.Text = request.MaxHeight.ToString(CultureInfo.InvariantCulture);
         _loadingPreset = false;
         _hasPreview = false;
+        _previewImage = null;
+        _differenceMode = false;
+        ApplyInspectionMode();
         SetStatus(Strings.ExportPreviewPresetReady, ExportPreviewStatus.Ready);
     }
 
@@ -157,20 +167,98 @@ public partial class ExportPreviewWindow : Window
         {
             var request = ReadRequest();
             var result = await Task.Run(() => _previewService.BuildPreview(_source, _sourcePath, request));
-            PreviewImage.Source = result.PreviewImage;
+            _previewImage = result.PreviewImage;
+            PreviewCanvas.Source = _previewImage;
             ApplySummary(result.Summary);
             _hasPreview = true;
+
+            if (_differenceMode)
+                BuildDifferenceImage();
+            ApplyInspectionMode();
+
             SetStatus(Strings.ExportPreviewReady, ExportPreviewStatus.Ready);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
         {
             _hasPreview = false;
+            _previewImage = null;
+            _differenceMode = false;
+            ApplyInspectionMode();
             SetStatus(Strings.Format(nameof(Strings.ExportPreviewFailedFormat), ex.Message), ExportPreviewStatus.Error);
         }
         finally
         {
             SetBusy(false);
         }
+    }
+
+    private void ExportCanvas_ViewChanged(object sender, EventArgs e)
+    {
+        if (_syncingCanvases || sender is not ZoomPanImage source || !source.IsVisible)
+            return;
+
+        _syncingCanvases = true;
+        try
+        {
+            var state = source.GetViewState();
+            if (!ReferenceEquals(source, OriginalCanvas) && OriginalCanvas.IsVisible)
+                OriginalCanvas.SetViewState(state);
+            if (!ReferenceEquals(source, PreviewCanvas) && PreviewCanvas.IsVisible)
+                PreviewCanvas.SetViewState(state);
+            if (!ReferenceEquals(source, DifferenceCanvas) && DifferenceCanvas.IsVisible)
+                DifferenceCanvas.SetViewState(state);
+        }
+        finally
+        {
+            _syncingCanvases = false;
+        }
+    }
+
+    private void DifferenceToggle_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_hasPreview)
+            return;
+
+        _differenceMode = !_differenceMode;
+        ApplyInspectionMode();
+
+        if (_differenceMode)
+            BuildDifferenceImage();
+    }
+
+    private void BuildDifferenceImage()
+    {
+        if (_previewImage is null)
+            return;
+
+        try
+        {
+            var diffBitmap = _previewService.BuildDifference(_source, _previewImage);
+            DifferenceCanvas.Source = diffBitmap;
+            DifferenceCanvas.SetViewState(PreviewCanvas.GetViewState());
+        }
+        catch
+        {
+            DifferenceCanvas.Source = null;
+        }
+    }
+
+    private void ApplyInspectionMode()
+    {
+        if (!_differenceMode || !_hasPreview)
+        {
+            OriginalPane.Visibility = Visibility.Visible;
+            PreviewPane.Visibility = Visibility.Visible;
+            DifferencePane.Visibility = Visibility.Collapsed;
+            DifferenceToggleText.Text = Strings.ExportPreviewDifference;
+            return;
+        }
+
+        OriginalPane.Visibility = Visibility.Collapsed;
+        PreviewPane.Visibility = Visibility.Collapsed;
+        DifferencePane.Visibility = Visibility.Visible;
+        DifferenceCanvas.SetViewState(PreviewCanvas.GetViewState());
+        DifferenceToggleText.Text = Strings.ExportPreviewSideBySide;
     }
 
     private ExportPreviewRequest ReadRequest()
@@ -206,6 +294,7 @@ public partial class ExportPreviewWindow : Window
     {
         PreviewButton.IsEnabled = !busy;
         SaveCopyButton.IsEnabled = !busy;
+        DifferenceToggle.IsEnabled = !busy;
         PresetCombo.IsEnabled = !busy;
         ExtensionBox.IsEnabled = !busy;
         QualitySlider.IsEnabled = !busy;

@@ -766,6 +766,8 @@ public static class Strings
     public static string ExportPreviewWarnings => Get(nameof(ExportPreviewWarnings));
     public static string ExportPreviewOriginal => Get(nameof(ExportPreviewOriginal));
     public static string ExportPreviewEncodedPreview => Get(nameof(ExportPreviewEncodedPreview));
+    public static string ExportPreviewDifference => Get(nameof(ExportPreviewDifference));
+    public static string ExportPreviewSideBySide => Get(nameof(ExportPreviewSideBySide));
     public static string ExportPreviewReadyStatus => Get(nameof(ExportPreviewReadyStatus));
     public static string ExportPreviewSaveDialogTitle => Get(nameof(ExportPreviewSaveDialogTitle));
     public static string ExportPreviewChooseDifferentFilename => Get(nameof(ExportPreviewChooseDifferentFilename));

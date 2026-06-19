@@ -2543,6 +2543,12 @@ Details written to:
   <data name="ExportPreviewEncodedPreview" xml:space="preserve">
     <value>Encoded preview</value>
   </data>
+  <data name="ExportPreviewDifference" xml:space="preserve">
+    <value>Difference</value>
+  </data>
+  <data name="ExportPreviewSideBySide" xml:space="preserve">
+    <value>Side by side</value>
+  </data>
   <data name="ExportPreviewReadyStatus" xml:space="preserve">
     <value>Ready.</value>
   </data>
