@@ -88,6 +88,19 @@ public sealed class TileServiceTests
     }
 
     [Fact]
+    public void BuildPyramid_WhenDecodeFails_RemovesPartialCacheDirectory()
+    {
+        using var temp = TestDirectory.Create();
+        var source = temp.WriteFile("broken.tif", "not a real image");
+        var cacheRoot = Path.Combine(temp.Path, "tiles");
+
+        Assert.ThrowsAny<Exception>(() => TileService.BuildPyramid(source, cacheRoot));
+
+        Assert.True(Directory.Exists(cacheRoot));
+        Assert.Empty(Directory.GetDirectories(cacheRoot));
+    }
+
+    [Fact]
     public void ChooseLevel_FitView_UsesLowerResolutionLevel()
     {
         var pyramid = new TilePyramidInfo(
