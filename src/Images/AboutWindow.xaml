@@ -668,6 +668,22 @@
                 </Button>
             </UniformGrid>
 
+            <Button Style="{StaticResource ChromeButton}"
+                    Click="ExportSupportBundleButton_Click"
+                    Margin="0,8,0,0"
+                    HorizontalAlignment="Stretch"
+                    AutomationProperties.Name="Export a redacted support bundle for bug reports"
+                    ToolTip="Saves a ZIP with system info, codec report, recent logs, crash log, recovery records, and redacted settings. No image bytes or private paths.">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="&#xE721;"
+                               FontFamily="{StaticResource IconFontFamily}"
+                               FontSize="12"
+                               Margin="0,0,8,0"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="Export support bundle" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+
             <Button Style="{StaticResource PrimaryButton}"
                     Click="CloseButton_Click"
                     Margin="0,14,0,0"
