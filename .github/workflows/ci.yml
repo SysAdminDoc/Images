@@ -65,6 +65,16 @@ jobs:
               exit 1
           }
 
+      - name: Package maintenance report
+        if: always()
+        shell: pwsh
+        run: |
+          Write-Host "=== Deprecated packages ==="
+          dotnet list Images.sln package --deprecated 2>&1 | Out-String | Write-Host
+          Write-Host "=== Outdated packages ==="
+          dotnet list Images.sln package --outdated --include-transitive 2>&1 | Out-String | Write-Host
+        continue-on-error: true
+
       - name: Build
         run: dotnet build Images.sln -c Release --no-restore
 

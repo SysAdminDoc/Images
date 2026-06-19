@@ -77,9 +77,19 @@ jobs:
           New-Item -ItemType Directory -Path transitive-deps -Force | Out-Null
           $tree | Set-Content -Path transitive-deps\nuget-transitive-tree.txt -Encoding utf8
 
-      - name: Upload transitive dependency tree
+      - name: Package maintenance report
+        shell: pwsh
+        run: |
+          $deprecated = dotnet list Images.sln package --deprecated 2>&1 | Out-String
+          $outdated = dotnet list Images.sln package --outdated --include-transitive 2>&1 | Out-String
+          $report = "=== Deprecated packages ===`n$deprecated`n=== Outdated packages ===`n$outdated"
+          Write-Host $report
+          $report | Set-Content -Path transitive-deps\package-maintenance.txt -Encoding utf8
+        continue-on-error: true
+
+      - name: Upload dependency reports
         uses: actions/upload-artifact@v4
         with:
-          name: nuget-transitive-tree
-          path: transitive-deps/nuget-transitive-tree.txt
+          name: dependency-reports
+          path: transitive-deps/
           if-no-files-found: warn
