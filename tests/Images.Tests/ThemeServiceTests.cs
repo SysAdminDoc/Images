@@ -67,6 +67,33 @@ public sealed class ThemeServiceTests
         Assert.Equal(SystemColors.ControlTextColor, Assert.IsType<SolidColorBrush>(dictionary["TextBrush"]).Color);
         Assert.Equal(SystemColors.HighlightColor, Assert.IsType<SolidColorBrush>(dictionary["AccentBrush"]).Color);
         Assert.Equal(SystemColors.HighlightTextColor, Assert.IsType<SolidColorBrush>(dictionary["CrustBrush"]).Color);
+        Assert.Equal(SystemColors.HighlightColor, Assert.IsType<SolidColorBrush>(dictionary["AccentSelectionBrush"]).Color);
+        Assert.Equal(SystemColors.WindowColor, Assert.IsType<SolidColorBrush>(dictionary["StatusPanelBrush"]).Color);
+    }
+
+    [Fact]
+    public void HighContrastEffectiveModeOverridesLatte()
+    {
+        Assert.Equal(AppThemeMode.HighContrast, ThemeService.ResolveEffectiveMode(AppThemeMode.Latte, highContrast: true));
+        Assert.Equal(AppThemeMode.Latte, ThemeService.ResolveEffectiveMode(AppThemeMode.Latte, highContrast: false));
+    }
+
+    [Fact]
+    public void LatteThemeOverridesSemanticSurfaceBrushes()
+    {
+        var dark = LoadThemeDictionary("DarkTheme.xaml");
+        var latte = LoadThemeDictionary("LatteTheme.xaml");
+
+        Assert.True(ThemeService.IsLatteDictionary(latte));
+        Assert.NotEqual(
+            Assert.IsType<SolidColorBrush>(dark["PanelBrush"]).Color,
+            Assert.IsType<SolidColorBrush>(latte["PanelBrush"]).Color);
+        Assert.Equal(Color.FromRgb(248, 250, 252), Assert.IsType<SolidColorBrush>(latte["ViewportBrush"]).Color);
+        Assert.Equal(Color.FromArgb(0xFB, 239, 241, 245), Assert.IsType<SolidColorBrush>(latte["FloatingChromeBrush"]).Color);
+        Assert.True(latte.Contains("AccentPanelBrush"));
+        Assert.True(latte.Contains("AccentSelectionBrush"));
+        Assert.True(latte.Contains("SuccessPanelBrush"));
+        Assert.True(latte.Contains("OverlayGuideBrush"));
     }
 
     [Fact]

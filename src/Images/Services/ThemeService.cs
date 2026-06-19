@@ -58,10 +58,11 @@ public static class ThemeService
         var highContrast = ShouldUseHighContrast(
             settings.GetBool(Keys.AccessibilityHighContrast, false),
             SystemParameters.HighContrast) || resolvedMode == AppThemeMode.HighContrast;
+        var effectiveMode = ResolveEffectiveMode(resolvedMode, highContrast);
 
         SetHighContrastDictionary(application.Resources, highContrast);
-        SetLatteOverlay(application.Resources, resolvedMode == AppThemeMode.Latte);
-        CurrentMode = resolvedMode;
+        SetLatteOverlay(application.Resources, effectiveMode == AppThemeMode.Latte);
+        CurrentMode = effectiveMode;
     }
 
     public static void SetTheme(AppThemeMode mode)
@@ -95,6 +96,9 @@ public static class ThemeService
         if (requested == AppThemeMode.System) return systemLight ? AppThemeMode.Latte : AppThemeMode.Dark;
         return requested;
     }
+
+    internal static AppThemeMode ResolveEffectiveMode(AppThemeMode resolvedMode, bool highContrast)
+        => highContrast ? AppThemeMode.HighContrast : resolvedMode;
 
     internal static bool ShouldUseHighContrast(bool appPreference, bool systemHighContrast)
         => appPreference || systemHighContrast;
