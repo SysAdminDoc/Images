@@ -18,7 +18,7 @@ All notable changes to **Images** are documented here.
 - **Archive reader dependency** — upgraded SharpCompress from 0.47.4 to 0.48.1, clearing the GHSA-6c8g-7p36-r338 / CVE-2026-44788 NuGet vulnerability gate. Images still uses SharpCompress only for read-only archive page streams and does not call the affected `WriteToDirectory()` extraction API.
 - **Magick.NET 14.13.0 → 14.14.0** — resolves 12 upstream advisories (2 high, 10 moderate severity) including GHSA-36wm-hprc-mcf5 and GHSA-7gg8-qqx7-92g5. Zero vulnerable NuGet packages remain.
 - **Transitive dependency audit** — CI security and release workflows now log the full NuGet transitive dependency tree as an uploadable artifact alongside the vulnerable-package gate, with documented S-09 native decoder floor requirements for future bundled runtimes.
-- **ONNX Runtime 1.24.4 → 1.26.0** — resolves heap OOB read/write, integer truncation, Pad Reflect vulnerability, and CPU attention overflow fixes shipped in 1.25.0.
+- **ONNX Runtime DirectML 1.24.4** — pinned to 1.24.4 (the latest available release); the previously claimed 1.26.0 version does not exist on NuGet.
 - **.NET 10 LTS migration** — moved from .NET 9 STS (EOL November 2026) to .NET 10 LTS (supported through November 2028). All Microsoft.* NuGet packages updated to the 10.0.x track. CI, security, and release workflows updated.
 - **Content-based format validation** — files are now probed by magic bytes on open, not just by extension. When the detected content format doesn't match the file extension, an informational toast alerts the user. The same signature detection logic is shared with the file health scanner, eliminating duplicated code.
 - **Granular EXIF metadata removal** — the viewport context menu now offers a "Strip metadata" submenu with category choices: device info (make, model, serial numbers), timestamps, software and comments, or all metadata at once. Each category previews what will be removed and writes atomically. The existing GPS-only strip remains as a separate quick action. All strip operations are available through the command palette.
@@ -30,7 +30,7 @@ All notable changes to **Images** are documented here.
 
 - Microsoft.Data.Sqlite 9.0.0 → 10.0.0
 - Microsoft.Extensions.Logging 9.0.0 → 10.0.0
-- Microsoft.ML.OnnxRuntime.DirectML 1.24.4 → 1.26.0
+- Microsoft.ML.OnnxRuntime.DirectML pinned at 1.24.4 (latest available)
 - Serilog 4.2.0 → 4.3.1
 - Target framework net9.0 → net10.0
 
