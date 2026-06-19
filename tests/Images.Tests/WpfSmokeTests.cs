@@ -44,10 +44,10 @@ public sealed class WpfSmokeTests : IDisposable
     private static void SkipUnlessSmoke()
     {
         if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("RUN_SMOKE_TESTS")))
-            Skip.If(true, "Set RUN_SMOKE_TESTS=1 to run WPF smoke tests (requires display session).");
+            Assert.Skip("Set RUN_SMOKE_TESTS=1 to run WPF smoke tests (requires display session).");
     }
 
-    [SkippableFact]
+    [Fact]
     [Trait("Category", "SmokeGate")]
     public void LaunchAndClose()
     {
@@ -58,7 +58,7 @@ public sealed class WpfSmokeTests : IDisposable
         Assert.True(app.HasExited);
     }
 
-    [SkippableFact]
+    [Fact]
     [Trait("Category", "SmokeGate")]
     public void OpenFixtureImage()
     {
@@ -76,7 +76,7 @@ public sealed class WpfSmokeTests : IDisposable
         app.Close();
     }
 
-    [SkippableFact]
+    [Fact]
     public void NavigateNextPrevious()
     {
         SkipUnlessSmoke();
@@ -97,7 +97,7 @@ public sealed class WpfSmokeTests : IDisposable
         app.Close();
     }
 
-    [SkippableFact]
+    [Fact]
     public void EscapeClosesApp()
     {
         SkipUnlessSmoke();
