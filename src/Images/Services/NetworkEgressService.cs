@@ -21,26 +21,38 @@ public static class NetworkEgressService
     /// <summary>All recorded entries, newest first. Observable for WPF binding.</summary>
     public static ReadOnlyObservableCollection<NetworkEgressEntry> Entries { get; } = new(_entries);
 
-    /// <summary>
-    /// Record an outbound network call. Thread-safe; dispatches to UI thread for collection
-    /// mutation so WPF bindings stay happy.
-    /// </summary>
+    /// <summary>Record an outbound network call.</summary>
     public static void Record(string url, string purpose, long bytes, long durationMs)
+        => Record(url, purpose, bytes, durationMs, "outbound");
+
+    private static void InsertEntry(NetworkEgressEntry entry)
+    {
+        // Insert at 0 so newest is first.
+        _entries.Insert(0, entry);
+    }
+
+    public static void RecordInbound(string url, string purpose, long bytes)
+    {
+        Record(url, purpose, bytes, 0, "inbound");
+    }
+
+    public static void Record(string url, string purpose, long bytes, long durationMs,
+        string direction = "outbound")
     {
         var entry = new NetworkEgressEntry(
             Url: url ?? "(unknown)",
             Purpose: purpose ?? "(unknown)",
             Bytes: Math.Max(0, bytes),
             DurationMs: Math.Max(0, durationMs),
-            Timestamp: DateTimeOffset.UtcNow);
+            Timestamp: DateTimeOffset.UtcNow,
+            Direction: direction);
 
         _log.LogInformation(
-            "network-egress: {Purpose} {Url} — {Bytes} bytes in {DurationMs} ms",
-            entry.Purpose, entry.Url, entry.Bytes, entry.DurationMs);
+            "network-{Direction}: {Purpose} {Url} — {Bytes} bytes in {DurationMs} ms",
+            entry.Direction, entry.Purpose, entry.Url, entry.Bytes, entry.DurationMs);
 
         lock (_lock)
         {
-            // Dispatch to UI thread if we have one; otherwise mutate directly (tests, CLI).
             var dispatcher = System.Windows.Application.Current?.Dispatcher;
             if (dispatcher is not null && !dispatcher.CheckAccess())
             {
@@ -55,12 +67,6 @@ public static class NetworkEgressService
         PersistEntry(entry);
     }
 
-    private static void InsertEntry(NetworkEgressEntry entry)
-    {
-        // Insert at 0 so newest is first.
-        _entries.Insert(0, entry);
-    }
-
     /// <summary>Clear all in-memory entries. Does not delete the persisted JSONL file.</summary>
     public static void Clear()
     {
@@ -72,6 +78,22 @@ public static class NetworkEgressService
         else
         {
             _entries.Clear();
+        }
+    }
+
+    /// <summary>Clear in-memory entries and delete the persisted JSONL file.</summary>
+    public static void ClearAll()
+    {
+        Clear();
+        try
+        {
+            var path = GetJsonlPath();
+            if (path is not null && File.Exists(path))
+                File.Delete(path);
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "network-egress: could not delete persisted log");
         }
     }
 
@@ -146,6 +168,8 @@ public static class NetworkEgressService
         }
     }
 
+    private const int MaxPersistedEntries = 2000;
+
     private static void PersistEntry(NetworkEgressEntry entry)
     {
         try
@@ -154,12 +178,29 @@ public static class NetworkEgressService
             if (path is null) return;
 
             var json = JsonSerializer.Serialize(entry, EgressJsonContext.Default.NetworkEgressEntry);
-            // Append atomically — one line per entry, newline-terminated.
             File.AppendAllText(path, json + Environment.NewLine);
+
+            RotateIfNeeded(path);
         }
         catch (Exception ex)
         {
             _log.LogWarning(ex, "network-egress: could not persist entry");
+        }
+    }
+
+    private static void RotateIfNeeded(string path)
+    {
+        try
+        {
+            var lines = File.ReadAllLines(path);
+            if (lines.Length <= MaxPersistedEntries) return;
+
+            var trimmed = lines[^MaxPersistedEntries..];
+            File.WriteAllLines(path, trimmed);
+        }
+        catch
+        {
+            // Best effort — don't block the caller
         }
     }
 
@@ -175,7 +216,8 @@ public sealed record NetworkEgressEntry(
     [property: JsonPropertyName("purpose")] string Purpose,
     [property: JsonPropertyName("bytes")] long Bytes,
     [property: JsonPropertyName("durationMs")] long DurationMs,
-    [property: JsonPropertyName("timestamp")] DateTimeOffset Timestamp)
+    [property: JsonPropertyName("timestamp")] DateTimeOffset Timestamp,
+    [property: JsonPropertyName("direction")] string Direction = "outbound")
 {
     /// <summary>Human-readable byte count for display.</summary>
     [JsonIgnore]

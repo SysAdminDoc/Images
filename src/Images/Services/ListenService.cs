@@ -1,6 +1,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,25 +9,23 @@ using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
 
-/// <summary>
-/// V20-31: local TCP listen service for piped workflows. Binds to <see cref="IPAddress.Loopback"/>
-/// (127.0.0.1) only and accepts UTF-8 file paths, one per line. Each valid path is forwarded to
-/// the viewer for live open/refresh. All received paths are logged through the network egress
-/// panel (P-03) for full transparency.
-/// </summary>
 public sealed class ListenService : IDisposable
 {
     private static readonly ILogger _log = Log.Get("Images.ListenService");
+
+    private const int MaxLineLength = 32_768;
+    private const int MaxConnectionsPerSecond = 20;
 
     private TcpListener? _listener;
     private CancellationTokenSource? _cts;
     private readonly Action<string> _onPathReceived;
     private bool _disposed;
 
-    /// <summary>The actual port the listener bound to.</summary>
-    public int Port { get; private set; }
+    private int _connectionsThisSecond;
+    private long _lastRateTick;
 
-    /// <summary>Whether the listener is actively accepting connections.</summary>
+    public int Port { get; private set; }
+    public string SessionToken { get; private set; } = string.Empty;
     public bool IsListening => _listener is not null && !_disposed;
 
     public ListenService(Action<string> onPathReceived)
@@ -34,19 +33,19 @@ public sealed class ListenService : IDisposable
         _onPathReceived = onPathReceived ?? throw new ArgumentNullException(nameof(onPathReceived));
     }
 
-    /// <summary>
-    /// Start listening on the specified port. Binds to loopback only (127.0.0.1).
-    /// </summary>
     public void Start(int port)
     {
         if (_listener is not null) return;
 
+        SessionToken = GenerateToken();
         _cts = new CancellationTokenSource();
         _listener = new TcpListener(IPAddress.Loopback, port);
         _listener.Start();
         Port = ((IPEndPoint)_listener.LocalEndpoint).Port;
 
-        _log.LogInformation("listen-mode: bound to tcp://127.0.0.1:{Port}", Port);
+        _log.LogInformation(
+            "listen-mode: bound to tcp://127.0.0.1:{Port}, session token: {Token}",
+            Port, SessionToken);
 
         Task.Run(() => AcceptLoop(_cts.Token));
     }
@@ -58,6 +57,14 @@ public sealed class ListenService : IDisposable
             try
             {
                 var client = await _listener!.AcceptTcpClientAsync(ct);
+
+                if (!CheckRateLimit())
+                {
+                    _log.LogWarning("listen-mode: connection rate limit exceeded, dropping");
+                    client.Dispose();
+                    continue;
+                }
+
                 _ = HandleClient(client, ct);
             }
             catch (OperationCanceledException) { break; }
@@ -78,50 +85,109 @@ public sealed class ListenService : IDisposable
                 client.ReceiveTimeout = 5000;
                 using var reader = new StreamReader(client.GetStream(), Encoding.UTF8);
 
+                var authenticated = false;
                 while (!ct.IsCancellationRequested)
                 {
-                    var line = await reader.ReadLineAsync(ct);
-                    if (line is null) break; // client disconnected
+                    var line = await ReadBoundedLine(reader, ct);
+                    if (line is null) break;
 
-                    var path = line.Trim();
-                    if (string.IsNullOrEmpty(path)) continue;
+                    var trimmed = line.Trim();
+                    if (string.IsNullOrEmpty(trimmed)) continue;
 
-                    // Validate: must be a rooted local path, not a URL or UNC.
-                    if (!Path.IsPathFullyQualified(path))
+                    if (!authenticated)
+                    {
+                        if (string.Equals(trimmed, SessionToken, StringComparison.Ordinal))
+                        {
+                            authenticated = true;
+                            _log.LogDebug("listen-mode: client authenticated");
+                            continue;
+                        }
+
+                        _log.LogWarning("listen-mode: rejected unauthenticated client");
+                        NetworkEgressService.RecordInbound(
+                            $"tcp://127.0.0.1:{Port}",
+                            "listen-mode: rejected unauthenticated connection",
+                            Encoding.UTF8.GetByteCount(line));
+                        return;
+                    }
+
+                    if (!Path.IsPathFullyQualified(trimmed))
                     {
                         _log.LogDebug("listen-mode: rejected non-qualified path");
                         continue;
                     }
 
-                    if (path.StartsWith("\\\\", StringComparison.Ordinal))
+                    if (trimmed.StartsWith("\\\\", StringComparison.Ordinal))
                     {
                         _log.LogDebug("listen-mode: rejected UNC path");
                         continue;
                     }
 
-                    if (!File.Exists(path))
+                    if (!File.Exists(trimmed))
                     {
                         _log.LogDebug("listen-mode: rejected non-existent path");
                         continue;
                     }
 
-                    // Log to network egress panel (P-03).
-                    NetworkEgressService.Record(
+                    NetworkEgressService.RecordInbound(
                         $"tcp://127.0.0.1:{Port}",
                         "listen-mode: received path",
-                        Encoding.UTF8.GetByteCount(line),
-                        0);
+                        Encoding.UTF8.GetByteCount(line));
 
-                    _log.LogInformation("listen-mode: opening {Path}", path);
-                    _onPathReceived(path);
+                    _log.LogInformation("listen-mode: opening {Path}", trimmed);
+                    _onPathReceived(trimmed);
                 }
             }
         }
-        catch (OperationCanceledException) { /* shutdown */ }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
             _log.LogDebug(ex, "listen-mode: client error (non-fatal)");
         }
+    }
+
+    private static async Task<string?> ReadBoundedLine(StreamReader reader, CancellationToken ct)
+    {
+        var sb = new StringBuilder();
+        var buffer = new char[1];
+
+        while (!ct.IsCancellationRequested)
+        {
+            var read = await reader.ReadAsync(buffer.AsMemory(), ct);
+            if (read == 0) return sb.Length > 0 ? sb.ToString() : null;
+
+            if (buffer[0] == '\n') return sb.ToString();
+            if (buffer[0] == '\r') continue;
+
+            sb.Append(buffer[0]);
+            if (sb.Length > MaxLineLength)
+            {
+                _log.LogWarning("listen-mode: line exceeded {MaxLen} chars, dropping", MaxLineLength);
+                return null;
+            }
+        }
+
+        return sb.Length > 0 ? sb.ToString() : null;
+    }
+
+    private bool CheckRateLimit()
+    {
+        var now = Environment.TickCount64;
+        if (now - _lastRateTick > 1000)
+        {
+            _lastRateTick = now;
+            _connectionsThisSecond = 0;
+        }
+
+        _connectionsThisSecond++;
+        return _connectionsThisSecond <= MaxConnectionsPerSecond;
+    }
+
+    private static string GenerateToken()
+    {
+        var bytes = new byte[24];
+        RandomNumberGenerator.Fill(bytes);
+        return Convert.ToBase64String(bytes);
     }
 
     public void Dispose()
@@ -132,7 +198,7 @@ public sealed class ListenService : IDisposable
         _cts?.Cancel();
 
         try { _listener?.Stop(); }
-        catch { /* best effort */ }
+        catch { }
 
         _listener = null;
         _cts?.Dispose();
