@@ -20,6 +20,11 @@ All notable changes to **Images** are documented here.
 - **XMP write-through for color labels, keywords, and location** — `ReviewLabelService` now writes `xmp:Label` (color labels) and IPTC/Photoshop location fields to sidecars. `XmpSidecarImportService.ApplyFolder` applies ratings, color labels, keywords, and location in one pass with per-field counts. 4 new regression tests.
 - **CLIP pipeline validation with explicit fallback reasons** — Model Manager exposes a Validate button that runs step-by-step checks (file availability, tokenizer load, preprocessor config, ONNX session creation, text embedding smoke) and surfaces exact failure reasons. `SemanticSearchService.ClipFallbackReason` explains why the deterministic provider was used.
 - **Start surface with recent folders, books, and import inbox** — the no-image launch panel now shows recent folders (clickable, bound to MRU), recent archive books with page progress, and an Import Inbox button alongside the existing Open/Paste/Settings/Diagnostics actions.
+- **Background jobs center** — `BackgroundJobsService` tracks running and recent async tasks with name, state, duration, error, and affected count. The About window surfaces a Jobs panel with session summary and per-job details.
+
+### Infrastructure
+
+- **WinGet and Scoop manifest validation** — the release workflow now validates generated Scoop JSON (version, URL, SHA-256 fields) and WinGet YAML (PackageIdentifier, version match) before uploading, with optional `wingetcreate validate` when available.
 
 ### Infrastructure
 
