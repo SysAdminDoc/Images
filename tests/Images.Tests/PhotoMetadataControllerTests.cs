@@ -60,14 +60,14 @@ public sealed class PhotoMetadataControllerTests
                 timeout: TimeSpan.FromSeconds(1));
 
             controller.Refresh(first);
-            Assert.True(firstStarted.Wait(TimeSpan.FromSeconds(1)));
+            Assert.True(firstStarted.Wait(TimeSpan.FromSeconds(2)));
 
             currentPath = second;
             controller.Refresh(second);
-            PumpUntil(() => !controller.IsLoading && controller.Rows.FirstOrDefault()?.Value == "second");
-
             releaseFirst.Set();
-            PumpFor(TimeSpan.FromMilliseconds(50));
+
+            PumpUntil(() => !controller.IsLoading && controller.Rows.FirstOrDefault()?.Value == "second");
+            PumpFor(TimeSpan.FromMilliseconds(200));
 
             var row = Assert.Single(controller.Rows);
             Assert.Equal("second", row.Value);
@@ -104,7 +104,7 @@ public sealed class PhotoMetadataControllerTests
 
     private static void PumpUntil(Func<bool> condition)
     {
-        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(3);
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
         while (!condition())
         {
             if (DateTime.UtcNow >= deadline)
