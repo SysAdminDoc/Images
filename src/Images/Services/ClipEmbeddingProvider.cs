@@ -62,12 +62,11 @@ public sealed class ClipEmbeddingProvider : ISemanticEmbeddingProvider, IDisposa
             var tokenizer = ClipTokenizer.Load(tokenizerModel.InstalledPath!);
             var preprocessor = ClipImagePreprocessor.Load(preprocessorModel.InstalledPath!);
 
-            var sessionOptions = CreateSessionOptions();
+            var sessionOptions = OnnxRuntimeService.CreateSessionOptions();
             var textSession = new InferenceSession(textModel.InstalledPath!, sessionOptions);
             var visionSession = new InferenceSession(visionModel.InstalledPath!, sessionOptions);
 
-            var epName = sessionOptions.AppendExecutionProvider_DML != null ? "DirectML" : "CPU";
-            var statusText = $"CLIP ViT-B/32 ready ({epName})";
+            var statusText = $"CLIP ViT-B/32 ready ({OnnxRuntimeService.ProviderLabel})";
 
             return new ClipEmbeddingProvider(textSession, visionSession, tokenizer, preprocessor, statusText);
         }
@@ -159,26 +158,6 @@ public sealed class ClipEmbeddingProvider : ISemanticEmbeddingProvider, IDisposa
         if (!string.IsNullOrWhiteSpace(asset.Format))
             parts.Add(asset.Format);
         return string.Join(" | ", parts);
-    }
-
-    private static SessionOptions CreateSessionOptions()
-    {
-        var options = new SessionOptions
-        {
-            GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL,
-            LogSeverityLevel = OrtLoggingLevel.ORT_LOGGING_LEVEL_WARNING,
-        };
-
-        try
-        {
-            options.AppendExecutionProvider_DML(0);
-        }
-        catch
-        {
-            // DirectML not available; fall back to CPU
-        }
-
-        return options;
     }
 
     public void Dispose()

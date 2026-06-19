@@ -63,14 +63,7 @@ public static class SuperResolutionService
         var origWidth = (int)sourceImage.Width;
         var origHeight = (int)sourceImage.Height;
 
-        var options = new SessionOptions
-        {
-            GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL,
-            LogSeverityLevel = OrtLoggingLevel.ORT_LOGGING_LEVEL_WARNING,
-        };
-        try { options.AppendExecutionProvider_DML(0); } catch { }
-
-        using var session = new InferenceSession(modelPath, options);
+        using var session = OnnxRuntimeService.CreateSession(modelPath);
 
         var inputMeta = session.InputMetadata.Values.First();
         var hasDynamicInput = inputMeta.Dimensions.Any(d => d <= 0);
