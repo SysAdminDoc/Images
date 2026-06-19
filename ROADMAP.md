@@ -8,20 +8,13 @@ The feature set already rivals ImageGlass and nomacs. What's missing for a `1.0`
 
 1. Code signing (D-05 in Roadmap_Blocked.md — needs Azure Artifact Signing credentials)
 2. WinGet + Scoop publication (D-02 in Roadmap_Blocked.md — needs first manual submission)
-3. SBOM and build attestations (below)
-4. XMP write-through for labels/keywords/location (below)
+3. XMP write-through for labels/keywords/location (below)
 
-When all four ship (plus the two blocked items), promote to `1.0.0`.
+When the remaining item ships (plus the two blocked items), promote to `1.0.0`.
 
 ## Research-Driven Additions
 
 ### P1
-
-- [ ] P1 — Add SBOM and artifact attestations to release artifacts
-  Why: Unsigned ZIP/installer releases have checksums and dependency logs but no cryptographic build provenance or SBOM attestation.
-  Touches: `.github/workflows/release.yml`; release diagnostics scripts; package-manifest upload flow.
-  Acceptance: Release workflow emits a CycloneDX or SPDX SBOM, uploads it with release diagnostics, and creates GitHub build/SBOM attestations for ZIP, setup EXE, checksums, and package manifests where repository plan support allows.
-  Complexity: M
 
 - [ ] P1 — Enforce documented UIA accessibility contracts with FlaUI
   Why: `docs/accessibility.md` documents a rich UIA tree, but tests only cover basic launch/navigation and do not assert screen-reader names, help text, live regions, or secondary windows.
@@ -88,6 +81,13 @@ When all four ship (plus the two blocked items), promote to `1.0.0`.
   Acceptance: A Jobs surface lists running and recent tasks with name, state, duration, last error, and affected count where available; cancellable tasks expose Cancel; completed/faulted tasks are retained for the session and included in support bundles without file contents.
   Complexity: M
 
+- [ ] P1 — Add color-management truth mode and HDR/wide-gamut guardrails
+  Why: Images advertises broad HDR/EXR/JXL/AVIF support and reports ICC data, but the current WPF display path explicitly does not soft-proof or apply managed display transforms; accurate color is a trust boundary for a premium viewer.
+  Evidence: ImageGlass HDR/JPEG XL color issues; FastStone ICC-processing performance focus; `ImageColorAnalysisService`; `ExportCapabilityWarningService`; `docs/research-advanced-features.md`.
+  Touches: `ImageColorAnalysisService`; `ImageLoader`; `ZoomPanImage` display pipeline; `ExportPreviewService`; `ExportCapabilityWarningService`; color-profile fixture tests.
+  Acceptance: Profiled, unprofiled, wide-gamut, EXR/HDR, AVIF, and JXL fixtures surface explicit display-truth status; supported SDR ICC cases can preview through a managed sRGB display transform or clearly explain why not; HDR/native wide-gamut files are never implied accurate until a future renderer supports it.
+  Complexity: L
+
 ### P2
 
 - [ ] P2 — Add a cross-folder session tray with portable file lists
@@ -110,3 +110,24 @@ When all four ship (plus the two blocked items), promote to `1.0.0`.
   Touches: `MainWindow.xaml`; `MainViewModel`; recent folder/book services; clipboard import; Settings/About command bindings; UIA smoke tests.
   Acceptance: Launching with no file shows a restrained start surface with Open file, Open folder, Recent folders, Recent books, Paste image, Import inbox, Settings, and Diagnostics actions; it has keyboard/UIA names, hides once an image loads, and does not appear in peek mode.
   Complexity: S
+
+- [ ] P2 — Add saved smart collections for catalog and gallery filters
+  Why: Eagle Smart Folders, XnView Smart Albums, Mylio Dynamic Search, and ACDSee saved searches show that users expect repeatable local collections for recurring criteria, not one-off filter strings.
+  Evidence: Eagle Smart Folders; XnView Smart Albums/catalog search; Mylio Dynamic Search; ACDSee catalog/search model; existing `AssetSmartFilterService`, `CatalogQueryService`, and gallery smart filter tokens.
+  Touches: `AssetSmartFilterService`; `CatalogQueryService`; `SettingsService`; gallery workbench; semantic search window; persisted schema/tests.
+  Acceptance: Users can save, rename, reorder, and delete smart collections based on folder roots, rating/label/tag, format, dimensions, date, duplicate status, palette/orientation, and optional semantic text; selecting a collection replays the filter against current catalog state without copying originals.
+  Complexity: M
+
+- [ ] P2 — Add contact sheet and proof sheet export
+  Why: FastStone, Photo Mechanic, IrfanView, XnView, and ACDSee all treat contact/proof sheets as a core delivery and review workflow; Images has print/export/reference-board pieces but no repeatable sheet generator.
+  Evidence: FastStone contact sheet/slideshow tooling; Photo Mechanic contact/proof sheet printing with variables and watermarks; IrfanView/XnView print-layout workflows; existing `PrintService`, `ReferenceBoardLayoutService`, and export pipeline.
+  Touches: `PrintService`; new contact-sheet/proof-sheet planner; `ImageExportService`; `PhotoMetadataController`; session tray/gallery selections; XAML dialog/tests.
+  Acceptance: Selected images, session trays, or current-folder filters can generate PDF/PNG contact sheets and single-image proof sheets with configurable grid, margins, filename/rating/metadata captions, optional watermark text, and dry-run preview before writing.
+  Complexity: M
+
+- [ ] P2 — Add viewer performance budgets and release diagnostics
+  Why: qView, FastStone, PicView, and ImageGlass compete heavily on instant open, fast folder switching, and low memory; Images has launch/decode instrumentation but no regression budget or fixture-backed performance report.
+  Evidence: qView fast/minimal positioning; FastStone speed/reliability positioning; PicView fast customizable viewer positioning; existing `LaunchTiming`, `ImageEventSource`, `DirectoryNavigator`, `ThumbnailCache`, and deep-zoom pipeline.
+  Touches: `LaunchTiming`; `ImageEventSource`; `DirectoryNavigator`; `ThumbnailCache`; `TileService`; release diagnostics scripts; performance fixture tests.
+  Acceptance: A local diagnostics command and CI/release report measure cold start, first image decode, next/previous navigation, large-folder scan, thumbnail generation, and huge-image tile open against fixed fixtures; regressions are reported with thresholds and memory snapshots without blocking emergency security releases.
+  Complexity: M
