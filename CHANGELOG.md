@@ -25,6 +25,10 @@ All notable changes to **Images** are documented here.
 
 - **Quick keyword sets** — `KeywordSetService` persists named keyword presets to `keyword-sets.json`, supports add/remove/rename/apply to image sidecars via `TagGraphService`, and exports/imports definitions as portable JSON. 7 regression tests.
 - **Performance budget CLI** — `Images.exe --perf-report` measures process-to-CLI time, directory scan, thumbnail cache health, settings DB access, and memory working set against configurable thresholds with pass/warn status.
+- **Incremental catalog rescan** — `CatalogService.Rebuild` now skips unchanged files (same size + modified time), removes stale paths, and reports reused/updated/removed counts. Repeat scans avoid re-hashing ~90% of files for large libraries. 2 regression tests.
+- **Cross-folder session tray** — `SessionTrayService` manages an ordered, deduplicated list of image paths from any folder. Add, remove, reorder, save/load plain text file lists (with comment and blank line tolerance), and filter to valid entries. 7 regression tests.
+- **Saved smart collections** — `SmartCollectionService` persists named filter collections (rating, tags, format, orientation, dimensions, date, duplicate status) to `smart-collections.json`. Collections can be added, removed, renamed, reordered, and applied against catalog/gallery items. 11 regression tests.
+- **Contact sheet export** — `ContactSheetService` plans grid layouts from image lists and renders PNG contact sheets with Magick.NET, thumbnail fitting, filename captions, unreadable-file fallback, and optional watermark. 6 regression tests.
 
 ### Infrastructure
 
