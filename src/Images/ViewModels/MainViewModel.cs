@@ -1355,7 +1355,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool IsListening
     {
         get => _isListening;
-        private set => Set(ref _isListening, value);
+        private set
+        {
+            if (Set(ref _isListening, value))
+            {
+                Raise(nameof(ListenPortLabel));
+                Raise(nameof(ListenPortTooltip));
+            }
+        }
     }
 
     private int _listenPort;
@@ -1377,7 +1384,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         : "";
 
     public string ListenPortTooltip => IsListening
-        ? Strings.Format(nameof(Strings.ListenMode_Tooltip), ListenPort)
+        ? Strings.Format(nameof(Strings.ListenMode_Tooltip), ListenPort, _listenService?.SessionToken ?? "")
         : "";
 
     /// <summary>
@@ -1396,7 +1403,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         IsListening = true;
 
         _log.LogInformation("V20-31 listen mode started on port {Port}", ListenPort);
-        Toast($"Listen mode active on port {ListenPort}");
+        Toast(Strings.Format(nameof(Strings.ListenMode_StartedToast), ListenPort));
     }
 
     // V20-32: peek-mode flag — true when launched via `Images.exe --peek <path>` for chromeless,

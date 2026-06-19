@@ -111,31 +111,16 @@ public sealed class ListenService : IDisposable
                         return;
                     }
 
-                    if (!Path.IsPathFullyQualified(trimmed))
-                    {
-                        _log.LogDebug("listen-mode: rejected non-qualified path");
+                    if (!TryNormalizeIncomingPath(trimmed, out var path))
                         continue;
-                    }
-
-                    if (trimmed.StartsWith("\\\\", StringComparison.Ordinal))
-                    {
-                        _log.LogDebug("listen-mode: rejected UNC path");
-                        continue;
-                    }
-
-                    if (!File.Exists(trimmed))
-                    {
-                        _log.LogDebug("listen-mode: rejected non-existent path");
-                        continue;
-                    }
 
                     NetworkEgressService.RecordInbound(
                         $"tcp://127.0.0.1:{Port}",
                         "listen-mode: received path",
                         Encoding.UTF8.GetByteCount(line));
 
-                    _log.LogInformation("listen-mode: opening {Path}", trimmed);
-                    _onPathReceived(trimmed);
+                    _log.LogInformation("listen-mode: opening {Path}", path);
+                    _onPathReceived(path);
                 }
             }
         }
@@ -168,6 +153,31 @@ public sealed class ListenService : IDisposable
         }
 
         return sb.Length > 0 ? sb.ToString() : null;
+    }
+
+    internal static bool TryNormalizeIncomingPath(string input, out string path)
+    {
+        path = input.Trim();
+
+        if (!Path.IsPathFullyQualified(path))
+        {
+            _log.LogDebug("listen-mode: rejected non-qualified path");
+            return false;
+        }
+
+        if (path.StartsWith("\\\\", StringComparison.Ordinal))
+        {
+            _log.LogDebug("listen-mode: rejected UNC path");
+            return false;
+        }
+
+        if (!File.Exists(path))
+        {
+            _log.LogDebug("listen-mode: rejected non-existent path");
+            return false;
+        }
+
+        return true;
     }
 
     private bool CheckRateLimit()

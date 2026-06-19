@@ -1269,6 +1269,7 @@ public static class Strings
     // ---- Listen mode (V20-31) ----
     public static string ListenMode_PortLabel => Get(nameof(ListenMode_PortLabel));
     public static string ListenMode_Tooltip => Get(nameof(ListenMode_Tooltip));
+    public static string ListenMode_StartedToast => Get(nameof(ListenMode_StartedToast));
 
     // ---- Slideshow (V30-33) ----
     public static string Slideshow_Playing => Get(nameof(Slideshow_Playing));

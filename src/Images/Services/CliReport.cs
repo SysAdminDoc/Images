@@ -175,7 +175,9 @@ public static class CliReport
         sb.AppendLine();
         sb.AppendLine("  Images.exe --listen <port>  |  -l <port>");
         sb.AppendLine("    Start the viewer with a loopback TCP listener on <port>.");
-        sb.AppendLine("    Send UTF-8 file paths (one per line) to tcp://127.0.0.1:<port>.");
+        sb.AppendLine("    Send the session token as the first line, then UTF-8 file paths.");
+        sb.AppendLine("    The token is shown in the listen-mode toolbar tooltip and app log.");
+        sb.AppendLine("    Target tcp://127.0.0.1:<port>; one authenticated path per line.");
         sb.AppendLine("    The viewer opens or refreshes the sent image live.");
         sb.AppendLine();
         sb.AppendLine("  Images.exe --system-info");
