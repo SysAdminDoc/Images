@@ -144,23 +144,8 @@ public static class NetworkEgressService
 
         try
         {
-            // Cap at 500 lines to avoid unbounded memory on a huge log.
-            const int maxLines = 500;
-            var lines = File.ReadLines(path).Take(maxLines);
-            foreach (var line in lines)
-            {
-                if (string.IsNullOrWhiteSpace(line)) continue;
-                try
-                {
-                    var entry = JsonSerializer.Deserialize(line, EgressJsonContext.Default.NetworkEgressEntry);
-                    if (entry is not null)
-                        _entries.Add(entry);
-                }
-                catch
-                {
-                    // Skip malformed lines.
-                }
-            }
+            foreach (var entry in ReadPersistedEntriesForDisplay(File.ReadLines(path), MaxLoadedEntries))
+                _entries.Add(entry);
         }
         catch (Exception ex)
         {
@@ -168,7 +153,47 @@ public static class NetworkEgressService
         }
     }
 
+    internal const int MaxLoadedEntries = 500;
     private const int MaxPersistedEntries = 2000;
+
+    internal static IReadOnlyList<NetworkEgressEntry> ReadPersistedEntriesForDisplay(
+        IEnumerable<string> lines,
+        int maxLines)
+    {
+        var entries = new List<NetworkEgressEntry>();
+        foreach (var line in TakeLatestLines(lines, maxLines))
+        {
+            if (string.IsNullOrWhiteSpace(line)) continue;
+            try
+            {
+                var entry = JsonSerializer.Deserialize(line, EgressJsonContext.Default.NetworkEgressEntry);
+                if (entry is not null)
+                    entries.Add(entry);
+            }
+            catch
+            {
+                // Skip malformed lines.
+            }
+        }
+
+        entries.Reverse();
+        return entries;
+    }
+
+    internal static IReadOnlyList<string> TakeLatestLines(IEnumerable<string> lines, int maxLines)
+    {
+        if (maxLines <= 0) return [];
+
+        var buffer = new Queue<string>(maxLines);
+        foreach (var line in lines)
+        {
+            if (buffer.Count == maxLines)
+                buffer.Dequeue();
+            buffer.Enqueue(line);
+        }
+
+        return buffer.ToArray();
+    }
 
     private static void PersistEntry(NetworkEgressEntry entry)
     {

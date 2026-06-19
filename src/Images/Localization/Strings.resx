@@ -4011,10 +4011,10 @@ Details written to:
     <value>Network activity log</value>
   </data>
   <data name="AboutNetworkActivityEmpty" xml:space="preserve">
-    <value>No outbound network calls recorded. Images only connects to check for updates — nothing else.</value>
+    <value>No network activity recorded. Images only connects to check for updates.</value>
   </data>
   <data name="AboutNetworkActivitySummaryFormat" xml:space="preserve">
-    <value>{0} call(s), {1} total</value>
+    <value>{0} event(s), {1} total</value>
   </data>
   <data name="AboutNetworkActivityCopyAutomationName" xml:space="preserve">
     <value>Copy network activity log to clipboard</value>
@@ -4026,13 +4026,13 @@ Details written to:
     <value>Clear network activity log</value>
   </data>
   <data name="AboutNetworkActivityClear" xml:space="preserve">
-    <value>Clear</value>
+    <value>Clear log</value>
   </data>
   <data name="AboutNetworkActivityCopied" xml:space="preserve">
     <value>Network activity log copied to clipboard.</value>
   </data>
   <data name="AboutNetworkActivityCleared" xml:space="preserve">
-    <value>Network activity log cleared.</value>
+    <value>Network activity log cleared from this device.</value>
   </data>
   <data name="AboutNetworkActivityNothingToCopy" xml:space="preserve">
     <value>No network activity to copy.</value>

@@ -273,7 +273,7 @@ public partial class AboutWindow : Window
 
     private void ClearNetworkLogButton_Click(object sender, RoutedEventArgs e)
     {
-        NetworkEgressService.Clear();
+        NetworkEgressService.ClearAll();
         PopulateNetworkActivity();
         ShowUpdateStatus(Strings.AboutNetworkActivityCleared, "Success");
     }
