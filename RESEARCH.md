@@ -1,103 +1,86 @@
 # Research - Images
 
 ## Executive Summary
-Images is a local-first Windows WPF image viewer and editor with unusually strong privacy, metadata, archive, slideshow, format-validation, and AI-search foundations for a small desktop app. Its strongest current shape is "power-user Windows Photos replacement": fast viewing, local file control, metadata safety, batch operations, and optional local AI. The highest-value direction is not a broad rewrite; it is making the already ambitious Windows-native product reliable enough to ship. Top opportunities, in order: fix the invalid ONNX Runtime DirectML package pin that currently prevents restore; make dependency and release-readiness checks mechanically catch that failure; centralize the AI runtime/provider boundary; add automated WPF smoke coverage; harden loopback listen mode and network-log retention; wire the documented XMP migration importer into a real guided flow; add explicit destructive-writeback confirmation/backup policy; add tile-pyramid cache quotas; turn batch/export into operation-chain and synchronized inspection workflows; keep public docs aligned with .NET 10 and actual package state; add light/system themes and command/shortcut consistency.
+Images is a Windows-only, local-first WPF image viewer/editor that has moved past a simple viewer baseline into review labels, inline rename, archive/document viewing, batch/export workflows, catalog search, semantic search, local model management, diagnostics, and explicit network-egress transparency. The strongest direction is not another cloud DAM or AI subscription tool; it is a trustworthy local power-user viewer that borrows the best reliability, metadata, culling, batch, and diagnostics patterns from ImageGlass, FastStone, XnView, digiKam, PhotoDemon, Mylio, and Squoosh while preserving offline ownership. Top opportunities: fix stale release-readiness gates, keep the blocked Ghostscript 10.07.1 runtime refresh visible until binaries are staged, add SBOM/provenance attestations, make WPF smoke/accessibility coverage enforceable, complete XMP metadata write-through, surface local ML runtime validation instead of silent fallback, add unified local data controls, harden catalog rescans, and remove theme-token drift.
 
 ## Product Map
-- Core workflows: open and navigate local image folders; inspect and edit metadata; rename and organize files; compare, crop, rotate, resize, export, batch process, and strip metadata; view archives/books and extract Motion Photo/Live Photo embedded video.
-- User personas: privacy-conscious Windows photographers; technical users managing large local image sets; users replacing slow default viewers; archivists/comic readers; local-AI users who want semantic search without cloud upload.
-- Platforms and distribution: Windows desktop WPF on `net10.0-windows10.0.22621.0`; local builds via `dotnet`; docs mention future WinGet/MSIX/signing tracks that remain blocked in `Roadmap_Blocked.md`.
-- Key integrations and data flows: WIC and Magick.NET for image decoding; ExifTool-style metadata workflows; SQLite catalog/cache storage; SharpCompress archives; Ghostscript helper path for PDF/PS-family formats; ONNX Runtime/DirectML references for local AI; Serilog file logging; XMP sidecars as recoverable metadata state; optional loopback listen mode for local tool integration.
+- Core workflows: open/navigate image folders and archives; inline rename and review-label culling; inspect metadata/OCR/codecs/network activity; apply non-destructive edits; batch convert/export with preview; import, dedupe, catalog, and semantic-search local collections.
+- User personas: Windows power user replacing Photos/IrfanView/FastStone; privacy-sensitive organizer; creator who needs repeatable batch/export workflows; archive/comic reader; local-AI early adopter who wants explicit model provenance.
+- Platforms and distribution: Windows 10/11 desktop, WPF on `net10.0-windows10.0.22621.0`, GitHub release ZIP and Inno installer, generated WinGet/Scoop manifests, future signing/Store tracks blocked in `Roadmap_Blocked.md`.
+- Key integrations and data flows: WIC/Magick.NET/SharpCompress/Ghostscript/jpegtran decode and writeback; SQLite settings/catalog/semantic indexes under app data; XMP sidecars as portable review metadata; Windows OCR; ONNX Runtime DirectML/CPU with future Windows ML; GitHub Releases update check only when opted in.
 
 ## Competitive Landscape
-- ImageGlass: Does well at format breadth, HDR/SVG parity, signed installers, MSIX/Flatpak/DMG distribution, Motion Photos, and plugin boundaries. Images should learn from its capability matrix, plugin separation, and installer trust posture. Avoid copying its broad platform/distribution scope before the Windows restore/build path is dependable.
-- NeeView: Does well at book/archive viewing, browsing history, and keyboard-heavy image navigation. Images should learn from its archive-as-book ergonomics, bookmark/history affordances, and thumbnail naming options. Avoid turning the main viewer into a file-manager clone that dilutes image-first focus.
-- Czkawka/Krokiet: Does well at duplicate/similar-image workflows, bad-extension detection, broken-file detection, EXIF removal, and progress-heavy batch tasks. Images should learn from its data-safety and preview-state discipline, especially for long scans and large previews. Avoid adding destructive cleanup flows without reversible confirmation and clear dry-run output.
-- FastStone Image Viewer and IrfanView: Do well at quick launch, batch conversion, slideshow, comparison, EXIF/GPS display, and side-by-side conversion previews. Images should learn from their dense power-user workflows and fast A/B export preview. Avoid legacy menu sprawl and unstructured settings growth.
-- PicView and PhotoDemon: Do well at portable/local operation, rich image effects, batch resize/compression, archive/comic viewing, and modern lightweight UX. Images should learn from portable trust signals and simple effect discoverability. Avoid adding large editing surfaces that compete with dedicated raster editors.
-- Eagle: Does well at local/offline AI search, reverse image search, and natural-language image lookup. Images should learn from the "no upload" positioning and model availability feedback. Avoid automatic model downloads or opaque inference unless users explicitly opt in.
-- Adobe Lightroom and Capture One: Do well at assisted culling, focus/exposure/closed-eye review, smart albums, and third-party workflow actions. Images should learn from quality-signal ranking and review filtering. Avoid cloud/library assumptions, subscription-oriented UX, and database ownership that conflict with local-file-first philosophy.
-- Windows Photos: Does well at being preinstalled and visually simple, but community complaints center on speed and control. Images should keep optimizing launch/open confidence and avoid hiding file-level operations that power users expect.
+- ImageGlass: strong broad-format and HDR/vector momentum plus modern release cadence. Learn from its format transparency and command surface; avoid ambiguity around paid Store distribution, unsigned beta trust, and runtime dependency expectations.
+- FastStone, IrfanView, and XnView MP: mature table-stakes for batch convert/rename, metadata, contact sheets, and simple support workflows. Learn their metadata and batch breadth; avoid silent destructive metadata writes or hidden advanced options.
+- digiKam and darktable: strongest fit for sidecar-first, non-destructive metadata workflows. Learn granular XMP read/write and catalog rebuilding; avoid making the SQLite catalog more authoritative than files and sidecars.
+- PhotoDemon: a good model for approachable advanced editing, macros, presets, and batch workflows. Learn real-time previews and understandable macro/batch UX; avoid turning Images into a full Photoshop-class editor.
+- NeeView, PicView, qView, and JPEGView: focused viewer UX with book/archive modes, customization, minimal chrome, and fast local browsing. Learn viewer-speed expectations; avoid overloading the first screen with organizer/editor controls.
+- Mylio, Eagle, ACDSee, and Lightroom: commercial evidence that local AI search, culling, face/location organization, and guided import are premium/paywalled value. Learn trust cues and guided workflows; avoid cloud lock-in, subscription identity, and unverified AI scoring.
+- Immich, PhotoPrism, Hydrus, and Czkawka: adjacent evidence for local tags, CLIP search, dedupe, and large-library jobs. Learn transparent job state and incremental scans; avoid confusing tag models and silent machine-learning failures.
 
 ## Security, Privacy, and Reliability
-- [Verified] Current main cannot restore because `src/Images/Images.csproj` pins `Microsoft.ML.OnnxRuntime.DirectML` to `1.26.0`, while NuGet currently exposes DirectML up to `1.24.4`; local `dotnet list Images.sln package --outdated --include-transitive` and `--vulnerable` both fail before analysis.
-- [Verified] The repository is on `net10.0-windows10.0.22621.0`, but public-facing docs still contain stale .NET 9 cues; `README.md` and release/readiness docs need to be checked only after the runtime package path is fixed.
-- [Verified] DirectML provider calls are scattered across `ClipEmbeddingProvider`, `BackgroundRemovalService`, `LaMaInpaintService`, and `SuperResolutionService`, which makes provider fallback, status reporting, and security updates hard to reason about.
-- [Verified] `ClipEmbeddingProvider` attempts to infer DirectML status from `sessionOptions.AppendExecutionProvider_DML`, which is not an actual runtime provider-status check; users need truthful CPU/GPU/NPU/provider feedback before trusting local AI features.
-- [Verified] ONNX Runtime 1.25 and 1.26 release notes include memory-safety fixes and hardening, but DirectML package availability lags base ONNX Runtime. Images needs an explicit version policy instead of silently pinning unavailable versions.
-- [Verified] Ghostscript 10.07.1 includes sandbox and temporary-file permission hardening; the repo already tracks Ghostscript staging as blocked, so it should remain a blocked distribution item until the binary provenance path is solved.
-- [Likely] Minor package drift exists after the .NET 10 migration (`Microsoft.Data.Sqlite 10.0.0` vs newer 10.0.x, `Serilog.Sinks.File 6.0.0` vs 7.0.0). Refresh only after restore is green, because current package commands cannot complete.
-- [Verified] `ListenService` binds to `127.0.0.1` and rejects UNC/nonexistent paths, but any local client can send file paths without a per-session token, identity check, max-line cap, or command-rate cap; it records inbound local control through `NetworkEgressService`, which blurs inbound control with outbound egress.
-- [Verified] `NetworkEgressService.Clear()` clears only in-memory entries and does not delete persisted `network-egress.jsonl`; `LoadPersistedEntries()` reads the first 500 lines, not the newest 500, and there is no retention/rotation policy.
-- [Verified] Flat-raster crop/rotation writeback can overwrite source files, while `RecoveryCenterService` records writebacks as review-only/non-restorable. This conflicts with the repo's own "originals protected by default" design principle unless the confirmation/backup policy is made more explicit.
-- Missing guardrails: package-version resolution before dependency claims; UI smoke tests for core flows; runtime-provider diagnostics for local AI; visual regression coverage for themes and export preview; rollback notes for runtime package changes.
-- Recovery and rollback needs: keep XMP sidecars authoritative for metadata edits; ensure catalog/search caches can rebuild after schema/runtime changes; make AI model/runtime failures degrade to non-AI viewing without breaking open/navigation/export.
+- Verified: `scripts/Test-ReleaseReadiness.ps1` still requires `ROADMAP.md` to mention `PROJECT_CONTEXT.md` and reads `PROJECT_CONTEXT.md`, while `AGENTS.md` now marks `PROJECT_CONTEXT.md` as forbidden sprawl and the live `ROADMAP.md` contains only actionable items. This can block releases despite a valid current roadmap.
+- Verified: docs and changelog state official releases bundle Ghostscript 10.07.0, while Artifex lists Ghostscript 10.07.1 as a maintenance release that addresses potential security issues. The runtime provenance process is good; the approved version floor is now stale, and the implementation row belongs in `Roadmap_Blocked.md` until a 10.07.1 runtime is staged.
+- Verified: release workflow emits checksums and a transitive dependency tree, but does not generate a first-class SBOM or GitHub artifact attestations for the ZIP, setup EXE, checksums, or package manifests.
+- Verified: CI runs WPF smoke tests with `continue-on-error: true`; rendered UI regressions and accessibility regressions can pass main CI.
+- Verified: `ClipEmbeddingProvider.TryCreate` catches all setup/runtime failures and silently falls back to deterministic metadata embeddings through `SemanticSearchService`; users cannot distinguish missing files, shape mismatch, provider failure, or CPU fallback.
+- Verified: privacy documentation lists settings, logs, crash dumps, thumbnails, catalog, semantic index, model storage, recovery records, wallpaper copies, and email drafts, but Settings only opens app data/logs and About clears thumbnails/network history. There is no unified local data management surface.
 
 ## Architecture Assessment
-- `src/Images/ViewModels/MainViewModel.cs` and `src/Images/MainWindow.xaml` remain very large, which increases regression risk for shell, command state, and keyboard/navigation polish. Future work should extract command groups, runtime status presentation, and mode-specific panels without changing user-visible behavior.
-- The AI runtime boundary should be consolidated behind a small provider factory/service that owns Windows ML, DirectML, CPU fallback, provider labels, and failure telemetry; current direct `AppendExecutionProvider_DML` usage appears in multiple services.
-- Batch and export foundations exist, but operation chaining is not yet a first-class workflow. The next useful step is an ordered operation pipeline that reuses existing rotate/crop/resize/metadata/export services and shows dry-run counts before write operations.
-- Export preview should evolve before adding blocked quality metrics: a split A/B preview with file-size and format deltas is code-ready and matches Squoosh/FastStone patterns without requiring SSIMULACRA2 or external metric binaries.
-- Tests cover many service-level concerns, but gaps remain for WPF launch/open/navigation/settings/export smoke tests, real runtime-provider reporting, theme contrast snapshots, and restore/package availability checks.
-- Localization infrastructure exists through `Strings.resx`, `LocExtension`, locale settings, and archive right-to-left page-turn support; the next gap is missing-key prevention, hard-coded-string detection, and RTL visual smoke coverage rather than basic i18n research.
-- `XmpSidecarImportService` is documented and tested but has no production caller; `docs/migration-guide.md` currently implies automatic XMP migration that the running app does not yet provide as a guided workflow.
-- `TileService` builds deep-zoom pyramids under `%LOCALAPPDATA%\Images\tiles` without the quota, health, clear, or LRU eviction behavior already present in `ThumbnailCache`.
-- Commands, labels, and shortcuts are duplicated across `MainWindow.xaml`, the command palette, README, settings summary text, and the unused `hotkeys` table; this blocks reliable shortcut remapping and increases localization drift.
-- Documentation gaps are currently operational: `RESEARCH.md` had stale missing-feature claims for features now shipped, and `ROADMAP.md` retained completed historical work. Research and roadmap files must stay short, active, and mechanically tied to current repo state.
+- `src/Images/Services/XmpSidecarImportService.cs` parses ratings, color labels, keywords, hierarchical keywords, and IPTC/Photoshop location fields, but `ApplyFolderRatings` only writes ratings. This leaves sidecar interoperability visibly incomplete.
+- `src/Images/Services/CatalogService.cs` performs full recursive rebuilds, hashes every candidate, clears the catalog, then inserts current rows. For large libraries this risks slow first-run/rescan behavior seen in competing viewers.
+- `src/Images/Services/SemanticSearchService.cs` rebuilds from catalog output and clears its index in one transaction; it needs staging/reuse semantics before model-backed search scales.
+- `src/Images/Services/ModelManagerService.cs` verifies file SHA-256 and size, but runtime compatibility lives in `ClipEmbeddingProvider`; model health should be a visible validation step with exact provider/failure copy.
+- `tests/Images.Tests/WpfSmokeTests.cs` covers launch, fixture open, next/previous, and Escape only. It does not assert documented UIA names/help text from `docs/accessibility.md` or smoke Settings/About/Command Palette.
+- Theme dictionaries are strong, but raw alpha colors remain in surface XAML (`MainWindow.xaml`, `SettingsWindow.xaml`, `AboutWindow.xaml`, secondary tools). High-contrast behavior should not depend on Catppuccin-only literals.
+- Docs are stale in places: `docs/release-support-policy.md` still says `net9.0-windows` and `0.1.x`, and `docs/release-checklist.md` still references `PROJECT_CONTEXT.md`.
 
 ## Rejected Ideas
-- Cross-platform UI rewrite: ImageGlass, PicView, and qView show cross-platform demand, but Images is explicitly Windows/WPF-native and already benefits from WIC, Windows ML, and Windows shell conventions.
-- Cloud sync, accounts, or hosted libraries: Lightroom-style cloud/library behavior conflicts with the local-first privacy position and has no evidence in the repo architecture.
-- Automatic model downloads by default: Eagle proves local AI demand, but Images should not fetch large models or change network behavior without explicit opt-in and a provenance/consent design.
-- Full photo-management suite parity with digiKam or Lightroom: smart albums and culling are useful later, but the immediate gap is reliable viewer/editor/runtime infrastructure.
-- Plugin marketplace now: ImageGlass validates plugin boundaries, but Images should finish the runtime/package/test foundation before loading third-party code.
-- MSIX-only distribution: signed packaged distribution is desirable, but blocking account/signing work already lives in `Roadmap_Blocked.md`; portable/dev builds must remain viable.
-- MCP integration before catalog/query boundaries: read-only automation could be valuable later, but it depends on a stable catalog API, privacy policy, and plugin/security boundary.
-- HDR display implementation as a quick win: ImageGlass has HDR tone mapping, but Images already tracks HDR/color work as blocked by rendering/color-management decisions; do not duplicate it in the active roadmap.
-- Mobile companion app: the codebase, package targets, and differentiators are Windows desktop/WPF-specific; mobile work would fragment the product before the core release/runtime path is reliable.
-- Multi-user collaboration: no account, cloud, or shared-library architecture exists, and it would conflict with the local-file-first privacy posture.
+- Cloud sync, accounts, and multi-user sharing: rejected because the repo philosophy and privacy policy are explicitly local-first; Mylio/Immich are useful as indexing/UX references only.
+- Public galleries/web sharing: rejected because Piwigo/Immich solve a different server-hosted problem and would add account/network scope.
+- Face recognition as immediate work: rejected until local model validation, privacy controls, and sidecar migration are stronger.
+- Full MSIX/Store migration: rejected for this roadmap because signing, Store account, and package-model choices are already blocked externally.
+- Full plugin host or native Bio-Formats/OpenSlide/libvips/OIIO/OCIO adoption: rejected for active roadmap because those runtime decisions remain in `Roadmap_Blocked.md`; only sandbox/provenance guardrails should precede them.
+- Cloud/generative AI culling or photo-to-video features: rejected because they contradict zero-cloud, no-telemetry expectations and would create subscription/model-credit semantics.
+- C2PA signing: rejected for active roadmap because signing credentials and publisher identity remain blocked; read-only inspection should continue.
 
 ## Sources
-Competitors and adjacent projects:
-- https://github.com/d2phap/ImageGlass/releases/tag/10.0.2.66-beta-2
-- https://imageglass.org/docs/features
-- https://github.com/neelabo/NeeView/releases
-- https://github.com/qarmin/czkawka/releases/tag/11.0.1
-- https://picview.org/
-- https://photodemon.org/
+Competitors:
+- https://github.com/d2phap/ImageGlass/releases
+- https://github.com/nomacs/nomacs
+- https://github.com/Ruben2776/PicView
+- https://neeview.org/
+- https://github.com/jurplel/qView
+- https://github.com/tannerhelland/photodemon
+- https://github.com/sylikc/jpegview
+- https://github.com/qarmin/czkawka
+- https://docs.digikam.org/en/setup_application/metadata_settings.html
+- https://www.darktable.org/about/
+
+Commercial:
 - https://www.faststone.org/FSViewerDetail.htm
-- https://www.irfanview.com/main_history.htm
+- https://www.irfanview.com/faq.htm
+- https://www.xnview.com/en/faq/
+- https://www.acdsee.com/en/products/photo-studio-home/features/
+- https://helpx.adobe.com/lightroom-classic/help/assisted-culling.html
+- https://en.eagle.cool/
+- https://support.mylio.com/what-is-mylio-photos
 
-Commercial and product research:
-- https://www.adobe.com/learn/lightroom-cc/web/ai-assisted-culling-lightroom
-- https://support.captureone.com/hc/en-us/articles/35747427882653-Capture-One-16-8-release-notes
-- https://en.eagle.cool/blog/post/eagle-plugin-ai-search
-
-Platform, standards, and dependencies:
-- https://onnxruntime.ai/docs/execution-providers/DirectML-ExecutionProvider.html
-- https://www.nuget.org/packages/Microsoft.ML.OnnxRuntime.DirectML
-- https://www.nuget.org/packages/Microsoft.ML.OnnxRuntime
-- https://github.com/microsoft/onnxruntime/releases/tag/v1.25.0
-- https://github.com/microsoft/onnxruntime/releases/tag/v1.26.0
-- https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview
-- https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/supported-execution-providers
-- https://learn.microsoft.com/en-us/lifecycle/products/microsoft-net-and-net-core
-- https://learn.microsoft.com/en-us/dotnet/desktop/wpf/whats-new/net100
-- https://learn.microsoft.com/en-us/windows/win32/ipc/named-pipes
-- https://learn.microsoft.com/en-us/windows/win32/ipc/named-pipe-security-and-access-rights
-- https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/commanding-overview
-- https://developer.chrome.com/blog/local-network-access
-- https://github.com/dlemstra/Magick.NET/releases
-- https://ghostscript.readthedocs.io/en/gs10.07.1/News.html
-- https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html
-
-Community and ecosystem signal:
+Adjacent, platform, and security:
 - https://github.com/ibaaj/awesome-OpenSourcePhotography
 - https://github.com/meichthys/foss_photo_libraries
-- https://github.com/RhetTbull/osxphotos
+- https://www.libvips.org/
+- https://openimageio.readthedocs.io/
+- https://opencolorio.org/
+- https://openslide.org/
+- https://www.openmicroscopy.org/bio-formats/
+- https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview
+- https://learn.microsoft.com/en-us/dotnet/desktop/wpf/whats-new/net100
+- https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html
+- https://docs.github.com/en/actions/concepts/security/artifact-attestations
+- https://github.com/dlemstra/Magick.NET/releases
+- https://ghostscript.readthedocs.io/en/latest/News.html
 
 ## Open Questions
-- Which runtime policy should Images choose now: keep DirectML at the latest available package, switch local AI to Windows ML plus base ONNX Runtime, or ship CPU-only until DirectML catches up?
-- Are external model downloads allowed in a future opt-in flow, and where should model provenance and storage policy be documented?
-- Is there an available signing identity, Store account, or WinGet publisher path for distribution work currently parked in `Roadmap_Blocked.md`?
-- Which Windows UI automation stack should be standardized for CI: FlaUI, WinAppDriver/Appium, or a repo-local smoke runner around the current WPF shell?
+- Is the publisher willing to treat Ghostscript 10.07.1 as the new minimum approved bundled runtime for the next release, or should releases temporarily require an externally supplied runtime ZIP?
+- Should a local data deletion control preserve settings by default, or should it offer a separate "factory reset" path that removes settings, hotkeys, and recent folders too?
