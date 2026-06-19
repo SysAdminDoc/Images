@@ -17,6 +17,9 @@ public sealed record ReviewLabelState(
     ReviewLabelKind Label,
     string SidecarPath)
 {
+    public string? ColorLabel { get; init; }
+    public SidecarLocation Location { get; init; } = SidecarLocation.Empty;
+
     public string RatingText => Rating is null ? "Unrated" : $"{Rating} star{(Rating == 1 ? "" : "s")}";
     public string LabelText => Label switch
     {
@@ -52,7 +55,11 @@ public sealed class ReviewLabelService
             try
             {
                 var document = XDocument.Load(candidate, LoadOptions.None);
-                return new ReviewLabelState(ReadRating(document), ReadLabel(document), candidate);
+                return new ReviewLabelState(ReadRating(document), ReadLabel(document), candidate)
+                {
+                    ColorLabel = ReadColorLabel(document),
+                    Location = ReadLocation(document)
+                };
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or System.Xml.XmlException or InvalidOperationException)
             {
@@ -83,6 +90,18 @@ public sealed class ReviewLabelService
                 ReviewLabelKind.Reject => "Marked reject.",
                 _ => "Review label cleared."
             });
+
+    public ReviewLabelMutationResult SetColorLabel(string imagePath, string? colorLabel)
+        => Mutate(
+            imagePath,
+            state => state with { ColorLabel = colorLabel },
+            colorLabel is null ? "Color label cleared." : $"Color label set to {colorLabel}.");
+
+    public ReviewLabelMutationResult SetLocation(string imagePath, SidecarLocation location)
+        => Mutate(
+            imagePath,
+            state => state with { Location = location },
+            location.HasAnyField ? $"Location set to {location}." : "Location cleared.");
 
     public ReviewLabelMutationResult Restore(string imagePath, ReviewLabelState state)
         => Mutate(imagePath, _ => state, "Review label restored.");
@@ -127,6 +146,8 @@ public sealed class ReviewLabelService
     {
         XNamespace xmp = "http://ns.adobe.com/xap/1.0/";
         XNamespace imv = "http://maven.imaging/1.0/";
+        XNamespace photoshop = "http://ns.adobe.com/photoshop/1.0/";
+        XNamespace iptcCore = "http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/";
         var description = EnsureDescription(document);
         EnsureNamespace(document, "xmp", xmp);
         EnsureNamespace(document, "imv", imv);
@@ -137,6 +158,19 @@ public sealed class ReviewLabelService
         description.SetAttributeValue(imv + "ReviewLabel", state.Label == ReviewLabelKind.None
             ? null
             : state.Label.ToString().ToLowerInvariant());
+        description.SetAttributeValue(xmp + "Label", string.IsNullOrWhiteSpace(state.ColorLabel)
+            ? null
+            : state.ColorLabel);
+
+        if (state.Location.HasAnyField)
+        {
+            EnsureNamespace(document, "photoshop", photoshop);
+            EnsureNamespace(document, "Iptc4xmpCore", iptcCore);
+            description.SetAttributeValue(photoshop + "City", state.Location.City);
+            description.SetAttributeValue(photoshop + "State", state.Location.StateProvince);
+            description.SetAttributeValue(photoshop + "Country", state.Location.Country);
+            description.SetAttributeValue(iptcCore + "Location", state.Location.Location);
+        }
     }
 
     private static int? ReadRating(XDocument document)
@@ -179,6 +213,45 @@ public sealed class ReviewLabelService
 
         return ReviewLabelKind.None;
     }
+
+    private static string? ReadColorLabel(XDocument document)
+    {
+        XNamespace xmp = "http://ns.adobe.com/xap/1.0/";
+        foreach (var attribute in document.Descendants().Attributes())
+        {
+            if (attribute.Name == xmp + "Label" ||
+                (attribute.Name.LocalName.Equals("Label", StringComparison.OrdinalIgnoreCase) &&
+                 attribute.Parent?.Name.LocalName.Equals("Description", StringComparison.OrdinalIgnoreCase) == true))
+            {
+                var value = attribute.Value?.Trim();
+                return string.IsNullOrWhiteSpace(value) ? null : value;
+            }
+        }
+        return null;
+    }
+
+    private static SidecarLocation ReadLocation(XDocument document)
+    {
+        XNamespace photoshop = "http://ns.adobe.com/photoshop/1.0/";
+        XNamespace iptcCore = "http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/";
+        string? location = null, city = null, state = null, country = null;
+
+        foreach (var attribute in document.Descendants().Attributes())
+        {
+            if (attribute.Name == iptcCore + "Location")
+                location ??= TrimOrNull(attribute.Value);
+            if (attribute.Name == photoshop + "City")
+                city ??= TrimOrNull(attribute.Value);
+            if (attribute.Name == photoshop + "State")
+                state ??= TrimOrNull(attribute.Value);
+            if (attribute.Name == photoshop + "Country")
+                country ??= TrimOrNull(attribute.Value);
+        }
+        return new SidecarLocation(location, city, state, country);
+    }
+
+    private static string? TrimOrNull(string? value)
+        => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private static XElement EnsureDescription(XDocument document)
     {
