@@ -75,6 +75,20 @@
                             <TextBlock Text="{x:Static loc:Strings.ModelManagerImportFile}" />
                         </StackPanel>
                     </Button>
+                    <Button x:Name="ValidateButton"
+                            Style="{StaticResource ChromeButton}"
+                            Margin="8,0,0,0"
+                            Click="ValidateButton_Click"
+                            AutomationProperties.Name="Validate CLIP pipeline runtime">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE9D5;"
+                                       FontFamily="{StaticResource IconFontFamily}"
+                                       FontSize="12"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="Validate" />
+                        </StackPanel>
+                    </Button>
                 </WrapPanel>
             </Grid>
         </Border>

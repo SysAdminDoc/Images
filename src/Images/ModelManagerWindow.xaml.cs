@@ -88,6 +88,28 @@ public partial class ModelManagerWindow : Window
         SetStatus(message, deleted ? ModelStatusTone.Ready : ModelStatusTone.Error);
     }
 
+    private void ValidateButton_Click(object sender, RoutedEventArgs e)
+    {
+        SetStatus("Validating CLIP pipeline...", ModelStatusTone.Ready);
+        try
+        {
+            var result = _modelManager.ValidateClipPipeline();
+            if (result.Success)
+            {
+                SetStatus(result.Summary, ModelStatusTone.Ready);
+            }
+            else
+            {
+                var reason = result.FirstFailureReason ?? "Unknown failure";
+                SetStatus($"Validation failed: {reason}", ModelStatusTone.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"Validation error: {ex.Message}", ModelStatusTone.Error);
+        }
+    }
+
     private void RevealRootButton_Click(object sender, RoutedEventArgs e)
     {
         var root = _modelManager.GetModelRoot();
