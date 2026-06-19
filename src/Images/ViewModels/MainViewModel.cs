@@ -168,6 +168,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _archiveOldScanFilterEnabled = _settings.GetBool(Keys.ArchiveOldScanFilter, false);
         _archiveSpreadModeEnabled = _settings.GetBool(Keys.ArchiveSpreadMode, false);
         RestorePersistedSortMode();
+        RestorePersistedWorkflowMode();
 
         OpenCommand = new RelayCommand(async () => await OpenFileDialogAsync(), () => !IsOperationBusy);
         NextCommand = new RelayCommand(async () => await NextAsync(), () => CanUseImageCommands);
@@ -308,6 +309,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ExtractMotionVideoCommand = new RelayCommand(async () => await ExtractMotionVideoAsync(), () => IsMotionPhoto || CompanionVideoPath is not null);
         SettingsCommand = new RelayCommand(ShowSettingsWindow);
         ExtractTextCommand = new RelayCommand(async () => await _ocrWorkflow.ToggleAsync(), () => HasImage && !IsOperationBusy && !IsCompareMode);
+        SetWorkflowModeCommand = new RelayCommand(p => ApplyWorkflowMode(p), p => p is WorkflowMode or string);
         ToggleCommandPaletteCommand = new RelayCommand(() => ShowCommandPalette = !ShowCommandPalette);
         InstallStoreExtensionCommand = new RelayCommand(OpenStoreExtensionPage, () => _loadErrorStoreExtension is not null);
         CycleChannelModeCommand = new RelayCommand(CycleChannelMode, () => HasDisplayImage);
@@ -985,6 +987,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         private set => Set(ref _filteredCommandPaletteItems, value);
     }
 
+    public ICommand SetWorkflowModeCommand { get; }
+
     public ICommand ToggleCommandPaletteCommand { get; }
 
     private void RefreshCommandPaletteItems()
@@ -1269,6 +1273,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             new() { Name = Strings.CommandPalette_SlideshowShuffle, Category = view, Command = ToggleSlideshowShuffleCommand },
             new() { Name = Strings.CommandPalette_SlideshowFaster, Category = view, Command = IncreaseSlideshowIntervalCommand },
             new() { Name = Strings.CommandPalette_SlideshowSlower, Category = view, Command = DecreaseSlideshowIntervalCommand },
+
+            // Workflow modes
+            new() { Name = "Mode: Viewer", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Viewer)) },
+            new() { Name = "Mode: Review", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Review)) },
+            new() { Name = "Mode: Organize", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Organize)) },
+            new() { Name = "Mode: Edit", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Edit)) },
+            new() { Name = "Mode: Book", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Book)) },
+            new() { Name = "Mode: Diagnostics", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Diagnostics)) },
 
             // Sort
             new() { Name = Strings.CommandPalette_SortName, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.NaturalName)) },
@@ -3000,6 +3012,61 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         IsFilmstripVisible = !IsFilmstripVisible;
         Toast(IsFilmstripVisible ? Strings.MainToastFilmstripShown : Strings.MainToastFilmstripHidden);
+    }
+
+    private WorkflowMode _activeWorkflowMode = WorkflowMode.Viewer;
+
+    public WorkflowMode ActiveWorkflowMode
+    {
+        get => _activeWorkflowMode;
+        private set
+        {
+            if (_activeWorkflowMode == value) return;
+            _activeWorkflowMode = value;
+            Raise(nameof(ActiveWorkflowMode));
+            Raise(nameof(ActiveWorkflowModeText));
+        }
+    }
+
+    public string ActiveWorkflowModeText => WorkflowModeService.DisplayName(_activeWorkflowMode);
+
+    private void ApplyWorkflowMode(object? parameter)
+    {
+        WorkflowMode mode;
+        if (parameter is WorkflowMode wm)
+            mode = wm;
+        else if (parameter is string s && Enum.TryParse(s, ignoreCase: true, out WorkflowMode parsed))
+            mode = parsed;
+        else
+            return;
+
+        if (IsPeekMode || IsFullscreen) return;
+
+        var preset = WorkflowModePreset.ForMode(mode);
+        var modeService = new WorkflowModeService(_settings);
+        modeService.SetMode(mode);
+        ActiveWorkflowMode = mode;
+
+        IsFilmstripVisible = preset.FilmstripVisible;
+        IsMetadataHudVisible = preset.MetadataHudVisible;
+
+        if (preset.GalleryOpen && !IsGalleryOpen && CanToggleGallery)
+            IsGalleryOpen = true;
+        else if (!preset.GalleryOpen && IsGalleryOpen)
+            IsGalleryOpen = false;
+
+        if (preset.ReviewModeActive && !IsReviewMode && CanUseReviewLabels)
+            IsReviewMode = true;
+        else if (!preset.ReviewModeActive && IsReviewMode)
+            IsReviewMode = false;
+
+        Toast($"Switched to {WorkflowModeService.DisplayName(mode)} mode");
+    }
+
+    private void RestorePersistedWorkflowMode()
+    {
+        var modeService = new WorkflowModeService(_settings);
+        ActiveWorkflowMode = modeService.CurrentMode;
     }
 
     private void SetFolderSort(object? parameter)
