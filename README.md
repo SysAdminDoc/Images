@@ -7,7 +7,7 @@
 [![Version](https://img.shields.io/badge/version-0.2.11-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
 [![License](https://img.shields.io/badge/license-MIT-a6e3a1?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-cba6f7?style=flat-square)](#)
-[![.NET](https://img.shields.io/badge/.NET-9.0-f38ba8?style=flat-square)](#)
+[![.NET](https://img.shields.io/badge/.NET-10.0-f38ba8?style=flat-square)](#)
 
 A Windows 7–style classic image viewer, reimagined in dark mode, with inline rename-while-viewing.
 

@@ -32,6 +32,37 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
     & $versionScript -Version $Version -RepositoryRoot $RepositoryRoot
 }
 
+$slnPath = Resolve-RepoPath "Images.sln"
+if (-not (Test-Path -LiteralPath $slnPath)) {
+    throw "Images.sln not found at $slnPath."
+}
+
+Write-Host "Validating NuGet package resolution..."
+$restoreOutput = & dotnet restore $slnPath 2>&1
+$restoreExitCode = $LASTEXITCODE
+if ($restoreExitCode -ne 0) {
+    $errors = $restoreOutput | Where-Object { $_ -match "error NU" }
+    $errorText = ($errors | ForEach-Object { $_.ToString().Trim() }) -join "`n  "
+    throw "dotnet restore failed (exit $restoreExitCode). Fix package references before release:`n  $errorText"
+}
+
+Write-Host "Validating solution build..."
+$buildOutput = & dotnet build $slnPath -c Release --no-restore 2>&1
+$buildExitCode = $LASTEXITCODE
+if ($buildExitCode -ne 0) {
+    $errors = $buildOutput | Where-Object { $_ -match "error CS|error MSB" }
+    $errorText = ($errors | Select-Object -First 10 | ForEach-Object { $_.ToString().Trim() }) -join "`n  "
+    throw "dotnet build failed (exit $buildExitCode). Fix build errors before release:`n  $errorText"
+}
+
+Write-Host "Checking for vulnerable NuGet packages..."
+$vulnOutput = & dotnet list $slnPath package --vulnerable --include-transitive 2>&1
+$vulnLines = $vulnOutput | Where-Object { $_ -match ">\s+\S+" -and $_ -match "High|Critical" }
+if ($vulnLines) {
+    $vulnText = ($vulnLines | ForEach-Object { $_.ToString().Trim() }) -join "`n  "
+    Write-Warning "High/Critical vulnerable transitive packages detected:`n  $vulnText"
+}
+
 $checklist = Read-RepoText "docs\release-checklist.md"
 $requiredChecklistSections = @(
     "Current-State Audit",
