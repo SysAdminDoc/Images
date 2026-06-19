@@ -32,6 +32,7 @@ public static class CliReport
         if (string.Equals(token, "--help", StringComparison.OrdinalIgnoreCase)) return CliMode.Help;
         if (string.Equals(token, "-h", StringComparison.OrdinalIgnoreCase)) return CliMode.Help;
         if (string.Equals(token, "/?", StringComparison.Ordinal)) return CliMode.Help;
+        if (string.Equals(token, "--perf-report", StringComparison.OrdinalIgnoreCase)) return CliMode.PerfReport;
         return null;
     }
 
@@ -57,6 +58,9 @@ public static class CliReport
                     return 0;
                 case CliMode.Help:
                     Console.Out.Write(BuildHelpText());
+                    return 0;
+                case CliMode.PerfReport:
+                    Console.Out.Write(PerformanceBudgetService.BuildReport());
                     return 0;
                 default:
                     Console.Error.WriteLine("Unknown CLI mode.");
@@ -257,4 +261,5 @@ public enum CliMode
     CodecReport,
     Version,
     Help,
+    PerfReport,
 }
