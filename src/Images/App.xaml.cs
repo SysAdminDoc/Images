@@ -120,7 +120,7 @@ public partial class App : Application
         // file paths for live open/refresh. Parse before Show so the indicator is visible from
         // the first paint. Remaining non-flag args still go through the normal OpenPath flow.
         int? listenPort = null;
-        string? resolvedArgPath = null;
+        var resolvedPaths = new List<string>();
         for (int i = 0; i < e.Args.Length; i++)
         {
             if ((string.Equals(e.Args[i], "-l", StringComparison.OrdinalIgnoreCase) ||
@@ -129,11 +129,11 @@ public partial class App : Application
             {
                 if (int.TryParse(e.Args[i + 1], out var port) && port > 0 && port <= 65535)
                     listenPort = port;
-                i++; // skip the port value
+                i++;
             }
-            else if (resolvedArgPath is null && TryResolveArgPath(e.Args[i], out var r))
+            else if (TryResolveArgPath(e.Args[i], out var r))
             {
-                resolvedArgPath = r;
+                resolvedPaths.Add(r);
             }
         }
 
@@ -146,10 +146,15 @@ public partial class App : Application
             LaunchTiming.Log(_log, "listen-mode-started", $"port={listenPort.Value}");
         }
 
-        if (resolvedArgPath is not null)
+        if (resolvedPaths.Count > 1)
         {
-            window.OpenPath(resolvedArgPath);
-            LaunchTiming.Log(_log, "argv-open-complete", Path.GetFileName(resolvedArgPath));
+            window.OpenPathList(resolvedPaths);
+            LaunchTiming.Log(_log, "argv-multi-open-complete", $"{resolvedPaths.Count} files");
+        }
+        else if (resolvedPaths.Count == 1)
+        {
+            window.OpenPath(resolvedPaths[0]);
+            LaunchTiming.Log(_log, "argv-open-complete", Path.GetFileName(resolvedPaths[0]));
         }
     }
 

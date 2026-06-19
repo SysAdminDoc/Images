@@ -191,4 +191,54 @@ public sealed class DirectoryNavigatorTests
         Assert.Equal(missing, ex.FileName);
         Assert.Equal(current, nav.CurrentPath);
     }
+
+    [Fact]
+    public void OpenExplicitList_SetsFilesAndNavigates()
+    {
+        using var dir1 = TestDirectory.Create();
+        using var dir2 = TestDirectory.Create();
+        var a = dir1.WriteFile("a.jpg");
+        var b = dir2.WriteFile("b.png");
+
+        using var nav = new DirectoryNavigator();
+
+        Assert.True(nav.OpenExplicitList([a, b]));
+        Assert.Equal(2, nav.Count);
+        Assert.Equal(a, nav.CurrentPath);
+        Assert.Null(nav.Folder);
+
+        nav.MoveNext();
+        Assert.Equal(b, nav.CurrentPath);
+
+        nav.MoveNext();
+        Assert.Equal(a, nav.CurrentPath);
+    }
+
+    [Fact]
+    public void OpenExplicitList_FallsBackForSinglePath()
+    {
+        using var temp = TestDirectory.Create();
+        var img = temp.WriteFile("solo.jpg");
+
+        using var nav = new DirectoryNavigator();
+
+        Assert.True(nav.OpenExplicitList([img]));
+        Assert.Equal(1, nav.Count);
+        Assert.Equal(img, nav.CurrentPath);
+    }
+
+    [Fact]
+    public void OpenExplicitList_SkipsMissingAndUnsupported()
+    {
+        using var temp = TestDirectory.Create();
+        var valid = temp.WriteFile("ok.jpg");
+        var missing = Path.Combine(temp.Path, "gone.jpg");
+        var unsupported = temp.WriteFile("data.xyz");
+
+        using var nav = new DirectoryNavigator();
+
+        Assert.True(nav.OpenExplicitList([valid, missing, unsupported]));
+        Assert.Equal(1, nav.Count);
+        Assert.Equal(valid, nav.CurrentPath);
+    }
 }

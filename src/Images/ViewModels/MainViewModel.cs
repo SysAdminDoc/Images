@@ -3556,6 +3556,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         CompletePreparedOpenFile(path, resumedArchivePage, loaded);
     }
 
+    public void OpenFileList(IReadOnlyList<string> paths)
+    {
+        if (paths is null || paths.Count == 0) return;
+
+        FlushPendingRename();
+        if (!_nav.OpenExplicitList(paths))
+        {
+            ShowToast("Could not open the provided files.");
+            return;
+        }
+
+        _preload.Reset();
+        ResetPageState();
+        var loaded = LoadCurrent();
+        CompletePreparedOpenFile(paths[0], 0, loaded);
+    }
+
     private async Task OpenFileAsync(string path)
     {
         if (!TryPrepareOpenFile(path, out var resumedArchivePage))

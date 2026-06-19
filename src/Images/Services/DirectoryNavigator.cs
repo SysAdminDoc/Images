@@ -70,6 +70,36 @@ public sealed class DirectoryNavigator : IDisposable
         }
     }
 
+    public bool OpenExplicitList(IReadOnlyList<string> paths, int startIndex = 0)
+    {
+        if (paths is null || paths.Count == 0) return false;
+
+        var resolved = new List<string>(paths.Count);
+        foreach (var p in paths)
+        {
+            try
+            {
+                var full = Path.GetFullPath(p);
+                if (File.Exists(full) && SupportedExtensions.Contains(Path.GetExtension(full)))
+                    resolved.Add(full);
+            }
+            catch
+            {
+            }
+        }
+
+        if (resolved.Count == 0) return false;
+
+        DetachWatcher();
+        _folder = null;
+        _files = resolved;
+        CurrentIndex = Math.Clamp(startIndex, 0, _files.Count - 1);
+        _backStack.Clear();
+        _forwardStack.Clear();
+        ListChanged?.Invoke(this, EventArgs.Empty);
+        return true;
+    }
+
     /// <summary>
     /// Load the folder containing <paramref name="path"/> and point CurrentIndex at it.
     /// </summary>
