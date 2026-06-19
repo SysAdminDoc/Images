@@ -58,6 +58,56 @@ public sealed class ReviewLabelServiceTests
         Assert.Equal(ReviewLabelKind.Pick, state.Label);
     }
 
+    [Fact]
+    public void SetColorLabel_WriteAndReadXmpSidecar()
+    {
+        using var temp = TestDirectory.Create();
+        var image = WritePng(temp.Path, "labeled.png");
+        var service = new ReviewLabelService();
+
+        var result = service.SetColorLabel(image, "Green");
+        var state = service.ReadState(image);
+
+        Assert.True(result.Success);
+        Assert.Equal("Green", state.ColorLabel);
+        Assert.Contains("Label", File.ReadAllText(image + ".xmp"));
+    }
+
+    [Fact]
+    public void SetLocation_WriteAndReadXmpSidecar()
+    {
+        using var temp = TestDirectory.Create();
+        var image = WritePng(temp.Path, "geotagged.png");
+        var service = new ReviewLabelService();
+        var location = new SidecarLocation("Central Park", "New York", "NY", "USA");
+
+        var result = service.SetLocation(image, location);
+        var state = service.ReadState(image);
+
+        Assert.True(result.Success);
+        Assert.Equal("New York", state.Location.City);
+        Assert.Equal("NY", state.Location.StateProvince);
+        Assert.Equal("USA", state.Location.Country);
+        Assert.Equal("Central Park", state.Location.Location);
+    }
+
+    [Fact]
+    public void SetColorLabel_PreservesExistingRatingAndReviewLabel()
+    {
+        using var temp = TestDirectory.Create();
+        var image = WritePng(temp.Path, "multi.png");
+        var service = new ReviewLabelService();
+        service.SetRating(image, 4);
+        service.SetLabel(image, ReviewLabelKind.Pick);
+
+        service.SetColorLabel(image, "Blue");
+        var state = service.ReadState(image);
+
+        Assert.Equal(4, state.Rating);
+        Assert.Equal(ReviewLabelKind.Pick, state.Label);
+        Assert.Equal("Blue", state.ColorLabel);
+    }
+
     private static string WritePng(string folder, string fileName)
     {
         var path = Path.Combine(folder, fileName);

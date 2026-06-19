@@ -389,6 +389,75 @@ public sealed class XmpSidecarImportServiceTests
         Assert.Equal(["test"], result.FlatKeywords);
     }
 
+    [Fact]
+    public void ApplyFolder_WritesRatingsLabelsKeywordsAndLocations()
+    {
+        var ratings = new List<(string Path, int Rating)>();
+        var labels = new List<(string Path, string Label)>();
+        var keywords = new List<(string Path, IReadOnlyList<string> Keywords)>();
+        var locations = new List<(string Path, SidecarLocation Location)>();
+
+        var result = new FolderImportResult(
+            [
+                new SidecarImportResult(
+                    Success: true,
+                    SidecarPath: "full.xmp",
+                    Rating: 5,
+                    ColorLabel: "Green",
+                    FlatKeywords: ["landscape"],
+                    HierarchicalKeywords: [],
+                    Message: "full"),
+                new SidecarImportResult(
+                    Success: true,
+                    SidecarPath: "loc.xmp",
+                    Rating: null,
+                    ColorLabel: null,
+                    FlatKeywords: [],
+                    HierarchicalKeywords: [],
+                    Message: "loc") { Location = new SidecarLocation(null, "Tokyo", null, "Japan") },
+                new SidecarImportResult(
+                    Success: true,
+                    SidecarPath: "orphan.xmp",
+                    Rating: 3,
+                    ColorLabel: null,
+                    FlatKeywords: [],
+                    HierarchicalKeywords: [],
+                    Message: "orphan"),
+            ],
+            SuccessCount: 3,
+            FailedCount: 0,
+            Message: "scan");
+
+        var summary = XmpSidecarImportService.ApplyFolder(
+            result,
+            findImageForSidecar: s => s switch
+            {
+                "full.xmp" => "full.jpg",
+                "loc.xmp" => "loc.jpg",
+                _ => null
+            },
+            applyRating: (p, r) => ratings.Add((p, r)),
+            applyColorLabel: (p, l) => labels.Add((p, l)),
+            applyKeywords: (p, k) => keywords.Add((p, k)),
+            applyLocation: (p, l) => locations.Add((p, l)));
+
+        Assert.Equal(1, summary.RatingsApplied);
+        Assert.Equal(1, summary.LabelsApplied);
+        Assert.Equal(1, summary.KeywordsApplied);
+        Assert.Equal(1, summary.LocationsApplied);
+        Assert.Equal(1, summary.UnmatchedImages);
+        Assert.Equal(4, summary.TotalApplied);
+
+        Assert.Equal(("full.jpg", 5), Assert.Single(ratings));
+        Assert.Equal(("full.jpg", "Green"), Assert.Single(labels));
+        var (kwPath, kwList) = Assert.Single(keywords);
+        Assert.Equal("full.jpg", kwPath);
+        Assert.Contains("landscape", kwList);
+        var (locPath, loc) = Assert.Single(locations);
+        Assert.Equal("loc.jpg", locPath);
+        Assert.Equal("Tokyo", loc.City);
+    }
+
     // ── Test XMP builders ──────────────────────────────────────────────
 
     private static string BuildSidecar(

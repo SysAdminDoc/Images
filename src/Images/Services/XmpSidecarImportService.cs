@@ -193,6 +193,75 @@ public sealed class XmpSidecarImportService
             FailedSidecars: result.FailedCount);
     }
 
+    public static XmpFolderApplyFullSummary ApplyFolder(
+        FolderImportResult result,
+        Func<string, string?> findImageForSidecar,
+        Action<string, int> applyRating,
+        Action<string, string>? applyColorLabel = null,
+        Action<string, IReadOnlyList<string>>? applyKeywords = null,
+        Action<string, SidecarLocation>? applyLocation = null)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+        ArgumentNullException.ThrowIfNull(findImageForSidecar);
+        ArgumentNullException.ThrowIfNull(applyRating);
+
+        int ratingsApplied = 0, labelsApplied = 0, keywordsApplied = 0, locationsApplied = 0;
+        int skippedEmpty = 0, unmatchedImages = 0;
+
+        foreach (var item in result.Results)
+        {
+            if (!item.Success) continue;
+
+            var imagePath = findImageForSidecar(item.SidecarPath);
+            if (imagePath is null)
+            {
+                unmatchedImages++;
+                continue;
+            }
+
+            var hadData = false;
+
+            if (item.Rating is int rating)
+            {
+                applyRating(imagePath, rating);
+                ratingsApplied++;
+                hadData = true;
+            }
+
+            if (applyColorLabel is not null && item.ColorLabel is not null)
+            {
+                applyColorLabel(imagePath, item.ColorLabel);
+                labelsApplied++;
+                hadData = true;
+            }
+
+            if (applyKeywords is not null && item.AllKeywords.Count > 0)
+            {
+                applyKeywords(imagePath, item.AllKeywords);
+                keywordsApplied++;
+                hadData = true;
+            }
+
+            if (applyLocation is not null && item.Location.HasAnyField)
+            {
+                applyLocation(imagePath, item.Location);
+                locationsApplied++;
+                hadData = true;
+            }
+
+            if (!hadData) skippedEmpty++;
+        }
+
+        return new XmpFolderApplyFullSummary(
+            RatingsApplied: ratingsApplied,
+            LabelsApplied: labelsApplied,
+            KeywordsApplied: keywordsApplied,
+            LocationsApplied: locationsApplied,
+            SkippedEmpty: skippedEmpty,
+            UnmatchedImages: unmatchedImages,
+            FailedSidecars: result.FailedCount);
+    }
+
     internal static string? FindImageForSidecar(string sidecarPath)
     {
         var dir = Path.GetDirectoryName(sidecarPath);
@@ -525,6 +594,32 @@ public sealed record XmpFolderApplySummary(
 /// <summary>
 /// IPTC/Photoshop location fields extracted from an XMP sidecar. All fields are informational.
 /// </summary>
+public sealed record XmpFolderApplyFullSummary(
+    int RatingsApplied,
+    int LabelsApplied,
+    int KeywordsApplied,
+    int LocationsApplied,
+    int SkippedEmpty,
+    int UnmatchedImages,
+    int FailedSidecars)
+{
+    public int TotalApplied => RatingsApplied + LabelsApplied + KeywordsApplied + LocationsApplied;
+
+    public override string ToString()
+    {
+        var parts = new List<string>();
+        if (RatingsApplied > 0) parts.Add($"{RatingsApplied} rating{Plural(RatingsApplied)}");
+        if (LabelsApplied > 0) parts.Add($"{LabelsApplied} label{Plural(LabelsApplied)}");
+        if (KeywordsApplied > 0) parts.Add($"{KeywordsApplied} keyword set{Plural(KeywordsApplied)}");
+        if (LocationsApplied > 0) parts.Add($"{LocationsApplied} location{Plural(LocationsApplied)}");
+        if (UnmatchedImages > 0) parts.Add($"{UnmatchedImages} unmatched");
+        if (FailedSidecars > 0) parts.Add($"{FailedSidecars} failed");
+        return parts.Count == 0 ? "No changes applied." : $"Applied: {string.Join(", ", parts)}.";
+    }
+
+    private static string Plural(int count) => count == 1 ? "" : "s";
+}
+
 public sealed record SidecarLocation(
     string? Location,
     string? City,
