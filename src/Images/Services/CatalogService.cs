@@ -38,6 +38,9 @@ public sealed record CatalogRebuildResult(
     DateTimeOffset ScannedUtc)
 {
     public int IndexedCount => Assets.Count;
+    public int ReusedCount { get; init; }
+    public int UpdatedCount { get; init; }
+    public int RemovedCount { get; init; }
 }
 
 public sealed class CatalogService
@@ -88,14 +91,29 @@ public sealed class CatalogService
         if (!_isAvailable || normalizedRoots.Count == 0)
             return new CatalogRebuildResult(_dbPath, normalizedRoots, [], 0, scannedUtc);
 
+        var existing = LoadExistingState();
+        var currentPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         var failed = 0;
+        var reused = 0;
+        var updated = 0;
         var assets = new List<CatalogAssetRecord>();
+
         foreach (var path in CollectCandidateFiles(normalizedRoots, cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
+            currentPaths.Add(path);
+
+            if (existing.TryGetValue(path, out var cached) && IsUnchanged(path, cached))
+            {
+                reused++;
+                continue;
+            }
+
             try
             {
                 assets.Add(BuildAsset(path, scannedUtc, cancellationToken));
+                updated++;
             }
             catch (OperationCanceledException)
             {
@@ -110,17 +128,78 @@ public sealed class CatalogService
 
         using var conn = Open();
         using var tx = conn.BeginTransaction();
-        ClearCatalog(conn, tx);
+
+        var removed = RemoveStalePaths(conn, tx, existing.Keys, currentPaths);
+        TouchScannedUtc(conn, tx, scannedUtc, currentPaths, existing.Keys);
+
         foreach (var asset in assets)
         {
             cancellationToken.ThrowIfCancellationRequested();
             UpsertAsset(conn, tx, asset);
         }
         foreach (var root in normalizedRoots)
-            UpsertRoot(conn, tx, root, scannedUtc, assets.Count, failed);
+            UpsertRoot(conn, tx, root, scannedUtc, reused + updated, failed);
         tx.Commit();
 
-        return new CatalogRebuildResult(_dbPath, normalizedRoots, assets, failed, scannedUtc);
+        var allAssets = LoadAllAssets(conn);
+
+        return new CatalogRebuildResult(_dbPath, normalizedRoots, allAssets, failed, scannedUtc)
+        {
+            ReusedCount = reused,
+            UpdatedCount = updated,
+            RemovedCount = removed
+        };
+    }
+
+    private static bool IsUnchanged(string path, CatalogFileSummary cached)
+    {
+        try
+        {
+            var info = new FileInfo(path);
+            if (!info.Exists || info.Length != cached.SizeBytes) return false;
+            var diskMtimeSeconds = ToOffset(info.LastWriteTimeUtc).ToUnixTimeSeconds();
+            var cachedMtimeSeconds = cached.ModifiedUtc.ToUnixTimeSeconds();
+            return diskMtimeSeconds == cachedMtimeSeconds;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static int RemoveStalePaths(
+        SqliteConnection conn, SqliteTransaction tx,
+        IEnumerable<string> existingPaths, HashSet<string> currentPaths)
+    {
+        var removed = 0;
+        foreach (var path in existingPaths)
+        {
+            if (currentPaths.Contains(path)) continue;
+
+            using var cmd = conn.CreateCommand();
+            cmd.Transaction = tx;
+            cmd.CommandText = "DELETE FROM catalog_assets WHERE lower(source_path) = lower($path);";
+            cmd.Parameters.AddWithValue("$path", path);
+            removed += cmd.ExecuteNonQuery();
+        }
+        return removed;
+    }
+
+    private static void TouchScannedUtc(
+        SqliteConnection conn, SqliteTransaction tx,
+        DateTimeOffset scannedUtc, HashSet<string> currentPaths, IEnumerable<string> existingPaths)
+    {
+        foreach (var path in existingPaths)
+        {
+            if (!currentPaths.Contains(path)) continue;
+
+            using var cmd = conn.CreateCommand();
+            cmd.Transaction = tx;
+            cmd.CommandText = "UPDATE catalog_assets SET scanned_utc = $scanned WHERE lower(source_path) = lower($path);";
+            cmd.Parameters.AddWithValue("$scanned", scannedUtc.ToUnixTimeSeconds());
+            cmd.Parameters.AddWithValue("$path", path);
+            cmd.ExecuteNonQuery();
+        }
     }
 
     public CatalogAssetRecord? GetByPath(string sourcePath)
@@ -823,6 +902,94 @@ public sealed class CatalogService
         if (!TagGraphService.TryNormalizeTag(value, out var normalized, out _))
             return null;
         return normalized;
+    }
+
+    private sealed record CatalogFileSummary(long SizeBytes, DateTimeOffset ModifiedUtc);
+
+    private Dictionary<string, CatalogFileSummary> LoadExistingState()
+    {
+        var map = new Dictionary<string, CatalogFileSummary>(StringComparer.OrdinalIgnoreCase);
+        if (!_isAvailable) return map;
+
+        try
+        {
+            using var conn = Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT source_path, size_bytes, modified_utc FROM catalog_assets;";
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var path = reader.GetString(0);
+                var size = reader.GetInt64(1);
+                var mtime = FromUnix(reader.GetInt64(2));
+                map[path] = new CatalogFileSummary(size, mtime);
+            }
+        }
+        catch (Exception ex) when (ex is SqliteException or IOException)
+        {
+            Log.LogWarning(ex, "Could not load existing catalog state for incremental rescan");
+        }
+
+        return map;
+    }
+
+    private IReadOnlyList<CatalogAssetRecord> LoadAllAssets(SqliteConnection conn)
+    {
+        var assets = new List<CatalogAssetRecord>();
+        try
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
+                SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
+                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc
+                FROM catalog_assets
+                ORDER BY source_path COLLATE NOCASE;
+                """;
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var assetId = reader.GetInt64(0);
+                var asset = ReadAssetRecord(reader);
+                var tags = LoadTagsForAsset(conn, assetId);
+                assets.Add(asset with { Tags = tags });
+            }
+        }
+        catch (Exception ex) when (ex is SqliteException or IOException)
+        {
+            Log.LogWarning(ex, "Could not reload catalog assets after incremental rebuild");
+        }
+        return assets;
+    }
+
+    private static CatalogAssetRecord ReadAssetRecord(SqliteDataReader reader)
+    {
+        return new CatalogAssetRecord(
+            SourcePath: reader.GetString(1),
+            Fingerprint: reader.GetString(2),
+            SizeBytes: reader.GetInt64(3),
+            CreatedUtc: FromUnix(reader.GetInt64(4)),
+            ModifiedUtc: FromUnix(reader.GetInt64(5)),
+            Width: reader.GetInt32(6),
+            Height: reader.GetInt32(7),
+            Format: reader.GetString(8),
+            Codec: reader.GetString(9),
+            Rating: reader.IsDBNull(10) ? null : reader.GetInt32(10),
+            Tags: [],
+            SidecarPath: reader.IsDBNull(11) ? null : reader.GetString(11),
+            SidecarModifiedUtc: reader.IsDBNull(12) ? null : FromUnix(reader.GetInt64(12)),
+            ScannedUtc: FromUnix(reader.GetInt64(13)));
+    }
+
+    private static IReadOnlyList<string> LoadTagsForAsset(SqliteConnection conn, long assetId)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT tag FROM catalog_tags WHERE asset_id = $id ORDER BY tag;";
+        cmd.Parameters.AddWithValue("$id", assetId);
+        var tags = new List<string>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            tags.Add(reader.GetString(0));
+        return tags;
     }
 
     private static DateTimeOffset ToOffset(DateTime utc)
