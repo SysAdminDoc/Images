@@ -6,6 +6,10 @@ All notable changes to **Images** are documented here.
 
 ### Features
 
+- **Operation-chain batch workflow** — Batch Processor now exposes an ordered copy pipeline for resize, rotate, flip, metadata stripping, rename patterns, and export settings. Preview shows output names, dimensions, size deltas, warnings, dry-run remains default, and preview/run work can be canceled.
+- **Export preview linked inspection** — Export Preview now uses synchronized pan/zoom canvases for original and encoded output, plus a toggleable difference view generated at encoded dimensions for lossy/export review before saving.
+- **Command registry and shortcut rebinding** — `CommandShortcutService` centralizes command IDs, default shortcuts, and user overrides in the `hotkeys` SQLite table. Settings exposes a Hotkeys section with per-command rebinding, conflict detection, and reset-to-default. The command palette, keyboard dispatch, and settings summary now all consume the same registry.
+- **Image loading state indicator** — the viewport now clears stale content and shows a pulsing loading indicator while decoding large images. `IsImageLoading` is set true in `PrepareCurrentLoad` and cleared in `CompleteCurrentLoad` (including early-return paths), preventing stale previews after navigation during decode.
 - **Centralized ONNX Runtime provider** — one `OnnxRuntimeService` now owns DirectML/CPU probing, SessionOptions creation, and provider label reporting for all AI services (CLIP, background removal, LaMa inpaint, super resolution). Fixes broken provider-name detection.
 - **Listen-mode hardening** — per-session cryptographic token authentication, 20/s connection rate limit, 32K char line length cap, inbound/outbound event labeling in the network activity panel, `ClearAll()` to delete persisted logs, and automatic 2000-entry JSONL rotation.
 - **Tile-pyramid cache management** — 1 GB cap with LRU eviction for pyramids older than 30 days, `GetHealth()` reporting, `ClearAll()` cache clearing, and automatic post-build eviction.
