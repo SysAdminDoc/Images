@@ -57,6 +57,32 @@ public sealed class XmpSidecarImportService
         }
     }
 
+    public FolderImportResult ScanFolder(string folderPath, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(folderPath) || !Directory.Exists(folderPath))
+            return new FolderImportResult([], 0, 0, "Folder does not exist.");
+
+        var results = new List<SidecarImportResult>();
+        var success = 0;
+        var failed = 0;
+
+        var xmpFiles = Directory.EnumerateFiles(folderPath, "*.xmp", SearchOption.TopDirectoryOnly);
+        foreach (var xmpPath in xmpFiles)
+        {
+            ct.ThrowIfCancellationRequested();
+            var result = ImportSidecar(xmpPath);
+            results.Add(result);
+            if (result.Success) success++;
+            else failed++;
+        }
+
+        var message = results.Count == 0
+            ? "No XMP sidecar files found in this folder."
+            : $"Scanned {results.Count} sidecar{(results.Count == 1 ? "" : "s")}: {success} imported, {failed} failed.";
+
+        return new FolderImportResult(results, success, failed, message);
+    }
+
     public SidecarImportResult ImportForImage(string imagePath)
     {
         if (string.IsNullOrWhiteSpace(imagePath))
@@ -407,6 +433,15 @@ public sealed record SidecarImportResult(
             FlatKeywords: [],
             HierarchicalKeywords: [],
             Message: message);
+}
+
+public sealed record FolderImportResult(
+    IReadOnlyList<SidecarImportResult> Results,
+    int SuccessCount,
+    int FailedCount,
+    string Message)
+{
+    public int TotalScanned => Results.Count;
 }
 
 /// <summary>

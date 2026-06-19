@@ -1251,6 +1251,12 @@ public static class Strings
     // ---- Format mismatch ----
     public static string MainFormatMismatch => Get(nameof(MainFormatMismatch));
 
+    // ---- XMP migration import ----
+    public static string CommandPalette_ImportXmpSidecars => Get(nameof(CommandPalette_ImportXmpSidecars));
+    public static string MainToastXmpImportResult => Get(nameof(MainToastXmpImportResult));
+    public static string MainToastXmpImportFailed => Get(nameof(MainToastXmpImportFailed));
+    public static string MainToastXmpNoSidecars => Get(nameof(MainToastXmpNoSidecars));
+
     // ---- Motion Photo / Live Photo ----
     public static string MainToastMotionVideoExtracted => Get(nameof(MainToastMotionVideoExtracted));
     public static string MainToastMotionVideoFailed => Get(nameof(MainToastMotionVideoFailed));
