@@ -59,6 +59,7 @@ All notable changes to **Images** are documented here.
 
 ### Changed
 
+- **Network activity trust polish** - persisted network activity now restores the newest retained entries first, skips malformed JSONL rows without blocking startup, and the About dialog's Clear log action deletes the local persisted history instead of only clearing the current view.
 - **Theme semantic brush hardening** - Latte now overrides the semantic surface/chrome brushes used by shared controls, high-contrast mode now suppresses Latte overlays when active, and selected/accent/status overlays across the viewer resolve through theme tokens instead of dark-only hex values.
 
 - **Settings and collection chrome polish** — shared WPF `DataGrid` and `ListBoxItem` styles now provide intentional row rhythm, hover, selected, focused, and disabled states instead of default Windows chrome. The Hotkeys settings editor now shows quieter shortcut summary copy, inline Default/Custom badges, clearer shortcut edit help text, and a localized live loading indicator in the viewer.
