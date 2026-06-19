@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using ImageMagick;
+using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
 
@@ -19,12 +20,25 @@ public sealed record TilePyramidInfo(
     int MaxLevel,
     int TotalTiles);
 
+public sealed record TileCacheHealth(
+    bool Available,
+    string? CacheRoot,
+    int PyramidCount,
+    long TotalBytes,
+    long CapBytes,
+    DateTime? OldestPyramidUtc);
+
 public static class TileService
 {
     public const int DefaultTileSize = 256;
     public const int DefaultOverlap = 1;
     public const long LargeImageThresholdBytes = 256 * 1024 * 1024;
     public const int LargeImageThresholdPixels = 50_000_000;
+    public const long DefaultCapBytes = 1024L * 1024 * 1024; // 1 GB
+    public const int MaxAgeDays = 30;
+
+    private static readonly Microsoft.Extensions.Logging.ILogger _log =
+        Log.Get("Images.TileService");
 
     public static bool ShouldUseTileEngine(string path)
     {
@@ -141,6 +155,7 @@ public static class TileService
             TotalTiles: totalTiles);
 
         WritePyramidInfo(infoPath, info);
+        Task.Run(EvictIfOverCap);
         return info;
     }
 
@@ -359,6 +374,113 @@ public static class TileService
     {
         var json = System.Text.Json.JsonSerializer.Serialize(info);
         File.WriteAllText(path, json, System.Text.Encoding.UTF8);
+    }
+
+    public static TileCacheHealth GetHealth()
+    {
+        var root = GetDefaultCacheRoot();
+        if (!Directory.Exists(root))
+            return new TileCacheHealth(false, root, 0, 0, DefaultCapBytes, null);
+
+        try
+        {
+            var dirs = Directory.GetDirectories(root);
+            long totalBytes = 0;
+            DateTime? oldest = null;
+
+            foreach (var dir in dirs)
+            {
+                var dirInfo = new DirectoryInfo(dir);
+                foreach (var file in dirInfo.EnumerateFiles("*", SearchOption.AllDirectories))
+                {
+                    totalBytes += file.Length;
+                    var lastWrite = file.LastWriteTimeUtc;
+                    if (oldest is null || lastWrite < oldest)
+                        oldest = lastWrite;
+                }
+            }
+
+            return new TileCacheHealth(true, root, dirs.Length, totalBytes,
+                DefaultCapBytes, oldest);
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "tile-cache: could not compute health");
+            return new TileCacheHealth(true, root, 0, 0, DefaultCapBytes, null);
+        }
+    }
+
+    public static (int Deleted, long DeletedBytes) ClearAll()
+    {
+        var root = GetDefaultCacheRoot();
+        if (!Directory.Exists(root))
+            return (0, 0);
+
+        var deleted = 0;
+        long deletedBytes = 0;
+
+        try
+        {
+            foreach (var dir in Directory.GetDirectories(root))
+            {
+                var dirInfo = new DirectoryInfo(dir);
+                var size = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories)
+                    .Sum(f => f.Length);
+
+                try
+                {
+                    Directory.Delete(dir, recursive: true);
+                    deleted++;
+                    deletedBytes += size;
+                }
+                catch { }
+            }
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "tile-cache: error during clear");
+        }
+
+        return (deleted, deletedBytes);
+    }
+
+    public static void EvictIfOverCap()
+    {
+        var root = GetDefaultCacheRoot();
+        if (!Directory.Exists(root)) return;
+
+        try
+        {
+            var dirs = Directory.GetDirectories(root)
+                .Select(d => new DirectoryInfo(d))
+                .OrderBy(d => d.LastWriteTimeUtc)
+                .ToList();
+
+            long totalBytes = dirs.Sum(d =>
+                d.EnumerateFiles("*", SearchOption.AllDirectories).Sum(f => f.Length));
+
+            var cutoffUtc = DateTime.UtcNow.AddDays(-MaxAgeDays);
+
+            foreach (var dir in dirs)
+            {
+                if (totalBytes <= DefaultCapBytes && dir.LastWriteTimeUtc >= cutoffUtc)
+                    break;
+
+                var size = dir.EnumerateFiles("*", SearchOption.AllDirectories)
+                    .Sum(f => f.Length);
+                try
+                {
+                    dir.Delete(recursive: true);
+                    totalBytes -= size;
+                    _log.LogDebug("tile-cache: evicted {Dir} ({Size} bytes)", dir.Name, size);
+                }
+                catch { }
+            }
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "tile-cache: eviction error");
+        }
     }
 
     private static TilePyramidInfo? TryReadPyramidInfo(string path)
