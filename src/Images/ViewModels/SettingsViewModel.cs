@@ -256,15 +256,18 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     public ObservableCollection<ShortcutSettingRow> ShortcutRows { get; } = new();
 
-    public string HotkeySummary =>
-        string.Join(
-            "; ",
-            _shortcutService.GetSnapshots()
-                .Where(s => s.Id is CommandIds.Settings or CommandIds.BatchProcessor or CommandIds.DuplicateCleanup
-                    or CommandIds.FileHealthScan or CommandIds.EditStack or CommandIds.Adjustments
-                    or CommandIds.Effects or CommandIds.Perspective or CommandIds.CropMode
-                    or CommandIds.SelectionMode)
-                .Select(s => string.Format(CultureInfo.CurrentCulture, "{0} {1}", s.Shortcut, s.Name)));
+    public string HotkeySummary
+    {
+        get
+        {
+            var snapshots = _shortcutService.GetSnapshots();
+            var customizedCount = snapshots.Count(s => s.IsCustomized);
+            var format = customizedCount == 0
+                ? Strings.SettingsHotkeySummaryDefaultFormat
+                : Strings.SettingsHotkeySummaryCustomizedFormat;
+            return string.Format(CultureInfo.CurrentCulture, format, snapshots.Count, customizedCount);
+        }
+    }
 
     public string DiagnosticsStorageSummary =>
         Strings.SettingsDiagnosticsStorageSummary;
@@ -480,6 +483,14 @@ public sealed class ShortcutSettingRow : ObservableObject
     public bool IsCustomized
     {
         get => _isCustomized;
-        set => Set(ref _isCustomized, value);
+        set
+        {
+            if (Set(ref _isCustomized, value))
+                Raise(nameof(StateText));
+        }
     }
+
+    public string StateText => IsCustomized
+        ? Strings.SettingsHotkeyStateCustom
+        : Strings.SettingsHotkeyStateDefault;
 }

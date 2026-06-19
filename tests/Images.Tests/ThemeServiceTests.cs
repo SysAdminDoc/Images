@@ -1,4 +1,6 @@
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using Images.Services;
 
@@ -59,12 +61,24 @@ public sealed class ThemeServiceTests
     [Fact]
     public void HighContrastThemeLoadsSystemBrushResources()
     {
-        var dictionary = LoadHighContrastThemeDictionary();
+        var dictionary = LoadThemeDictionary("HighContrastTheme.xaml");
 
         Assert.True(ThemeService.IsHighContrastDictionary(dictionary));
         Assert.Equal(SystemColors.ControlTextColor, Assert.IsType<SolidColorBrush>(dictionary["TextBrush"]).Color);
         Assert.Equal(SystemColors.HighlightColor, Assert.IsType<SolidColorBrush>(dictionary["AccentBrush"]).Color);
         Assert.Equal(SystemColors.HighlightTextColor, Assert.IsType<SolidColorBrush>(dictionary["CrustBrush"]).Color);
+    }
+
+    [Fact]
+    public void DarkThemeDefinesCollectionControlChrome()
+    {
+        var dictionary = LoadThemeDictionary("DarkTheme.xaml");
+
+        Assert.IsType<Style>(dictionary[typeof(DataGrid)]);
+        Assert.IsType<Style>(dictionary[typeof(DataGridColumnHeader)]);
+        Assert.IsType<Style>(dictionary[typeof(DataGridRow)]);
+        Assert.IsType<Style>(dictionary[typeof(DataGridCell)]);
+        Assert.IsType<Style>(dictionary[typeof(ListBoxItem)]);
     }
 
     private static ResourceDictionary CreateTestHighContrastDictionary()
@@ -73,7 +87,7 @@ public sealed class ThemeServiceTests
     private static ResourceDictionary ThrowIfCreated()
         => throw new InvalidOperationException("Duplicate high-contrast dictionaries should not be created.");
 
-    private static ResourceDictionary LoadHighContrastThemeDictionary()
+    private static ResourceDictionary LoadThemeDictionary(string fileName)
     {
         ResourceDictionary? dictionary = null;
         Exception? exception = null;
@@ -82,7 +96,7 @@ public sealed class ThemeServiceTests
             try
             {
                 dictionary = (ResourceDictionary)Application.LoadComponent(
-                    new Uri("/Images;component/Themes/HighContrastTheme.xaml", UriKind.Relative));
+                    new Uri($"/Images;component/Themes/{fileName}", UriKind.Relative));
             }
             catch (Exception ex)
             {
@@ -94,8 +108,8 @@ public sealed class ThemeServiceTests
         thread.Join();
 
         if (exception is not null)
-            throw new InvalidOperationException("HighContrastTheme.xaml failed to load.", exception);
+            throw new InvalidOperationException($"{fileName} failed to load.", exception);
 
-        return dictionary ?? throw new InvalidOperationException("HighContrastTheme.xaml did not produce a dictionary.");
+        return dictionary ?? throw new InvalidOperationException($"{fileName} did not produce a dictionary.");
     }
 }
