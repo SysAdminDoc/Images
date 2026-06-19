@@ -6,7 +6,7 @@ Use this checklist before publishing a stable Images release. The automated gate
 
 Before bumping or publishing a release:
 
-1. Compare `README.md`, `CHANGELOG.md`, `PROJECT_CONTEXT.md`, and the current top section of `ROADMAP.md`.
+1. Compare `README.md`, `CHANGELOG.md`, `ROADMAP.md`, and `Roadmap_Blocked.md`.
 2. Check `git log --oneline` since the last release tag and confirm shipped user-facing work is represented in `CHANGELOG.md`.
 3. Confirm the "Current verified state" and "Important gaps" sections do not repeat stale claims from the historical roadmap appendix.
 4. Confirm any known local-only or ignored working files are intentionally excluded from the release commit.
@@ -15,11 +15,10 @@ Before bumping or publishing a release:
 
 For each shipped roadmap item:
 
-1. Mark the corresponding roadmap row as `[x]`.
-2. Move or summarize superseded historical claims instead of deleting source-heavy research sections.
-3. Record evidence in the roadmap row or nearby notes: local file path, commit hash, release tag, workflow, or external source URL.
-4. If a roadmap item was only partially completed, leave it unchecked and narrow the remaining acceptance gate.
-5. Update `PROJECT_CONTEXT.md` when the next recommended work changes.
+1. Delete the completed roadmap row from `ROADMAP.md` (git history is the record).
+2. Move blocked items to `Roadmap_Blocked.md` with a short blocker and unblock criterion.
+3. If a roadmap item was only partially completed, narrow the remaining acceptance gate in the row.
+4. Record evidence in the commit message or CHANGELOG entry: commit hash, release tag, workflow, or external source URL.
 
 ## Version/Date Consistency Check
 
