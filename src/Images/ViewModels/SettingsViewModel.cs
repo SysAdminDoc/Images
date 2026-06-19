@@ -37,9 +37,15 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         OpenOcrLanguageSettingsCommand = new RelayCommand(OpenOcrLanguageSettings);
         OpenAppDataCommand = new RelayCommand(OpenAppData);
         OpenLogsCommand = new RelayCommand(OpenLogs);
+        RefreshStorageDetailCommand = new RelayCommand(RefreshStorageDetail);
+        ClearThumbnailCacheCommand = new RelayCommand(ClearThumbnailCache);
+        ClearLogsCommand = new RelayCommand(ClearLogs);
+        ClearRecoveryLogCommand = new RelayCommand(ClearRecoveryLog);
+        ClearNetworkLogCommand = new RelayCommand(ClearNetworkLog);
         ApplyShortcutCommand = new RelayCommand(ApplyShortcut, p => p is ShortcutSettingRow);
         ResetShortcutCommand = new RelayCommand(ResetShortcut, p => p is ShortcutSettingRow);
         RefreshShortcutRows();
+        RefreshStorageDetail();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -272,6 +278,29 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public string DiagnosticsStorageSummary =>
         Strings.SettingsDiagnosticsStorageSummary;
 
+    private string _storageDetail = "";
+
+    public string StorageDetail
+    {
+        get => _storageDetail;
+        private set
+        {
+            if (_storageDetail == value) return;
+            _storageDetail = value;
+            Raise(nameof(StorageDetail));
+        }
+    }
+
+    public ICommand RefreshStorageDetailCommand { get; }
+
+    public ICommand ClearThumbnailCacheCommand { get; }
+
+    public ICommand ClearLogsCommand { get; }
+
+    public ICommand ClearRecoveryLogCommand { get; }
+
+    public ICommand ClearNetworkLogCommand { get; }
+
     public string? SettingsStatusText
     {
         get => _settingsStatusText;
@@ -404,6 +433,127 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             SetStatus(
                 string.Format(CultureInfo.CurrentCulture, Strings.SettingsLanguageSettingsFailedFormat, ex.Message),
                 SettingsStatusToneKind.Warning);
+        }
+    }
+
+    private void RefreshStorageDetail()
+    {
+        try
+        {
+            var lines = new List<string>();
+            AddStoreSize(lines, "Thumbnail cache", "thumbs");
+            AddStoreSize(lines, "Logs", "Logs");
+            AddStoreSize(lines, "Recovery log", "recovery");
+            AddStoreSize(lines, "Semantic index", "semantic");
+            AddStoreSize(lines, "Models", "models");
+            AddStoreSize(lines, "Diagnostics", "diagnostics");
+            AddStoreSize(lines, "Wallpaper", "wallpaper");
+
+            var settingsDb = Path.Combine(AppStorage.TryGetAppDirectory() ?? "", "settings.db");
+            if (File.Exists(settingsDb))
+                lines.Add($"Settings DB: {FormatBytes(new FileInfo(settingsDb).Length)}");
+
+            var networkLog = Path.Combine(AppStorage.TryGetAppDirectory() ?? "", "network-egress.jsonl");
+            if (File.Exists(networkLog))
+                lines.Add($"Network log: {FormatBytes(new FileInfo(networkLog).Length)}");
+
+            StorageDetail = lines.Count > 0
+                ? string.Join("\n", lines)
+                : "No local data found.";
+        }
+        catch
+        {
+            StorageDetail = "Could not read storage sizes.";
+        }
+    }
+
+    private static void AddStoreSize(List<string> lines, string label, string subdir)
+    {
+        var dir = AppStorage.TryGetAppDirectory(subdir);
+        if (dir is null || !Directory.Exists(dir)) return;
+
+        try
+        {
+            var size = Directory.EnumerateFiles(dir, "*", SearchOption.AllDirectories)
+                .Sum(f => { try { return new FileInfo(f).Length; } catch { return 0L; } });
+            if (size > 0)
+                lines.Add($"{label}: {FormatBytes(size)}");
+        }
+        catch
+        {
+        }
+    }
+
+    private static string FormatBytes(long bytes) => bytes switch
+    {
+        < 1024 => $"{bytes} B",
+        < 1024 * 1024 => $"{bytes / 1024.0:F1} KB",
+        < 1024 * 1024 * 1024 => $"{bytes / (1024.0 * 1024.0):F1} MB",
+        _ => $"{bytes / (1024.0 * 1024.0 * 1024.0):F2} GB"
+    };
+
+    private void ClearThumbnailCache()
+    {
+        try
+        {
+            ThumbnailCache.Instance.Clear();
+            SetStatus("Thumbnail cache cleared.", SettingsStatusToneKind.Success);
+            RefreshStorageDetail();
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"Could not clear thumbnails: {ex.Message}", SettingsStatusToneKind.Warning);
+        }
+    }
+
+    private void ClearLogs()
+    {
+        try
+        {
+            var dir = AppStorage.TryGetAppDirectory("Logs");
+            if (dir is not null && Directory.Exists(dir))
+            {
+                foreach (var file in Directory.GetFiles(dir, "images-*.log"))
+                {
+                    try { File.Delete(file); } catch { }
+                }
+            }
+            SetStatus("Log files cleared.", SettingsStatusToneKind.Success);
+            RefreshStorageDetail();
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"Could not clear logs: {ex.Message}", SettingsStatusToneKind.Warning);
+        }
+    }
+
+    private void ClearRecoveryLog()
+    {
+        try
+        {
+            var file = Path.Combine(
+                AppStorage.TryGetAppDirectory("recovery") ?? "", "recovery-log.jsonl");
+            if (File.Exists(file)) File.Delete(file);
+            SetStatus("Recovery log cleared.", SettingsStatusToneKind.Success);
+            RefreshStorageDetail();
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"Could not clear recovery log: {ex.Message}", SettingsStatusToneKind.Warning);
+        }
+    }
+
+    private void ClearNetworkLog()
+    {
+        try
+        {
+            NetworkEgressService.ClearAll();
+            SetStatus("Network activity log cleared.", SettingsStatusToneKind.Success);
+            RefreshStorageDetail();
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"Could not clear network log: {ex.Message}", SettingsStatusToneKind.Warning);
         }
     }
 
