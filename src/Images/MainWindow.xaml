@@ -1858,7 +1858,7 @@
                          Sits above everything else in the viewport. Mouse passes through
                          everywhere except the card itself (IsHitTestVisible=False on the dimmer). -->
                     <Grid Visibility="{Binding ShowCheatsheet, Converter={StaticResource BoolToVis}}">
-                        <Rectangle Fill="#CC000000" IsHitTestVisible="False" />
+                        <Rectangle Fill="{DynamicResource OverlayDimmerBrush}" IsHitTestVisible="False" />
                         <Border Style="{StaticResource ElevatedCard}"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
@@ -2003,7 +2003,7 @@
 
                     <!-- V20-29: Command palette overlay — Ctrl+Shift+P opens. Type to filter, Enter to execute, Escape to dismiss. -->
                     <Grid Visibility="{Binding ShowCommandPalette, Converter={StaticResource BoolToVis}}">
-                        <Rectangle Fill="#CC000000" IsHitTestVisible="True"
+                        <Rectangle Fill="{DynamicResource OverlayDimmerBrush}" IsHitTestVisible="True"
                                    MouseDown="CommandPalette_DimmerClick" />
                         <Border Style="{StaticResource ElevatedCard}"
                                 HorizontalAlignment="Center"
@@ -2315,7 +2315,7 @@
                 </Grid.RowDefinitions>
                 <!-- Subtle top highlight: sits just inside the divider line, gives the toolbar a
                      gently lit edge like polished macOS / Win11 chrome. -->
-                <Border Grid.Row="0" Height="1" Background="#12CDD6F4" />
+                <Border Grid.Row="0" Height="1" Background="{DynamicResource DividerBrush}" />
                 <Border Grid.Row="1"
                         Background="{StaticResource MantleBrush}"
                         BorderBrush="{StaticResource HairlineBrush}"
@@ -2573,7 +2573,7 @@
                                 <Border Margin="10,0,0,0"
                                         Padding="8,2"
                                         CornerRadius="{StaticResource Radius.Sm.CR}"
-                                        Background="#2ACBA6F7"
+                                        Background="{DynamicResource MauvePanelBrush}"
                                         BorderBrush="{StaticResource MauveBrush}"
                                         BorderThickness="1"
                                         VerticalAlignment="Center"
@@ -2600,7 +2600,7 @@
                                 <Border Margin="10,0,0,0"
                                         Padding="8,2"
                                         CornerRadius="{StaticResource Radius.Sm.CR}"
-                                        Background="#2AA6E3A1"
+                                        Background="{DynamicResource SuccessPanelBrush}"
                                         BorderBrush="{StaticResource GreenBrush}"
                                         BorderThickness="1"
                                         VerticalAlignment="Center"
@@ -2626,7 +2626,7 @@
                                 <Border Margin="10,0,0,0"
                                         Padding="8,2"
                                         CornerRadius="{StaticResource Radius.Sm.CR}"
-                                        Background="#2A89B4FA"
+                                        Background="{DynamicResource AccentSelectionBrush}"
                                         BorderBrush="{StaticResource AccentBrush}"
                                         BorderThickness="1"
                                         VerticalAlignment="Center"
@@ -2645,7 +2645,7 @@
                                 <Border Margin="10,0,0,0"
                                         Padding="8,2"
                                         CornerRadius="{StaticResource Radius.Sm.CR}"
-                                        Background="#2AA6E3A1"
+                                        Background="{DynamicResource SuccessPanelBrush}"
                                         BorderBrush="{StaticResource GreenBrush}"
                                         BorderThickness="1"
                                         VerticalAlignment="Center"
@@ -2672,7 +2672,7 @@
                                         Margin="10,0,0,0"
                                         Padding="8,2"
                                         CornerRadius="{StaticResource Radius.Sm.CR}"
-                                        Background="#2AA6E3A1"
+                                        Background="{DynamicResource SuccessPanelBrush}"
                                         BorderBrush="{StaticResource GreenBrush}"
                                         BorderThickness="1"
                                         VerticalAlignment="Center"
@@ -3125,7 +3125,7 @@
                                         <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsReviewReject}" Value="True">
-                                                    <Setter Property="Background" Value="#1FF38BA8" />
+                                                    <Setter Property="Background" Value="{DynamicResource DangerPanelBrush}" />
                                                     <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
                                                     <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
                                                 </DataTrigger>
@@ -3465,7 +3465,7 @@
                                             Height="32"
                                             CornerRadius="{StaticResource Radius.Sm.CR}"
                                             BorderThickness="1"
-                                            Background="#1A89B4FA"
+                                            Background="{DynamicResource AccentPanelBrush}"
                                             BorderBrush="{StaticResource AccentBrush}"
                                             VerticalAlignment="Top"
                                             Margin="0,0,12,0">
@@ -3540,7 +3540,7 @@
                                 <Border Margin="0,12,0,0"
                                         Padding="10,9"
                                         CornerRadius="{StaticResource Radius.Sm.CR}"
-                                        Background="#10313244"
+                                        Background="{DynamicResource SubtleSurfaceBrush}"
                                         BorderBrush="{StaticResource HairlineBrush}"
                                         BorderThickness="1">
                                     <StackPanel>
@@ -3731,7 +3731,7 @@
                                                     Height="28"
                                                     CornerRadius="{StaticResource Radius.Sm.CR}"
                                                     BorderThickness="1"
-                                                    Background="#1A89B4FA"
+                                                    Background="{DynamicResource AccentPanelBrush}"
                                                     BorderBrush="{StaticResource HairlineBrush}"
                                                     VerticalAlignment="Center"
                                                     Margin="0,0,10,0">
@@ -4125,7 +4125,7 @@
                             <Border Margin="0,12,0,0"
                                     Padding="10"
                                     CornerRadius="{StaticResource Radius.Sm.CR}"
-                                    Background="#10313244"
+                                    Background="{DynamicResource SubtleSurfaceBrush}"
                                     BorderBrush="{StaticResource HairlineBrush}"
                                     BorderThickness="1">
                                 <StackPanel Orientation="Horizontal">
