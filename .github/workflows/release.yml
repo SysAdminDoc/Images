@@ -218,6 +218,49 @@ jobs:
             -Version "${{ github.event.inputs.version }}" `
             -ChecksumFile $env:CHECKSUM
 
+      - name: Validate package manifests
+        shell: pwsh
+        run: |
+          $scoopJson = "packaging\output\scoop\images.json"
+          if (Test-Path $scoopJson) {
+            $scoop = Get-Content -LiteralPath $scoopJson -Raw | ConvertFrom-Json
+            if ([string]::IsNullOrWhiteSpace($scoop.version)) { throw "Scoop manifest missing version field" }
+            if ([string]::IsNullOrWhiteSpace($scoop.architecture.'64bit'.url)) { throw "Scoop manifest missing 64bit URL" }
+            if ([string]::IsNullOrWhiteSpace($scoop.architecture.'64bit'.hash)) { throw "Scoop manifest missing 64bit hash" }
+            if ($scoop.architecture.'64bit'.hash.Length -ne 64) { throw "Scoop manifest hash is not SHA-256 (expected 64 hex chars)" }
+            Write-Host "Scoop manifest validated: v$($scoop.version), hash=$($scoop.architecture.'64bit'.hash.Substring(0,16))..."
+          } else {
+            Write-Warning "Scoop manifest not found at $scoopJson"
+          }
+
+          $wingetDir = Get-ChildItem -Path "packaging\output\winget" -Recurse -Filter "*.yaml" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($wingetDir) {
+            $yamlFiles = Get-ChildItem -Path "packaging\output\winget" -Recurse -Filter "*.yaml"
+            foreach ($yaml in $yamlFiles) {
+              $content = Get-Content -LiteralPath $yaml.FullName -Raw
+              if ($content -notmatch "PackageIdentifier:\s+SysAdminDoc\.Images") {
+                throw "WinGet manifest $($yaml.Name) missing PackageIdentifier"
+              }
+              if ($content -notmatch "PackageVersion:\s+$([regex]::Escape($env:GITHUB_EVENT_INPUTS_VERSION ?? "${{ github.event.inputs.version }}"))") {
+                Write-Warning "WinGet manifest $($yaml.Name) version may not match release version"
+              }
+              Write-Host "WinGet manifest validated: $($yaml.Name)"
+            }
+
+            $wingetCreate = Get-Command wingetcreate -ErrorAction SilentlyContinue
+            if ($wingetCreate) {
+              $wingetManifestDir = (Get-ChildItem -Path "packaging\output\winget\manifests" -Directory -Recurse | Where-Object { $_.GetFiles("*.yaml").Count -gt 0 } | Select-Object -First 1)?.FullName
+              if ($wingetManifestDir) {
+                Write-Host "Running winget validate on $wingetManifestDir"
+                wingetcreate validate $wingetManifestDir
+              }
+            } else {
+              Write-Host "wingetcreate not available -- skipping schema validation (manifests are structurally checked)"
+            }
+          } else {
+            Write-Warning "No WinGet manifests found"
+          }
+
       - name: Upload package manifests
         uses: actions/upload-artifact@v4
         with:
