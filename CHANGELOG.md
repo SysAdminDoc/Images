@@ -6,6 +6,18 @@ All notable changes to **Images** are documented here.
 
 ### Features
 
+- **Centralized ONNX Runtime provider** — one `OnnxRuntimeService` now owns DirectML/CPU probing, SessionOptions creation, and provider label reporting for all AI services (CLIP, background removal, LaMa inpaint, super resolution). Fixes broken provider-name detection.
+- **Listen-mode hardening** — per-session cryptographic token authentication, 20/s connection rate limit, 32K char line length cap, inbound/outbound event labeling in the network activity panel, `ClearAll()` to delete persisted logs, and automatic 2000-entry JSONL rotation.
+- **Tile-pyramid cache management** — 1 GB cap with LRU eviction for pyramids older than 30 days, `GetHealth()` reporting, `ClearAll()` cache clearing, and automatic post-build eviction.
+- **Writeback backup policy** — optional same-folder or app-local backup before destructive crop, rotation, GPS strip, and metadata strip overwrites, configurable via settings.
+- **Folder back/forward navigation** — DirectoryNavigator tracks a 50-entry history stack across folder changes, with GoBack()/GoForward() and CanGoBack/CanGoForward properties.
+- **XMP sidecar folder import** — command palette action scans a folder for .xmp sidecars and applies ratings to matching images. Keywords reported in toast; write requires future ExifTool integration.
+- **Catppuccin Latte light theme** — full Latte palette override with runtime switching. ThemeService supports Dark, Latte, High Contrast, and Follow System modes via the `appearance.theme` setting.
+- **WPF smoke test scaffold** — FlaUI-based smoke tests for launch/close, fixture image open, navigation, and Escape exit. CI step runs with `RUN_SMOKE_TESTS=1` on windows-latest.
+- **Read-only catalog query boundary** — `CatalogQueryService` wraps the catalog with ListIndexedFolders, QueryByFolder, multi-term Search, and optional path redaction for automation integrations.
+- **Localization CI enhancements** — Strings.cs property parity check against resx keys, XAML hard-coded string scan with warnings, and orphaned-property detection.
+- **Package-resolution validation** — release readiness script now runs dotnet restore, dotnet build, and a vulnerable-package scan before existing doc/version checks.
+
 - **Command palette (V20-29)** — `Ctrl+Shift+P` opens a VS Code-style fuzzy-search overlay listing 55 commands across 8 categories (Navigate, View, Edit, File, Tools, Review, Compare, Help). Type to filter by name, category, or shortcut; Up/Down to select; Enter or double-click to execute; Escape or click the dimmer to dismiss. No other Windows image viewer ships a command palette.
 - **Color-channel isolation (V20-28)** — view individual R, G, B, or A channels as grayscale. Cycle through modes via the command palette or click the channel chip in the bottom toolbar. Mode persists across image navigation. Tile-pyramid (DZI) images skip channel filtering gracefully.
 - **Multi-monitor window placement (V20-27)** — window position is now remembered per-monitor so the viewer restores to the correct display across sessions. On multi-monitor setups, the command palette shows "Send to monitor N" commands to move the window between displays. Falls back to primary-monitor clamping when a saved monitor is disconnected.
