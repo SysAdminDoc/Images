@@ -117,31 +117,6 @@
                                           AutomationProperties.Name="{x:Static loc:Strings.MacroDryRunOnly}" />
                             </StackPanel>
                         </Border>
-
-                        <Border Style="{StaticResource Divider}" />
-
-                        <TextBlock Text="{x:Static loc:Strings.MacroActionPresets}" Style="{StaticResource SectionLabel}" />
-                        <Border Style="{StaticResource Card}" Padding="12">
-                            <StackPanel>
-                                <Button Style="{StaticResource ChromeButton}"
-                                        Margin="0,0,0,8"
-                                        Click="AddStripGpsButton_Click"
-                                        AutomationProperties.Name="{x:Static loc:Strings.MacroAddStripGps}">
-                                    <TextBlock Text="{x:Static loc:Strings.MacroAddStripGps}" />
-                                </Button>
-                                <Button Style="{StaticResource ChromeButton}"
-                                        Margin="0,0,0,8"
-                                        Click="AddExportPngButton_Click"
-                                        AutomationProperties.Name="{x:Static loc:Strings.MacroAddExportPng}">
-                                    <TextBlock Text="{x:Static loc:Strings.MacroAddExportPng}" />
-                                </Button>
-                                <Button Style="{StaticResource ChromeButton}"
-                                        Click="AddRenamePatternButton_Click"
-                                        AutomationProperties.Name="{x:Static loc:Strings.MacroAddRenamePattern}">
-                                    <TextBlock Text="{x:Static loc:Strings.MacroAddRenamePattern}" />
-                                </Button>
-                            </StackPanel>
-                        </Border>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
@@ -151,6 +126,7 @@
                           HorizontalAlignment="Stretch"
                           Background="{StaticResource HairlineBrush}" />
 
+            <!-- Right panel: pipeline steps + preview + action bar -->
             <Grid Grid.Column="2"
                   Background="{StaticResource ViewportBrush}"
                   Margin="18">
@@ -161,6 +137,7 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
+                <!-- Pipeline steps card -->
                 <Border Grid.Row="0"
                         Style="{StaticResource Card}"
                         Padding="14">
@@ -168,34 +145,124 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <Grid Grid.Row="0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="{x:Static loc:Strings.MacroJsonHeading}" Style="{StaticResource SectionLabel}" />
-                            <Button Grid.Column="1"
-                                    Style="{StaticResource ChromeButton}"
-                                    Click="ValidatePlanButton_Click"
-                                    AutomationProperties.Name="{x:Static loc:Strings.MacroValidate}">
-                                <TextBlock Text="{x:Static loc:Strings.MacroValidate}" />
-                            </Button>
-                        </Grid>
-                        <TextBox x:Name="MacroJsonBox"
+
+                        <!-- Header -->
+                        <TextBlock Grid.Row="0"
+                                   Text="{x:Static loc:Strings.MacroPipelineSteps}"
+                                   Style="{StaticResource SectionLabel}" />
+
+                        <!-- Step list -->
+                        <ListBox x:Name="StepList"
                                  Grid.Row="1"
                                  Margin="0,10,0,0"
-                                 AcceptsReturn="True"
-                                 AcceptsTab="True"
-                                 FontFamily="Consolas"
-                                 FontSize="12"
-                                 TextWrapping="NoWrap"
-                                 VerticalScrollBarVisibility="Auto"
-                                 HorizontalScrollBarVisibility="Auto"
-                                 AutomationProperties.Name="{x:Static loc:Strings.MacroJsonHeading}" />
+                                 HorizontalContentAlignment="Stretch"
+                                 AutomationProperties.Name="{x:Static loc:Strings.MacroPipelineSteps}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource Card}"
+                                            Padding="10"
+                                            Margin="0,0,0,6">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Step number badge -->
+                                            <Border Grid.Column="0"
+                                                    Style="{StaticResource Badge}"
+                                                    Margin="0,0,10,0"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding StepLabel}"
+                                                           Style="{StaticResource Text.Caption}"
+                                                           FontWeight="SemiBold" />
+                                            </Border>
+
+                                            <!-- Kind + parameter summary -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding KindLabel}"
+                                                           Style="{StaticResource Text.Body}"
+                                                           FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding ParameterSummary}"
+                                                           Style="{StaticResource Text.Caption}"
+                                                           TextWrapping="Wrap"
+                                                           Margin="0,2,0,0" />
+                                            </StackPanel>
+
+                                            <!-- Move / Remove buttons -->
+                                            <StackPanel Grid.Column="2"
+                                                        Orientation="Horizontal"
+                                                        VerticalAlignment="Center">
+                                                <Button Style="{StaticResource ChromeButton}"
+                                                        Content="{x:Static loc:Strings.MacroMoveUp}"
+                                                        Margin="4,0,0,0"
+                                                        Click="MoveStepUp_Click"
+                                                        Tag="{Binding}"
+                                                        AutomationProperties.Name="{x:Static loc:Strings.MacroMoveUp}" />
+                                                <Button Style="{StaticResource ChromeButton}"
+                                                        Content="{x:Static loc:Strings.MacroMoveDown}"
+                                                        Margin="4,0,0,0"
+                                                        Click="MoveStepDown_Click"
+                                                        Tag="{Binding}"
+                                                        AutomationProperties.Name="{x:Static loc:Strings.MacroMoveDown}" />
+                                                <Button Style="{StaticResource ChromeButton}"
+                                                        Content="{x:Static loc:Strings.MacroRemoveStep}"
+                                                        Margin="4,0,0,0"
+                                                        Click="RemoveStep_Click"
+                                                        Tag="{Binding}"
+                                                        AutomationProperties.Name="{x:Static loc:Strings.MacroRemoveStep}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <!-- Empty state -->
+                        <TextBlock x:Name="NoStepsText"
+                                   Grid.Row="1"
+                                   Text="{x:Static loc:Strings.MacroNoSteps}"
+                                   Style="{StaticResource Text.Caption}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+
+                        <!-- Add step buttons -->
+                        <WrapPanel Grid.Row="2" Margin="0,10,0,0">
+                            <TextBlock Text="{x:Static loc:Strings.MacroAddStep}"
+                                       Style="{StaticResource Text.Caption}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,10,0" />
+                            <Button Style="{StaticResource ChromeButton}"
+                                    Margin="0,0,6,0"
+                                    Click="AddStripGpsStep_Click"
+                                    AutomationProperties.Name="{x:Static loc:Strings.MacroStripGps}">
+                                <TextBlock Text="{x:Static loc:Strings.MacroStripGps}" />
+                            </Button>
+                            <Button Style="{StaticResource ChromeButton}"
+                                    Margin="0,0,6,0"
+                                    Click="AddStripMetadataStep_Click"
+                                    AutomationProperties.Name="{x:Static loc:Strings.MacroStripMetadata}">
+                                <TextBlock Text="{x:Static loc:Strings.MacroStripMetadata}" />
+                            </Button>
+                            <Button Style="{StaticResource ChromeButton}"
+                                    Margin="0,0,6,0"
+                                    Click="AddExportCopyStep_Click"
+                                    AutomationProperties.Name="{x:Static loc:Strings.MacroExportCopy}">
+                                <TextBlock Text="{x:Static loc:Strings.MacroExportCopy}" />
+                            </Button>
+                            <Button Style="{StaticResource ChromeButton}"
+                                    Click="AddRenamePatternStep_Click"
+                                    AutomationProperties.Name="{x:Static loc:Strings.MacroRenamePattern}">
+                                <TextBlock Text="{x:Static loc:Strings.MacroRenamePattern}" />
+                            </Button>
+                        </WrapPanel>
                     </Grid>
                 </Border>
 
+                <!-- Preview / run log card -->
                 <Border Grid.Row="2"
                         Style="{StaticResource Card}"
                         Padding="14">
@@ -204,14 +271,17 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="{x:Static loc:Strings.MacroRunLog}" Style="{StaticResource SectionLabel}" />
+                        <TextBlock x:Name="PreviewHeading"
+                                   Text="{x:Static loc:Strings.MacroPreviewResults}"
+                                   Style="{StaticResource SectionLabel}" />
                         <ListBox x:Name="ResultList"
                                  Grid.Row="1"
                                  Margin="0,8,0,0"
-                                 AutomationProperties.Name="{x:Static loc:Strings.MacroRunLog}" />
+                                 AutomationProperties.Name="{x:Static loc:Strings.MacroPreviewResults}" />
                     </Grid>
                 </Border>
 
+                <!-- Action bar -->
                 <Border Grid.Row="3"
                         Style="{StaticResource Card}"
                         Padding="12"
@@ -220,16 +290,35 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock x:Name="PlanSummaryText"
                                    Text="{x:Static loc:Strings.MacroDefaultSummary}"
                                    Style="{StaticResource Text.Caption}"
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center" />
-                        <Button x:Name="RunButton"
+                        <Button x:Name="PreviewButton"
                                 Grid.Column="1"
-                                Style="{StaticResource PrimaryButton}"
+                                Style="{StaticResource ChromeButton}"
                                 Margin="14,0,0,0"
+                                Click="PreviewButton_Click"
+                                AutomationProperties.Name="{x:Static loc:Strings.MacroPreview}">
+                            <TextBlock Text="{x:Static loc:Strings.MacroPreview}" />
+                        </Button>
+                        <Button x:Name="CancelButton"
+                                Grid.Column="2"
+                                Style="{StaticResource ChromeButton}"
+                                Margin="8,0,0,0"
+                                Click="CancelButton_Click"
+                                Visibility="Collapsed"
+                                AutomationProperties.Name="{x:Static loc:Strings.MacroCancelButton}">
+                            <TextBlock Text="{x:Static loc:Strings.MacroCancelButton}" />
+                        </Button>
+                        <Button x:Name="RunButton"
+                                Grid.Column="3"
+                                Style="{StaticResource PrimaryButton}"
+                                Margin="8,0,0,0"
                                 Click="RunButton_Click"
                                 AutomationProperties.Name="{x:Static loc:Strings.MacroRunButton}">
                             <TextBlock Text="{x:Static loc:Strings.MacroRunButton}" />

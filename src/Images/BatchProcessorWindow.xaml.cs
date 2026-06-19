@@ -14,9 +14,21 @@ public partial class BatchProcessorWindow : Window
 {
     private readonly BatchProcessorService _batch = new();
     private readonly ObservableCollection<string> _sourceRows = [];
+    private readonly ObservableCollection<BatchOperationRow> _operationRows = [];
     private readonly ObservableCollection<BatchPreviewItem> _previewRows = [];
     private readonly ObservableCollection<string> _resultRows = [];
+    private readonly IReadOnlyList<BatchOperationOption> _operationOptions =
+    [
+        new(BatchOperationKinds.Resize, "Resize", "Max width", "2400", "Max height", "2400"),
+        new(BatchOperationKinds.Rotate, "Rotate", "Degrees", "90", null, null),
+        new(BatchOperationKinds.FlipHorizontal, "Flip horizontal", null, null, null, null),
+        new(BatchOperationKinds.FlipVertical, "Flip vertical", null, null, null, null),
+        new(BatchOperationKinds.StripMetadata, "Strip metadata", "Categories", "all", null, null),
+        new(BatchOperationKinds.RenamePattern, "Rename pattern", "Pattern", "{name}-{index}", null, null),
+        new(BatchOperationKinds.ExportCopy, "Export copy", "Extension", ".jpg", "Quality", "88")
+    ];
     private string? _outputFolder;
+    private CancellationTokenSource? _batchCts;
     private bool _loadingPreset;
 
     public BatchProcessorWindow()
@@ -24,6 +36,9 @@ public partial class BatchProcessorWindow : Window
         InitializeComponent();
 
         SourceList.ItemsSource = _sourceRows;
+        OperationList.ItemsSource = _operationRows;
+        OperationKindCombo.ItemsSource = _operationOptions;
+        OperationKindCombo.SelectedIndex = 0;
         PreviewList.ItemsSource = _previewRows;
         ResultList.ItemsSource = _resultRows;
         PresetCombo.ItemsSource = BatchProcessorPreset.Defaults;
@@ -122,11 +137,15 @@ public partial class BatchProcessorWindow : Window
     {
         if (_loadingPreset)
             return;
+        SyncLegacyControlsToOperations();
         PreviewSummaryText.Text = Strings.BatchSettingsChanged;
     }
 
     private async void PreviewButton_Click(object sender, RoutedEventArgs e)
         => await BuildPreviewAsync();
+
+    private void CancelButton_Click(object sender, RoutedEventArgs e)
+        => _batchCts?.Cancel();
 
     private async void RunButton_Click(object sender, RoutedEventArgs e)
     {
@@ -142,10 +161,12 @@ public partial class BatchProcessorWindow : Window
         var preset = ReadPreset();
         var dryRun = DryRunCheckBox.IsChecked == true;
         SetStatus(Strings.Format("BatchRunningFormat", sources.Count, Plural(sources.Count)), BatchProcessorStatus.Busy);
+        _batchCts = new CancellationTokenSource();
 
         try
         {
-            var result = await Task.Run(() => _batch.Run(sources, preset, _outputFolder, dryRun));
+            var token = _batchCts.Token;
+            var result = await Task.Run(() => _batch.Run(sources, preset, _outputFolder, dryRun, token), token);
             foreach (var item in result.Items)
             {
                 _resultRows.Add(item.Success
@@ -159,8 +180,14 @@ public partial class BatchProcessorWindow : Window
                 Strings.Format("BatchCompleteFormat", result.SuccessCount, result.FailedCount),
                 result.FailedCount == 0 ? BatchProcessorStatus.Ready : BatchProcessorStatus.Warning);
         }
+        catch (OperationCanceledException)
+        {
+            SetStatus(Strings.BatchCanceled, BatchProcessorStatus.Warning);
+        }
         finally
         {
+            _batchCts?.Dispose();
+            _batchCts = null;
             SetBusy(false);
         }
     }
@@ -176,10 +203,12 @@ public partial class BatchProcessorWindow : Window
 
         SetBusy(true);
         SetStatus(Strings.BatchBuildingPreview, BatchProcessorStatus.Busy);
+        _batchCts = new CancellationTokenSource();
         try
         {
             var preset = ReadPreset();
-            var result = await Task.Run(() => _batch.BuildPreview(sources, preset, _outputFolder));
+            var token = _batchCts.Token;
+            var result = await Task.Run(() => _batch.BuildPreview(sources, preset, _outputFolder, token), token);
             _previewRows.Clear();
             foreach (var item in result.Items)
                 _previewRows.Add(item);
@@ -187,8 +216,14 @@ public partial class BatchProcessorWindow : Window
             PreviewSummaryText.Text = Strings.Format("BatchPreviewSummaryFormat", result.Items.Count, Plural(result.Items.Count), result.FailedCount);
             SetStatus(Strings.BatchPreviewReady, BatchProcessorStatus.Ready);
         }
+        catch (OperationCanceledException)
+        {
+            SetStatus(Strings.BatchCanceled, BatchProcessorStatus.Warning);
+        }
         finally
         {
+            _batchCts?.Dispose();
+            _batchCts = null;
             SetBusy(false);
         }
     }
@@ -238,6 +273,56 @@ public partial class BatchProcessorWindow : Window
         }
     }
 
+    private void OperationKindCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (OperationKindCombo.SelectedItem is not BatchOperationOption option)
+            return;
+
+        SetOperationParameterControls(option);
+    }
+
+    private void AddOperationButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (OperationKindCombo.SelectedItem is not BatchOperationOption option)
+            return;
+
+        _operationRows.Add(new BatchOperationRow(CreateOperation(option)));
+        PreviewSummaryText.Text = Strings.BatchSettingsChanged;
+    }
+
+    private void MoveOperationUpButton_Click(object sender, RoutedEventArgs e)
+    {
+        var index = OperationList.SelectedIndex;
+        if (index <= 0)
+            return;
+
+        _operationRows.Move(index, index - 1);
+        OperationList.SelectedIndex = index - 1;
+        PreviewSummaryText.Text = Strings.BatchSettingsChanged;
+    }
+
+    private void MoveOperationDownButton_Click(object sender, RoutedEventArgs e)
+    {
+        var index = OperationList.SelectedIndex;
+        if (index < 0 || index >= _operationRows.Count - 1)
+            return;
+
+        _operationRows.Move(index, index + 1);
+        OperationList.SelectedIndex = index + 1;
+        PreviewSummaryText.Text = Strings.BatchSettingsChanged;
+    }
+
+    private void RemoveOperationButton_Click(object sender, RoutedEventArgs e)
+    {
+        var index = OperationList.SelectedIndex;
+        if (index < 0 || index >= _operationRows.Count)
+            return;
+
+        _operationRows.RemoveAt(index);
+        OperationList.SelectedIndex = Math.Min(index, _operationRows.Count - 1);
+        PreviewSummaryText.Text = Strings.BatchSettingsChanged;
+    }
+
     private void ApplyPreset(BatchProcessorPreset preset)
     {
         _loadingPreset = true;
@@ -248,17 +333,153 @@ public partial class BatchProcessorWindow : Window
         QualityText.Text = preset.Quality.ToString(CultureInfo.InvariantCulture);
         MaxWidthBox.Text = preset.MaxWidth.ToString(CultureInfo.InvariantCulture);
         MaxHeightBox.Text = preset.MaxHeight.ToString(CultureInfo.InvariantCulture);
+        LoadOperations(preset.Operations ?? []);
         _loadingPreset = false;
         PreviewSummaryText.Text = Strings.BatchPresetReady;
     }
 
     private BatchProcessorPreset ReadPreset()
-        => BatchProcessorService.NormalizePreset(new BatchProcessorPreset(
+    {
+        SyncLegacyControlsToOperations();
+        return BatchProcessorService.NormalizePreset(new BatchProcessorPreset(
             PresetNameBox.Text,
             ExtensionBox.Text,
             (int)Math.Round(QualitySlider.Value),
             Math.Max(0, ParseInt(MaxWidthBox.Text)),
-            Math.Max(0, ParseInt(MaxHeightBox.Text))));
+            Math.Max(0, ParseInt(MaxHeightBox.Text)),
+            _operationRows.Select(row => row.Step).ToList()));
+    }
+
+    private void LoadOperations(IReadOnlyList<BatchOperationStep> operations)
+    {
+        _operationRows.Clear();
+        foreach (var operation in operations)
+            _operationRows.Add(new BatchOperationRow(operation));
+    }
+
+    private void SyncLegacyControlsToOperations()
+    {
+        if (_loadingPreset || _operationRows.Count == 0)
+            return;
+
+        var extension = RenameService.NormalizeExtension(ExtensionBox.Text);
+        if (string.IsNullOrWhiteSpace(extension))
+            extension = ".png";
+
+        var quality = Math.Clamp((int)Math.Round(QualitySlider.Value), 1, 100);
+        var maxWidth = Math.Max(0, ParseInt(MaxWidthBox.Text));
+        var maxHeight = Math.Max(0, ParseInt(MaxHeightBox.Text));
+
+        UpsertOperation(
+            BatchOperationKinds.ExportCopy,
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["extension"] = extension,
+                ["quality"] = quality.ToString(CultureInfo.InvariantCulture)
+            },
+            insertBeforeExport: false);
+
+        var resizeIndex = FindOperationIndex(BatchOperationKinds.Resize);
+        if (maxWidth > 0 || maxHeight > 0)
+        {
+            UpsertOperation(
+                BatchOperationKinds.Resize,
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["maxWidth"] = maxWidth.ToString(CultureInfo.InvariantCulture),
+                    ["maxHeight"] = maxHeight.ToString(CultureInfo.InvariantCulture)
+                },
+                insertBeforeExport: true);
+        }
+        else if (resizeIndex >= 0)
+        {
+            _operationRows.RemoveAt(resizeIndex);
+        }
+    }
+
+    private void UpsertOperation(string kind, IReadOnlyDictionary<string, string> parameters, bool insertBeforeExport)
+    {
+        var index = FindOperationIndex(kind);
+        var row = new BatchOperationRow(new BatchOperationStep(kind, parameters));
+        if (index >= 0)
+        {
+            _operationRows[index] = row;
+            return;
+        }
+
+        if (!insertBeforeExport)
+        {
+            _operationRows.Add(row);
+            return;
+        }
+
+        var exportIndex = FindOperationIndex(BatchOperationKinds.ExportCopy);
+        if (exportIndex >= 0)
+            _operationRows.Insert(exportIndex, row);
+        else
+            _operationRows.Add(row);
+    }
+
+    private int FindOperationIndex(string kind)
+    {
+        for (var i = 0; i < _operationRows.Count; i++)
+        {
+            if (string.Equals(_operationRows[i].Step.Kind, kind, StringComparison.OrdinalIgnoreCase))
+                return i;
+        }
+
+        return -1;
+    }
+
+    private BatchOperationStep CreateOperation(BatchOperationOption option)
+    {
+        var parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        switch (option.Kind)
+        {
+            case BatchOperationKinds.Resize:
+                parameters["maxWidth"] = string.IsNullOrWhiteSpace(OperationParamOneBox.Text) ? "2400" : OperationParamOneBox.Text.Trim();
+                parameters["maxHeight"] = string.IsNullOrWhiteSpace(OperationParamTwoBox.Text) ? "2400" : OperationParamTwoBox.Text.Trim();
+                break;
+            case BatchOperationKinds.Rotate:
+                parameters["degrees"] = string.IsNullOrWhiteSpace(OperationParamOneBox.Text) ? "90" : OperationParamOneBox.Text.Trim();
+                break;
+            case BatchOperationKinds.StripMetadata:
+                parameters["categories"] = string.IsNullOrWhiteSpace(OperationParamOneBox.Text) ? "all" : OperationParamOneBox.Text.Trim();
+                break;
+            case BatchOperationKinds.RenamePattern:
+                parameters["pattern"] = string.IsNullOrWhiteSpace(OperationParamOneBox.Text) ? "{name}-{index}" : OperationParamOneBox.Text.Trim();
+                break;
+            case BatchOperationKinds.ExportCopy:
+                parameters["extension"] = string.IsNullOrWhiteSpace(OperationParamOneBox.Text) ? ".jpg" : OperationParamOneBox.Text.Trim();
+                parameters["quality"] = string.IsNullOrWhiteSpace(OperationParamTwoBox.Text) ? "88" : OperationParamTwoBox.Text.Trim();
+                break;
+        }
+
+        return BatchProcessorService.NormalizePreset(new BatchProcessorPreset(
+            "Operation",
+            ExtensionBox.Text,
+            (int)Math.Round(QualitySlider.Value),
+            ParseInt(MaxWidthBox.Text),
+            ParseInt(MaxHeightBox.Text),
+            [new BatchOperationStep(option.Kind, parameters)])).Operations![0];
+    }
+
+    private void SetOperationParameterControls(BatchOperationOption option)
+    {
+        var hasOne = !string.IsNullOrWhiteSpace(option.ParameterOneLabel);
+        var hasTwo = !string.IsNullOrWhiteSpace(option.ParameterTwoLabel);
+        OperationParameterGrid.Visibility = hasOne || hasTwo ? Visibility.Visible : Visibility.Collapsed;
+
+        OperationParamOneLabel.Visibility = hasOne ? Visibility.Visible : Visibility.Collapsed;
+        OperationParamOneBox.Visibility = hasOne ? Visibility.Visible : Visibility.Collapsed;
+        OperationParamOneLabel.Text = option.ParameterOneLabel ?? "";
+        OperationParamOneBox.Text = option.ParameterOneDefault ?? "";
+
+        OperationParamTwoLabel.Visibility = hasTwo ? Visibility.Visible : Visibility.Collapsed;
+        OperationParamTwoBox.Visibility = hasTwo ? Visibility.Visible : Visibility.Collapsed;
+        OperationParamTwoLabel.Text = option.ParameterTwoLabel ?? "";
+        OperationParamTwoBox.Text = option.ParameterTwoDefault ?? "";
+    }
 
     private List<string> CollectSourceFiles()
     {
@@ -298,7 +519,13 @@ public partial class BatchProcessorWindow : Window
         AddFolderButton.IsEnabled = !busy;
         PreviewButton.IsEnabled = !busy;
         RunButton.IsEnabled = !busy;
+        CancelButton.IsEnabled = busy;
         PresetCombo.IsEnabled = !busy;
+        OperationKindCombo.IsEnabled = !busy;
+        AddOperationButton.IsEnabled = !busy;
+        MoveOperationUpButton.IsEnabled = !busy;
+        MoveOperationDownButton.IsEnabled = !busy;
+        RemoveOperationButton.IsEnabled = !busy;
     }
 
     private void SetStatus(string message, BatchProcessorStatus status)
@@ -332,6 +559,32 @@ public partial class BatchProcessorWindow : Window
     }
 
     private static string Plural(int count) => count == 1 ? "" : "s";
+
+    private sealed record BatchOperationOption(
+        string Kind,
+        string Name,
+        string? ParameterOneLabel,
+        string? ParameterOneDefault,
+        string? ParameterTwoLabel,
+        string? ParameterTwoDefault);
+
+    private sealed class BatchOperationRow(BatchOperationStep step)
+    {
+        public BatchOperationStep Step { get; } = step;
+        public string Name => Step.Kind switch
+        {
+            BatchOperationKinds.Resize => "Resize",
+            BatchOperationKinds.Rotate => "Rotate",
+            BatchOperationKinds.FlipHorizontal => "Flip horizontal",
+            BatchOperationKinds.FlipVertical => "Flip vertical",
+            BatchOperationKinds.StripMetadata => "Strip metadata",
+            BatchOperationKinds.RenamePattern => "Rename pattern",
+            BatchOperationKinds.ExportCopy => "Export copy",
+            _ => Step.Kind
+        };
+
+        public string Summary => BatchProcessorService.DescribeOperation(Step);
+    }
 
     private enum BatchProcessorStatus
     {

@@ -1193,6 +1193,30 @@ Details written to:
   <data name="BatchPresetMaxDimensions" xml:space="preserve">
     <value>Max dimensions</value>
   </data>
+  <data name="BatchOperationsHeading" xml:space="preserve">
+    <value>Operations</value>
+  </data>
+  <data name="BatchOperationsHint" xml:space="preserve">
+    <value>Build an ordered copy pipeline. Operations run top to bottom and write a new file.</value>
+  </data>
+  <data name="BatchOperationKindAutomationName" xml:space="preserve">
+    <value>Batch operation type</value>
+  </data>
+  <data name="BatchAddOperation" xml:space="preserve">
+    <value>Add operation</value>
+  </data>
+  <data name="BatchOperationListAutomationName" xml:space="preserve">
+    <value>Batch operation chain</value>
+  </data>
+  <data name="BatchMoveOperationUp" xml:space="preserve">
+    <value>Move up</value>
+  </data>
+  <data name="BatchMoveOperationDown" xml:space="preserve">
+    <value>Move down</value>
+  </data>
+  <data name="BatchRemoveOperation" xml:space="preserve">
+    <value>Remove</value>
+  </data>
   <data name="BatchMaxWidthAutomationName" xml:space="preserve">
     <value>Batch max width</value>
   </data>
@@ -1285,6 +1309,9 @@ Details written to:
   </data>
   <data name="BatchCompleteFormat" xml:space="preserve">
     <value>Batch complete: {0} succeeded, {1} failed.</value>
+  </data>
+  <data name="BatchCanceled" xml:space="preserve">
+    <value>Batch canceled.</value>
   </data>
   <data name="BatchAddSourcesBeforePreview" xml:space="preserve">
     <value>Add supported source files before building a preview.</value>
@@ -2239,6 +2266,78 @@ Details written to:
   </data>
   <data name="MacroSkippedSourceFormat" xml:space="preserve">
     <value>Skipped source: {0}</value>
+  </data>
+  <data name="MacroPipelineSteps" xml:space="preserve">
+    <value>Pipeline steps</value>
+  </data>
+  <data name="MacroStepNumber" xml:space="preserve">
+    <value>Step {0}</value>
+  </data>
+  <data name="MacroRemoveStep" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="MacroMoveUp" xml:space="preserve">
+    <value>Move up</value>
+  </data>
+  <data name="MacroMoveDown" xml:space="preserve">
+    <value>Move down</value>
+  </data>
+  <data name="MacroAddStep" xml:space="preserve">
+    <value>Add step</value>
+  </data>
+  <data name="MacroStripGps" xml:space="preserve">
+    <value>Strip GPS</value>
+  </data>
+  <data name="MacroStripMetadata" xml:space="preserve">
+    <value>Strip metadata</value>
+  </data>
+  <data name="MacroExportCopy" xml:space="preserve">
+    <value>Export copy</value>
+  </data>
+  <data name="MacroRenamePattern" xml:space="preserve">
+    <value>Rename pattern</value>
+  </data>
+  <data name="MacroPreview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="MacroPreviewResults" xml:space="preserve">
+    <value>Preview results</value>
+  </data>
+  <data name="MacroCancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="MacroPreviewRunningFormat" xml:space="preserve">
+    <value>Previewing {0} file{1}...</value>
+  </data>
+  <data name="MacroPreviewCompleteFormat" xml:space="preserve">
+    <value>Preview complete: {0} file{1} processed.</value>
+  </data>
+  <data name="MacroCancelled" xml:space="preserve">
+    <value>Operation cancelled.</value>
+  </data>
+  <data name="MacroStripMetadataCategories" xml:space="preserve">
+    <value>Categories</value>
+  </data>
+  <data name="MacroExportExtension" xml:space="preserve">
+    <value>Extension</value>
+  </data>
+  <data name="MacroExportQuality" xml:space="preserve">
+    <value>Quality</value>
+  </data>
+  <data name="MacroRenamePatternLabel" xml:space="preserve">
+    <value>Pattern</value>
+  </data>
+  <data name="MacroNoSteps" xml:space="preserve">
+    <value>No steps added yet.</value>
+  </data>
+  <data name="MacroAddStepsFirst" xml:space="preserve">
+    <value>Add at least one pipeline step before running.</value>
+  </data>
+  <data name="MacroPreviewItemFormat" xml:space="preserve">
+    <value>{0} → {1}</value>
+  </data>
+  <data name="MacroPreviewItemFailedFormat" xml:space="preserve">
+    <value>{0} — Error: {1}</value>
   </data>
   <data name="ImportInboxWindowTitle" xml:space="preserve">
     <value>Images - Import inbox</value>

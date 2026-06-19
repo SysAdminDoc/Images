@@ -107,6 +107,37 @@ public static class MetadataEditService
     }
 
     /// <summary>
+    /// Removes EXIF tags matching the specified categories from an in-memory image.
+    /// Used by copy/export workflows so source files are not changed.
+    /// </summary>
+    public static MetadataStripResult StripMetadata(MagickImage image, MetadataStripCategory categories)
+    {
+        ArgumentNullException.ThrowIfNull(image);
+        if (categories == MetadataStripCategory.None)
+            return new MetadataStripResult(0, []);
+
+        var exif = image.GetExifProfile();
+        if (exif is null)
+            return new MetadataStripResult(0, []);
+
+        var tagsToRemove = exif.Values
+            .Where(v => ShouldRemoveTag(v.Tag.ToString(), categories))
+            .Select(v => v.Tag)
+            .ToList();
+
+        if (tagsToRemove.Count == 0)
+            return new MetadataStripResult(0, []);
+
+        var removedNames = tagsToRemove.Select(t => t.ToString()).ToList();
+
+        foreach (var tag in tagsToRemove)
+            exif.RemoveValue(tag);
+
+        image.SetProfile(exif);
+        return new MetadataStripResult(tagsToRemove.Count, removedNames);
+    }
+
+    /// <summary>
     /// Previews which EXIF tags would be removed for the given categories without modifying the file.
     /// </summary>
     public static MetadataStripResult PreviewStrip(string path, MetadataStripCategory categories)

@@ -233,6 +233,14 @@ public static class Strings
     public static string BatchPresetExtension => Get(nameof(BatchPresetExtension));
     public static string BatchPresetQuality => Get(nameof(BatchPresetQuality));
     public static string BatchPresetMaxDimensions => Get(nameof(BatchPresetMaxDimensions));
+    public static string BatchOperationsHeading => Get(nameof(BatchOperationsHeading));
+    public static string BatchOperationsHint => Get(nameof(BatchOperationsHint));
+    public static string BatchOperationKindAutomationName => Get(nameof(BatchOperationKindAutomationName));
+    public static string BatchAddOperation => Get(nameof(BatchAddOperation));
+    public static string BatchOperationListAutomationName => Get(nameof(BatchOperationListAutomationName));
+    public static string BatchMoveOperationUp => Get(nameof(BatchMoveOperationUp));
+    public static string BatchMoveOperationDown => Get(nameof(BatchMoveOperationDown));
+    public static string BatchRemoveOperation => Get(nameof(BatchRemoveOperation));
     public static string BatchMaxWidthAutomationName => Get(nameof(BatchMaxWidthAutomationName));
     public static string BatchMaxHeightAutomationName => Get(nameof(BatchMaxHeightAutomationName));
     public static string BatchOutputHeading => Get(nameof(BatchOutputHeading));
@@ -257,6 +265,7 @@ public static class Strings
     public static string BatchSettingsChanged => Get(nameof(BatchSettingsChanged));
     public static string BatchAddSourcesBeforeRunning => Get(nameof(BatchAddSourcesBeforeRunning));
     public static string BatchAddSourcesBeforePreview => Get(nameof(BatchAddSourcesBeforePreview));
+    public static string BatchCanceled => Get(nameof(BatchCanceled));
     public static string BatchBuildingPreview => Get(nameof(BatchBuildingPreview));
     public static string BatchPreviewReady => Get(nameof(BatchPreviewReady));
     public static string BatchLoadPresetDialogTitle => Get(nameof(BatchLoadPresetDialogTitle));
@@ -661,6 +670,30 @@ public static class Strings
     public static string MacroSkippedSourceFormat => Get(nameof(MacroSkippedSourceFormat));
     public static string MacroLoadJson => Get(nameof(MacroLoadJson));
     public static string MacroSaveJson => Get(nameof(MacroSaveJson));
+    public static string MacroPipelineSteps => Get(nameof(MacroPipelineSteps));
+    public static string MacroStepNumber => Get(nameof(MacroStepNumber));
+    public static string MacroRemoveStep => Get(nameof(MacroRemoveStep));
+    public static string MacroMoveUp => Get(nameof(MacroMoveUp));
+    public static string MacroMoveDown => Get(nameof(MacroMoveDown));
+    public static string MacroAddStep => Get(nameof(MacroAddStep));
+    public static string MacroStripGps => Get(nameof(MacroStripGps));
+    public static string MacroStripMetadata => Get(nameof(MacroStripMetadata));
+    public static string MacroExportCopy => Get(nameof(MacroExportCopy));
+    public static string MacroRenamePattern => Get(nameof(MacroRenamePattern));
+    public static string MacroPreview => Get(nameof(MacroPreview));
+    public static string MacroPreviewResults => Get(nameof(MacroPreviewResults));
+    public static string MacroCancelButton => Get(nameof(MacroCancelButton));
+    public static string MacroPreviewRunningFormat => Get(nameof(MacroPreviewRunningFormat));
+    public static string MacroPreviewCompleteFormat => Get(nameof(MacroPreviewCompleteFormat));
+    public static string MacroCancelled => Get(nameof(MacroCancelled));
+    public static string MacroStripMetadataCategories => Get(nameof(MacroStripMetadataCategories));
+    public static string MacroExportExtension => Get(nameof(MacroExportExtension));
+    public static string MacroExportQuality => Get(nameof(MacroExportQuality));
+    public static string MacroRenamePatternLabel => Get(nameof(MacroRenamePatternLabel));
+    public static string MacroNoSteps => Get(nameof(MacroNoSteps));
+    public static string MacroAddStepsFirst => Get(nameof(MacroAddStepsFirst));
+    public static string MacroPreviewItemFormat => Get(nameof(MacroPreviewItemFormat));
+    public static string MacroPreviewItemFailedFormat => Get(nameof(MacroPreviewItemFailedFormat));
 
     // ---- Import inbox window ----
     public static string ImportInboxWindowTitle => Get(nameof(ImportInboxWindowTitle));
