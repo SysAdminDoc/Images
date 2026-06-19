@@ -81,9 +81,16 @@ jobs:
           & $exe --system-info
           & $exe --codec-report
 
-      - name: WPF smoke tests
+      - name: WPF smoke gate
         shell: pwsh
         env:
           RUN_SMOKE_TESTS: "1"
-        run: dotnet test Images.sln -c Release --no-build --filter "Category=Smoke"
+        run: dotnet test Images.sln -c Release --no-build --filter "Category=SmokeGate"
+
+      - name: WPF smoke exploratory
+        if: always()
+        shell: pwsh
+        env:
+          RUN_SMOKE_TESTS: "1"
+        run: dotnet test Images.sln -c Release --no-build --filter "Category=Smoke&Category!=SmokeGate"
         continue-on-error: true

@@ -48,6 +48,7 @@ public sealed class WpfSmokeTests : IDisposable
     }
 
     [SkippableFact]
+    [Trait("Category", "SmokeGate")]
     public void LaunchAndClose()
     {
         SkipUnlessSmoke();
@@ -58,6 +59,7 @@ public sealed class WpfSmokeTests : IDisposable
     }
 
     [SkippableFact]
+    [Trait("Category", "SmokeGate")]
     public void OpenFixtureImage()
     {
         SkipUnlessSmoke();
