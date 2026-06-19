@@ -3,17 +3,29 @@ using Microsoft.Win32;
 
 namespace Images.Services;
 
+public enum AppThemeMode
+{
+    Dark,
+    Latte,
+    HighContrast,
+    System,
+}
+
 public static class ThemeService
 {
     internal const string ThemeMarkerKey = "Images.Theme.Name";
     internal const string HighContrastThemeName = "HighContrast";
+    internal const string LatteName = "Latte";
 
     private static readonly Uri HighContrastThemeUri = new("Themes/HighContrastTheme.xaml", UriKind.Relative);
+    private static readonly Uri LatteThemeUri = new("Themes/LatteTheme.xaml", UriKind.Relative);
     private static readonly object Gate = new();
 
     private static Application? _application;
     private static SettingsService? _settings;
     private static bool _systemEventsSubscribed;
+
+    public static AppThemeMode CurrentMode { get; private set; } = AppThemeMode.Dark;
 
     public static void Initialize(Application application, SettingsService settings)
     {
@@ -40,11 +52,48 @@ public static class ThemeService
         var application = Application.Current;
         if (application is null) return;
 
+        var mode = ParseThemeMode(settings.GetString(Keys.ThemeMode, "dark"));
+        var resolvedMode = ResolveMode(mode, SystemParameters.HighContrast, IsSystemLightTheme());
+
         var highContrast = ShouldUseHighContrast(
             settings.GetBool(Keys.AccessibilityHighContrast, false),
-            SystemParameters.HighContrast);
+            SystemParameters.HighContrast) || resolvedMode == AppThemeMode.HighContrast;
 
         SetHighContrastDictionary(application.Resources, highContrast);
+        SetLatteOverlay(application.Resources, resolvedMode == AppThemeMode.Latte);
+        CurrentMode = resolvedMode;
+    }
+
+    public static void SetTheme(AppThemeMode mode)
+    {
+        var settings = _settings;
+        if (settings is null) return;
+
+        var modeString = mode switch
+        {
+            AppThemeMode.Latte => "latte",
+            AppThemeMode.HighContrast => "high-contrast",
+            AppThemeMode.System => "system",
+            _ => "dark",
+        };
+
+        settings.SetString(Keys.ThemeMode, modeString);
+        ApplyFromSettings(settings);
+    }
+
+    internal static AppThemeMode ParseThemeMode(string? value) => value switch
+    {
+        "latte" => AppThemeMode.Latte,
+        "high-contrast" => AppThemeMode.HighContrast,
+        "system" => AppThemeMode.System,
+        _ => AppThemeMode.Dark,
+    };
+
+    internal static AppThemeMode ResolveMode(AppThemeMode requested, bool systemHighContrast, bool systemLight)
+    {
+        if (systemHighContrast) return AppThemeMode.HighContrast;
+        if (requested == AppThemeMode.System) return systemLight ? AppThemeMode.Latte : AppThemeMode.Dark;
+        return requested;
     }
 
     internal static bool ShouldUseHighContrast(bool appPreference, bool systemHighContrast)
@@ -58,7 +107,7 @@ public static class ThemeService
     {
         ArgumentNullException.ThrowIfNull(resources);
 
-        var existing = FindHighContrastDictionary(resources);
+        var existing = FindDictionary(resources, IsHighContrastDictionary);
         if (existing is not null && (!enabled || refresh))
         {
             resources.MergedDictionaries.Remove(existing);
@@ -68,6 +117,21 @@ public static class ThemeService
         if (!enabled || existing is not null) return;
 
         resources.MergedDictionaries.Add((createDictionary ?? CreateHighContrastDictionary)());
+    }
+
+    internal static void SetLatteOverlay(ResourceDictionary resources, bool enabled)
+    {
+        ArgumentNullException.ThrowIfNull(resources);
+
+        var existing = FindDictionary(resources, IsLatteDictionary);
+        if (existing is not null && !enabled)
+        {
+            resources.MergedDictionaries.Remove(existing);
+            return;
+        }
+
+        if (!enabled || existing is not null) return;
+        resources.MergedDictionaries.Add(new ResourceDictionary { Source = LatteThemeUri });
     }
 
     internal static bool IsHighContrastDictionary(ResourceDictionary dictionary)
@@ -82,11 +146,23 @@ public static class ThemeService
                string.Equals(dictionary[ThemeMarkerKey] as string, HighContrastThemeName, StringComparison.Ordinal);
     }
 
-    private static ResourceDictionary? FindHighContrastDictionary(ResourceDictionary resources)
+    internal static bool IsLatteDictionary(ResourceDictionary dictionary)
+    {
+        ArgumentNullException.ThrowIfNull(dictionary);
+
+        if (dictionary.Source is not null &&
+            dictionary.Source.OriginalString.EndsWith("LatteTheme.xaml", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return dictionary.Contains(ThemeMarkerKey) &&
+               string.Equals(dictionary[ThemeMarkerKey] as string, LatteName, StringComparison.Ordinal);
+    }
+
+    private static ResourceDictionary? FindDictionary(ResourceDictionary resources, Func<ResourceDictionary, bool> predicate)
     {
         foreach (var dictionary in resources.MergedDictionaries)
         {
-            if (IsHighContrastDictionary(dictionary))
+            if (predicate(dictionary))
                 return dictionary;
         }
 
@@ -95,6 +171,20 @@ public static class ThemeService
 
     private static ResourceDictionary CreateHighContrastDictionary()
         => new() { Source = HighContrastThemeUri };
+
+    private static bool IsSystemLightTheme()
+    {
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            var value = key?.GetValue("AppsUseLightTheme");
+            return value is int intVal && intVal == 1;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 
     private static void SubscribeSystemEvents()
     {
@@ -112,14 +202,7 @@ public static class ThemeService
         var settings = _settings;
         if (application is null || settings is null) return;
 
-        void Apply()
-        {
-            var highContrast = ShouldUseHighContrast(
-                settings.GetBool(Keys.AccessibilityHighContrast, false),
-                SystemParameters.HighContrast);
-
-            SetHighContrastDictionary(application.Resources, highContrast, refresh: highContrast);
-        }
+        void Apply() => ApplyFromSettings(settings);
 
         if (application.Dispatcher.CheckAccess())
             Apply();
