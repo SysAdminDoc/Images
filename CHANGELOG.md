@@ -21,6 +21,7 @@ All notable changes to **Images** are documented here.
 - **CLIP pipeline validation with explicit fallback reasons** — Model Manager exposes a Validate button that runs step-by-step checks (file availability, tokenizer load, preprocessor config, ONNX session creation, text embedding smoke) and surfaces exact failure reasons. `SemanticSearchService.ClipFallbackReason` explains why the deterministic provider was used.
 - **Start surface with recent folders, books, and import inbox** — the no-image launch panel now shows recent folders (clickable, bound to MRU), recent archive books with page progress, and an Import Inbox button alongside the existing Open/Paste/Settings/Diagnostics actions.
 - **Background jobs center** — `BackgroundJobsService` tracks running and recent async tasks with name, state, duration, error, and affected count. The About window surfaces a Jobs panel with session summary and per-job details.
+- **Workflow modes** — Viewer, Review, Organize, Edit, Book, and Diagnostics modes switch between chrome presets (filmstrip, metadata HUD, gallery, review labels). Modes are accessible via the command palette ("Mode: Review", etc.), persisted across sessions, and respect peek/fullscreen isolation.
 
 ### Infrastructure
 
