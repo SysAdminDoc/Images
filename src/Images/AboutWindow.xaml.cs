@@ -117,6 +117,20 @@ public partial class AboutWindow : Window
         }
     }
 
+    private void ExportSupportBundleButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var path = SupportBundleService.Build();
+            ShellIntegration.RevealPathInExplorer(path);
+            ShowUpdateStatus($"Support bundle saved to {path}", "Success");
+        }
+        catch (Exception ex)
+        {
+            ShowUpdateStatus($"Could not export support bundle: {ex.Message}", "Warning");
+        }
+    }
+
     private void SaveSystemInfoButton_Click(object sender, RoutedEventArgs e)
     {
         try
