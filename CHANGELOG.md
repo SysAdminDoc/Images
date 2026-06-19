@@ -4,6 +4,18 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### Fixes
+
+- **Stabilized STA supersession controller tests** — `PhotoMetadataControllerTests` and `ColorAnalysisControllerTests` supersession tests no longer intermittently fail during parallel full-suite runs. Root cause was thread pool starvation; fixed by releasing the blocked reader immediately after supersession, widening `PumpUntil` deadline to 5s, and extending the dispatcher drain interval.
+- **Release-readiness script repaired** — removed stale `PROJECT_CONTEXT.md` requirement that blocked valid releases; script now validates the current `ROADMAP.md`/`Roadmap_Blocked.md` policy instead.
+- **Stale version references corrected** — release support policy updated from `0.1.x`/`net9.0` to `0.2.x`/`net10.0`; release checklist updated to match current roadmap hygiene rules.
+- **23 hardcoded XAML hex colors replaced with semantic theme tokens** — status chips, selected-item highlights, overlay dimmers, and subtle surface backgrounds across 8 windows now consume `DynamicResource` brushes from the theme dictionaries. New tokens: `OverlayDimmerBrush`, `SubtleSurfaceBrush`. Light/dark/high-contrast themes all updated.
+
+### Infrastructure
+
+- **WPF smoke tests split into required gate and exploratory tiers** — `LaunchAndClose` and `OpenFixtureImage` now run as a required CI gate (`SmokeGate` category); keyboard-driven interactive tests remain `continue-on-error`.
+- **Migrated xUnit v2.9.3 → v3.2.2** — dropped deprecated `Xunit.SkippableFact` in favor of native `Assert.Skip()`; updated test runner to v3.1.5.
+
 ### Features
 
 - **Operation-chain batch workflow** — Batch Processor now exposes an ordered copy pipeline for resize, rotate, flip, metadata stripping, rename patterns, and export settings. Preview shows output names, dimensions, size deltas, warnings, dry-run remains default, and preview/run work can be canceled.
