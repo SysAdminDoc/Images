@@ -14,12 +14,17 @@ public sealed class DirectoryNavigator : IDisposable
         SupportedImageFormats.Extensions,
         StringComparer.OrdinalIgnoreCase);
 
+    private const int MaxHistoryDepth = 50;
+
     private List<string> _files = new();
     private string? _folder;
     private FileSystemWatcher? _watcher;
     private DispatcherTimer? _watchDebounce;
     private readonly Dispatcher _dispatcher;
     private readonly Func<string, IEnumerable<string>> _enumerateFiles;
+    private readonly Stack<string> _backStack = new();
+    private readonly Stack<string> _forwardStack = new();
+    private bool _navigatingHistory;
 
     public IReadOnlyList<string> Files => _files;
     public int Count => _files.Count;
@@ -27,6 +32,8 @@ public sealed class DirectoryNavigator : IDisposable
     public string? CurrentPath => CurrentIndex >= 0 && CurrentIndex < _files.Count ? _files[CurrentIndex] : null;
     public string? Folder => _folder;
     public DirectorySortMode SortMode { get; private set; } = DirectorySortMode.NaturalName;
+    public bool CanGoBack => _backStack.Count > 0;
+    public bool CanGoForward => _forwardStack.Count > 0;
 
     public event EventHandler? ListChanged;
 
@@ -88,6 +95,7 @@ public sealed class DirectoryNavigator : IDisposable
             return TrySetCurrentIndex(full);
         }
 
+        var previousPath = CurrentPath;
         var previousFolder = _folder;
         var previousFiles = _files;
         var previousIndex = CurrentIndex;
@@ -98,6 +106,12 @@ public sealed class DirectoryNavigator : IDisposable
             _files = previousFiles;
             CurrentIndex = previousIndex;
             return false;
+        }
+
+        if (previousPath is not null && !_navigatingHistory)
+        {
+            PushBack(previousPath);
+            _forwardStack.Clear();
         }
 
         AttachWatcher(folder);
@@ -164,6 +178,59 @@ public sealed class DirectoryNavigator : IDisposable
         if (_files.Count == 0) return false;
         CurrentIndex = _files.Count - 1;
         return true;
+    }
+
+    public bool GoBack()
+    {
+        if (_backStack.Count == 0) return false;
+
+        var target = _backStack.Pop();
+        if (CurrentPath is not null)
+            PushForward(CurrentPath);
+
+        _navigatingHistory = true;
+        try { return Open(target); }
+        finally { _navigatingHistory = false; }
+    }
+
+    public bool GoForward()
+    {
+        if (_forwardStack.Count == 0) return false;
+
+        var target = _forwardStack.Pop();
+        if (CurrentPath is not null)
+            PushBack(CurrentPath);
+
+        _navigatingHistory = true;
+        try { return Open(target); }
+        finally { _navigatingHistory = false; }
+    }
+
+    public IReadOnlyList<string> GetBackHistory() => _backStack.ToArray();
+    public IReadOnlyList<string> GetForwardHistory() => _forwardStack.ToArray();
+
+    private void PushBack(string path)
+    {
+        _backStack.Push(path);
+        while (_backStack.Count > MaxHistoryDepth)
+        {
+            var temp = _backStack.ToArray();
+            _backStack.Clear();
+            for (var i = 0; i < MaxHistoryDepth; i++)
+                _backStack.Push(temp[temp.Length - 1 - i]);
+        }
+    }
+
+    private void PushForward(string path)
+    {
+        _forwardStack.Push(path);
+        while (_forwardStack.Count > MaxHistoryDepth)
+        {
+            var temp = _forwardStack.ToArray();
+            _forwardStack.Clear();
+            for (var i = 0; i < MaxHistoryDepth; i++)
+                _forwardStack.Push(temp[temp.Length - 1 - i]);
+        }
     }
 
     public bool SetSortMode(DirectorySortMode mode)
