@@ -108,6 +108,102 @@ public sealed class WpfSmokeTests : IDisposable
         app.WaitWhileMainHandleIsMissing(TimeSpan.FromSeconds(3));
     }
 
+    [Fact]
+    [Trait("Category", "SmokeGate")]
+    public void CanvasHasDocumentedAutomationNameAndHelpText()
+    {
+        SkipUnlessSmoke();
+        if (!File.Exists(FixtureImage))
+            throw new FileNotFoundException($"Fixture image missing: {FixtureImage}");
+
+        var (app, window) = LaunchApp(FixtureImage);
+        System.Threading.Thread.Sleep(1500);
+
+        var canvas = window.FindFirstDescendant(cf =>
+            cf.ByControlType(FlaUI.Core.Definitions.ControlType.Image));
+        Assert.NotNull(canvas);
+
+        var name = canvas.Name;
+        Assert.NotNull(name);
+        Assert.Matches(@"Image, \d+ by \d+ pixels", name);
+
+        var help = canvas.Properties.HelpText.ValueOrDefault;
+        Assert.NotNull(help);
+        Assert.Contains("arrow keys", help, StringComparison.OrdinalIgnoreCase);
+
+        app.Close();
+    }
+
+    [Fact]
+    [Trait("Category", "SmokeGate")]
+    public void WindowTitleContainsFilenameWhenImageLoaded()
+    {
+        SkipUnlessSmoke();
+        if (!File.Exists(FixtureImage))
+            throw new FileNotFoundException($"Fixture image missing: {FixtureImage}");
+
+        var (app, window) = LaunchApp(FixtureImage);
+        System.Threading.Thread.Sleep(1000);
+
+        Assert.Contains("smoke-test", window.Title, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Images", window.Title, StringComparison.OrdinalIgnoreCase);
+
+        app.Close();
+    }
+
+    [Fact]
+    public void NavigationButtonsHaveAutomationNames()
+    {
+        SkipUnlessSmoke();
+        if (!File.Exists(FixtureImage))
+            throw new FileNotFoundException($"Fixture image missing: {FixtureImage}");
+
+        var (app, window) = LaunchApp(FixtureImage);
+        System.Threading.Thread.Sleep(1000);
+
+        var prev = window.FindFirstDescendant(cf => cf.ByName("Previous image"));
+        var next = window.FindFirstDescendant(cf => cf.ByName("Next image"));
+        Assert.NotNull(prev);
+        Assert.NotNull(next);
+
+        app.Close();
+    }
+
+    [Fact]
+    public void ToolbarButtonsHaveAutomationNames()
+    {
+        SkipUnlessSmoke();
+        var (app, window) = LaunchApp();
+        System.Threading.Thread.Sleep(1000);
+
+        var openBtn = window.FindFirstDescendant(cf => cf.ByName("Open image"));
+        Assert.NotNull(openBtn);
+
+        var settingsBtn = window.FindFirstDescendant(cf => cf.ByName("Open settings"));
+        Assert.NotNull(settingsBtn);
+
+        var diagBtn = window.FindFirstDescendant(cf => cf.ByName("Open diagnostics"));
+        Assert.NotNull(diagBtn);
+
+        app.Close();
+    }
+
+    [Fact]
+    public void FolderPositionChipExistsWhenImageLoaded()
+    {
+        SkipUnlessSmoke();
+        if (!File.Exists(FixtureImage))
+            throw new FileNotFoundException($"Fixture image missing: {FixtureImage}");
+
+        var (app, window) = LaunchApp(FixtureImage);
+        System.Threading.Thread.Sleep(1500);
+
+        var posChip = window.FindFirstDescendant(cf => cf.ByName("Folder position"));
+        Assert.NotNull(posChip);
+
+        app.Close();
+    }
+
     public void Dispose()
     {
         try { _app?.Close(); } catch { }
