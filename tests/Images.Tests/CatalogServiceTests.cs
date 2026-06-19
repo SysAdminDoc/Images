@@ -167,6 +167,49 @@ public sealed class CatalogServiceTests
     private static int ReadInt(string dbPath, string sql)
         => Convert.ToInt32(ReadScalar(dbPath, sql));
 
+    [Fact]
+    public void Rebuild_IncrementalReusesUnchangedRows()
+    {
+        using var temp = TestDirectory.Create();
+        var img1 = WriteImage(temp.Path, "stable.png", 8, 8);
+        var img2 = WriteImage(temp.Path, "updated.png", 8, 8);
+        var dbPath = Path.Combine(temp.Path, "catalog.db");
+        var service = new CatalogService(dbPath);
+
+        var first = service.Rebuild([temp.Path]);
+        Assert.Equal(2, first.IndexedCount);
+        Assert.Equal(0, first.ReusedCount);
+        Assert.Equal(2, first.UpdatedCount);
+
+        File.WriteAllBytes(img2, File.ReadAllBytes(WriteImage(temp.Path, "temp-replace.png", 16, 16)));
+        File.Delete(Path.Combine(temp.Path, "temp-replace.png"));
+
+        var second = service.Rebuild([temp.Path]);
+        Assert.Equal(2, second.IndexedCount);
+        Assert.Equal(1, second.ReusedCount);
+        Assert.Equal(1, second.UpdatedCount);
+        Assert.Equal(0, second.RemovedCount);
+    }
+
+    [Fact]
+    public void Rebuild_IncrementalRemovesDeletedFiles()
+    {
+        using var temp = TestDirectory.Create();
+        var img1 = WriteImage(temp.Path, "keep.png", 8, 8);
+        var img2 = WriteImage(temp.Path, "delete.png", 8, 8);
+        var dbPath = Path.Combine(temp.Path, "catalog.db");
+        var service = new CatalogService(dbPath);
+
+        service.Rebuild([temp.Path]);
+        File.Delete(img2);
+
+        var result = service.Rebuild([temp.Path]);
+        Assert.Equal(1, result.IndexedCount);
+        Assert.Equal(1, result.ReusedCount);
+        Assert.Equal(0, result.UpdatedCount);
+        Assert.Equal(1, result.RemovedCount);
+    }
+
     private static string ReadString(string dbPath, string sql)
         => Convert.ToString(ReadScalar(dbPath, sql)) ?? "";
 
