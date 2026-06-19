@@ -6732,44 +6732,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 return;
             }
 
-            var applied = 0;
-            foreach (var r in result.Results)
-            {
-                if (!r.Success) continue;
+            var summary = XmpSidecarImportService.ApplyFolderRatings(
+                result,
+                XmpSidecarImportService.FindImageForSidecar,
+                (imagePath, rating) => _reviewLabels.SetRating(imagePath, rating));
 
-                var imagePath = FindImageForSidecar(r.SidecarPath);
-                if (imagePath is null) continue;
-
-                if (r.Rating is int rating)
-                {
-                    _reviewLabels.SetRating(imagePath, rating);
-                    applied++;
-                }
-            }
-
-            Toast(string.Format(System.Globalization.CultureInfo.InvariantCulture,
-                Strings.MainToastXmpImportResult, result.SuccessCount, result.FailedCount));
+            Toast(Strings.Format(
+                nameof(Strings.MainToastXmpImportResult),
+                summary.RatingsApplied,
+                summary.SkippedWithoutRating,
+                summary.UnmatchedImages,
+                summary.FailedSidecars));
         }
         catch (Exception ex)
         {
             Toast(string.Format(System.Globalization.CultureInfo.InvariantCulture,
                 Strings.MainToastXmpImportFailed, ex.Message));
         }
-    }
-
-    private static string? FindImageForSidecar(string sidecarPath)
-    {
-        var dir = Path.GetDirectoryName(sidecarPath);
-        if (dir is null) return null;
-
-        var stem = Path.GetFileNameWithoutExtension(sidecarPath);
-        foreach (var ext in DirectoryNavigator.SupportedExtensions)
-        {
-            var candidate = Path.Combine(dir, stem + ext);
-            if (File.Exists(candidate)) return candidate;
-        }
-
-        return null;
     }
 
     private void OpenMacroActions()

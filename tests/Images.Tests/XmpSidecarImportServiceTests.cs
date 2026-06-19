@@ -238,6 +238,87 @@ public sealed class XmpSidecarImportServiceTests
     }
 
     [Fact]
+    public void FindImageForSidecar_FindsImageWhenXmpExtensionIsAppended()
+    {
+        using var temp = TestDirectory.Create();
+        var imagePath = Path.Combine(temp.Path, "photo.jpg");
+        File.WriteAllBytes(imagePath, [0xFF, 0xD8]);
+        var sidecarPath = temp.WriteFile("photo.jpg.xmp", BuildSidecar(ratingAttr: "2"));
+
+        var found = XmpSidecarImportService.FindImageForSidecar(sidecarPath);
+
+        Assert.Equal(imagePath, found);
+    }
+
+    [Fact]
+    public void FindImageForSidecar_FindsImageWhenXmpExtensionReplacesImageExtension()
+    {
+        using var temp = TestDirectory.Create();
+        var imagePath = Path.Combine(temp.Path, "photo.jpg");
+        File.WriteAllBytes(imagePath, [0xFF, 0xD8]);
+        var sidecarPath = temp.WriteFile("photo.xmp", BuildSidecar(ratingAttr: "2"));
+
+        var found = XmpSidecarImportService.FindImageForSidecar(sidecarPath);
+
+        Assert.Equal(imagePath, found);
+    }
+
+    [Fact]
+    public void ApplyFolderRatings_ReportsAppliedSkippedUnmatchedAndFailedCounts()
+    {
+        var applied = new List<(string Path, int Rating)>();
+        var result = new FolderImportResult(
+            [
+                new SidecarImportResult(
+                    Success: true,
+                    SidecarPath: "rated.xmp",
+                    Rating: 4,
+                    ColorLabel: null,
+                    FlatKeywords: [],
+                    HierarchicalKeywords: [],
+                    Message: "rated"),
+                new SidecarImportResult(
+                    Success: true,
+                    SidecarPath: "keywords-only.xmp",
+                    Rating: null,
+                    ColorLabel: null,
+                    FlatKeywords: ["portrait"],
+                    HierarchicalKeywords: [],
+                    Message: "keywords"),
+                new SidecarImportResult(
+                    Success: true,
+                    SidecarPath: "unmatched.xmp",
+                    Rating: 5,
+                    ColorLabel: null,
+                    FlatKeywords: [],
+                    HierarchicalKeywords: [],
+                    Message: "unmatched"),
+                SidecarImportResult.Failure("bad.xmp", "bad")
+            ],
+            SuccessCount: 3,
+            FailedCount: 1,
+            Message: "scan");
+
+        var summary = XmpSidecarImportService.ApplyFolderRatings(
+            result,
+            sidecar => sidecar switch
+            {
+                "rated.xmp" => "photo.jpg",
+                "keywords-only.xmp" => "keywords.jpg",
+                _ => null
+            },
+            (path, rating) => applied.Add((path, rating)));
+
+        Assert.Equal(new XmpFolderApplySummary(
+            RatingsApplied: 1,
+            SkippedWithoutRating: 1,
+            UnmatchedImages: 1,
+            FailedSidecars: 1), summary);
+        var call = Assert.Single(applied);
+        Assert.Equal(("photo.jpg", 4), call);
+    }
+
+    [Fact]
     public void ImportForImage_ReturnsFailure_WhenNoSidecarExists()
     {
         using var temp = TestDirectory.Create();

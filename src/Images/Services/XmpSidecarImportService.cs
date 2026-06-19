@@ -151,6 +151,72 @@ public sealed class XmpSidecarImportService
             Message: message) { Location = location };
     }
 
+    public static XmpFolderApplySummary ApplyFolderRatings(
+        FolderImportResult result,
+        Func<string, string?> findImageForSidecar,
+        Action<string, int> applyRating)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+        ArgumentNullException.ThrowIfNull(findImageForSidecar);
+        ArgumentNullException.ThrowIfNull(applyRating);
+
+        var ratingsApplied = 0;
+        var skippedWithoutRating = 0;
+        var unmatchedImages = 0;
+
+        foreach (var item in result.Results)
+        {
+            if (!item.Success) continue;
+
+            var imagePath = findImageForSidecar(item.SidecarPath);
+            if (imagePath is null)
+            {
+                unmatchedImages++;
+                continue;
+            }
+
+            if (item.Rating is int rating)
+            {
+                applyRating(imagePath, rating);
+                ratingsApplied++;
+            }
+            else
+            {
+                skippedWithoutRating++;
+            }
+        }
+
+        return new XmpFolderApplySummary(
+            RatingsApplied: ratingsApplied,
+            SkippedWithoutRating: skippedWithoutRating,
+            UnmatchedImages: unmatchedImages,
+            FailedSidecars: result.FailedCount);
+    }
+
+    internal static string? FindImageForSidecar(string sidecarPath)
+    {
+        var dir = Path.GetDirectoryName(sidecarPath);
+        if (dir is null) return null;
+
+        var xmpStem = Path.GetFileNameWithoutExtension(sidecarPath);
+        if (string.IsNullOrWhiteSpace(xmpStem)) return null;
+
+        var directCandidate = Path.Combine(dir, xmpStem);
+        if (File.Exists(directCandidate) && IsSupportedImagePath(directCandidate))
+            return directCandidate;
+
+        var imageStem = Path.GetFileNameWithoutExtension(xmpStem);
+        if (string.IsNullOrWhiteSpace(imageStem)) return null;
+
+        foreach (var ext in DirectoryNavigator.SupportedExtensions)
+        {
+            var candidate = Path.Combine(dir, imageStem + ext);
+            if (File.Exists(candidate)) return candidate;
+        }
+
+        return null;
+    }
+
     private static int? ReadRating(XDocument document)
     {
         // xmp:Rating as attribute on rdf:Description
@@ -365,6 +431,12 @@ public sealed class XmpSidecarImportService
         return trimmed.Length == 0 ? null : trimmed;
     }
 
+    private static bool IsSupportedImagePath(string path)
+    {
+        var extension = Path.GetExtension(path);
+        return DirectoryNavigator.SupportedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
+    }
+
     private static IEnumerable<string> SidecarPaths(string imagePath)
     {
         yield return imagePath + ".xmp";
@@ -443,6 +515,12 @@ public sealed record FolderImportResult(
 {
     public int TotalScanned => Results.Count;
 }
+
+public sealed record XmpFolderApplySummary(
+    int RatingsApplied,
+    int SkippedWithoutRating,
+    int UnmatchedImages,
+    int FailedSidecars);
 
 /// <summary>
 /// IPTC/Photoshop location fields extracted from an XMP sidecar. All fields are informational.
