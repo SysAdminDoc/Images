@@ -4406,6 +4406,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 $"Rotate {degrees} degrees"))
             .ToList();
 
+        WritebackGuardService.CreateBackup(path, WritebackGuardService.GetBackupMode(_settings));
+
         BeginOperationStatus(Strings.MainOpApplyingRotation, $"Overwriting {Path.GetFileName(path)}.");
         try
         {
@@ -5291,6 +5293,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 CropSelectionService.ToEditParameters(crop),
                 $"Crop {crop.Width}x{crop.Height} at {crop.X},{crop.Y}"))
             .ToList();
+
+        var backupMode = WritebackGuardService.GetBackupMode(_settings);
+        var backupPath = WritebackGuardService.CreateBackup(path, backupMode);
 
         BeginOperationStatus(Strings.MainOpApplyingCrop, $"Overwriting {Path.GetFileName(path)}.");
         try
@@ -6636,6 +6641,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (CurrentPath is null || IsOperationBusy) return;
         var path = CurrentPath;
 
+        WritebackGuardService.CreateBackup(path, WritebackGuardService.GetBackupMode(_settings));
+
         BeginOperationStatus(Strings.MainOpRemovingLocation, $"Updating {Path.GetFileName(path)}.");
         try
         {
@@ -6670,6 +6677,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (CurrentPath is null || IsOperationBusy) return;
         var path = CurrentPath;
         var label = MetadataEditService.CategoryLabel(categories);
+
+        WritebackGuardService.CreateBackup(path, WritebackGuardService.GetBackupMode(_settings));
 
         BeginOperationStatus(
             string.Format(System.Globalization.CultureInfo.InvariantCulture, Strings.MainOpStrippingMetadata, label),
