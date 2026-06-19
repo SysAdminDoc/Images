@@ -38,8 +38,8 @@ public sealed class SettingsViewModelTests
         var viewModel = new SettingsViewModel(settings);
 
         Assert.Contains(viewModel.ShortcutRows, r => r.Id == CommandIds.BatchProcessor);
-        Assert.Contains("Ctrl+Shift+B", viewModel.HotkeySummary, StringComparison.Ordinal);
-        Assert.Contains("Ctrl+Alt+P", viewModel.HotkeySummary, StringComparison.Ordinal);
+        Assert.Contains("editable shortcuts", viewModel.HotkeySummary, StringComparison.Ordinal);
+        Assert.Contains("using their defaults", viewModel.HotkeySummary, StringComparison.Ordinal);
         Assert.Contains("Diagnostics", viewModel.DiagnosticsStorageSummary, StringComparison.Ordinal);
         Assert.Contains("codec report", viewModel.DiagnosticsStorageSummary, StringComparison.Ordinal);
     }
@@ -58,6 +58,7 @@ public sealed class SettingsViewModelTests
         Assert.Equal("O", settings.GetHotkey(CommandIds.Open)?.Key);
         Assert.Equal(SettingsViewModel.SettingsStatusToneKind.Success, viewModel.SettingsStatusTone);
         Assert.Contains(viewModel.ShortcutRows, r => r.Id == CommandIds.Open && r.ShortcutText == "Ctrl+Shift+O");
+        Assert.Contains("customized", viewModel.HotkeySummary, StringComparison.Ordinal);
 
         var paste = Assert.Single(viewModel.ShortcutRows, r => r.Id == CommandIds.Paste);
         paste.ShortcutText = "Ctrl+Shift+O";

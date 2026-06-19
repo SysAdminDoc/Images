@@ -381,45 +381,76 @@
                                            TextWrapping="Wrap" />
                                 <DataGrid ItemsSource="{Binding ShortcutRows}"
                                           AutoGenerateColumns="False"
-                                          CanUserAddRows="False"
-                                          CanUserDeleteRows="False"
-                                          HeadersVisibility="Column"
-                                          GridLinesVisibility="None"
                                           MinHeight="240"
-                                          MaxHeight="320"
+                                          MaxHeight="340"
                                           Margin="0,14,0,0"
-                                          Background="Transparent"
-                                          BorderBrush="{StaticResource HairlineBrush}"
-                                          Foreground="{StaticResource TextBrush}"
-                                          RowBackground="Transparent"
-                                          AlternatingRowBackground="#10181825"
+                                          RowHeight="50"
                                           HorizontalScrollBarVisibility="Disabled"
-                                          SelectionMode="Single"
                                           AutomationProperties.Name="{x:Static loc:Strings.SettingsSectionHotkeys}">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="{x:Static loc:Strings.SettingsHotkeyColumnCategory}"
                                                             Binding="{Binding Category}"
                                                             IsReadOnly="True"
-                                                            Width="110" />
+                                                            Width="104" />
                                         <DataGridTextColumn Header="{x:Static loc:Strings.SettingsHotkeyColumnAction}"
                                                             Binding="{Binding ActionName}"
                                                             IsReadOnly="True"
                                                             Width="*" />
                                         <DataGridTemplateColumn Header="{x:Static loc:Strings.SettingsHotkeyColumnShortcut}"
-                                                                Width="120">
+                                                                Width="188">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBox Text="{Binding ShortcutText, UpdateSourceTrigger=PropertyChanged}"
-                                                             MinWidth="92"
-                                                             Padding="6,3"
-                                                             AutomationProperties.Name="{Binding ActionName}" />
+                                                    <Grid VerticalAlignment="Center">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBox Text="{Binding ShortcutText, UpdateSourceTrigger=PropertyChanged}"
+                                                                 MinWidth="104"
+                                                                 MinHeight="30"
+                                                                 Padding="8,4"
+                                                                 FontSize="12.5"
+                                                                 ToolTip="{x:Static loc:Strings.SettingsHotkeyShortcutHelp}"
+                                                                 AutomationProperties.Name="{Binding ActionName}"
+                                                                 AutomationProperties.HelpText="{x:Static loc:Strings.SettingsHotkeyShortcutHelp}" />
+                                                        <Border Grid.Column="1"
+                                                                Padding="6,2"
+                                                                Margin="8,0,0,0"
+                                                                VerticalAlignment="Center"
+                                                                AutomationProperties.Name="{Binding StateText}">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border" BasedOn="{StaticResource Badge}">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsCustomized}" Value="True">
+                                                                            <Setter Property="Background" Value="#1F89B4FA" />
+                                                                            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <TextBlock Text="{Binding StateText}"
+                                                                       FontSize="10.5"
+                                                                       FontWeight="SemiBold">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Foreground" Value="{StaticResource SubtextBrush}" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsCustomized}" Value="True">
+                                                                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </Border>
+                                                    </Grid>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
                                         <DataGridTextColumn Header="{x:Static loc:Strings.SettingsHotkeyColumnDefault}"
                                                             Binding="{Binding DefaultShortcutText}"
                                                             IsReadOnly="True"
-                                                            Width="96" />
+                                                            Width="88" />
                                         <DataGridTemplateColumn Header="{x:Static loc:Strings.SettingsHotkeyColumnActions}"
                                                                 Width="116">
                                             <DataGridTemplateColumn.CellTemplate>
@@ -431,7 +462,8 @@
                                                                 Padding="8,3"
                                                                 MinHeight="26"
                                                                 Margin="0,0,6,0"
-                                                                Content="{x:Static loc:Strings.SettingsHotkeyApply}" />
+                                                                Content="{x:Static loc:Strings.SettingsHotkeyApply}"
+                                                                ToolTip="{x:Static loc:Strings.SettingsHotkeyShortcutHelp}" />
                                                         <Button Style="{StaticResource ChromeButton}"
                                                                 Command="{Binding DataContext.ResetShortcutCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                                 CommandParameter="{Binding}"

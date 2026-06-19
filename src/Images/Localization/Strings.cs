@@ -389,6 +389,8 @@ public static class Strings
     public static string SettingsSectionHotkeys => Get(nameof(SettingsSectionHotkeys));
     public static string SettingsHotkeysFixed => Get(nameof(SettingsHotkeysFixed));
     public static string SettingsHotkeysDescription => Get(nameof(SettingsHotkeysDescription));
+    public static string SettingsHotkeySummaryDefaultFormat => Get(nameof(SettingsHotkeySummaryDefaultFormat));
+    public static string SettingsHotkeySummaryCustomizedFormat => Get(nameof(SettingsHotkeySummaryCustomizedFormat));
     public static string SettingsHotkeyColumnAction => Get(nameof(SettingsHotkeyColumnAction));
     public static string SettingsHotkeyColumnCategory => Get(nameof(SettingsHotkeyColumnCategory));
     public static string SettingsHotkeyColumnShortcut => Get(nameof(SettingsHotkeyColumnShortcut));
@@ -396,6 +398,9 @@ public static class Strings
     public static string SettingsHotkeyColumnActions => Get(nameof(SettingsHotkeyColumnActions));
     public static string SettingsHotkeyApply => Get(nameof(SettingsHotkeyApply));
     public static string SettingsHotkeyReset => Get(nameof(SettingsHotkeyReset));
+    public static string SettingsHotkeyShortcutHelp => Get(nameof(SettingsHotkeyShortcutHelp));
+    public static string SettingsHotkeyStateDefault => Get(nameof(SettingsHotkeyStateDefault));
+    public static string SettingsHotkeyStateCustom => Get(nameof(SettingsHotkeyStateCustom));
     public static string SettingsSectionTextExtraction => Get(nameof(SettingsSectionTextExtraction));
     public static string SettingsOcrLanguagesButton => Get(nameof(SettingsOcrLanguagesButton));
     public static string SettingsOcrLanguagesTooltip => Get(nameof(SettingsOcrLanguagesTooltip));
