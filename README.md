@@ -66,10 +66,11 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Export a copy** to JPEG, PNG, WebP, AVIF, JXL, TIFF, BMP, GIF/APNG, PSD/PSB, PDF/EPS/SVG, TGA, DDS, QOI, EXR, HDR, JPEG 2000, X11/Magick, production/scientific, and portable bitmap formats.
 - **Rotate**, **delete-to-Recycle-Bin**, **Reveal in Explorer**, **Copy path**.
 - **Calm confirmations and recovery** — destructive file actions confirm before moving anything to Recycle Bin, routine actions complete with toast feedback, and recent destructive operations are recorded in the app-local Recovery Center.
-- **Organized settings** — Settings groups startup, appearance, accessibility, archive defaults, hotkeys, diagnostics, text extraction, and privacy controls, including reduced motion, high-contrast surfaces, and window-placement preferences.
+- **Organized settings** — Settings groups startup, appearance, accessibility, archive defaults, hotkeys, diagnostics, text extraction, and privacy controls, including reduced motion, high-contrast surfaces, window-placement preferences, and per-store local data management with clear actions for thumbnails, logs, recovery records, and network activity.
 - **C2PA content credential inspection** — when an optional `c2patool` runtime is installed, the side panel shows a read-only Content Credentials section for supported image formats displaying trust status, claim generator, signature date, assertions, and ingredient provenance. Images explicitly communicates that content credentials show provenance (who created or edited a file), not authenticity (whether the content is truthful).
 - **Runtime provenance dashboard** — About, `--system-info`, and `--codec-report` list key NuGet packages, optional runtimes, OS OCR, c2patool, and local model/runtime status with source, version, path, SHA-256 where available, advisory status, and setup/release action copy.
 - **Local model manager** — open Model manager from the context menu or Automation card to inspect approved local model definitions, reveal app-local model storage, import model files you downloaded yourself, verify SHA-256 against pinned OpenCV/Carve LaMa and Qdrant CLIP ViT-B/32 candidates, and delete mismatched or stale files. Images does not download models automatically.
+- **Redacted support bundle export** — About offers a one-click "Export support bundle" that writes a ZIP with system info, codec report, network activity, diagnostics status, recent logs, crash log, recovery records, redacted settings, and cache health for bug reports. No image bytes or private paths included.
 - **Network-quiet by default** — automatic update checks are disabled until enabled in Settings; manual About checks remain available.
 
 ## Install
@@ -201,6 +202,7 @@ src/Images/
 │   ├── ImageMetadataService.cs # Read-only EXIF summary for the Details panel and HUD
 │   ├── ImageColorAnalysisService.cs # Read-only ICC/profile and histogram/channel summaries
 │   ├── CodecCapabilityService.cs # About-window codec summary and copyable diagnostics
+│   ├── SupportBundleService.cs # Redacted ZIP bundle for bug reports
 │   ├── SupportedImageFormats.cs # Central extension catalog for discovery/dialogs
 │   ├── CodecRuntime.cs         # Optional app-local Ghostscript runtime discovery
 │   ├── AppStorage.cs           # LocalAppData/Temp storage fallback for caches and logs
