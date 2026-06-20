@@ -96,8 +96,8 @@ public sealed class CatalogServiceTests
         var service = new CatalogService(dbPath);
 
         Assert.True(service.IsAvailable);
-        Assert.Equal(1, ReadInt(dbPath, "PRAGMA user_version;"));
-        Assert.Equal(1, ReadInt(dbPath, "SELECT schema_version FROM catalog_schema_canary WHERE id = 1;"));
+        Assert.Equal(2, ReadInt(dbPath, "PRAGMA user_version;"));
+        Assert.Equal(2, ReadInt(dbPath, "SELECT schema_version FROM catalog_schema_canary WHERE id = 1;"));
         var backupPath = dbPath + ".bak.v0-1";
         Assert.True(File.Exists(backupPath));
         Assert.Equal("kept-before-migration", ReadString(backupPath, "SELECT value FROM legacy_marker LIMIT 1;"));
