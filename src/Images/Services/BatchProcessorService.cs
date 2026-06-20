@@ -3,6 +3,7 @@ using System.IO;
 using System.Security;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using ImageMagick;
 using Microsoft.Extensions.Logging;
 
@@ -62,6 +63,13 @@ public sealed record BatchRunResult(
     public int SuccessCount => Items.Count(item => item.Success);
     public int FailedCount => Items.Count - SuccessCount;
 }
+
+public sealed record BatchProgressUpdate(
+    int CompletedCount,
+    int TotalCount,
+    string FileName,
+    bool Success,
+    string? Error);
 
 public sealed class BatchProcessorService
 {
@@ -155,6 +163,63 @@ public sealed class BatchProcessorService
             results.Add(RunOne(paths[index], index + 1, preset, outputFolder, dryRun, cancellationToken));
         }
 
+        return new BatchRunResult(results);
+    }
+
+    public async Task<BatchRunResult> RunAsync(
+        IEnumerable<string> sourcePaths,
+        BatchProcessorPreset preset,
+        string? outputFolder,
+        bool dryRun,
+        int maxConcurrency = 0,
+        IProgress<BatchProgressUpdate>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(sourcePaths);
+        preset = NormalizePreset(preset);
+
+        var paths = NormalizeSourcePaths(sourcePaths);
+        if (paths.Count == 0)
+            return new BatchRunResult([]);
+
+        var concurrency = maxConcurrency > 0
+            ? maxConcurrency
+            : Math.Max(1, Environment.ProcessorCount - 1);
+
+        var results = new MacroRunItemResult[paths.Count];
+        var completed = 0;
+        using var semaphore = new SemaphoreSlim(concurrency, concurrency);
+
+        var tasks = new Task[paths.Count];
+        for (var i = 0; i < paths.Count; i++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var index = i;
+            var path = paths[index];
+
+            tasks[index] = Task.Run(async () =>
+            {
+                await semaphore.WaitAsync(cancellationToken);
+                try
+                {
+                    var result = RunOne(path, index + 1, preset, outputFolder, dryRun, cancellationToken);
+                    results[index] = result;
+                    var done = Interlocked.Increment(ref completed);
+                    progress?.Report(new BatchProgressUpdate(
+                        done,
+                        paths.Count,
+                        Path.GetFileName(path),
+                        result.Success,
+                        result.Error));
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }, cancellationToken);
+        }
+
+        await Task.WhenAll(tasks);
         return new BatchRunResult(results);
     }
 
