@@ -170,6 +170,48 @@ The rename TextBox intercepts arrow keys via `PreviewKeyDown` so left/right move
 
 Window-level `Escape` dismisses toasts, overlays, or closes peek-mode windows.
 
+## WCAG 2.5.7 / 2.5.8 audit
+
+Audited 2026-06-19 against WCAG 2.2 success criteria 2.5.7 (Dragging Movements) and 2.5.8 (Target Size Minimum, 24x24 DIU).
+
+### 2.5.8 Target Size Minimum (24x24 DIU)
+
+| Element | Size | Status |
+|---|---|---|
+| `ToolbarButton` (style) | 40 x 34 | Pass |
+| `ChromeButton` (style) | MinHeight 34 | Pass |
+| `NavArrowButton` (style) | 58 x 58 | Pass |
+| Page nav buttons (page scrubber area) | 30 x 26 | Pass |
+| Folder sort button | Padding 9,4 + MinHeight 26 | Pass |
+| Toggle review mode button | MinHeight 28 | Pass |
+| Star rating buttons (1-5, 0) | ChromeButton (MinHeight 34) | Pass |
+| Pick / Reject / Clear / Undo buttons | ChromeButton (MinHeight 34) | Pass |
+| Crop overlay Apply button | MinWidth 78, MinHeight 32 | Pass |
+| Selection overlay Copy / Clear buttons | MinWidth 72, MinHeight 32 | Pass |
+| Channel isolation chip | Padding 8,2 + MinHeight 24 | Pass (fixed) |
+| Slideshow indicator chip | Padding 8,2 + MinHeight 24 | Pass (fixed) |
+| OCR text regions | Sized by OCR bounding box (dynamic) | N/A (content-driven) |
+
+**Fixes applied:** Added `MinHeight="24"` to the channel isolation chip and slideshow indicator chip in `MainWindow.xaml`. Both are interactive Border elements (MouseLeftButtonUp/MouseLeftButtonDown handlers) that previously had only `Padding="8,2"`, which at FontSize 10.5 rendered below the 24 DIU minimum.
+
+### 2.5.7 Dragging Movements
+
+| Drag operation | Non-drag alternative | Status |
+|---|---|---|
+| Image pan (ZoomPanImage drag) | Shift+Wheel (horizontal), +/- zoom, 0/1 fit/1:1, Ctrl+F zoom cycle, double-click fit/1:1 | Partial -- no vertical-pan keyboard alternative |
+| Crop rectangle (CropOverlay drag) | Enter applies crop; no keyboard positioning/resizing | Fail -- drag-only positioning |
+| Pixel selection (SelectionOverlay drag) | Ctrl+C copies; Escape cancels; no keyboard positioning | Fail -- drag-only positioning |
+| Local exposure brush (drag painting) | Enter applies; Escape cancels; radius/strength via sliders | Fail -- painting is drag-only |
+| Retouch brush (drag painting) | Enter applies; Escape cancels; radius/strength via sliders | Fail -- painting is drag-only |
+| Red-eye correction (click to place) | Enter applies; Escape cancels; radius/strength/threshold via sliders | Fail -- placement is click-only |
+| Page scrubber slider | Arrow keys (native WPF Slider), PageUp/PageDown, direct page buttons | Pass |
+| Filmstrip scroll | Mouse wheel, keyboard arrow navigation in ListBox | Pass |
+
+**Known drag-only limitations (not addressed in this audit):**
+- Crop/selection rectangle positioning requires mouse drag. A future enhancement could add arrow-key nudging when the crop/selection overlay is active.
+- Brush-based editing (local exposure, retouch, red-eye) is inherently spatial and mouse/pen-driven. Keyboard painting is not practical for these tools.
+- Vertical image panning has no keyboard-only path. Shift+Wheel covers horizontal pan; vertical pan currently requires mouse drag or zoom-to-fit shortcuts.
+
 ## Known limitations
 
 - **No live-region on rename status**: The rename status dot color changes (Pending/Saved/Conflict/Error) are not raised as UIA `LiveRegionChanged` events. Screen reader users must Tab to the status area to hear the current rename state.
