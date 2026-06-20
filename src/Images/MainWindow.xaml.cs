@@ -70,6 +70,8 @@ public partial class MainWindow : Window
 
         Viewport.MouseEnter += (_, _) => FadeArrows(1.0);
         Viewport.MouseLeave += (_, _) => FadeArrows(0.0);
+        _edgeHideTimer.Tick += EdgeHideTimer_Tick;
+        MouseMove += (_, e) => FullscreenEdgeCheck(e.GetPosition(this));
         Loaded += (_, _) =>
         {
             Focus();
@@ -609,28 +611,122 @@ public partial class MainWindow : Window
     // IsFullscreen VM flag. Previous window state is remembered so exit restores it exactly.
     private WindowState _preFullscreenState = WindowState.Normal;
     private WindowStyle _preFullscreenStyle = WindowStyle.SingleBorderWindow;
+    private const double FullscreenEdgeZone = 40;
+    private readonly System.Windows.Threading.DispatcherTimer _edgeHideTimer = new()
+    {
+        Interval = TimeSpan.FromSeconds(2)
+    };
+    private bool _fullscreenToolbarRevealed;
+    private bool _fullscreenSidePanelRevealed;
 
     private void ToggleFullscreen()
     {
         if (Vm.IsFullscreen)
         {
-            // Restore
             WindowStyle = _preFullscreenStyle;
             WindowState = _preFullscreenState;
             ResizeMode = ResizeMode.CanResize;
             Vm.IsFullscreen = false;
+            RestoreFullscreenPanels();
         }
         else
         {
             _preFullscreenState = WindowState;
             _preFullscreenStyle = WindowStyle;
-            // Normal-state first so the Maximized toggle re-fires on a borderless window even
-            // if we were already maximized — otherwise WPF no-ops the state-set.
             WindowState = WindowState.Normal;
             WindowStyle = WindowStyle.None;
             ResizeMode = ResizeMode.NoResize;
             WindowState = WindowState.Maximized;
             Vm.IsFullscreen = true;
+            HideFullscreenPanels();
+        }
+    }
+
+    private void HideFullscreenPanels()
+    {
+        BottomToolbarGrid.Visibility = Visibility.Collapsed;
+        _fullscreenToolbarRevealed = false;
+        _fullscreenSidePanelRevealed = false;
+    }
+
+    private void RestoreFullscreenPanels()
+    {
+        _edgeHideTimer.Stop();
+        BottomToolbarGrid.Visibility = Vm.IsPeekMode ? Visibility.Collapsed : Visibility.Visible;
+        RightSidePanel.Visibility = Visibility.Visible;
+        _fullscreenToolbarRevealed = false;
+        _fullscreenSidePanelRevealed = false;
+    }
+
+    private void FullscreenEdgeCheck(Point mousePos)
+    {
+        if (!Vm.IsFullscreen || Vm.IsPeekMode)
+            return;
+
+        var height = ActualHeight;
+        var width = ActualWidth;
+        var nearBottom = mousePos.Y >= height - FullscreenEdgeZone;
+        var nearRight = mousePos.X >= width - FullscreenEdgeZone;
+
+        if (nearBottom && !_fullscreenToolbarRevealed)
+        {
+            BottomToolbarGrid.Visibility = Visibility.Visible;
+            _fullscreenToolbarRevealed = true;
+            RestartEdgeHideTimer();
+        }
+
+        if (nearRight && !_fullscreenSidePanelRevealed)
+        {
+            RightSidePanel.Visibility = Visibility.Visible;
+            _fullscreenSidePanelRevealed = true;
+            RestartEdgeHideTimer();
+        }
+
+        if ((nearBottom && _fullscreenToolbarRevealed) ||
+            (nearRight && _fullscreenSidePanelRevealed))
+        {
+            RestartEdgeHideTimer();
+        }
+
+        if (!nearBottom && _fullscreenToolbarRevealed && !nearRight && !_fullscreenSidePanelRevealed)
+        {
+            BottomToolbarGrid.Visibility = Visibility.Collapsed;
+            _fullscreenToolbarRevealed = false;
+        }
+
+        if (!nearRight && _fullscreenSidePanelRevealed && !nearBottom && !_fullscreenToolbarRevealed)
+        {
+            RightSidePanel.Visibility = Visibility.Collapsed;
+            _fullscreenSidePanelRevealed = false;
+        }
+    }
+
+    private void RestartEdgeHideTimer()
+    {
+        _edgeHideTimer.Stop();
+        _edgeHideTimer.Start();
+    }
+
+    private void EdgeHideTimer_Tick(object? sender, EventArgs e)
+    {
+        _edgeHideTimer.Stop();
+        if (!Vm.IsFullscreen)
+            return;
+
+        var mousePos = Mouse.GetPosition(this);
+        var nearBottom = mousePos.Y >= ActualHeight - FullscreenEdgeZone;
+        var nearRight = mousePos.X >= ActualWidth - FullscreenEdgeZone;
+
+        if (!nearBottom && _fullscreenToolbarRevealed)
+        {
+            BottomToolbarGrid.Visibility = Visibility.Collapsed;
+            _fullscreenToolbarRevealed = false;
+        }
+
+        if (!nearRight && _fullscreenSidePanelRevealed)
+        {
+            RightSidePanel.Visibility = Visibility.Collapsed;
+            _fullscreenSidePanelRevealed = false;
         }
     }
 
