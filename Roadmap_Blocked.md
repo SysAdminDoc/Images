@@ -373,3 +373,15 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
 - [ ] **V100-07** *P2* — **Multi-instance LAN sync** (nomacs moat, full version) — pan/zoom/image-send mirror between instances on same network. Builds on V30-32 local lite. Effort: L.
   - **Blocked by**: V30-32 local multi-instance sync — the full LAN version needs the local sync foundation first.
   - **Unblock when**: V30-32 local multi-instance sync ships.
+
+## Blocked On V20-01 SkiaSharp Canvas And Renderer Maturity
+
+- [ ] P1 — **Color-management truth mode and HDR/wide-gamut guardrails**
+  Why: Images advertises broad HDR/EXR/JXL/AVIF support and reports ICC data, but the current WPF display path does not soft-proof or apply managed display transforms.
+  - **Blocked by**: V20-01 SkiaSharp canvas — full managed sRGB display transform and HDR rendering need the new canvas engine. Guardrail status badges are possible in the current pipeline but the full acceptance (profiled previews, display truth status per format) needs renderer changes.
+  - **Unblock when**: V20-01 SkiaSharp canvas ships, providing a display pipeline that can apply ICC transforms.
+
+- [ ] P1 — **Light Table / Select Set comparison queue**
+  Why: The current compare mode handles a pair, but top culling tools use temporary sets for 3-8 near-duplicates.
+  - **Blocked by**: requires major new multi-image layout surface (2-up and 4-up linked pan/zoom/rotate) that is better built on V20-01 SkiaSharp canvas for consistent rendering across tiles.
+  - **Unblock when**: V20-01 SkiaSharp canvas ships or the WPF bitmap-based multi-tile layout is validated for linked transforms.
