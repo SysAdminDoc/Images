@@ -4054,6 +4054,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         try
         {
+            if (ImageLoader.IsRawExtension(path!))
+            {
+                var preview = await Task.Run(() => ImageLoader.TryLoadRawPreview(path!));
+                if (preview is not null &&
+                    string.Equals(_nav.CurrentPath, path, StringComparison.OrdinalIgnoreCase))
+                {
+                    CompleteCurrentLoad(path!, preview, startCropMode: startCropMode);
+                }
+            }
+
             var result = await DecodeCurrentPathAsync(path!);
             if (!string.Equals(_nav.CurrentPath, path, StringComparison.OrdinalIgnoreCase))
             {

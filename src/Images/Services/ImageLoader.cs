@@ -33,7 +33,8 @@ public static class ImageLoader
         PageSequence? Pages = null,
         TilePyramidInfo? TilePyramid = null,
         FormatMismatchInfo? FormatMismatch = null,
-        MotionPhotoInfo? MotionPhoto = null);
+        MotionPhotoInfo? MotionPhoto = null,
+        bool IsPreview = false);
 
     // Extensions worth probing for animated content. Pure-photo formats (JPEG, RAW, etc.) skip the
     // MagickImageCollection path so we don't pay for a second decoder on every single-frame image.
@@ -706,6 +707,54 @@ public static class ImageLoader
         catch
         {
             return (0, 0);
+        }
+    }
+
+    public static bool IsRawExtension(string path)
+        => SupportedImageFormats.RawExtensions.Contains(
+            Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);
+
+    public static LoadResult? TryLoadRawPreview(string path)
+    {
+        if (!IsRawExtension(path))
+            return null;
+
+        try
+        {
+            using var image = new MagickImage();
+            image.Ping(path);
+
+            var exifProfile = image.GetExifProfile();
+            if (exifProfile is null || exifProfile.ThumbnailLength <= 0)
+                return null;
+
+            using var thumb = exifProfile.CreateThumbnail();
+            if (thumb is null)
+                return null;
+
+            var thumbBytes = thumb.ToByteArray(MagickFormat.Jpeg);
+            if (thumbBytes is null || thumbBytes.Length < 100)
+                return null;
+
+            using var ms = new MemoryStream(thumbBytes, writable: false);
+            var bmp = new BitmapImage();
+            bmp.BeginInit();
+            bmp.CacheOption = BitmapCacheOption.OnLoad;
+            bmp.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+            bmp.StreamSource = ms;
+            bmp.EndInit();
+            bmp.Freeze();
+
+            return new LoadResult(
+                bmp,
+                bmp.PixelWidth,
+                bmp.PixelHeight,
+                "RAW embedded preview",
+                IsPreview: true);
+        }
+        catch
+        {
+            return null;
         }
     }
 }
