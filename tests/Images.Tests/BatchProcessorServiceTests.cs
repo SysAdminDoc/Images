@@ -156,6 +156,73 @@ public sealed class BatchProcessorServiceTests
         Assert.Equal(1200, preset.MaxHeight);
     }
 
+    [Fact]
+    public async Task RunAsync_ProcessesFilesInParallel()
+    {
+        using var temp = TestDirectory.Create();
+        var output = Directory.CreateDirectory(Path.Combine(temp.Path, "out")).FullName;
+        var sources = new List<string>();
+        for (var i = 0; i < 8; i++)
+            sources.Add(WriteImage(temp.Path, $"source_{i}.png", 4, 4));
+
+        var progressUpdates = new List<BatchProgressUpdate>();
+        var progress = new Progress<BatchProgressUpdate>(update => progressUpdates.Add(update));
+
+        var result = await new BatchProcessorService().RunAsync(
+            sources,
+            new BatchProcessorPreset("PNG", ".png", 92, 0, 0),
+            output,
+            dryRun: false,
+            maxConcurrency: 4,
+            progress: progress);
+
+        Assert.Equal(8, result.SuccessCount);
+        Assert.Equal(0, result.FailedCount);
+        Assert.Equal(8, result.Items.Count);
+        Assert.Equal(8, Directory.EnumerateFiles(output).Count());
+        foreach (var item in result.Items)
+            Assert.True(item.Success);
+    }
+
+    [Fact]
+    public async Task RunAsync_PreservesResultOrder()
+    {
+        using var temp = TestDirectory.Create();
+        var output = Directory.CreateDirectory(Path.Combine(temp.Path, "out")).FullName;
+        var sources = new List<string>();
+        for (var i = 0; i < 4; i++)
+            sources.Add(WriteImage(temp.Path, $"file_{i:D2}.png", 4, 4));
+
+        var result = await new BatchProcessorService().RunAsync(
+            sources,
+            new BatchProcessorPreset("PNG", ".png", 92, 0, 0),
+            output,
+            dryRun: false,
+            maxConcurrency: 2);
+
+        Assert.Equal(4, result.Items.Count);
+        for (var i = 0; i < result.Items.Count; i++)
+            Assert.Contains($"file_{i:D2}", result.Items[i].SourcePath, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task RunAsync_DryRun_DoesNotWriteOutput()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteImage(temp.Path, "source.png", 4, 4);
+        var output = Directory.CreateDirectory(Path.Combine(temp.Path, "out")).FullName;
+
+        var result = await new BatchProcessorService().RunAsync(
+            [source],
+            new BatchProcessorPreset("PNG", ".png", 92, 0, 0),
+            output,
+            dryRun: true,
+            maxConcurrency: 2);
+
+        Assert.Equal(1, result.SuccessCount);
+        Assert.Empty(Directory.EnumerateFiles(output));
+    }
+
     private static string WriteImage(string folder, string name, uint width, uint height)
     {
         var path = Path.Combine(folder, name);

@@ -166,7 +166,9 @@ public partial class BatchProcessorWindow : Window
         try
         {
             var token = _batchCts.Token;
-            var result = await Task.Run(() => _batch.Run(sources, preset, _outputFolder, dryRun, token), token);
+            var progress = new Progress<BatchProgressUpdate>(update =>
+                SetStatus($"{update.CompletedCount}/{update.TotalCount} — {update.FileName}", BatchProcessorStatus.Busy));
+            var result = await _batch.RunAsync(sources, preset, _outputFolder, dryRun, progress: progress, cancellationToken: token);
             foreach (var item in result.Items)
             {
                 _resultRows.Add(item.Success
