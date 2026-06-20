@@ -12,7 +12,7 @@ Approved and implemented for a managed in-process adapter:
 - RAR/CBR and 7z/CB7 use `SharpCompress` 0.48.1 from NuGet.
 - The adapter is read-only. It lists candidate page entries, rejects unsafe paths, skips nested archives and document-preview entries, caps every buffered page at 256 MiB, and never extracts entry names or archive contents to disk.
 
-SharpCompress was accepted because the package is MIT licensed, NuGet-distributed, targets `net9.0`, has no additional dependencies for this target, and keeps Images away from native 7-Zip or UnRAR sidecars for this first expansion.
+SharpCompress was accepted because the package is MIT licensed, NuGet-distributed, targets `net10.0`, has no additional dependencies for this target, and keeps Images away from native 7-Zip or UnRAR sidecars for this first expansion.
 
 ## Accepted Integration: SharpCompress
 
