@@ -171,6 +171,16 @@ public sealed class ListenService : IDisposable
             return false;
         }
 
+        try
+        {
+            path = Path.GetFullPath(path);
+        }
+        catch
+        {
+            _log.LogDebug("listen-mode: rejected path that could not be canonicalized");
+            return false;
+        }
+
         if (!File.Exists(path))
         {
             _log.LogDebug("listen-mode: rejected non-existent path");

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO;
 using System.Security;
@@ -188,12 +189,12 @@ public sealed class BatchProcessorService
 
         var results = new MacroRunItemResult[paths.Count];
         var completed = 0;
+        var reservedNames = new ConcurrentDictionary<string, byte>(StringComparer.OrdinalIgnoreCase);
         using var semaphore = new SemaphoreSlim(concurrency, concurrency);
 
         var tasks = new Task[paths.Count];
         for (var i = 0; i < paths.Count; i++)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             var index = i;
             var path = paths[index];
 
@@ -202,7 +203,7 @@ public sealed class BatchProcessorService
                 await semaphore.WaitAsync(cancellationToken);
                 try
                 {
-                    var result = RunOne(path, index + 1, preset, outputFolder, dryRun, cancellationToken);
+                    var result = RunOne(path, index + 1, preset, outputFolder, dryRun, cancellationToken, reservedNames);
                     results[index] = result;
                     var done = Interlocked.Increment(ref completed);
                     progress?.Report(new BatchProgressUpdate(
@@ -274,7 +275,8 @@ public sealed class BatchProcessorService
         BatchProcessorPreset preset,
         string? outputFolder,
         bool dryRun,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        ConcurrentDictionary<string, byte>? reservedNames = null)
     {
         var messages = new List<string>();
         var currentPath = sourcePath;
@@ -288,7 +290,8 @@ public sealed class BatchProcessorService
             var request = ExportRequestFromPreset(preset);
             var outputPath = ResolveUniqueDestination(
                 ResolveOutputFolder(sourcePath, outputFolder),
-                Path.ChangeExtension(outputName, request.Extension));
+                Path.ChangeExtension(outputName, request.Extension),
+                reservedNames);
             currentPath = outputPath;
 
             if (dryRun)
@@ -555,7 +558,10 @@ public sealed class BatchProcessorService
         return folder;
     }
 
-    private static string ResolveUniqueDestination(string folder, string fileName)
+    private static string ResolveUniqueDestination(
+        string folder,
+        string fileName,
+        ConcurrentDictionary<string, byte>? reservedNames = null)
     {
         var stem = Path.GetFileNameWithoutExtension(fileName);
         var extension = Path.GetExtension(fileName);
@@ -565,11 +571,14 @@ public sealed class BatchProcessorService
                 ? stem + extension
                 : $"{stem} ({attempt + 1}){extension}";
             var candidate = Path.Combine(folder, candidateName);
-            if (!File.Exists(candidate))
+            if (!File.Exists(candidate) &&
+                (reservedNames is null || reservedNames.TryAdd(candidate, 0)))
                 return candidate;
         }
 
-        return Path.Combine(folder, stem + "-" + Guid.NewGuid().ToString("N")[..8] + extension);
+        var fallback = Path.Combine(folder, stem + "-" + Guid.NewGuid().ToString("N")[..8] + extension);
+        reservedNames?.TryAdd(fallback, 0);
+        return fallback;
     }
 
     private static void WriteAtomically(MagickImage image, string targetPath)

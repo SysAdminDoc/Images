@@ -645,6 +645,7 @@ public partial class MainWindow : Window
     private void HideFullscreenPanels()
     {
         BottomToolbarGrid.Visibility = Visibility.Collapsed;
+        RightSidePanel.Visibility = Visibility.Collapsed;
         _fullscreenToolbarRevealed = false;
         _fullscreenSidePanelRevealed = false;
     }
@@ -674,6 +675,11 @@ public partial class MainWindow : Window
             _fullscreenToolbarRevealed = true;
             RestartEdgeHideTimer();
         }
+        else if (!nearBottom && _fullscreenToolbarRevealed)
+        {
+            BottomToolbarGrid.Visibility = Visibility.Collapsed;
+            _fullscreenToolbarRevealed = false;
+        }
 
         if (nearRight && !_fullscreenSidePanelRevealed)
         {
@@ -681,20 +687,7 @@ public partial class MainWindow : Window
             _fullscreenSidePanelRevealed = true;
             RestartEdgeHideTimer();
         }
-
-        if ((nearBottom && _fullscreenToolbarRevealed) ||
-            (nearRight && _fullscreenSidePanelRevealed))
-        {
-            RestartEdgeHideTimer();
-        }
-
-        if (!nearBottom && _fullscreenToolbarRevealed && !nearRight && !_fullscreenSidePanelRevealed)
-        {
-            BottomToolbarGrid.Visibility = Visibility.Collapsed;
-            _fullscreenToolbarRevealed = false;
-        }
-
-        if (!nearRight && _fullscreenSidePanelRevealed && !nearBottom && !_fullscreenToolbarRevealed)
+        else if (!nearRight && _fullscreenSidePanelRevealed)
         {
             RightSidePanel.Visibility = Visibility.Collapsed;
             _fullscreenSidePanelRevealed = false;

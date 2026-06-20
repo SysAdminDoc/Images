@@ -217,7 +217,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         SetRetouchModeCommand = new RelayCommand(SetRetouchMode, parameter => parameter is string);
         ClearRetouchSourceCommand = new RelayCommand(ClearRetouchSource, () => HasRetouchSource);
         ToggleInpaintModeCommand = new RelayCommand(ToggleInpaintMode, () => CanUseInpaint);
-        ApplyInpaintCommand = new RelayCommand(ApplyInpaint, () => HasInpaintMaskRegions);
+        ApplyInpaintCommand = new RelayCommand(ApplyInpaint, () => HasInpaintMaskRegions && !IsOperationBusy);
         CancelInpaintCommand = new RelayCommand(CancelInpaintMode, () => IsInpaintMode || HasInpaintMaskRegions);
         ClearInpaintMaskCommand = new RelayCommand(ClearInpaintMask, () => HasInpaintMaskRegions);
         CopyInspectorHexCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hex, "HEX"), () => HasInspectorSample);
@@ -2420,6 +2420,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (_isDisposed || !IsSlideshowActive || IsSlideshowPaused)
             return;
 
+        FlushPendingRename();
+
         if (_slideshowShuffle && _slideshowRandom is not null)
         {
             var count = _nav.Files.Count;
@@ -4060,7 +4062,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 if (preview is not null &&
                     string.Equals(_nav.CurrentPath, path, StringComparison.OrdinalIgnoreCase))
                 {
-                    CompleteCurrentLoad(path!, preview, startCropMode: startCropMode);
+                    CompleteCurrentLoad(path!, preview, startCropMode: false);
+                    IsImageLoading = true;
                 }
             }
 
@@ -4263,6 +4266,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             ApplyLoadFailure(error);
 
         CurrentPath = path;
+        _externalEditReload.Arm(path);
         try { _fileSize = new FileInfo(path).Length; } catch { _fileSize = 0; }
         Raise(nameof(FileSizeText));
         RefreshFolderPreview();
