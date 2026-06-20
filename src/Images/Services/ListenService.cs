@@ -45,7 +45,7 @@ public sealed class ListenService : IDisposable
 
         _log.LogInformation(
             "listen-mode: bound to tcp://127.0.0.1:{Port}, session token: {Token}",
-            Port, SessionToken);
+            Port, SessionToken.Length > 8 ? SessionToken[..8] + "..." : SessionToken);
 
         Task.Run(() => AcceptLoop(_cts.Token));
     }

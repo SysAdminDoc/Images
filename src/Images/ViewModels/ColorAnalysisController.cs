@@ -2,11 +2,14 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows.Threading;
 using Images.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Images.ViewModels;
 
 public sealed class ColorAnalysisController : IDisposable
 {
+    private static readonly ILogger _log = Log.Get(nameof(ColorAnalysisController));
+
     public const string LoadingStatusText = "Reading color profile and histogram...";
 
     private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(5);
@@ -105,8 +108,9 @@ public sealed class ColorAnalysisController : IDisposable
             analysis = ImageColorAnalysis.Empty;
             statusOverride = "Color analysis timed out.";
         }
-        catch
+        catch (Exception ex)
         {
+            _log.LogWarning(ex, "Color analysis failed for {File}", Path.GetFileName(path));
             analysis = new ImageColorAnalysis([], "Color analysis is unavailable for this image.", "");
         }
 

@@ -2,11 +2,14 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows.Threading;
 using Images.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Images.ViewModels;
 
 public sealed class PhotoMetadataController : IDisposable
 {
+    private static readonly ILogger _log = Log.Get(nameof(PhotoMetadataController));
+
     public const string LoadingStatusText = "Reading photo metadata...";
     public const string EmptyStatusText = "No embedded camera metadata.";
     public const string TimeoutStatusText = "Metadata read timed out.";
@@ -103,8 +106,9 @@ public sealed class PhotoMetadataController : IDisposable
             metadata = PhotoMetadata.Empty;
             statusOverride = TimeoutStatusText;
         }
-        catch
+        catch (Exception ex)
         {
+            _log.LogWarning(ex, "Metadata read failed for {File}", Path.GetFileName(path));
             metadata = PhotoMetadata.Empty;
         }
 

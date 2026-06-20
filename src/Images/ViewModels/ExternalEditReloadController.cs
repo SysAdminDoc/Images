@@ -1,10 +1,14 @@
 using System.IO;
 using System.Windows.Threading;
+using Images.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Images.ViewModels;
 
 public sealed class ExternalEditReloadController : IDisposable
 {
+    private static readonly ILogger _log = Log.Get(nameof(ExternalEditReloadController));
+
     public const string ReloadedToastMessage = "Reloaded after external edit";
 
     public static readonly TimeSpan DefaultDebounceInterval = TimeSpan.FromMilliseconds(800);
@@ -70,8 +74,10 @@ public sealed class ExternalEditReloadController : IDisposable
             watcher = null;
             WatchedPath = path;
         }
-        catch
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
         {
+            _log.LogWarning(ex, "FileSystemWatcher setup failed for {Path}", path);
+
             if (watcher is not null)
             {
                 watcher.Changed -= OnExternalEdit;
