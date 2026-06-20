@@ -869,7 +869,7 @@ public sealed class CatalogService
 
     private static string ComputeSha256(string path, CancellationToken cancellationToken)
     {
-        using var stream = File.OpenRead(path);
+        using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
         using var sha = SHA256.Create();
         var buffer = new byte[1024 * 128];
         int read;
@@ -1055,7 +1055,8 @@ public sealed class CatalogService
             Tags: [],
             SidecarPath: reader.IsDBNull(11) ? null : reader.GetString(11),
             SidecarModifiedUtc: reader.IsDBNull(12) ? null : FromUnix(reader.GetInt64(12)),
-            ScannedUtc: FromUnix(reader.GetInt64(13)));
+            ScannedUtc: FromUnix(reader.GetInt64(13)),
+            Palette: reader.FieldCount > 14 && !reader.IsDBNull(14) ? reader.GetString(14) : null);
     }
 
     private static IReadOnlyList<string> LoadTagsForAsset(SqliteConnection conn, long assetId)
