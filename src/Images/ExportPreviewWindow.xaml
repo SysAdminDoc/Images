@@ -170,9 +170,9 @@
 
             <Grid Grid.Column="2" Margin="18">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="14" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" MinWidth="120" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" MinWidth="120" />
                 </Grid.ColumnDefinitions>
 
                 <!-- Side-by-side panes (visible when not in difference mode) -->
@@ -193,6 +193,16 @@
                         </Border>
                     </Grid>
                 </Border>
+
+                <GridSplitter x:Name="ComparisonSplitter"
+                              Grid.Column="1"
+                              Width="8"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Stretch"
+                              Background="{StaticResource Surface0Brush}"
+                              Cursor="SizeWE"
+                              AutomationProperties.Name="Comparison divider"
+                              ToolTip="Drag to adjust comparison split" />
 
                 <Border x:Name="PreviewPane" Grid.Column="2" Style="{StaticResource Card}" Padding="12">
                     <Grid>

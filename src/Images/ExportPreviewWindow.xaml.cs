@@ -249,6 +249,7 @@ public partial class ExportPreviewWindow : Window
         {
             OriginalPane.Visibility = Visibility.Visible;
             PreviewPane.Visibility = Visibility.Visible;
+            ComparisonSplitter.Visibility = Visibility.Visible;
             DifferencePane.Visibility = Visibility.Collapsed;
             DifferenceToggleText.Text = Strings.ExportPreviewDifference;
             return;
@@ -256,6 +257,7 @@ public partial class ExportPreviewWindow : Window
 
         OriginalPane.Visibility = Visibility.Collapsed;
         PreviewPane.Visibility = Visibility.Collapsed;
+        ComparisonSplitter.Visibility = Visibility.Collapsed;
         DifferencePane.Visibility = Visibility.Visible;
         DifferenceCanvas.SetViewState(PreviewCanvas.GetViewState());
         DifferenceToggleText.Text = Strings.ExportPreviewSideBySide;
