@@ -6,6 +6,20 @@ All notable changes to **Images** are documented here.
 
 ### Fixes
 
+- **Parallel batch filename collision** — `RunAsync` now reserves output filenames via `ConcurrentDictionary` across parallel tasks, preventing TOCTOU races where two concurrent writes could silently overwrite the same output file. Also removed a pre-loop cancellation check that could leave null entries in the task array, causing `Task.WhenAll` to throw `ArgumentException` instead of `OperationCanceledException`.
+- **ListenService path canonicalization** — incoming TCP paths are now canonicalized with `Path.GetFullPath` before the existence check, preventing `..` segment traversal.
+- **Catalog LoadAllAssets missing palette** — `ReadAssetRecord` now reads the `palette` column, so `CatalogRebuildResult.Assets` returns palette data after a scan.
+- **External-edit watcher re-armed after navigation** — `ExternalEditReloadController.Arm` is now called in `CompleteCurrentLoad`, so FileSystemWatcher detects external edits to the current file after arrow-key navigation, not just after initial open.
+- **CurrentPath set before controller refreshes** — `CurrentPath` is now assigned before metadata/color/C2PA controller refreshes fire, closing a brief window where controllers could compare against the previous path.
+- **RAW preview loading state** — `IsImageLoading` is now re-set to `true` after displaying the embedded JPEG preview, so the loading indicator stays visible while the full RAW decode runs.
+- **ApplyInpaint busy guard** — `ApplyInpaintCommand.CanExecute` now checks `!IsOperationBusy`, preventing double-invoke of concurrent inpaint operations.
+- **Slideshow flush pending rename** — `SlideshowTimer_Tick` now calls `FlushPendingRename()` before navigating, so a rename in progress is committed rather than silently discarded.
+- **CatalogService SHA-256 file sharing** — `ComputeSha256` now opens files with `FileShare.ReadWrite | FileShare.Delete`, matching the rest of the codebase and preventing failures on files being edited by another application.
+- **Theme-aware window captions** — `WindowChrome.ApplyDarkCaption` now checks `ThemeService.CurrentMode` and applies Catppuccin Latte light caption colors when the light theme is active, preventing a dark title bar clashing with a light window body.
+- **Controller error logging** — `ExternalEditReloadController`, `PhotoMetadataController`, and `ColorAnalysisController` now log exceptions instead of silently swallowing them in catch blocks. `ExternalEditReloadController.Arm` now catches specific exception types instead of bare `catch`.
+- **ListenService token truncation** — session token is now logged as the first 8 characters only, preventing full token exposure in log files or support bundles.
+- **ImageLoader QuickDimensions reliability** — `BitmapCacheOption.OnLoad` ensures all metadata is read before the stream closes, preventing silent failures on codecs that defer dimension reading.
+- **Fullscreen edge-hover panel bugs** — fixed two issues: (1) hiding logic no longer depends on the other panel's state, so each panel hides independently when the mouse leaves its edge zone, (2) `HideFullscreenPanels` now explicitly collapses the right side panel, preventing a WPF binding-cleared bug where the side panel would stay visible on the second fullscreen entry.
 - **Stabilized STA supersession controller tests** — `PhotoMetadataControllerTests` and `ColorAnalysisControllerTests` supersession tests no longer intermittently fail during parallel full-suite runs. Root cause was thread pool starvation; fixed by releasing the blocked reader immediately after supersession, widening `PumpUntil` deadline to 5s, and extending the dispatcher drain interval.
 - **Release-readiness script repaired** — removed stale `PROJECT_CONTEXT.md` requirement that blocked valid releases; script now validates the current `ROADMAP.md`/`Roadmap_Blocked.md` policy instead.
 - **Stale version references corrected** — release support policy updated from `0.1.x`/`net9.0` to `0.2.x`/`net10.0`; release checklist updated to match current roadmap hygiene rules.
@@ -32,6 +46,14 @@ All notable changes to **Images** are documented here.
 
 ### Infrastructure
 
+- **Edge-hover contextual panels in fullscreen** — in fullscreen mode (F11), the bottom toolbar and right side panel auto-hide for zero-chrome image viewing. Moving the mouse to the bottom or right edge of the screen reveals the respective panel; panels auto-hide after 2 seconds when the mouse leaves the edge zone.
+- **Draggable comparison divider in export preview** — the side-by-side export preview now has a draggable GridSplitter between original and encoded output. Drag the divider to adjust comparison proportions; the splitter hides in difference-view mode.
+- **Color palette extraction in catalog** — catalog scans now extract the dominant color palette (red/orange/yellow/green/cyan/blue/purple/pink/dark/light/gray) from each image and persist it in the catalog DB. Gallery `palette:` filter tokens query catalog-backed palette data. Schema migrated v1→v2 with `ALTER TABLE ADD COLUMN palette`.
+- **Embedded-JPEG-first RAW preview** — RAW files (DNG/NEF/CR2/CR3/ARW/RAF/ORF/PEF and 25+ formats) now show the embedded EXIF thumbnail immediately while the full demosaic decode runs in the background. The async load path extracts the preview via `MagickImage.Ping` + `ExifProfile.CreateThumbnail` without reading the full RAW data. `LoadResult.IsPreview` flag distinguishes preview from full decode.
+- **Parallel batch processing** — `BatchProcessorService.RunAsync` processes files concurrently with `SemaphoreSlim`-bounded parallelism (default `ProcessorCount - 1`). The batch window now reports per-file progress during runs. Throughput scales with available cores on large batches. 3 new regression tests.
+- **WCAG 2.5.7/2.5.8 accessibility audit** — fixed two undersized interactive chips (channel isolation and slideshow indicator) with `MinHeight="24"`. Documented drag-operation alternatives and known limitations in `docs/accessibility.md`.
+- **Test coverage for 11 previously untested services** — 89 new regression tests covering BackgroundJobsService, SupportedImageFormats, WritebackGuardService, WorkflowModeService, DirectorySortMode, PerformanceBudgetService, MetadataEditService, CatalogQueryService, AppInfo, LaunchTiming, and SupportBundleService. Total test count: 708 passed.
+- **CI runner pinned to `windows-2025`** — CI, release, and security workflows now use `windows-2025` instead of `windows-latest` to avoid breakage from the June 2026 runner-image migration to Windows Server 2025 + VS 2026.
 - **WinGet and Scoop manifest validation** — the release workflow now validates generated Scoop JSON (version, URL, SHA-256 fields) and WinGet YAML (PackageIdentifier, version match) before uploading, with optional `wingetcreate validate` when available.
 
 ### Infrastructure
