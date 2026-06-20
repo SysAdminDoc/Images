@@ -23,7 +23,8 @@ public sealed record CatalogAssetRecord(
     IReadOnlyList<string> Tags,
     string? SidecarPath,
     DateTimeOffset? SidecarModifiedUtc,
-    DateTimeOffset ScannedUtc)
+    DateTimeOffset ScannedUtc,
+    string? Palette = null)
 {
     public string FileName => Path.GetFileName(SourcePath);
     public string Folder => Path.GetDirectoryName(SourcePath) ?? "";
@@ -45,7 +46,7 @@ public sealed record CatalogRebuildResult(
 
 public sealed class CatalogService
 {
-    private const int CurrentSchemaVersion = 1;
+    private const int CurrentSchemaVersion = 2;
     private const int SchemaCanaryId = 1;
     private static readonly ILogger Log = Images.Services.Log.Get(nameof(CatalogService));
     private readonly string? _dbPath;
@@ -214,7 +215,7 @@ public sealed class CatalogService
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
                 SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
-                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc
+                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette
                 FROM catalog_assets
                 WHERE lower(source_path) = lower($path)
                 LIMIT 1;
@@ -246,7 +247,7 @@ public sealed class CatalogService
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
                 SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
-                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc
+                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette
                 FROM catalog_assets
                 ORDER BY lower(source_path)
                 LIMIT $limit;
@@ -367,7 +368,21 @@ public sealed class CatalogService
             return;
         }
 
+        if (fromVersion == 1 && toVersion == 2)
+        {
+            Migrate_1_to_2(conn, tx);
+            return;
+        }
+
         throw new InvalidOperationException($"No catalog migration exists for v{fromVersion} to v{toVersion}.");
+    }
+
+    private static void Migrate_1_to_2(SqliteConnection conn, SqliteTransaction tx)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = "ALTER TABLE catalog_assets ADD COLUMN palette TEXT NULL;";
+        cmd.ExecuteNonQuery();
     }
 
     private static void Migrate_0_to_1(SqliteConnection conn, SqliteTransaction tx)
@@ -571,6 +586,8 @@ public sealed class CatalogService
         image.Ping(info);
         var sidecar = ReadSidecarState(info.FullName);
 
+        var palette = TryExtractPalette(info.FullName);
+
         return new CatalogAssetRecord(
             info.FullName,
             fingerprint,
@@ -585,7 +602,65 @@ public sealed class CatalogService
             sidecar.Tags,
             sidecar.Path,
             sidecar.ModifiedUtc,
-            scannedUtc);
+            scannedUtc,
+            palette);
+    }
+
+    private static string? TryExtractPalette(string path)
+    {
+        try
+        {
+            var settings = new MagickReadSettings { Width = 64, Height = 64 };
+            using var image = new MagickImage(new FileInfo(path), settings);
+            image.Resize(new MagickGeometry(1, 1) { IgnoreAspectRatio = true });
+            var color = image.Histogram()
+                .OrderByDescending(pair => pair.Value)
+                .Select(pair => pair.Key)
+                .FirstOrDefault();
+
+            if (color is null) return null;
+
+            var r = (byte)Math.Clamp((int)Math.Round(color.R / 257d), 0, 255);
+            var g = (byte)Math.Clamp((int)Math.Round(color.G / 257d), 0, 255);
+            var b = (byte)Math.Clamp((int)Math.Round(color.B / 257d), 0, 255);
+
+            var max = Math.Max(r, Math.Max(g, b));
+            var min = Math.Min(r, Math.Min(g, b));
+            var brightness = max / 255d;
+
+            if (brightness < 0.18) return "dark";
+
+            var saturation = max == 0 ? 0 : (max - min) / (double)max;
+            if (saturation < 0.18) return brightness > 0.82 ? "light" : "gray";
+
+            double hue;
+            if (max == min)
+                hue = 0;
+            else if (max == r)
+                hue = 60 * (((g - b) / (double)(max - min)) % 6);
+            else if (max == g)
+                hue = 60 * (((b - r) / (double)(max - min)) + 2);
+            else
+                hue = 60 * (((r - g) / (double)(max - min)) + 4);
+            if (hue < 0) hue += 360;
+
+            return hue switch
+            {
+                < 15 or >= 345 => "red",
+                < 45 => "orange",
+                < 70 => "yellow",
+                < 155 => "green",
+                < 190 => "cyan",
+                < 250 => "blue",
+                < 285 => "purple",
+                _ => "pink"
+            };
+        }
+        catch (Exception ex) when (ex is MagickException or IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            Log.LogDebug(ex, "Could not extract palette for catalog asset {Path}", path);
+            return null;
+        }
     }
 
     private static IEnumerable<string> NormalizeRoots(IEnumerable<string> roots)
@@ -669,11 +744,11 @@ public sealed class CatalogService
         cmd.CommandText = """
             INSERT INTO catalog_assets (
                 source_path, fingerprint, size_bytes, created_utc, modified_utc,
-                width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc
+                width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette
             )
             VALUES (
                 $path, $fingerprint, $size, $created, $modified,
-                $width, $height, $format, $codec, $rating, $sidecar, $sidecarModified, $scanned
+                $width, $height, $format, $codec, $rating, $sidecar, $sidecarModified, $scanned, $palette
             )
             ON CONFLICT(source_path) DO UPDATE SET
                 fingerprint = excluded.fingerprint,
@@ -687,7 +762,8 @@ public sealed class CatalogService
                 rating = excluded.rating,
                 sidecar_path = excluded.sidecar_path,
                 sidecar_modified_utc = excluded.sidecar_modified_utc,
-                scanned_utc = excluded.scanned_utc;
+                scanned_utc = excluded.scanned_utc,
+                palette = excluded.palette;
             """;
         AddAssetParameters(cmd, asset);
         cmd.ExecuteNonQuery();
@@ -755,6 +831,7 @@ public sealed class CatalogService
         cmd.Parameters.AddWithValue("$sidecar", asset.SidecarPath is null ? DBNull.Value : asset.SidecarPath);
         cmd.Parameters.AddWithValue("$sidecarModified", asset.SidecarModifiedUtc is null ? DBNull.Value : asset.SidecarModifiedUtc.Value.ToUnixTimeSeconds());
         cmd.Parameters.AddWithValue("$scanned", asset.ScannedUtc.ToUnixTimeSeconds());
+        cmd.Parameters.AddWithValue("$palette", asset.Palette is null ? DBNull.Value : asset.Palette);
     }
 
     private static CatalogAssetRecord ReadAsset(SqliteConnection conn, SqliteDataReader reader)
@@ -774,7 +851,8 @@ public sealed class CatalogService
             ReadTags(conn, assetId),
             reader.IsDBNull(11) ? null : reader.GetString(11),
             reader.IsDBNull(12) ? null : FromUnix(reader.GetInt64(12)),
-            FromUnix(reader.GetInt64(13)));
+            FromUnix(reader.GetInt64(13)),
+            reader.FieldCount > 14 && !reader.IsDBNull(14) ? reader.GetString(14) : null);
     }
 
     private static IReadOnlyList<string> ReadTags(SqliteConnection conn, long assetId)
@@ -941,7 +1019,7 @@ public sealed class CatalogService
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
                 SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
-                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc
+                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette
                 FROM catalog_assets
                 ORDER BY source_path COLLATE NOCASE;
                 """;
