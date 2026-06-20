@@ -106,3 +106,33 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
   Acceptance: Release workflow generates CycloneDX 1.7 SBOM. ONNX model definitions from ModelManagerService are included as ML-BOM components with pinned SHA-256 hashes.
   Complexity: S
 
+## Research-Driven Additions (2026-06-20 pass)
+
+- [ ] P1 — **Remove resolved CVE verification items from roadmap**
+  Why: Dependency audit confirmed all packages are at patched versions: Magick.NET 14.14.0 bundles libheif 1.23.0 + ImageMagick 7.1.2-25 (all CVEs fixed), SQLitePCLRaw 3.0.3 bundles SQLite 3.50.4+ (CVE-2025-6965 fixed). The two P0 "verify Magick.NET CVEs" and P1 "validate SQLitePCLRaw" items above are no longer actionable.
+  Evidence: Magick.NET 14.14.0 release notes, NuGet dependency chain analysis, Broadcom CVE advisory
+  Touches: `ROADMAP.md` (delete the three resolved items from the prior Research-Driven Additions section)
+  Acceptance: ROADMAP.md contains no items whose verification criteria are already met by current package versions.
+  Complexity: S
+
+- [ ] P1 — **Log tile processing errors in TileService instead of swallowing**
+  Why: `TileService.cs` lines 314, 474, and 515 have bare `catch { }` blocks that silently discard tile decode/render errors. Unlike process-kill or file-delete best-effort catches (appropriate), tile decode errors indicate format-specific display bugs that users need to diagnose. Silent swallowing makes tile-pyramid rendering failures invisible in logs.
+  Evidence: Code grep for bare catches in `TileService.cs`; contrast with `ImageLoader.cs` which logs all decode failures
+  Touches: `src/Images/Services/TileService.cs` (3 catch blocks)
+  Acceptance: All three catch blocks log at Warning level with the file path and exception message via `ILogger`. No user-facing UX change.
+  Complexity: S
+
+- [ ] P2 — **Detect and prefer Windows 11 24H2 native JPEG XL WIC codec**
+  Why: Windows 11 24H2 shipped a native JPEG XL WIC codec extension (v1.2.36.0). When installed, WIC can decode .jxl natively — faster than routing through Magick.NET and providing automatic Explorer thumbnail support. Images currently always falls back to Magick.NET for JXL. Detecting the WIC codec and preferring it when available would improve JXL decode performance and consistency with OS behavior.
+  Evidence: WindowsForum "Windows 11 24H2 Update: Embracing JPEG XL", gHacks JXL guide
+  Touches: `src/Images/Services/ImageLoader.cs` (WIC codec detection before Magick.NET fallback), `src/Images/Services/CodecCapabilityService.cs` (JXL WIC availability probe)
+  Acceptance: When the Windows JXL WIC codec is installed, `.jxl` files decode via WIC instead of Magick.NET. `--codec-report` output shows "JXL: WIC (native)" vs "JXL: Magick.NET (fallback)". No behavior change on systems without the codec.
+  Complexity: S
+
+- [ ] P2 — **Evaluate ImageSharp 4.0 for thumbnail generation**
+  Why: ImageSharp 4.0.0 (May 2026) shipped with Vector512 SIMD, decode-time color conversion, and faster JPEG hot paths. ThumbnailCache currently uses Magick.NET for 256-px WebP thumbnail generation. ImageSharp 4.0 may be significantly faster for this specific resize-and-encode workload, especially on folders with thousands of images.
+  Evidence: SixLabors ImageSharp 4.0.0 announcement (Vector512 SIMD, faster JPEG)
+  Touches: `src/Images/Services/ThumbnailCache.cs` (thumbnail generation path), `src/Images/Images.csproj` (add SixLabors.ImageSharp if evaluation proves worthwhile)
+  Acceptance: Benchmark compares Magick.NET vs ImageSharp 4.0 thumbnail generation on 100 mixed-format images. If ImageSharp is measurably faster, switch the thumbnail pipeline. If not, document the result and stay on Magick.NET.
+  Complexity: M
+

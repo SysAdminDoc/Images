@@ -6,15 +6,17 @@ Images is a Windows-only WPF/.NET 10 image viewer at v0.2.11, with ~62k lines of
 
 The project's strongest current shape is as a trustworthy local power-user viewer with the Windows 7 Photo Viewer aesthetic in Catppuccin Mocha. The v1.0 milestone is blocked only on code signing (D-05) and WinGet publication (D-02) — both credential-gated.
 
+All NuGet dependencies are at their latest versions with no outstanding CVEs. The ResourceLimits gap remains the only P0 security item.
+
 Top opportunities in priority order:
-1. Verify Magick.NET bundled codec versions against critical 2026 CVEs (libheif, libjxl, ImageMagick)
-2. Set Magick.NET ResourceLimits to prevent memory-bomb attacks via crafted SVG/PS input
-3. Close remaining 21 untested service test gaps (ImageLoader, PreloadService, OcrService highest priority)
-4. Add touch/gesture input for pan/zoom/navigate (NeeView differentiator, tablet users)
+1. Set Magick.NET ResourceLimits to prevent memory-bomb attacks (the only remaining P0 — CVE items are resolved)
+2. Fix PreloadService cache poisoning on faulted Lazy (existing audit item)
+3. Close remaining 21 untested service test gaps (ImageLoader, OcrService highest priority)
+4. Add touch/gesture input via DirectManipulation COM interop (the correct WPF approach)
 5. Benchmark and optimize cold-start performance (IrfanView/FastStone sub-second bar)
-6. Add motion photo embedded video playback (ImageGlass 10 now ships this)
-7. Complete WCAG 2.5.7 drag alternatives audit for crop/pan/brush tools
-8. Validate SQLitePCLRaw embedded SQLite version against CVE-2025-6965
+6. Detect and prefer Windows 11 24H2 native JPEG XL WIC codec when available
+7. Log tile processing errors in TileService instead of swallowing silently
+8. Complete WCAG 2.5.7 drag alternatives audit for crop/pan/brush tools
 
 ## Product Map
 
@@ -26,137 +28,123 @@ Top opportunities in priority order:
 ## Competitive Landscape
 
 ### ImageGlass (d2phap/ImageGlass) — 13.5k stars
-v10 Beta 2 (June 2026) is a full **Avalonia UI rewrite** with cross-platform support. New: native HDR tone-mapping for AVIF/JXL/HDR/EXR, SVG/SVGZ vector rendering with animated SMIL, ImageGlass.SDK plugin system with out-of-process IPC, motion photo video playback, gallery persistent cache. The biggest strategic threat long-term. Learn from: plugin SDK architecture, HDR tone-mapping, motion photo playback. Avoid: unsigned binaries and ambiguous paid-tier semantics.
+v10 is still **beta** (Beta 2, June 2026); v9.4.1.15 (Jan 2026) is the latest stable. The Avalonia rewrite adds HDR tone-mapping, SVG/SMIL animation, and the new **ImageGlass.SDK** plugin system with in-process codec plugins and out-of-process IPC tools declared via `igplugin.json`. No GA date announced. Learn from: plugin SDK architecture and HDR tone-mapping. Avoid: unsigned binaries and ambiguous paid-tier semantics. Source: imageglass.org/news roadmap-2026, beta-2 announcement.
 
 ### NeeView (neelabo/NeeView) — 879 stars, newly OSS
-Newly open-sourced January 2025. Same WPF/.NET 10 stack. v46 Alpha 7 (June 20, 2026). Best-in-class book/comic reading UX: dual-page mode, recursive archive browsing, touch/gesture input, Susie plugin support, playlist navigation, script customization. Microsoft Store presence. No OCR, no search, no catalog, no editing. Learn from: touch/gesture support and scripting. Avoid: Japanese-centric defaults.
+v45.3 stable (March 2026), v46.0-Alpha.6 in preview. Same WPF/.NET 10 stack. **Correction from prior research**: NeeView does NOT have first-class touch/gesture support — it relies on standard WPF touch-to-mouse translation, same as any WPF app. Best-in-class book/comic reading UX: dual-page mode, recursive archive browsing, playlist navigation, script customization. Microsoft Store presence. No OCR, no search, no catalog, no editing. Learn from: book UX depth and scripting. Source: NeeView GitHub releases, documentation.
 
 ### PicView (Ruben2776/PicView) — 3.3k stars
-Avalonia-based, cross-platform (Windows/macOS). v4.2 (March 2026). Signed binaries, image effects window with presets, side-by-side viewing, reactive programming, multi-language. Learn from: binary signing approach (SignPath Foundation for OSS). Avoid: slow release cycle.
+Avalonia-based, cross-platform (Windows/macOS). v4.2 (March 2026). Uses **SignPath Foundation** for free OSS code signing — the same path available to Images (D-05a in `Roadmap_Blocked.md`). Ground-up v5.0 rewrite in progress. Learn from: SignPath signing pipeline. Source: PicView GitHub, picview.org.
+
+### FlyPhotos (riyasy/FlyPhotos) — ~454 stars, NEW
+WinUI 3 / Win2D / native AOT. Lightweight Picasa successor leveraging WIC codecs for JXL, AVIF, HEIC, RAW out of the box. Worth monitoring as a fast-startup competitor — native AOT gives it near-instant launch. Not yet feature-competitive with Images. Source: GitHub riyasy/FlyPhotos.
 
 ### FastStone Image Viewer — commercial freeware
 Edge-hover fullscreen panels with zero-chrome viewing. 4-up synchronized comparison. Batch processing handles resize/rotate/crop/DPI/watermark/border in one pass. Learn from: established batch processing depth. Images now has edge-hover panels (shipped in commit `5ed2a49`).
 
-### XnView MP — commercial freeware (personal use)
-SQLite-backed catalog with hierarchical category tree, drag-drop batch assignment. Deepest metadata editor in the freeware space. Smart folders auto-populate by criteria. Learn from: category tree sidebar and metadata editor depth. Images has smart collections (commit `56c4578`) and catalog (commit `e9297b8`).
+### digiKam 9.1.0 (June 2026) — OSS, Qt6
+Jumped from 8.x to 9.0 with Qt6 migration. Face pipeline rewrite (8.6): KNN+SVM classifiers, YuNet/SFace, FIQA gating, 25-50% speedup. The most mature OSS face recognition in the desktop photo space. Learn from: face pipeline architecture when V60-03 ships. Source: digikam.org announcements.
 
-### nomacs (nomacs/nomacs) — 3k stars
-Qt6 port complete and stable. v3.22.1 (April 2026). Active translation community. OpenCV-based image processing. Plugin system. Learn from: localization community management.
-
-### JPEGView (sylikc/jpegview) — 2.9k stars
-**Inactive since August 2024.** No 2025-2026 updates. Not a competitive concern.
+### ACDSee Photo Studio Ultimate 2026 — commercial
+AI Denoise, AI Hair, AI Presets combining adjustments with AI masking (Background, Portrait, Sky, Subject). JXL and AVIF support added. Multi-threaded Activity Manager for background batch ops. Learn from: AI preset concept for the export/batch pipeline. Source: acdsee.com/whats-new.
 
 ## Security, Privacy, and Reliability
 
-### Critical — Action Required
+### Verified — All Dependencies at Safe Versions
 
-- **libheif CVE-2026-32740 (CVSS 8.8)**: Heap-buffer-overflow in chroma plane allocation via crafted HEIF/AVIF. Multiple related CVEs (CVE-2026-32738/32739/32741/32814/32882/41069/41071). Fixed in libheif 1.22.2+. Magick.NET 14.14.0 bundles libheif — **must verify bundled version is >= 1.22.2**. Source: Snyk advisory database.
-- **libjxl CVE-2026-1837**: Use-after-free in grayscale color transformation. CVE-2025-70103 adds a heap overflow in PNM decoding. **Must verify bundled libjxl version** in Magick.NET. Source: Snyk advisory database.
-- **ImageMagick CVE-2026-25797**: RCE via PostScript injection (insufficient sanitization in PS header generation). Fixed in ImageMagick 7.1.2-15. CVE-2026-46557 (stack overflow in fx, fixed in Magick.NET 14.13.1). **Verify Magick.NET 14.14.0 includes both fixes.** Source: Snyk advisory database.
-- **No Magick.NET ResourceLimits configured**: `ImageLoader.cs` and all Magick.NET call sites set no memory, width, height, or area limits. CVE-2026-25985 demonstrates a 674 GB allocation attack via crafted SVG. `ResourceLimits.Memory`, `ResourceLimits.Width`, `ResourceLimits.Height` should be set at app startup. Source: CVE-2026-25985, code inspection.
+- **Magick.NET 14.14.0**: Bundles ImageMagick 7.1.2-25 (June 2026) with fixes for 12 security issues including CVE-2026-25797 (RCE via PostScript), CVE-2026-46557 (stack overflow in fx), CVE-2026-23952 (NULL deref in MSL). Bundles libheif 1.23.0 (above 1.22.2 floor for CVE-2026-32740), aom 3.14.1, libde265 1.1.0, openexr 3.4.12. **All previously flagged CVEs are patched at the current package version.** Source: Magick.NET 14.14.0 release notes, Snyk.
+- **SQLitePCLRaw 3.0.3**: Depends on SourceGear.sqlite3 >= 3.50.4.5, meaning bundled SQLite is 3.50.4+ — well above the 3.50.2 floor for CVE-2025-6965. **No action needed.** Source: NuGet dependency chain, Broadcom advisory.
+- **SharpCompress 0.49.1**: CVE-2026-44788 (zip-slip) affects versions 0.43.0-0.47.4, fixed in 0.48.0. **Current version is patched.** Source: Snyk, GitHub advisory GHSA-6c8g-7p36-r338.
+- **Microsoft.ML.OnnxRuntime.DirectML 1.24.4**: At latest version. 1.24.x included fix for out-of-bounds read in ArrayFeatureExtractor. No new advisories. Source: NuGet.
+- **Serilog 4.3.1, Serilog.Extensions.Logging 10.0.0, Serilog.Sinks.File 7.0.0**: All at latest, no CVEs. Source: NuGet.
+- **Microsoft.Data.Sqlite 10.0.9**: At latest (released June 2026). No advisories. Source: NuGet.
 
-### High — Validate
+**Consequence**: The two P0 "verify bundled codec versions" and P1 "validate SQLitePCLRaw" items in the existing ROADMAP.md Research-Driven Additions are already resolved. They should be removed from the roadmap.
 
-- **SQLitePCLRaw CVE-2025-6965**: Bundled SQLite before 3.50.2 has memory corruption risk. SQLitePCLRaw 3.0.3 **should** bundle a patched version, but the embedded `e_sqlite3` native library version must be confirmed. Source: NVD.
-- **WIC CVE-2025-50165**: Uninitialized function pointer in JPEG 12/16-bit compression path. Triggered during re-encoding, not decoding. Patched in Windows builds 10.0.26100.4946+. Already tracked as S-06 in `Roadmap_Blocked.md`. Source: ESET.
-- **ImageMagick CVE-2026-23876 (XBM heap overflow), CVE-2026-23952 (MSL NULL deref)**: DoS or memory corruption through crafted images. Magick.NET policy should restrict or sandbox XBM/MSL input. Source: Snyk.
+### Remaining Security Gap
 
-### Verified — Previously Fixed
+- **No Magick.NET ResourceLimits configured**: `ImageLoader.cs` and all Magick.NET call sites set no memory, width, height, or area limits. CVE-2026-25985 demonstrates a 674 GB allocation attack via crafted SVG. `ResourceLimits.Memory`, `ResourceLimits.Width`, `ResourceLimits.Height` should be set at app startup. Zero `ResourceLimits` hits in codebase. Source: CVE-2026-25985, code inspection.
 
-- **Verified (fixed)**: CI pinned to `windows-2025` (commit `3b04fda`). Prior risk of `windows-latest` migration breaking builds is resolved.
-- **Verified (fixed)**: Batch processing now uses `SemaphoreSlim`-bounded parallelism (commit `4c929f9`). Prior concern about sequential processing is resolved.
-- **Verified (fixed)**: WCAG 2.5.8 undersized interactive chips fixed (commit `e2e2bfe`). 24x24 minimum target sizes addressed.
-- **Verified (fixed)**: Edge-hover fullscreen panels shipped (commit `5ed2a49`).
-- **Verified (fixed)**: Draggable comparison divider added to export preview (commit `e19dcad`).
-- **Verified (fixed)**: Color palette extraction added to catalog (commit `23a8ffe`).
-- **Verified (fixed)**: Embedded-JPEG-first RAW preview shipped (commit `c0fd6d8`).
-- **Verified (fixed)**: 89 regression tests added for 11 previously untested services (commit `145603f`).
-- **Verified (active)**: SharpCompress CVE-2026-44788 (zip-slip, CVSS 5.9). Images uses read-only archive streams and does **not** call `WriteToDirectory`. Not reachable. SharpCompress 0.49.1 pinned.
-- **Verified (active)**: Ghostscript 10.07.0 bundled, now two versions behind 10.08.0. Already tracked in `Roadmap_Blocked.md`. Cannot unblock without downloading the binary.
+### Code Quality Observations
+
+- **TileService bare catches**: `TileService.cs` lines 314, 474, 515 have bare `catch { }` blocks that silently swallow tile processing errors. Unlike `process.Kill()` or `File.Delete()` best-effort catches (which are appropriate), tile decode errors should be logged so users can diagnose display issues with specific image formats.
+- **Ghostscript 10.07.0 bundled**: Now two versions behind 10.08.0. Already tracked in `Roadmap_Blocked.md` — cannot unblock without downloading the binary.
+- **WIC CVE-2025-50165**: Already tracked as S-06 in `Roadmap_Blocked.md`.
 
 ## Architecture Assessment
 
-- **Codebase**: 48,381 lines C# + 13,897 lines XAML across 105 service files, 32 XAML files, 7 controllers. 13,905 lines of test code (617 test methods).
-- **MainViewModel.cs** at 7,263 lines with ~159 public commands. 7 controllers factored out (OCR, C2PA, color analysis, update check, folder preview, photo metadata, external edit reload). Further decomposition is optional.
-- **Test coverage**: 21 of 105 services lack dedicated test files: `ChannelIsolationService`, `ChannelMode`, `CliReport`, `ClipEmbeddingProvider`, `ClipboardService`, `CodecRuntime`, `CrashLog`, `ImageEventSource`, `ImageLoader` (796 lines), `ImageMetadataService`, `Log`, `MonitorService`, `OcrCapabilityService`, `OcrService`, `OnnxRuntimeService`, `PreloadService`, `PrintService`, `ShellChangeNotificationService`, `ShellIntegration`, `StoreExtensionService`, `WindowChrome`. The most critical gaps are `ImageLoader` (core decode path) and `OcrService` (user-facing feature).
-- **Largest untested services by line count**: `ImageLoader` (796), `CodecRuntime` (estimated ~200), `OcrService` (estimated ~200), `ClipEmbeddingProvider` (estimated ~200).
-- **Touch/gesture input**: No `ManipulationDelta`, `Stylus`, or WPF touch-input handling anywhere in the codebase. Pan/zoom is mouse-only. NeeView has touch/gesture support — this is a gap for tablet and touchscreen Windows users.
-- **Magick.NET resource limits**: No `ResourceLimits` calls anywhere. SVG/PS input can trigger unbounded memory allocation.
-- **MotionPhotoService**: Detects and extracts embedded MP4 byte ranges but does not play or preview video content. ImageGlass 10 now plays motion photo video inline.
-- **Batch processing**: Now parallel with `SemaphoreSlim`-bounded concurrency (commit `4c929f9`, `BatchProcessorService.cs` line 193). This resolves the prior sequential-processing concern.
-- **Localization**: Infrastructure complete (CI parity checks, `LocExtension`, typed accessors) but only English locale exists. Crowdin blocked on I-02.
-- **CatalogService.cs** (1,090 lines): Incremental rescan operational (commit `e9297b8`). Color palette extraction added (commit `23a8ffe`, v1→v2 migration).
-- **Theme system**: Three themes (Mocha dark, Latte light, SystemColors high-contrast) with Follow System mode. DynamicResource throughout. No token drift detected.
+- **Codebase**: 48,381 lines C# + 13,897 lines XAML across 105 service files, 32 XAML files, 7 controllers. 13,905 lines of test code (617 test methods). 100 test files.
+- **MainViewModel.cs** at 7,263 lines with ~159 public commands. 7 controllers factored out. Further decomposition is optional.
+- **Test coverage**: 21 of 105 services lack dedicated test files. Full list: `ChannelIsolationService`, `ChannelMode`, `CliReport`, `ClipEmbeddingProvider`, `ClipboardService`, `CodecRuntime`, `CrashLog`, `ImageEventSource`, `ImageLoader` (796 lines), `ImageMetadataService`, `Log`, `MonitorService`, `OcrCapabilityService`, `OcrService`, `OnnxRuntimeService`, `PreloadService`, `PrintService`, `ShellChangeNotificationService`, `ShellIntegration`, `StoreExtensionService`, `WindowChrome`. Most critical: `ImageLoader` (core decode path, 796 lines) and `OcrService` (user-facing feature).
+- **Touch/gesture input**: Zero ManipulationDelta, Stylus, or touch handling in codebase. **Correction**: NeeView also lacks first-class touch — it uses standard WPF touch-to-mouse translation. The correct WPF approach for smooth pinch-to-zoom is the Win32 `IDirectManipulationManager` COM interop (per Garuma/blog.neteril.org), not WPF's ManipulationDelta which predates precision trackpads. Source: blog.neteril.org, dev.to/garuma.
+- **Magick.NET resource limits**: No `ResourceLimits`, `MagickNET.Initialize()`, or `OpenCL` calls anywhere. SVG/PS input can trigger unbounded memory allocation.
+- **MotionPhotoService**: Detects and extracts embedded MP4 byte ranges but does not play video. WPF's `MediaElement` wraps Windows Media Foundation and handles MP4/H.264 if OS codecs are present. For robust playback, FFME (FFmpeg-based MediaElement replacement) is the WPF standard. Source: github.com/unosquare/ffmediaelement.
+- **Batch processing**: Parallel with `SemaphoreSlim`-bounded concurrency (commit `4c929f9`). Resolved.
+- **Localization**: Infrastructure complete but only English locale exists. Crowdin blocked on I-02.
+- **Dispose patterns**: 11 of 105 services implement IDisposable (51 total Dispose references). The `PreloadService` has the most complex disposal (12 references) — the `Lazy<Task>` cache poisoning bug (existing audit item) is confirmed in the code at line 75.
+- **Sealed classes**: 230 sealed declarations vs 199 total class declarations — good default-sealed discipline.
+- **Windows JPEG XL WIC codec**: Windows 11 24H2 shipped a native JXL WIC codec extension (v1.2.36.0). Images could detect it and prefer WIC over Magick.NET for .jxl, getting native OS decode performance and automatic Explorer thumbnail support. Source: WindowsForum, gHacks.
+
+### .NET 10 / WPF Platform Notes
+
+- **WPF .NET 10**: BitmapMetadata bug fixes and null bitmap stream crash fix (directly relevant). Fluent theme expansion. Grid shorthand syntax. No new GPU pipeline, touch APIs, or media stack. Source: MS Learn whats-new/net100.
+- **.NET 10 JIT**: ~11% throughput gain, Span operations 11x faster, delegate stack alloc 19.5ns→6.7ns, doubled inlining budget, try/finally inlining. Source: .NET Blog performance-improvements-net-10.
+- **SkiaSharp 4.0**: Shipped with Skia M147 (2.5 years of upstream improvements). Uno Platform joined as co-maintainer. Relevant when V20-01 canvas swap activates. Source: .NET Blog.
+- **ImageSharp 4.0.0** (May 2026): Vector512 SIMD, decode-time color conversion, expanded metadata APIs, faster JPEG hot paths. Could improve ThumbnailCache generation. Source: SixLabors announcement.
 
 ## Rejected Ideas
 
-- **Cross-platform (Avalonia/MAUI)**: Rejected. ImageGlass v10 bets on Avalonia; NeeView stays WPF. Images has 14k lines of XAML, custom UIA peers, Win32 P/Invoke for dark caption/wallpaper/minidump. Migration is a rewrite, not a port. WPF on .NET 10 is actively maintained. Source: ImageGlass v10 beta, NeeView v46 alpha.
-- **Cloud sync, accounts, multi-user**: Rejected per project philosophy and privacy policy. 78% of surveyed users refuse cloud AI features. Source: Mylio/Immich/PhotoPrism, AI Digital Space survey 2026.
-- **Full Photoshop-class editor**: Rejected. Images should stay viewer-first with non-destructive edit capabilities. Source: PhotoDemon (200+ filters but became an editor, not a viewer).
-- **AI denoise/masking/upscaling as immediate work**: Rejected until V60-01 inference runtime ships (blocked in `Roadmap_Blocked.md`). Source: Lightroom AI denoise, Capture One Enhanced Denoise.
-- **Video playback**: Rejected per codec-support-policy.md tier table. Motion photo video preview (extracting and playing the embedded MP4 segment) is a separate, smaller scope item. Source: IrfanView plugin, ImageGlass 10 motion photo.
-- **Tabbed MDI windows**: Rejected. `SessionTrayService` (cross-folder file list) serves the same multi-folder use case without UI complexity. Source: ACDSee.
+- **Cross-platform (Avalonia/MAUI)**: Rejected. Images has 14k lines of XAML, custom UIA peers, Win32 P/Invoke. Migration is a rewrite, not a port. WPF on .NET 10 is actively maintained. Source: ImageGlass v10 beta (Avalonia), NeeView (stays WPF).
+- **Cloud sync, accounts, multi-user**: Rejected per project philosophy and privacy policy. Source: Mylio/Immich.
+- **Full Photoshop-class editor**: Rejected. Viewer-first with non-destructive edit capabilities. Source: PhotoDemon.
+- **AI denoise/masking/upscaling as immediate work**: Rejected until V60-01 inference runtime ships. Source: Lightroom AI denoise, ACDSee AI Denoise.
+- **Video playback (full)**: Rejected per codec-support-policy.md. Motion photo MP4 preview is a separate, smaller scope item. Source: IrfanView plugin.
+- **Tabbed MDI windows**: Rejected. `SessionTrayService` serves the multi-folder use case. Source: ACDSee.
 - **TWAIN scanner integration**: Already tracked as V30-24 in `Roadmap_Blocked.md`. Source: IrfanView/Saraff.Twain.NET.
-- **Anti-AI development stance**: Rejected. PhotoDemon explicitly adopted a "no-AI/no-LLM" policy (June 2026). Images' position is local-only AI with explicit model provenance — the right balance for privacy-conscious power users. Source: PhotoDemon repository.
+- **Native AOT compilation**: Rejected. FlyPhotos uses native AOT for instant startup, but WPF does not support AOT compilation. Source: FlyPhotos GitHub.
+- **Anti-AI development stance**: Rejected. PhotoDemon adopted "no-AI/no-LLM" (June 2026). Images' position is local-only AI with explicit model provenance. Source: PhotoDemon repository.
 
 ## Sources
 
 Competitors:
 - https://github.com/d2phap/ImageGlass/releases
-- https://github.com/neelabo/NeeView
+- https://imageglass.org/news/imageglass-roadmap-update-2026-98
+- https://github.com/neelabo/NeeView/releases
 - https://github.com/Ruben2776/PicView
-- https://github.com/nomacs/nomacs
+- https://github.com/riyasy/FlyPhotos
 - https://github.com/tannerhelland/photodemon
 - https://www.faststone.org/FSViewerDetail.htm
-- https://www.irfanview.com/history_old.htm
-- https://www.xnview.com/wiki/index.php?title=How_to_batch_convert_and_batch_process_with_XnView_MP
-- https://en.eagle.cool/article/505-search-by-color
+- https://www.digikam.org/news/2026-06-07-9.1.0_release_announcement/
+- https://www.acdsee.com/en/photo-studio/whats-new/
 
 Commercial/AI:
 - https://helpx.adobe.com/lightroom-classic/help/assisted-culling.html
-- https://support.captureone.com/hc/en-us/articles/35747427882653-Capture-One-16-8-release-notes
-- https://mylio.com/face-recognition/
-- https://excire.com/en/best-photo-organizing-software/
+- https://excire.com/en/lightroom-classic-ai-culling-vs-excire-search-plugin/
+- https://www.photoworkout.com/best-software-organize-photos-windows/
 
 Security:
-- https://security.snyk.io/vuln/SNYK-DOTNET-MAGICKNETQ8ANYCPU-10905670
-- https://security.snyk.io/vuln/SNYK-DOTNET-MAGICKNETQ8ANYCPU-15792499
-- https://advisories.gitlab.com/nuget/sharpcompress/CVE-2026-44788/
+- https://github.com/dlemstra/Magick.NET/releases/tag/14.14.0
+- https://github.com/advisories/GHSA-6c8g-7p36-r338
+- https://knowledge.broadcom.com/external/article/405851/sqlite-vulnerability-cve20256965.html
+- https://advisories.gitlab.com/nuget/sqlitepclraw.lib.e_sqlite3/CVE-2025-6965/
 
 Platform and ecosystem:
 - https://learn.microsoft.com/en-us/dotnet/desktop/wpf/whats-new/net100
-- https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview
-- https://github.com/dlemstra/Magick.NET/releases
-- https://ghostscript.readthedocs.io/en/latest/News.html
-- https://spec.c2pa.org/specifications/specifications/2.4/index.html
-- https://sqlite.org/releaselog/current.html
+- https://devblogs.microsoft.com/dotnet/performance-improvements-in-net-10/
+- https://sixlabors.com/posts/announcing-imagesharp-400/
+- https://devblogs.microsoft.com/dotnet/welcome-to-skia-sharp-40-preview1/
+- https://dev.to/garuma/using-directmanipulation-with-wpf-247k
+- https://github.com/unosquare/ffmediaelement
+- https://windowsforum.com/threads/windows-11-24h2-update-embracing-jpeg-xl-for-enhanced-imaging.355915/
 
 Community:
-- https://www.dpreview.com/forums/threads/do-some-programs-support-heif.4770308/
-- https://windowsforum.com/threads/fix-slow-photos-app-on-windows-11-tips-for-smooth-performance.344392/
+- https://github.com/d2phap/ImageGlass/issues/794
 - https://aidigitalspace.com/offline-ai-tools/
 - https://www.microfournerds.com/blog/sick-of-paying-monthly-best-lightroom-alternatives-2025
-- https://github.com/d2phap/ImageGlass/issues/794
 - https://news.ycombinator.com/item?id=46794971
-
-Adjacent:
-- https://github.com/ibaaj/awesome-OpenSourcePhotography
-- https://github.com/meichthys/foss_photo_libraries
-
-## Community Signals
-
-- **Format gaps remain the #1 complaint** about Windows image viewers. HEIC requires a paid codec extension; AVIF has rendering bugs above 4000px in many viewers; JXL support was only recently added to Windows Photos. Images already handles all of these via Magick.NET fallback — this is a strong solved differentiator worth highlighting in marketing. Source: DPReview forums, r/windows, gHacks.
-- **Performance expectations are hardening**: IrfanView and FastStone are praised as "instant" openers. ImageGlass GitHub issue #794 specifically asks for faster launch times. Microsoft Photos is called "bloatware" (882 MB for a photo viewer). Users expect sub-second startup and smooth 10k+ folder scrolling. Images has `LaunchTiming` and `PerformanceBudgetService` infrastructure but no published benchmarks. Source: DonationCoder, Windows Forum, Eleven Forum.
-- **Privacy-first is now mainstream**: 78% of surveyed users refuse cloud AI features; 91% would pay more for on-device processing. Microsoft Photos telemetry and Recall deepened distrust. Mylio and Excire built entire value propositions around "100% local" AI. Images' zero-network-egress default is perfectly positioned. Source: AI Digital Space survey 2026.
-- **AI features wanted locally**: Natural-language photo search, face clustering, duplicate detection via visual similarity, and aesthetic scoring/culling. All cloud-skeptical. Images has the ONNX/CLIP foundation but it's blocked on V60-01. Source: Unite.AI, Reddit.
-- **Emerging use case — AI art curation**: Generative AI users producing thousands of images need fast browse, aesthetic rating, and prompt-metadata search. No desktop tool does this well. Images' catalog + gallery + smart filters could serve this niche. Source: Reddit r/StableDiffusion.
-- **Emerging use case — screenshot OCR search**: Power users accumulate thousands of screenshots with no organization. OCR-searchable screenshots is an unmet need. Images already has OCR + catalog — connecting them would be novel. Source: Reddit r/DataHoarder.
-- **Subscription fatigue drives OSS adoption**: "Sick of paying monthly" is a literal article title about Lightroom alternatives. Free/OSS image management tools are seeing increased interest. Source: Micro Four Nerds.
-- **WCAG 2.2** became ISO/IEC 40500:2025. Key criteria: 2.5.7 (drag alternatives), 2.5.8 (24x24 target sizes — now fixed), 2.4.13 (focus indicators — already strong). 2.5.7 drag alternatives still need audit for crop/pan/brush tools. Source: W3C WCAG 2.2.
-- **C2PA/Content Credentials momentum**: Samsung Galaxy S25 and Google Pixel 10 sign photos by default. EU AI Act Article 50 enforcement begins August 2026. Images' read-only C2PA inspection via c2patool is correctly positioned ahead of the market. Source: C2PA spec 2.4.
 
 ## Open Questions
 
-- Should Magick.NET ResourceLimits be configurable per-user (Settings) or hardcoded at safe defaults (e.g., 2 GB memory, 32768 px max dimension)?
-- What is the actual bundled libheif/libjxl version inside Magick.NET 14.14.0? Needs a runtime probe or NuGet package inspection to confirm CVE coverage.
-- Should WCAG 2.5.7 drag alternatives (crop, pan, brush) be tracked as one audit pass or per-tool?
+- Should Magick.NET ResourceLimits be configurable per-user (Settings) or hardcoded at safe defaults?
+- Should the touch/gesture implementation use DirectManipulation COM interop (smooth, precision-trackpad-aware) or WPF ManipulationDelta (simpler, touchscreen-only)?
+- Should WCAG 2.5.7 drag alternatives be tracked as one audit pass or per-tool?
