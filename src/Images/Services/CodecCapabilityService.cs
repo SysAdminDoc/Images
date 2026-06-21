@@ -1,6 +1,7 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Windows.Media.Imaging;
 using ImageMagick;
 using SharpCompress.Archives;
 
@@ -408,6 +409,7 @@ public static class CodecCapabilityService
             sb.AppendLine($"- c2patool version: {provenance.C2paToolVersion}");
         if (provenance.C2paToolSha256 is not null)
             sb.AppendLine($"- c2patool SHA-256: {provenance.C2paToolSha256}");
+        sb.AppendLine($"- JXL WIC codec: {(IsJxlWicAvailable() ? "installed (native decode preferred)" : "not installed (Magick.NET fallback)")}");
         sb.AppendLine($"- ONNX Runtime DirectML: {GetOnnxRuntimeVersion()}");
         sb.AppendLine();
 
@@ -560,6 +562,24 @@ public static class CodecCapabilityService
         {
             return "unknown";
         }
+    }
+
+    internal static bool IsJxlWicAvailable()
+    {
+        try
+        {
+            // Minimal JPEG XL bare codestream header (2 bytes). If the WIC JXL codec extension
+            // is installed (Windows 11 24H2+), BitmapDecoder.Create will succeed or at least not
+            // throw NotSupportedException. An actual decode will fail on this truncated input, but
+            // the codec discovery succeeds if the extension is registered.
+            var jxlHeader = new byte[] { 0xFF, 0x0A };
+            using var ms = new MemoryStream(jxlHeader, writable: false);
+            BitmapDecoder.Create(ms, BitmapCreateOptions.DelayCreation, BitmapCacheOption.None);
+            return true;
+        }
+        catch (NotSupportedException) { return false; }
+        catch (FileFormatException) { return true; } // codec found but rejected truncated input
+        catch { return false; }
     }
 
     private static string? GetOnnxRuntimeAssemblyPath()

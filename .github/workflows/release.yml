@@ -207,7 +207,7 @@ jobs:
         run: |
           dotnet tool install --global CycloneDX
           $sbom = "Images-v${{ github.event.inputs.version }}-sbom.cdx.json"
-          dotnet CycloneDX Images.sln -o . -f $sbom -sv "${{ github.event.inputs.version }}" -j
+          dotnet CycloneDX Images.sln -o . -fn $sbom -sv "${{ github.event.inputs.version }}" -F Json -t
           if (-not (Test-Path $sbom)) { throw "SBOM not produced" }
           "SBOM=$sbom" | Out-File -FilePath $env:GITHUB_ENV -Append
 
