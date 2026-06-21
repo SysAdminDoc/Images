@@ -104,6 +104,12 @@ public static class MotionPhotoService
                 remaining -= read;
             }
 
+            if (remaining > 0)
+            {
+                try { File.Delete(outputPath); } catch { }
+                return null;
+            }
+
             return outputPath;
         }
         catch
@@ -117,7 +123,7 @@ public static class MotionPhotoService
     /// </summary>
     private static MotionPhotoInfo? FindEmbeddedMp4(FileStream stream)
     {
-        const int scanSize = 64 * 1024;
+        const int scanSize = 256 * 1024;
         var fileLength = stream.Length;
         if (fileLength < 12)
             return null;

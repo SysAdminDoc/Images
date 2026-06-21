@@ -483,13 +483,22 @@ public static class ImageLoader
         {
             // FileShare.Read mirrors the byte[] path's share mode so an Explorer-initiated rename
             // of the current file doesn't block because we happen to still have it mapped.
-            mmf = MemoryMappedFile.CreateFromFile(
-                new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete),
-                mapName: null,
-                capacity: 0,
-                access: MemoryMappedFileAccess.Read,
-                inheritability: System.IO.HandleInheritability.None,
-                leaveOpen: false);
+            var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            try
+            {
+                mmf = MemoryMappedFile.CreateFromFile(
+                    fs,
+                    mapName: null,
+                    capacity: 0,
+                    access: MemoryMappedFileAccess.Read,
+                    inheritability: System.IO.HandleInheritability.None,
+                    leaveOpen: false);
+            }
+            catch
+            {
+                fs.Dispose();
+                throw;
+            }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
         {

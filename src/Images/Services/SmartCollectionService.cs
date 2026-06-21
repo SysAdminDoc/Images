@@ -51,7 +51,11 @@ public sealed record SmartCollectionCriteria(
     public bool Matches(AssetSmartFilterItem item)
     {
         if (FolderRoots is { Count: > 0 } &&
-            !FolderRoots.Any(root => item.Folder.StartsWith(root, StringComparison.OrdinalIgnoreCase)))
+            !FolderRoots.Any(root =>
+                string.Equals(item.Folder, root, StringComparison.OrdinalIgnoreCase) ||
+                item.Folder.StartsWith(
+                    root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase)))
             return false;
 
         if (MinRating is not null && (item.Rating ?? 0) < MinRating.Value) return false;

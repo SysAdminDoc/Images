@@ -431,13 +431,6 @@ public sealed class ZoomPanImage : ContentControl
 
     private void OnManipulationDelta(object? sender, ManipulationDeltaEventArgs e)
     {
-        var isFit = Math.Abs(_scale.ScaleX - 1.0) < 0.01;
-        if (!isFit)
-        {
-            _translate.X += e.DeltaManipulation.Translation.X;
-            _translate.Y += e.DeltaManipulation.Translation.Y;
-        }
-
         var pinchScale = Math.Max(e.DeltaManipulation.Scale.X, e.DeltaManipulation.Scale.Y);
         if (Math.Abs(pinchScale - 1.0) > 0.001)
         {
@@ -450,6 +443,12 @@ public sealed class ZoomPanImage : ContentControl
             _translate.X -= dx;
             _translate.Y -= dy;
             _scale.ScaleX = _scale.ScaleY = newScale;
+        }
+
+        if (IsZoomed)
+        {
+            _translate.X += e.DeltaManipulation.Translation.X;
+            _translate.Y += e.DeltaManipulation.Translation.Y;
         }
 
         QueueTileRefresh();
