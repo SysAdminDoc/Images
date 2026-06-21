@@ -334,7 +334,7 @@ public sealed class ImportInboxService
     {
         cancellationToken.ThrowIfCancellationRequested();
         using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-        return Convert.ToHexString(SHA256.HashData(stream));
+        return Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
     }
 
     private static string ResolveUniqueDestination(string folder, string fileName)
