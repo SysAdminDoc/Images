@@ -473,6 +473,16 @@ public sealed class ZoomPanImage : ContentControl
         e.Handled = true;
     }
 
+    public void PanBy(double dx, double dy)
+    {
+        _translate.X += dx;
+        _translate.Y += dy;
+        QueueTileRefresh();
+        RaiseViewChanged();
+    }
+
+    public bool IsZoomed => Math.Abs(_scale.ScaleX - 1.0) > 0.01;
+
     public void ZoomBy(double factor)
     {
         var n = Math.Clamp(_scale.ScaleX * factor, 0.1, 20);

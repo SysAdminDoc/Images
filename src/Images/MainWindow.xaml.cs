@@ -859,6 +859,18 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (Canvas.IsZoomed && Keyboard.Modifiers == ModifierKeys.None && !Vm.IsCropMode)
+        {
+            const double panStep = 40;
+            switch (e.Key)
+            {
+                case Key.Left: Canvas.PanBy(panStep, 0); e.Handled = true; return;
+                case Key.Right: Canvas.PanBy(-panStep, 0); e.Handled = true; return;
+                case Key.Up: Canvas.PanBy(0, panStep); e.Handled = true; return;
+                case Key.Down: Canvas.PanBy(0, -panStep); e.Handled = true; return;
+            }
+        }
+
         switch (e.Key)
         {
             case Key.Escape:
