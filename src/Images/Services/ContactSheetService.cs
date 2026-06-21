@@ -63,6 +63,11 @@ public sealed class ContactSheetService
         var sheetW = cols * cellW + options.MarginPx;
         var sheetH = rows * cellH + options.MarginPx;
 
+        const int maxDimension = 32768;
+        if (sheetW > maxDimension || sheetH > maxDimension)
+            return new ContactSheetPlan([], 0, 0, 0, 0,
+                $"Sheet dimensions ({sheetW}x{sheetH}) exceed the {maxDimension}px limit. Reduce image count or increase columns.");
+
         var cells = new List<ContactSheetCell>();
         for (var i = 0; i < imagePaths.Count; i++)
         {
