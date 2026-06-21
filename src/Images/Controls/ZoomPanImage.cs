@@ -9,6 +9,8 @@ using Images.Services;
 
 namespace Images.Controls;
 
+public enum SwipeDirection { Left, Right }
+
 public readonly record struct ZoomPanViewState(double Scale, double TranslateX, double TranslateY);
 
 /// <summary>
@@ -36,6 +38,7 @@ public sealed class ZoomPanImage : ContentControl
     private int? _renderedTileLevel;
     private bool _tileRefreshQueued;
     public event EventHandler? ViewChanged;
+    public event EventHandler<SwipeDirection>? SwipeNavigate;
 
     public static readonly DependencyProperty SourceProperty = DependencyProperty.Register(
         nameof(Source), typeof(ImageSource), typeof(ZoomPanImage),
@@ -176,6 +179,12 @@ public sealed class ZoomPanImage : ContentControl
         MouseMove += OnMove;
         MouseLeftButtonUp += OnUp;
         MouseDoubleClick += OnDouble;
+
+        IsManipulationEnabled = true;
+        ManipulationStarting += OnManipulationStarting;
+        ManipulationDelta += OnManipulationDelta;
+        ManipulationInertiaStarting += OnManipulationInertiaStarting;
+
         Loaded += (_, _) => QueueTileRefresh();
         SizeChanged += (_, _) =>
         {
@@ -411,6 +420,56 @@ public sealed class ZoomPanImage : ContentControl
             return;
 
         if (Math.Abs(_scale.ScaleX - 1) > 0.001) ResetView(); else OneToOne();
+        e.Handled = true;
+    }
+
+    private void OnManipulationStarting(object? sender, ManipulationStartingEventArgs e)
+    {
+        e.ManipulationContainer = this;
+        e.Handled = true;
+    }
+
+    private void OnManipulationDelta(object? sender, ManipulationDeltaEventArgs e)
+    {
+        var isFit = Math.Abs(_scale.ScaleX - 1.0) < 0.01;
+        if (!isFit)
+        {
+            _translate.X += e.DeltaManipulation.Translation.X;
+            _translate.Y += e.DeltaManipulation.Translation.Y;
+        }
+
+        var pinchScale = Math.Max(e.DeltaManipulation.Scale.X, e.DeltaManipulation.Scale.Y);
+        if (Math.Abs(pinchScale - 1.0) > 0.001)
+        {
+            var newScale = Math.Clamp(_scale.ScaleX * pinchScale, 0.1, 20);
+            var center = e.ManipulationOrigin;
+            var cx = ActualWidth / 2;
+            var cy = ActualHeight / 2;
+            var dx = (center.X - cx) * (newScale - _scale.ScaleX);
+            var dy = (center.Y - cy) * (newScale - _scale.ScaleY);
+            _translate.X -= dx;
+            _translate.Y -= dy;
+            _scale.ScaleX = _scale.ScaleY = newScale;
+        }
+
+        QueueTileRefresh();
+        RaiseViewChanged();
+        e.Handled = true;
+    }
+
+    private void OnManipulationInertiaStarting(object? sender, ManipulationInertiaStartingEventArgs e)
+    {
+        var isFit = Math.Abs(_scale.ScaleX - 1.0) < 0.01;
+        var vx = e.InitialVelocities.LinearVelocity.X;
+        if (isFit && Math.Abs(vx) > 0.5)
+        {
+            SwipeNavigate?.Invoke(this, vx > 0 ? SwipeDirection.Right : SwipeDirection.Left);
+            e.Cancel();
+            e.Handled = true;
+            return;
+        }
+
+        e.TranslationBehavior.DesiredDeceleration = 0.01;
         e.Handled = true;
     }
 

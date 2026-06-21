@@ -68,6 +68,11 @@ public partial class MainWindow : Window
             }
         };
 
+        Canvas.SwipeNavigate += (_, dir) =>
+        {
+            if (dir == Controls.SwipeDirection.Left) Vm.NextCommand.Execute(null);
+            else Vm.PrevCommand.Execute(null);
+        };
         Viewport.MouseEnter += (_, _) => FadeArrows(1.0);
         Viewport.MouseLeave += (_, _) => FadeArrows(0.0);
         _edgeHideTimer.Tick += EdgeHideTimer_Tick;
