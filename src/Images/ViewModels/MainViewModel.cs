@@ -307,6 +307,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         StripSoftwareCommand = new RelayCommand(async () => await StripMetadataAsync(MetadataStripCategory.Software), () => CanUseImageCommands);
         StripAllMetadataCommand = new RelayCommand(async () => await StripMetadataAsync(MetadataStripCategory.All), () => CanUseImageCommands);
         ExtractMotionVideoCommand = new RelayCommand(async () => await ExtractMotionVideoAsync(), () => IsMotionPhoto || CompanionVideoPath is not null);
+        PlayMotionVideoCommand = new RelayCommand(async () => await PlayMotionVideoAsync(), () => IsMotionPhoto || CompanionVideoPath is not null);
+        StopMotionVideoCommand = new RelayCommand(StopMotionVideo, () => IsMotionVideoPlaying);
         SettingsCommand = new RelayCommand(ShowSettingsWindow);
         ExtractTextCommand = new RelayCommand(async () => await _ocrWorkflow.ToggleAsync(), () => HasImage && !IsOperationBusy && !IsCompareMode);
         SetWorkflowModeCommand = new RelayCommand(p => ApplyWorkflowMode(p), p => p is WorkflowMode or string);
@@ -518,6 +520,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private MotionPhotoInfo? _motionPhoto;
     public bool IsMotionPhoto => _motionPhoto is not null;
     public string? CompanionVideoPath { get; private set; }
+
+    private string? _motionVideoPath;
+    public string? MotionVideoPath
+    {
+        get => _motionVideoPath;
+        private set { _motionVideoPath = value; Raise(); Raise(nameof(IsMotionVideoPlaying)); }
+    }
+    public bool IsMotionVideoPlaying => _motionVideoPath is not null;
 
     // V20-15-Loop: surface LoopCount on the existing animated chip. GIF convention is
     // LoopCount=0 → infinite (rendered as "loops"); any positive value is the exact iteration
@@ -3586,6 +3596,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand StripSoftwareCommand { get; }
     public ICommand StripAllMetadataCommand { get; }
     public ICommand ExtractMotionVideoCommand { get; }
+    public ICommand PlayMotionVideoCommand { get; }
+    public ICommand StopMotionVideoCommand { get; }
     public ICommand SettingsCommand { get; }
     public ICommand ExtractTextCommand { get; }
 
@@ -7085,6 +7097,38 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 Toast(Strings.MainToastCompanionVideoFailed);
             }
+        }
+    }
+
+    private async Task PlayMotionVideoAsync()
+    {
+        if (CurrentPath is null) return;
+        StopMotionVideo();
+
+        if (_motionPhoto is not null)
+        {
+            var tempDir = AppStorage.TryGetAppDirectory("motion-video");
+            if (tempDir is null) return;
+            Directory.CreateDirectory(tempDir);
+            var output = await Task.Run(() => MotionPhotoService.ExtractEmbeddedVideo(CurrentPath, _motionPhoto, tempDir));
+            if (output is not null)
+                MotionVideoPath = output;
+            else
+                Toast(Strings.MainToastMotionVideoFailed);
+        }
+        else if (CompanionVideoPath is not null)
+        {
+            MotionVideoPath = CompanionVideoPath;
+        }
+    }
+
+    private void StopMotionVideo()
+    {
+        var previous = _motionVideoPath;
+        MotionVideoPath = null;
+        if (previous is not null && previous.Contains("motion-video", StringComparison.OrdinalIgnoreCase))
+        {
+            try { File.Delete(previous); } catch { }
         }
     }
 

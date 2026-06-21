@@ -463,6 +463,27 @@
                                    MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
                                    MouseLeftButtonUp="Canvas_MouseLeftButtonUp" />
 
+                <Grid x:Name="MotionVideoOverlay"
+                      Visibility="{Binding IsMotionVideoPlaying, Converter={StaticResource BoolToVis}}"
+                      Background="{DynamicResource BaseBrush}">
+                    <MediaElement x:Name="MotionVideoPlayer"
+                                  LoadedBehavior="Play"
+                                  UnloadedBehavior="Manual"
+                                  Stretch="Uniform"
+                                  MediaEnded="MotionVideoPlayer_MediaEnded" />
+                    <Button Content="&#xE711;"
+                            FontFamily="{DynamicResource IconFontFamily}"
+                            FontSize="18"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Margin="12"
+                            Width="36" Height="36"
+                            Style="{DynamicResource ChromeButton}"
+                            Command="{Binding StopMotionVideoCommand}"
+                            AutomationProperties.Name="Stop motion video"
+                            ToolTip="Stop video" />
+                </Grid>
+
                 <Grid Visibility="{Binding ShowCompareMode, Converter={StaticResource BoolToVis}}"
                       AutomationProperties.Name="Image compare mode"
                       AutomationProperties.HelpText="{Binding CompareStatusText}">
