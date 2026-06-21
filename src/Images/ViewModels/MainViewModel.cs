@@ -2430,6 +2430,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (_isDisposed || !IsSlideshowActive || IsSlideshowPaused)
             return;
 
+        _slideshowTimer?.Stop();
+
         FlushPendingRename();
 
         if (_slideshowShuffle && _slideshowRandom is not null)
@@ -2475,6 +2477,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Strings.MainOpLoadingNext,
                 BuildDecodeOperationDetail(_nav.CurrentPath ?? ""));
         }
+
+        if (IsSlideshowActive && !IsSlideshowPaused)
+            _slideshowTimer?.Start();
     }
 
     // -------------------- Rename editor state --------------------

@@ -28,7 +28,7 @@ public sealed class PreloadService : IDisposable
         new(StringComparer.OrdinalIgnoreCase);
     private CancellationTokenSource _cts = new();
     private readonly object _ctsGate = new();
-    private bool _isDisposed;
+    private volatile bool _isDisposed;
     private readonly ILogger _log = Log.For<PreloadService>();
 
     /// <summary>
@@ -43,10 +43,13 @@ public sealed class PreloadService : IDisposable
         if (SupportedImageFormats.RequiresGhostscript(path)) return;
 
         _lastAccess[path] = DateTime.UtcNow;
-        if (_cache.TryGetValue(path, out var existing) && !existing.Value.IsFaulted && !existing.Value.IsCanceled)
-            return;
-        if (existing is not null)
+        if (_cache.TryGetValue(path, out var existing))
         {
+            if (!existing.IsValueCreated)
+                return;
+            var task = existing.Value;
+            if (!task.IsFaulted && !task.IsCanceled)
+                return;
             _cache.TryRemove(path, out _);
             _log.LogDebug("preload evicted faulted entry: {Path}", path);
         }

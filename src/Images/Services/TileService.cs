@@ -78,7 +78,7 @@ public static class TileService
         if (File.Exists(infoPath))
         {
             var existing = TryReadPyramidInfo(infoPath);
-            if (existing is not null && existing.SourcePath == sourcePath)
+            if (existing is not null && string.Equals(existing.SourcePath, sourcePath, StringComparison.OrdinalIgnoreCase))
             {
                 TouchCacheDirectory(existing.CacheDirectory);
                 return existing;
