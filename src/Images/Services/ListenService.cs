@@ -76,6 +76,8 @@ public sealed class ListenService : IDisposable
         }
     }
 
+    private const int ConnectionIdleTimeoutSeconds = 300;
+
     private async Task HandleClient(TcpClient client, CancellationToken ct)
     {
         try
@@ -83,12 +85,14 @@ public sealed class ListenService : IDisposable
             using (client)
             {
                 client.ReceiveTimeout = 5000;
+                using var idleCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                 using var reader = new StreamReader(client.GetStream(), Encoding.UTF8);
 
                 var authenticated = false;
                 while (!ct.IsCancellationRequested)
                 {
-                    var line = await ReadBoundedLine(reader, ct);
+                    idleCts.CancelAfter(TimeSpan.FromSeconds(ConnectionIdleTimeoutSeconds));
+                    var line = await ReadBoundedLine(reader, idleCts.Token);
                     if (line is null) break;
 
                     var trimmed = line.Trim();

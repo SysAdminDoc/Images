@@ -237,6 +237,7 @@ public sealed class FolderPreviewController : IDisposable
         _generation++;
         _previewCts.Cancel();
         _ = DisposeSourceLaterAsync(_previewCts);
+        _thumbnailDecodeGate.Dispose();
     }
 }
 

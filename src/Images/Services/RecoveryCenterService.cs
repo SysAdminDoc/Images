@@ -437,6 +437,13 @@ public sealed class RecoveryCenterService
         if (string.IsNullOrWhiteSpace(normalized))
             throw new IOException("Restore target path is not available.");
 
+        if (normalized.StartsWith("\\\\?\\", StringComparison.Ordinal) ||
+            normalized.StartsWith("\\\\.\\", StringComparison.Ordinal))
+            throw new IOException("Restore target uses a device-namespace path.");
+
+        if (!Path.IsPathFullyQualified(normalized))
+            throw new IOException("Restore target path is not fully qualified.");
+
         if (!File.Exists(normalized) && !Directory.Exists(normalized))
             return normalized;
 

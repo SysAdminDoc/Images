@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Interop;
 using Microsoft.Win32;
 
 namespace Images.Services;
@@ -63,6 +64,17 @@ public static class ThemeService
         SetHighContrastDictionary(application.Resources, highContrast);
         SetLatteOverlay(application.Resources, effectiveMode == AppThemeMode.Latte);
         CurrentMode = effectiveMode;
+        ReapplyCaptionsToOpenWindows(application);
+    }
+
+    private static void ReapplyCaptionsToOpenWindows(Application application)
+    {
+        foreach (Window window in application.Windows)
+        {
+            var hwnd = new WindowInteropHelper(window).Handle;
+            if (hwnd != IntPtr.Zero)
+                WindowChrome.ApplyDarkCaption(hwnd);
+        }
     }
 
     public static void SetTheme(AppThemeMode mode)

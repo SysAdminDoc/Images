@@ -43,7 +43,13 @@ public sealed class PreloadService : IDisposable
         if (SupportedImageFormats.RequiresGhostscript(path)) return;
 
         _lastAccess[path] = DateTime.UtcNow;
-        if (_cache.ContainsKey(path)) return;
+        if (_cache.TryGetValue(path, out var existing) && !existing.Value.IsFaulted && !existing.Value.IsCanceled)
+            return;
+        if (existing is not null)
+        {
+            _cache.TryRemove(path, out _);
+            _log.LogDebug("preload evicted faulted entry: {Path}", path);
+        }
 
         // Probe size first — if it's a monster RAW / panorama / layered production file, skip.
         // The on-demand path will decode it only if the user actually navigates there.
@@ -109,6 +115,12 @@ public sealed class PreloadService : IDisposable
         if (!_cache.TryGetValue(path, out var lazy)) return null;
         _lastAccess[path] = DateTime.UtcNow;
         var task = lazy.Value;
+        if (task.IsFaulted || task.IsCanceled)
+        {
+            _cache.TryRemove(path, out _);
+            _lastAccess.TryRemove(path, out _);
+            return null;
+        }
         if (!task.IsCompletedSuccessfully) return null;
         return task.Result;
     }
@@ -121,7 +133,14 @@ public sealed class PreloadService : IDisposable
     {
         if (!_cache.TryGetValue(path, out var lazy)) return null;
         _lastAccess[path] = DateTime.UtcNow;
-        return lazy.Value;
+        var task = lazy.Value;
+        if (task.IsFaulted || task.IsCanceled)
+        {
+            _cache.TryRemove(path, out _);
+            _lastAccess.TryRemove(path, out _);
+            return null;
+        }
+        return task;
     }
 
     /// <summary>
