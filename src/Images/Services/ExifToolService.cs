@@ -155,6 +155,22 @@ internal static class ExifToolService
             return false;
         }
 
+        var fileName = Path.GetFileNameWithoutExtension(normalizedPath);
+        if (!fileName.Equals("exiftool", StringComparison.OrdinalIgnoreCase))
+        {
+            error = $"ExifTool executable must be named exiftool (got '{Path.GetFileName(normalizedPath)}').";
+            return false;
+        }
+
+        var ext = Path.GetExtension(normalizedPath);
+        if (!string.IsNullOrEmpty(ext)
+            && !ext.Equals(".exe", StringComparison.OrdinalIgnoreCase)
+            && !ext.Equals(".pl", StringComparison.OrdinalIgnoreCase))
+        {
+            error = $"ExifTool executable has unexpected extension '{ext}'.";
+            return false;
+        }
+
         return true;
     }
 

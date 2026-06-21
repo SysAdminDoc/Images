@@ -2424,15 +2424,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         if (_slideshowShuffle && _slideshowRandom is not null)
         {
-            var count = _nav.Files.Count;
+            var files = _nav.Files;
+            var count = files.Count;
             if (count > 1)
             {
                 var nextIndex = _slideshowRandom.Next(count);
                 while (nextIndex == _nav.CurrentIndex && count > 1)
                     nextIndex = _slideshowRandom.Next(count);
 
-                // Navigate by finding the path at the target index and opening it
-                var targetPath = _nav.Files[nextIndex];
+                if (nextIndex >= files.Count) return;
+                var targetPath = files[nextIndex];
                 _nav.Open(targetPath);
                 ResetPageState();
                 await LoadCurrentWithOperationStatusAsync(
