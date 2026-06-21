@@ -105,10 +105,6 @@ public partial class App : Application
 
         ThemeService.Initialize(this, SettingsService.Instance);
 
-        // P-03: load any persisted network-egress entries from prior sessions so the About
-        // panel shows full history.
-        NetworkEgressService.LoadPersistedEntries();
-
         var window = new MainWindow();
         LaunchTiming.Log(_log, "main-window-created");
 
@@ -148,6 +144,8 @@ public partial class App : Application
 
         window.Show();
         LaunchTiming.Log(_log, "main-window-shown");
+
+        _ = Task.Run(() => NetworkEgressService.LoadPersistedEntries());
 
         if (listenPort is not null)
         {

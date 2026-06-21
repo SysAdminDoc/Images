@@ -77,9 +77,9 @@ public static class PerformanceBudgetService
         return new PerfMeasurement(
             "Process-to-CLI",
             snapshot.ProcessElapsedMs,
-            ThresholdMs: 3000,
-            Passed: snapshot.ProcessElapsedMs < 3000,
-            Detail: $"App elapsed: {snapshot.AppElapsedMs:F1} ms");
+            ThresholdMs: 1000,
+            Passed: snapshot.ProcessElapsedMs < 1000,
+            Detail: $"App elapsed: {snapshot.AppElapsedMs:F1} ms; target: sub-second cold start");
     }
 
     private static PerfMeasurement MeasureDirectoryScan()
