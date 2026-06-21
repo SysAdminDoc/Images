@@ -751,11 +751,13 @@ public partial class MainWindow : Window
         switch (e.ChangedButton)
         {
             case MouseButton.XButton1:
-                Vm.PrevCommand.Execute(null);
+                if (Vm.PrevCommand.CanExecute(null))
+                    Vm.PrevCommand.Execute(null);
                 e.Handled = true;
                 break;
             case MouseButton.XButton2:
-                Vm.NextCommand.Execute(null);
+                if (Vm.NextCommand.CanExecute(null))
+                    Vm.NextCommand.Execute(null);
                 e.Handled = true;
                 break;
         }
@@ -1574,6 +1576,12 @@ public partial class MainWindow : Window
         var paths = (string[]?)e.Data.GetData(DataFormats.FileDrop);
         if (paths is null || paths.Length == 0) return null;
         var first = paths[0];
+        if (Directory.Exists(first))
+        {
+            var firstImage = Directory.EnumerateFiles(first)
+                .FirstOrDefault(f => Services.DirectoryNavigator.SupportedExtensions.Contains(Path.GetExtension(f)));
+            return firstImage;
+        }
         if (!File.Exists(first)) return null;
         var ext = Path.GetExtension(first);
         return Services.DirectoryNavigator.SupportedExtensions.Contains(ext) ? first : null;
