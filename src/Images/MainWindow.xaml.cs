@@ -66,6 +66,16 @@ public partial class MainWindow : Window
             {
                 ApplyOverlayWindowState();
             }
+            if (e.PropertyName is nameof(MainViewModel.MotionVideoPath))
+            {
+                if (Vm.MotionVideoPath is not null)
+                    MotionVideoPlayer.Source = new Uri(Vm.MotionVideoPath);
+                else
+                {
+                    MotionVideoPlayer.Stop();
+                    MotionVideoPlayer.Source = null;
+                }
+            }
         };
 
         Canvas.SwipeNavigate += (_, dir) =>
@@ -1632,5 +1642,10 @@ public partial class MainWindow : Window
     {
         Vm.PauseResumeSlideshow();
         e.Handled = true;
+    }
+
+    private void MotionVideoPlayer_MediaEnded(object sender, RoutedEventArgs e)
+    {
+        Vm.StopMotionVideoCommand.Execute(null);
     }
 }
