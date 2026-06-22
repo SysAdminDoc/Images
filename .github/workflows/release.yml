@@ -24,7 +24,7 @@ jobs:
   build:
     runs-on: windows-2025
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-dotnet@v5
         with:
@@ -68,7 +68,7 @@ jobs:
           $tree | Set-Content -Path transitive-deps\nuget-transitive-tree.txt -Encoding utf8
 
       - name: Upload release transitive dependency tree
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: nuget-transitive-tree-${{ github.event.inputs.version }}
           path: transitive-deps/nuget-transitive-tree.txt
@@ -187,7 +187,7 @@ jobs:
 
       - name: Upload release diagnostics logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-diagnostics-${{ github.event.inputs.version }}
           path: release-diagnostics/**
@@ -262,7 +262,7 @@ jobs:
           }
 
       - name: Upload package manifests
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: package-manifests-${{ github.event.inputs.version }}
           path: packaging/output/**
@@ -283,17 +283,17 @@ jobs:
           gh release upload $tag $env:SBOM --clobber
 
       - name: Attest portable ZIP
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: ${{ env.ZIP }}
 
       - name: Attest installer
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: ${{ env.SETUP }}
 
       - name: Attest SBOM
-        uses: actions/attest-sbom@v2
+        uses: actions/attest-sbom@v4
         with:
           subject-path: ${{ env.ZIP }}
           sbom-path: ${{ env.SBOM }}
