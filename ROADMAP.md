@@ -54,6 +54,20 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
   Acceptance: Smoke tests open at least Settings, About, Duplicate Cleanup, Semantic Search, Model Manager, and Import Inbox windows and assert automation names, keyboard reachability, and no empty critical HelpText.
   Complexity: M
 
+- [ ] P1 — Restore local release verification parity after workflow removal
+  Why: Hosted GitHub workflows and Dependabot were removed, but release/trust docs still promise workflow, SBOM, attestation, and vulnerability gates; local readiness only covers part of that path.
+  Evidence: commit `55fabf2`, missing `.github`, `scripts/Test-ReleaseReadiness.ps1`, `docs/distribution-trust.md`, `docs/release-support-policy.md`, WinGet and Scoop manifest docs
+  Touches: `scripts/Test-ReleaseReadiness.ps1`, `scripts/Test-LocalizationResources.ps1`, `scripts/Test-ReleaseDiagnostics.ps1`, `scripts/New-PackageManifests.ps1`, `docs/release-checklist.md`, `docs/distribution-trust.md`, `docs/release-support-policy.md`
+  Acceptance: One local release command runs version sync, restore, build, tests, vulnerability scan, localization parity, release diagnostics, and package-manifest/checksum validation; docs no longer claim `.github` or Dependabot gates exist.
+  Complexity: M
+
+- [ ] P1 — Add viewport context-menu smoke and keyboard regression coverage
+  Why: The viewer right-click menu was recently nested and made scrollable after becoming too long; without UIA coverage it can regress off-screen or lose keyboard access.
+  Evidence: `src/Images/MainWindow.xaml`, `src/Images/Themes/DarkTheme.xaml`, `tests/Images.Tests/WpfSmokeTests.cs`, FlaUI
+  Touches: `tests/Images.Tests/WpfSmokeTests.cs`, `src/Images/MainWindow.xaml`, `src/Images/Themes/DarkTheme.xaml`
+  Acceptance: A smoke test opens the viewport context menu at a constrained window size, verifies grouped root items and at least one nested submenu, confirms the menu stays within the viewport or scrolls, and reaches commands by keyboard.
+  Complexity: M
+
 ### P2
 
 - [ ] P2 — Add local assisted culling score lane
@@ -89,6 +103,13 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
   Evidence: `src/Images/Services/BackgroundJobsService.cs`, `src/Images/Services/BackgroundTaskTracker.cs`, ACDSee activity-management patterns
   Touches: `src/Images/MainWindow.xaml`, `src/Images/ViewModels/MainViewModel.cs`, `src/Images/Services/BackgroundJobsService.cs`, `tests/Images.Tests/`
   Acceptance: The main viewer exposes a compact activity entry with running/faulted counts, recent job details, cancellation where supported, and screen-reader status updates.
+  Complexity: M
+
+- [ ] P2 — Produce a local release SBOM and provenance bundle
+  Why: Distribution docs promise CycloneDX SBOMs and build/artifact provenance from hosted workflows, but current releases are local-build-only.
+  Evidence: `docs/distribution-trust.md`, `docs/codec-bundling.md`, `scripts/Test-ReleaseDiagnostics.ps1`, CycloneDX ML-BOM, C2PA provenance expectations
+  Touches: `scripts/Test-ReleaseReadiness.ps1`, `scripts/Test-ReleaseDiagnostics.ps1`, `scripts/New-PackageManifests.ps1`, `src/Images/Services/CodecCapabilityService.cs`, `docs/distribution-trust.md`
+  Acceptance: Local release output includes SHA-256 checksums, a CycloneDX SBOM covering NuGet dependencies plus staged native runtimes/model definitions, and a provenance summary that matches `--system-info`/`--codec-report` diagnostics.
   Complexity: M
 
 ### P3
