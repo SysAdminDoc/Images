@@ -114,7 +114,6 @@ public sealed class ImageCodecCorpusTests
     [InlineData(".webp")]
     [InlineData(".tif")]
     [InlineData(".gif")]
-    [InlineData(".apng")]
     public void Save_GeneratedExportCorpus_RoundTripsThroughLoader(string extension)
     {
         using var temp = TestDirectory.Create();
@@ -128,6 +127,18 @@ public sealed class ImageCodecCorpusTests
         Assert.Equal(6, result.PixelWidth);
         Assert.Equal(4, result.PixelHeight);
         Assert.False(string.IsNullOrWhiteSpace(result.DecoderUsed));
+    }
+
+    [Fact]
+    public void ResolveWritablePath_ApngFallsBackToPng()
+    {
+        using var temp = TestDirectory.Create();
+        var requested = Path.Combine(temp.Path, "export.apng");
+
+        var resolved = ImageExportService.ResolveWritablePath(requested);
+
+        Assert.Equal(Path.Combine(temp.Path, "export.png"), resolved);
+        Assert.Equal(".png", ImageExportService.NormalizeExportExtension(".apng"));
     }
 
     private static void WriteWicBitmap(string path)

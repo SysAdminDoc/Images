@@ -11,7 +11,7 @@ public static class ImageExportService
     public static readonly string[] ExportExtensions =
     [
         ".jpg", ".jpeg", ".jpe", ".jfif", ".jif", ".png", ".webp", ".avif", ".jxl",
-        ".tif", ".tiff", ".bmp", ".dib", ".gif", ".apng",
+        ".tif", ".tiff", ".bmp", ".dib", ".gif",
         ".psd", ".psb", ".pdf", ".pdfa", ".eps", ".svg", ".tga", ".targa", ".dds",
         ".qoi", ".exr", ".hdr", ".jp2", ".j2k", ".j2c", ".jpc", ".jpm", ".jpt",
         ".jps", ".ppm", ".pgm", ".pbm", ".pnm", ".pam", ".pfm", ".xpm", ".xbm",
@@ -28,7 +28,7 @@ public static class ImageExportService
         "JPEG XL|*.jxl",
         "TIFF|*.tif;*.tiff",
         "BMP|*.bmp;*.dib",
-        "GIF / APNG|*.gif;*.apng",
+        "GIF|*.gif",
         "Photoshop|*.psd;*.psb",
         "PDF / EPS / SVG|*.pdf;*.pdfa;*.eps;*.svg",
         "TGA|*.tga;*.targa",
@@ -554,5 +554,6 @@ public static class ImageExportService
         MagickFormat.Pbm;
 
     private static bool CanWrite(MagickFormat format)
-        => MagickFormatInfo.Create(format)?.SupportsWriting == true;
+        => format is not MagickFormat.APng &&
+           MagickFormatInfo.Create(format)?.SupportsWriting == true;
 }

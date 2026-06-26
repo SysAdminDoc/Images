@@ -16,10 +16,7 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Background="{StaticResource PanelBrush}"
-                BorderBrush="{StaticResource HairlineBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="18,14">
+                Style="{StaticResource ToolWindowHeader}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -56,10 +53,7 @@
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0"
-                    Background="{StaticResource PanelBrush}"
-                    BorderBrush="{StaticResource HairlineBrush}"
-                    BorderThickness="0,0,1,0"
-                    Padding="16">
+                    Style="{StaticResource ToolWindowSidebar}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <TextBlock Text="{x:Static loc:Strings.MacroSources}" Style="{StaticResource SectionLabel}" />
@@ -329,10 +323,7 @@
         </Grid>
 
         <Border Grid.Row="2"
-                Background="{StaticResource PanelBrush}"
-                BorderBrush="{StaticResource HairlineBrush}"
-                BorderThickness="0,1,0,0"
-                Padding="16,10">
+                Style="{StaticResource WindowStatusBar}">
             <StackPanel Orientation="Horizontal">
                 <Ellipse x:Name="StatusDot"
                          Width="8"

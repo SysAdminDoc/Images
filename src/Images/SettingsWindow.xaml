@@ -26,14 +26,9 @@
             <Setter Property="Margin" Value="0,14" />
         </Style>
 
-        <Style x:Key="SettingsIconTile" TargetType="Border">
-            <Setter Property="Width" Value="38" />
-            <Setter Property="Height" Value="38" />
-            <Setter Property="CornerRadius" Value="{StaticResource Radius.Md.CR}" />
-            <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="VerticalAlignment" Value="Top" />
+        <Style x:Key="SettingsIconTile" TargetType="Border" BasedOn="{StaticResource IconTile}">
+            <Setter Property="Width" Value="40" />
+            <Setter Property="Height" Value="40" />
         </Style>
     </Window.Resources>
 

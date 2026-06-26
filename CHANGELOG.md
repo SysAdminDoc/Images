@@ -4,7 +4,13 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### UX
+
+- **Shared premium tool-window shell** — Secondary workbenches now use consistent header, sidebar, workspace, status-bar, icon-tile, and empty-state treatments so batch export, cleanup, recovery, model, semantic search, and edit tools feel like one coherent product surface.
+
 ### Fixes
+
+- **APNG export capability correction** — Save/export no longer advertises APNG as a writable target when the runtime cannot encode it reliably. APNG files still open and inspect as before; `.apng` export targets resolve to PNG.
 
 - **Parallel batch filename collision** — `RunAsync` now reserves output filenames via `ConcurrentDictionary` across parallel tasks, preventing TOCTOU races where two concurrent writes could silently overwrite the same output file. Also removed a pre-loop cancellation check that could leave null entries in the task array, causing `Task.WhenAll` to throw `ArgumentException` instead of `OperationCanceledException`.
 - **ListenService path canonicalization** — incoming TCP paths are now canonicalized with `Path.GetFullPath` before the existence check, preventing `..` segment traversal.

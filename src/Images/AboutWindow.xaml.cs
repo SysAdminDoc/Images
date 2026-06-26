@@ -396,13 +396,13 @@ public partial class AboutWindow : Window
                 UpdateStatusIcon.Text = "";
                 UpdateStatusIcon.Foreground = ThemeBrush("GreenBrush");
                 UpdateStatusCard.BorderBrush = ThemeBrush("GreenBrush");
-                UpdateStatusCard.Background = new SolidColorBrush(Color.FromArgb(0x1F, 0xA6, 0xE3, 0xA1));
+                UpdateStatusCard.Background = ThemeBrush("SuccessPanelBrush");
                 break;
             case "Update":
                 UpdateStatusIcon.Text = "";
                 UpdateStatusIcon.Foreground = ThemeBrush("AccentBrush");
                 UpdateStatusCard.BorderBrush = ThemeBrush("AccentBrush");
-                UpdateStatusCard.Background = new SolidColorBrush(Color.FromArgb(0x1F, 0x89, 0xB4, 0xFA));
+                UpdateStatusCard.Background = ThemeBrush("AccentPanelBrush");
                 break;
             default:
                 UpdateStatusIcon.Text = "";

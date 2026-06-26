@@ -16,10 +16,7 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Background="{StaticResource PanelBrush}"
-                BorderBrush="{StaticResource HairlineBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="18,14">
+                Style="{StaticResource ToolWindowHeader}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -101,10 +98,7 @@
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0"
-                    Background="{StaticResource PanelBrush}"
-                    BorderBrush="{StaticResource HairlineBrush}"
-                    BorderThickness="0,0,1,0"
-                    Padding="16">
+                    Style="{StaticResource ToolWindowSidebar}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -178,15 +172,20 @@
                           Background="{StaticResource HairlineBrush}" />
 
             <Border Grid.Column="2"
-                    Background="{StaticResource ViewportBrush}"
-                    Padding="18">
+                    Style="{StaticResource ToolWindowWorkspace}">
                 <Grid>
                     <Border x:Name="EmptyState"
-                            Style="{StaticResource ElevatedCard}"
-                            Width="500"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
+                            Style="{StaticResource EmptyStateCard}"
+                            AutomationProperties.Name="{x:Static loc:Strings.ModelManagerNoModelSelected}">
                         <StackPanel>
+                            <Border Style="{StaticResource EmptyStateIcon}">
+                                <TextBlock Text="&#xE950;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="18"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
                             <TextBlock Text="{x:Static loc:Strings.ModelManagerNoModelSelected}"
                                        Style="{StaticResource Text.Display}"
                                        TextAlignment="Center" />
@@ -317,10 +316,7 @@
         </Grid>
 
         <Border Grid.Row="2"
-                Background="{StaticResource PanelBrush}"
-                BorderBrush="{StaticResource HairlineBrush}"
-                BorderThickness="0,1,0,0"
-                Padding="16,10">
+                Style="{StaticResource WindowStatusBar}">
             <StackPanel Orientation="Horizontal">
                 <Ellipse x:Name="StatusDot"
                          Width="8"
