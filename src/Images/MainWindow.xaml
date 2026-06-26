@@ -57,70 +57,9 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE77F;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <Separator />
-                        <MenuItem Header="Reference board" Command="{Binding OpenReferenceBoardCommand}" InputGestureText="{Binding ShortcutTexts[reference-board]}">
+                        <MenuItem Header="Reload" Command="{Binding ReloadCommand}" InputGestureText="{Binding ShortcutTexts[reload]}">
                             <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Duplicate cleanup" Command="{Binding OpenDuplicateCleanupCommand}" InputGestureText="{Binding ShortcutTexts[duplicate-cleanup]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="{Binding CompareModeText}" Command="{Binding StartCompareCommand}" InputGestureText="{Binding ShortcutTexts[compare]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8AB;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Compare with…" Command="{Binding CompareWithCommand}" InputGestureText="{Binding ShortcutTexts[compare-with]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Exit compare" Command="{Binding ExitCompareCommand}" InputGestureText="Esc">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE711;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="File health scan" Command="{Binding OpenFileHealthScanCommand}" InputGestureText="{Binding ShortcutTexts[file-health-scan]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE946;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Recovery center" Command="{Binding OpenRecoveryCenterCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE777;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Model manager" Command="{Binding OpenModelManagerCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE950;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Semantic search" Command="{Binding OpenSemanticSearchCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE721;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Tag relationships" Command="{Binding OpenTagGraphCommand}" InputGestureText="{Binding ShortcutTexts[tag-graph]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EC;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Import inbox" Command="{Binding OpenImportInboxCommand}" InputGestureText="{Binding ShortcutTexts[import-inbox]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Macro actions" Command="{Binding OpenMacroActionsCommand}" InputGestureText="{Binding ShortcutTexts[macro-actions]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE945;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Batch processor" Command="{Binding OpenBatchProcessorCommand}" InputGestureText="{Binding ShortcutTexts[batch-processor]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EF;" />
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE72C;" />
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator />
@@ -133,308 +72,194 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EC;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Edit history" Command="{Binding OpenEditStackCommand}" InputGestureText="{Binding ShortcutTexts[edit-stack]}">
+                        <MenuItem Header="Compare">
                             <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE81C;" />
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8AB;" />
                             </MenuItem.Icon>
+                            <MenuItem Header="{Binding CompareModeText}" Command="{Binding StartCompareCommand}" InputGestureText="{Binding ShortcutTexts[compare]}" />
+                            <MenuItem Header="Compare with…" Command="{Binding CompareWithCommand}" InputGestureText="{Binding ShortcutTexts[compare-with]}" />
+                            <MenuItem Header="Exit compare" Command="{Binding ExitCompareCommand}" InputGestureText="Esc" />
                         </MenuItem>
-                        <MenuItem Header="Resize…" Command="{Binding OpenResizeDialogCommand}" InputGestureText="{Binding ShortcutTexts[resize]}">
+                        <MenuItem Header="View">
                             <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8A1;" />
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE890;" />
                             </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Adjustments…" Command="{Binding OpenAdjustmentsCommand}" InputGestureText="{Binding ShortcutTexts[adjustments]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE790;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Effects…" Command="{Binding OpenEffectsCommand}" InputGestureText="{Binding ShortcutTexts[effects]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE945;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Auto Enhance" Command="{Binding AutoEnhanceCommand}" InputGestureText="{Binding ShortcutTexts[auto-enhance]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE950;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Perspective…" Command="{Binding OpenPerspectiveCommand}" InputGestureText="{Binding ShortcutTexts[perspective]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7A8;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Annotations…" Command="{Binding OpenAnnotationsCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xED5C;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="{Binding ExposureBrushModeText}"
-                                  Command="{Binding ToggleExposureBrushModeCommand}"
-                                  InputGestureText="{Binding ShortcutTexts[exposure-brush]}"
-                                  IsCheckable="True"
-                                  IsChecked="{Binding IsExposureBrushMode, Mode=OneWay}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE790;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="{Binding RedEyeCorrectionModeText}"
-                                  Command="{Binding ToggleRedEyeModeCommand}"
-                                  InputGestureText="{Binding ShortcutTexts[red-eye]}"
-                                  IsCheckable="True"
-                                  IsChecked="{Binding IsRedEyeCorrectionMode, Mode=OneWay}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7B3;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="{Binding RetouchModeText}"
-                                  Command="{Binding ToggleRetouchModeCommand}"
-                                  InputGestureText="{Binding ShortcutTexts[retouch]}"
-                                  IsCheckable="True"
-                                  IsChecked="{Binding IsRetouchMode, Mode=OneWay}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE90F;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="{Binding SelectionModeText}"
-                                  Command="{Binding ToggleSelectionModeCommand}"
-                                  InputGestureText="{Binding ShortcutTexts[selection-mode]}"
-                                  IsCheckable="True"
-                                  IsChecked="{Binding IsSelectionMode, Mode=OneWay}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="{Binding CropModeText}"
-                                  Command="{Binding ToggleCropModeCommand}"
-                                  InputGestureText="{Binding ShortcutTexts[crop-mode]}"
-                                  IsCheckable="True"
-                                  IsChecked="{Binding IsCropMode, Mode=OneWay}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7A8;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="{Binding OverlayModeText}"
-                                  Command="{Binding ToggleOverlayModeCommand}"
-                                  IsCheckable="True"
-                                  IsChecked="{Binding IsPinnedOverlayMode, Mode=OneWay}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7B3;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Exit overlay"
-                                  Command="{Binding ExitOverlayModeCommand}"
-                                  InputGestureText="Ctrl+Alt+O">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE711;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <Separator />
-                        <MenuItem Header="Reload" Command="{Binding ReloadCommand}" InputGestureText="{Binding ShortcutTexts[reload]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE72C;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Previous page" Command="{Binding PrevPageCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE76B;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Next page" Command="{Binding NextPageCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE76C;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <Separator />
-                        <MenuItem Header="Save a copy…" Command="{Binding SaveAsCopyCommand}" InputGestureText="{Binding ShortcutTexts[save-copy]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE74E;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Export workbench…" Command="{Binding OpenExportWorkbenchCommand}" InputGestureText="{Binding ShortcutTexts[export-workbench]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EF;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Print…" Command="{Binding PrintCommand}" InputGestureText="{Binding ShortcutTexts[print]}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE749;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Print to default printer" Command="{Binding PrintDefaultCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE749;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Send to email" Command="{Binding SendToEmailCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE715;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <Separator />
-                        <MenuItem Header="Reveal in Explorer" Command="{Binding RevealCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE838;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Copy image" Command="{Binding CopyImageCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Copy image and path" Command="{Binding CopyImageAndPathCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Copy to folder…" Command="{Binding CopyToFolderCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Copy to recent folder"
-                                  ItemsSource="{Binding RecentTransferFolders}"
-                                  Visibility="{Binding RecentTransferFolders.Count, Converter={StaticResource BoolToVis}}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
-                            </MenuItem.Icon>
-                            <MenuItem.ItemContainerStyle>
-                                <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
-                                    <Setter Property="Header" Value="{Binding Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}" />
-                                    <Setter Property="ToolTip" Value="{Binding}" />
-                                    <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.CopyToFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
-                                    <Setter Property="CommandParameter" Value="{Binding}" />
-                                </Style>
-                            </MenuItem.ItemContainerStyle>
-                        </MenuItem>
-                        <MenuItem Header="Move to folder…" Command="{Binding MoveToFolderCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Move to recent folder"
-                                  ItemsSource="{Binding RecentTransferFolders}"
-                                  Visibility="{Binding RecentTransferFolders.Count, Converter={StaticResource BoolToVis}}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
-                            </MenuItem.Icon>
-                            <MenuItem.ItemContainerStyle>
-                                <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
-                                    <Setter Property="Header" Value="{Binding Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}" />
-                                    <Setter Property="ToolTip" Value="{Binding}" />
-                                    <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.MoveToFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
-                                    <Setter Property="CommandParameter" Value="{Binding}" />
-                                </Style>
-                            </MenuItem.ItemContainerStyle>
-                        </MenuItem>
-                        <MenuItem Header="Open with default app" Command="{Binding OpenInDefaultAppCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B5;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Strip GPS location" Command="{Binding StripLocationCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE707;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Extract motion video"
-                                  Command="{Binding ExtractMotionVideoCommand}"
-                                  Visibility="{Binding IsMotionPhoto, Converter={StaticResource BoolToVis}}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE714;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Strip metadata">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8AC;" />
-                            </MenuItem.Icon>
-                            <MenuItem Header="Device info (make, model, serial)" Command="{Binding StripDeviceInfoCommand}" />
-                            <MenuItem Header="Timestamps" Command="{Binding StripTimestampsCommand}" />
-                            <MenuItem Header="Software and comments" Command="{Binding StripSoftwareCommand}" />
+                            <MenuItem Header="Previous page" Command="{Binding PrevPageCommand}" />
+                            <MenuItem Header="Next page" Command="{Binding NextPageCommand}" />
                             <Separator />
-                            <MenuItem Header="All metadata" Command="{Binding StripAllMetadataCommand}" />
-                        </MenuItem>
-                        <MenuItem Header="Metadata HUD"
-                                  Command="{Binding ToggleMetadataHudCommand}"
-                                  InputGestureText="{Binding ShortcutTexts[metadata-hud]}"
-                                  IsCheckable="True"
-                                  IsChecked="{Binding IsMetadataHudVisible, Mode=OneWay}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE946;" />
-                            </MenuItem.Icon>
+                            <MenuItem Header="Metadata HUD"
+                                      Command="{Binding ToggleMetadataHudCommand}"
+                                      InputGestureText="{Binding ShortcutTexts[metadata-hud]}"
+                                      IsCheckable="True"
+                                      IsChecked="{Binding IsMetadataHudVisible, Mode=OneWay}" />
                         </MenuItem>
                         <Separator />
-                        <MenuItem Header="Rotate left" Command="{Binding RotateCcwCommand}">
+                        <MenuItem Header="Edit">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE70F;" />
+                            </MenuItem.Icon>
+                            <MenuItem Header="Edit history" Command="{Binding OpenEditStackCommand}" InputGestureText="{Binding ShortcutTexts[edit-stack]}" />
+                            <Separator />
+                            <MenuItem Header="Adjustments…" Command="{Binding OpenAdjustmentsCommand}" InputGestureText="{Binding ShortcutTexts[adjustments]}" />
+                            <MenuItem Header="Effects…" Command="{Binding OpenEffectsCommand}" InputGestureText="{Binding ShortcutTexts[effects]}" />
+                            <MenuItem Header="Auto Enhance" Command="{Binding AutoEnhanceCommand}" InputGestureText="{Binding ShortcutTexts[auto-enhance]}" />
+                            <MenuItem Header="Annotations…" Command="{Binding OpenAnnotationsCommand}" />
+                            <Separator />
+                            <MenuItem Header="Local tools">
+                                <MenuItem Header="{Binding ExposureBrushModeText}"
+                                          Command="{Binding ToggleExposureBrushModeCommand}"
+                                          InputGestureText="{Binding ShortcutTexts[exposure-brush]}"
+                                          IsCheckable="True"
+                                          IsChecked="{Binding IsExposureBrushMode, Mode=OneWay}" />
+                                <MenuItem Header="{Binding RedEyeCorrectionModeText}"
+                                          Command="{Binding ToggleRedEyeModeCommand}"
+                                          InputGestureText="{Binding ShortcutTexts[red-eye]}"
+                                          IsCheckable="True"
+                                          IsChecked="{Binding IsRedEyeCorrectionMode, Mode=OneWay}" />
+                                <MenuItem Header="{Binding RetouchModeText}"
+                                          Command="{Binding ToggleRetouchModeCommand}"
+                                          InputGestureText="{Binding ShortcutTexts[retouch]}"
+                                          IsCheckable="True"
+                                          IsChecked="{Binding IsRetouchMode, Mode=OneWay}" />
+                                <MenuItem Header="{Binding SelectionModeText}"
+                                          Command="{Binding ToggleSelectionModeCommand}"
+                                          InputGestureText="{Binding ShortcutTexts[selection-mode]}"
+                                          IsCheckable="True"
+                                          IsChecked="{Binding IsSelectionMode, Mode=OneWay}" />
+                            </MenuItem>
+                            <MenuItem Header="Overlay">
+                                <MenuItem Header="{Binding OverlayModeText}"
+                                          Command="{Binding ToggleOverlayModeCommand}"
+                                          IsCheckable="True"
+                                          IsChecked="{Binding IsPinnedOverlayMode, Mode=OneWay}" />
+                                <MenuItem Header="Exit overlay"
+                                          Command="{Binding ExitOverlayModeCommand}"
+                                          InputGestureText="Ctrl+Alt+O" />
+                            </MenuItem>
+                        </MenuItem>
+                        <MenuItem Header="Transform">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7AD;" />
                             </MenuItem.Icon>
+                            <MenuItem Header="Resize…" Command="{Binding OpenResizeDialogCommand}" InputGestureText="{Binding ShortcutTexts[resize]}" />
+                            <MenuItem Header="Perspective…" Command="{Binding OpenPerspectiveCommand}" InputGestureText="{Binding ShortcutTexts[perspective]}" />
+                            <MenuItem Header="{Binding CropModeText}"
+                                      Command="{Binding ToggleCropModeCommand}"
+                                      InputGestureText="{Binding ShortcutTexts[crop-mode]}"
+                                      IsCheckable="True"
+                                      IsChecked="{Binding IsCropMode, Mode=OneWay}" />
+                            <Separator />
+                            <MenuItem Header="Rotate left" Command="{Binding RotateCcwCommand}" />
+                            <MenuItem Header="Rotate right" Command="{Binding RotateCwCommand}" />
+                            <MenuItem Header="Rotate 180°" Command="{Binding Rotate180Command}" />
+                            <MenuItem Header="Apply rotation to file" Command="{Binding ApplyRotationToFileCommand}" />
+                            <Separator />
+                            <MenuItem Header="Flip horizontal" Command="{Binding FlipHorizontalCommand}" />
+                            <MenuItem Header="Flip vertical" Command="{Binding FlipVerticalCommand}" />
                         </MenuItem>
-                        <MenuItem Header="Rotate right" Command="{Binding RotateCwCommand}">
+                        <MenuItem Header="Organize">
                             <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7AC;" />
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EC;" />
                             </MenuItem.Icon>
+                            <MenuItem Header="Reference board" Command="{Binding OpenReferenceBoardCommand}" InputGestureText="{Binding ShortcutTexts[reference-board]}" />
+                            <MenuItem Header="Duplicate cleanup" Command="{Binding OpenDuplicateCleanupCommand}" InputGestureText="{Binding ShortcutTexts[duplicate-cleanup]}" />
+                            <MenuItem Header="Semantic search" Command="{Binding OpenSemanticSearchCommand}" />
+                            <MenuItem Header="Tag relationships" Command="{Binding OpenTagGraphCommand}" InputGestureText="{Binding ShortcutTexts[tag-graph]}" />
+                            <MenuItem Header="Import inbox" Command="{Binding OpenImportInboxCommand}" InputGestureText="{Binding ShortcutTexts[import-inbox]}" />
                         </MenuItem>
-                        <MenuItem Header="Rotate 180°" Command="{Binding Rotate180Command}">
+                        <MenuItem Header="Workflow tools">
                             <MenuItem.Icon>
-                                <TextBlock FontSize="10.5"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource OverlayBrush}"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Text="180" />
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE945;" />
                             </MenuItem.Icon>
+                            <MenuItem Header="Macro actions" Command="{Binding OpenMacroActionsCommand}" InputGestureText="{Binding ShortcutTexts[macro-actions]}" />
+                            <MenuItem Header="Batch processor" Command="{Binding OpenBatchProcessorCommand}" InputGestureText="{Binding ShortcutTexts[batch-processor]}" />
+                            <Separator />
+                            <MenuItem Header="File health scan" Command="{Binding OpenFileHealthScanCommand}" InputGestureText="{Binding ShortcutTexts[file-health-scan]}" />
+                            <MenuItem Header="Recovery center" Command="{Binding OpenRecoveryCenterCommand}" />
+                            <MenuItem Header="Model manager" Command="{Binding OpenModelManagerCommand}" />
                         </MenuItem>
-                        <MenuItem Header="Apply rotation to file" Command="{Binding ApplyRotationToFileCommand}">
+                        <Separator />
+                        <MenuItem Header="File actions">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
+                            </MenuItem.Icon>
+                            <MenuItem Header="Reveal in Explorer" Command="{Binding RevealCommand}" />
+                            <MenuItem Header="Open with default app" Command="{Binding OpenInDefaultAppCommand}" />
+                            <Separator />
+                            <MenuItem Header="Copy">
+                                <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}" />
+                                <MenuItem Header="Copy image" Command="{Binding CopyImageCommand}" />
+                                <MenuItem Header="Copy image and path" Command="{Binding CopyImageAndPathCommand}" />
+                                <Separator />
+                                <MenuItem Header="Copy to folder…" Command="{Binding CopyToFolderCommand}" />
+                                <MenuItem Header="Copy to recent folder"
+                                          Tag="{Binding}"
+                                          ItemsSource="{Binding RecentTransferFolders}"
+                                          Visibility="{Binding RecentTransferFolders.Count, Converter={StaticResource BoolToVis}}">
+                                    <MenuItem.ItemContainerStyle>
+                                        <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                            <Setter Property="Header" Value="{Binding Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}" />
+                                            <Setter Property="ToolTip" Value="{Binding}" />
+                                            <Setter Property="Command" Value="{Binding Tag.CopyToFolderCommand, RelativeSource={RelativeSource AncestorType=MenuItem}}" />
+                                            <Setter Property="CommandParameter" Value="{Binding}" />
+                                        </Style>
+                                    </MenuItem.ItemContainerStyle>
+                                </MenuItem>
+                            </MenuItem>
+                            <MenuItem Header="Move">
+                                <MenuItem Header="Move to folder…" Command="{Binding MoveToFolderCommand}" />
+                                <MenuItem Header="Move to recent folder"
+                                          Tag="{Binding}"
+                                          ItemsSource="{Binding RecentTransferFolders}"
+                                          Visibility="{Binding RecentTransferFolders.Count, Converter={StaticResource BoolToVis}}">
+                                    <MenuItem.ItemContainerStyle>
+                                        <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                            <Setter Property="Header" Value="{Binding Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}" />
+                                            <Setter Property="ToolTip" Value="{Binding}" />
+                                            <Setter Property="Command" Value="{Binding Tag.MoveToFolderCommand, RelativeSource={RelativeSource AncestorType=MenuItem}}" />
+                                            <Setter Property="CommandParameter" Value="{Binding}" />
+                                        </Style>
+                                    </MenuItem.ItemContainerStyle>
+                                </MenuItem>
+                            </MenuItem>
+                            <Separator />
+                            <MenuItem Header="Strip GPS location" Command="{Binding StripLocationCommand}" />
+                            <MenuItem Header="Strip metadata">
+                                <MenuItem Header="Device info (make, model, serial)" Command="{Binding StripDeviceInfoCommand}" />
+                                <MenuItem Header="Timestamps" Command="{Binding StripTimestampsCommand}" />
+                                <MenuItem Header="Software and comments" Command="{Binding StripSoftwareCommand}" />
+                                <Separator />
+                                <MenuItem Header="All metadata" Command="{Binding StripAllMetadataCommand}" />
+                            </MenuItem>
+                            <MenuItem Header="Extract motion video"
+                                      Command="{Binding ExtractMotionVideoCommand}"
+                                      Visibility="{Binding IsMotionPhoto, Converter={StaticResource BoolToVis}}" />
+                        </MenuItem>
+                        <MenuItem Header="Output">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE74E;" />
                             </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Flip horizontal" Command="{Binding FlipHorizontalCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock FontFamily="Segoe UI Symbol"
-                                           FontSize="13"
-                                           Foreground="{StaticResource OverlayBrush}"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Text="↔" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Flip vertical" Command="{Binding FlipVerticalCommand}">
-                            <MenuItem.Icon>
-                                <TextBlock FontFamily="Segoe UI Symbol"
-                                           FontSize="13"
-                                           Foreground="{StaticResource OverlayBrush}"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Text="↕" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <Separator />
-                        <MenuItem Header="Set as desktop wallpaper">
-                            <MenuItem.Icon>
-                                <TextBlock FontFamily="Segoe UI Symbol"
-                                           FontSize="12"
-                                           Foreground="{StaticResource OverlayBrush}"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Text="▣" />
-                            </MenuItem.Icon>
-                            <MenuItem Header="Fill"
-                                      Command="{Binding SetAsWallpaperCommand}"
-                                      CommandParameter="Fill" />
-                            <MenuItem Header="Fit"
-                                      Command="{Binding SetAsWallpaperCommand}"
-                                      CommandParameter="Fit" />
-                            <MenuItem Header="Span"
-                                      Command="{Binding SetAsWallpaperCommand}"
-                                      CommandParameter="Span" />
-                            <MenuItem Header="Tile"
-                                      Command="{Binding SetAsWallpaperCommand}"
-                                      CommandParameter="Tile" />
+                            <MenuItem Header="Save a copy…" Command="{Binding SaveAsCopyCommand}" InputGestureText="{Binding ShortcutTexts[save-copy]}" />
+                            <MenuItem Header="Export workbench…" Command="{Binding OpenExportWorkbenchCommand}" InputGestureText="{Binding ShortcutTexts[export-workbench]}" />
+                            <Separator />
+                            <MenuItem Header="Print…" Command="{Binding PrintCommand}" InputGestureText="{Binding ShortcutTexts[print]}" />
+                            <MenuItem Header="Print to default printer" Command="{Binding PrintDefaultCommand}" />
+                            <MenuItem Header="Send to email" Command="{Binding SendToEmailCommand}" />
+                            <Separator />
+                            <MenuItem Header="Set as desktop wallpaper">
+                                <MenuItem Header="Fill"
+                                          Command="{Binding SetAsWallpaperCommand}"
+                                          CommandParameter="Fill" />
+                                <MenuItem Header="Fit"
+                                          Command="{Binding SetAsWallpaperCommand}"
+                                          CommandParameter="Fit" />
+                                <MenuItem Header="Span"
+                                          Command="{Binding SetAsWallpaperCommand}"
+                                          CommandParameter="Span" />
+                                <MenuItem Header="Tile"
+                                          Command="{Binding SetAsWallpaperCommand}"
+                                          CommandParameter="Tile" />
+                            </MenuItem>
                         </MenuItem>
                         <Separator />
                         <MenuItem Header="Move to Recycle Bin…" Command="{Binding DeleteCommand}" InputGestureText="{Binding ShortcutTexts[delete]}">

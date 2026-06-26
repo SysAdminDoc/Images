@@ -469,7 +469,7 @@
         <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="6" />
-        <Setter Property="MaxHeight" Value="680" />
+        <Setter Property="MaxHeight" Value="520" />
         <Setter Property="HasDropShadow" Value="True" />
         <Setter Property="Effect" Value="{StaticResource Elevation.Medium}" />
         <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI" />
@@ -567,7 +567,7 @@
                                     Padding="6"
                                     Effect="{StaticResource Elevation.Medium}"
                                     SnapsToDevicePixels="True">
-                                <ScrollViewer MaxHeight="620"
+                                <ScrollViewer MaxHeight="520"
                                               VerticalScrollBarVisibility="Auto"
                                               HorizontalScrollBarVisibility="Disabled"
                                               CanContentScroll="False">
