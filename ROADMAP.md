@@ -13,126 +13,103 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ## Audit-Surfaced Items
 
-- [ ] P1 — **PreloadService cache poisoning on cancellation**
-  Why: A faulted `Lazy<Task>` permanently poisons the cache slot. Cancelled preloads leave entries that always re-throw on subsequent access.
-  Where: `src/Images/Services/PreloadService.cs` (Enqueue, TryGetInFlight)
+- [ ] P2 — **ImportInboxService silent GPS strip failure**
+  Why: If `StripGpsMetadata` throws after file copy/move succeeds, the file lands at the destination with GPS intact but the import reports success. The user believes GPS was stripped.
+  Where: `src/Images/Services/ImportInboxService.cs` (ApplyPostImportEdits, line 217-226)
 
-- [ ] P1 — **ExifToolService executable path validation**
-  Why: `TryNormalizeExecutable` accepts any path to an existing file. If the configured path were attacker-controlled, a malicious executable could be launched.
-  Where: `src/Images/Services/ExifToolService.cs`
+- [ ] P2 — **TileService concurrent pyramid build race**
+  Why: Two threads can build the same tile pyramid simultaneously — both see no `pyramid.json`, both create tiles concurrently, potentially producing corrupt tile files from overlapping writes.
+  Where: `src/Images/Services/TileService.cs` (BuildPyramid, lines 88-171)
 
-- [ ] P2 — **RecoveryCenterService restore path re-validation**
-  Why: Deserialized paths from the JSONL log are used in `File.Move` without re-validation. A tampered log could move files to attacker-controlled locations.
-  Where: `src/Images/Services/RecoveryCenterService.cs` (Restore method)
+- [ ] P2 — **ExifToolService pipe-buffer deadlock on large output**
+  Why: stdout/stderr are read async but WaitForExit blocks synchronously. If ExifTool fills the OS pipe buffer (4-64KB), the process blocks on write while WaitForExit blocks on exit. Mitigated by timeout+kill but causes unnecessary 30s delays on large metadata sets.
+  Where: `src/Images/Services/ExifToolService.cs` (RunProcess, lines 118-129)
 
-- [ ] P2 — **ListenService per-connection idle timeout**
-  Why: `ReceiveTimeout` only works for synchronous reads; async `ReadAsync` can hold a connection open indefinitely with the session token.
-  Where: `src/Images/Services/ListenService.cs` (HandleClient)
-
-- [ ] P2 — **Slideshow shuffle index bounds check**
-  Why: If the file list changes between reading `_nav.Files.Count` and indexing `_nav.Files[nextIndex]`, an out-of-bounds access is possible.
-  Where: `src/Images/ViewModels/MainViewModel.cs` (SlideshowTimer_Tick)
-
-- [ ] P2 — **Theme-aware caption re-application on runtime theme switch**
-  Why: Window captions are applied once at SourceInitialized. Switching themes at runtime doesn't update already-open window captions.
-  Where: `src/Images/Services/WindowChrome.cs`, `src/Images/Services/ThemeService.cs`
-
-- [ ] P3 — **FolderPreviewController SemaphoreSlim not disposed**
-  Why: `_thumbnailDecodeGate` SemaphoreSlim is never disposed in `Dispose()`.
-  Where: `src/Images/ViewModels/FolderPreviewController.cs`
+- [ ] P3 — **DispatcherUnhandledException continues after fatal errors**
+  Why: `args.Handled = true` prevents WPF from terminating after any unhandled exception, including state-corrupting ones. The crash dialog shows but the app continues in an undefined state.
+  Where: `src/Images/App.xaml.cs` (DispatcherUnhandledException handler, line 67)
 
 ## Research-Driven Additions
 
-- [ ] P0 — **Verify Magick.NET bundled codec versions against critical 2026 CVEs**
-  Why: libheif CVE-2026-32740 (CVSS 8.8, heap-buffer-overflow via crafted HEIF/AVIF), libjxl CVE-2026-1837 (use-after-free), ImageMagick CVE-2026-25797 (RCE via PostScript injection). All fixed upstream but the bundled versions in Magick.NET 14.14.0 must be confirmed >= safe floors (libheif 1.22.2+, ImageMagick 7.1.2-15+).
-  Evidence: Snyk advisory database, NVD
-  Touches: `src/Images/Images.csproj` (package version), `src/Images/Services/ImageLoader.cs`, `src/Images/Services/CodecRuntime.cs`
-  Acceptance: Runtime probe or NuGet inspection confirms all bundled codec versions are at or above patched releases. If not, Magick.NET upgraded to a version that bundles them.
-  Complexity: S
+### P1
 
-- [ ] P0 — **Set Magick.NET ResourceLimits to prevent memory-bomb attacks**
-  Why: No `ResourceLimits.Memory`, `ResourceLimits.Width`, or `ResourceLimits.Height` calls exist anywhere in the codebase. CVE-2026-25985 demonstrates a 674 GB allocation attack via crafted SVG. Any untrusted SVG/PS/XBM file opened in Images can exhaust system memory.
-  Evidence: CVE-2026-25985, code grep for `ResourceLimits` returns zero hits
-  Touches: `src/Images/App.xaml.cs` (startup initialization), potentially `src/Images/Services/ImageLoader.cs`
-  Acceptance: `ResourceLimits.Memory`, `ResourceLimits.Width`, `ResourceLimits.Height`, and `ResourceLimits.Area` are set at app startup to safe defaults (e.g., 2 GB, 32768 px, 32768 px, 1 Gpx). Magick.NET operations on oversized input fail gracefully with a user-facing toast instead of OOM.
-  Complexity: S
+- [ ] P1 — Replace silent trust-path catches with logged diagnostics
+  Why: C2PA, contact sheet, ExifTool, listen-mode, and performance-report failures can currently disappear, which weakens supportability and trust.
+  Evidence: `src/Images/Services/C2paToolRuntime.cs`, `src/Images/ViewModels/C2paInspectionController.cs`, `src/Images/Services/ContactSheetService.cs`, `src/Images/Services/ExifToolService.cs`, `src/Images/Services/ListenService.cs`, C2PA 2.2 specification
+  Touches: `src/Images/Services/Log.cs`, `src/Images/Services/DiagnosticsStatusService.cs`, affected services/controllers, `tests/Images.Tests/`
+  Acceptance: No non-cleanup `catch { }` remains in those paths; failures log warning-level context, diagnostics show degraded status, and tests assert at least one representative logged/degraded path.
+  Complexity: M
 
-- [ ] P1 — **Validate SQLitePCLRaw embedded SQLite version**
-  Why: CVE-2025-6965 affects SQLite before 3.50.2 with memory corruption risk. SQLitePCLRaw 3.0.3 should bundle a patched version but the embedded `e_sqlite3` native library version has not been confirmed.
-  Evidence: NVD CVE-2025-6965
-  Touches: `src/Images/Images.csproj` (SQLitePCLRaw version), `tests/` (add version assertion test)
-  Acceptance: A test or startup diagnostic confirms the embedded SQLite version is >= 3.50.2. If not, SQLitePCLRaw upgraded.
-  Complexity: S
+- [ ] P1 — Add model-backed semantic search diagnostics and quality gates
+  Why: CLIP search now has approved model imports and provider code, but provider creation/preprocessing can silently fall back to deterministic metadata embeddings.
+  Evidence: `src/Images/Services/ClipEmbeddingProvider.cs`, `src/Images/Services/SemanticSearchService.cs`, `src/Images/Services/ModelManagerService.cs`, Excire Foto, Immich
+  Touches: `src/Images/Services/ClipEmbeddingProvider.cs`, `src/Images/Services/SemanticSearchService.cs`, `src/Images/SemanticSearchWindow.xaml(.cs)`, `tests/Images.Tests/`
+  Acceptance: Semantic search reports the exact active provider and fallback reason, logs model/preprocess failures, includes a small query-quality fixture, and keeps deterministic fallback explicit in UI.
+  Complexity: M
 
-- [ ] P1 — **Close remaining 21 untested service test gaps**
-  Why: 21 of 105 services lack dedicated test files. The most critical untested services are `ImageLoader` (796 lines, core decode path), `OcrService` (user-facing OCR feature), `PreloadService` (cache correctness), `CodecRuntime` (codec detection), and `CrashLog` (crash reporting reliability). Untested services are fragile to refactoring.
-  Evidence: `diff` of `src/Images/Services/*.cs` basenames vs `tests/Images.Tests/*Tests.cs` basenames
-  Touches: `tests/Images.Tests/` (new test files for each untested service)
-  Acceptance: Every service file in `src/Images/Services/` has a corresponding `*Tests.cs` file with at least basic construction and key-path coverage. Test count increases from 617 to ~700+.
+- [ ] P1 — Automate UIA coverage for secondary windows
+  Why: Accessibility docs cover many tool windows, but the smoke gate mostly verifies the main viewer and toolbar.
+  Evidence: `docs/accessibility.md`, `tests/Images.Tests/WpfSmokeTests.cs`, Microsoft WPF accessibility guidance
+  Touches: `tests/Images.Tests/WpfSmokeTests.cs`, `src/Images/*Window.xaml`, `docs/accessibility.md`
+  Acceptance: Smoke tests open at least Settings, About, Duplicate Cleanup, Semantic Search, Model Manager, and Import Inbox windows and assert automation names, keyboard reachability, and no empty critical HelpText.
+  Complexity: M
+
+### P2
+
+- [ ] P2 — Add local assisted culling score lane
+  Why: Images has review labels and duplicate cleanup, but no first-pass "best shot" assistance for large photo sets.
+  Evidence: Adobe Lightroom Classic assisted culling, Excire Foto, `src/Images/Services/DuplicateCleanupService.cs`, `src/Images/ViewModels/MainViewModel.cs`
+  Touches: `src/Images/Services/`, `src/Images/ViewModels/MainViewModel.cs`, `src/Images/MainWindow.xaml`, `tests/Images.Tests/`
+  Acceptance: Culling mode can rank a folder by local-only signals such as sharpness, exposure warnings, similarity, and existing ratings; every score shows its reason and can be applied as keep/reject without network access.
   Complexity: L
 
-- [ ] P1 — **Cold-start performance benchmark and optimization pass**
-  Why: IrfanView and FastStone open in sub-second; ImageGlass GitHub issue #794 specifically asks for faster launch. Microsoft Photos is called "bloatware." Images has `LaunchTiming` and `PerformanceBudgetService` infrastructure but no published benchmarks or optimization targets. Users choosing between viewers compare startup speed directly.
-  Evidence: ImageGlass #794, DonationCoder benchmarks, community forums
-  Touches: `src/Images/Services/LaunchTiming.cs`, `src/Images/App.xaml.cs`, `src/Images/MainWindow.xaml.cs`, potentially service initialization order
-  Acceptance: `--perf-report` output documents cold-start time on reference hardware. If >1 second, identify and defer non-critical initialization (catalog scan, thumbnail cache, ONNX runtime, settings migrations) to post-render.
+- [ ] P2 — Add C2PA export provenance handoff
+  Why: Images can inspect Content Credentials, but edited/exported files do not have a clear provenance-write or "not written" outcome.
+  Evidence: `src/Images/ViewModels/C2paInspectionController.cs`, `src/Images/Services/C2paManifestService.cs`, `src/Images/Services/ImageExportService.cs`, C2PA 2.2 specification
+  Touches: `src/Images/Services/ImageExportService.cs`, `src/Images/Services/C2paManifestService.cs`, `src/Images/ExportPreviewWindow.xaml(.cs)`, `tests/Images.Tests/`
+  Acceptance: Export preview states whether C2PA will be preserved, written through an approved configured runtime, or omitted; exported test files verify the expected manifest/no-manifest outcome.
+  Complexity: L
+
+- [ ] P2 — Add Picasa metadata migration importer
+  Why: The migration guide says Picasa requires dedicated `.picasa.ini` and `contacts.xml` parsing, but only standard XMP import exists today.
+  Evidence: `docs/migration-guide.md`, `src/Images/Services/XmpSidecarImportService.cs`, digiKam migration work
+  Touches: `src/Images/Services/PicasaImportService.cs`, `src/Images/ImportInboxWindow.xaml(.cs)`, `docs/migration-guide.md`, `tests/Images.Tests/`
+  Acceptance: Fixture `.picasa.ini` and `contacts.xml` files convert star ratings, albums, face rectangles, and contact names into XMP sidecars without modifying originals.
   Complexity: M
 
-- [ ] P1 — **Touch and gesture input for pan/zoom/navigate**
-  Why: No `ManipulationDelta`, `Stylus`, or WPF touch-input handling exists anywhere in the codebase. NeeView (same WPF/.NET 10 stack) has touch/gesture support. Windows tablets and touchscreen laptops are common. Pan, zoom, and next/prev navigation should respond to pinch-to-zoom, swipe, and drag gestures.
-  Evidence: NeeView feature set, code grep for `ManipulationDelta`/`Stylus`/`Touch` returns zero hits
-  Touches: `src/Images/Controls/ZoomPanImage.cs` (manipulation events), `src/Images/MainWindow.xaml.cs` (swipe navigation)
-  Acceptance: Pinch-to-zoom works on touchscreen. Swipe left/right navigates images. Single-finger drag pans when zoomed. Multi-touch does not conflict with mouse input.
+- [ ] P2 — Add pseudo-locale and overflow layout gate
+  Why: Localization infrastructure exists, but there are no locale files and no automated check that expanded strings fit premium WPF surfaces.
+  Evidence: `src/Images/Localization/Strings.resx`, `scripts/Test-LocalizationResources.ps1`, `docs/accessibility.md`
+  Touches: `src/Images/Localization/`, `scripts/Test-LocalizationResources.ps1`, `.github/workflows/ci.yml`, `tests/Images.Tests/`
+  Acceptance: CI can generate or validate a pseudo-locale, run resource parity, and smoke key windows with expanded text without clipping critical controls.
   Complexity: M
 
-- [ ] P2 — **Motion photo embedded video playback**
-  Why: `MotionPhotoService` detects and extracts embedded MP4 byte ranges from Samsung/Google motion photos but does not play or preview the video segment. ImageGlass 10 Beta 2 now plays motion photo video inline. Users with modern phones produce motion photos by default.
-  Evidence: ImageGlass 10 feature list, code inspection of `src/Images/Services/MotionPhotoService.cs`
-  Touches: `src/Images/Services/MotionPhotoService.cs`, `src/Images/ViewModels/MainViewModel.cs` (playback command), `src/Images/MainWindow.xaml` (video surface)
-  Acceptance: When a motion photo is displayed, a UI control allows playing the embedded MP4 segment inline. Playback uses `MediaElement` or equivalent WPF video surface. Non-motion photos are unaffected.
+- [ ] P2 — Promote background jobs into a primary activity surface
+  Why: Long-running indexing, batch, contact-sheet, scan, and model work should be visible without opening About.
+  Evidence: `src/Images/Services/BackgroundJobsService.cs`, `src/Images/Services/BackgroundTaskTracker.cs`, ACDSee activity-management patterns
+  Touches: `src/Images/MainWindow.xaml`, `src/Images/ViewModels/MainViewModel.cs`, `src/Images/Services/BackgroundJobsService.cs`, `tests/Images.Tests/`
+  Acceptance: The main viewer exposes a compact activity entry with running/faulted counts, recent job details, cancellation where supported, and screen-reader status updates.
   Complexity: M
 
-- [ ] P2 — **WCAG 2.5.7 drag alternatives audit for crop/pan/brush tools**
-  Why: WCAG 2.2 SC 2.5.7 requires that every drag operation has a non-drag alternative. Crop selection, pan, dodge/burn brush, clone/heal brush, and red-eye correction all use drag-only interaction. WCAG 2.5.8 target sizes were fixed (commit `e2e2bfe`) but 2.5.7 remains unaudited.
-  Evidence: WCAG 2.2 / ISO 40500:2025, code inspection of overlay controls
-  Touches: `src/Images/Controls/CropOverlay.xaml.cs`, `src/Images/Controls/LocalExposureBrushOverlay.xaml.cs`, `src/Images/Controls/RetouchBrushOverlay.xaml.cs`, `src/Images/Controls/RedEyeCorrectionOverlay.xaml.cs`, `src/Images/Controls/ZoomPanImage.cs`
-  Acceptance: Each drag-only tool has a documented non-drag alternative (arrow-key nudge for crop handles, keyboard pan for viewport, coordinate-entry fields for precise placement). Audit results documented in `docs/accessibility.md`.
+### P3
+
+- [ ] P3 — Resolve the Windows ML versus ONNX Runtime backend mismatch
+  Why: Model manager copy promises "Windows ML first", but runtime code only probes ONNX Runtime DirectML/CPU.
+  Evidence: `src/Images/Services/ModelManagerService.cs`, `src/Images/Services/OnnxRuntimeService.cs`, `src/Images/Images.csproj`, Microsoft Windows ML documentation
+  Touches: `src/Images/Services/OnnxRuntimeService.cs`, `src/Images/Services/ModelManagerService.cs`, `src/Images/Images.csproj`, `docs/integration-policy.md`
+  Acceptance: A code-backed decision either implements a Windows ML probe behind the existing service seam or updates product/runtime copy to ONNX-first; diagnostics and tests agree with the chosen backend contract.
   Complexity: M
 
-- [ ] P2 — **CycloneDX SBOM spec upgrade to 1.7**
-  Why: CycloneDX 1.7 (March 2026) adds ML-BOM support for ONNX model provenance and TLP distribution constraints. Images bundles ONNX Runtime and has a model manager — ML-BOM would declare approved model hashes in the SBOM alongside NuGet dependencies.
-  Evidence: CycloneDX 1.7 spec release notes
-  Touches: `.github/workflows/release.yml` (SBOM generation step), potentially `src/Images/Services/ModelManagerService.cs` (model hash declarations)
-  Acceptance: Release workflow generates CycloneDX 1.7 SBOM. ONNX model definitions from ModelManagerService are included as ML-BOM components with pinned SHA-256 hashes.
+- [ ] P3 — Build an HDR and color-management decision fixture set
+  Why: Competitors are moving toward HDR/color-managed preview, while Images currently reports color profile risk more than it transforms display output.
+  Evidence: `src/Images/Services/ImageColorAnalysisService.cs`, `src/Images/Services/ImageLoader.cs`, ImageGlass 10 roadmap, HN image-viewer color-management discussion
+  Touches: `tests/Images.Tests/Fixtures/`, `src/Images/Services/ImageLoader.cs`, `src/Images/ViewModels/ColorAnalysisController.cs`, `docs/codec-support-policy.md`
+  Acceptance: A fixture-backed test/diagnostic corpus covers ICC, wide-gamut, HDR-like, AVIF/JXL, and TIFF samples; the output documents whether WPF/Magick transforms are sufficient or a renderer/runtime decision must move to `Roadmap_Blocked.md`.
+  Complexity: M
+
+- [ ] P3 — Scout Lightroom collection migration from exported metadata
+  Why: The migration guide marks Lightroom catalog import as planned, but direct `.lrcat` parsing risks brittle schema coupling.
+  Evidence: `docs/migration-guide.md`, `src/Images/Services/XmpSidecarImportService.cs`, Lightroom Classic metadata export documentation
+  Touches: `src/Images/Services/XmpSidecarImportService.cs`, `docs/migration-guide.md`, `tests/Images.Tests/`
+  Acceptance: A small exported Lightroom fixture proves whether ratings, keywords, hierarchical subjects, labels, and collection membership can be imported from XMP or sidecar-adjacent data without reading private catalog tables.
   Complexity: S
-
-## Research-Driven Additions (2026-06-20 pass)
-
-- [ ] P1 — **Remove resolved CVE verification items from roadmap**
-  Why: Dependency audit confirmed all packages are at patched versions: Magick.NET 14.14.0 bundles libheif 1.23.0 + ImageMagick 7.1.2-25 (all CVEs fixed), SQLitePCLRaw 3.0.3 bundles SQLite 3.50.4+ (CVE-2025-6965 fixed). The two P0 "verify Magick.NET CVEs" and P1 "validate SQLitePCLRaw" items above are no longer actionable.
-  Evidence: Magick.NET 14.14.0 release notes, NuGet dependency chain analysis, Broadcom CVE advisory
-  Touches: `ROADMAP.md` (delete the three resolved items from the prior Research-Driven Additions section)
-  Acceptance: ROADMAP.md contains no items whose verification criteria are already met by current package versions.
-  Complexity: S
-
-- [ ] P1 — **Log tile processing errors in TileService instead of swallowing**
-  Why: `TileService.cs` lines 314, 474, and 515 have bare `catch { }` blocks that silently discard tile decode/render errors. Unlike process-kill or file-delete best-effort catches (appropriate), tile decode errors indicate format-specific display bugs that users need to diagnose. Silent swallowing makes tile-pyramid rendering failures invisible in logs.
-  Evidence: Code grep for bare catches in `TileService.cs`; contrast with `ImageLoader.cs` which logs all decode failures
-  Touches: `src/Images/Services/TileService.cs` (3 catch blocks)
-  Acceptance: All three catch blocks log at Warning level with the file path and exception message via `ILogger`. No user-facing UX change.
-  Complexity: S
-
-- [ ] P2 — **Detect and prefer Windows 11 24H2 native JPEG XL WIC codec**
-  Why: Windows 11 24H2 shipped a native JPEG XL WIC codec extension (v1.2.36.0). When installed, WIC can decode .jxl natively — faster than routing through Magick.NET and providing automatic Explorer thumbnail support. Images currently always falls back to Magick.NET for JXL. Detecting the WIC codec and preferring it when available would improve JXL decode performance and consistency with OS behavior.
-  Evidence: WindowsForum "Windows 11 24H2 Update: Embracing JPEG XL", gHacks JXL guide
-  Touches: `src/Images/Services/ImageLoader.cs` (WIC codec detection before Magick.NET fallback), `src/Images/Services/CodecCapabilityService.cs` (JXL WIC availability probe)
-  Acceptance: When the Windows JXL WIC codec is installed, `.jxl` files decode via WIC instead of Magick.NET. `--codec-report` output shows "JXL: WIC (native)" vs "JXL: Magick.NET (fallback)". No behavior change on systems without the codec.
-  Complexity: S
-
-- [ ] P2 — **Evaluate ImageSharp 4.0 for thumbnail generation**
-  Why: ImageSharp 4.0.0 (May 2026) shipped with Vector512 SIMD, decode-time color conversion, and faster JPEG hot paths. ThumbnailCache currently uses Magick.NET for 256-px WebP thumbnail generation. ImageSharp 4.0 may be significantly faster for this specific resize-and-encode workload, especially on folders with thousands of images.
-  Evidence: SixLabors ImageSharp 4.0.0 announcement (Vector512 SIMD, faster JPEG)
-  Touches: `src/Images/Services/ThumbnailCache.cs` (thumbnail generation path), `src/Images/Images.csproj` (add SixLabors.ImageSharp if evaluation proves worthwhile)
-  Acceptance: Benchmark compares Magick.NET vs ImageSharp 4.0 thumbnail generation on 100 mixed-format images. If ImageSharp is measurably faster, switch the thumbnail pipeline. If not, document the result and stay on Magick.NET.
-  Complexity: M
-
