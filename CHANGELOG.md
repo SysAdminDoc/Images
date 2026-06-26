@@ -6,6 +6,7 @@ All notable changes to **Images** are documented here.
 
 ### UX
 
+- **Premium main-viewer command polish** — Viewport context menus are now scroll-bounded, sectioned, and submenu-capable; first-run and side-panel launch actions use consistent ellipsis copy, icon semantics, and left-aligned compact tool buttons.
 - **Shared premium tool-window shell** — Secondary workbenches now use consistent header, sidebar, workspace, status-bar, icon-tile, and empty-state treatments so batch export, cleanup, recovery, model, semantic search, and edit tools feel like one coherent product surface.
 
 ### Fixes

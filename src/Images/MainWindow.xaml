@@ -57,6 +57,7 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE77F;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <Separator />
                         <MenuItem Header="Reference board" Command="{Binding OpenReferenceBoardCommand}" InputGestureText="{Binding ShortcutTexts[reference-board]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
@@ -72,7 +73,7 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8AB;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Compare with..." Command="{Binding CompareWithCommand}" InputGestureText="{Binding ShortcutTexts[compare-with]}">
+                        <MenuItem Header="Compare with…" Command="{Binding CompareWithCommand}" InputGestureText="{Binding ShortcutTexts[compare-with]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
                             </MenuItem.Icon>
@@ -122,6 +123,7 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EF;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <Separator />
                         <MenuItem Header="{Binding ReviewModeText}"
                                   Command="{Binding ToggleReviewModeCommand}"
                                   InputGestureText="{Binding ShortcutTexts[review-mode]}"
@@ -136,17 +138,17 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE81C;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Resize..." Command="{Binding OpenResizeDialogCommand}" InputGestureText="{Binding ShortcutTexts[resize]}">
+                        <MenuItem Header="Resize…" Command="{Binding OpenResizeDialogCommand}" InputGestureText="{Binding ShortcutTexts[resize]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8A1;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Adjustments..." Command="{Binding OpenAdjustmentsCommand}" InputGestureText="{Binding ShortcutTexts[adjustments]}">
+                        <MenuItem Header="Adjustments…" Command="{Binding OpenAdjustmentsCommand}" InputGestureText="{Binding ShortcutTexts[adjustments]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE790;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Effects..." Command="{Binding OpenEffectsCommand}" InputGestureText="{Binding ShortcutTexts[effects]}">
+                        <MenuItem Header="Effects…" Command="{Binding OpenEffectsCommand}" InputGestureText="{Binding ShortcutTexts[effects]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE945;" />
                             </MenuItem.Icon>
@@ -156,12 +158,12 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE950;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Perspective..." Command="{Binding OpenPerspectiveCommand}" InputGestureText="{Binding ShortcutTexts[perspective]}">
+                        <MenuItem Header="Perspective…" Command="{Binding OpenPerspectiveCommand}" InputGestureText="{Binding ShortcutTexts[perspective]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7A8;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Annotations..." Command="{Binding OpenAnnotationsCommand}">
+                        <MenuItem Header="Annotations…" Command="{Binding OpenAnnotationsCommand}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xED5C;" />
                             </MenuItem.Icon>
@@ -226,6 +228,7 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE711;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <Separator />
                         <MenuItem Header="Reload" Command="{Binding ReloadCommand}" InputGestureText="{Binding ShortcutTexts[reload]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE72C;" />
@@ -241,6 +244,7 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE76C;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <Separator />
                         <MenuItem Header="Save a copy…" Command="{Binding SaveAsCopyCommand}" InputGestureText="{Binding ShortcutTexts[save-copy]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE74E;" />
@@ -287,7 +291,7 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Copy to folder..." Command="{Binding CopyToFolderCommand}">
+                        <MenuItem Header="Copy to folder…" Command="{Binding CopyToFolderCommand}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8C8;" />
                             </MenuItem.Icon>
@@ -299,7 +303,7 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
                             </MenuItem.Icon>
                             <MenuItem.ItemContainerStyle>
-                                <Style TargetType="{x:Type MenuItem}">
+                                <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
                                     <Setter Property="Header" Value="{Binding Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}" />
                                     <Setter Property="ToolTip" Value="{Binding}" />
                                     <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.CopyToFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
@@ -307,7 +311,7 @@
                                 </Style>
                             </MenuItem.ItemContainerStyle>
                         </MenuItem>
-                        <MenuItem Header="Move to folder..." Command="{Binding MoveToFolderCommand}">
+                        <MenuItem Header="Move to folder…" Command="{Binding MoveToFolderCommand}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
                             </MenuItem.Icon>
@@ -319,7 +323,7 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
                             </MenuItem.Icon>
                             <MenuItem.ItemContainerStyle>
-                                <Style TargetType="{x:Type MenuItem}">
+                                <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
                                     <Setter Property="Header" Value="{Binding Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}" />
                                     <Setter Property="ToolTip" Value="{Binding}" />
                                     <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.MoveToFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
@@ -835,7 +839,7 @@
                                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                Margin="0,0,9,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Open image..."
+                                    <TextBlock Text="Open image…"
                                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                VerticalAlignment="Center" />
                                 </StackPanel>
@@ -3944,17 +3948,21 @@
                             <StackPanel Grid.Column="1"
                                         Margin="12,0,0,0">
                                 <Button Command="{Binding OpenTagGraphCommand}"
-                                        Style="{StaticResource ChromeButton}"
-                                        MinWidth="92"
+                                        Style="{StaticResource SidePanelToolButton}"
                                         AutomationProperties.Name="Open tag relationships">
-                                    <TextBlock Text="Tags" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE8EC;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Tags" VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </Button>
                                 <Button Command="{Binding OpenImportInboxCommand}"
-                                        Style="{StaticResource ChromeButton}"
-                                        MinWidth="92"
+                                        Style="{StaticResource SidePanelToolButton}"
                                         Margin="0,8,0,0"
                                         AutomationProperties.Name="Open import inbox">
-                                    <TextBlock Text="Inbox" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE8B7;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Inbox" VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </Button>
                             </StackPanel>
                         </Grid>
@@ -3984,31 +3992,39 @@
                             <StackPanel Grid.Column="1"
                                         Margin="12,0,0,0">
                                 <Button Command="{Binding OpenMacroActionsCommand}"
-                                        Style="{StaticResource ChromeButton}"
-                                        MinWidth="92"
+                                        Style="{StaticResource SidePanelToolButton}"
                                         AutomationProperties.Name="Open macro actions">
-                                    <TextBlock Text="Macros" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE945;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Macros" VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </Button>
                                 <Button Command="{Binding OpenBatchProcessorCommand}"
-                                        Style="{StaticResource ChromeButton}"
-                                        MinWidth="92"
+                                        Style="{StaticResource SidePanelToolButton}"
                                         Margin="0,8,0,0"
                                         AutomationProperties.Name="Open batch processor">
-                                    <TextBlock Text="Batch" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE8EF;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Batch" VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </Button>
                                 <Button Command="{Binding OpenModelManagerCommand}"
-                                        Style="{StaticResource ChromeButton}"
-                                        MinWidth="92"
+                                        Style="{StaticResource SidePanelToolButton}"
                                         Margin="0,8,0,0"
                                         AutomationProperties.Name="Open model manager">
-                                    <TextBlock Text="Models" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE950;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Models" VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </Button>
                                 <Button Command="{Binding OpenSemanticSearchCommand}"
-                                        Style="{StaticResource ChromeButton}"
-                                        MinWidth="92"
+                                        Style="{StaticResource SidePanelToolButton}"
                                         Margin="0,8,0,0"
                                         AutomationProperties.Name="Open semantic search">
-                                    <TextBlock Text="Search" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Search" VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </Button>
                             </StackPanel>
                         </Grid>
@@ -4038,24 +4054,30 @@
                             <StackPanel Grid.Column="1"
                                         Margin="12,0,0,0">
                                 <Button Command="{Binding OpenDuplicateCleanupCommand}"
-                                        Style="{StaticResource ChromeButton}"
-                                        MinWidth="86"
+                                        Style="{StaticResource SidePanelToolButton}"
                                         AutomationProperties.Name="Open duplicate cleanup">
-                                    <TextBlock Text="Duplicates" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE8C8;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Duplicates" VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </Button>
                                 <Button Command="{Binding OpenFileHealthScanCommand}"
-                                        Style="{StaticResource ChromeButton}"
-                                        MinWidth="86"
+                                        Style="{StaticResource SidePanelToolButton}"
                                         Margin="0,8,0,0"
                                         AutomationProperties.Name="Open file health scan">
-                                    <TextBlock Text="File health" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="File health" VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </Button>
                                 <Button Command="{Binding OpenRecoveryCenterCommand}"
-                                        Style="{StaticResource ChromeButton}"
-                                        MinWidth="86"
+                                        Style="{StaticResource SidePanelToolButton}"
                                         Margin="0,8,0,0"
                                         AutomationProperties.Name="Open recovery center">
-                                    <TextBlock Text="Recovery" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE777;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Recovery" VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </Button>
                             </StackPanel>
                         </Grid>

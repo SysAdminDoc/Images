@@ -228,6 +228,8 @@
         <Setter Property="FontSize" Value="13" />
         <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -238,8 +240,8 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Padding="{TemplateBinding Padding}"
                             SnapsToDevicePixels="True">
-                        <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                           RecognizesAccessKey="True" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -281,8 +283,8 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Padding="{TemplateBinding Padding}"
                             SnapsToDevicePixels="True">
-                        <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                           RecognizesAccessKey="True" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -328,8 +330,8 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Padding="{TemplateBinding Padding}"
                             SnapsToDevicePixels="True">
-                        <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                           RecognizesAccessKey="True" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -467,10 +469,12 @@
         <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="6" />
+        <Setter Property="MaxHeight" Value="680" />
         <Setter Property="HasDropShadow" Value="True" />
         <Setter Property="Effect" Value="{StaticResource Elevation.Medium}" />
         <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI" />
         <Setter Property="FontSize" Value="13" />
+        <Setter Property="KeyboardNavigation.DirectionalNavigation" Value="Cycle" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ContextMenu">
@@ -479,7 +483,13 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="{StaticResource Radius.Md.CR}"
                             Padding="{TemplateBinding Padding}">
-                        <StackPanel IsItemsHost="True" />
+                        <ScrollViewer MaxHeight="{TemplateBinding MaxHeight}"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      CanContentScroll="False">
+                            <StackPanel IsItemsHost="True"
+                                        KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </ScrollViewer>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -492,45 +502,81 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="MenuItem">
-                    <Border x:Name="Bd"
-                            Background="Transparent"
-                            CornerRadius="{StaticResource Radius.Sm.CR}"
-                            Padding="{TemplateBinding Padding}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="24" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <Grid Grid.Column="0"
-                                  Width="18"
-                                  Margin="0,0,10,0"
-                                  HorizontalAlignment="Center"
-                                  VerticalAlignment="Center">
-                                <ContentPresenter x:Name="IconPresenter"
-                                                  ContentSource="Icon"
-                                                  HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center" />
-                                <TextBlock x:Name="CheckGlyph"
-                                           Text="&#xE73E;"
+                    <Grid>
+                        <Border x:Name="Bd"
+                                Background="Transparent"
+                                CornerRadius="{StaticResource Radius.Sm.CR}"
+                                Padding="{TemplateBinding Padding}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="0"
+                                      Width="18"
+                                      Margin="0,0,10,0"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center">
+                                    <ContentPresenter x:Name="IconPresenter"
+                                                      ContentSource="Icon"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center" />
+                                    <TextBlock x:Name="CheckGlyph"
+                                               Text="&#xE73E;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource AccentBrush}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Opacity="0" />
+                                </Grid>
+                                <ContentPresenter Grid.Column="1"
+                                                  ContentSource="Header"
+                                                  VerticalAlignment="Center"
+                                                  RecognizesAccessKey="True" />
+                                <TextBlock x:Name="GestureText"
+                                           Grid.Column="2"
+                                           Text="{TemplateBinding InputGestureText}"
+                                           Foreground="{DynamicResource OverlayBrush}"
+                                           Margin="24,0,0,0"
+                                           VerticalAlignment="Center" />
+                                <TextBlock x:Name="SubmenuGlyph"
+                                           Grid.Column="3"
+                                           Text="&#xE76C;"
                                            FontFamily="{StaticResource IconFontFamily}"
-                                           FontSize="11"
-                                           Foreground="{DynamicResource AccentBrush}"
-                                           HorizontalAlignment="Center"
+                                           FontSize="10"
+                                           Foreground="{DynamicResource OverlayBrush}"
+                                           Margin="18,0,0,0"
                                            VerticalAlignment="Center"
-                                           Opacity="0" />
+                                           Visibility="Collapsed" />
                             </Grid>
-                            <ContentPresenter Grid.Column="1"
-                                              ContentSource="Header"
-                                              VerticalAlignment="Center"
-                                              RecognizesAccessKey="True" />
-                            <TextBlock Grid.Column="2"
-                                       Text="{TemplateBinding InputGestureText}"
-                                       Foreground="{DynamicResource OverlayBrush}"
-                                       Margin="24,0,0,0"
-                                       VerticalAlignment="Center" />
-                        </Grid>
-                    </Border>
+                        </Border>
+                        <Popup x:Name="PART_Popup"
+                               AllowsTransparency="True"
+                               Focusable="False"
+                               IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                               PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                               Placement="Right"
+                               PopupAnimation="Fade">
+                            <Border Background="{DynamicResource MantleBrush}"
+                                    BorderBrush="{DynamicResource HairlineBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource Radius.Md.CR}"
+                                    Padding="6"
+                                    Effect="{StaticResource Elevation.Medium}"
+                                    SnapsToDevicePixels="True">
+                                <ScrollViewer MaxHeight="620"
+                                              VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Disabled"
+                                              CanContentScroll="False">
+                                    <StackPanel IsItemsHost="True"
+                                                KeyboardNavigation.DirectionalNavigation="Cycle" />
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Bd" Property="Background" Value="#1A89B4FA" />
@@ -539,6 +585,14 @@
                         </Trigger>
                         <Trigger Property="IsHighlighted" Value="True">
                             <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface0Brush}" />
+                        </Trigger>
+                        <Trigger Property="HasItems" Value="True">
+                            <Setter TargetName="SubmenuGlyph" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="GestureText" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                        <Trigger Property="IsSubmenuOpen" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface0Brush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.45" />
@@ -1306,6 +1360,13 @@
         <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
+    <Style x:Key="SidePanelToolButton" TargetType="Button" BasedOn="{StaticResource ChromeButton}">
+        <Setter Property="MinWidth" Value="102" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
     </Style>
 
     <Style x:Key="EmptyStateCard" TargetType="Border" BasedOn="{StaticResource ElevatedCard}">
