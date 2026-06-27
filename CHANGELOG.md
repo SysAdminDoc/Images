@@ -11,6 +11,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixes
 
+- **Trust-path diagnostics no longer disappear silently** — C2PA runtime/manifest failures, contact-sheet degraded reads, listen-mode client errors, ExifTool cleanup failures, and performance-report storage failures now log contextual diagnostics; About diagnostics now shows C2PA runtime degraded/ready status.
 - **Dispatcher fatal exceptions no longer resume the WPF app** — the dispatcher crash path now logs, writes the crash record/minidump, shows the crash dialog, flushes logs, and returns unhandled so WPF terminates instead of continuing in an undefined state.
 - **ExifTool process output no longer risks pipe-buffer stalls** — the process runner now waits asynchronously while stdout and stderr drain, kills timed-out process trees, and preserves any completed output for diagnostics.
 - **Tile pyramid cache builds are serialized per image** — concurrent requests for the same deep-zoom pyramid now reuse a per-cache-key build lock, re-check the completed manifest inside the lock, and publish `pyramid.json` atomically after tiles are written.

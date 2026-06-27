@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
 
@@ -9,6 +10,7 @@ public static class C2paToolRuntime
     public const string EnvironmentVariable = "IMAGES_C2PATOOL_EXE";
 
     private const int VersionTimeoutMilliseconds = 3000;
+    private static readonly ILogger _log = Log.Get(nameof(C2paToolRuntime));
 
     public static C2paToolRuntimeStatus Inspect()
         => Inspect(AppContext.BaseDirectory, Environment.GetEnvironmentVariable(EnvironmentVariable));
@@ -81,7 +83,10 @@ public static class C2paToolRuntime
                 if (File.Exists(candidate))
                     return Path.GetFullPath(candidate);
             }
-            catch { }
+            catch (Exception ex) when (ex is ArgumentException or IOException or NotSupportedException or UnauthorizedAccessException or System.Security.SecurityException)
+            {
+                _log.LogWarning(ex, "Could not inspect PATH entry for c2patool: {Directory}", dir);
+            }
         }
 
         return null;
@@ -94,8 +99,9 @@ public static class C2paToolRuntime
             using var stream = File.OpenRead(executablePath);
             return Convert.ToHexStringLower(SHA256.HashData(stream));
         }
-        catch
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or NotSupportedException)
         {
+            _log.LogWarning(ex, "Could not compute SHA-256 for c2patool runtime {Path}", executablePath);
             return null;
         }
     }
@@ -117,8 +123,9 @@ public static class C2paToolRuntime
         {
             return Path.GetFullPath(path.Trim().Trim('"'));
         }
-        catch
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
         {
+            _log.LogWarning(ex, "Could not normalize c2patool path {Path}", path);
             return path.Trim().Trim('"');
         }
     }
@@ -138,12 +145,26 @@ public static class C2paToolRuntime
             psi.ArgumentList.Add("--version");
 
             using var process = Process.Start(psi);
-            if (process is null) return null;
+            if (process is null)
+            {
+                _log.LogWarning("Could not start c2patool to read version: {Path}", executablePath);
+                return null;
+            }
+
             var stdoutTask = process.StandardOutput.ReadToEndAsync();
             var stderrTask = process.StandardError.ReadToEndAsync();
             if (!process.WaitForExit(VersionTimeoutMilliseconds))
             {
-                try { process.Kill(entireProcessTree: true); } catch { }
+                _log.LogWarning("c2patool version probe timed out: {Path}", executablePath);
+                try
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+                catch (Exception ex)
+                {
+                    _log.LogWarning(ex, "Could not kill timed-out c2patool version probe: {Path}", executablePath);
+                }
+
                 return null;
             }
 
@@ -157,8 +178,9 @@ public static class C2paToolRuntime
                 .FirstOrDefault(line => line.Length > 0);
             return firstLine;
         }
-        catch
+        catch (Exception ex)
         {
+            _log.LogWarning(ex, "Could not read c2patool version: {Path}", executablePath);
             return null;
         }
     }

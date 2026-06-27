@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows.Threading;
 using Images.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Images.ViewModels;
 
@@ -8,12 +9,14 @@ public sealed class C2paInspectionController : IDisposable
 {
     public const string LoadingStatusText = "Checking content credentials...";
 
+    private static readonly ILogger _log = Log.Get(nameof(C2paInspectionController));
     private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(15);
 
     private readonly Dispatcher _uiDispatcher;
     private readonly Func<bool> _isDisposed;
     private readonly Func<string?> _currentPath;
     private readonly Func<string, C2paInspectionResult> _readManifest;
+    private readonly Func<C2paToolRuntimeStatus> _inspectRuntime;
     private readonly TimeSpan _timeout;
     private CancellationTokenSource _cts = new();
     private int _generation;
@@ -23,12 +26,14 @@ public sealed class C2paInspectionController : IDisposable
         Func<bool> isDisposed,
         Func<string?> currentPath,
         Func<string, C2paInspectionResult>? readManifest = null,
+        Func<C2paToolRuntimeStatus>? inspectRuntime = null,
         TimeSpan? timeout = null)
     {
         _uiDispatcher = uiDispatcher ?? throw new ArgumentNullException(nameof(uiDispatcher));
         _isDisposed = isDisposed ?? throw new ArgumentNullException(nameof(isDisposed));
         _currentPath = currentPath ?? throw new ArgumentNullException(nameof(currentPath));
         _readManifest = readManifest ?? C2paManifestService.Read;
+        _inspectRuntime = inspectRuntime ?? C2paToolRuntime.Inspect;
         _timeout = timeout ?? DefaultTimeout;
     }
 
@@ -63,9 +68,10 @@ public sealed class C2paInspectionController : IDisposable
 
     public void Refresh(string path)
     {
-        var runtime = C2paToolRuntime.Inspect();
+        var runtime = _inspectRuntime();
         if (!runtime.Available)
         {
+            _log.LogWarning("C2PA inspection unavailable: {Status}", runtime.StatusText);
             Clear();
             return;
         }
@@ -124,11 +130,13 @@ public sealed class C2paInspectionController : IDisposable
         }
         catch (TimeoutException)
         {
+            _log.LogWarning("C2PA inspection timed out for {File}", Path.GetFileName(path));
             _ = ObserveCompletionAsync(readTask);
             result = C2paInspectionResult.Error("C2PA inspection timed out.");
         }
-        catch
+        catch (Exception ex)
         {
+            _log.LogWarning(ex, "C2PA inspection failed for {File}", Path.GetFileName(path));
             result = C2paInspectionResult.Error("C2PA inspection failed.");
         }
 
@@ -162,7 +170,7 @@ public sealed class C2paInspectionController : IDisposable
     private static async Task ObserveCompletionAsync(Task task)
     {
         try { await task.ConfigureAwait(false); }
-        catch { }
+        catch (Exception ex) { _log.LogDebug(ex, "C2PA inspection background task completed after cancellation/timeout"); }
     }
 
     private static async Task DisposeSourceLaterAsync(CancellationTokenSource source)

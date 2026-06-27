@@ -34,6 +34,7 @@ public sealed class DiagnosticsStatusServiceTests
         Assert.Contains(items, item => item.Title == "Text extraction" && item.Tone == DiagnosticsStatusService.ReadyTone);
         Assert.Contains(items, item => item.Title == "Document previews" && item.Status == "Ghostscript ready");
         Assert.Contains(items, item => item.Title == "Image codecs" && item.Detail.Contains("14.13.0", StringComparison.Ordinal));
+        Assert.Contains(items, item => item.Title == "Content credentials" && item.Status == "c2patool ready" && item.Tone == DiagnosticsStatusService.ReadyTone);
         Assert.Contains(items, item => item.Title == "Logs" && item.Tone == DiagnosticsStatusService.ReadyTone);
         Assert.Contains(items, item => item.Title == "Storage" && item.Status == "Writable storage ready");
         Assert.Contains(items, item => item.Title == "Thumbnail cache" && item.Status == "Thumbnail cache ready" && item.Detail.Contains("42 files", StringComparison.Ordinal));
@@ -51,7 +52,13 @@ public sealed class DiagnosticsStatusServiceTests
                 GhostscriptDirectory = null,
                 GhostscriptVersion = null,
                 GhostscriptDllPath = null,
-                GhostscriptDllSha256 = null
+                GhostscriptDllSha256 = null,
+                C2paToolAvailable = false,
+                C2paToolExecutablePath = null,
+                C2paToolSource = "Not found",
+                C2paToolVersion = null,
+                C2paToolSha256 = null,
+                C2paToolStatus = "c2patool not found"
             },
             new OcrCapabilityService.OcrCapabilityStatus(
                 IsAvailable: false,
@@ -69,6 +76,7 @@ public sealed class DiagnosticsStatusServiceTests
 
         Assert.Contains(items, item => item.Title == "Text extraction" && item.Tone == DiagnosticsStatusService.WarningTone);
         Assert.Contains(items, item => item.Title == "Document previews" && item.Tone == DiagnosticsStatusService.WarningTone);
+        Assert.Contains(items, item => item.Title == "Content credentials" && item.Tone == DiagnosticsStatusService.WarningTone && item.Detail.Contains("degraded", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(items, item => item.Title == "Storage" && item.Tone == DiagnosticsStatusService.WarningTone);
         Assert.Contains(items, item => item.Title == "Update checks" && item.Tone == DiagnosticsStatusService.InfoTone);
     }
@@ -128,10 +136,10 @@ public sealed class DiagnosticsStatusServiceTests
             JpegTranVersion: "libjpeg-turbo 3.1.4.1",
             JpegTranSha256: "sha256:jpegtran-test",
             JpegTranStatus: "jpegtran available via app-local Codecs\\JpegTran",
-            C2paToolAvailable: false,
-            C2paToolExecutablePath: null,
-            C2paToolSource: "Not found",
-            C2paToolVersion: null,
-            C2paToolSha256: null,
-            C2paToolStatus: "c2patool not available");
+            C2paToolAvailable: true,
+            C2paToolExecutablePath: @"C:\Images\Codecs\C2paTool\c2patool.exe",
+            C2paToolSource: "app-local Codecs\\C2paTool",
+            C2paToolVersion: "c2patool 0.38.0",
+            C2paToolSha256: "sha256:c2pa-test",
+            C2paToolStatus: "c2patool available via app-local Codecs\\C2paTool");
 }

@@ -17,13 +17,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ### P1
 
-- [ ] P1 — Replace silent trust-path catches with logged diagnostics
-  Why: C2PA, contact sheet, ExifTool, listen-mode, and performance-report failures can currently disappear, which weakens supportability and trust.
-  Evidence: `src/Images/Services/C2paToolRuntime.cs`, `src/Images/ViewModels/C2paInspectionController.cs`, `src/Images/Services/ContactSheetService.cs`, `src/Images/Services/ExifToolService.cs`, `src/Images/Services/ListenService.cs`, C2PA 2.2 specification
-  Touches: `src/Images/Services/Log.cs`, `src/Images/Services/DiagnosticsStatusService.cs`, affected services/controllers, `tests/Images.Tests/`
-  Acceptance: No non-cleanup `catch { }` remains in those paths; failures log warning-level context, diagnostics show degraded status, and tests assert at least one representative logged/degraded path.
-  Complexity: M
-
 - [ ] P1 — Add model-backed semantic search diagnostics and quality gates
   Why: CLIP search now has approved model imports and provider code, but provider creation/preprocessing can silently fall back to deterministic metadata embeddings.
   Evidence: `src/Images/Services/ClipEmbeddingProvider.cs`, `src/Images/Services/SemanticSearchService.cs`, `src/Images/Services/ModelManagerService.cs`, Excire Foto, Immich

@@ -65,6 +65,12 @@ public static class DiagnosticsStatusService
                 ReadyTone,
                 "\uE8B9"),
             new(
+                "Content credentials",
+                provenance.C2paToolAvailable ? "c2patool ready" : "c2patool unavailable",
+                BuildC2paToolDetail(provenance),
+                provenance.C2paToolAvailable ? ReadyTone : WarningTone,
+                provenance.C2paToolAvailable ? "\uE8D7" : "\uE783"),
+            new(
                 "Logs",
                 Directory.Exists(logsPath) ? "Log folder ready" : "Log folder unavailable",
                 BuildLogsDetail(logsPath, crashLogPath),
@@ -113,6 +119,18 @@ public static class DiagnosticsStatusService
         => string.IsNullOrWhiteSpace(provenance.MagickAssemblyPath)
             ? provenance.MagickVersion
             : $"{provenance.MagickVersion} at {provenance.MagickAssemblyPath}";
+
+    private static string BuildC2paToolDetail(CodecCapabilityService.RuntimeProvenance provenance)
+    {
+        if (!provenance.C2paToolAvailable)
+            return $"{provenance.C2paToolStatus} C2PA inspection is degraded until c2patool is installed app-local, on PATH, or configured with IMAGES_C2PATOOL_EXE.";
+
+        var version = string.IsNullOrWhiteSpace(provenance.C2paToolVersion)
+            ? "version unavailable"
+            : provenance.C2paToolVersion;
+        var location = provenance.C2paToolExecutablePath ?? provenance.C2paToolSource;
+        return $"Using {version} from {location}. C2PA shows provenance, not truthfulness.";
+    }
 
     private static string BuildLogsDetail(string? logsPath, string crashLogPath)
     {

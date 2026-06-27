@@ -28,7 +28,7 @@ public sealed class ContactSheetServiceTests
         var plan = service.Plan([]);
 
         Assert.True(plan.IsEmpty);
-        Assert.Equal(0, plan.Cells.Count);
+        Assert.Empty(plan.Cells);
     }
 
     [Fact]

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
 
@@ -27,6 +28,7 @@ internal static class ExifToolService
     public const int DefaultTimeoutMilliseconds = 30000;
 
     private static readonly UTF8Encoding Utf8NoBom = new(encoderShouldEmitUTF8Identifier: false);
+    private static readonly ILogger _log = Log.Get(nameof(ExifToolService));
 
     public static ExifToolRunResult Run(
         string executablePath,
@@ -294,6 +296,9 @@ internal static class ExifToolService
             if (File.Exists(path))
                 File.Delete(path);
         }
-        catch { }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException)
+        {
+            _log.LogDebug(ex, "Could not delete temporary ExifTool argfile {Path}", path);
+        }
     }
 }

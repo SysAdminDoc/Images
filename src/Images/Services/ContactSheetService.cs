@@ -126,7 +126,7 @@ public sealed class ContactSheetService
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
-                    _log.LogDebug(ex, "Could not load thumbnail for contact sheet cell: {Path}", cell.SourcePath);
+                    _log.LogWarning(ex, "Could not load thumbnail for contact sheet cell: {Path}", cell.SourcePath);
                     drawables.FillColor(new MagickColor("#45475A"));
                     drawables.Rectangle(x, y, x + options.ThumbnailWidth, y + options.ThumbnailHeight);
                     drawables.FillColor(new MagickColor("#CDD6F4"));
@@ -182,7 +182,10 @@ public sealed class ContactSheetService
                 probe.Ping(path);
                 parts.Add($"{probe.Width}x{probe.Height}");
             }
-            catch { }
+            catch (Exception ex) when (ex is MagickException or IOException or UnauthorizedAccessException or InvalidOperationException or NotSupportedException)
+            {
+                _log.LogWarning(ex, "Could not read dimensions for contact sheet caption: {Path}", path);
+            }
         }
 
         return string.Join(" | ", parts);

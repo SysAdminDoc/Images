@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
 
@@ -14,6 +15,8 @@ public sealed record PerfMeasurement(
 
 public static class PerformanceBudgetService
 {
+    private static readonly ILogger _log = Log.Get(nameof(PerformanceBudgetService));
+
     public static string BuildReport()
     {
         var sb = new StringBuilder();
@@ -97,19 +100,28 @@ public static class PerformanceBudgetService
 
         var sw = Stopwatch.StartNew();
         var count = 0;
+        string? detail;
+        var passed = true;
         try
         {
             count = Directory.EnumerateFiles(testDir, "*", SearchOption.AllDirectories).Count();
+            detail = $"{count} files enumerated";
         }
-        catch { }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or DirectoryNotFoundException)
+        {
+            _log.LogWarning(ex, "Performance report could not enumerate thumbnail directory {Path}", testDir);
+            passed = false;
+            detail = $"Thumbnail directory scan failed: {ex.Message}";
+        }
+
         sw.Stop();
 
         return new PerfMeasurement(
             "Directory scan (thumbs)",
             sw.Elapsed.TotalMilliseconds,
             ThresholdMs: 5000,
-            Passed: sw.Elapsed.TotalMilliseconds < 5000,
-            Detail: $"{count} files enumerated");
+            Passed: passed && sw.Elapsed.TotalMilliseconds < 5000,
+            Detail: detail);
     }
 
     private static PerfMeasurement MeasureThumbnailCacheHealth()
@@ -129,19 +141,27 @@ public static class PerformanceBudgetService
     private static PerfMeasurement MeasureSettingsDbAccess()
     {
         var sw = Stopwatch.StartNew();
+        string? detail = null;
+        var passed = true;
         try
         {
             SettingsService.Instance.GetString("perf-probe", null);
         }
-        catch { }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or InvalidOperationException or Microsoft.Data.Sqlite.SqliteException)
+        {
+            _log.LogWarning(ex, "Performance report could not read settings database");
+            passed = false;
+            detail = $"Settings DB read failed: {ex.Message}";
+        }
+
         sw.Stop();
 
         return new PerfMeasurement(
             "Settings DB read",
             sw.Elapsed.TotalMilliseconds,
             ThresholdMs: 100,
-            Passed: sw.Elapsed.TotalMilliseconds < 100,
-            Detail: null);
+            Passed: passed && sw.Elapsed.TotalMilliseconds < 100,
+            Detail: detail);
     }
 
     private static PerfMeasurement MeasureMemorySnapshot()

@@ -131,7 +131,7 @@ public sealed class ListenService : IDisposable
         catch (OperationCanceledException) { }
         catch (Exception ex)
         {
-            _log.LogDebug(ex, "listen-mode: client error (non-fatal)");
+            _log.LogWarning(ex, "listen-mode: client error");
         }
     }
 
@@ -179,9 +179,9 @@ public sealed class ListenService : IDisposable
         {
             path = Path.GetFullPath(path);
         }
-        catch
+        catch (Exception ex) when (ex is ArgumentException or IOException or NotSupportedException or UnauthorizedAccessException or System.Security.SecurityException)
         {
-            _log.LogDebug("listen-mode: rejected path that could not be canonicalized");
+            _log.LogWarning(ex, "listen-mode: rejected path that could not be canonicalized");
             return false;
         }
 
@@ -222,7 +222,7 @@ public sealed class ListenService : IDisposable
         _cts?.Cancel();
 
         try { _listener?.Stop(); }
-        catch { }
+        catch (Exception ex) { _log.LogDebug(ex, "listen-mode: listener stop failed during dispose"); }
 
         _listener = null;
         _cts?.Dispose();

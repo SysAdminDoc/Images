@@ -2,12 +2,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
 
 public static class C2paManifestService
 {
     private const int ReadTimeoutMilliseconds = 10_000;
+    private static readonly ILogger _log = Log.Get(nameof(C2paManifestService));
 
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -72,13 +74,25 @@ public static class C2paManifestService
             {
                 using var process = Process.Start(psi);
                 if (process is null)
+                {
+                    _log.LogWarning("Failed to start c2patool process for {Path}", path);
                     return C2paInspectionResult.Error("Failed to start c2patool process.");
+                }
 
                 var stdoutTask = process.StandardOutput.ReadToEndAsync();
                 var stderrTask = process.StandardError.ReadToEndAsync();
                 if (!process.WaitForExit(ReadTimeoutMilliseconds))
                 {
-                    try { process.Kill(entireProcessTree: true); } catch { }
+                    _log.LogWarning("c2patool timed out reading {Path}", path);
+                    try
+                    {
+                        process.Kill(entireProcessTree: true);
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWarning(ex, "Could not kill timed-out c2patool process for {Path}", path);
+                    }
+
                     return C2paInspectionResult.Error("c2patool timed out reading this file.");
                 }
 
@@ -97,6 +111,11 @@ public static class C2paManifestService
                     return C2paInspectionResult.NoManifest("No C2PA content credentials found in this file.");
                 }
 
+                _log.LogWarning(
+                    "c2patool exited with code {ExitCode} for {Path}: {Error}",
+                    exitCode,
+                    path,
+                    TrimToFirstLine(stderr));
                 return C2paInspectionResult.Error(
                     $"c2patool exited with code {exitCode}: {TrimToFirstLine(stderr)}");
             }
@@ -108,6 +127,7 @@ public static class C2paManifestService
         }
         catch (Exception ex)
         {
+            _log.LogWarning(ex, "Failed to inspect C2PA manifest for {Path}", path);
             return C2paInspectionResult.Error($"Failed to inspect C2PA manifest: {ex.Message}");
         }
     }
@@ -158,6 +178,7 @@ public static class C2paManifestService
         }
         catch (JsonException ex)
         {
+            _log.LogWarning(ex, "Failed to parse C2PA manifest JSON");
             return C2paInspectionResult.Error($"Failed to parse C2PA manifest JSON: {ex.Message}");
         }
     }
@@ -316,7 +337,11 @@ public static class C2paManifestService
     private static string NormalizePath(string path)
     {
         try { return Path.GetFullPath(path); }
-        catch { return path; }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            _log.LogWarning(ex, "Could not normalize C2PA target path {Path}", path);
+            return path;
+        }
     }
 }
 
