@@ -46,7 +46,8 @@ public sealed record SemanticSearchStatus(
     string ProviderId,
     string ModelId,
     int Dimensions,
-    string ProviderStatus);
+    string ProviderStatus,
+    string? ProviderFallbackReason);
 
 public sealed class SemanticSearchService
 {
@@ -68,16 +69,19 @@ public sealed class SemanticSearchService
         string? dbPath,
         CatalogService? catalog = null,
         ISemanticEmbeddingProvider? provider = null,
-        Func<DateTimeOffset>? clock = null)
+        Func<DateTimeOffset>? clock = null,
+        Func<(ISemanticEmbeddingProvider? Provider, string? FallbackReason)>? clipProviderFactory = null)
     {
         _dbPath = string.IsNullOrWhiteSpace(dbPath)
             ? CreateDefaultPath()
             : Path.GetFullPath(dbPath);
         _catalog = catalog ?? new CatalogService();
-        string? clipFallbackReason = null;
-        _provider = provider ?? TryCreateClipProvider(out clipFallbackReason) ?? new DeterministicSemanticEmbeddingProvider();
+        var clipProvider = provider is null
+            ? (clipProviderFactory?.Invoke() ?? TryCreateClipProvider())
+            : (provider, null);
+        _provider = clipProvider.Provider ?? new DeterministicSemanticEmbeddingProvider();
         ClipFallbackReason = _provider is DeterministicSemanticEmbeddingProvider
-            ? (clipFallbackReason ?? "CLIP models not available; using deterministic metadata embeddings.")
+            ? (clipProvider.FallbackReason ?? "CLIP models not available; using deterministic metadata embeddings.")
             : null;
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
 
@@ -245,7 +249,8 @@ public sealed class SemanticSearchService
                 _provider.ProviderId,
                 _provider.ModelId,
                 _provider.Dimensions,
-                _provider.StatusText);
+                _provider.StatusText,
+                ClipFallbackReason);
         }
 
         try
@@ -273,12 +278,13 @@ public sealed class SemanticSearchService
                 _provider.ProviderId,
                 _provider.ModelId,
                 _provider.Dimensions,
-                _provider.StatusText);
+                _provider.StatusText,
+                ClipFallbackReason);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or InvalidOperationException or NotSupportedException or SqliteException)
         {
             Log.LogWarning(ex, "Semantic search status failed");
-            return new SemanticSearchStatus(_dbPath, false, 0, null, _provider.ProviderId, _provider.ModelId, _provider.Dimensions, _provider.StatusText);
+            return new SemanticSearchStatus(_dbPath, false, 0, null, _provider.ProviderId, _provider.ModelId, _provider.Dimensions, _provider.StatusText, ClipFallbackReason);
         }
     }
 
@@ -561,20 +567,25 @@ public sealed class SemanticSearchService
         string MatchedText,
         DateTimeOffset IndexedUtc);
 
-    private static ISemanticEmbeddingProvider? TryCreateClipProvider(out string? fallbackReason)
+    private static (ISemanticEmbeddingProvider? Provider, string? FallbackReason) TryCreateClipProvider()
     {
-        fallbackReason = null;
         try
         {
             var provider = ClipEmbeddingProvider.TryCreate();
             if (provider is null)
-                fallbackReason = "CLIP model files not ready or ONNX session creation failed.";
-            return provider;
+            {
+                var fallbackReason = "CLIP model files not ready or ONNX session creation failed.";
+                Log.LogWarning("Semantic search falling back to deterministic embeddings: {Reason}", fallbackReason);
+                return (null, fallbackReason);
+            }
+
+            return (provider, null);
         }
         catch (Exception ex)
         {
-            fallbackReason = $"CLIP provider creation failed: {ex.Message}";
-            return null;
+            var fallbackReason = $"CLIP provider creation failed: {ex.Message}";
+            Log.LogWarning(ex, "Semantic search falling back to deterministic embeddings: {Reason}", fallbackReason);
+            return (null, fallbackReason);
         }
     }
 }

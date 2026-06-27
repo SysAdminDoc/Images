@@ -17,13 +17,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ### P1
 
-- [ ] P1 — Add model-backed semantic search diagnostics and quality gates
-  Why: CLIP search now has approved model imports and provider code, but provider creation/preprocessing can silently fall back to deterministic metadata embeddings.
-  Evidence: `src/Images/Services/ClipEmbeddingProvider.cs`, `src/Images/Services/SemanticSearchService.cs`, `src/Images/Services/ModelManagerService.cs`, Excire Foto, Immich
-  Touches: `src/Images/Services/ClipEmbeddingProvider.cs`, `src/Images/Services/SemanticSearchService.cs`, `src/Images/SemanticSearchWindow.xaml(.cs)`, `tests/Images.Tests/`
-  Acceptance: Semantic search reports the exact active provider and fallback reason, logs model/preprocess failures, includes a small query-quality fixture, and keeps deterministic fallback explicit in UI.
-  Complexity: M
-
 - [ ] P1 — Automate UIA coverage for secondary windows
   Why: Accessibility docs cover many tool windows, but the smoke gate mostly verifies the main viewer and toolbar.
   Evidence: `docs/accessibility.md`, `tests/Images.Tests/WpfSmokeTests.cs`, Microsoft WPF accessibility guidance

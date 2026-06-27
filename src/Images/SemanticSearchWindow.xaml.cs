@@ -235,7 +235,10 @@ public partial class SemanticSearchWindow : Window
     private void RefreshStatus()
     {
         var status = _semanticSearch.GetStatus();
-        ProviderStatusText.Text = Strings.Format(nameof(Strings.SemanticSearchProviderStatusFormat), status.ProviderStatus, status.ModelId, status.ProviderId, status.Dimensions);
+        var providerStatus = string.IsNullOrWhiteSpace(status.ProviderFallbackReason)
+            ? status.ProviderStatus
+            : $"{status.ProviderStatus} {status.ProviderFallbackReason}";
+        ProviderStatusText.Text = Strings.Format(nameof(Strings.SemanticSearchProviderStatusFormat), providerStatus, status.ModelId, status.ProviderId, status.Dimensions);
         IndexStatusText.Text = status.IsAvailable
             ? Strings.Format(nameof(Strings.SemanticSearchIndexStatusFormat), status.IndexedCount, Plural(status.IndexedCount), status.IndexPath, status.LastIndexedUtc is null ? Strings.SemanticSearchIndexStatusNever : status.LastIndexedUtc.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture))
             : Strings.SemanticSearchStorageUnavailable;

@@ -1,6 +1,7 @@
 using System.IO;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
+using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
 
@@ -12,6 +13,7 @@ public sealed class ClipEmbeddingProvider : ISemanticEmbeddingProvider, IDisposa
     public const string PreprocessorId = "qdrant-clip-vit-b32-preprocessor";
 
     private const int EmbeddingDimensions = 512;
+    private static readonly ILogger _log = Log.Get(nameof(ClipEmbeddingProvider));
 
     private readonly InferenceSession _textSession;
     private readonly InferenceSession _visionSession;
@@ -54,6 +56,12 @@ public sealed class ClipEmbeddingProvider : ISemanticEmbeddingProvider, IDisposa
             tokenizerModel?.IsReady != true ||
             preprocessorModel?.IsReady != true)
         {
+            _log.LogWarning(
+                "CLIP provider unavailable: text={TextReady}, vision={VisionReady}, tokenizer={TokenizerReady}, preprocessor={PreprocessorReady}",
+                textModel?.IsReady == true,
+                visionModel?.IsReady == true,
+                tokenizerModel?.IsReady == true,
+                preprocessorModel?.IsReady == true);
             return null;
         }
 
@@ -70,8 +78,9 @@ public sealed class ClipEmbeddingProvider : ISemanticEmbeddingProvider, IDisposa
 
             return new ClipEmbeddingProvider(textSession, visionSession, tokenizer, preprocessor, statusText);
         }
-        catch
+        catch (Exception ex)
         {
+            _log.LogWarning(ex, "CLIP provider creation failed");
             return null;
         }
     }
@@ -124,8 +133,9 @@ public sealed class ClipEmbeddingProvider : ISemanticEmbeddingProvider, IDisposa
         {
             pixelData = _preprocessor.Preprocess(path);
         }
-        catch
+        catch (Exception ex)
         {
+            _log.LogWarning(ex, "CLIP image preprocessing failed for {Path}", path);
             return new float[EmbeddingDimensions];
         }
 

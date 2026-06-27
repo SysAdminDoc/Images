@@ -41,6 +41,38 @@ public sealed class SemanticSearchServiceTests
     }
 
     [Fact]
+    public void Search_DeterministicFallbackRanksDocumentQuery()
+    {
+        using var temp = TestDirectory.Create();
+        WriteImage(temp.Path, "sunset-over-water.png", 16, 8);
+        var receipt = WriteImage(temp.Path, "receipt-paper-scan.png", 8, 16);
+        var service = CreateService(temp.Path);
+        service.Rebuild([temp.Path]);
+
+        var matches = service.Search("document receipt", limit: 2);
+
+        Assert.NotEmpty(matches);
+        Assert.Equal(Path.GetFullPath(receipt), matches[0].SourcePath);
+    }
+
+    [Fact]
+    public void GetStatus_WhenClipProviderFallsBack_ReportsReason()
+    {
+        using var temp = TestDirectory.Create();
+        var service = new SemanticSearchService(
+            Path.Combine(temp.Path, "semantic-index.db"),
+            new CatalogService(Path.Combine(temp.Path, "catalog.db")),
+            clock: () => new DateTimeOffset(2026, 5, 17, 12, 0, 0, TimeSpan.Zero),
+            clipProviderFactory: () => (null, "CLIP fixture unavailable."));
+
+        var status = service.GetStatus();
+
+        Assert.Equal("deterministic-local-metadata", status.ProviderId);
+        Assert.Equal("CLIP fixture unavailable.", status.ProviderFallbackReason);
+        Assert.Contains("Deterministic local metadata", status.ProviderStatus, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Rebuild_WhenCanceledKeepsPreviousSemanticIndexUsable()
     {
         using var temp = TestDirectory.Create();
