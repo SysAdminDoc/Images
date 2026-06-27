@@ -102,7 +102,7 @@ public sealed class TileServiceTests
     }
 
     [Fact]
-    public void BuildPyramid_ConcurrentRequestsReuseSingleCacheDirectory()
+    public async Task BuildPyramid_ConcurrentRequestsReuseSingleCacheDirectory()
     {
         using var temp = TestDirectory.Create();
         var source = Path.Combine(temp.Path, "source.png");
@@ -121,7 +121,7 @@ public sealed class TileServiceTests
             .ToArray();
 
         start.Set();
-        Task.WaitAll(tasks);
+        await Task.WhenAll(tasks);
 
         var completed = results.Select(result => Assert.IsType<TilePyramidInfo>(result)).ToArray();
         var cacheDirectory = Assert.Single(completed.Select(result => result.CacheDirectory).Distinct(StringComparer.OrdinalIgnoreCase));
