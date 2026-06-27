@@ -11,6 +11,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixes
 
+- **Dispatcher fatal exceptions no longer resume the WPF app** — the dispatcher crash path now logs, writes the crash record/minidump, shows the crash dialog, flushes logs, and returns unhandled so WPF terminates instead of continuing in an undefined state.
 - **ExifTool process output no longer risks pipe-buffer stalls** — the process runner now waits asynchronously while stdout and stderr drain, kills timed-out process trees, and preserves any completed output for diagnostics.
 - **Tile pyramid cache builds are serialized per image** — concurrent requests for the same deep-zoom pyramid now reuse a per-cache-key build lock, re-check the completed manifest inside the lock, and publish `pyramid.json` atomically after tiles are written.
 - **Import inbox GPS-strip failures are no longer silent** — when a requested GPS metadata strip fails after a copy or move, the import is reported as failed and the transferred file is rolled back where possible so a GPS-bearing file is not silently accepted into the destination.

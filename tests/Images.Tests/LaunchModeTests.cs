@@ -55,4 +55,39 @@ public sealed class LaunchModeTests
         Assert.Contains("session token as the first line", help, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("tcp://127.0.0.1:<port>", help, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void ReportDispatcherUnhandledException_ReturnsUnhandledAfterReportingCrash()
+    {
+        var exception = new InvalidOperationException("boom");
+        var calls = new List<string>();
+
+        var handled = Images.App.ReportDispatcherUnhandledException(
+            exception,
+            ex =>
+            {
+                Assert.Same(exception, ex);
+                calls.Add("log");
+            },
+            ex =>
+            {
+                Assert.Same(exception, ex);
+                calls.Add("crash-log");
+            },
+            () =>
+            {
+                calls.Add("dump");
+                return "crash.dmp";
+            },
+            (ex, dumpPath) =>
+            {
+                Assert.Same(exception, ex);
+                Assert.Equal("crash.dmp", dumpPath);
+                calls.Add("dialog");
+            },
+            () => calls.Add("flush"));
+
+        Assert.False(handled);
+        Assert.Equal(["log", "crash-log", "dump", "dialog", "flush"], calls);
+    }
 }

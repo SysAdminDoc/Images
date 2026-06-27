@@ -13,10 +13,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ## Audit-Surfaced Items
 
-- [ ] P3 — **DispatcherUnhandledException continues after fatal errors**
-  Why: `args.Handled = true` prevents WPF from terminating after any unhandled exception, including state-corrupting ones. The crash dialog shows but the app continues in an undefined state.
-  Where: `src/Images/App.xaml.cs` (DispatcherUnhandledException handler, line 67)
-
 ## Research-Driven Additions
 
 ### P1

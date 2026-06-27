@@ -59,11 +59,13 @@ public partial class App : Application
         // user-actionable surface; Log.For<App>() is the forensic surface.
         DispatcherUnhandledException += (_, args) =>
         {
-            _log.LogError(args.Exception, "DispatcherUnhandledException");
-            CrashLog.Append("DispatcherUnhandledException", args.Exception);
-            var dumpPath = CrashLog.TryWriteMiniDump();
-            CrashDialog.Show(args.Exception, dumpPath);
-            args.Handled = true;
+            args.Handled = ReportDispatcherUnhandledException(
+                args.Exception,
+                ex => _log.LogCritical(ex, "DispatcherUnhandledException"),
+                ex => CrashLog.Append("DispatcherUnhandledException", ex),
+                CrashLog.TryWriteMiniDump,
+                CrashDialog.Show,
+                Log.Shutdown);
         };
 
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
@@ -201,5 +203,28 @@ public partial class App : Application
 
         resolved = full;
         return true;
+    }
+
+    internal static bool ReportDispatcherUnhandledException(
+        Exception exception,
+        Action<Exception> logException,
+        Action<Exception> appendCrashLog,
+        Func<string?> writeMiniDump,
+        Action<Exception, string?> showCrashDialog,
+        Action flushLogs)
+    {
+        try
+        {
+            logException(exception);
+            appendCrashLog(exception);
+            var dumpPath = writeMiniDump();
+            showCrashDialog(exception, dumpPath);
+        }
+        finally
+        {
+            flushLogs();
+        }
+
+        return false;
     }
 }
