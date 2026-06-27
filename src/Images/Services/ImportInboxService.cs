@@ -3,6 +3,7 @@ using System.IO;
 using System.Security;
 using System.Security.Cryptography;
 using System.Xml.Linq;
+using ImageMagick;
 using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
@@ -195,7 +196,16 @@ public sealed class ImportInboxService
                 else
                     File.Copy(sourcePath, destinationPath);
 
-                ApplyPostImportEdits(destinationPath, request);
+                try
+                {
+                    ApplyPostImportEdits(destinationPath, request);
+                }
+                catch
+                {
+                    RollBackFailedTransfer(sourcePath, destinationPath, request.MoveOriginal);
+                    throw;
+                }
+
                 imported.Add(new ImportInboxCommitMove(sourcePath, destinationPath, request.MoveOriginal));
             }
             catch (OperationCanceledException)
@@ -220,9 +230,10 @@ public sealed class ImportInboxService
             {
                 MetadataEditService.StripGpsMetadata(destinationPath);
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or NotSupportedException or InvalidOperationException)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or NotSupportedException or InvalidOperationException or MagickException)
             {
                 Log.LogWarning(ex, "Could not strip GPS metadata from imported file {Path}", destinationPath);
+                throw new InvalidOperationException("GPS metadata could not be stripped from the imported file.", ex);
             }
         }
 
@@ -241,6 +252,28 @@ public sealed class ImportInboxService
                extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
                extension.Equals(".tif", StringComparison.OrdinalIgnoreCase) ||
                extension.Equals(".tiff", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void RollBackFailedTransfer(string sourcePath, string destinationPath, bool movedOriginal)
+    {
+        try
+        {
+            if (!File.Exists(destinationPath))
+                return;
+
+            if (movedOriginal)
+            {
+                if (!File.Exists(sourcePath))
+                    File.Move(destinationPath, sourcePath);
+                return;
+            }
+
+            File.Delete(destinationPath);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
+        {
+            Log.LogWarning(ex, "Could not roll back failed import from {SourcePath} to {DestinationPath}", sourcePath, destinationPath);
+        }
     }
 
     private static List<string> CollectSupportedFiles(

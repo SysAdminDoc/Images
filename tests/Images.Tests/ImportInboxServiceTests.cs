@@ -77,6 +77,44 @@ public sealed class ImportInboxServiceTests
         Assert.True(File.Exists(move.DestinationPath));
     }
 
+    [Fact]
+    public void Commit_CopyWithGpsStripFailureReportsFailureAndDeletesDestinationCopy()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Directory.CreateDirectory(Path.Combine(temp.Path, "source")).FullName;
+        var destination = Directory.CreateDirectory(Path.Combine(temp.Path, "library")).FullName;
+        var sourcePath = WriteFile(source, "photo.jpg", [1, 2, 3]);
+
+        var result = new ImportInboxService().Commit(
+            [new ImportInboxCommitRequest(sourcePath, destination, "", null, StripGps: true, MoveOriginal: false)]);
+
+        Assert.Empty(result.Imported);
+        var failure = Assert.Single(result.Failed);
+        Assert.Equal(sourcePath, failure.Path);
+        Assert.Contains("GPS metadata", failure.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.True(File.Exists(sourcePath));
+        Assert.False(File.Exists(Path.Combine(destination, "photo.jpg")));
+    }
+
+    [Fact]
+    public void Commit_MoveWithGpsStripFailureReportsFailureAndRestoresOriginal()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Directory.CreateDirectory(Path.Combine(temp.Path, "source")).FullName;
+        var destination = Directory.CreateDirectory(Path.Combine(temp.Path, "library")).FullName;
+        var sourcePath = WriteFile(source, "photo.jpg", [1, 2, 3]);
+
+        var result = new ImportInboxService().Commit(
+            [new ImportInboxCommitRequest(sourcePath, destination, "", null, StripGps: true, MoveOriginal: true)]);
+
+        Assert.Empty(result.Imported);
+        var failure = Assert.Single(result.Failed);
+        Assert.Equal(sourcePath, failure.Path);
+        Assert.Contains("GPS metadata", failure.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.True(File.Exists(sourcePath));
+        Assert.False(File.Exists(Path.Combine(destination, "photo.jpg")));
+    }
+
     private static string WriteFile(string folder, string name, byte[] bytes)
     {
         var path = Path.Combine(folder, name);

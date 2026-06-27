@@ -11,6 +11,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixes
 
+- **Import inbox GPS-strip failures are no longer silent** — when a requested GPS metadata strip fails after a copy or move, the import is reported as failed and the transferred file is rolled back where possible so a GPS-bearing file is not silently accepted into the destination.
 - **APNG export capability correction** — Save/export no longer advertises APNG as a writable target when the runtime cannot encode it reliably. APNG files still open and inspect as before; `.apng` export targets resolve to PNG.
 
 - **Parallel batch filename collision** — `RunAsync` now reserves output filenames via `ConcurrentDictionary` across parallel tasks, preventing TOCTOU races where two concurrent writes could silently overwrite the same output file. Also removed a pre-loop cancellation check that could leave null entries in the task array, causing `Task.WhenAll` to throw `ArgumentException` instead of `OperationCanceledException`.

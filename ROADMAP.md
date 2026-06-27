@@ -13,10 +13,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ## Audit-Surfaced Items
 
-- [ ] P2 — **ImportInboxService silent GPS strip failure**
-  Why: If `StripGpsMetadata` throws after file copy/move succeeds, the file lands at the destination with GPS intact but the import reports success. The user believes GPS was stripped.
-  Where: `src/Images/Services/ImportInboxService.cs` (ApplyPostImportEdits, line 217-226)
-
 - [ ] P2 — **TileService concurrent pyramid build race**
   Why: Two threads can build the same tile pyramid simultaneously — both see no `pyramid.json`, both create tiles concurrently, potentially producing corrupt tile files from overlapping writes.
   Where: `src/Images/Services/TileService.cs` (BuildPyramid, lines 88-171)
