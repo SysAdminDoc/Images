@@ -11,6 +11,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixes
 
+- **Tile pyramid cache builds are serialized per image** — concurrent requests for the same deep-zoom pyramid now reuse a per-cache-key build lock, re-check the completed manifest inside the lock, and publish `pyramid.json` atomically after tiles are written.
 - **Import inbox GPS-strip failures are no longer silent** — when a requested GPS metadata strip fails after a copy or move, the import is reported as failed and the transferred file is rolled back where possible so a GPS-bearing file is not silently accepted into the destination.
 - **APNG export capability correction** — Save/export no longer advertises APNG as a writable target when the runtime cannot encode it reliably. APNG files still open and inspect as before; `.apng` export targets resolve to PNG.
 

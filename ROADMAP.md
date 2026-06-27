@@ -13,10 +13,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ## Audit-Surfaced Items
 
-- [ ] P2 — **TileService concurrent pyramid build race**
-  Why: Two threads can build the same tile pyramid simultaneously — both see no `pyramid.json`, both create tiles concurrently, potentially producing corrupt tile files from overlapping writes.
-  Where: `src/Images/Services/TileService.cs` (BuildPyramid, lines 88-171)
-
 - [ ] P2 — **ExifToolService pipe-buffer deadlock on large output**
   Why: stdout/stderr are read async but WaitForExit blocks synchronously. If ExifTool fills the OS pipe buffer (4-64KB), the process blocks on write while WaitForExit blocks on exit. Mitigated by timeout+kill but causes unnecessary 30s delays on large metadata sets.
   Where: `src/Images/Services/ExifToolService.cs` (RunProcess, lines 118-129)

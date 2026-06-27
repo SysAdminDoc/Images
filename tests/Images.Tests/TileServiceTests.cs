@@ -1,5 +1,6 @@
 using System.IO;
 using Images.Services;
+using ImageMagick;
 
 namespace Images.Tests;
 
@@ -98,6 +99,38 @@ public sealed class TileServiceTests
 
         Assert.True(Directory.Exists(cacheRoot));
         Assert.Empty(Directory.GetDirectories(cacheRoot));
+    }
+
+    [Fact]
+    public void BuildPyramid_ConcurrentRequestsReuseSingleCacheDirectory()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Path.Combine(temp.Path, "source.png");
+        using (var image = new MagickImage(MagickColors.Red, 64, 64))
+            image.Write(source);
+
+        var cacheRoot = Path.Combine(temp.Path, "tiles");
+        var results = new TilePyramidInfo?[8];
+        using var start = new ManualResetEventSlim(false);
+        var tasks = Enumerable.Range(0, results.Length)
+            .Select(index => Task.Run(() =>
+            {
+                start.Wait();
+                results[index] = TileService.BuildPyramid(source, cacheRoot, tileSize: 16);
+            }))
+            .ToArray();
+
+        start.Set();
+        Task.WaitAll(tasks);
+
+        var completed = results.Select(result => Assert.IsType<TilePyramidInfo>(result)).ToArray();
+        var cacheDirectory = Assert.Single(completed.Select(result => result.CacheDirectory).Distinct(StringComparer.OrdinalIgnoreCase));
+
+        Assert.Equal(cacheDirectory, completed[0].CacheDirectory);
+        Assert.Single(Directory.GetDirectories(cacheRoot));
+        Assert.True(File.Exists(Path.Combine(cacheDirectory, "pyramid.json")));
+        Assert.Empty(Directory.EnumerateFiles(cacheDirectory, "*.tmp", SearchOption.TopDirectoryOnly));
+        Assert.All(completed, result => Assert.True(result.TotalTiles > 0));
     }
 
     [Fact]

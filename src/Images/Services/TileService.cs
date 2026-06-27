@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -39,6 +40,7 @@ public static class TileService
 
     private static readonly Microsoft.Extensions.Logging.ILogger _log =
         Log.Get("Images.TileService");
+    private static readonly ConcurrentDictionary<string, object> BuildLocks = new(StringComparer.OrdinalIgnoreCase);
 
     public static bool ShouldUseTileEngine(string path)
     {
@@ -75,99 +77,99 @@ public static class TileService
         var cacheDir = Path.Combine(cacheRoot, sourceKey);
 
         var infoPath = Path.Combine(cacheDir, "pyramid.json");
-        if (File.Exists(infoPath))
+        if (TryReadReusablePyramidInfo(infoPath, sourcePath) is { } existing)
+            return existing;
+
+        var buildLock = BuildLocks.GetOrAdd(cacheDir, static _ => new object());
+        lock (buildLock)
         {
-            var existing = TryReadPyramidInfo(infoPath);
-            if (existing is not null && string.Equals(existing.SourcePath, sourcePath, StringComparison.OrdinalIgnoreCase))
+            if (TryReadReusablePyramidInfo(infoPath, sourcePath) is { } existingInsideLock)
+                return existingInsideLock;
+
+            Directory.CreateDirectory(cacheDir);
+
+            try
             {
-                TouchCacheDirectory(existing.CacheDirectory);
-                return existing;
-            }
-        }
+                CodecRuntime.Configure();
+                using var source = new MagickImage();
+                source.Read(sourcePath, new MagickReadSettings { FrameIndex = (uint)Math.Max(0, pageIndex), FrameCount = 1 });
 
-        Directory.CreateDirectory(cacheDir);
+                var width = (int)source.Width;
+                var height = (int)source.Height;
+                var maxLevel = (int)Math.Ceiling(Math.Log2(Math.Max(width, height)));
 
-        try
-        {
-            CodecRuntime.Configure();
-            using var source = new MagickImage();
-            source.Read(sourcePath, new MagickReadSettings { FrameIndex = (uint)Math.Max(0, pageIndex), FrameCount = 1 });
+                var totalTiles = 0;
 
-            var width = (int)source.Width;
-            var height = (int)source.Height;
-            var maxLevel = (int)Math.Ceiling(Math.Log2(Math.Max(width, height)));
-
-            var totalTiles = 0;
-
-            for (var level = maxLevel; level >= 0; level--)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                var scale = Math.Pow(2, level - maxLevel);
-                var levelWidth = Math.Max(1, (int)Math.Ceiling(width * scale));
-                var levelHeight = Math.Max(1, (int)Math.Ceiling(height * scale));
-
-                var levelDir = Path.Combine(cacheDir, level.ToString());
-                Directory.CreateDirectory(levelDir);
-
-                using var levelImage = (MagickImage)source.Clone();
-                levelImage.Resize(new MagickGeometry((uint)levelWidth, (uint)levelHeight)
+                for (var level = maxLevel; level >= 0; level--)
                 {
-                    IgnoreAspectRatio = true,
-                });
+                    cancellationToken.ThrowIfCancellationRequested();
 
-                var cols = (int)Math.Ceiling((double)levelWidth / tileSize);
-                var rows = (int)Math.Ceiling((double)levelHeight / tileSize);
+                    var scale = Math.Pow(2, level - maxLevel);
+                    var levelWidth = Math.Max(1, (int)Math.Ceiling(width * scale));
+                    var levelHeight = Math.Max(1, (int)Math.Ceiling(height * scale));
 
-                for (var row = 0; row < rows; row++)
-                {
-                    for (var col = 0; col < cols; col++)
+                    var levelDir = Path.Combine(cacheDir, level.ToString());
+                    Directory.CreateDirectory(levelDir);
+
+                    using var levelImage = (MagickImage)source.Clone();
+                    levelImage.Resize(new MagickGeometry((uint)levelWidth, (uint)levelHeight)
                     {
-                        cancellationToken.ThrowIfCancellationRequested();
+                        IgnoreAspectRatio = true,
+                    });
 
-                        var x = col * tileSize - (col > 0 ? overlap : 0);
-                        var y = row * tileSize - (row > 0 ? overlap : 0);
-                        var w = tileSize + (col > 0 ? overlap : 0) + (col < cols - 1 ? overlap : 0);
-                        var h = tileSize + (row > 0 ? overlap : 0) + (row < rows - 1 ? overlap : 0);
+                    var cols = (int)Math.Ceiling((double)levelWidth / tileSize);
+                    var rows = (int)Math.Ceiling((double)levelHeight / tileSize);
 
-                        x = Math.Max(0, x);
-                        y = Math.Max(0, y);
-                        w = Math.Min(w, levelWidth - x);
-                        h = Math.Min(h, levelHeight - y);
+                    for (var row = 0; row < rows; row++)
+                    {
+                        for (var col = 0; col < cols; col++)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
 
-                        if (w <= 0 || h <= 0) continue;
+                            var x = col * tileSize - (col > 0 ? overlap : 0);
+                            var y = row * tileSize - (row > 0 ? overlap : 0);
+                            var w = tileSize + (col > 0 ? overlap : 0) + (col < cols - 1 ? overlap : 0);
+                            var h = tileSize + (row > 0 ? overlap : 0) + (row < rows - 1 ? overlap : 0);
 
-                        using var tile = (MagickImage)levelImage.Clone();
-                        tile.Crop(new MagickGeometry(x, y, (uint)w, (uint)h));
-                        tile.ResetPage();
+                            x = Math.Max(0, x);
+                            y = Math.Max(0, y);
+                            w = Math.Min(w, levelWidth - x);
+                            h = Math.Min(h, levelHeight - y);
 
-                        var tilePath = Path.Combine(levelDir, $"{col}_{row}.webp");
-                        tile.Quality = 80;
-                        tile.Write(tilePath, MagickFormat.WebP);
-                        totalTiles++;
+                            if (w <= 0 || h <= 0) continue;
+
+                            using var tile = (MagickImage)levelImage.Clone();
+                            tile.Crop(new MagickGeometry(x, y, (uint)w, (uint)h));
+                            tile.ResetPage();
+
+                            var tilePath = Path.Combine(levelDir, $"{col}_{row}.webp");
+                            tile.Quality = 80;
+                            tile.Write(tilePath, MagickFormat.WebP);
+                            totalTiles++;
+                        }
                     }
                 }
+
+                var info = new TilePyramidInfo(
+                    SourcePath: sourcePath,
+                    CacheDirectory: cacheDir,
+                    SourceWidth: width,
+                    SourceHeight: height,
+                    TileSize: tileSize,
+                    Overlap: overlap,
+                    MaxLevel: maxLevel,
+                    TotalTiles: totalTiles);
+
+                WritePyramidInfo(infoPath, info);
+                TouchCacheDirectory(cacheDir);
+                Task.Run(EvictIfOverCap);
+                return info;
             }
-
-            var info = new TilePyramidInfo(
-                SourcePath: sourcePath,
-                CacheDirectory: cacheDir,
-                SourceWidth: width,
-                SourceHeight: height,
-                TileSize: tileSize,
-                Overlap: overlap,
-                MaxLevel: maxLevel,
-                TotalTiles: totalTiles);
-
-            WritePyramidInfo(infoPath, info);
-            TouchCacheDirectory(cacheDir);
-            Task.Run(EvictIfOverCap);
-            return info;
-        }
-        catch
-        {
-            TryDeleteCacheDirectory(cacheDir);
-            throw;
+            catch
+            {
+                TryDeleteCacheDirectory(cacheDir);
+                throw;
+            }
         }
     }
 
@@ -385,7 +387,31 @@ public static class TileService
     private static void WritePyramidInfo(string path, TilePyramidInfo info)
     {
         var json = System.Text.Json.JsonSerializer.Serialize(info);
-        File.WriteAllText(path, json, System.Text.Encoding.UTF8);
+        var directory = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(directory))
+            Directory.CreateDirectory(directory);
+
+        var tempPath = Path.Combine(
+            string.IsNullOrEmpty(directory) ? "." : directory,
+            $"{Path.GetFileName(path)}.{Guid.NewGuid():N}.tmp");
+
+        try
+        {
+            File.WriteAllText(tempPath, json, System.Text.Encoding.UTF8);
+            File.Move(tempPath, path, overwrite: true);
+        }
+        finally
+        {
+            try
+            {
+                if (File.Exists(tempPath))
+                    File.Delete(tempPath);
+            }
+            catch
+            {
+                // Stale temp manifests are harmless and stay in the disposable cache.
+            }
+        }
     }
 
     private static void TouchCacheDirectory(string cacheDir)
@@ -532,5 +558,18 @@ public static class TileService
         {
             return null;
         }
+    }
+
+    private static TilePyramidInfo? TryReadReusablePyramidInfo(string infoPath, string sourcePath)
+    {
+        if (!File.Exists(infoPath))
+            return null;
+
+        var existing = TryReadPyramidInfo(infoPath);
+        if (existing is null || !string.Equals(existing.SourcePath, sourcePath, StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        TouchCacheDirectory(existing.CacheDirectory);
+        return existing;
     }
 }
