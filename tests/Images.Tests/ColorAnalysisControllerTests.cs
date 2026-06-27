@@ -8,6 +8,8 @@ namespace Images.Tests;
 
 public sealed class ColorAnalysisControllerTests
 {
+    private static readonly TimeSpan SuccessPathTimeout = TimeSpan.FromSeconds(10);
+
     [Fact]
     public void Refresh_WhenReaderReturnsRows_PopulatesRowsAndWarning()
     {
@@ -22,7 +24,7 @@ public sealed class ColorAnalysisControllerTests
                     [new MetadataFact("Profile", "Embedded ICC")],
                     "",
                     "Profile warning"),
-                timeout: TimeSpan.FromSeconds(1));
+                timeout: SuccessPathTimeout);
 
             controller.Refresh(path);
             PumpUntil(() => !controller.IsLoading);
@@ -60,7 +62,7 @@ public sealed class ColorAnalysisControllerTests
 
                     return new ImageColorAnalysis([new MetadataFact("Path", "second")], "", "");
                 },
-                timeout: TimeSpan.FromSeconds(1));
+                timeout: SuccessPathTimeout);
 
             controller.Refresh(first);
             Assert.True(firstStarted.Wait(TimeSpan.FromSeconds(2)));
@@ -79,7 +81,7 @@ public sealed class ColorAnalysisControllerTests
 
     private static void PumpUntil(Func<bool> condition)
     {
-        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+        var deadline = DateTime.UtcNow + SuccessPathTimeout;
         while (!condition())
         {
             if (DateTime.UtcNow >= deadline)

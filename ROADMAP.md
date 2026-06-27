@@ -13,10 +13,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ## Audit-Surfaced Items
 
-- [ ] P2 — **ExifToolService pipe-buffer deadlock on large output**
-  Why: stdout/stderr are read async but WaitForExit blocks synchronously. If ExifTool fills the OS pipe buffer (4-64KB), the process blocks on write while WaitForExit blocks on exit. Mitigated by timeout+kill but causes unnecessary 30s delays on large metadata sets.
-  Where: `src/Images/Services/ExifToolService.cs` (RunProcess, lines 118-129)
-
 - [ ] P3 — **DispatcherUnhandledException continues after fatal errors**
   Why: `args.Handled = true` prevents WPF from terminating after any unhandled exception, including state-corrupting ones. The crash dialog shows but the app continues in an undefined state.
   Where: `src/Images/App.xaml.cs` (DispatcherUnhandledException handler, line 67)

@@ -109,7 +109,7 @@ internal static class ExifToolService
         return startInfo;
     }
 
-    private static ExifToolProcessResult RunProcess(ProcessStartInfo startInfo, int timeoutMilliseconds)
+    internal static ExifToolProcessResult RunProcess(ProcessStartInfo startInfo, int timeoutMilliseconds)
     {
         using var process = Process.Start(startInfo);
         if (process is null)
@@ -117,16 +117,63 @@ internal static class ExifToolService
 
         var stdoutTask = process.StandardOutput.ReadToEndAsync();
         var stderrTask = process.StandardError.ReadToEndAsync();
-        if (!process.WaitForExit(timeoutMilliseconds))
+        var waitTask = process.WaitForExitAsync();
+        var timeoutTask = timeoutMilliseconds == Timeout.Infinite
+            ? Task.Delay(Timeout.InfiniteTimeSpan)
+            : Task.Delay(timeoutMilliseconds);
+
+        if (Task.WhenAny(waitTask, timeoutTask).GetAwaiter().GetResult() != waitTask)
         {
-            try { process.Kill(entireProcessTree: true); } catch { }
-            return new ExifToolProcessResult(-1, "", "", TimedOut: true);
+            TryKillProcess(process);
+            DrainKilledProcess(waitTask, stdoutTask, stderrTask);
+            return new ExifToolProcessResult(
+                -1,
+                GetCompletedOutput(stdoutTask),
+                GetCompletedOutput(stderrTask),
+                TimedOut: true);
         }
 
+        waitTask.GetAwaiter().GetResult();
         return new ExifToolProcessResult(
             process.ExitCode,
             stdoutTask.GetAwaiter().GetResult(),
             stderrTask.GetAwaiter().GetResult());
+    }
+
+    private static void TryKillProcess(Process process)
+    {
+        try
+        {
+            if (!process.HasExited)
+                process.Kill(entireProcessTree: true);
+        }
+        catch
+        {
+        }
+    }
+
+    private static void DrainKilledProcess(Task waitTask, Task<string> stdoutTask, Task<string> stderrTask)
+    {
+        try
+        {
+            var drainTask = Task.WhenAll(waitTask, stdoutTask, stderrTask);
+            Task.WhenAny(drainTask, Task.Delay(TimeSpan.FromSeconds(5))).GetAwaiter().GetResult();
+        }
+        catch
+        {
+        }
+    }
+
+    private static string GetCompletedOutput(Task<string> task)
+    {
+        try
+        {
+            return task.IsCompleted ? task.GetAwaiter().GetResult() : "";
+        }
+        catch
+        {
+            return "";
+        }
     }
 
     private static bool TryNormalizeExecutable(string path, out string normalizedPath, out string error)

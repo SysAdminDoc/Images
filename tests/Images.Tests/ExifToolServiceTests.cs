@@ -96,4 +96,37 @@ public sealed class ExifToolServiceTests
         Assert.True(startInfo.RedirectStandardError);
         Assert.Equal(["-@", @"C:\Temp\args.txt"], startInfo.ArgumentList);
     }
+
+    [Fact]
+    public void RunProcess_DrainsLargeOutputWithoutTimingOut()
+    {
+        var powerShell = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+            "System32",
+            "WindowsPowerShell",
+            "v1.0",
+            "powershell.exe");
+        Assert.True(File.Exists(powerShell), "Windows PowerShell is required for this process-drain regression.");
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = powerShell,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            StandardOutputEncoding = System.Text.Encoding.UTF8,
+            StandardErrorEncoding = System.Text.Encoding.UTF8,
+        };
+        startInfo.ArgumentList.Add("-NoProfile");
+        startInfo.ArgumentList.Add("-Command");
+        startInfo.ArgumentList.Add("$chunk = 'x' * 1024; for ($i = 0; $i -lt 96; $i++) { [Console]::Out.WriteLine($chunk) }; [Console]::Error.WriteLine('stderr-ok')");
+
+        var result = ExifToolService.RunProcess(startInfo, timeoutMilliseconds: 10000);
+
+        Assert.False(result.TimedOut);
+        Assert.Equal(0, result.ExitCode);
+        Assert.True(result.StandardOutput.Length > 96 * 1024);
+        Assert.Contains("stderr-ok", result.StandardError, StringComparison.Ordinal);
+    }
 }
