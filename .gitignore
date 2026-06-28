@@ -90,3 +90,6 @@ Images-*.zip
 PROJECT_CONTEXT.md
 CONTINUATION_PROMPT.md
 RESEARCH_FEATURE_PLAN*.md
+
+# AI config
+.codex/
