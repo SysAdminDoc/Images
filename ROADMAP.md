@@ -15,15 +15,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ## Research-Driven Additions
 
-### P1
-
-- [ ] P1 — Add viewport context-menu smoke and keyboard regression coverage
-  Why: The viewer right-click menu was recently nested and made scrollable after becoming too long; without UIA coverage it can regress off-screen or lose keyboard access.
-  Evidence: `src/Images/MainWindow.xaml`, `src/Images/Themes/DarkTheme.xaml`, `tests/Images.Tests/WpfSmokeTests.cs`, FlaUI
-  Touches: `tests/Images.Tests/WpfSmokeTests.cs`, `src/Images/MainWindow.xaml`, `src/Images/Themes/DarkTheme.xaml`
-  Acceptance: A smoke test opens the viewport context menu at a constrained window size, verifies grouped root items and at least one nested submenu, confirms the menu stays within the viewport or scrolls, and reaches commands by keyboard.
-  Complexity: M
-
 ### P2
 
 - [ ] P2 — Add local assisted culling score lane

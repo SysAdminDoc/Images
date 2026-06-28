@@ -105,6 +105,15 @@ public partial class MainWindow : Window
         SourceInitialized += OnSourceInitialized;
     }
 
+    private void Viewport_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (Viewport.ContextMenu is not { } menu) return;
+
+        menu.PlacementTarget = Viewport;
+        menu.IsOpen = true;
+        e.Handled = true;
+    }
+
     private bool _previewCenterQueued;
 
     private void QueueCenterCurrentPreviewItems()

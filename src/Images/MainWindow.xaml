@@ -41,12 +41,17 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Grid x:Name="Viewport" Grid.Row="0" ClipToBounds="True">
+            <Grid x:Name="Viewport"
+                  Grid.Row="0"
+                  ClipToBounds="True"
+                  PreviewMouseRightButtonUp="Viewport_PreviewMouseRightButtonUp">
                 <!-- V15-02: right-click context menu on the viewport. Rename-TextBox's own
                      built-in edit menu is unaffected because ContextMenu here is attached to
                      this Grid, not to descendants. -->
                 <Grid.ContextMenu>
-                    <ContextMenu Style="{StaticResource ViewportContextMenu}">
+                    <ContextMenu Style="{StaticResource ViewportContextMenu}"
+                                 AutomationProperties.AutomationId="ViewportContextMenu"
+                                 AutomationProperties.Name="Viewport context menu">
                         <MenuItem Header="Open…" Command="{Binding OpenCommand}" InputGestureText="{Binding ShortcutTexts[open]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
@@ -72,12 +77,13 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EC;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Compare">
+                        <MenuItem Header="Compare"
+                                  AutomationProperties.AutomationId="ViewportContextMenuCompare">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8AB;" />
                             </MenuItem.Icon>
                             <MenuItem Header="{Binding CompareModeText}" Command="{Binding StartCompareCommand}" InputGestureText="{Binding ShortcutTexts[compare]}" />
-                            <MenuItem Header="Compare with…" Command="{Binding CompareWithCommand}" InputGestureText="{Binding ShortcutTexts[compare-with]}" />
+                            <MenuItem Header="Compare with…" Command="{Binding CompareWithCommand}" InputGestureText="{Binding ShortcutTexts[compare-with]}" AutomationProperties.AutomationId="ViewportContextMenuCompareWith" />
                             <MenuItem Header="Exit compare" Command="{Binding ExitCompareCommand}" InputGestureText="Esc" />
                         </MenuItem>
                         <MenuItem Header="View">

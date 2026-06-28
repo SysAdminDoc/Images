@@ -1,7 +1,12 @@
 using System.IO;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Conditions;
+using FlaUI.Core.Definitions;
+using FlaUI.Core.Input;
+using FlaUI.Core.WindowsAPI;
 using FlaUI.UIA3;
 
 namespace Images.Tests;
@@ -16,6 +21,8 @@ public sealed class WpfSmokeTests : IDisposable
 
     private Application? _app;
     private UIA3Automation? _automation;
+    private const uint SwpNoZOrder = 0x0004;
+    private const uint SwpShowWindow = 0x0040;
 
     private static string FindAppExe()
     {
@@ -45,6 +52,42 @@ public sealed class WpfSmokeTests : IDisposable
     {
         if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("RUN_SMOKE_TESTS")))
             Assert.Skip("Set RUN_SMOKE_TESTS=1 to run WPF smoke tests (requires display session).");
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SetWindowPos(
+        IntPtr hWnd,
+        IntPtr hWndInsertAfter,
+        int x,
+        int y,
+        int cx,
+        int cy,
+        uint flags);
+
+    private static void ResizeWindow(Application app, int width, int height)
+    {
+        var handle = app.MainWindowHandle;
+        Assert.NotEqual(IntPtr.Zero, handle);
+
+        if (!SetWindowPos(handle, IntPtr.Zero, 40, 40, width, height, SwpNoZOrder | SwpShowWindow))
+            throw new Win32Exception(Marshal.GetLastWin32Error());
+
+        System.Threading.Thread.Sleep(300);
+    }
+
+    private static AutomationElement WaitForElement(Func<AutomationElement?> find, string description)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+        AutomationElement? element;
+        while ((element = find()) is null)
+        {
+            if (DateTime.UtcNow >= deadline)
+                throw new TimeoutException($"Timed out waiting for {description}.");
+
+            System.Threading.Thread.Sleep(100);
+        }
+
+        return element;
     }
 
     [Fact]
@@ -201,6 +244,69 @@ public sealed class WpfSmokeTests : IDisposable
         var posChip = window.FindFirstDescendant(cf => cf.ByName("Folder position"));
         Assert.NotNull(posChip);
 
+        app.Close();
+    }
+
+    [Fact]
+    [Trait("Category", "SmokeGate")]
+    public void ViewportContextMenuIsBoundedAndKeyboardReachable()
+    {
+        SkipUnlessSmoke();
+        if (!File.Exists(FixtureImage))
+            throw new FileNotFoundException($"Fixture image missing: {FixtureImage}");
+
+        var (app, window) = LaunchApp(FixtureImage);
+        ResizeWindow(app, width: 760, height: 560);
+        window.SetForeground();
+        System.Threading.Thread.Sleep(1000);
+
+        var canvas = window.FindFirstDescendant(cf =>
+            cf.ByControlType(ControlType.Image));
+        Assert.NotNull(canvas);
+
+        var canvasBounds = canvas.BoundingRectangle;
+        Mouse.RightClick(new System.Drawing.Point(
+            canvasBounds.Left + canvasBounds.Width / 2,
+            canvasBounds.Top + canvasBounds.Height / 2));
+        var menu = WaitForElement(
+            () => window.ContextMenu ?? _automation!.GetDesktop().FindFirstDescendant(cf => cf.ByName("Viewport context menu")),
+            "viewport context menu");
+
+        var rootItemNames = menu
+            .FindAllChildren(cf => cf.ByControlType(ControlType.MenuItem))
+            .Select(item => item.Name)
+            .ToArray();
+
+        Assert.Contains(rootItemNames, name => name.StartsWith("Open", StringComparison.Ordinal));
+        Assert.Contains("Compare", rootItemNames);
+        Assert.Contains("View", rootItemNames);
+        Assert.Contains("Edit", rootItemNames);
+        Assert.Contains("Transform", rootItemNames);
+        Assert.Contains("Organize", rootItemNames);
+        Assert.Contains("Workflow tools", rootItemNames);
+        Assert.Contains("File actions", rootItemNames);
+        Assert.Contains("Output", rootItemNames);
+
+        var menuBounds = menu.BoundingRectangle;
+        var windowBounds = window.BoundingRectangle;
+        var verticalScrollBar = menu.FindFirstDescendant(cf => cf.ByControlType(ControlType.ScrollBar));
+        Assert.True(
+            menuBounds.Height <= windowBounds.Height || verticalScrollBar is not null,
+            $"Viewport context menu height {menuBounds.Height} exceeded constrained window height {windowBounds.Height} without a scrollbar.");
+
+        var compare = WaitForElement(
+            () => menu.FindFirstDescendant(cf => cf.ByName("Compare")),
+            "Compare root menu item");
+        compare.Focus();
+        Keyboard.Press(VirtualKeyShort.RIGHT);
+
+        var compareWith = WaitForElement(
+            () => _automation!.GetDesktop().FindFirstDescendant(cf => cf.ByAutomationId("ViewportContextMenuCompareWith"))
+                ?? _automation!.GetDesktop().FindFirstDescendant(cf => cf.ByName("Compare with…")),
+            "Compare with submenu item");
+        Assert.False(compareWith.IsOffscreen);
+
+        Keyboard.Press(VirtualKeyShort.ESCAPE);
         app.Close();
     }
 

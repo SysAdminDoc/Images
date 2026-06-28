@@ -11,6 +11,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixes
 
+- **Viewport context menu is smoke-covered** — Right-clicks from the image viewport now open the existing context menu, and the smoke gate verifies the constrained-window menu stays bounded or scrollable, exposes grouped root commands, opens the Compare submenu, and reaches `Compare with…` by keyboard.
 - **Secondary window resource crashes are covered** — shared path converters are now registered in the theme dictionary and About's background-jobs card no longer references Settings-only resources, preventing startup/About XAML crashes from missing `StaticResource` keys.
 - **Semantic search fallback is explicit** — CLIP provider creation/preprocessing failures now log warning context, semantic status reports the active provider plus fallback reason, the search window shows deterministic fallback copy, and fixture tests pin deterministic query ranking.
 - **Trust-path diagnostics no longer disappear silently** — C2PA runtime/manifest failures, contact-sheet degraded reads, listen-mode client errors, ExifTool cleanup failures, and performance-report storage failures now log contextual diagnostics; About diagnostics now shows C2PA runtime degraded/ready status.
