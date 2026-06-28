@@ -17,13 +17,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ### P1
 
-- [ ] P1 — Automate UIA coverage for secondary windows
-  Why: Accessibility docs cover many tool windows, but the smoke gate mostly verifies the main viewer and toolbar.
-  Evidence: `docs/accessibility.md`, `tests/Images.Tests/WpfSmokeTests.cs`, Microsoft WPF accessibility guidance
-  Touches: `tests/Images.Tests/WpfSmokeTests.cs`, `src/Images/*Window.xaml`, `docs/accessibility.md`
-  Acceptance: Smoke tests open at least Settings, About, Duplicate Cleanup, Semantic Search, Model Manager, and Import Inbox windows and assert automation names, keyboard reachability, and no empty critical HelpText.
-  Complexity: M
-
 - [ ] P1 — Restore local release verification parity after workflow removal
   Why: Hosted GitHub workflows and Dependabot were removed, but release/trust docs still promise workflow, SBOM, attestation, and vulnerability gates; local readiness only covers part of that path.
   Evidence: commit `55fabf2`, missing `.github`, `scripts/Test-ReleaseReadiness.ps1`, `docs/distribution-trust.md`, `docs/release-support-policy.md`, WinGet and Scoop manifest docs

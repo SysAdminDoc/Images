@@ -12,6 +12,8 @@
 
     <!-- Converters (global) -->
     <vm:BooleanToVisibilityConverter x:Key="BoolToVis" />
+    <vm:PathToFileNameConverter x:Key="PathToFileNameConverter" />
+    <vm:PathToParentConverter x:Key="PathToParentConverter" />
     <vm:DropAcceptedIconConverter x:Key="DropAcceptedIcon" />
     <vm:DirectorySortModeMatchesConverter x:Key="SortModeMatches" />
 

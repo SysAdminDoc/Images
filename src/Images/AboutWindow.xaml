@@ -684,7 +684,8 @@
                 </StackPanel>
             </Button>
 
-            <Border Style="{StaticResource SettingsCard}"
+            <Border Style="{StaticResource Card}"
+                    Padding="16,14"
                     Margin="0,14,0,0"
                     AutomationProperties.Name="Background jobs">
                 <StackPanel>

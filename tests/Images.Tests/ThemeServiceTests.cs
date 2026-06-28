@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using Images.Services;
+using Images.ViewModels;
 
 namespace Images.Tests;
 
@@ -106,6 +107,15 @@ public sealed class ThemeServiceTests
         Assert.IsType<Style>(dictionary[typeof(DataGridRow)]);
         Assert.IsType<Style>(dictionary[typeof(DataGridCell)]);
         Assert.IsType<Style>(dictionary[typeof(ListBoxItem)]);
+    }
+
+    [Fact]
+    public void DarkThemeDefinesGlobalPathConverters()
+    {
+        var dictionary = LoadThemeDictionary("DarkTheme.xaml");
+
+        Assert.IsType<PathToFileNameConverter>(dictionary["PathToFileNameConverter"]);
+        Assert.IsType<PathToParentConverter>(dictionary["PathToParentConverter"]);
     }
 
     private static ResourceDictionary CreateTestHighContrastDictionary()

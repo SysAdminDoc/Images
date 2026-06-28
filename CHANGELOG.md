@@ -11,6 +11,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixes
 
+- **Secondary window resource crashes are covered** — shared path converters are now registered in the theme dictionary and About's background-jobs card no longer references Settings-only resources, preventing startup/About XAML crashes from missing `StaticResource` keys.
 - **Semantic search fallback is explicit** — CLIP provider creation/preprocessing failures now log warning context, semantic status reports the active provider plus fallback reason, the search window shows deterministic fallback copy, and fixture tests pin deterministic query ranking.
 - **Trust-path diagnostics no longer disappear silently** — C2PA runtime/manifest failures, contact-sheet degraded reads, listen-mode client errors, ExifTool cleanup failures, and performance-report storage failures now log contextual diagnostics; About diagnostics now shows C2PA runtime degraded/ready status.
 - **Dispatcher fatal exceptions no longer resume the WPF app** — the dispatcher crash path now logs, writes the crash record/minidump, shows the crash dialog, flushes logs, and returns unhandled so WPF terminates instead of continuing in an undefined state.
@@ -59,6 +60,7 @@ All notable changes to **Images** are documented here.
 
 ### Infrastructure
 
+- **Secondary tool-window UIA smoke coverage** — Smoke-gate tests now open Settings, About/Diagnostics, Duplicate Cleanup, Semantic Search, Model Manager, and Import Inbox with app theme resources, then verify titles, named controls, keyboard focusability, and critical UIA help text hygiene.
 - **Edge-hover contextual panels in fullscreen** — in fullscreen mode (F11), the bottom toolbar and right side panel auto-hide for zero-chrome image viewing. Moving the mouse to the bottom or right edge of the screen reveals the respective panel; panels auto-hide after 2 seconds when the mouse leaves the edge zone.
 - **Draggable comparison divider in export preview** — the side-by-side export preview now has a draggable GridSplitter between original and encoded output. Drag the divider to adjust comparison proportions; the splitter hides in difference-view mode.
 - **Color palette extraction in catalog** — catalog scans now extract the dominant color palette (red/orange/yellow/green/cyan/blue/purple/pink/dark/light/gray) from each image and persist it in the catalog DB. Gallery `palette:` filter tokens query catalog-backed palette data. Schema migrated v1→v2 with `ALTER TABLE ADD COLUMN palette`.
