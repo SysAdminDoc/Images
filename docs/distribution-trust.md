@@ -11,10 +11,8 @@ The only official distribution channel today is GitHub Releases:
 - `Images-vX.Y.Z-win-x64.zip`
 - `Images-vX.Y.Z-setup-win-x64.exe`
 - `Images-vX.Y.Z-checksums.txt`
-- `Images-vX.Y.Z-sbom.cdx.json` (CycloneDX SBOM)
-- GitHub artifact attestations (build provenance for ZIP + installer, SBOM attestation for ZIP)
 
-Both artifacts are produced by `.github/workflows/release.yml` from the same source checkout. The release workflow already validates version sync, scans vulnerable packages, builds the solution, publishes self-contained win-x64 output, builds the Inno Setup installer, and uploads SHA-256 checksums.
+Both artifacts are produced locally from the same source checkout. `scripts\Test-ReleaseReadiness.ps1` is the release gate for version sync, restore, build, tests, vulnerable-package scanning, localization parity, release diagnostics, checksums, and package-manifest validation. SBOM/provenance bundle generation is tracked separately and is not currently promised as a shipped artifact.
 
 ## Trust Goals
 
@@ -22,7 +20,7 @@ Both artifacts are produced by `.github/workflows/release.yml` from the same sou
 - Add WinGet and Scoop only as install/update entry points that point back to official release artifacts.
 - Keep checksum validation in every release and every package-manager manifest.
 - Make signing status explicit. Do not imply SmartScreen trust that does not exist.
-- Prefer signing that works in CI without a local hardware token, if account geography and identity verification permit it.
+- Prefer signing that works without a local hardware token, if account geography and identity verification permit it.
 
 ## Release Artifact Requirements
 
@@ -134,7 +132,7 @@ Start with the portable ZIP in the Scoop `extras` bucket. It matches Scoop's str
 
 Do not block WinGet/Scoop scoping on code signing. Continue publishing checksums and pursue signing as the next release-trust improvement.
 
-Preferred signing path for non-Store distribution is Azure Artifact Signing, if the publisher identity and geography are eligible. Microsoft documents it as the recommended non-Store signing option, with CI/CD integration and no hardware token, but also documents that SmartScreen reputation still builds over time. Signing reduces tamper and publisher-identity risk; it does not guarantee an instant SmartScreen-free first run.
+Preferred signing path for non-Store distribution is Azure Artifact Signing, if the publisher identity and geography are eligible. Microsoft documents it as the recommended non-Store signing option, with automation support and no hardware token, but also documents that SmartScreen reputation still builds over time. Signing reduces tamper and publisher-identity risk; it does not guarantee an instant SmartScreen-free first run.
 
 ### Options Considered
 
@@ -144,16 +142,16 @@ Preferred signing path for non-Store distribution is Azure Artifact Signing, if 
 | Self-signed certificate | Useful for development or managed enterprise trust only. | Reject for public releases. |
 | OV certificate | Traditional path, annual cost, hardware-token/HSM requirements. | Fallback if Azure Artifact Signing is unavailable. |
 | EV certificate | Higher cost. Microsoft no longer recommends it solely for SmartScreen bypass. | Reject unless enterprise requirements change. |
-| Azure Artifact Signing | Lower monthly cost, managed signing, CI-friendly, geography-limited. | Preferred evaluation path. |
-| Microsoft Store MSIX | Store handles MSIX signing, but requires package model and Store workflow. | Future distribution channel, not current Inno/portable path. |
+| Azure Artifact Signing | Lower monthly cost, managed signing, automation-friendly, geography-limited. | Preferred evaluation path. |
+| Microsoft Store MSIX | Store handles MSIX signing, but requires a different package model. | Future distribution channel, not current Inno/portable path. |
 
 ### Signing Rollout
 
 1. Confirm legal publisher identity to use for signatures.
 2. Confirm Azure Artifact Signing availability for that identity.
-3. Prototype signing the published `Images.exe` files and Inno installer in a private workflow.
+3. Prototype signing the published `Images.exe` files and Inno installer on a local release copy.
 4. Verify Authenticode signatures with `Get-AuthenticodeSignature` and `signtool verify /pa`.
-5. Update the release workflow only after private verification succeeds.
+5. Update the local release checklist only after private verification succeeds.
 6. Add signature status to release notes and diagnostics documentation.
 
 ## User Verification Copy
@@ -170,9 +168,9 @@ If the build is unsigned, say so plainly and direct users to checksum validation
 
 ## Open Follow-Ups
 
-- ~~Create the first WinGet manifest after the next stable release is published.~~ Shipped — `scripts/New-PackageManifests.ps1` generates WinGet multi-file manifests and the release workflow uploads them as artifacts.
+- ~~Create the first WinGet manifest after the next stable release is published.~~ Shipped — `scripts/New-PackageManifests.ps1` generates WinGet multi-file manifests from the local checksum file.
 - ~~Create the first Scoop manifest after the next stable release is published.~~ Shipped — same script generates a Scoop portable manifest with autoupdate metadata.
-- Add a release-workflow step that can sign artifacts once credentials are available.
+- Add a local signing step once credentials are available.
 - Add package-manager installation smoke tests to release validation after the first accepted manifests.
 
 ## Sources

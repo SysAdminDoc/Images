@@ -83,4 +83,4 @@ The actual runtime path must replace the conservative default with the MCU size 
 - Exact MCU-aligned JPEG crop shell-out, output validation, same-volume atomic replacement, rollback cleanup, and fake-process tests. Shipped 2026-05-14.
 - UI command for right-angle rotation writeback with exact aligned JPEG shell-out, output validation, same-volume atomic replacement, rollback cleanup, and fake-process tests. Shipped 2026-05-14.
 - Confirmation dialog for any MCU trim, including the exact edge pixel counts. Shipped 2026-05-14.
-- Release diagnostics smoke for staged runtime in portable and installed outputs. Shipped 2026-05-17 through `scripts\Test-ReleaseDiagnostics.ps1` and the release workflow.
+- Release diagnostics smoke for staged runtime in portable and installed outputs. Shipped 2026-05-17 through `scripts\Test-ReleaseDiagnostics.ps1` and now run through local release readiness.

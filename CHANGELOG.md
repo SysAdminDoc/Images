@@ -60,6 +60,7 @@ All notable changes to **Images** are documented here.
 
 ### Infrastructure
 
+- **Local release readiness parity restored** — `scripts\Test-ReleaseReadiness.ps1` now runs version sync, restore, Release build, tests, high/critical vulnerability blocking, localization parity, release diagnostics, checksum generation, and WinGet/Scoop manifest validation from one local command; release/trust docs now describe local-only gates instead of removed hosted workflows or Dependabot.
 - **Secondary tool-window UIA smoke coverage** — Smoke-gate tests now open Settings, About/Diagnostics, Duplicate Cleanup, Semantic Search, Model Manager, and Import Inbox with app theme resources, then verify titles, named controls, keyboard focusability, and critical UIA help text hygiene.
 - **Edge-hover contextual panels in fullscreen** — in fullscreen mode (F11), the bottom toolbar and right side panel auto-hide for zero-chrome image viewing. Moving the mouse to the bottom or right edge of the screen reveals the respective panel; panels auto-hide after 2 seconds when the mouse leaves the edge zone.
 - **Draggable comparison divider in export preview** — the side-by-side export preview now has a draggable GridSplitter between original and encoded output. Drag the divider to adjust comparison proportions; the splitter hides in difference-view mode.

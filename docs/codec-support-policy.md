@@ -13,7 +13,7 @@ What "broad codec support" means for Images, what's bundled vs optional, and how
 ## What ships in the bundle
 
 - **WIC**: handles common Windows codecs. No version pinning needed; tracks the OS.
-- **Magick.NET-Q16-AnyCPU + Magick.NET.Core**: pinned in [`Images.csproj`](../src/Images/Images.csproj). Native codec pack updates with the NuGet release. CVEs are tracked through the `Magick.NET*` Dependabot group and the daily Security workflow.
+- **Magick.NET-Q16-AnyCPU + Magick.NET.Core**: pinned in [`Images.csproj`](../src/Images/Images.csproj). Native codec pack updates with the NuGet release. CVEs are checked through local release readiness with `dotnet list package --vulnerable --include-transitive` plus manual upstream advisory review for native runtime changes.
 - **Archive books**: ZIP/CBZ use `System.IO.Compression`; RAR/CBR and 7z/CB7 use `SharpCompress` pinned in [`Images.csproj`](../src/Images/Images.csproj). Archive support is read-only, never extracts entries to disk, skips nested archives and document-preview entries, rejects unsafe paths, and caps each buffered page.
 
 The current open extension count and writable export count are reported live by About → Capability matrix and `Images.exe --codec-report`.

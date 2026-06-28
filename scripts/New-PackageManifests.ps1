@@ -18,9 +18,23 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
 $RepositoryRoot = [System.IO.Path]::GetFullPath($RepositoryRoot)
 
 if ([string]::IsNullOrWhiteSpace($OutputDir)) {
-    $OutputDir = Join-Path $RepositoryRoot "packaging" "output"
+    $OutputDir = Join-Path $RepositoryRoot "packaging"
+    $OutputDir = Join-Path $OutputDir "output"
 }
 New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
+
+function Set-Utf8NoBomContent {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path,
+
+        [Parameter(Mandatory)]
+        [string]$Value
+    )
+
+    $encoding = [System.Text.UTF8Encoding]::new($false)
+    [System.IO.File]::WriteAllText($Path, $Value, $encoding)
+}
 
 if (-not ($Version -match '^\d+\.\d+\.\d+$')) {
     throw "Version must be in X.Y.Z format. Got: $Version"
@@ -54,7 +68,12 @@ $ghBase = "https://github.com/SysAdminDoc/Images/releases/download/v${Version}"
 
 # --- WinGet manifests (multi-file format) ---
 
-$wingetDir = Join-Path $OutputDir "winget" "manifests" "s" "SysAdminDoc" "Images" $Version
+$wingetDir = Join-Path $OutputDir "winget"
+$wingetDir = Join-Path $wingetDir "manifests"
+$wingetDir = Join-Path $wingetDir "s"
+$wingetDir = Join-Path $wingetDir "SysAdminDoc"
+$wingetDir = Join-Path $wingetDir "Images"
+$wingetDir = Join-Path $wingetDir $Version
 New-Item -ItemType Directory -Path $wingetDir -Force | Out-Null
 
 $versionManifest = @"
@@ -125,9 +144,9 @@ ManifestType: defaultLocale
 ManifestVersion: 1.9.0
 "@
 
-Set-Content -LiteralPath (Join-Path $wingetDir "SysAdminDoc.Images.yaml") -Value $versionManifest -Encoding utf8NoBOM
-Set-Content -LiteralPath (Join-Path $wingetDir "SysAdminDoc.Images.installer.yaml") -Value $installerManifest -Encoding utf8NoBOM
-Set-Content -LiteralPath (Join-Path $wingetDir "SysAdminDoc.Images.locale.en-US.yaml") -Value $localeManifest -Encoding utf8NoBOM
+Set-Utf8NoBomContent -Path (Join-Path $wingetDir "SysAdminDoc.Images.yaml") -Value $versionManifest
+Set-Utf8NoBomContent -Path (Join-Path $wingetDir "SysAdminDoc.Images.installer.yaml") -Value $installerManifest
+Set-Utf8NoBomContent -Path (Join-Path $wingetDir "SysAdminDoc.Images.locale.en-US.yaml") -Value $localeManifest
 
 Write-Host "WinGet manifests written to: $wingetDir"
 
@@ -165,7 +184,7 @@ $scoopJson = @"
 }
 "@
 
-Set-Content -LiteralPath (Join-Path $scoopDir "images.json") -Value $scoopJson -Encoding utf8NoBOM
+Set-Utf8NoBomContent -Path (Join-Path $scoopDir "images.json") -Value $scoopJson
 
 Write-Host "Scoop manifest written to: $(Join-Path $scoopDir 'images.json')"
 

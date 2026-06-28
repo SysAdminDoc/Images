@@ -17,13 +17,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ### P1
 
-- [ ] P1 — Restore local release verification parity after workflow removal
-  Why: Hosted GitHub workflows and Dependabot were removed, but release/trust docs still promise workflow, SBOM, attestation, and vulnerability gates; local readiness only covers part of that path.
-  Evidence: commit `55fabf2`, missing `.github`, `scripts/Test-ReleaseReadiness.ps1`, `docs/distribution-trust.md`, `docs/release-support-policy.md`, WinGet and Scoop manifest docs
-  Touches: `scripts/Test-ReleaseReadiness.ps1`, `scripts/Test-LocalizationResources.ps1`, `scripts/Test-ReleaseDiagnostics.ps1`, `scripts/New-PackageManifests.ps1`, `docs/release-checklist.md`, `docs/distribution-trust.md`, `docs/release-support-policy.md`
-  Acceptance: One local release command runs version sync, restore, build, tests, vulnerability scan, localization parity, release diagnostics, and package-manifest/checksum validation; docs no longer claim `.github` or Dependabot gates exist.
-  Complexity: M
-
 - [ ] P1 — Add viewport context-menu smoke and keyboard regression coverage
   Why: The viewer right-click menu was recently nested and made scrollable after becoming too long; without UIA coverage it can regress off-screen or lose keyboard access.
   Evidence: `src/Images/MainWindow.xaml`, `src/Images/Themes/DarkTheme.xaml`, `tests/Images.Tests/WpfSmokeTests.cs`, FlaUI
@@ -57,8 +50,8 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 - [ ] P2 — Add pseudo-locale and overflow layout gate
   Why: Localization infrastructure exists, but there are no locale files and no automated check that expanded strings fit premium WPF surfaces.
   Evidence: `src/Images/Localization/Strings.resx`, `scripts/Test-LocalizationResources.ps1`, `docs/accessibility.md`
-  Touches: `src/Images/Localization/`, `scripts/Test-LocalizationResources.ps1`, `.github/workflows/ci.yml`, `tests/Images.Tests/`
-  Acceptance: CI can generate or validate a pseudo-locale, run resource parity, and smoke key windows with expanded text without clipping critical controls.
+  Touches: `src/Images/Localization/`, `scripts/Test-LocalizationResources.ps1`, `tests/Images.Tests/`
+  Acceptance: Local validation can generate or validate a pseudo-locale, run resource parity, and smoke key windows with expanded text without clipping critical controls.
   Complexity: M
 
 - [ ] P2 — Promote background jobs into a primary activity surface
@@ -69,7 +62,7 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
   Complexity: M
 
 - [ ] P2 — Produce a local release SBOM and provenance bundle
-  Why: Distribution docs promise CycloneDX SBOMs and build/artifact provenance from hosted workflows, but current releases are local-build-only.
+  Why: Local release output now has checksums, diagnostics, and package-manifest validation, but still lacks a generated SBOM/provenance bundle.
   Evidence: `docs/distribution-trust.md`, `docs/codec-bundling.md`, `scripts/Test-ReleaseDiagnostics.ps1`, CycloneDX ML-BOM, C2PA provenance expectations
   Touches: `scripts/Test-ReleaseReadiness.ps1`, `scripts/Test-ReleaseDiagnostics.ps1`, `scripts/New-PackageManifests.ps1`, `src/Images/Services/CodecCapabilityService.cs`, `docs/distribution-trust.md`
   Acceptance: Local release output includes SHA-256 checksums, a CycloneDX SBOM covering NuGet dependencies plus staged native runtimes/model definitions, and a provenance summary that matches `--system-info`/`--codec-report` diagnostics.

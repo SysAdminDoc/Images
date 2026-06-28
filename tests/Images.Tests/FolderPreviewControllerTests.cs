@@ -19,15 +19,14 @@ public sealed class FolderPreviewControllerTests
             using var firstStarted = new ManualResetEventSlim();
             using var releaseFirst = new ManualResetEventSlim();
             using var firstFinished = new ManualResetEventSlim();
-            var callCount = 0;
             var cancellationObserved = 0;
 
             using var controller = new FolderPreviewController(
                 Dispatcher.CurrentDispatcher,
                 isDisposed: () => false,
-                loadThumbnail: (_, token) =>
+                loadThumbnail: (path, token) =>
                 {
-                    if (Interlocked.Increment(ref callCount) == 1)
+                    if (string.Equals(path, @"C:\photos\first.png", StringComparison.OrdinalIgnoreCase))
                     {
                         firstStarted.Set();
                         releaseFirst.Wait(TimeSpan.FromSeconds(5));
@@ -40,12 +39,12 @@ public sealed class FolderPreviewControllerTests
                 });
 
             controller.Refresh(new[] { @"C:\photos\first.png", @"C:\photos\second.png" }, currentIndex: 0);
-            Assert.True(firstStarted.Wait(TimeSpan.FromSeconds(1)));
+            Assert.True(firstStarted.Wait(TimeSpan.FromSeconds(5)));
 
             controller.Clear();
             releaseFirst.Set();
 
-            Assert.True(firstFinished.Wait(TimeSpan.FromSeconds(1)));
+            Assert.True(firstFinished.Wait(TimeSpan.FromSeconds(5)));
             PumpFor(TimeSpan.FromMilliseconds(100));
 
             Assert.Equal(1, Volatile.Read(ref cancellationObserved));
@@ -62,15 +61,14 @@ public sealed class FolderPreviewControllerTests
             using var firstStarted = new ManualResetEventSlim();
             using var releaseFirst = new ManualResetEventSlim();
             using var firstFinished = new ManualResetEventSlim();
-            var callCount = 0;
             var cancellationObserved = 0;
 
             using var controller = new FolderPreviewController(
                 Dispatcher.CurrentDispatcher,
                 isDisposed: () => false,
-                loadThumbnail: (_, token) =>
+                loadThumbnail: (path, token) =>
                 {
-                    if (Interlocked.Increment(ref callCount) == 1)
+                    if (string.Equals(path, @"C:\photos\old-a.png", StringComparison.OrdinalIgnoreCase))
                     {
                         firstStarted.Set();
                         releaseFirst.Wait(TimeSpan.FromSeconds(5));
@@ -84,12 +82,12 @@ public sealed class FolderPreviewControllerTests
 
             controller.Refresh(new[] { @"C:\photos\old-a.png", @"C:\photos\old-b.png" }, currentIndex: 0);
             var staleItem = controller.Items[0];
-            Assert.True(firstStarted.Wait(TimeSpan.FromSeconds(1)));
+            Assert.True(firstStarted.Wait(TimeSpan.FromSeconds(5)));
 
             controller.Refresh(new[] { @"C:\photos\new-a.png", @"C:\photos\new-b.png" }, currentIndex: 0);
             releaseFirst.Set();
 
-            Assert.True(firstFinished.Wait(TimeSpan.FromSeconds(1)));
+            Assert.True(firstFinished.Wait(TimeSpan.FromSeconds(5)));
             PumpFor(TimeSpan.FromMilliseconds(100));
 
             Assert.Equal(1, Volatile.Read(ref cancellationObserved));

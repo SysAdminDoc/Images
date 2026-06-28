@@ -14,7 +14,7 @@ There is no LTS line yet; one will be considered when Images reaches `1.0`.
 
 ## Servicing surface
 
-- **NuGet packages**: monitored by Dependabot weekly and the [Security workflow](../.github/workflows/security.yml) daily. Vulnerabilities flagged by `dotnet list package --vulnerable --include-transitive` block the next release.
+- **NuGet packages**: checked locally by `scripts\Test-ReleaseReadiness.ps1` with `dotnet list package --vulnerable --include-transitive`. High or critical advisories block the next release until reviewed and fixed.
 - **Bundled native runtimes** (Magick.NET native pack, optional Ghostscript): tracked by version + SHA-256 in the runtime provenance surface. The SHA-256 of `gsdll64.dll` is shown in About → Runtime provenance and `Images.exe --system-info`. Replacement only after a license + CVE review.
 - **.NET runtime**: pinned to `net10.0-windows`. Move to a newer version will be staged behind a roadmap decision record.
 

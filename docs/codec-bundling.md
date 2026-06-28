@@ -46,14 +46,14 @@ Extract the runtime installer without installing it globally, then stage the ext
 ```powershell
 gh release download gs10070 --repo ArtifexSoftware/ghostpdl-downloads --pattern gs10070w64.exe --pattern ghostscript-10.07.0.tar.xz --dir .tmp-ghostscript-bundle
 & "C:\Program Files\7-Zip\7z.exe" x .tmp-ghostscript-bundle\gs10070w64.exe -o.tmp-ghostscript-bundle\extracted -y
-powershell -ExecutionPolicy Bypass -File scripts/Prepare-GhostscriptBundle.ps1 -Source ".tmp-ghostscript-bundle\extracted" -Force
+powershell -NoProfile -File scripts/Prepare-GhostscriptBundle.ps1 -Source ".tmp-ghostscript-bundle\extracted" -Force
 dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish
 ```
 
 From a machine with an already-approved Ghostscript runtime available:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/Prepare-GhostscriptBundle.ps1 -Source "C:\Program Files\gs\gs10.07.0" -Force
+powershell -NoProfile -File scripts/Prepare-GhostscriptBundle.ps1 -Source "C:\Program Files\gs\gs10.07.0" -Force
 dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish
 ```
 
@@ -73,13 +73,11 @@ Official releases stage jpegtran from libjpeg-turbo 3.1.4.1:
 Stage jpegtran:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/Prepare-JpegTranBundle.ps1 -Force
+powershell -NoProfile -File scripts/Prepare-JpegTranBundle.ps1 -Force
 dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish
 ```
 
-The project copies `src/Images/Codecs/Ghostscript/**` and `src/Images/Codecs/JpegTran/**` into build and publish output. The installer packages the self-contained published output, so app-local runtimes are included automatically once present during publish. The GitHub release workflow runs the jpegtran staging script before `dotnet publish`.
-
-The GitHub release workflow also has an optional `ghostscript_bundle_url` input. Point it at an approved private/runtime zip and the workflow will unpack it, locate `gsdll64.dll` or `gsdll32.dll`, prepare the app-local bundle, then publish the portable zip and installer with the runtime included.
+The project copies `src/Images/Codecs/Ghostscript/**` and `src/Images/Codecs/JpegTran/**` into build and publish output. The installer packages the self-contained published output, so app-local runtimes are included automatically once present during publish. Run the staging scripts locally before `dotnet publish`; for Ghostscript, unpack an approved runtime zip locally, locate `gsdll64.dll` or `gsdll32.dll`, and pass that folder to `Prepare-GhostscriptBundle.ps1`.
 
 ## Source-control policy
 
@@ -95,6 +93,6 @@ The shipped app reports the active decoder runtime through three matching surfac
 
 - About → **Runtime provenance** card. Shows Magick.NET version + assembly path, Ghostscript availability, source label (`bundled`/`IMAGES_GHOSTSCRIPT_DIR`/`installed`), Ghostscript version (when `gswin*c.exe` is present), absolute DLL path, and the SHA-256 of the loaded `gsdll64.dll` / `gsdll32.dll`. It also shows jpegtran availability, source label (`app-local Codecs\JpegTran` or `IMAGES_JPEGTRAN_EXE`), executable path, version, and SHA-256 when present.
 - About → **Codec report** button. Copies the same data to the clipboard alongside the per-format capability matrix.
-- `Images.exe --system-info` and `Images.exe --codec-report`. Print the same content to stdout for support tickets, CI smoke tests, and offline diagnostics.
+- `Images.exe --system-info` and `Images.exe --codec-report`. Print the same content to stdout for support tickets, local release smoke tests, and offline diagnostics.
 
 Compare the reported SHA-256 against the hashes recorded for the approved Ghostscript redistributable and jpegtran artifact in your release notes. A drift means the bundled runtime is not the package that was reviewed — investigate before shipping.
