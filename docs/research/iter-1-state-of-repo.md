@@ -28,12 +28,12 @@ Large-Repo Mode auto-engages by ROADMAP item count. Recipe self-modifies per `re
 | Phase | Last run | Days since | Run this iteration? |
 |---|---|---|---|
 | UX polish (U*) | 2026-04-24 (three premium-polish waves across v0.1.2) | 0 | no — rotated (recent) |
-| Theming (T*) | 2026-04-24 (DarkTheme.xaml rewrite v0.1.2) | 0 | no — rotated (recent) |
+| Theming (T*) | 2026-04-24 (DarkTheme.xaml rewrite v0.1.2) | 0 | no ��� rotated (recent) |
 | Dep scan (D*) | 2026-04-24 (v0.1.2 — Magick.NET 14.12 → 14.13) | 0 | no — rotated (recent) |
 | Modularization (M*) | never | — | skipped (< 5K LOC) |
 | Release (Q3) | 2026-04-24 22:25Z (v0.1.2); v0.1.3 + v0.1.4 manifest-bumped but un-tagged | 0 | **PENDING — tag v0.1.4 + run release.yml** |
 
-## Charter (from repo `CLAUDE.md` + `ROADMAP.md`)
+## Charter (from `ROADMAP.md`)
 Per ROADMAP §Vision: "One Windows app that replaces Photos, IrfanView, XnConvert, Upscayl, and a light Lightroom — by cannibalising the best ideas from a dozen OSS/freeware projects. Local-first, fast, dark-mode, no cloud, no subscription. Killer features are CLIP semantic search on a local library, live inline rename, Squoosh-style visual-diff converter, and the differentiator nobody else ships — network-egress transparency."
 
 Scope guards: Windows-first, local-only, zero telemetry by default, zero cloud, opinionated dark-mode, **keyboard-navigation required**, framework-dependent (no 70 MB self-contained).
@@ -51,4 +51,4 @@ These close concrete ROADMAP items; the ROADMAP reconcile in Phase 4 must mark t
 
 ## Preliminary Phase 1 scope (external scan)
 - April 2026 intel: Windows ML GA, WIC CVE-2025-50165, ImageGlass 10 Beta, JPEG XL Chrome-145-flag, cjpegli, C2PA v2.3, Oculante, Copilot+ NPU auto-EP — already referenced in ROADMAP v2 preamble. Delta scan asks: what happened in April-May 2026 that ROADMAP v2 doesn't know about?
-- 9 source classes: OSS competitors (ImageGlass 10, nomacs, qView, JPEGView, FastStone, Pictus, Oculante, Lyn, XnView MP), commercial (Windows Photos, Lightroom Classic), adjacent (darktable/digiKam for DAM, Squoosh for converter UX, Upscayl for AI, chaiNNer for plugin host), awesome-lists (`awesome-windows`, `awesome-image-viewer`, `awesome-dotnet-tools`), community signal (r/ImageViewer, HN, Lobsters, Windows Central), standards (C2PA v2.3, EXIF 3.0, JPEG XL, AVIF 1.2), academic (Windows ML inference papers, SkiaSharp benchmark threads), dep changelogs (Magick.NET 14.14?, SharpCompress, SkiaSharp 3, WpfAnimatedGif), CVEs (NVD, GHSA — libheif, libavif, libwebp, libjxl, ImageMagick).
+- 9 source classes: OSS competitors (ImageGlass 10, nomacs, qView, JPEGView, FastStone, Pictus, Oculante, Lyn, XnView MP), commercial (Windows Photos, Lightroom Classic), adjacent (darktable/digiKam for DAM, Squoosh for converter UX, Upscayl for AI, chaiNNer for plugin host), awesome-lists (`awesome-windows`, `awesome-image-viewer`, `awesome-dotnet-tools`), community signal (r/ImageViewer, HN, Lobsters, Windows Central), standards (C2PA v2.3, EXIF 3.0, JPEG XL, AVIF 1.2), academic (Windows ML inference papers, SkiaSharp benchmark threads), dep changelogs (Magick.NET 14.14?, SharpCompress, SkiaSharp 3, WpfAnimatedGif), CVEs (NVD, GHSA ��� libheif, libavif, libwebp, libjxl, ImageMagick).
