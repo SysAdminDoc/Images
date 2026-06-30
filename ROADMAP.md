@@ -17,13 +17,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ### P2
 
-- [ ] P2 — Add local assisted culling score lane
-  Why: Images has review labels and duplicate cleanup, but no first-pass "best shot" assistance for large photo sets.
-  Evidence: Adobe Lightroom Classic assisted culling, Excire Foto, `src/Images/Services/DuplicateCleanupService.cs`, `src/Images/ViewModels/MainViewModel.cs`
-  Touches: `src/Images/Services/`, `src/Images/ViewModels/MainViewModel.cs`, `src/Images/MainWindow.xaml`, `tests/Images.Tests/`
-  Acceptance: Culling mode can rank a folder by local-only signals such as sharpness, exposure warnings, similarity, and existing ratings; every score shows its reason and can be applied as keep/reject without network access.
-  Complexity: L
-
 - [ ] P2 — Add C2PA export provenance handoff
   Why: Images can inspect Content Credentials, but edited/exported files do not have a clear provenance-write or "not written" outcome.
   Evidence: `src/Images/ViewModels/C2paInspectionController.cs`, `src/Images/Services/C2paManifestService.cs`, `src/Images/Services/ImageExportService.cs`, C2PA 2.2 specification

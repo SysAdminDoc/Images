@@ -247,6 +247,41 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void CullingScores_RankFolderAndApplyReviewLabels()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var first = WritePng(temp.Path, "a.png");
+            var second = WritePng(temp.Path, "b.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(first);
+
+            Assert.True(viewModel.CanRunCullingScores);
+            viewModel.RunCullingScoresCommand.Execute(null);
+            PumpUntil(() => !viewModel.IsCullingScoreBusy && viewModel.HasCullingScores);
+
+            Assert.Equal(2, viewModel.CullingScoreItems.Count);
+            Assert.NotNull(viewModel.SelectedCullingScore);
+
+            var candidate = viewModel.CullingScoreItems.Single(item => item.Path == second);
+            viewModel.ApplyCullingRejectCommand.Execute(candidate);
+
+            Assert.Equal(ReviewLabelKind.Reject, new ReviewLabelService().ReadState(second).Label);
+            Assert.Equal(ReviewLabelKind.Reject, viewModel.CullingScoreItems.Single(item => item.Path == second).Label);
+
+            viewModel.OpenCullingScoreCommand.Execute(candidate);
+            Assert.Equal(second, viewModel.CurrentPath);
+
+            viewModel.ApplyCullingPickCommand.Execute(viewModel.SelectedCullingScore);
+
+            Assert.Equal(ReviewLabelKind.Pick, new ReviewLabelService().ReadState(second).Label);
+            Assert.Equal("Pick", viewModel.ReviewLabelText);
+        });
+    }
+
+    [Fact]
     public void AnimatedImageWorkbench_LoadsTimelineAndFrameCommands()
     {
         RunOnSta(() =>

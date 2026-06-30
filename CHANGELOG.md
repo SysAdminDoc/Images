@@ -42,6 +42,7 @@ All notable changes to **Images** are documented here.
 
 ### Features
 
+- **Local assisted culling lane** — Review mode can score the current folder with local-only sharpness, exposure clipping, similarity, and existing XMP rating/pick/reject signals, show reasons per ranked file, and apply keep/reject labels without network access.
 - **Multi-path launch sessions** — `Images.exe a.jpg b.png c.webp` opens an explicit ad hoc set spanning different folders. Next/previous/Home/End navigate the argument list in order; single-path launch falls back to the existing folder scan. `DirectoryNavigator.OpenExplicitList` supports the feature with 3 new regression tests.
 - **Redacted support bundle export** — About window now offers a one-click "Export support bundle" that writes a ZIP containing system info, codec report, network activity summary, diagnostics status, recent logs, crash log, recovery records, redacted settings, and cache health. No image bytes or private paths are included.
 - **Local data management panel** — Settings Diagnostics now shows per-store sizes (thumbnails, logs, recovery, semantic index, models, network log, settings DB) and offers individual clear actions for thumbnails, logs, recovery log, and network activity with a refresh button.

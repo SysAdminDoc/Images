@@ -34,6 +34,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly ImageFileTransferService _fileTransfer = new();
     private readonly RecoveryCenterService _recoveryCenter = new();
     private readonly ReviewLabelService _reviewLabels = new();
+    private readonly CullingScoreService _cullingScores;
     private readonly Func<LosslessJpegTrimConfirmation, LosslessJpegTrimChoice> _confirmLosslessJpegTrim;
     private readonly Func<string, string?> _pickFolder;
     private readonly Func<string, WallpaperLayout, string> _setWallpaper;
@@ -102,6 +103,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _clipboardImport = clipboardImport ?? new ClipboardImportService();
         _nav = navigator ?? new DirectoryNavigator();
         _recycleBinDelete = recycleBinDelete ?? new RecycleBinDeleteService(_settings);
+        _cullingScores = new CullingScoreService(_reviewLabels);
         _folderPreview = folderPreview ?? new FolderPreviewController(_uiDispatcher, () => _isDisposed);
         _folderPreview.StateChanged += (_, _) => RaiseFolderPreviewState();
         _photoMetadata = photoMetadata ?? new PhotoMetadataController(_uiDispatcher, () => _isDisposed, () => CurrentPath);
@@ -297,6 +299,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         MarkReviewRejectCommand = new RelayCommand(() => SetReviewLabel(ReviewLabelKind.Reject), () => CanUseReviewLabels);
         ClearReviewLabelCommand = new RelayCommand(() => SetReviewLabel(ReviewLabelKind.None), () => CanUseReviewLabels);
         UndoReviewLabelCommand = new RelayCommand(UndoReviewLabel, () => CanUndoReviewLabel);
+        RunCullingScoresCommand = new RelayCommand(async () => await RunCullingScoresAsync(), () => CanRunCullingScores);
+        OpenCullingScoreCommand = new RelayCommand(OpenCullingScore, CanUseCullingScoreItem);
+        ApplyCullingPickCommand = new RelayCommand(p => ApplyCullingReviewLabel(p, ReviewLabelKind.Pick), CanUseCullingScoreItem);
+        ApplyCullingRejectCommand = new RelayCommand(p => ApplyCullingReviewLabel(p, ReviewLabelKind.Reject), CanUseCullingScoreItem);
         ToggleFilmstripCommand = new RelayCommand(ToggleFilmstrip, () => CanToggleFilmstrip);
         ToggleMetadataHudCommand = new RelayCommand(ToggleMetadataHud, () => CanToggleMetadataHud);
         PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard, () => !IsOperationBusy);
@@ -2861,6 +2867,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public ObservableCollection<FolderPreviewItem> FolderPreviewItems => _folderPreview.Items;
     public ObservableCollection<FolderPreviewItem> GalleryItems { get; } = [];
+    public ObservableCollection<CullingScoreItem> CullingScoreItems { get; } = [];
     private IReadOnlyList<AssetSmartFilterItem> _gallerySmartFilterIndex = [];
     private string _gallerySmartFilterSignature = "";
     private string _galleryFilterSummaryText = "";
@@ -2944,6 +2951,41 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public string ReviewStatusText => $"{ReviewRatingText} · {ReviewLabelText}";
     public bool IsReviewPick => _currentReviewState.Label == ReviewLabelKind.Pick;
     public bool IsReviewReject => _currentReviewState.Label == ReviewLabelKind.Reject;
+
+    private CullingScoreItem? _selectedCullingScore;
+    public CullingScoreItem? SelectedCullingScore
+    {
+        get => _selectedCullingScore;
+        set
+        {
+            if (Set(ref _selectedCullingScore, value))
+                CommandManager.InvalidateRequerySuggested();
+        }
+    }
+
+    private bool _isCullingScoreBusy;
+    public bool IsCullingScoreBusy
+    {
+        get => _isCullingScoreBusy;
+        private set
+        {
+            if (!Set(ref _isCullingScoreBusy, value)) return;
+            Raise(nameof(CanRunCullingScores));
+            Raise(nameof(CullingScoreActionText));
+            CommandManager.InvalidateRequerySuggested();
+        }
+    }
+
+    private string _cullingScoreStatusText = "Score the current folder to rank likely keepers with local signals.";
+    public string CullingScoreStatusText
+    {
+        get => _cullingScoreStatusText;
+        private set => Set(ref _cullingScoreStatusText, value);
+    }
+
+    public bool HasCullingScores => CullingScoreItems.Count > 0;
+    public bool CanRunCullingScores => HasImage && !IsArchiveBook && !IsPeekMode && !IsOperationBusy && !IsCullingScoreBusy && _nav.Files.Count > 0;
+    public string CullingScoreActionText => IsCullingScoreBusy ? "Scoring" : "Score folder";
 
     private string _galleryFilterText = "";
     public string GalleryFilterText
@@ -3167,6 +3209,87 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ApplyReviewMutation(CurrentPath, _reviewLabels.SetLabel(CurrentPath, label));
     }
 
+    private async Task RunCullingScoresAsync()
+    {
+        if (!CanRunCullingScores)
+        {
+            Toast("Open a local image folder before scoring.");
+            return;
+        }
+
+        var files = _nav.Files
+            .Where(File.Exists)
+            .ToArray();
+        if (files.Length == 0)
+        {
+            CullingScoreStatusText = "No local files are available to score.";
+            Toast("No files to score.");
+            return;
+        }
+
+        IsCullingScoreBusy = true;
+        CullingScoreStatusText = $"Scoring {files.Length} local file{(files.Length == 1 ? "" : "s")}...";
+
+        try
+        {
+            var result = await Task.Run(() => _cullingScores.RankFiles(files));
+            CullingScoreItems.Clear();
+            foreach (var item in result.Items)
+                CullingScoreItems.Add(item);
+
+            SelectedCullingScore = result.Items.FirstOrDefault(item => AreSamePath(item.Path, CurrentPath))
+                                   ?? result.Items.FirstOrDefault();
+            CullingScoreStatusText = result.Summary;
+            Raise(nameof(HasCullingScores));
+            Toast(result.HasItems ? "Culling scores ready" : "No supported files scored");
+        }
+        catch (Exception ex) when (ex is IOException
+                                  or UnauthorizedAccessException
+                                  or ArgumentException
+                                  or NotSupportedException
+                                  or InvalidOperationException)
+        {
+            CullingScoreStatusText = $"Culling score failed: {ex.Message}";
+            Toast("Culling score failed.");
+        }
+        finally
+        {
+            IsCullingScoreBusy = false;
+        }
+    }
+
+    private void OpenCullingScore(object? parameter)
+    {
+        var item = ResolveCullingScoreItem(parameter);
+        if (item is null)
+            return;
+
+        SelectedCullingScore = item;
+        OpenFile(item.Path);
+    }
+
+    private void ApplyCullingReviewLabel(object? parameter, ReviewLabelKind label)
+    {
+        var item = ResolveCullingScoreItem(parameter);
+        if (item is null)
+            return;
+
+        SelectedCullingScore = item;
+        ApplyReviewMutation(item.Path, _reviewLabels.SetLabel(item.Path, label));
+    }
+
+    private bool CanUseCullingScoreItem(object? parameter)
+    {
+        if (IsOperationBusy || IsCullingScoreBusy)
+            return false;
+
+        var item = ResolveCullingScoreItem(parameter);
+        return item is not null && File.Exists(item.Path);
+    }
+
+    private CullingScoreItem? ResolveCullingScoreItem(object? parameter)
+        => parameter as CullingScoreItem ?? SelectedCullingScore;
+
     private void ApplyReviewMutation(string path, ReviewLabelMutationResult result)
     {
         if (!result.Success)
@@ -3176,7 +3299,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
 
         _reviewUndo.Push(new ReviewLabelUndoEntry(path, result.Previous));
-        _currentReviewState = result.Current;
+        if (AreSamePath(path, CurrentPath))
+            _currentReviewState = result.Current;
+        UpdateCullingScoreReviewState(path, result.Current);
         RaiseReviewState();
         InvalidateGallerySmartFilterIndex();
         Toast(result.Message);
@@ -3195,8 +3320,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return;
         }
 
-        if (CurrentPath is not null && string.Equals(Path.GetFullPath(CurrentPath), Path.GetFullPath(entry.Path), StringComparison.OrdinalIgnoreCase))
+        if (AreSamePath(CurrentPath, entry.Path))
             _currentReviewState = result.Current;
+        UpdateCullingScoreReviewState(entry.Path, result.Current);
         RaiseReviewState();
         InvalidateGallerySmartFilterIndex();
         Toast(Strings.MainToastReviewUndone);
@@ -3210,6 +3336,41 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RaiseReviewState();
     }
 
+    private void UpdateCullingScoreReviewState(string path, ReviewLabelState state)
+    {
+        for (var i = 0; i < CullingScoreItems.Count; i++)
+        {
+            var item = CullingScoreItems[i];
+            if (!AreSamePath(item.Path, path))
+                continue;
+
+            var updated = item with
+            {
+                Rating = state.Rating,
+                Label = state.Label
+            };
+            CullingScoreItems[i] = updated;
+            if (SelectedCullingScore is not null && AreSamePath(SelectedCullingScore.Path, path))
+                SelectedCullingScore = updated;
+            break;
+        }
+    }
+
+    private static bool AreSamePath(string? left, string? right)
+    {
+        if (string.IsNullOrWhiteSpace(left) || string.IsNullOrWhiteSpace(right))
+            return false;
+
+        try
+        {
+            return string.Equals(Path.GetFullPath(left), Path.GetFullPath(right), StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception ex) when (ex is ArgumentException or IOException or NotSupportedException)
+        {
+            return string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
     private void RaiseReviewState()
     {
         Raise(nameof(IsReviewMode));
@@ -3221,6 +3382,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(ReviewStatusText));
         Raise(nameof(IsReviewPick));
         Raise(nameof(IsReviewReject));
+        Raise(nameof(CanRunCullingScores));
         CommandManager.InvalidateRequerySuggested();
     }
 
@@ -3591,6 +3753,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand MarkReviewRejectCommand { get; }
     public ICommand ClearReviewLabelCommand { get; }
     public ICommand UndoReviewLabelCommand { get; }
+    public ICommand RunCullingScoresCommand { get; }
+    public ICommand OpenCullingScoreCommand { get; }
+    public ICommand ApplyCullingPickCommand { get; }
+    public ICommand ApplyCullingRejectCommand { get; }
     public ICommand ToggleFilmstripCommand { get; }
     public ICommand ToggleMetadataHudCommand { get; }
     public ICommand PasteFromClipboardCommand { get; }
