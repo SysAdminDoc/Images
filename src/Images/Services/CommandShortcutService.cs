@@ -137,6 +137,7 @@ public sealed class CommandShortcutService
         return
         [
             new(CommandIds.Open, Strings.CommandPalette_Open, nav, "Ctrl+O"),
+            new(CommandIds.BrowseFolder, Strings.CommandPalette_BrowseFolder, nav, "Ctrl+Shift+F"),
             new(CommandIds.Previous, Strings.CommandPalette_Previous, nav, "Left"),
             new(CommandIds.Next, Strings.CommandPalette_Next, nav, "Right"),
             new(CommandIds.First, Strings.CommandPalette_First, nav, "Home"),
@@ -206,6 +207,7 @@ public sealed class CommandShortcutService
 public static class CommandIds
 {
     public const string Open = "open";
+    public const string BrowseFolder = "browse-folder";
     public const string Previous = "previous";
     public const string Next = "next";
     public const string First = "first";

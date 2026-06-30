@@ -1570,12 +1570,24 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
-    private void Window_Drop(object sender, DragEventArgs e)
+    private async void Window_Drop(object sender, DragEventArgs e)
     {
         Vm.IsDropTargetActive = false;
-        var path = GetDroppedPath(e);
-        if (path is null) return;
-        Vm.OpenFile(path);
+        if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
+        var paths = (string[]?)e.Data.GetData(DataFormats.FileDrop);
+        if (paths is null || paths.Length == 0) return;
+        var first = paths[0];
+
+        if (Directory.Exists(first))
+        {
+            e.Handled = true;
+            Vm.BrowseFolderCommand.Execute(first);
+            return;
+        }
+
+        var resolved = GetDroppedFilePath(first);
+        if (resolved is null) return;
+        Vm.OpenFile(resolved);
         e.Handled = true;
     }
 
@@ -1586,14 +1598,16 @@ public partial class MainWindow : Window
         if (paths is null || paths.Length == 0) return null;
         var first = paths[0];
         if (Directory.Exists(first))
-        {
-            var firstImage = Directory.EnumerateFiles(first)
+            return Directory.EnumerateFiles(first)
                 .FirstOrDefault(f => Services.DirectoryNavigator.SupportedExtensions.Contains(Path.GetExtension(f)));
-            return firstImage;
-        }
-        if (!File.Exists(first)) return null;
-        var ext = Path.GetExtension(first);
-        return Services.DirectoryNavigator.SupportedExtensions.Contains(ext) ? first : null;
+        return GetDroppedFilePath(first);
+    }
+
+    private static string? GetDroppedFilePath(string path)
+    {
+        if (!File.Exists(path)) return null;
+        var ext = Path.GetExtension(path);
+        return Services.DirectoryNavigator.SupportedExtensions.Contains(ext) ? path : null;
     }
 
     // ---- V20-29: Command palette event handlers ----

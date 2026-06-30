@@ -173,6 +173,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RestorePersistedWorkflowMode();
 
         OpenCommand = new RelayCommand(async () => await OpenFileDialogAsync(), () => !IsOperationBusy);
+        BrowseFolderCommand = new RelayCommand(async p => await BrowseFolderAsync(p as string), _ => !IsOperationBusy);
         NextCommand = new RelayCommand(async () => await NextAsync(), () => CanUseImageCommands);
         PrevCommand = new RelayCommand(async () => await PrevAsync(), () => CanUseImageCommands);
         FirstCommand = new RelayCommand(async () => await FirstAsync(), () => CanUseImageCommands);
@@ -1059,6 +1060,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             case CommandIds.Open:
                 OpenCommand.Execute(null);
                 return true;
+            case CommandIds.BrowseFolder:
+                BrowseFolderCommand.Execute(null);
+                return true;
             case CommandIds.Previous:
                 if (IsArchiveBook) LeftBookPageTurnCommand.Execute(null);
                 else PrevCommand.Execute(null);
@@ -1205,6 +1209,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             // Navigation
             PaletteCommand(CommandIds.Open, OpenCommand),
+            PaletteCommand(CommandIds.BrowseFolder, BrowseFolderCommand),
             PaletteCommand(CommandIds.Next, NextCommand),
             PaletteCommand(CommandIds.Previous, PrevCommand),
             PaletteCommand(CommandIds.First, FirstCommand),
@@ -3629,6 +3634,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     // -------------------- Commands --------------------
 
     public ICommand OpenCommand { get; }
+    public ICommand BrowseFolderCommand { get; }
     public ICommand NextCommand { get; }
     public ICommand PrevCommand { get; }
     public ICommand FirstCommand { get; }
@@ -4109,6 +4115,54 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         };
         if (dlg.ShowDialog() == true)
             await OpenFileWithOperationStatusAsync(dlg.FileName, Strings.MainOpOpeningFile);
+    }
+
+    private async Task BrowseFolderAsync(string? droppedFolder = null)
+    {
+        var folder = droppedFolder ?? _pickFolder(Strings.MainDialogBrowseFolder);
+        if (string.IsNullOrEmpty(folder)) return;
+
+        BeginOperationStatus(Strings.MainOpScanningFolder, DisplayFolderName(folder));
+        try
+        {
+            await YieldForOperationStatusAsync();
+
+            var files = await Task.Run(() =>
+            {
+                var options = new EnumerationOptions
+                {
+                    RecurseSubdirectories = true,
+                    IgnoreInaccessible = true,
+                    AttributesToSkip = FileAttributes.ReparsePoint
+                };
+                var found = new List<string>();
+                foreach (var f in Directory.EnumerateFiles(folder, "*.*", options))
+                {
+                    if (DirectoryNavigator.SupportedExtensions.Contains(Path.GetExtension(f)))
+                        found.Add(f);
+                }
+                found.Sort(StringComparer.OrdinalIgnoreCase);
+                return found;
+            });
+
+            if (files.Count == 0)
+            {
+                ShowSecondaryStatus(
+                    Strings.MainSecondaryNoSupportedImages,
+                    $"Images did not find supported formats in {DisplayFolderName(folder)} or its subfolders.",
+                    SecondaryStatusToneKind.Info,
+                    "");
+                Toast($"No images in {Path.GetFileName(folder)}");
+                return;
+            }
+
+            OpenFileList(files);
+            Toast($"Loaded {files.Count:N0} images from {Path.GetFileName(folder)}");
+        }
+        finally
+        {
+            EndOperationStatus();
+        }
     }
 
     private string? PickCompareFile()

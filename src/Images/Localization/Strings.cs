@@ -565,6 +565,9 @@ public static class Strings
     public static string CommandPalette_Category_Compare => Get(nameof(CommandPalette_Category_Compare));
     public static string CommandPalette_Category_Help => Get(nameof(CommandPalette_Category_Help));
     public static string CommandPalette_Open => Get(nameof(CommandPalette_Open));
+    public static string CommandPalette_BrowseFolder => Get(nameof(CommandPalette_BrowseFolder));
+    public static string MainDialogBrowseFolder => Get(nameof(MainDialogBrowseFolder));
+    public static string MainOpScanningFolder => Get(nameof(MainOpScanningFolder));
     public static string CommandPalette_Next => Get(nameof(CommandPalette_Next));
     public static string CommandPalette_Previous => Get(nameof(CommandPalette_Previous));
     public static string CommandPalette_First => Get(nameof(CommandPalette_First));
@@ -748,6 +751,9 @@ public static class Strings
     public static string ImportInboxAddFolderBeforeRefresh => Get(nameof(ImportInboxAddFolderBeforeRefresh));
     public static string ImportInboxBuildingStatus => Get(nameof(ImportInboxBuildingStatus));
     public static string ImportInboxStagedResultFormat => Get(nameof(ImportInboxStagedResultFormat));
+    public static string ImportInboxImportPicasa => Get(nameof(ImportInboxImportPicasa));
+    public static string ImportInboxImportPicasaDialogTitle => Get(nameof(ImportInboxImportPicasaDialogTitle));
+    public static string ImportInboxImportingPicasa => Get(nameof(ImportInboxImportingPicasa));
     public static string ImportInboxRefreshCanceled => Get(nameof(ImportInboxRefreshCanceled));
     public static string ImportInboxChooseDestinationDialogTitle => Get(nameof(ImportInboxChooseDestinationDialogTitle));
     public static string ImportInboxDestinationSelected => Get(nameof(ImportInboxDestinationSelected));

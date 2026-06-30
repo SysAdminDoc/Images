@@ -57,6 +57,11 @@
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="Browse folder…" Command="{Binding BrowseFolderCommand}" InputGestureText="{Binding ShortcutTexts[browse-folder]}">
+                            <MenuItem.Icon>
+                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="Paste from clipboard" Command="{Binding PasteFromClipboardCommand}" InputGestureText="{Binding ShortcutTexts[paste]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE77F;" />

@@ -2519,6 +2519,15 @@ Details written to:
   <data name="ImportInboxCheckBeforeImporting" xml:space="preserve">
     <value>Check at least one staged file before importing.</value>
   </data>
+  <data name="ImportInboxImportPicasa" xml:space="preserve">
+    <value>Import Picasa edits</value>
+  </data>
+  <data name="ImportInboxImportPicasaDialogTitle" xml:space="preserve">
+    <value>Select Picasa folder to import</value>
+  </data>
+  <data name="ImportInboxImportingPicasa" xml:space="preserve">
+    <value>Importing Picasa edits…</value>
+  </data>
   <data name="ImportInboxImportingFormat" xml:space="preserve">
     <value>Importing {0} file{1}...</value>
   </data>
@@ -4071,6 +4080,15 @@ Details written to:
   </data>
   <data name="CommandPalette_Open" xml:space="preserve">
     <value>Open file...</value>
+  </data>
+  <data name="CommandPalette_BrowseFolder" xml:space="preserve">
+    <value>Browse folder…</value>
+  </data>
+  <data name="MainDialogBrowseFolder" xml:space="preserve">
+    <value>Browse folder for images</value>
+  </data>
+  <data name="MainOpScanningFolder" xml:space="preserve">
+    <value>Scanning folder</value>
   </data>
   <data name="CommandPalette_Next" xml:space="preserve">
     <value>Next image</value>
