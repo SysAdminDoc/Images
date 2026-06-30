@@ -1896,4 +1896,34 @@ public sealed class MainViewModelStateTests
 
         public BitmapSource? GetImage() => Image;
     }
+
+    [Fact]
+    public void OpenFileList_PopulatesGalleryWithAllItems()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var sub1 = Path.Combine(temp.Path, "sub1");
+            var sub2 = Path.Combine(temp.Path, "sub2");
+            Directory.CreateDirectory(sub1);
+            Directory.CreateDirectory(sub2);
+            var a = WritePng(temp.Path, "root.png");
+            var b = WritePng(sub1, "child1.png");
+            var c = WritePng(sub2, "child2.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFileList([a, b, c]);
+
+            Assert.Equal(a, viewModel.CurrentPath);
+            Assert.Equal("1 / 3", viewModel.PositionText);
+            Assert.Equal(3, viewModel.FolderPreviewItems.Count);
+            Assert.Equal([a, b, c], viewModel.FolderPreviewItems.Select(i => i.Path));
+
+            viewModel.ToggleGalleryCommand.Execute(null);
+
+            Assert.True(viewModel.IsGalleryOpen);
+            Assert.True(viewModel.ShowGallery);
+            Assert.Equal(3, viewModel.GalleryItems.Count);
+        });
+    }
 }
