@@ -200,6 +200,12 @@ public partial class MainWindow : Window
             Vm.EnsurePreviewThumbnailCommand.Execute(item);
     }
 
+    private void GalleryItems_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (Vm.IsGalleryOpen && Vm.SelectedGalleryItem is not null)
+            Vm.IsGalleryOpen = false;
+    }
+
     private void FolderSortButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button { ContextMenu: { } menu } button)

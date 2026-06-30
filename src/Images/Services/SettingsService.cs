@@ -512,6 +512,7 @@ public static class Keys
     public const string ArchiveSpreadMode = "viewer.archive.spread-mode";
     public const string Locale = "locale";
     public const string ViewerSortMode = "viewer.sort-mode";
+    public const string GalleryTileSize = "gallery.tile-size";
     public const string WritebackBackupPolicy = "writeback.backup-policy";
     public const string WritebackConfirmFirst = "writeback.confirm-first";
     public const string ThemeMode = "appearance.theme";

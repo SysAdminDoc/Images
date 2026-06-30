@@ -171,6 +171,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _archiveSpreadModeEnabled = _settings.GetBool(Keys.ArchiveSpreadMode, false);
         RestorePersistedSortMode();
         RestorePersistedWorkflowMode();
+        RestorePersistedGalleryTileSize();
 
         OpenCommand = new RelayCommand(async () => await OpenFileDialogAsync(), () => !IsOperationBusy);
         BrowseFolderCommand = new RelayCommand(async p => await BrowseFolderAsync(p as string), _ => !IsOperationBusy);
@@ -2876,6 +2877,21 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private IReadOnlyList<AssetSmartFilterItem> _gallerySmartFilterIndex = [];
     private string _gallerySmartFilterSignature = "";
     private string _galleryFilterSummaryText = "";
+
+    private double _galleryTileSize = 180;
+    public double GalleryTileSize
+    {
+        get => _galleryTileSize;
+        set
+        {
+            if (Set(ref _galleryTileSize, Math.Clamp(value, 80, 320)))
+            {
+                Raise(nameof(GalleryTileImageHeight));
+                _settings.SetString(Keys.GalleryTileSize, value.ToString("F0", System.Globalization.CultureInfo.InvariantCulture));
+            }
+        }
+    }
+    public double GalleryTileImageHeight => Math.Round(_galleryTileSize * 0.7);
     private readonly Stack<ReviewLabelUndoEntry> _reviewUndo = new();
     private ReviewLabelState _currentReviewState = new(null, ReviewLabelKind.None, "");
 
@@ -3055,10 +3071,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void OpenPreviewItem(FolderPreviewItem? item)
     {
         if (item is null || !File.Exists(item.Path)) return;
-        var closeGallery = IsGalleryOpen;
         OpenFile(item.Path);
-        if (closeGallery)
-            IsGalleryOpen = false;
     }
 
     private void RevealPreviewItem(FolderPreviewItem? item)
@@ -3151,6 +3164,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _nav.SetSortMode(mode);
     }
 
+    private void RestorePersistedGalleryTileSize()
+    {
+        var raw = _settings.GetString(Keys.GalleryTileSize);
+        if (raw is not null && double.TryParse(raw, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var size))
+            _galleryTileSize = Math.Clamp(size, 80, 320);
+    }
+
     private void ToggleGallery()
     {
         if (IsGalleryOpen)
@@ -3173,6 +3193,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void OpenSelectedGalleryItem()
     {
         OpenPreviewItem(SelectedGalleryItem);
+        IsGalleryOpen = false;
     }
 
     private void ApplyGallerySmartFilter(object? parameter)
@@ -4157,6 +4178,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             }
 
             OpenFileList(files);
+            IsGalleryOpen = true;
             Toast($"Loaded {files.Count:N0} images from {Path.GetFileName(folder)}");
         }
         finally
