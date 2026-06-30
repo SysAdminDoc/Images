@@ -2520,13 +2520,13 @@ Details written to:
     <value>Check at least one staged file before importing.</value>
   </data>
   <data name="ImportInboxImportPicasa" xml:space="preserve">
-    <value>Import Picasa edits</value>
+    <value>Import Picasa metadata</value>
   </data>
   <data name="ImportInboxImportPicasaDialogTitle" xml:space="preserve">
-    <value>Select Picasa folder to import</value>
+    <value>Choose Picasa folder</value>
   </data>
   <data name="ImportInboxImportingPicasa" xml:space="preserve">
-    <value>Importing Picasa edits…</value>
+    <value>Importing Picasa metadata...</value>
   </data>
   <data name="ImportInboxImportingFormat" xml:space="preserve">
     <value>Importing {0} file{1}...</value>

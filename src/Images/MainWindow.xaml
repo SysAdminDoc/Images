@@ -44,6 +44,7 @@
             <Grid x:Name="Viewport"
                   Grid.Row="0"
                   ClipToBounds="True"
+                  Background="Transparent"
                   PreviewMouseRightButtonUp="Viewport_PreviewMouseRightButtonUp">
                 <!-- V15-02: right-click context menu on the viewport. Rename-TextBox's own
                      built-in edit menu is unaffected because ContextMenu here is attached to

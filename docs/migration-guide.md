@@ -51,7 +51,9 @@ Lightroom catalog import (`.lrcat`) is planned (M-02). In the meantime, Lightroo
 
 Picasa stores metadata in `.picasa.ini` files (one per folder) and `contacts.xml` (global face-name mappings). These are not standard XMP and require dedicated parsing.
 
-A Picasa `.picasa.ini` importer is planned (M-01) and will convert face rectangles, star ratings, and album assignments to XMP sidecars.
+Use **Import Inbox > Import Picasa metadata** on a folder that contains `.picasa.ini`. Images reads a local `contacts.xml` file from the selected folder or its parent when present, then writes XMP sidecars next to the images without changing the originals.
+
+The importer converts Picasa star/rating values to `xmp:Rating`, album assignments to `album:` tags plus Lightroom hierarchical subjects, and face rectangles to XMP region records. Resolved contacts are also written as `person:` tags.
 
 ## IrfanView
 

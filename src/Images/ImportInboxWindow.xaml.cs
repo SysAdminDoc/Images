@@ -14,6 +14,7 @@ namespace Images;
 public partial class ImportInboxWindow : Window
 {
     private readonly ImportInboxService _inbox = new();
+    private readonly PicasaImportService _picasaImport = new();
     private readonly RecycleBinDeleteService _deleteService = new(SettingsService.Instance);
     private readonly ObservableCollection<ImportInboxRow> _rows = [];
     private readonly List<string> _sourceRoots = [];
@@ -131,6 +132,38 @@ public partial class ImportInboxWindow : Window
 
         AddSource(folder);
         await ReloadAsync();
+    }
+
+    private async void ImportPicasaButton_Click(object sender, RoutedEventArgs e)
+    {
+        var folder = PickFolder(Strings.ImportInboxImportPicasaDialogTitle);
+        if (folder is null)
+            return;
+
+        SetBusy(true);
+        SetStatus(Strings.ImportInboxImportingPicasa, ImportInboxStatus.Busy);
+        PicasaImportSummary result;
+        try
+        {
+            result = await Task.Run(() => _picasaImport.ImportFolder(folder));
+        }
+        catch (OperationCanceledException)
+        {
+            SetStatus(Strings.ImportInboxRefreshCanceled, ImportInboxStatus.Warning);
+            return;
+        }
+        finally
+        {
+            SetBusy(false);
+        }
+
+        if (result.Success)
+        {
+            AddSource(folder);
+            await ReloadAsync();
+        }
+
+        SetStatus(result.Message, result.Success ? ImportInboxStatus.Ready : ImportInboxStatus.Warning);
     }
 
     private async void ChooseDestinationButton_Click(object sender, RoutedEventArgs e)
@@ -314,6 +347,7 @@ public partial class ImportInboxWindow : Window
     {
         AddFilesButton.IsEnabled = !busy;
         AddFolderButton.IsEnabled = !busy;
+        ImportPicasaButton.IsEnabled = !busy;
         RefreshButton.IsEnabled = !busy;
         InboxList.IsEnabled = !busy;
         ImportButton.IsEnabled = !busy;

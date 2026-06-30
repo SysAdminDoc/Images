@@ -43,6 +43,13 @@
                             AutomationProperties.Name="{x:Static loc:Strings.ImportInboxAddFolder}">
                         <TextBlock Text="{x:Static loc:Strings.ImportInboxAddFolder}" />
                     </Button>
+                    <Button x:Name="ImportPicasaButton"
+                            Style="{StaticResource ChromeButton}"
+                            Margin="8,0,0,0"
+                            Click="ImportPicasaButton_Click"
+                            AutomationProperties.Name="{x:Static loc:Strings.ImportInboxImportPicasa}">
+                        <TextBlock Text="{x:Static loc:Strings.ImportInboxImportPicasa}" />
+                    </Button>
                     <Button x:Name="RefreshButton"
                             Style="{StaticResource ChromeButton}"
                             Margin="8,0,0,0"

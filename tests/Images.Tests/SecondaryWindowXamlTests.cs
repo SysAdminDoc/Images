@@ -111,6 +111,7 @@ public sealed class SecondaryWindowXamlTests
             [
                 Strings.ImportInboxAddFiles,
                 Strings.ImportInboxAddFolder,
+                Strings.ImportInboxImportPicasa,
                 Strings.ImportInboxChoose,
                 Strings.ImportInboxStagedFiles
             ])

@@ -17,13 +17,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ### P2
 
-- [ ] P2 — Add Picasa metadata migration importer
-  Why: The migration guide says Picasa requires dedicated `.picasa.ini` and `contacts.xml` parsing, but only standard XMP import exists today.
-  Evidence: `docs/migration-guide.md`, `src/Images/Services/XmpSidecarImportService.cs`, digiKam migration work
-  Touches: `src/Images/Services/PicasaImportService.cs`, `src/Images/ImportInboxWindow.xaml(.cs)`, `docs/migration-guide.md`, `tests/Images.Tests/`
-  Acceptance: Fixture `.picasa.ini` and `contacts.xml` files convert star ratings, albums, face rectangles, and contact names into XMP sidecars without modifying originals.
-  Complexity: M
-
 - [ ] P2 — Add pseudo-locale and overflow layout gate
   Why: Localization infrastructure exists, but there are no locale files and no automated check that expanded strings fit premium WPF surfaces.
   Evidence: `src/Images/Localization/Strings.resx`, `scripts/Test-LocalizationResources.ps1`, `docs/accessibility.md`
