@@ -116,6 +116,12 @@ public sealed class DirectoryNavigator : IDisposable
         var folder = Path.GetDirectoryName(full);
         if (string.IsNullOrEmpty(folder)) return false;
 
+        // Explicit-list mode: the file list was set via OpenExplicitList (e.g., recursive folder
+        // browse). If the target is already in the list, just move the index — never rescan a
+        // single folder and destroy the cross-directory list.
+        if (_folder is null && _files.Count > 0 && TrySetCurrentIndex(full))
+            return true;
+
         // Short-circuit: if we're already watching this folder, move to the exact file. If the
         // file was created after the last scan, rescan once before declaring the open failed.
         if (_folder is not null && string.Equals(_folder, folder, StringComparison.OrdinalIgnoreCase))

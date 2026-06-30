@@ -241,11 +241,9 @@ public sealed class ZoomPanImage : ContentControl
 
     private void ApplyAnimationFrame(AnimationSequence? seq, int index)
     {
-        // Cancel any legacy Source animation and show the explicit frame selected by the
-        // workbench. This keeps scrubbing, step commands, copy, export, and the canvas in sync.
-        _image.BeginAnimation(Image.SourceProperty, null);
         if (seq is null || seq.Frames.Count < 2)
         {
+            _image.BeginAnimation(Image.SourceProperty, null);
             _image.Source = Source;
             return;
         }
