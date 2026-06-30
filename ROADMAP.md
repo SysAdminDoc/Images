@@ -75,15 +75,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
   Acceptance: A small exported Lightroom fixture proves whether ratings, keywords, hierarchical subjects, labels, and collection membership can be imported from XMP or sidecar-adjacent data without reading private catalog tables.
   Complexity: S
 
-### P1
-
-- [ ] P1 - Add Magick.NET codec security-policy gate
-  Why: Images sets Magick.NET resource limits, but untrusted image/document inputs also need an explicit policy audit so supported formats, delegates, and failure modes match the codec policy.
-  Evidence: `src/Images/App.xaml.cs`, `src/Images/Services/ImageLoader.cs`, `docs/codec-support-policy.md`, ImageMagick security policy
-  Touches: `src/Images/App.xaml.cs`, `src/Images/Services/ImageLoader.cs`, `src/Images/Services/CodecCapabilityService.cs`, `docs/codec-support-policy.md`, `tests/Images.Tests/`
-  Acceptance: Startup diagnostics and tests prove the active Magick.NET limits/policy reject or safely route high-risk delegate/document paths, huge dimensions, and disallowed write targets without silently widening supported codec behavior.
-  Complexity: M
-
 ### P2
 
 - [ ] P2 - Add Explorer-parity navigation modes

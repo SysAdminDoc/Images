@@ -67,4 +67,14 @@ public sealed class CliReportTests
         Assert.Equal(CliMode.SystemInfo, CliReport.TryResolveMode(["--SYSTEM-INFO"]));
         Assert.Equal(CliMode.CodecReport, CliReport.TryResolveMode(["--Codec-Report"]));
     }
+
+    [Fact]
+    public void BuildSystemInfo_IncludesMagickSecurityPolicy()
+    {
+        var report = CliReport.BuildSystemInfo();
+
+        Assert.Contains("Magick policy:", report, StringComparison.Ordinal);
+        Assert.Contains("Magick limits:", report, StringComparison.Ordinal);
+        Assert.Contains("Magick blocked:", report, StringComparison.Ordinal);
+    }
 }

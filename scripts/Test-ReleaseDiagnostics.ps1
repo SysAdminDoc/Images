@@ -76,12 +76,16 @@ function Test-DiagnosticDirectory {
     Assert-Contains $systemInfo "Windows.Media.Ocr" "$Label --system-info"
     Assert-Contains $systemInfo "SharpCompress" "$Label --system-info"
     Assert-Contains $systemInfo "jpegtran" "$Label --system-info"
+    Assert-Contains $systemInfo "Magick policy:\s+enforced" "$Label --system-info"
+    Assert-Contains $systemInfo "Magick blocked:\s+.*\.pdf" "$Label --system-info"
 
     Assert-Contains $codecReport "Dependency provenance" "$Label --codec-report"
     Assert-Contains $codecReport "Capability matrix" "$Label --codec-report"
     Assert-Contains $codecReport "SharpCompress" "$Label --codec-report"
     Assert-Contains $codecReport "Windows.Media.Ocr" "$Label --codec-report"
     Assert-Contains $codecReport "jpegtran" "$Label --codec-report"
+    Assert-Contains $codecReport "Magick security policy: enforced" "$Label --codec-report"
+    Assert-Contains $codecReport "Magick blocked write targets: .*\.svg" "$Label --codec-report"
 
     if ($RequireGhostscript) {
         Assert-Contains $systemInfo "Ghostscript:\s+available" "$Label --system-info"

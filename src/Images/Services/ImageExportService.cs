@@ -12,7 +12,7 @@ public static class ImageExportService
     [
         ".jpg", ".jpeg", ".jpe", ".jfif", ".jif", ".png", ".webp", ".avif", ".jxl",
         ".tif", ".tiff", ".bmp", ".dib", ".gif",
-        ".psd", ".psb", ".pdf", ".pdfa", ".eps", ".svg", ".tga", ".targa", ".dds",
+        ".psd", ".psb", ".tga", ".targa", ".dds",
         ".qoi", ".exr", ".hdr", ".jp2", ".j2k", ".j2c", ".jpc", ".jpm", ".jpt",
         ".jps", ".ppm", ".pgm", ".pbm", ".pnm", ".pam", ".pfm", ".xpm", ".xbm",
         ".miff", ".mng", ".jng", ".wbmp", ".farbfeld", ".ff", ".dcx", ".pcx",
@@ -30,7 +30,6 @@ public static class ImageExportService
         "BMP|*.bmp;*.dib",
         "GIF|*.gif",
         "Photoshop|*.psd;*.psb",
-        "PDF / EPS / SVG|*.pdf;*.pdfa;*.eps;*.svg",
         "TGA|*.tga;*.targa",
         "DDS|*.dds",
         "QOI|*.qoi",
@@ -51,7 +50,13 @@ public static class ImageExportService
     }
 
     public static MagickFormat? TryResolveFormat(string extension)
-        => ResolveMagickFormat(extension.ToLowerInvariant());
+    {
+        var normalized = extension.ToLowerInvariant();
+        if (!MagickSecurityPolicy.IsWriteTargetAllowed(normalized))
+            return null;
+
+        return ResolveMagickFormat(normalized);
+    }
 
     public static string ResolveWritablePath(string requestedPath)
         => ResolveWritableTarget(requestedPath).Path;
@@ -360,7 +365,7 @@ public static class ImageExportService
 
         var normalizedPath = Path.GetFullPath(requestedPath);
         var ext = Path.GetExtension(normalizedPath).ToLowerInvariant();
-        var format = ResolveMagickFormat(ext);
+        var format = TryResolveFormat(ext);
         return format is not null && CanWrite(format.Value)
             ? (normalizedPath, format.Value)
             : (Path.ChangeExtension(normalizedPath, ".png"), MagickFormat.Png);
@@ -555,5 +560,6 @@ public static class ImageExportService
 
     private static bool CanWrite(MagickFormat format)
         => format is not MagickFormat.APng &&
+           MagickSecurityPolicy.IsWriteFormatAllowed(format) &&
            MagickFormatInfo.Create(format)?.SupportsWriting == true;
 }

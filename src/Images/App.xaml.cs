@@ -2,7 +2,6 @@ using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
-using ImageMagick;
 using Images.Localization;
 using Images.Services;
 using Microsoft.Extensions.Logging;
@@ -41,13 +40,11 @@ public partial class App : Application
             codecStatus.DocumentStatus,
             codecStatus.GhostscriptDirectory ?? "(none)");
 
-        ResourceLimits.Memory = 2UL * 1024 * 1024 * 1024;
-        ResourceLimits.Width = 32768;
-        ResourceLimits.Height = 32768;
-        ResourceLimits.Area = 1_000_000_000;
-        ResourceLimits.ListLength = 128;
-        _log.LogInformation("Magick.NET resource limits: Memory={Memory} MB, Width={Width}, Height={Height}, Area={Area}, ListLength={ListLength}",
-            ResourceLimits.Memory / (1024 * 1024), ResourceLimits.Width, ResourceLimits.Height, ResourceLimits.Area, ResourceLimits.ListLength);
+        var magickPolicy = MagickSecurityPolicy.Inspect(codecStatus.GhostscriptAvailable, codecStatus.GhostscriptSource);
+        _log.LogInformation("Magick.NET security policy: {Policy}; ResourceLimits={ResourceLimits}; BlockedWriteTargets={BlockedWriteTargets}",
+            magickPolicy.EnforcementText,
+            magickPolicy.ResourceLimitSummary,
+            magickPolicy.BlockedWriteSummary);
         var jpegTranStatus = JpegTranRuntime.Inspect();
         _log.LogInformation("JPEG transform runtime: {Status}; Path={Path}",
             jpegTranStatus.StatusText,

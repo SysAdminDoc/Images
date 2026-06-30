@@ -55,6 +55,7 @@ public static class CodecCapabilityService
         string AppDirectory,
         string MagickVersion,
         string? MagickAssemblyPath,
+        MagickSecurityPolicyReport MagickPolicy,
         string SharpCompressVersion,
         string? SharpCompressAssemblyPath,
         bool GhostscriptAvailable,
@@ -120,6 +121,7 @@ public static class CodecCapabilityService
             AppDirectory: AppContext.BaseDirectory,
             MagickVersion: CodecRuntime.GetMagickAssemblyVersion(),
             MagickAssemblyPath: CodecRuntime.GetMagickAssemblyPath(),
+            MagickPolicy: MagickSecurityPolicy.Inspect(status.GhostscriptAvailable, status.GhostscriptSource),
             SharpCompressVersion: GetSharpCompressAssemblyVersion(),
             SharpCompressAssemblyPath: GetSharpCompressAssemblyPath(),
             GhostscriptAvailable: status.GhostscriptAvailable,
@@ -176,6 +178,16 @@ public static class CodecCapabilityService
                     ? "OK: current version is above the project-reviewed 14.11.0 security floor; the NuGet vulnerability gate still runs before release."
                     : "Needs review: version is below the project-reviewed 14.11.0 security floor.",
                 Action: "Keep Magick.NET package versions aligned and run the release readiness/vulnerability gate before shipping."),
+
+            new(
+                Name: "Magick.NET security policy",
+                Kind: "Policy",
+                Source: "App-enforced Magick.NET resource, delegate, and write-target gate: docs/codec-support-policy.md",
+                Version: provenance.MagickPolicy.EnforcementText,
+                Path: null,
+                Sha256: null,
+                AdvisoryStatus: $"Resource limits: {provenance.MagickPolicy.ResourceLimitSummary}. {provenance.MagickPolicy.DocumentDelegateStatus}",
+                Action: $"Blocked write targets: {provenance.MagickPolicy.BlockedWriteSummary}. Keep document/vector exports routed to PNG unless a separately reviewed sidecar is added."),
 
             new(
                 Name: "SharpCompress",
@@ -386,6 +398,10 @@ public static class CodecCapabilityService
         sb.AppendLine($"- Magick.NET: {provenance.MagickVersion} — {writableExports} writable export extensions active");
         if (provenance.MagickAssemblyPath is not null)
             sb.AppendLine($"- Magick.NET assembly: {provenance.MagickAssemblyPath}");
+        sb.AppendLine($"- Magick security policy: {provenance.MagickPolicy.EnforcementText}");
+        sb.AppendLine($"- Magick resource limits: {provenance.MagickPolicy.ResourceLimitSummary}");
+        sb.AppendLine($"- Magick blocked write targets: {provenance.MagickPolicy.BlockedWriteSummary}");
+        sb.AppendLine($"- Magick document delegates: {provenance.MagickPolicy.DocumentDelegateStatus}");
         sb.AppendLine($"- SharpCompress: {provenance.SharpCompressVersion} — archive book reader active");
         if (provenance.SharpCompressAssemblyPath is not null)
             sb.AppendLine($"- SharpCompress assembly: {provenance.SharpCompressAssemblyPath}");
@@ -438,6 +454,7 @@ public static class CodecCapabilityService
         sb.AppendLine("- PSD and PSB are handled in-process by Magick.NET.");
         sb.AppendLine("- Archive books are read-only; nested archives, document-preview entries, and unsafe paths are ignored.");
         sb.AppendLine("- PDF, EPS, PS, and AI preview rendering requires Ghostscript.");
+        sb.AppendLine("- PDF, PDF/A, EPS, SVG, MVG/MSL, and URL-style write targets are blocked by the Magick.NET security policy.");
         sb.AppendLine("- Lossless JPEG writeback will require an approved libjpeg-turbo jpegtran.exe sidecar.");
         sb.AppendLine("- HEIC/HEIF is available as a read format in this Magick.NET build; export to AVIF, JXL, WebP, PNG, or TIFF.");
         sb.AppendLine("- Camera RAW formats are read-only preview formats; export through Save a copy.");

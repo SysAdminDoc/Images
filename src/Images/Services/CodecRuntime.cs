@@ -50,11 +50,15 @@ public static class CodecRuntime
                 MagickNET.SetGhostscriptDirectory(ghostscriptDirectory);
             }
 
+            var policy = MagickSecurityPolicy.Configure(
+                documentDelegateAvailable: ghostscriptDirectory is not null,
+                documentDelegateSource: ghostscriptSource);
+
             _status = new CodecRuntimeStatus(
                 GhostscriptAvailable: ghostscriptDirectory is not null,
                 GhostscriptDirectory: ghostscriptDirectory,
                 GhostscriptSource: ghostscriptSource,
-                MagickStatus: $"Magick.NET {GetMagickAssemblyVersion()} configured",
+                MagickStatus: $"Magick.NET {GetMagickAssemblyVersion()} configured; security policy {policy.EnforcementText}",
                 DocumentStatus: ghostscriptDirectory is null
                     ? "EPS/PDF/PS/AI previews need bundled or installed Ghostscript"
                     : $"EPS/PDF/PS/AI previews enabled via {ghostscriptSource}");

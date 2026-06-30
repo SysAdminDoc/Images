@@ -90,6 +90,12 @@ public sealed class WpfSmokeTests : IDisposable
         return element;
     }
 
+    private static AutomationElement? FindImageCanvas(Window window)
+        => window.FindFirstDescendant(cf => cf.ByAutomationId("ImageCanvas"))
+           ?? window
+               .FindAllDescendants(cf => cf.ByControlType(ControlType.Image))
+               .FirstOrDefault(element => element.Name.StartsWith("Image, ", StringComparison.Ordinal));
+
     [Fact]
     [Trait("Category", "SmokeGate")]
     public void LaunchAndClose()
@@ -112,8 +118,7 @@ public sealed class WpfSmokeTests : IDisposable
         var (app, window) = LaunchApp(FixtureImage);
         Assert.Contains("smoke-test", window.Title, StringComparison.OrdinalIgnoreCase);
 
-        var imageElement = window.FindFirstDescendant(cf =>
-            cf.ByControlType(FlaUI.Core.Definitions.ControlType.Image));
+        var imageElement = FindImageCanvas(window);
         Assert.NotNull(imageElement);
 
         app.Close();
@@ -162,8 +167,7 @@ public sealed class WpfSmokeTests : IDisposable
         var (app, window) = LaunchApp(FixtureImage);
         System.Threading.Thread.Sleep(1500);
 
-        var canvas = window.FindFirstDescendant(cf =>
-            cf.ByControlType(FlaUI.Core.Definitions.ControlType.Image));
+        var canvas = FindImageCanvas(window);
         Assert.NotNull(canvas);
 
         var name = canvas.Name;
@@ -260,8 +264,7 @@ public sealed class WpfSmokeTests : IDisposable
         window.SetForeground();
         System.Threading.Thread.Sleep(1000);
 
-        var canvas = window.FindFirstDescendant(cf =>
-            cf.ByControlType(ControlType.Image));
+        var canvas = FindImageCanvas(window);
         Assert.NotNull(canvas);
 
         var canvasBounds = canvas.BoundingRectangle;

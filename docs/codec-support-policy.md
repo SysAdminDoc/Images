@@ -18,6 +18,15 @@ What "broad codec support" means for Images, what's bundled vs optional, and how
 
 The current open extension count and writable export count are reported live by About → Capability matrix and `Images.exe --codec-report`.
 
+## Magick.NET security policy gate
+
+Images applies an app-level Magick.NET gate before the GUI or CLI diagnostics touch ImageMagick:
+
+- Resource limits are pinned at startup/CLI report time: 2 GiB memory cache, 4 GiB disk cache, 512 MiB max memory request, 64 MiB max profile, 32768 x 32768 decode dimensions, 30000 px render edge, 1,000,000,000 px area, 128 image-list entries, 120 seconds, and 1 worker thread.
+- PDF / EPS / PS / AI previews are routed only through a configured Ghostscript runtime. Without Ghostscript, these formats stay visible as supported preview formats but fail with an explicit setup message.
+- PDF, PDF/A, EPS, SVG/SVGZ, MVG/MSVG/MSL, PS/AI, and URL-style write targets are blocked for Save a copy and batch export. If a user requests one of those extensions, the writer falls back to PNG instead of invoking a high-risk Magick delegate.
+- About â†’ Runtime provenance, `Images.exe --system-info`, `Images.exe --codec-report`, and the local release diagnostics gate report the active policy and fail release readiness if the policy is not enforced.
+
 ## What can be opt-in
 
 **Ghostscript** — optional runtime for PDF / EPS / PS / AI document previews. Three discovery paths:

@@ -56,7 +56,6 @@ public static class ImageLoader
     private const int DocumentPreviewDpi = 144;
     private const int StableReadRetryCount = 3;
     private const int StableReadRetryDelayMs = 80;
-    private const int MaxRenderableDimension = 30000;
     private static readonly BitmapSource TilePlaceholder = CreateTilePlaceholder();
 
     public static LoadResult Load(
@@ -645,8 +644,7 @@ public static class ImageLoader
         image.Format = MagickFormat.Bgra;
         image.Alpha(AlphaOption.Set);
 
-        if (image.Width <= 0 || image.Height <= 0 ||
-            image.Width > MaxRenderableDimension || image.Height > MaxRenderableDimension)
+        if (!MagickSecurityPolicy.IsRenderableDimensions((long)image.Width, (long)image.Height))
             throw new InvalidOperationException("Decoded image dimensions are not supported.");
 
         var w = (int)image.Width;

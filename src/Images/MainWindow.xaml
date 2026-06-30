@@ -284,6 +284,7 @@
 
                 <ctl:ZoomPanImage x:Name="Canvas"
                                    Source="{Binding CurrentImage}"
+                                   AutomationProperties.AutomationId="ImageCanvas"
                                    TilePyramid="{Binding CurrentTilePyramid}"
                                    Animation="{Binding CurrentAnimation}"
                                    AnimationFrameIndex="{Binding CurrentAnimationFrameIndex}"

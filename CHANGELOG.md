@@ -62,6 +62,8 @@ All notable changes to **Images** are documented here.
 
 ### Infrastructure
 
+- **Magick.NET security policy gate** - Codec runtime startup now applies and reports app-level Magick.NET resource limits, Ghostscript-gated document previews, huge-dimension rendering guards, and blocked PDF/EPS/SVG/MVG/MSL/URL-style write targets; release diagnostics now fail if the policy is not enforced.
+
 - **Local release readiness parity restored** — `scripts\Test-ReleaseReadiness.ps1` now runs version sync, restore, Release build, tests, high/critical vulnerability blocking, localization parity, release diagnostics, checksum generation, and WinGet/Scoop manifest validation from one local command; release/trust docs now describe local-only gates instead of removed hosted workflows or Dependabot.
 - **Secondary tool-window UIA smoke coverage** — Smoke-gate tests now open Settings, About/Diagnostics, Duplicate Cleanup, Semantic Search, Model Manager, and Import Inbox with app theme resources, then verify titles, named controls, keyboard focusability, and critical UIA help text hygiene.
 - **Edge-hover contextual panels in fullscreen** — in fullscreen mode (F11), the bottom toolbar and right side panel auto-hide for zero-chrome image viewing. Moving the mouse to the bottom or right edge of the screen reveals the respective panel; panels auto-hide after 2 seconds when the mouse leaves the edge zone.

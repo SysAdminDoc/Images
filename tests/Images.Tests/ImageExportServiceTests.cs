@@ -19,6 +19,22 @@ public sealed class ImageExportServiceTests
         Assert.Equal(Path.Combine(temp.Path, "export.png"), resolved);
     }
 
+    [Theory]
+    [InlineData(".pdf")]
+    [InlineData(".pdfa")]
+    [InlineData(".eps")]
+    [InlineData(".svg")]
+    public void ResolveWritablePath_WhenPolicyBlocksDelegateWrite_FallsBackToPng(string extension)
+    {
+        using var temp = TestDirectory.Create();
+        var requested = Path.Combine(temp.Path, "export" + extension);
+
+        var resolved = ImageExportService.ResolveWritablePath(requested);
+
+        Assert.Equal(Path.Combine(temp.Path, "export.png"), resolved);
+        Assert.Null(ImageExportService.TryResolveFormat(extension));
+    }
+
     [Fact]
     public void Save_WhenTargetExists_ReplacesAtomically()
     {

@@ -29,6 +29,12 @@ public sealed class CodecCapabilityServiceTests
             && row.AdvisoryStatus.Contains("14.11.0", StringComparison.Ordinal));
 
         Assert.Contains(rows, row =>
+            row.Name == "Magick.NET security policy"
+            && row.Kind == "Policy"
+            && row.AdvisoryStatus.Contains("Resource limits", StringComparison.Ordinal)
+            && row.Action.Contains(".pdf", StringComparison.Ordinal));
+
+        Assert.Contains(rows, row =>
             row.Name == "SharpCompress"
             && row.Kind == "NuGet"
             && row.AdvisoryStatus.Contains("GHSA-6c8g-7p36-r338", StringComparison.Ordinal)
@@ -56,6 +62,8 @@ public sealed class CodecCapabilityServiceTests
         Assert.Contains("Action:", report, StringComparison.Ordinal);
         Assert.Contains("Local model registry", report, StringComparison.Ordinal);
         Assert.Contains("SharpCompress", report, StringComparison.Ordinal);
+        Assert.Contains("Magick security policy", report, StringComparison.Ordinal);
+        Assert.Contains("Magick blocked write targets", report, StringComparison.Ordinal);
     }
 
     private static CodecCapabilityService.RuntimeProvenance ReadyProvenance()
@@ -67,6 +75,7 @@ public sealed class CodecCapabilityServiceTests
             AppDirectory: @"C:\Images",
             MagickVersion: "14.13.0",
             MagickAssemblyPath: null,
+            MagickPolicy: MagickSecurityPolicy.Configure(true, "test Ghostscript"),
             SharpCompressVersion: "0.48.1.0",
             SharpCompressAssemblyPath: null,
             GhostscriptAvailable: true,
