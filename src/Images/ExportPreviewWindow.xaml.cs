@@ -96,13 +96,16 @@ public partial class ExportPreviewWindow : Window
 
             SetBusy(true);
             SetStatus(Strings.Format(nameof(Strings.ExportPreviewSavingFormat), Path.GetFileName(targetPath)), ExportPreviewStatus.Busy);
-            var savedPath = await Task.Run(() => ImageExportService.Save(
+            var result = await Task.Run(() => ImageExportService.SaveWithC2paHandoff(
                 _source,
+                _sourcePath,
                 targetPath,
                 (uint)request.Quality,
                 request.MaxWidth,
                 request.MaxHeight));
-            SetStatus(Strings.Format(nameof(Strings.ExportPreviewSavedFormat), savedPath), ExportPreviewStatus.Ready);
+            SetStatus(
+                Strings.Format(nameof(Strings.ExportPreviewSavedWithC2paFormat), result.OutputPath, result.C2paHandoff.Summary),
+                result.C2paHandoff.RequiresAttention ? ExportPreviewStatus.Warning : ExportPreviewStatus.Ready);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
         {
@@ -284,6 +287,8 @@ public partial class ExportPreviewWindow : Window
         DeltaText.Text = summary.DeltaText;
         DimensionsText.Text = summary.DimensionsText;
         FormatText.Text = Strings.Format(nameof(Strings.ExportPreviewFormatQualityFormat), summary.FormatText, summary.QualityText);
+        C2paStatusText.Text = summary.C2paHandoff.Summary;
+        C2paDetailText.Text = summary.C2paHandoff.Detail;
 
         _warnings.Clear();
         foreach (var warning in summary.Warnings)

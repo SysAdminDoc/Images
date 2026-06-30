@@ -17,13 +17,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ### P2
 
-- [ ] P2 — Add C2PA export provenance handoff
-  Why: Images can inspect Content Credentials, but edited/exported files do not have a clear provenance-write or "not written" outcome.
-  Evidence: `src/Images/ViewModels/C2paInspectionController.cs`, `src/Images/Services/C2paManifestService.cs`, `src/Images/Services/ImageExportService.cs`, C2PA 2.2 specification
-  Touches: `src/Images/Services/ImageExportService.cs`, `src/Images/Services/C2paManifestService.cs`, `src/Images/ExportPreviewWindow.xaml(.cs)`, `tests/Images.Tests/`
-  Acceptance: Export preview states whether C2PA will be preserved, written through an approved configured runtime, or omitted; exported test files verify the expected manifest/no-manifest outcome.
-  Complexity: L
-
 - [ ] P2 — Add Picasa metadata migration importer
   Why: The migration guide says Picasa requires dedicated `.picasa.ini` and `contacts.xml` parsing, but only standard XMP import exists today.
   Evidence: `docs/migration-guide.md`, `src/Images/Services/XmpSidecarImportService.cs`, digiKam migration work

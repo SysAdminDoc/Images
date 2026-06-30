@@ -6,6 +6,8 @@ using ImageMagick;
 
 namespace Images.Services;
 
+public sealed record ImageExportResult(string OutputPath, C2paExportHandoff C2paHandoff);
+
 public static class ImageExportService
 {
     public static readonly string[] ExportExtensions =
@@ -80,6 +82,39 @@ public static class ImageExportService
         return target.Path;
     }
 
+    public static ImageExportResult SaveWithC2paHandoff(
+        BitmapSource source,
+        string? sourcePath,
+        string path,
+        uint quality = 92,
+        int maxWidth = 0,
+        int maxHeight = 0)
+        => SaveWithC2paHandoff(
+            source,
+            sourcePath,
+            path,
+            quality,
+            maxWidth,
+            maxHeight,
+            planC2paExport: null);
+
+    internal static ImageExportResult SaveWithC2paHandoff(
+        BitmapSource source,
+        string? sourcePath,
+        string path,
+        uint quality,
+        int maxWidth,
+        int maxHeight,
+        Func<string?, string, C2paExportHandoff>? planC2paExport)
+    {
+        var target = ResolveWritableTarget(path);
+        var c2pa = (planC2paExport ?? C2paManifestService.PlanExportHandoff)(
+            sourcePath,
+            Path.GetExtension(target.Path));
+        var savedPath = Save(source, target.Path, quality, maxWidth, maxHeight);
+        return new ImageExportResult(savedPath, c2pa);
+    }
+
     public static BitmapSource RenderPreview(BitmapSource source, IReadOnlyList<EditOperation> operations)
     {
         if (operations.Count == 0)
@@ -107,6 +142,26 @@ public static class ImageExportService
 
         WriteAtomically(image, target.Path);
         return target.Path;
+    }
+
+    public static ImageExportResult SaveWithC2paHandoff(
+        string sourcePath,
+        string path,
+        IReadOnlyList<EditOperation> operations)
+        => SaveWithC2paHandoff(sourcePath, path, operations, planC2paExport: null);
+
+    internal static ImageExportResult SaveWithC2paHandoff(
+        string sourcePath,
+        string path,
+        IReadOnlyList<EditOperation> operations,
+        Func<string?, string, C2paExportHandoff>? planC2paExport)
+    {
+        var target = ResolveWritableTarget(path);
+        var c2pa = (planC2paExport ?? C2paManifestService.PlanExportHandoff)(
+            sourcePath,
+            Path.GetExtension(target.Path));
+        var savedPath = Save(sourcePath, target.Path, operations);
+        return new ImageExportResult(savedPath, c2pa);
     }
 
     public static string Overwrite(string sourcePath, IReadOnlyList<EditOperation> operations)

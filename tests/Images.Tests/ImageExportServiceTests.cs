@@ -107,6 +107,58 @@ public sealed class ImageExportServiceTests
     }
 
     [Fact]
+    public void SaveWithC2paHandoff_WritesFileAndReportsExpectedNoManifestOutcome()
+    {
+        using var temp = TestDirectory.Create();
+        var target = Path.Combine(temp.Path, "export.png");
+        var handoff = C2paExportHandoff.Omitted(
+            C2paExportReason.SourceHasNoManifest,
+            "C2PA not written",
+            "No source Content Credentials were found.");
+        var bitmap = BitmapSource.Create(
+            2,
+            2,
+            96,
+            96,
+            PixelFormats.Bgra32,
+            null,
+            new byte[]
+            {
+                0xFF, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
+                0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+            },
+            8);
+        bitmap.Freeze();
+
+        var result = ImageExportService.SaveWithC2paHandoff(
+            bitmap,
+            sourcePath: null,
+            path: target,
+            quality: 92,
+            maxWidth: 0,
+            maxHeight: 0,
+            planC2paExport: (_, extension) =>
+            {
+                Assert.Equal(".png", extension);
+                return handoff;
+            });
+        var inspection = C2paManifestService.Read(
+            result.OutputPath,
+            executableOverride: @"C:\Tools\c2patool.exe",
+            processRunner: psi =>
+            {
+                return (1, "", "no manifest found");
+            });
+
+        Assert.Equal(Path.GetFullPath(target), result.OutputPath);
+        Assert.Equal(handoff, result.C2paHandoff);
+        Assert.True(File.Exists(result.OutputPath));
+        Assert.True(
+            inspection.Status == C2paStatus.NoManifest,
+            $"Expected no manifest, got {inspection.Status}: {inspection.ErrorMessage}");
+    }
+
+    [Fact]
     public void Overwrite_WithCropOperation_ReplacesSourcePixelsAndTouchesFile()
     {
         using var temp = TestDirectory.Create();

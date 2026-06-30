@@ -11,7 +11,7 @@ public static class C2paManifestService
     private const int ReadTimeoutMilliseconds = 10_000;
     private static readonly ILogger _log = Log.Get(nameof(C2paManifestService));
 
-    private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> SupportedExtensionSet = new(StringComparer.OrdinalIgnoreCase)
     {
         ".jpg", ".jpeg", ".jpe", ".jfif",
         ".png",
@@ -28,6 +28,153 @@ public static class C2paManifestService
     public static C2paInspectionResult Read(string path)
         => Read(path, null, null);
 
+    public static bool IsSupportedExtension(string extension)
+        => SupportedExtensionSet.Contains(NormalizeExtension(extension));
+
+    public static C2paExportHandoff PlanExportHandoff(string? sourcePath, string targetExtension)
+        => PlanExportHandoff(
+            sourcePath,
+            targetExtension,
+            readManifest: null,
+            inspectRuntime: null,
+            inspectWriter: null);
+
+    internal static C2paExportHandoff PlanExportHandoff(
+        string? sourcePath,
+        string targetExtension,
+        Func<string, C2paInspectionResult>? readManifest,
+        Func<C2paToolRuntimeStatus>? inspectRuntime,
+        Func<C2paExportWriterRuntimeStatus>? inspectWriter)
+    {
+        var targetExt = NormalizeExtension(targetExtension);
+        if (string.IsNullOrEmpty(targetExt) || !SupportedExtensionSet.Contains(targetExt))
+        {
+            return C2paExportHandoff.Omitted(
+                C2paExportReason.TargetFormatUnsupported,
+                "C2PA omitted",
+                $"Target {FormatExtension(targetExt)} is not a C2PA-supported export format; Images will not write Content Credentials.");
+        }
+
+        if (string.IsNullOrWhiteSpace(sourcePath))
+        {
+            return C2paExportHandoff.Omitted(
+                C2paExportReason.SourcePathUnavailable,
+                "C2PA not written",
+                "This export is based on a decoded bitmap without a source file, so Images cannot inspect or write source Content Credentials.");
+        }
+
+        string normalizedSourcePath;
+        try
+        {
+            normalizedSourcePath = Path.GetFullPath(sourcePath);
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            _log.LogWarning(ex, "Could not normalize C2PA export source path {Path}", sourcePath);
+            return C2paExportHandoff.Omitted(
+                C2paExportReason.SourcePathUnavailable,
+                "C2PA not written",
+                "The source path could not be normalized for C2PA inspection; export will not write Content Credentials.");
+        }
+
+        if (!File.Exists(normalizedSourcePath))
+        {
+            return C2paExportHandoff.Omitted(
+                C2paExportReason.SourceFileMissing,
+                "C2PA not written",
+                "The source file was not available for C2PA inspection; export will not write Content Credentials.");
+        }
+
+        var sourceExt = NormalizeExtension(Path.GetExtension(normalizedSourcePath));
+        if (!SupportedExtensionSet.Contains(sourceExt))
+        {
+            return C2paExportHandoff.Omitted(
+                C2paExportReason.SourceFormatUnsupported,
+                "C2PA not written",
+                $"Source {FormatExtension(sourceExt)} is not a C2PA-supported source format; export will not write Content Credentials.");
+        }
+
+        var runtime = (inspectRuntime ?? C2paToolRuntime.Inspect)();
+        if (!runtime.Available || string.IsNullOrWhiteSpace(runtime.ExecutablePath))
+        {
+            return C2paExportHandoff.Omitted(
+                C2paExportReason.InspectionRuntimeUnavailable,
+                "C2PA not written",
+                $"{runtime.StatusText} Export will not write Content Credentials.",
+                sourceInspection: null,
+                inspectionRuntime: runtime);
+        }
+
+        var sourceInspection = readManifest is not null
+            ? readManifest(normalizedSourcePath)
+            : Read(normalizedSourcePath, runtime.ExecutablePath, processRunner: null);
+
+        if (sourceInspection.Status == C2paStatus.NoManifest)
+        {
+            return C2paExportHandoff.Omitted(
+                C2paExportReason.SourceHasNoManifest,
+                "C2PA not written",
+                "No source Content Credentials were found; export will not create a new C2PA manifest.",
+                sourceInspection,
+                runtime);
+        }
+
+        if (sourceInspection.Status == C2paStatus.RuntimeUnavailable)
+        {
+            return C2paExportHandoff.Omitted(
+                C2paExportReason.InspectionRuntimeUnavailable,
+                "C2PA not written",
+                $"{sourceInspection.ErrorMessage ?? runtime.StatusText} Export will not write Content Credentials.",
+                sourceInspection,
+                runtime);
+        }
+
+        if (sourceInspection.Status == C2paStatus.Error)
+        {
+            return C2paExportHandoff.Omitted(
+                C2paExportReason.InspectionFailed,
+                "C2PA not written",
+                $"Source Content Credentials could not be inspected: {sourceInspection.ErrorMessage ?? "unknown C2PA inspection error"}",
+                sourceInspection,
+                runtime);
+        }
+
+        var writer = (inspectWriter ?? C2paExportWriterRuntimeStatus.NotConfigured)();
+        if (!writer.Available)
+        {
+            var reason = writer.Source.Equals("Not configured", StringComparison.OrdinalIgnoreCase)
+                ? C2paExportReason.WriterNotConfigured
+                : C2paExportReason.WriterRuntimeUnavailable;
+            return C2paExportHandoff.Omitted(
+                reason,
+                "C2PA omitted",
+                $"{writer.StatusText} Export will not copy stale source credentials.",
+                sourceInspection,
+                runtime,
+                writer);
+        }
+
+        if (!writer.Approved)
+        {
+            return C2paExportHandoff.Omitted(
+                C2paExportReason.WriterNotApproved,
+                "C2PA omitted",
+                $"{writer.StatusText} Export will not write Content Credentials until the writer is approved.",
+                sourceInspection,
+                runtime,
+                writer);
+        }
+
+        return new C2paExportHandoff(
+            C2paExportAction.WriteWithRuntime,
+            C2paExportReason.ReadyToWrite,
+            "C2PA will be written",
+            $"Source Content Credentials will be handed to {writer.Source} for an approved C2PA export write.",
+            sourceInspection,
+            runtime,
+            writer);
+    }
+
     internal static C2paInspectionResult Read(
         string path,
         string? executableOverride,
@@ -37,7 +184,7 @@ public static class C2paManifestService
             return C2paInspectionResult.NoManifest("File not found.");
 
         var ext = Path.GetExtension(path);
-        if (!SupportedExtensions.Contains(ext))
+        if (!SupportedExtensionSet.Contains(ext))
             return C2paInspectionResult.NoManifest("File format does not support C2PA content credentials.");
 
         var runtime = executableOverride is not null
@@ -60,8 +207,8 @@ public static class C2paManifestService
                 StandardErrorEncoding = System.Text.Encoding.UTF8,
             };
             psi.ArgumentList.Add(NormalizePath(path));
-            psi.EnvironmentVariables["C2PATOOL_TRUST_ANCHORS"] ??= "";
-            psi.EnvironmentVariables["C2PATOOL_TRUST_CONFIG"] ??= "";
+            EnsureEnvironmentVariable(psi, "C2PATOOL_TRUST_ANCHORS", "");
+            EnsureEnvironmentVariable(psi, "C2PATOOL_TRUST_CONFIG", "");
 
             int exitCode;
             string stdout, stderr;
@@ -343,6 +490,22 @@ public static class C2paManifestService
             return path;
         }
     }
+
+    private static void EnsureEnvironmentVariable(ProcessStartInfo psi, string key, string value)
+    {
+        if (!psi.EnvironmentVariables.ContainsKey(key))
+            psi.EnvironmentVariables[key] = value;
+    }
+
+    private static string NormalizeExtension(string extension)
+    {
+        if (string.IsNullOrWhiteSpace(extension)) return string.Empty;
+        var normalized = RenameService.NormalizeExtension(extension);
+        return normalized.ToLowerInvariant();
+    }
+
+    private static string FormatExtension(string extension)
+        => string.IsNullOrWhiteSpace(extension) ? "format" : extension;
 }
 
 public enum C2paStatus
@@ -358,6 +521,29 @@ public enum C2paTrustLevel
     Present,
     Signed,
     Invalid,
+}
+
+public enum C2paExportAction
+{
+    Preserve,
+    WriteWithRuntime,
+    Omit,
+}
+
+public enum C2paExportReason
+{
+    PreservedSource,
+    ReadyToWrite,
+    SourcePathUnavailable,
+    SourceFileMissing,
+    SourceFormatUnsupported,
+    TargetFormatUnsupported,
+    SourceHasNoManifest,
+    InspectionRuntimeUnavailable,
+    InspectionFailed,
+    WriterNotConfigured,
+    WriterRuntimeUnavailable,
+    WriterNotApproved,
 }
 
 public sealed record C2paInspectionResult(
@@ -393,6 +579,73 @@ public sealed record C2paInspectionResult(
         Claims: [],
         ErrorMessage: message,
         RawJson: null);
+}
+
+public sealed record C2paExportHandoff(
+    C2paExportAction Action,
+    C2paExportReason Reason,
+    string Summary,
+    string Detail,
+    C2paInspectionResult? SourceInspection,
+    C2paToolRuntimeStatus? InspectionRuntime,
+    C2paExportWriterRuntimeStatus? WriterRuntime)
+{
+    public bool WillPreserve => Action == C2paExportAction.Preserve;
+    public bool WillWrite => Action == C2paExportAction.WriteWithRuntime;
+    public bool WillOmit => Action == C2paExportAction.Omit;
+    public bool HasSourceCredentials => SourceInspection?.HasCredentials == true;
+    public bool RequiresAttention => Action == C2paExportAction.Omit &&
+                                     Reason is C2paExportReason.TargetFormatUnsupported
+                                         or C2paExportReason.InspectionRuntimeUnavailable
+                                         or C2paExportReason.InspectionFailed
+                                         or C2paExportReason.WriterNotConfigured
+                                         or C2paExportReason.WriterRuntimeUnavailable
+                                         or C2paExportReason.WriterNotApproved;
+
+    public static C2paExportHandoff Omitted(
+        C2paExportReason reason,
+        string summary,
+        string detail,
+        C2paInspectionResult? sourceInspection = null,
+        C2paToolRuntimeStatus? inspectionRuntime = null,
+        C2paExportWriterRuntimeStatus? writerRuntime = null)
+        => new(
+            C2paExportAction.Omit,
+            reason,
+            summary,
+            detail,
+            sourceInspection,
+            inspectionRuntime,
+            writerRuntime);
+
+    public static C2paExportHandoff Preserved(string detail, C2paInspectionResult? sourceInspection = null)
+        => new(
+            C2paExportAction.Preserve,
+            C2paExportReason.PreservedSource,
+            "C2PA preserved",
+            detail,
+            sourceInspection,
+            null,
+            null);
+}
+
+public sealed record C2paExportWriterRuntimeStatus(
+    bool Available,
+    bool Approved,
+    string Source,
+    string StatusText)
+{
+    public static C2paExportWriterRuntimeStatus NotConfigured() => new(
+        Available: false,
+        Approved: false,
+        Source: "Not configured",
+        StatusText: "No approved C2PA export writer is configured.");
+
+    public static C2paExportWriterRuntimeStatus ApprovedRuntime(string source, string statusText) => new(
+        Available: true,
+        Approved: true,
+        Source: source,
+        StatusText: statusText);
 }
 
 public sealed record C2paClaim(

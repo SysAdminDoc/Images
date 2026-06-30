@@ -37,7 +37,8 @@ public sealed record ExportPreviewSummary(
     string SourceSizeText,
     string EstimatedSizeText,
     string DeltaText,
-    IReadOnlyList<string> Warnings)
+    IReadOnlyList<string> Warnings,
+    C2paExportHandoff C2paHandoff)
 {
     public string DimensionsText => Width == 0 || Height == 0 ? "Unknown" : $"{Width} x {Height}";
     public string WarningText => Warnings.Count == 0 ? "No format warnings." : string.Join(" ", Warnings);
@@ -49,6 +50,13 @@ public sealed record ExportPreviewResult(
 
 public sealed class ExportPreviewService
 {
+    private readonly Func<string?, string, C2paExportHandoff> _planC2paExport;
+
+    public ExportPreviewService(Func<string?, string, C2paExportHandoff>? planC2paExport = null)
+    {
+        _planC2paExport = planC2paExport ?? C2paManifestService.PlanExportHandoff;
+    }
+
     public ExportPreviewResult BuildPreview(BitmapSource source, string? sourcePath, ExportPreviewRequest request)
     {
         ArgumentNullException.ThrowIfNull(source);
@@ -123,7 +131,7 @@ public sealed class ExportPreviewService
     public static ExportPreviewRequest FromPreset(ExportPreviewPreset preset)
         => NormalizeRequest(new ExportPreviewRequest(preset.Extension, preset.Quality, preset.MaxWidth, preset.MaxHeight));
 
-    private static ExportPreviewSummary CreateSummary(
+    private ExportPreviewSummary CreateSummary(
         MagickImage image,
         EncodedPreview encoded,
         long sourceBytes,
@@ -142,7 +150,8 @@ public sealed class ExportPreviewService
             ImageExportService.FormatBytes(sourceBytes),
             ImageExportService.FormatBytes(encoded.Bytes.LongLength),
             FormatDelta(delta),
-            ExportCapabilityWarningService.BuildWarnings(image, sourcePath, request.Extension, format));
+            ExportCapabilityWarningService.BuildWarnings(image, sourcePath, request.Extension, format),
+            _planC2paExport(sourcePath, request.Extension));
     }
 
     private static EncodedPreview Encode(MagickImage image, ExportPreviewRequest request)

@@ -2585,6 +2585,9 @@ Details written to:
   <data name="ExportPreviewFormat" xml:space="preserve">
     <value>Format</value>
   </data>
+  <data name="ExportPreviewC2pa" xml:space="preserve">
+    <value>Content Credentials</value>
+  </data>
   <data name="ExportPreviewWarnings" xml:space="preserve">
     <value>Warnings</value>
   </data>
@@ -2614,6 +2617,9 @@ Details written to:
   </data>
   <data name="ExportPreviewSavedFormat" xml:space="preserve">
     <value>Saved copy to {0}.</value>
+  </data>
+  <data name="ExportPreviewSavedWithC2paFormat" xml:space="preserve">
+    <value>Saved copy to {0}. {1}</value>
   </data>
   <data name="ExportPreviewSaveFailedFormat" xml:space="preserve">
     <value>Save failed: {0}</value>

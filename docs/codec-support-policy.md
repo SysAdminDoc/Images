@@ -7,7 +7,7 @@ What "broad codec support" means for Images, what's bundled vs optional, and how
 | Tier | What it means | Examples |
 |---|---|---|
 | **Bundled, in-process** | Always available, ships inside the app's directory. | WIC (via Windows), Magick.NET (Apache 2.0, NuGet), SharpCompress (MIT, NuGet), .NET ZIP APIs |
-| **Optional, app-local or system-installed** | Surfaces extra format families or safer writeback paths when present, never required. Provenance shown in About + `--system-info`. | Ghostscript (PDF/EPS/PS/AI previews), jpegtran (exact JPEG crop/rotation writeback) |
+| **Optional, app-local or system-installed** | Surfaces extra format families or safer writeback paths when present, never required. Provenance shown in About + `--system-info`. | Ghostscript (PDF/EPS/PS/AI previews), jpegtran (exact JPEG crop/rotation writeback), c2patool (Content Credentials inspection) |
 | **Not supported** | Requested, not in scope today. The viewer's unsupported-format hint points at the right tool. | video, audio, native design-suite docs |
 
 ## What ships in the bundle
@@ -26,6 +26,15 @@ Images applies an app-level Magick.NET gate before the GUI or CLI diagnostics to
 - PDF / EPS / PS / AI previews are routed only through a configured Ghostscript runtime. Without Ghostscript, these formats stay visible as supported preview formats but fail with an explicit setup message.
 - PDF, PDF/A, EPS, SVG/SVGZ, MVG/MSVG/MSL, PS/AI, and URL-style write targets are blocked for Save a copy and batch export. If a user requests one of those extensions, the writer falls back to PNG instead of invoking a high-risk Magick delegate.
 - About â†’ Runtime provenance, `Images.exe --system-info`, `Images.exe --codec-report`, and the local release diagnostics gate report the active policy and fail release readiness if the policy is not enforced.
+
+## C2PA export handoff
+
+Images currently treats C2PA writing as an explicit handoff decision, not an implicit metadata copy:
+
+- Export preview and Save a copy compute a `C2paExportHandoff` for the source file and resolved output format.
+- Unsupported C2PA output formats, missing source files, unsupported source formats, unavailable `c2patool`, source files with no manifest, C2PA inspection errors, and missing or unapproved C2PA writers are all reported as "not written" or "omitted" states.
+- Re-encoded Magick.NET exports do not copy stale source Content Credentials into edited pixels. A future C2PA writer must pass the optional-runtime gate below before the UI can report "C2PA will be written".
+- The reader process receives empty `C2PATOOL_TRUST_ANCHORS` and `C2PATOOL_TRUST_CONFIG` variables when none are configured, avoiding accidental ambient trust configuration while keeping inspection deterministic.
 
 ## What can be opt-in
 

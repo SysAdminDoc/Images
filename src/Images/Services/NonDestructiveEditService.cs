@@ -47,7 +47,8 @@ public sealed record EditExportResult(
     string OutputPath,
     string ProvenanceSidecarPath,
     int AppliedOperationCount,
-    string Message);
+    string Message,
+    C2paExportHandoff? C2paHandoff = null);
 
 public sealed class NonDestructiveEditService
 {
@@ -240,18 +241,21 @@ public sealed class NonDestructiveEditService
                 .ToList();
 
             cancellationToken.ThrowIfCancellationRequested();
-            var outputPath = ImageExportService.Save(normalizedPath, targetPath, operations);
+            var exportResult = ImageExportService.SaveWithC2paHandoff(normalizedPath, targetPath, operations);
+            var outputPath = exportResult.OutputPath;
 
             cancellationToken.ThrowIfCancellationRequested();
             var sidecarPath = WriteExportProvenance(outputPath, CreateProvenance(normalizedPath, snapshot, operations, virtualCopyId));
+            var message = operations.Count == 0
+                ? "Saved copy and wrote export provenance."
+                : $"Applied {operations.Count} edit operation{Plural(operations.Count)} and wrote export provenance.";
             return new EditExportResult(
                 true,
                 outputPath,
                 sidecarPath,
                 operations.Count,
-                operations.Count == 0
-                    ? "Saved copy and wrote export provenance."
-                    : $"Applied {operations.Count} edit operation{Plural(operations.Count)} and wrote export provenance.");
+                $"{message} {exportResult.C2paHandoff.Summary}",
+                exportResult.C2paHandoff);
         }
         catch (OperationCanceledException)
         {

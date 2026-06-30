@@ -782,6 +782,7 @@ public static class Strings
     public static string ExportPreviewDelta => Get(nameof(ExportPreviewDelta));
     public static string ExportPreviewPixels => Get(nameof(ExportPreviewPixels));
     public static string ExportPreviewFormat => Get(nameof(ExportPreviewFormat));
+    public static string ExportPreviewC2pa => Get(nameof(ExportPreviewC2pa));
     public static string ExportPreviewWarnings => Get(nameof(ExportPreviewWarnings));
     public static string ExportPreviewOriginal => Get(nameof(ExportPreviewOriginal));
     public static string ExportPreviewEncodedPreview => Get(nameof(ExportPreviewEncodedPreview));
@@ -792,6 +793,7 @@ public static class Strings
     public static string ExportPreviewChooseDifferentFilename => Get(nameof(ExportPreviewChooseDifferentFilename));
     public static string ExportPreviewSavingFormat => Get(nameof(ExportPreviewSavingFormat));
     public static string ExportPreviewSavedFormat => Get(nameof(ExportPreviewSavedFormat));
+    public static string ExportPreviewSavedWithC2paFormat => Get(nameof(ExportPreviewSavedWithC2paFormat));
     public static string ExportPreviewSaveFailedFormat => Get(nameof(ExportPreviewSaveFailedFormat));
     public static string ExportPreviewSettingsChanged => Get(nameof(ExportPreviewSettingsChanged));
     public static string ExportPreviewPresetReady => Get(nameof(ExportPreviewPresetReady));

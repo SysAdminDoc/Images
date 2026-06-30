@@ -6818,14 +6818,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 var result = await Task.Run(() => _editStack.Export(CurrentPath, targetPath));
                 if (result.Success)
-                    Toast($"Saved edited copy → {Path.GetFileName(result.OutputPath)}");
+                    Toast($"Saved edited copy: {Path.GetFileName(result.OutputPath)}. {result.C2paHandoff?.Summary ?? "C2PA not written"}");
                 else
                     Toast($"Save failed: {result.Message}");
             }
             else
             {
-                var savedPath = ImageExportService.Save(bs, targetPath);
-                Toast($"Saved copy → {Path.GetFileName(savedPath)}");
+                var result = await Task.Run(() => ImageExportService.SaveWithC2paHandoff(bs, CurrentPath, targetPath));
+                Toast($"Saved copy: {Path.GetFileName(result.OutputPath)}. {result.C2paHandoff.Summary}");
             }
         }
         catch (Exception ex)

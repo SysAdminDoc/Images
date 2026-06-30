@@ -138,6 +138,112 @@ public sealed class C2paManifestServiceTests
     }
 
     [Fact]
+    public void PlanExportHandoff_WhenTargetFormatIsUnsupported_OmitsWithoutInspectingSource()
+    {
+        using var temp = TestDirectory.Create();
+        var source = temp.WriteFile("credentialed.jpg", "fake image bytes");
+        var inspected = false;
+
+        var result = C2paManifestService.PlanExportHandoff(
+            source,
+            ".jxl",
+            readManifest: _ =>
+            {
+                inspected = true;
+                return FoundCredentials();
+            },
+            inspectRuntime: () => throw new InvalidOperationException("runtime should not be inspected"),
+            inspectWriter: C2paExportWriterRuntimeStatus.NotConfigured);
+
+        Assert.Equal(C2paExportAction.Omit, result.Action);
+        Assert.Equal(C2paExportReason.TargetFormatUnsupported, result.Reason);
+        Assert.False(inspected);
+    }
+
+    [Fact]
+    public void PlanExportHandoff_WhenRuntimeUnavailable_OmitsWithoutReadingManifest()
+    {
+        using var temp = TestDirectory.Create();
+        var source = temp.WriteFile("credentialed.jpg", "fake image bytes");
+        var inspected = false;
+
+        var result = C2paManifestService.PlanExportHandoff(
+            source,
+            ".png",
+            readManifest: _ =>
+            {
+                inspected = true;
+                return FoundCredentials();
+            },
+            inspectRuntime: () => C2paToolRuntimeStatus.Missing("c2patool not found"),
+            inspectWriter: C2paExportWriterRuntimeStatus.NotConfigured);
+
+        Assert.Equal(C2paExportAction.Omit, result.Action);
+        Assert.Equal(C2paExportReason.InspectionRuntimeUnavailable, result.Reason);
+        Assert.True(result.RequiresAttention);
+        Assert.False(inspected);
+    }
+
+    [Fact]
+    public void PlanExportHandoff_WhenSourceHasNoManifest_ReportsNoWrite()
+    {
+        using var temp = TestDirectory.Create();
+        var source = temp.WriteFile("plain.jpg", "fake image bytes");
+
+        var result = C2paManifestService.PlanExportHandoff(
+            source,
+            ".png",
+            readManifest: _ => C2paInspectionResult.NoManifest("No manifest"),
+            inspectRuntime: ReadyRuntime,
+            inspectWriter: C2paExportWriterRuntimeStatus.NotConfigured);
+
+        Assert.Equal(C2paExportAction.Omit, result.Action);
+        Assert.Equal(C2paExportReason.SourceHasNoManifest, result.Reason);
+        Assert.False(result.RequiresAttention);
+        Assert.False(result.HasSourceCredentials);
+        Assert.Contains("No source Content Credentials", result.Detail, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PlanExportHandoff_WhenSourceHasManifestButNoWriter_ReportsOmission()
+    {
+        using var temp = TestDirectory.Create();
+        var source = temp.WriteFile("credentialed.jpg", "fake image bytes");
+
+        var result = C2paManifestService.PlanExportHandoff(
+            source,
+            ".png",
+            readManifest: _ => FoundCredentials(),
+            inspectRuntime: ReadyRuntime,
+            inspectWriter: C2paExportWriterRuntimeStatus.NotConfigured);
+
+        Assert.Equal(C2paExportAction.Omit, result.Action);
+        Assert.Equal(C2paExportReason.WriterNotConfigured, result.Reason);
+        Assert.True(result.HasSourceCredentials);
+        Assert.True(result.RequiresAttention);
+        Assert.Contains("will not copy stale", result.Detail, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void PlanExportHandoff_WhenApprovedWriterIsAvailable_ReportsWriteHandoff()
+    {
+        using var temp = TestDirectory.Create();
+        var source = temp.WriteFile("credentialed.jpg", "fake image bytes");
+
+        var result = C2paManifestService.PlanExportHandoff(
+            source,
+            ".png",
+            readManifest: _ => FoundCredentials(),
+            inspectRuntime: ReadyRuntime,
+            inspectWriter: () => C2paExportWriterRuntimeStatus.ApprovedRuntime("test signer", "ready"));
+
+        Assert.Equal(C2paExportAction.WriteWithRuntime, result.Action);
+        Assert.Equal(C2paExportReason.ReadyToWrite, result.Reason);
+        Assert.True(result.WillWrite);
+        Assert.Contains("test signer", result.Detail, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Read_UnsupportedExtension_ReturnsNoManifest()
     {
         using var temp = TestDirectory.Create();
@@ -162,4 +268,32 @@ public sealed class C2paManifestServiceTests
 
         Assert.Equal(C2paStatus.NoManifest, result.Status);
     }
+
+    private static C2paToolRuntimeStatus ReadyRuntime() => new(
+        Available: true,
+        ExecutablePath: @"C:\Tools\c2patool.exe",
+        Source: "test",
+        Version: "test",
+        Sha256: "sha256:test",
+        StatusText: "c2patool ready");
+
+    private static C2paInspectionResult FoundCredentials() => new(
+        Status: C2paStatus.Found,
+        TrustLevel: C2paTrustLevel.Signed,
+        ActiveManifestLabel: "urn:uuid:test",
+        Claims:
+        [
+            new C2paClaim(
+                Label: "urn:uuid:test",
+                Title: "credentialed.jpg",
+                Format: "image/jpeg",
+                InstanceId: "xmp:iid:test",
+                ClaimGenerator: "test",
+                SignatureDate: "2026-06-30T00:00:00Z",
+                SignatureIssuer: "test issuer",
+                Assertions: [],
+                Ingredients: [])
+        ],
+        ErrorMessage: null,
+        RawJson: "{}");
 }

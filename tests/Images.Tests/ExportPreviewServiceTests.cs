@@ -58,6 +58,29 @@ public sealed class ExportPreviewServiceTests
     }
 
     [Fact]
+    public void BuildPreview_IncludesC2paExportHandoff()
+    {
+        var bitmap = CreateBitmap(16, 8);
+        var handoff = C2paExportHandoff.Omitted(
+            C2paExportReason.SourceHasNoManifest,
+            "C2PA not written",
+            "No source Content Credentials were found.");
+        var service = new ExportPreviewService((sourcePath, extension) =>
+        {
+            Assert.Null(sourcePath);
+            Assert.Equal(".png", extension);
+            return handoff;
+        });
+
+        var result = service.BuildPreview(
+            bitmap,
+            sourcePath: null,
+            new ExportPreviewRequest(".png", 92, 0, 0));
+
+        Assert.Equal(handoff, result.Summary.C2paHandoff);
+    }
+
+    [Fact]
     public void NormalizeRequest_WhenFormatCannotBeWritten_FallsBackToPng()
     {
         var request = ExportPreviewService.NormalizeRequest(new ExportPreviewRequest(".not-real", 200, -4, 320));

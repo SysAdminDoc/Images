@@ -139,6 +139,24 @@
 
                         <Border Style="{StaticResource Divider}" />
 
+                        <TextBlock Text="{x:Static loc:Strings.ExportPreviewC2pa}" Style="{StaticResource SectionLabel}" />
+                        <Border Style="{StaticResource Card}"
+                                Padding="12"
+                                AutomationProperties.Name="{x:Static loc:Strings.ExportPreviewC2pa}">
+                            <StackPanel>
+                                <TextBlock x:Name="C2paStatusText"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}"
+                                           TextWrapping="Wrap" />
+                                <TextBlock x:Name="C2paDetailText"
+                                           Style="{StaticResource Text.Caption}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,6,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Divider}" />
+
                         <TextBlock Text="{x:Static loc:Strings.ExportPreviewWarnings}" Style="{StaticResource SectionLabel}" />
                         <Border Style="{StaticResource Card}" Padding="12">
                             <ItemsControl x:Name="WarningsList"
