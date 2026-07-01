@@ -458,6 +458,83 @@ public sealed class XmpSidecarImportServiceTests
         Assert.Equal("Tokyo", loc.City);
     }
 
+    // ── Lightroom collection migration scout ──────────────────────────
+    //
+    // These fixtures prove that Lightroom Classic's "Save Metadata to Files"
+    // (Ctrl+S) XMP output covers ratings, keywords, hierarchical subjects,
+    // and labels without requiring .lrcat database access.
+    //
+    // Collection membership is NOT written to XMP sidecars by Lightroom
+    // and cannot be recovered from sidecar-adjacent data alone.
+
+    [Fact]
+    public void LightroomScout_RatingsKeywordsLabelsHierarchies_AllParseFromXmp()
+    {
+        using var temp = TestDirectory.Create();
+        var xmpPath = temp.WriteFile("lr-export.xmp", BuildSidecar(
+            ratingAttr: "4",
+            labelAttr: "Blue",
+            dcSubjectItems: ["travel", "architecture", "Europe"],
+            lrHierarchicalItems: [
+                "Places|Europe|France|Paris",
+                "Genre|Architecture|Historic",
+                "Trip|2025 Summer"
+            ]));
+
+        var result = _service.ImportSidecar(xmpPath);
+
+        Assert.True(result.Success);
+        Assert.Equal(4, result.Rating);
+        Assert.Equal("Blue", result.ColorLabel);
+        Assert.Equal(["architecture", "Europe", "travel"], result.FlatKeywords);
+        Assert.Equal([
+            "Genre|Architecture|Historic",
+            "Places|Europe|France|Paris",
+            "Trip|2025 Summer"
+        ], result.HierarchicalKeywords);
+
+        var allKeywords = result.AllKeywords;
+        Assert.Contains("Paris", allKeywords);
+        Assert.Contains("Historic", allKeywords);
+        Assert.Contains("2025 Summer", allKeywords);
+        Assert.Contains("travel", allKeywords);
+    }
+
+    [Fact]
+    public void LightroomScout_CollectionMembership_NotInXmpSidecar()
+    {
+        using var temp = TestDirectory.Create();
+        var xmpPath = temp.WriteFile("lr-no-collections.xmp", BuildSidecar(
+            ratingAttr: "3",
+            dcSubjectItems: ["landscape"]));
+
+        var result = _service.ImportSidecar(xmpPath);
+
+        Assert.True(result.Success);
+        Assert.Null(result.Location.Location);
+        Assert.DoesNotContain(result.HierarchicalKeywords,
+            k => k.Contains("collection", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void LightroomScout_LeafExtraction_RecoversHierarchyLeaves()
+    {
+        using var temp = TestDirectory.Create();
+        var xmpPath = temp.WriteFile("lr-leaves.xmp", BuildSidecar(
+            lrHierarchicalItems: [
+                "Places|Europe|France|Paris",
+                "People|Family|Alice",
+                "Genre|Street Photography"
+            ]));
+
+        var result = _service.ImportSidecar(xmpPath);
+        var allKeywords = result.AllKeywords;
+
+        Assert.Contains("Paris", allKeywords);
+        Assert.Contains("Alice", allKeywords);
+        Assert.Contains("Street Photography", allKeywords);
+    }
+
     // ── Test XMP builders ──────────────────────────────────────────────
 
     private static string BuildSidecar(
