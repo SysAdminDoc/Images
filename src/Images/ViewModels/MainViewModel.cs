@@ -164,6 +164,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _hintTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(2400) };
         _hintTimer.Tick += (_, _) => { _hintTimer.Stop(); ShowGestureHint = false; };
 
+        BackgroundJobsService.Changed += OnBackgroundJobsChanged;
+        RefreshBackgroundActivity();
+
         _isFilmstripVisible = _settings.GetBool(Keys.FilmstripVisible, true);
         _isMetadataHudVisible = _settings.GetBool(Keys.MetadataHudVisible, false);
         _archiveRightToLeft = _settings.GetBool(Keys.ArchiveRightToLeft, false);
@@ -918,6 +921,39 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool HasSecondaryStatus
         => !string.IsNullOrWhiteSpace(SecondaryStatusTitle)
             || !string.IsNullOrWhiteSpace(SecondaryStatusDetail);
+
+    private int _activityRunningCount;
+    public int ActivityRunningCount { get => _activityRunningCount; private set => Set(ref _activityRunningCount, value); }
+
+    private int _activityFaultedCount;
+    public int ActivityFaultedCount { get => _activityFaultedCount; private set => Set(ref _activityFaultedCount, value); }
+
+    public bool HasBackgroundActivity => _activityRunningCount > 0 || _activityFaultedCount > 0;
+
+    private string _activitySummaryText = "";
+    public string ActivitySummaryText { get => _activitySummaryText; private set => Set(ref _activitySummaryText, value); }
+
+    private IReadOnlyList<BackgroundJobEntry> _activityJobs = Array.Empty<BackgroundJobEntry>();
+    public IReadOnlyList<BackgroundJobEntry> ActivityJobs { get => _activityJobs; private set => Set(ref _activityJobs, value); }
+
+    private void RefreshBackgroundActivity()
+    {
+        var running = BackgroundJobsService.GetRunning();
+        var recent = BackgroundJobsService.GetRecent(5);
+        var faulted = recent.Count(j => j.State == BackgroundJobState.Faulted);
+
+        ActivityRunningCount = running.Count;
+        ActivityFaultedCount = faulted;
+        ActivitySummaryText = BackgroundJobsService.BuildSummaryText();
+        ActivityJobs = BackgroundJobsService.GetAll(8);
+        Raise(nameof(HasBackgroundActivity));
+    }
+
+    private void OnBackgroundJobsChanged(object? sender, EventArgs e)
+    {
+        if (_isDisposed) return;
+        _uiDispatcher.BeginInvoke(RefreshBackgroundActivity);
+    }
 
     public string FirstRunPrivacyText => _settings.GetBool(Keys.UpdateCheckEnabled, false)
         ? Strings.MainFirstRunPrivacyOn
@@ -7509,6 +7545,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _listenService?.Dispose();
         _externalEditReload.Dispose();
 
+        BackgroundJobsService.Changed -= OnBackgroundJobsChanged;
         _nav.ListChanged -= OnDirectoryListChanged;
         _ocrWorkflow.Dispose();
         _photoMetadata.Dispose();
