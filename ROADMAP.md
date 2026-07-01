@@ -40,15 +40,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
   Acceptance: A small exported Lightroom fixture proves whether ratings, keywords, hierarchical subjects, labels, and collection membership can be imported from XMP or sidecar-adjacent data without reading private catalog tables.
   Complexity: S
 
-### P2
-
-- [ ] P2 - Add optional local face-region review workflow
-  Why: Images has `person:` tag namespaces and planned Picasa face-region migration, but modern photo managers treat face grouping as core organization; this should land as an explicit local review lane, not an automatic write.
-  Evidence: `README.md`, `docs/migration-guide.md`, PhotoPrism ONNX SCRFD face detector, digiKam face recognition, Immich facial recognition, Excire Search 2026 people culling
-  Touches: `src/Images/Services/ModelManagerService.cs`, `src/Images/Services/TagGraphService.cs`, `src/Images/Services/ReviewLabelService.cs`, `src/Images/MainWindow.xaml`, `tests/Images.Tests/`
-  Acceptance: With an approved local face model installed, Images can detect candidate face regions for a selected folder, group visually similar faces, require user confirmation before assigning names, and write reviewed regions/names to XMP sidecars with a delete-derived-data control.
-  Complexity: L
-
 ### P3
 
 - [ ] P3 - Build native-vector fidelity fixture set
