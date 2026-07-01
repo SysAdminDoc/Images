@@ -42,13 +42,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ### P2
 
-- [ ] P2 - Add Explorer-parity navigation modes
-  Why: Images has persisted sort modes, but Windows viewer users expect direct-open navigation to optionally follow Explorer order and to auto-switch sibling folders at folder boundaries.
-  Evidence: `src/Images/Services/DirectoryNavigator.cs`, `src/Images/Services/DirectorySortMode.cs`, ImageGlass 10 Explorer sort order, ImageGlass 9.5 sibling directory auto-switch
-  Touches: `src/Images/Services/DirectoryNavigator.cs`, `src/Images/Services/DirectorySortMode.cs`, `src/Images/ViewModels/MainViewModel.cs`, `src/Images/SettingsWindow.xaml`, `tests/Images.Tests/`
-  Acceptance: Settings exposes Explorer order and sibling-folder auto-switch toggles; direct-open folder navigation preserves current behavior by default, follows Explorer-compatible ordering when enabled, and moves to the next/previous sibling folder only when explicitly enabled.
-  Complexity: M
-
 - [ ] P2 - Add optional local face-region review workflow
   Why: Images has `person:` tag namespaces and planned Picasa face-region migration, but modern photo managers treat face grouping as core organization; this should land as an explicit local review lane, not an automatic write.
   Evidence: `README.md`, `docs/migration-guide.md`, PhotoPrism ONNX SCRFD face detector, digiKam face recognition, Immich facial recognition, Excire Search 2026 people culling
