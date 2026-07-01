@@ -19,15 +19,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ### P3
 
-- [ ] P3 — Scout Lightroom collection migration from exported metadata
-  Why: The migration guide marks Lightroom catalog import as planned, but direct `.lrcat` parsing risks brittle schema coupling.
-  Evidence: `docs/migration-guide.md`, `src/Images/Services/XmpSidecarImportService.cs`, Lightroom Classic metadata export documentation
-  Touches: `src/Images/Services/XmpSidecarImportService.cs`, `docs/migration-guide.md`, `tests/Images.Tests/`
-  Acceptance: A small exported Lightroom fixture proves whether ratings, keywords, hierarchical subjects, labels, and collection membership can be imported from XMP or sidecar-adjacent data without reading private catalog tables.
-  Complexity: S
-
-### P3
-
 - [ ] P3 - Build native-vector fidelity fixture set
   Why: SVG/SVGZ previews currently rely on existing decode paths, while competing viewers are adding native vector renderers; Images needs fixture evidence before changing renderer architecture.
   Evidence: `src/Images/Services/ImageLoader.cs`, `src/Images/Controls/ZoomPanImage.cs`, ImageGlass 10 native vector rendering
