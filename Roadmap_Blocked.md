@@ -55,6 +55,13 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
   - **Blocked by**: S-07 MSIX packaging work + Microsoft Store developer account + Store submission.
   - **Unblock when**: S-07 ships and Store account is provisioned.
 
+## Blocked On Code-Signing Identity
+
+- [ ] P3 — **Scout signed Windows preview/thumbnail handler integration**
+  Why: `--peek` covers external preview workflows, but Explorer Preview Pane and thumbnails require shell-extension trust, install, rollback, and signing evidence before implementation.
+  - **Blocked by**: D-05 code signing — shell extension registration requires signed binaries for trusted Explorer integration.
+  - **Unblock when**: D-05 or D-05a code signing identity is provisioned.
+
 ## Blocked On Research / Evaluation (Not Code-Ready)
 
 - [ ] **V80-21** *P1* — **OpenSlide Lab Pack evaluation**. Evaluate optional bundled support for Aperio SVS, Hamamatsu NDPI, Leica SCN, MIRAX, Philips TIFF, Sakura SVSLIDE, Ventana BIF, Zeiss CZI, DICOM WSI, and generic tiled TIFF. Treat as an optional "Lab Pack" because the UX, file sizes, licensing, and test corpus are different from consumer photos. Effort: L. [[S-OPENSLIDE]](https://openslide.org/) [[S-QUPATH]](https://qupath.github.io/)
