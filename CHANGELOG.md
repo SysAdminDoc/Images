@@ -28,6 +28,21 @@ All notable changes to **Images** are documented here.
 - **Catalog LoadAllAssets missing palette** — `ReadAssetRecord` now reads the `palette` column, so `CatalogRebuildResult.Assets` returns palette data after a scan.
 - **External-edit watcher re-armed after navigation** — `ExternalEditReloadController.Arm` is now called in `CompleteCurrentLoad`, so FileSystemWatcher detects external edits to the current file after arrow-key navigation, not just after initial open.
 - **CurrentPath set before controller refreshes** — `CurrentPath` is now assigned before metadata/color/C2PA controller refreshes fire, closing a brief window where controllers could compare against the previous path.
+- **Activity panel faulted count asymmetry** — Background activity running/faulted counts now derive from the same job set displayed in the panel, preventing the panel from hiding while faulted jobs are still in the visible list.
+- **Slideshow timer crash resilience** — Slideshow timer tick is now wrapped in a top-level try-catch to prevent silent slideshow stops on unexpected decode errors.
+- **ListenService broken state on port bind failure** — `Start()` no longer leaves the service permanently broken when the requested port is in use; a subsequent call with a different port can succeed.
+- **Thumbnail cache quota tracking** — LRU eviction no longer decrements the tracked total before confirming the file delete succeeded, preventing cache growth past the configured cap when files are locked by other processes.
+- **NonDestructiveEditService temp file collision** — Atomic sidecar writes now use GUID-based temp filenames to prevent concurrent saves of the same sidecar from clobbering each other.
+- **Catalog rebuild crash on inaccessible directories** — Directory enumeration during catalog rebuild now uses `IgnoreInaccessible` to skip permission-denied subdirectories instead of aborting the entire scan.
+- **Duplicate cleanup IndexOutOfRange guard** — Similar-image finding summaries and sort now safely handle findings with fewer than two candidates.
+- **Tile cache lock memory leak** — Build lock entries are now removed when tile pyramid caches are cleared, preventing unbounded dictionary growth in long sessions.
+- **Import inbox GPS strip ordering** — Post-import edits now write sidecar tags and ratings before stripping GPS metadata, so rollback on failure preserves the original file's GPS coordinates.
+- **Atomic write TOCTOU race** — Export and batch processor atomic writes now use `File.Move(overwrite: true)` instead of `File.Exists` + `File.Replace/Move`, eliminating a race where a concurrent write could cause data loss.
+- **MenuItem hardcoded checked-highlight color** — Replaced a Mocha-specific `#1A89B4FA` in the global MenuItem template trigger with the theme-aware `AccentPanelBrush`.
+- **DarkTheme missing theme name marker** — Added `Images.Theme.Name` resource key to DarkTheme for consistency with Latte and HighContrast dictionaries.
+- **Gallery focus trap** — Gallery ListBoxItem now sets `Focusable="False"` to delegate keyboard focus to child buttons, matching the filmstrip pattern.
+- **Annotation swatch accessibility** — Color palette buttons now have `AutomationProperties.Name` and `ToolTip` so screen readers can identify each color.
+- **Sibling folder settings localization** — The sibling folder auto-switch toggle in Settings now uses localized resource strings instead of hardcoded English.
 - **RAW preview loading state** — `IsImageLoading` is now re-set to `true` after displaying the embedded JPEG preview, so the loading indicator stays visible while the full RAW decode runs.
 - **ApplyInpaint busy guard** — `ApplyInpaintCommand.CanExecute` now checks `!IsOperationBusy`, preventing double-invoke of concurrent inpaint operations.
 - **Slideshow flush pending rename** — `SlideshowTimer_Tick` now calls `FlushPendingRename()` before navigating, so a rename in progress is committed rather than silently discarded.
@@ -66,6 +81,7 @@ All notable changes to **Images** are documented here.
 
 ### Infrastructure
 
+- **Pseudo-locale overflow gate** - `Strings.qps-ploc.resx` can be regenerated locally, localization validation now requires and checks the pseudo-locale by default, and WPF smoke coverage opens key secondary windows under expanded strings to catch critical control clipping.
 - **Magick.NET security policy gate** - Codec runtime startup now applies and reports app-level Magick.NET resource limits, Ghostscript-gated document previews, huge-dimension rendering guards, and blocked PDF/EPS/SVG/MVG/MSL/URL-style write targets; release diagnostics now fail if the policy is not enforced.
 
 - **Local release readiness parity restored** — `scripts\Test-ReleaseReadiness.ps1` now runs version sync, restore, Release build, tests, high/critical vulnerability blocking, localization parity, release diagnostics, checksum generation, and WinGet/Scoop manifest validation from one local command; release/trust docs now describe local-only gates instead of removed hosted workflows or Dependabot.
