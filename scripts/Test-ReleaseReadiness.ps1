@@ -376,4 +376,9 @@ if (-not $SkipPackageManifestValidation) {
     }
 }
 
+Write-Host "Generating SBOM and provenance bundle..."
+$sbomScript = Join-Path $PSScriptRoot "New-Sbom.ps1"
+$sbomOutputDir = Resolve-RepoPath "artifacts\release-readiness"
+& $sbomScript -RepositoryRoot $RepositoryRoot -OutputDir $sbomOutputDir
+
 Write-Host "Release readiness validated."
