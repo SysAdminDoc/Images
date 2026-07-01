@@ -117,11 +117,11 @@
                                     AutomationProperties.Name="{loc:Loc AnnotationFontSizeAutomationName}" />
 
                             <WrapPanel Margin="0,14,0,0">
-                                <Button Tag="#F38BA8" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#F38BA8" BorderBrush="{StaticResource HairlineBrush}" />
-                                <Button Tag="#F9E2AF" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#F9E2AF" BorderBrush="{StaticResource HairlineBrush}" />
-                                <Button Tag="#A6E3A1" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#A6E3A1" BorderBrush="{StaticResource HairlineBrush}" />
-                                <Button Tag="#89B4FA" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#89B4FA" BorderBrush="{StaticResource HairlineBrush}" />
-                                <Button Tag="#FFFFFF" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#FFFFFF" BorderBrush="{StaticResource HairlineBrush}" />
+                                <Button Tag="#F38BA8" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#F38BA8" BorderBrush="{StaticResource HairlineBrush}" ToolTip="Red" AutomationProperties.Name="Red color" />
+                                <Button Tag="#F9E2AF" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#F9E2AF" BorderBrush="{StaticResource HairlineBrush}" ToolTip="Yellow" AutomationProperties.Name="Yellow color" />
+                                <Button Tag="#A6E3A1" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#A6E3A1" BorderBrush="{StaticResource HairlineBrush}" ToolTip="Green" AutomationProperties.Name="Green color" />
+                                <Button Tag="#89B4FA" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#89B4FA" BorderBrush="{StaticResource HairlineBrush}" ToolTip="Blue" AutomationProperties.Name="Blue color" />
+                                <Button Tag="#FFFFFF" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#FFFFFF" BorderBrush="{StaticResource HairlineBrush}" ToolTip="White" AutomationProperties.Name="White color" />
                             </WrapPanel>
                         </StackPanel>
                     </Border>

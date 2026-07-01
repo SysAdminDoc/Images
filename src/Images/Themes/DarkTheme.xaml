@@ -10,6 +10,8 @@
          motion → text → controls.
          ============================================================ -->
 
+    <sys:String x:Key="Images.Theme.Name">Dark</sys:String>
+
     <!-- Converters (global) -->
     <vm:BooleanToVisibilityConverter x:Key="BoolToVis" />
     <vm:PathToFileNameConverter x:Key="PathToFileNameConverter" />
@@ -581,7 +583,7 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="#1A89B4FA" />
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                             <Setter TargetName="CheckGlyph" Property="Opacity" Value="1" />
                             <Setter TargetName="IconPresenter" Property="Opacity" Value="0" />
                         </Trigger>

@@ -1317,6 +1317,7 @@
                                 <Style TargetType="ListBoxItem">
                                     <Setter Property="Padding" Value="0" />
                                     <Setter Property="Margin" Value="0" />
+                                    <Setter Property="Focusable" Value="False" />
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                     <Setter Property="Template">
                                         <Setter.Value>
