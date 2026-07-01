@@ -17,13 +17,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ### P2
 
-- [ ] P2 — Produce a local release SBOM and provenance bundle
-  Why: Local release output now has checksums, diagnostics, and package-manifest validation, but still lacks a generated SBOM/provenance bundle.
-  Evidence: `docs/distribution-trust.md`, `docs/codec-bundling.md`, `scripts/Test-ReleaseDiagnostics.ps1`, CycloneDX ML-BOM, C2PA provenance expectations
-  Touches: `scripts/Test-ReleaseReadiness.ps1`, `scripts/Test-ReleaseDiagnostics.ps1`, `scripts/New-PackageManifests.ps1`, `src/Images/Services/CodecCapabilityService.cs`, `docs/distribution-trust.md`
-  Acceptance: Local release output includes SHA-256 checksums, a CycloneDX SBOM covering NuGet dependencies plus staged native runtimes/model definitions, and a provenance summary that matches `--system-info`/`--codec-report` diagnostics.
-  Complexity: M
-
 ### P3
 
 - [ ] P3 — Resolve the Windows ML versus ONNX Runtime backend mismatch
