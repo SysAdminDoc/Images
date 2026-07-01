@@ -19,13 +19,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ### P3
 
-- [ ] P3 — Build an HDR and color-management decision fixture set
-  Why: Competitors are moving toward HDR/color-managed preview, while Images currently reports color profile risk more than it transforms display output.
-  Evidence: `src/Images/Services/ImageColorAnalysisService.cs`, `src/Images/Services/ImageLoader.cs`, ImageGlass 10 roadmap, HN image-viewer color-management discussion
-  Touches: `tests/Images.Tests/Fixtures/`, `src/Images/Services/ImageLoader.cs`, `src/Images/ViewModels/ColorAnalysisController.cs`, `docs/codec-support-policy.md`
-  Acceptance: A fixture-backed test/diagnostic corpus covers ICC, wide-gamut, HDR-like, AVIF/JXL, and TIFF samples; the output documents whether WPF/Magick transforms are sufficient or a renderer/runtime decision must move to `Roadmap_Blocked.md`.
-  Complexity: M
-
 - [ ] P3 — Scout Lightroom collection migration from exported metadata
   Why: The migration guide marks Lightroom catalog import as planned, but direct `.lrcat` parsing risks brittle schema coupling.
   Evidence: `docs/migration-guide.md`, `src/Images/Services/XmpSidecarImportService.cs`, Lightroom Classic metadata export documentation
