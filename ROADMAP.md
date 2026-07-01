@@ -19,13 +19,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ### P3
 
-- [ ] P3 - Build native-vector fidelity fixture set
-  Why: SVG/SVGZ previews currently rely on existing decode paths, while competing viewers are adding native vector renderers; Images needs fixture evidence before changing renderer architecture.
-  Evidence: `src/Images/Services/ImageLoader.cs`, `src/Images/Controls/ZoomPanImage.cs`, ImageGlass 10 native vector rendering
-  Touches: `tests/Images.Tests/Fixtures/`, `tests/Images.Tests/ImageLoaderTests.cs`, `src/Images/Services/ImageLoader.cs`, `docs/codec-support-policy.md`
-  Acceptance: Fixture tests cover SVG/SVGZ scaling, transparency, embedded raster images, text fallback, and animated-SMIL unsupported/degraded states; the result documents whether Magick/WPF is sufficient or a renderer decision must move to blocked work.
-  Complexity: M
-
 - [ ] P3 - Scout signed Windows preview/thumbnail handler integration
   Why: `--peek` covers external preview workflows, but Explorer Preview Pane and thumbnails require shell-extension trust, install, rollback, and signing evidence before implementation.
   Evidence: `docs/peek-mode.md`, `installer/Images.iss`, PowerToys Peek, Microsoft preview-handler guidance, ImageGlass shell thumbnail settings
