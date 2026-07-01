@@ -58,7 +58,9 @@ public sealed record DuplicateCleanupFinding(
 
             return Kind == DuplicateCleanupFindingKind.ExactDuplicate
                 ? $"{size} each - {root}"
-                : $"{Candidates[0].FileName} vs {Candidates[1].FileName} - {root}";
+                : Candidates.Count > 1
+                    ? $"{Candidates[0].FileName} vs {Candidates[1].FileName} - {root}"
+                    : $"{Candidates[0].FileName} - {root}";
         }
     }
 
@@ -274,8 +276,8 @@ public sealed class DuplicateCleanupService
     private static IReadOnlyList<DuplicateCleanupFinding> SortSimilarFindings(List<DuplicateCleanupFinding> findings)
         => findings
             .OrderBy(finding => finding.Distance)
-            .ThenBy(finding => finding.Candidates[0].FileName, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(finding => finding.Candidates[1].FileName, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(finding => finding.PrimaryCandidate?.FileName ?? "", StringComparer.OrdinalIgnoreCase)
+            .ThenBy(finding => finding.SecondaryCandidate?.FileName ?? "", StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
     private static IEnumerable<DuplicateCleanupCandidate> SortCandidatesForReview(IEnumerable<DuplicateCleanupCandidate> candidates)

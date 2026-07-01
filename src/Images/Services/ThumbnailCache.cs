@@ -405,7 +405,7 @@ public sealed class ThumbnailCache
             foreach (var f in files)
             {
                 if (total <= _capBytes) break;
-                try { total -= f.Length; f.Delete(); } catch { /* best-effort */ }
+                try { var len = f.Length; f.Delete(); total -= len; } catch { /* best-effort */ }
             }
         }
         catch (Exception ex)

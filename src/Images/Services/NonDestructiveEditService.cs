@@ -576,7 +576,7 @@ public sealed class NonDestructiveEditService
             throw new IOException("Sidecar destination has no directory.");
 
         Directory.CreateDirectory(directory);
-        var tempPath = sidecarPath + ".tmp";
+        var tempPath = sidecarPath + $".{Guid.NewGuid():N}.tmp";
         try
         {
             document.Save(tempPath);

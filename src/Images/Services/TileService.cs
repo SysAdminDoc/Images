@@ -312,6 +312,7 @@ public static class TileService
             {
                 if (Directory.Exists(cacheDir))
                     Directory.Delete(cacheDir, recursive: true);
+                BuildLocks.TryRemove(cacheDir, out _);
             }
             catch (Exception ex) { _log.LogDebug(ex, "tile-cache: could not remove {Dir}", cacheDir); }
         }
@@ -496,6 +497,7 @@ public static class TileService
                     Directory.Delete(dir, recursive: true);
                     deleted++;
                     deletedBytes += size;
+                    BuildLocks.TryRemove(dir, out _);
                 }
                 catch (Exception ex) { _log.LogDebug(ex, "tile-cache: could not clear {Dir}", dir); }
             }

@@ -709,7 +709,12 @@ public sealed class CatalogService
             IEnumerable<string> files;
             try
             {
-                files = Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories);
+                files = Directory.EnumerateFiles(root, "*",
+                    new EnumerationOptions
+                    {
+                        RecurseSubdirectories = true,
+                        IgnoreInaccessible = true,
+                    });
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
             {

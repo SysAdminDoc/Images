@@ -425,6 +425,10 @@ public static class Strings
     public static string SettingsMetadataHudOffStatus => Get(nameof(SettingsMetadataHudOffStatus));
     public static string SettingsRecycleBinConfirmOnStatus => Get(nameof(SettingsRecycleBinConfirmOnStatus));
     public static string SettingsRecycleBinConfirmOffStatus => Get(nameof(SettingsRecycleBinConfirmOffStatus));
+    public static string SettingsSiblingFolderTitle => Get(nameof(SettingsSiblingFolderTitle));
+    public static string SettingsSiblingFolderDescription => Get(nameof(SettingsSiblingFolderDescription));
+    public static string SettingsSiblingFolderOnStatus => Get(nameof(SettingsSiblingFolderOnStatus));
+    public static string SettingsSiblingFolderOffStatus => Get(nameof(SettingsSiblingFolderOffStatus));
     public static string SettingsReduceMotionOnStatus => Get(nameof(SettingsReduceMotionOnStatus));
     public static string SettingsReduceMotionOffStatus => Get(nameof(SettingsReduceMotionOffStatus));
     public static string SettingsHighContrastOnStatus => Get(nameof(SettingsHighContrastOnStatus));

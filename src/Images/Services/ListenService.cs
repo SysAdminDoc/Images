@@ -37,10 +37,21 @@ public sealed class ListenService : IDisposable
     {
         if (_listener is not null) return;
 
+        var cts = new CancellationTokenSource();
+        var listener = new TcpListener(IPAddress.Loopback, port);
+        try
+        {
+            listener.Start();
+        }
+        catch
+        {
+            cts.Dispose();
+            throw;
+        }
+
         SessionToken = GenerateToken();
-        _cts = new CancellationTokenSource();
-        _listener = new TcpListener(IPAddress.Loopback, port);
-        _listener.Start();
+        _cts = cts;
+        _listener = listener;
         Port = ((IPEndPoint)_listener.LocalEndpoint).Port;
 
         _log.LogInformation(

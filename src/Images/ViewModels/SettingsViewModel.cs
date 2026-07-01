@@ -158,9 +158,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             _settings.SetBool(Keys.SiblingFolderAutoSwitch, value);
             Raise(nameof(SiblingFolderAutoSwitch));
             SetStatus(
-                value
-                    ? "Sibling folder auto-switch enabled. Navigation continues into adjacent folders."
-                    : "Sibling folder auto-switch disabled. Navigation wraps within the current folder.",
+                value ? Strings.SettingsSiblingFolderOnStatus : Strings.SettingsSiblingFolderOffStatus,
                 SettingsStatusToneKind.Success);
         }
     }

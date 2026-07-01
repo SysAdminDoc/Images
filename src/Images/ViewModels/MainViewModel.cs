@@ -939,14 +939,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void RefreshBackgroundActivity()
     {
-        var running = BackgroundJobsService.GetRunning();
-        var recent = BackgroundJobsService.GetRecent(5);
-        var faulted = recent.Count(j => j.State == BackgroundJobState.Faulted);
+        var all = BackgroundJobsService.GetAll(8);
+        var running = all.Count(j => j.State == BackgroundJobState.Running);
+        var faulted = all.Count(j => j.State == BackgroundJobState.Faulted);
 
-        ActivityRunningCount = running.Count;
+        ActivityRunningCount = running;
         ActivityFaultedCount = faulted;
         ActivitySummaryText = BackgroundJobsService.BuildSummaryText();
-        ActivityJobs = BackgroundJobsService.GetAll(8);
+        ActivityJobs = all;
         Raise(nameof(HasBackgroundActivity));
     }
 
@@ -2481,50 +2481,57 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         _slideshowTimer?.Stop();
 
-        FlushPendingRename();
-
-        if (_slideshowShuffle && _slideshowRandom is not null)
+        try
         {
-            var files = _nav.Files;
-            var count = files.Count;
-            if (count > 1)
-            {
-                var nextIndex = _slideshowRandom.Next(count);
-                while (nextIndex == _nav.CurrentIndex && count > 1)
-                    nextIndex = _slideshowRandom.Next(count);
+            FlushPendingRename();
 
-                if (nextIndex >= files.Count) return;
-                var targetPath = files[nextIndex];
-                _nav.Open(targetPath);
-                ResetPageState();
-                await LoadCurrentWithOperationStatusAsync(
-                    Strings.MainOpLoadingNext,
-                    BuildDecodeOperationDetail(targetPath));
-            }
-        }
-        else
-        {
-            if (_nav.CurrentIndex >= _nav.Files.Count - 1)
+            if (_slideshowShuffle && _slideshowRandom is not null)
             {
-                if (_slideshowLoop)
+                var files = _nav.Files;
+                var count = files.Count;
+                if (count > 1)
                 {
-                    if (!_nav.MoveFirst()) return;
-                }
-                else
-                {
-                    StopSlideshow();
-                    return;
+                    var nextIndex = _slideshowRandom.Next(count);
+                    while (nextIndex == _nav.CurrentIndex && count > 1)
+                        nextIndex = _slideshowRandom.Next(count);
+
+                    if (nextIndex >= files.Count) return;
+                    var targetPath = files[nextIndex];
+                    _nav.Open(targetPath);
+                    ResetPageState();
+                    await LoadCurrentWithOperationStatusAsync(
+                        Strings.MainOpLoadingNext,
+                        BuildDecodeOperationDetail(targetPath));
                 }
             }
             else
             {
-                if (!_nav.MoveNext()) return;
-            }
+                if (_nav.CurrentIndex >= _nav.Files.Count - 1)
+                {
+                    if (_slideshowLoop)
+                    {
+                        if (!_nav.MoveFirst()) return;
+                    }
+                    else
+                    {
+                        StopSlideshow();
+                        return;
+                    }
+                }
+                else
+                {
+                    if (!_nav.MoveNext()) return;
+                }
 
-            ResetPageState();
-            await LoadCurrentWithOperationStatusAsync(
-                Strings.MainOpLoadingNext,
-                BuildDecodeOperationDetail(_nav.CurrentPath ?? ""));
+                ResetPageState();
+                await LoadCurrentWithOperationStatusAsync(
+                    Strings.MainOpLoadingNext,
+                    BuildDecodeOperationDetail(_nav.CurrentPath ?? ""));
+            }
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "Slideshow tick failed");
         }
 
         if (IsSlideshowActive && !IsSlideshowPaused)
