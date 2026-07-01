@@ -17,20 +17,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ### P2
 
-- [ ] P2 — Add pseudo-locale and overflow layout gate
-  Why: Localization infrastructure exists, but there are no locale files and no automated check that expanded strings fit premium WPF surfaces.
-  Evidence: `src/Images/Localization/Strings.resx`, `scripts/Test-LocalizationResources.ps1`, `docs/accessibility.md`
-  Touches: `src/Images/Localization/`, `scripts/Test-LocalizationResources.ps1`, `tests/Images.Tests/`
-  Acceptance: Local validation can generate or validate a pseudo-locale, run resource parity, and smoke key windows with expanded text without clipping critical controls.
-  Complexity: M
-
-- [ ] P2 — Promote background jobs into a primary activity surface
-  Why: Long-running indexing, batch, contact-sheet, scan, and model work should be visible without opening About.
-  Evidence: `src/Images/Services/BackgroundJobsService.cs`, `src/Images/Services/BackgroundTaskTracker.cs`, ACDSee activity-management patterns
-  Touches: `src/Images/MainWindow.xaml`, `src/Images/ViewModels/MainViewModel.cs`, `src/Images/Services/BackgroundJobsService.cs`, `tests/Images.Tests/`
-  Acceptance: The main viewer exposes a compact activity entry with running/faulted counts, recent job details, cancellation where supported, and screen-reader status updates.
-  Complexity: M
-
 - [ ] P2 — Produce a local release SBOM and provenance bundle
   Why: Local release output now has checksums, diagnostics, and package-manifest validation, but still lacks a generated SBOM/provenance bundle.
   Evidence: `docs/distribution-trust.md`, `docs/codec-bundling.md`, `scripts/Test-ReleaseDiagnostics.ps1`, CycloneDX ML-BOM, C2PA provenance expectations
