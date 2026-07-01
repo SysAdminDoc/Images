@@ -224,6 +224,13 @@ public sealed class ImportInboxService
 
     private void ApplyPostImportEdits(string destinationPath, ImportInboxCommitRequest request)
     {
+        var tags = TagGraphService.ParseTagInput(request.TagsText);
+        if (tags.Count > 0)
+            _tagGraph.ExportSidecarTags(destinationPath, tags, includeParents: true);
+
+        if (request.Rating is not null)
+            WriteRatingSidecar(destinationPath, Math.Clamp(request.Rating.Value, -1, 5));
+
         if (request.StripGps && SupportsMetadataWrite(destinationPath))
         {
             try
@@ -236,13 +243,6 @@ public sealed class ImportInboxService
                 throw new InvalidOperationException("GPS metadata could not be stripped from the imported file.", ex);
             }
         }
-
-        var tags = TagGraphService.ParseTagInput(request.TagsText);
-        if (tags.Count > 0)
-            _tagGraph.ExportSidecarTags(destinationPath, tags, includeParents: true);
-
-        if (request.Rating is not null)
-            WriteRatingSidecar(destinationPath, Math.Clamp(request.Rating.Value, -1, 5));
     }
 
     private static bool SupportsMetadataWrite(string path)

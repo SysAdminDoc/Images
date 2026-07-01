@@ -437,10 +437,7 @@ public static class ImageExportService
         try
         {
             image.Write(tempPath);
-            if (File.Exists(targetPath))
-                File.Replace(tempPath, targetPath, null);
-            else
-                File.Move(tempPath, targetPath);
+            File.Move(tempPath, targetPath, overwrite: true);
         }
         finally
         {
