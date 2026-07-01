@@ -156,7 +156,7 @@ public sealed class ModelManagerService
             FileName: "inpainting_lama_2025jan.onnx",
             ExpectedSha256: "7df918ac3921d3daf0aae1d219776cf0dc4e4935f035af81841b40adcf74fdf2",
             ExpectedSizeBytes: 92_600_000,
-            RuntimeContract: "Windows ML first; ONNX Runtime DirectML fallback; CPU only with visible slow-path status.",
+            RuntimeContract: "ONNX Runtime DirectML first; CPU fallback with visible slow-path status.",
             Notes: "Primary LaMa candidate from docs/inpaint-runtime-decision.md. No automatic download; import the exact ONNX file and verify SHA-256."),
         new(
             Id: "carve-lama-fp32",
@@ -169,7 +169,7 @@ public sealed class ModelManagerService
             FileName: "lama_fp32.onnx",
             ExpectedSha256: "1faef5301d78db7dda502fe59966957ec4b79dd64e16f03ed96913c7a4eb68d6",
             ExpectedSizeBytes: 208_000_000,
-            RuntimeContract: "Fixed 512x512 input, opset 17; Windows ML first, ONNX Runtime DirectML fallback.",
+            RuntimeContract: "Fixed 512x512 input, opset 17; ONNX Runtime DirectML first, CPU fallback.",
             Notes: "Fallback validation candidate. The alternate Carve lama.onnx export is intentionally not approved because the model card marks it slower/not recommended."),
         new(
             Id: "qdrant-clip-vit-b32-text",

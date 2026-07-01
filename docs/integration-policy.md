@@ -92,7 +92,7 @@ Copy this block into a new design or decision document before adding the integra
 | Windows.Media.Ocr | Accepted | In-box Windows API; no bundled runtime. |
 | 7-Zip/UnRAR native archive readers | Not reviewed | Native sidecars remain unapproved; ZIP/CBZ use .NET built-in APIs and RAR/7z use the reviewed managed SharpCompress path. |
 | jpegtran.exe | Accepted for release staging through reviewed libjpeg-turbo 3.1.4.1 artifact | Lossless JPEG crop/rotation planning, runtime diagnostics, exact MCU-aligned writeback, right-angle rotation writeback, confirmed-trim UI, exact artifact URL, license files, `jpegtran.exe` plus `jpeg62.dll` SHA-256 provenance, staging script, and release diagnostics smoke are documented in `docs/lossless-jpeg-transform-policy.md` and `src/Images/Codecs/JpegTran/PROVENANCE.md`. Runtime binaries remain ignored by git and are staged only for build/publish output. |
-| LaMa inpainting ONNX | Decision scoped, not bundled | Content-aware repair will use opt-in local LaMa ONNX through Windows ML first and ONNX Runtime DirectML fallback after V60-01. See `docs/inpaint-runtime-decision.md`. |
+| LaMa inpainting ONNX | Decision scoped, not bundled | Content-aware repair will use opt-in local LaMa ONNX through ONNX Runtime DirectML (current) with Windows ML as the planned forward path when V60-01 ships. See `docs/inpaint-runtime-decision.md`. |
 | ExifTool | Not reviewed | Required before sidecar or metadata write workflows. |
 | ONNX models | Not reviewed | Required before semantic search, AI tagging, background removal, upscaling, or face recognition. |
 | OpenSlide/Bio-Formats | Not reviewed | Required before lab/scientific image packs. |

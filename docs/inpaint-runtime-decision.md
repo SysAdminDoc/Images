@@ -58,7 +58,7 @@ Original research reference:
 - `ModelManagerService`: shipped shared registry/storage foundation for approved model IDs, expected hashes, source URLs, app-local grouped folders, SHA-256 verification, import/delete/reveal actions, and runtime status copy.
 - `InpaintModelRegistry`: future inpaint-specific tensor shape, opset, preprocessing, mask, and tiling contract layered over the shared model manager.
 - `ModelStorage`: app-data model folder and SHA-256 verification are shipped; future user-initiated download and license/readme retention remain unimplemented.
-- `InpaintRuntime`: future runtime detects Windows ML first, falls back to ONNX Runtime DirectML, and reports CPU fallback explicitly.
+- `InpaintRuntime`: future runtime uses ONNX Runtime DirectML first and CPU fallback. Windows ML is the planned forward path for Win11 24H2+ when V60-01 inference runtime ships.
 - `InpaintPlanner`: converts a pixel selection or mask into 512 x 512 tiles with mask dilation and overlap.
 - `InpaintOperation`: XMP edit-stack operation with model ID/hash, mask bounds, tile grid, and renderer version. Store raster patch sidecars if exact replay is not stable across runtime updates.
 - `InpaintRenderer`: deterministic apply path used by preview, Save a copy, and future original overwrite flows.
