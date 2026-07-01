@@ -228,6 +228,66 @@ public sealed class DirectoryNavigatorTests
     }
 
     [Fact]
+    public void SiblingFolderAutoSwitch_MoveNextAtEnd_SwitchesToNextFolder()
+    {
+        using var parent = TestDirectory.Create();
+        var folderA = Directory.CreateDirectory(Path.Combine(parent.Path, "A"));
+        var folderB = Directory.CreateDirectory(Path.Combine(parent.Path, "B"));
+        File.WriteAllBytes(Path.Combine(folderA.FullName, "a1.jpg"), [0xFF, 0xD8]);
+        File.WriteAllBytes(Path.Combine(folderA.FullName, "a2.jpg"), [0xFF, 0xD8]);
+        File.WriteAllBytes(Path.Combine(folderB.FullName, "b1.jpg"), [0xFF, 0xD8]);
+
+        using var nav = new DirectoryNavigator();
+        nav.SiblingFolderAutoSwitch = true;
+        nav.Open(Path.Combine(folderA.FullName, "a1.jpg"));
+        nav.MoveNext(); // a2
+        Assert.Contains("a2.jpg", nav.CurrentPath);
+
+        nav.MoveNext(); // should switch to folder B
+        Assert.Contains("b1.jpg", nav.CurrentPath!);
+        Assert.Equal(folderB.FullName, nav.Folder);
+    }
+
+    [Fact]
+    public void SiblingFolderAutoSwitch_MovePrevAtStart_SwitchesToPreviousFolder()
+    {
+        using var parent = TestDirectory.Create();
+        var folderA = Directory.CreateDirectory(Path.Combine(parent.Path, "A"));
+        var folderB = Directory.CreateDirectory(Path.Combine(parent.Path, "B"));
+        File.WriteAllBytes(Path.Combine(folderA.FullName, "a1.jpg"), [0xFF, 0xD8]);
+        File.WriteAllBytes(Path.Combine(folderB.FullName, "b1.jpg"), [0xFF, 0xD8]);
+        File.WriteAllBytes(Path.Combine(folderB.FullName, "b2.jpg"), [0xFF, 0xD8]);
+
+        using var nav = new DirectoryNavigator();
+        nav.SiblingFolderAutoSwitch = true;
+        nav.Open(Path.Combine(folderB.FullName, "b1.jpg"));
+        Assert.Contains("b1.jpg", nav.CurrentPath);
+
+        nav.MovePrevious(); // should switch to folder A, last image
+        Assert.Contains("a1.jpg", nav.CurrentPath!);
+        Assert.Equal(folderA.FullName, nav.Folder);
+    }
+
+    [Fact]
+    public void SiblingFolderAutoSwitch_Disabled_WrapsNormally()
+    {
+        using var parent = TestDirectory.Create();
+        var folderA = Directory.CreateDirectory(Path.Combine(parent.Path, "A"));
+        var folderB = Directory.CreateDirectory(Path.Combine(parent.Path, "B"));
+        File.WriteAllBytes(Path.Combine(folderA.FullName, "a1.jpg"), [0xFF, 0xD8]);
+        File.WriteAllBytes(Path.Combine(folderA.FullName, "a2.jpg"), [0xFF, 0xD8]);
+        File.WriteAllBytes(Path.Combine(folderB.FullName, "b1.jpg"), [0xFF, 0xD8]);
+
+        using var nav = new DirectoryNavigator();
+        nav.SiblingFolderAutoSwitch = false;
+        nav.Open(Path.Combine(folderA.FullName, "a1.jpg"));
+        nav.MoveNext(); // a2
+        nav.MoveNext(); // should wrap to a1
+        Assert.Contains("a1.jpg", nav.CurrentPath);
+        Assert.Equal(folderA.FullName, nav.Folder);
+    }
+
+    [Fact]
     public void OpenExplicitList_SkipsMissingAndUnsupported()
     {
         using var temp = TestDirectory.Create();

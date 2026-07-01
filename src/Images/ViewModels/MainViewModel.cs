@@ -173,6 +173,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _archiveOldScanFilterEnabled = _settings.GetBool(Keys.ArchiveOldScanFilter, false);
         _archiveSpreadModeEnabled = _settings.GetBool(Keys.ArchiveSpreadMode, false);
         RestorePersistedSortMode();
+        _nav.SiblingFolderAutoSwitch = _settings.GetBool(Keys.SiblingFolderAutoSwitch, false);
         RestorePersistedWorkflowMode();
         RestorePersistedGalleryTileSize();
 
@@ -7265,6 +7266,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (IsArchiveBook && HasDisplayImage && !IsOperationBusy)
                 ReloadCurrentPreservingViewState(resetPreload: false);
         }
+
+        _nav.SiblingFolderAutoSwitch = _settings.GetBool(Keys.SiblingFolderAutoSwitch, false);
 
         Raise(nameof(FirstRunPrivacyText));
     }

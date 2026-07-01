@@ -118,6 +118,28 @@
                                               IsChecked="{Binding RememberWindowPlacement}"
                                               AutomationProperties.Name="{x:Static loc:Strings.SettingsRememberWindowTitle}" />
                                 </Grid>
+
+                                <Border Style="{StaticResource SettingsDivider}" />
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                        <TextBlock Text="Sibling folder auto-switch"
+                                                   Style="{StaticResource Text.Body}"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="When reaching the last or first image in a folder, continue into the next or previous sibling folder instead of wrapping."
+                                                   Style="{StaticResource Text.Hint}"
+                                                   Margin="0,3,0,0"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1"
+                                              VerticalAlignment="Center"
+                                              IsChecked="{Binding SiblingFolderAutoSwitch}"
+                                              AutomationProperties.Name="Sibling folder auto-switch" />
+                                </Grid>
                             </StackPanel>
                         </Border>
 

@@ -150,6 +150,21 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
+    public bool SiblingFolderAutoSwitch
+    {
+        get => _settings.GetBool(Keys.SiblingFolderAutoSwitch, false);
+        set
+        {
+            _settings.SetBool(Keys.SiblingFolderAutoSwitch, value);
+            Raise(nameof(SiblingFolderAutoSwitch));
+            SetStatus(
+                value
+                    ? "Sibling folder auto-switch enabled. Navigation continues into adjacent folders."
+                    : "Sibling folder auto-switch disabled. Navigation wraps within the current folder.",
+                SettingsStatusToneKind.Success);
+        }
+    }
+
     public bool ReduceMotion
     {
         get => _settings.GetBool(Keys.AccessibilityReduceMotion, false);

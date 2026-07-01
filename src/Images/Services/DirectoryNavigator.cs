@@ -32,6 +32,7 @@ public sealed class DirectoryNavigator : IDisposable
     public string? CurrentPath => CurrentIndex >= 0 && CurrentIndex < _files.Count ? _files[CurrentIndex] : null;
     public string? Folder => _folder;
     public DirectorySortMode SortMode { get; private set; } = DirectorySortMode.NaturalName;
+    public bool SiblingFolderAutoSwitch { get; set; }
     public bool CanGoBack => _backStack.Count > 0;
     public bool CanGoForward => _forwardStack.Count > 0;
 
@@ -191,6 +192,14 @@ public sealed class DirectoryNavigator : IDisposable
     public bool MoveNext()
     {
         if (_files.Count == 0) return false;
+
+        if (SiblingFolderAutoSwitch && CurrentIndex == _files.Count - 1)
+        {
+            var next = FindSiblingFolder(forward: true);
+            if (next is not null)
+                return Open(next);
+        }
+
         CurrentIndex = (CurrentIndex + 1) % _files.Count;
         return true;
     }
@@ -198,6 +207,18 @@ public sealed class DirectoryNavigator : IDisposable
     public bool MovePrevious()
     {
         if (_files.Count == 0) return false;
+
+        if (SiblingFolderAutoSwitch && CurrentIndex == 0)
+        {
+            var prev = FindSiblingFolder(forward: false);
+            if (prev is not null)
+            {
+                if (!Open(prev)) return false;
+                CurrentIndex = _files.Count - 1;
+                return true;
+            }
+        }
+
         CurrentIndex = (CurrentIndex - 1 + _files.Count) % _files.Count;
         return true;
     }
@@ -339,6 +360,40 @@ public sealed class DirectoryNavigator : IDisposable
         CurrentIndex = ClampIndex(CurrentIndex);
         ListChanged?.Invoke(this, EventArgs.Empty);
         return true;
+    }
+
+    private string? FindSiblingFolder(bool forward)
+    {
+        if (_folder is null) return null;
+
+        try
+        {
+            var parent = Path.GetDirectoryName(_folder);
+            if (string.IsNullOrEmpty(parent)) return null;
+
+            var siblings = Directory
+                .EnumerateDirectories(parent, "*", SearchOption.TopDirectoryOnly)
+                .OrderBy(d => d, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var idx = siblings.FindIndex(d => string.Equals(d, _folder, StringComparison.OrdinalIgnoreCase));
+            if (idx < 0) return null;
+
+            for (var i = 1; i < siblings.Count; i++)
+            {
+                var candidateIdx = forward
+                    ? (idx + i) % siblings.Count
+                    : (idx - i + siblings.Count) % siblings.Count;
+
+                var first = FirstSupportedImageInFolder(siblings[candidateIdx]);
+                if (first is not null) return first;
+            }
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or DirectoryNotFoundException or IOException or System.Security.SecurityException)
+        {
+        }
+
+        return null;
     }
 
     private void SortFiles(List<string> files) => files.Sort(CompareByActiveMode);
