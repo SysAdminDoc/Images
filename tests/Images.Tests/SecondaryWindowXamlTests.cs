@@ -1,12 +1,15 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using Images.Localization;
 
 namespace Images.Tests;
 
+[Collection("WpfSmoke")]
 public sealed class SecondaryWindowXamlTests
 {
     private sealed record WindowContractCase(
@@ -56,6 +59,65 @@ public sealed class SecondaryWindowXamlTests
 
         if (exception is not null)
             throw new InvalidOperationException("Secondary window XAML failed to construct.", exception);
+    }
+
+    [Fact]
+    [Trait("Category", "SmokeGate")]
+    public void SecondaryWindowsPseudoLocaleDoesNotClipCriticalText()
+    {
+        if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("RUN_SMOKE_TESTS")))
+            Assert.Skip("Set RUN_SMOKE_TESTS=1 to run secondary WPF window smoke tests.");
+
+        Exception? exception = null;
+
+        var thread = new Thread(() =>
+        {
+            var previousStringsCulture = Strings.Culture;
+            var previousCurrentCulture = CultureInfo.CurrentCulture;
+            var previousCurrentUICulture = CultureInfo.CurrentUICulture;
+
+            try
+            {
+                var pseudoCulture = CultureInfo.GetCultureInfo("qps-ploc");
+                Strings.Culture = pseudoCulture;
+                CultureInfo.CurrentCulture = pseudoCulture;
+                CultureInfo.CurrentUICulture = pseudoCulture;
+
+                var createdApplication = Application.Current is null;
+                var application = Application.Current ?? new Application
+                {
+                    ShutdownMode = ShutdownMode.OnExplicitShutdown
+                };
+
+                application.Resources.MergedDictionaries.Clear();
+                application.Resources.MergedDictionaries.Add(
+                    (ResourceDictionary)Application.LoadComponent(
+                        new Uri("/Images;component/Themes/DarkTheme.xaml", UriKind.Relative)));
+
+                foreach (var testCase in CreateWindowContractCases())
+                    AssertPseudoWindowContract(testCase);
+
+                if (createdApplication)
+                    application.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+            finally
+            {
+                Strings.Culture = previousStringsCulture;
+                CultureInfo.CurrentCulture = previousCurrentCulture;
+                CultureInfo.CurrentUICulture = previousCurrentUICulture;
+            }
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        if (exception is not null)
+            throw new InvalidOperationException("Secondary window pseudo-locale layout smoke failed.", exception);
     }
 
     private static IReadOnlyList<WindowContractCase> CreateWindowContractCases() =>
@@ -164,6 +226,93 @@ public sealed class SecondaryWindowXamlTests
         {
             window.Close();
         }
+    }
+
+    private static void AssertPseudoWindowContract(WindowContractCase testCase)
+    {
+        var window = testCase.CreateWindow();
+        try
+        {
+            window.Show();
+            window.Activate();
+            window.UpdateLayout();
+
+            Assert.Contains("[!!", window.Title, StringComparison.Ordinal);
+            Assert.Contains(testCase.ExpectedTitle, window.Title, StringComparison.OrdinalIgnoreCase);
+
+            var descendants = EnumerateDescendants(window).OfType<FrameworkElement>().ToArray();
+            foreach (var automationName in testCase.RequiredAutomationNames)
+            {
+                var matchingElement = descendants.FirstOrDefault(element =>
+                    string.Equals(
+                        AutomationProperties.GetName(element),
+                        automationName,
+                        StringComparison.Ordinal));
+
+                Assert.NotNull(matchingElement);
+                var failures = FindCriticalTextFitFailures(matchingElement!).ToArray();
+                Assert.Empty(failures);
+            }
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    private static IEnumerable<string> FindCriticalTextFitFailures(FrameworkElement root)
+    {
+        IReadOnlyList<TextBlock> textBlocks = root switch
+        {
+            TextBlock textBlock => [textBlock],
+            ButtonBase => EnumerateDescendants(root).OfType<TextBlock>().ToArray(),
+            _ => []
+        };
+
+        foreach (var text in textBlocks)
+        {
+            if (!ShouldMeasureTextBlock(text))
+                continue;
+
+            text.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            var desiredWidth = text.DesiredSize.Width;
+            var desiredHeight = text.DesiredSize.Height;
+
+            var allowedWidth = text.ActualWidth + 2.0;
+            var allowedHeight = text.ActualHeight + 2.0;
+            if (desiredWidth > allowedWidth || desiredHeight > allowedHeight)
+            {
+                yield return
+                    $"{GetElementDescription(root)} clipped '{text.Text}' " +
+                    $"desired={desiredWidth:0.##}x{desiredHeight:0.##} actual={text.ActualWidth:0.##}x{text.ActualHeight:0.##}.";
+            }
+        }
+    }
+
+    private static bool ShouldMeasureTextBlock(TextBlock textBlock)
+    {
+        if (!textBlock.IsVisible || textBlock.ActualWidth <= 0 || textBlock.ActualHeight <= 0)
+            return false;
+
+        if (textBlock.TextWrapping != TextWrapping.NoWrap || textBlock.TextTrimming != TextTrimming.None)
+            return false;
+
+        var text = textBlock.Text;
+        if (string.IsNullOrWhiteSpace(text))
+            return false;
+
+        return text.Length > 2 || !text.Any(character => character >= '\uE000');
+    }
+
+    private static string GetElementDescription(FrameworkElement element)
+    {
+        var automationName = AutomationProperties.GetName(element);
+        if (!string.IsNullOrWhiteSpace(automationName))
+            return automationName;
+
+        return string.IsNullOrWhiteSpace(element.Name)
+            ? element.GetType().Name
+            : $"{element.GetType().Name}.{element.Name}";
     }
 
     private static IEnumerable<DependencyObject> EnumerateDescendants(DependencyObject root)

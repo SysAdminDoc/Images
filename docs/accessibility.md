@@ -162,6 +162,12 @@ All secondary windows use `AutomationProperties.Name` on interactive controls:
 
 Automated smoke coverage (`SecondaryWindowXamlTests`) opens Settings, About/Diagnostics, Duplicate Cleanup, Semantic Search, Model Manager, and Import Inbox with app theme resources loaded. It verifies titles, required automation names, named focusable controls, and whitespace-only HelpText regressions when `RUN_SMOKE_TESTS=1`.
 
+### Pseudo-locale overflow gate
+
+`scripts/Test-LocalizationResources.ps1 -GeneratePseudoLocale` creates `src/Images/Localization/Strings.qps-ploc.resx` from the base resources. The default localization gate now validates base/locale parity, generated pseudo-locale placeholder preservation, and expanded text markers before release readiness can pass.
+
+`SecondaryWindowsPseudoLocaleDoesNotClipCriticalText` sets `Strings.Culture` to `qps-ploc`, opens the secondary windows above, and checks critical named controls for no-wrap text that measures wider or taller than its rendered bounds. Run it with `RUN_SMOKE_TESTS=1` when validating WPF layout changes.
+
 ## Keyboard focus
 
 All interactive controls use a shared `FocusVisual` style (dashed ring, ~7:1 contrast ratio on the Catppuccin base -- WCAG AA pass). Applied to `ChromeButton`, `ToolbarButton`, `NavArrowButton`, and standard controls.

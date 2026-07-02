@@ -11,6 +11,7 @@ using FlaUI.UIA3;
 
 namespace Images.Tests;
 
+[Collection("WpfSmoke")]
 [Trait("Category", "Smoke")]
 public sealed class WpfSmokeTests : IDisposable
 {
