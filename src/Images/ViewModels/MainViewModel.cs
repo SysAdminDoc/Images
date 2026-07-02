@@ -1468,7 +1468,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (_listenService is not null) return;
 
         _listenService = new ListenService(
-            path => _uiDispatcher.Invoke(() => OpenFile(path)));
+            path => _uiDispatcher.BeginInvoke(() => OpenFile(path)));
         _listenService.Start(port);
         ListenPort = _listenService.Port;
         IsListening = true;
@@ -6934,9 +6934,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         try
         {
             await YieldForOperationStatusAsync();
-            if (_editStack.HasEnabledOperations(CurrentPath))
+            var sourcePath = CurrentPath;
+            if (_editStack.HasEnabledOperations(sourcePath))
             {
-                var result = await Task.Run(() => _editStack.Export(CurrentPath, targetPath));
+                var result = await Task.Run(() => _editStack.Export(sourcePath, targetPath));
                 if (result.Success)
                     Toast($"Saved edited copy: {Path.GetFileName(result.OutputPath)}. {result.C2paHandoff?.Summary ?? "C2PA not written"}");
                 else
@@ -6944,7 +6945,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             }
             else
             {
-                var result = await Task.Run(() => ImageExportService.SaveWithC2paHandoff(bs, CurrentPath, targetPath));
+                var result = await Task.Run(() => ImageExportService.SaveWithC2paHandoff(bs, sourcePath, targetPath));
                 Toast($"Saved copy: {Path.GetFileName(result.OutputPath)}. {result.C2paHandoff.Summary}");
             }
         }
@@ -7396,6 +7397,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private async Task PlayMotionVideoAsync()
     {
         if (CurrentPath is null) return;
+        var path = CurrentPath;
         StopMotionVideo();
 
         if (_motionPhoto is not null)
@@ -7403,7 +7405,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             var tempDir = AppStorage.TryGetAppDirectory("motion-video");
             if (tempDir is null) return;
             Directory.CreateDirectory(tempDir);
-            var output = await Task.Run(() => MotionPhotoService.ExtractEmbeddedVideo(CurrentPath, _motionPhoto, tempDir));
+            var output = await Task.Run(() => MotionPhotoService.ExtractEmbeddedVideo(path, _motionPhoto, tempDir));
             if (output is not null)
                 MotionVideoPath = output;
             else

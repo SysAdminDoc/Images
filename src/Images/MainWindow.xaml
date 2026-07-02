@@ -2114,7 +2114,7 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsImageLoading}" Value="True">
                                                     <DataTrigger.EnterActions>
-                                                        <BeginStoryboard>
+                                                        <BeginStoryboard x:Name="LoadingPulse">
                                                             <Storyboard RepeatBehavior="Forever">
                                                                 <DoubleAnimation Storyboard.TargetProperty="Opacity"
                                                                                  From="0.3" To="1" AutoReverse="True"
@@ -2122,6 +2122,9 @@
                                                             </Storyboard>
                                                         </BeginStoryboard>
                                                     </DataTrigger.EnterActions>
+                                                    <DataTrigger.ExitActions>
+                                                        <StopStoryboard BeginStoryboardName="LoadingPulse" />
+                                                    </DataTrigger.ExitActions>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>

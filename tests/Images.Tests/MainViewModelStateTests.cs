@@ -16,6 +16,7 @@ using SharpCompress.Writers.SevenZip;
 
 namespace Images.Tests;
 
+[Collection("WpfSmoke")]
 public sealed class MainViewModelStateTests
 {
     [Fact]
