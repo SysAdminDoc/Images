@@ -56,6 +56,15 @@ All notable changes to **Images** are documented here.
 - **Release-readiness script repaired** — removed stale `PROJECT_CONTEXT.md` requirement that blocked valid releases; script now validates the current `ROADMAP.md`/`Roadmap_Blocked.md` policy instead.
 - **Stale version references corrected** — release support policy updated from `0.1.x`/`net9.0` to `0.2.x`/`net10.0`; release checklist updated to match current roadmap hygiene rules.
 - **23 hardcoded XAML hex colors replaced with semantic theme tokens** — status chips, selected-item highlights, overlay dimmers, and subtle surface backgrounds across 8 windows now consume `DynamicResource` brushes from the theme dictionaries. New tokens: `OverlayDimmerBrush`, `SubtleSurfaceBrush`. Light/dark/high-contrast themes all updated.
+- **Async void crash prevention (3 handlers)** — `EditStackWindow.ExportButton_Click`, `ImportInboxWindow.ImportButton_Click`, and `ImportInboxWindow.ImportPicasaButton_Click` now catch I/O exceptions instead of crashing the app on disk-full or file-locked errors.
+- **FindResource → TryFindResource (14 call sites)** — Programmatic resource lookups in `ReferenceBoardWindow`, `AboutWindow`, `CrashDialog`, and `MainWindow` now use `TryFindResource` with fallbacks, preventing crashes on missing theme resources.
+- **Cross-monitor DPI correction** — `MonitorService.MoveWindowToMonitor` now queries the target monitor's DPI via `GetDpiForMonitor` instead of using the source monitor's DPI, fixing incorrect window sizing when moving between monitors with different DPI scaling.
+- **CancellationTokenSource disposal leaks (4 windows)** — `DuplicateCleanupWindow`, `FileHealthScanWindow`, `SemanticSearchWindow`, and `ImportInboxWindow` now dispose the old CTS before creating a new one on re-scan.
+- **FolderPreviewController semaphore disposal race** — Removed premature `SemaphoreSlim.Dispose()` call that raced with in-flight thumbnail decode tasks during shutdown, causing misleading error log entries.
+- **CurrentPath data race in SaveAsCopy and PlayMotionVideo** — `CurrentPath` is now captured into a local variable before `Task.Run` lambdas in `SaveAsCopyAsync` and `PlayMotionVideoAsync`, preventing a race where the rename debounce timer could change the path between the null-check and lambda execution.
+- **ListenService shutdown hang** — Replaced synchronous `Dispatcher.Invoke` with `BeginInvoke` in the TCP listen callback to prevent hangs when the dispatcher message pump has stopped.
+- **Loading indicator storyboard leak** — Added `StopStoryboard` exit action to the loading ellipse pulse animation so each load cycle does not accumulate orphaned composition-thread clocks.
+- **STA test stability** — Added `MainViewModelStateTests` to the serialized `WpfSmoke` collection to prevent intermittent failures from STA thread pollution.
 
 ### Features
 

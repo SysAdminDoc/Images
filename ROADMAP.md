@@ -29,5 +29,9 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
   Why: DirectoryNavigator.PushBack/PushForward do O(n) stack-to-array-to-stack rebuilds on every push past the 50-item cap, creating unnecessary GC pressure during rapid navigation.
   Where: `src/Images/Services/DirectoryNavigator.cs`
 
+- [ ] P3 — Fix GetCurrentMonitorWorkArea fallback coordinate space mismatch
+  Why: The two fallback paths (hwnd == IntPtr.Zero and GetMonitorInfo failure) return SystemParameters.WorkArea in logical units, but the method's contract promises physical pixels. Callers that apply physical-to-logical conversion would double-convert. Extremely unlikely to hit in practice.
+  Where: `src/Images/Services/MonitorService.cs` GetCurrentMonitorWorkArea
+
 ## Research-Driven Additions
 
