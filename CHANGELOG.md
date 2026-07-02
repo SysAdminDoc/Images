@@ -2,7 +2,7 @@
 
 All notable changes to **Images** are documented here.
 
-## Unreleased
+## 0.2.13
 
 ### Theme
 
