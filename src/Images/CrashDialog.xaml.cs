@@ -149,7 +149,7 @@ public partial class CrashDialog : Window
                 StatusIcon.Text = "\uE73E";
                 StatusIcon.Foreground = TryFindResource("GreenBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Green;
                 StatusCard.BorderBrush = TryFindResource("GreenBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Green;
-                StatusCard.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x1F, 0xA6, 0xE3, 0xA1));
+                StatusCard.Background = TryFindResource("SuccessPanelBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Transparent;
                 break;
             default:
                 StatusIcon.Text = "\uE783";

@@ -57,6 +57,7 @@
     <!-- ============ Semantic surfaces + chrome ============ -->
     <!-- Viewport is deep near-black for image contrast; panels use Mantle; overlays use translucent Crust -->
     <SolidColorBrush x:Key="ViewportBrush" Color="#FF0A0A10" />
+    <SolidColorBrush x:Key="ViewerSurfaceBrush" Color="#FF0A0A10" />
     <SolidColorBrush x:Key="PanelBrush" Color="#F2181825" />
     <SolidColorBrush x:Key="SurfacePanelBrush" Color="#8A313244" />
     <SolidColorBrush x:Key="HairlineBrush" Color="#4045475A" />

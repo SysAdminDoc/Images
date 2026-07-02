@@ -40,6 +40,7 @@
     <SolidColorBrush x:Key="YellowBrush" Color="{StaticResource YellowColor}" />
 
     <SolidColorBrush x:Key="ViewportBrush" Color="{StaticResource BaseColor}" />
+    <SolidColorBrush x:Key="ViewerSurfaceBrush" Color="{StaticResource BaseColor}" />
     <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource MantleColor}" />
     <SolidColorBrush x:Key="SurfacePanelBrush" Color="{StaticResource Surface0Color}" />
     <SolidColorBrush x:Key="HairlineBrush" Color="{StaticResource Surface1Color}" />

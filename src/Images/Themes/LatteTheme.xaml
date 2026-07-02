@@ -48,6 +48,7 @@
 
     <!-- ============ Semantic surfaces + chrome ============ -->
     <SolidColorBrush x:Key="ViewportBrush" Color="#FFF8FAFC" />
+    <SolidColorBrush x:Key="ViewerSurfaceBrush" Color="#FFF8FAFC" />
     <SolidColorBrush x:Key="PanelBrush" Color="#FAEFF1F5" />
     <SolidColorBrush x:Key="SurfacePanelBrush" Color="#DDE6E9EF" />
     <SolidColorBrush x:Key="HairlineBrush" Color="#7CBCC0CC" />

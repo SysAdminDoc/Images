@@ -361,7 +361,7 @@ public partial class ReferenceBoardWindow : Window
         var groupFrame = CreateBoardBorder(
             width: 540,
             height: 330,
-            background: new SolidColorBrush(Color.FromArgb(36, 137, 180, 250)),
+            background: Brush("AccentPanelBrush"),
             borderBrush: Brush("AccentBrush"),
             content: grid);
 
@@ -394,7 +394,7 @@ public partial class ReferenceBoardWindow : Window
         var header = new Border
         {
             Height = 30,
-            Background = new SolidColorBrush(Color.FromArgb(28, 205, 214, 244)),
+            Background = Brush("SurfacePanelBrush"),
             CornerRadius = new CornerRadius(7),
             Cursor = Cursors.SizeAll,
             Padding = new Thickness(10, 0, 10, 0),
