@@ -11,6 +11,7 @@ All notable changes to **Images** are documented here.
 ### Internal
 
 - **AsyncRelayCommand replaces async void command pattern** — 25 `RelayCommand(async () => await …)` usages in MainViewModel now use `AsyncRelayCommand` which accepts `Func<Task>`, catches `OperationCanceledException` (expected during navigation), and routes other exceptions through the dispatcher crash handler instead of terminating the process.
+- **Preload eviction now cancels in-flight decodes** — PreloadService uses per-entry linked `CancellationTokenSource` so evicted cache entries cancel their background decode immediately instead of running to completion.
 
 ### UX
 

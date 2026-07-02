@@ -26,6 +26,8 @@ public sealed class PreloadService : IDisposable
         new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, DateTime> _lastAccess =
         new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, CancellationTokenSource> _entryCts =
+        new(StringComparer.OrdinalIgnoreCase);
     private CancellationTokenSource _cts = new();
     private readonly object _ctsGate = new();
     private volatile bool _isDisposed;
@@ -74,12 +76,19 @@ public sealed class PreloadService : IDisposable
         }
         catch { /* quick dims is best-effort */ }
 
-        CancellationToken token;
+        CancellationTokenSource entryCts;
         lock (_ctsGate)
         {
             if (_isDisposed) return;
-            token = _cts.Token;
+            entryCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
         }
+        var token = entryCts.Token;
+        if (_entryCts.TryRemove(path, out var oldEntryCts))
+        {
+            oldEntryCts.Cancel();
+            _ = DisposeCanceledSourceLaterAsync(oldEntryCts);
+        }
+        _entryCts[path] = entryCts;
         var taskName = $"preload-decode:{Path.GetFileName(path)}";
         var lazy = new Lazy<Task<ImageLoader.LoadResult?>>(() => BackgroundTaskTracker.Run(taskName, () =>
         {
@@ -122,6 +131,8 @@ public sealed class PreloadService : IDisposable
         {
             _cache.TryRemove(path, out _);
             _lastAccess.TryRemove(path, out _);
+            if (_entryCts.TryRemove(path, out var cts))
+                _ = DisposeCanceledSourceLaterAsync(cts);
             return null;
         }
         if (!task.IsCompletedSuccessfully) return null;
@@ -141,6 +152,8 @@ public sealed class PreloadService : IDisposable
         {
             _cache.TryRemove(path, out _);
             _lastAccess.TryRemove(path, out _);
+            if (_entryCts.TryRemove(path, out var cts))
+                _ = DisposeCanceledSourceLaterAsync(cts);
             return null;
         }
         return task;
@@ -162,6 +175,9 @@ public sealed class PreloadService : IDisposable
 
         old.Cancel();
         _ = DisposeCanceledSourceLaterAsync(old);
+        foreach (var kv in _entryCts)
+            _ = DisposeCanceledSourceLaterAsync(kv.Value);
+        _entryCts.Clear();
         _cache.Clear();
         _lastAccess.Clear();
     }
@@ -169,13 +185,16 @@ public sealed class PreloadService : IDisposable
     private void EvictIfNeeded()
     {
         if (_cache.Count <= SlotCap) return;
-        // Pick the least-recently-accessed entry and drop it. Cancellation of its backing Task
-        // happens on the next Reset or just lets it complete + be GC'd.
         var victim = _lastAccess.OrderBy(kv => kv.Value).FirstOrDefault();
         if (victim.Key is not null)
         {
             _cache.TryRemove(victim.Key, out _);
             _lastAccess.TryRemove(victim.Key, out _);
+            if (_entryCts.TryRemove(victim.Key, out var cts))
+            {
+                cts.Cancel();
+                _ = DisposeCanceledSourceLaterAsync(cts);
+            }
         }
     }
 
@@ -191,6 +210,9 @@ public sealed class PreloadService : IDisposable
 
         old.Cancel();
         old.Dispose();
+        foreach (var kv in _entryCts)
+            kv.Value.Dispose();
+        _entryCts.Clear();
         _cache.Clear();
         _lastAccess.Clear();
     }
