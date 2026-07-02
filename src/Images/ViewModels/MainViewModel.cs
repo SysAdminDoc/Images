@@ -2465,12 +2465,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void RestartSlideshowTimer()
     {
-        _slideshowTimer?.Stop();
-        _slideshowTimer = new DispatcherTimer
+        if (_slideshowTimer is not null)
         {
-            Interval = TimeSpan.FromSeconds(_slideshowIntervalSeconds)
-        };
-        _slideshowTimer.Tick += SlideshowTimer_Tick;
+            _slideshowTimer.Stop();
+            _slideshowTimer.Interval = TimeSpan.FromSeconds(_slideshowIntervalSeconds);
+        }
+        else
+        {
+            _slideshowTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(_slideshowIntervalSeconds)
+            };
+            _slideshowTimer.Tick += SlideshowTimer_Tick;
+        }
+
         _slideshowTimer.Start();
     }
 

@@ -2,6 +2,30 @@
 
 All notable changes to **Images** are documented here.
 
+## 0.2.14
+
+### Correctness
+
+- **GoBack/GoForward no longer corrupt history on failed navigation** — Stack mutations now deferred until `Open` succeeds. Previously, navigating to a deleted file permanently lost the history entry and created a self-referencing forward-navigation loop.
+- **OpenRecentArchiveCommand converted to AsyncRelayCommand** — Last remaining `RelayCommand(async ...)` pattern; any non-cancellation exception from archive open would crash the app.
+- **SaveAsCopyAsync captures source path before yield** — `CurrentPath` was re-read after `YieldForOperationStatusAsync`, creating a TOCTOU race if a FileSystemWatcher event changed the current file during the dispatcher yield.
+- **AnnotationsWindow.LoadPreview handles corrupt/unsupported files** — Added `UriKind.Absolute` (prevents fragment truncation on filenames containing `#`) and try-catch for graceful failure on bad image data.
+- **MainWindow MotionVideoPlayer adds UriKind.Absolute** — Same fragment-truncation fix for motion photo video playback.
+- **QuarantineExtrasButton_Click catches I/O exceptions** — Only async-void handler with no catch; disk errors during quarantine would crash the app.
+- **Window_Drop removes dead async keyword** — No awaits, generated CS1998 warning.
+
+### Theme
+
+- **ViewerSurfaceBrush added to all three theme dictionaries** — Referenced by 4 tool windows (Annotations, Adjustments, Effects, PerspectiveCorrection) but never defined; DynamicResource silently resolved to null, making preview canvases transparent.
+- **CrashDialog success state uses themed SuccessPanelBrush** — Was the only code path hardcoding Mocha green instead of using the theme resource.
+- **ReferenceBoardWindow uses themed AccentPanelBrush and SurfacePanelBrush** — Group frame and header backgrounds now adapt to Latte and HighContrast themes.
+
+### Internal
+
+- **CancellationTokenSource disposed on window close** — DuplicateCleanupWindow, FileHealthScanWindow, ImportInboxWindow, and SemanticSearchWindow now dispose their CTS in the Closed handler instead of only cancelling it.
+- **NetworkEgressService.LoadPersistedEntries dispatches to UI thread** — Called via `Task.Run` at startup; `_entries.Add` on the thread pool thread would throw `NotSupportedException` if the About panel was already bound.
+- **RestartSlideshowTimer reuses existing DispatcherTimer** — Previously allocated a new timer on every restart without unsubscribing the old Tick handler, causing redundant allocations during slideshows.
+
 ## 0.2.13
 
 ### Theme

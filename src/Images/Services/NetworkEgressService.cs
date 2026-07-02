@@ -144,8 +144,23 @@ public static class NetworkEgressService
 
         try
         {
-            foreach (var entry in ReadPersistedEntriesForDisplay(File.ReadLines(path), MaxLoadedEntries))
-                _entries.Add(entry);
+            var loaded = ReadPersistedEntriesForDisplay(File.ReadLines(path), MaxLoadedEntries).ToList();
+            if (loaded.Count == 0) return;
+
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is not null && !dispatcher.CheckAccess())
+            {
+                dispatcher.BeginInvoke(() =>
+                {
+                    foreach (var entry in loaded)
+                        InsertEntry(entry);
+                });
+            }
+            else
+            {
+                foreach (var entry in loaded)
+                    InsertEntry(entry);
+            }
         }
         catch (Exception ex)
         {

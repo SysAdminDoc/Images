@@ -68,7 +68,7 @@ public sealed class CodecCapabilityServiceTests
 
     private static CodecCapabilityService.RuntimeProvenance ReadyProvenance()
         => new(
-            AppVersion: "Images 0.2.13",
+            AppVersion: "Images 0.2.14",
             Runtime: ".NET 9.0.15",
             OperatingSystem: "Windows",
             ProcessArchitecture: "X64",
