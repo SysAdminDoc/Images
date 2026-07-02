@@ -139,6 +139,10 @@ public partial class EditStackWindow : Window
                 ? Strings.Format("ExportEditedCopySuccessFormat", result.Message, Path.GetFileName(result.OutputPath))
                 : Strings.Format("ExportEditedCopyFailedFormat", result.Message));
         }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            SetStatus(Strings.Format("ExportEditedCopyFailedFormat", ex.Message));
+        }
         finally
         {
             SetBusy(false);

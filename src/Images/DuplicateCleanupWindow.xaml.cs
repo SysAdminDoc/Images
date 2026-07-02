@@ -89,6 +89,7 @@ public partial class DuplicateCleanupWindow : Window
         }
 
         _scanCancellation?.Cancel();
+        _scanCancellation?.Dispose();
         _scanCancellation = new CancellationTokenSource();
         var scanCancellation = _scanCancellation;
         var token = _scanCancellation.Token;

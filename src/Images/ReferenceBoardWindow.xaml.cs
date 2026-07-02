@@ -382,7 +382,7 @@ public partial class ReferenceBoardWindow : Window
             Background = background,
             BorderBrush = borderBrush,
             BorderThickness = new Thickness(1),
-            Effect = (Effect?)FindResource("Elevation.Low"),
+            Effect = TryFindResource("Elevation.Low") as Effect,
             Child = content,
             SnapsToDevicePixels = true,
             UseLayoutRounding = true
@@ -626,7 +626,7 @@ public partial class ReferenceBoardWindow : Window
         return true;
     }
 
-    private Brush Brush(string key) => (Brush)FindResource(key);
+    private Brush Brush(string key) => TryFindResource(key) as Brush ?? Brushes.Transparent;
 
     private static Size FitWithin(double width, double height, double maxWidth, double maxHeight)
     {

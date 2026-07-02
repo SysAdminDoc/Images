@@ -551,7 +551,7 @@ public partial class MainWindow : Window
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
             ShowInTaskbar = false,
             ResizeMode = ResizeMode.NoResize,
-            Background = (System.Windows.Media.Brush)FindResource("BaseBrush"),
+            Background = TryFindResource("BaseBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Black,
             Owner = this
         };
 
@@ -575,7 +575,7 @@ public partial class MainWindow : Window
             IsDefault = true,
             MinWidth = 80,
             Margin = new Thickness(8, 0, 0, 0),
-            Style = (Style)FindResource("ChromeButton")
+            Style = TryFindResource("ChromeButton") as Style
         };
         okButton.Click += (_, _) => { result = passwordBox.Password; dialog.DialogResult = true; };
 
@@ -584,7 +584,7 @@ public partial class MainWindow : Window
             Content = Localization.Strings.Cancel,
             IsCancel = true,
             MinWidth = 80,
-            Style = (Style)FindResource("ChromeButton")
+            Style = TryFindResource("ChromeButton") as Style
         };
 
         var buttonsPanel = new System.Windows.Controls.StackPanel
@@ -603,7 +603,7 @@ public partial class MainWindow : Window
                 Localization.Strings.ArchivePasswordPrompt,
                 archiveName),
             TextWrapping = TextWrapping.Wrap,
-            Foreground = (System.Windows.Media.Brush)FindResource("TextBrush"),
+            Foreground = TryFindResource("TextBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.White,
             FontSize = 13,
             Margin = new Thickness(0, 0, 0, 12)
         };

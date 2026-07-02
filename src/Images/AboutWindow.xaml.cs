@@ -413,7 +413,7 @@ public partial class AboutWindow : Window
         }
     }
 
-    private Brush ThemeBrush(string key) => (Brush)FindResource(key);
+    private Brush ThemeBrush(string key) => TryFindResource(key) as Brush ?? Brushes.Transparent;
 
     private static string FormatBytes(long bytes)
     {
@@ -475,7 +475,7 @@ public partial class AboutWindow : Window
         var labelBlock = new TextBlock
         {
             Text = label,
-            Style = (Style)FindResource("MetaLabel")
+            Style = TryFindResource("MetaLabel") as Style
         };
         Grid.SetColumn(labelBlock, 0);
         grid.Children.Add(labelBlock);
@@ -483,7 +483,7 @@ public partial class AboutWindow : Window
         var valueBlock = new TextBlock
         {
             Text = value,
-            Style = (Style)FindResource("MetaValue"),
+            Style = TryFindResource("MetaValue") as Style,
             TextWrapping = TextWrapping.Wrap
         };
         Grid.SetColumn(valueBlock, 1);
@@ -501,7 +501,7 @@ public partial class AboutWindow : Window
         var labelBlock = new TextBlock
         {
             Text = row.Name,
-            Style = (Style)FindResource("MetaLabel"),
+            Style = TryFindResource("MetaLabel") as Style,
             TextWrapping = TextWrapping.Wrap
         };
         Grid.SetColumn(labelBlock, 0);
@@ -520,7 +520,7 @@ public partial class AboutWindow : Window
         var valueBlock = new TextBlock
         {
             Text = value,
-            Style = (Style)FindResource("MetaValue"),
+            Style = TryFindResource("MetaValue") as Style,
             TextWrapping = TextWrapping.Wrap
         };
         Grid.SetColumn(valueBlock, 1);

@@ -81,6 +81,7 @@ public partial class SemanticSearchWindow : Window
         }
 
         _indexCancellation?.Cancel();
+        _indexCancellation?.Dispose();
         _indexCancellation = new CancellationTokenSource();
         var indexCancellation = _indexCancellation;
         var token = indexCancellation.Token;

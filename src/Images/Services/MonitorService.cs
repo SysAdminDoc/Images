@@ -30,6 +30,9 @@ public static class MonitorService
     [DllImport("user32.dll")]
     private static extern uint GetDpiForWindow(IntPtr hwnd);
 
+    [DllImport("shcore.dll")]
+    private static extern int GetDpiForMonitor(IntPtr hMonitor, int dpiType, out uint dpiX, out uint dpiY);
+
     // ---- Native structures ----
 
     [StructLayout(LayoutKind.Sequential)]
@@ -82,6 +85,8 @@ public static class MonitorService
 
         /// <summary>True when this is the primary display.</summary>
         public bool IsPrimary { get; init; }
+
+        internal IntPtr Handle { get; init; }
     }
 
     // ---- Public API ----
@@ -106,6 +111,7 @@ public static class MonitorService
                     WorkAreaPhysical = ToRect(info.WorkArea),
                     BoundsPhysical = ToRect(info.Monitor),
                     IsPrimary = (info.Flags & 1) == 1,
+                    Handle = hMonitor,
                 });
             }
             return true;
@@ -158,9 +164,8 @@ public static class MonitorService
     public static void MoveWindowToMonitor(Window window, MonitorInfo target)
     {
         var hwnd = new WindowInteropHelper(window).Handle;
-        var dpiScale = GetDpiScale(hwnd);
+        var dpiScale = GetMonitorDpiScale(target.Handle, hwnd);
 
-        // Convert physical work area to logical (DIU) for WPF.
         var waLeft = target.WorkAreaPhysical.Left / dpiScale;
         var waTop = target.WorkAreaPhysical.Top / dpiScale;
         var waWidth = target.WorkAreaPhysical.Width / dpiScale;
@@ -196,6 +201,21 @@ public static class MonitorService
     }
 
     // ---- Helpers ----
+
+    private static double GetMonitorDpiScale(IntPtr hMonitor, IntPtr hwndFallback)
+    {
+        if (hMonitor != IntPtr.Zero)
+        {
+            try
+            {
+                if (GetDpiForMonitor(hMonitor, 0, out var dpiX, out _) == 0 && dpiX > 0)
+                    return dpiX / 96.0;
+            }
+            catch { }
+        }
+
+        return GetDpiScale(hwndFallback);
+    }
 
     private static double GetDpiScale(IntPtr hwnd)
     {

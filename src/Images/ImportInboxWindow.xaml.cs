@@ -66,6 +66,7 @@ public partial class ImportInboxWindow : Window
         }
 
         _loadCancellation?.Cancel();
+        _loadCancellation?.Dispose();
         _loadCancellation = new CancellationTokenSource();
         var cancellation = _loadCancellation;
         var token = cancellation.Token;
@@ -150,6 +151,11 @@ public partial class ImportInboxWindow : Window
         catch (OperationCanceledException)
         {
             SetStatus(Strings.ImportInboxRefreshCanceled, ImportInboxStatus.Warning);
+            return;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            SetStatus(ex.Message, ImportInboxStatus.Error);
             return;
         }
         finally
@@ -291,6 +297,10 @@ public partial class ImportInboxWindow : Window
                     ? Strings.Format(nameof(Strings.ImportInboxImportedFormat), result.ImportedCount, Plural(result.ImportedCount))
                     : Strings.Format(nameof(Strings.ImportInboxImportedPartialFormat), result.ImportedCount, Plural(result.ImportedCount), result.FailedCount),
                 result.FailedCount == 0 ? ImportInboxStatus.Ready : ImportInboxStatus.Warning);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            SetStatus(ex.Message, ImportInboxStatus.Error);
         }
         finally
         {

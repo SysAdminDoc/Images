@@ -147,15 +147,15 @@ public partial class CrashDialog : Window
         {
             case "Success":
                 StatusIcon.Text = "\uE73E";
-                StatusIcon.Foreground = (System.Windows.Media.Brush)FindResource("GreenBrush");
-                StatusCard.BorderBrush = (System.Windows.Media.Brush)FindResource("GreenBrush");
+                StatusIcon.Foreground = TryFindResource("GreenBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Green;
+                StatusCard.BorderBrush = TryFindResource("GreenBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Green;
                 StatusCard.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x1F, 0xA6, 0xE3, 0xA1));
                 break;
             default:
                 StatusIcon.Text = "\uE783";
-                StatusIcon.Foreground = (System.Windows.Media.Brush)FindResource("YellowBrush");
-                StatusCard.BorderBrush = (System.Windows.Media.Brush)FindResource("YellowBrush");
-                StatusCard.Background = (System.Windows.Media.Brush)FindResource("WarningPanelBrush");
+                StatusIcon.Foreground = TryFindResource("YellowBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Yellow;
+                StatusCard.BorderBrush = TryFindResource("YellowBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Yellow;
+                StatusCard.Background = TryFindResource("WarningPanelBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Transparent;
                 break;
         }
     }

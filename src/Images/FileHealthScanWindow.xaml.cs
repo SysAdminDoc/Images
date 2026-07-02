@@ -65,6 +65,7 @@ public partial class FileHealthScanWindow : Window
         }
 
         _scanCancellation?.Cancel();
+        _scanCancellation?.Dispose();
         _scanCancellation = new CancellationTokenSource();
         var scanCancellation = _scanCancellation;
         var token = scanCancellation.Token;
