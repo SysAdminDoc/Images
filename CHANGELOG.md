@@ -25,6 +25,7 @@ All notable changes to **Images** are documented here.
 - **CancellationTokenSource disposed on window close** — DuplicateCleanupWindow, FileHealthScanWindow, ImportInboxWindow, and SemanticSearchWindow now dispose their CTS in the Closed handler instead of only cancelling it.
 - **NetworkEgressService.LoadPersistedEntries dispatches to UI thread** — Called via `Task.Run` at startup; `_entries.Add` on the thread pool thread would throw `NotSupportedException` if the About panel was already bound.
 - **RestartSlideshowTimer reuses existing DispatcherTimer** — Previously allocated a new timer on every restart without unsubscribing the old Tick handler, causing redundant allocations during slideshows.
+- **AsyncRelayCommand catches non-cancellation exceptions** — Exceptions from command methods now log + toast instead of propagating through `async void` to `DispatcherUnhandledException` and terminating the app. Static `CommandFaulted` event enables graceful error reporting.
 
 ## 0.2.13
 

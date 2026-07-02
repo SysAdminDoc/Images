@@ -2,10 +2,17 @@ using System.Windows.Input;
 
 namespace Images.ViewModels;
 
+public sealed class CommandFaultedEventArgs(Exception exception) : EventArgs
+{
+    public Exception Exception { get; } = exception;
+}
+
 public sealed class AsyncRelayCommand : ICommand
 {
     private readonly Func<object?, Task> _execute;
     private readonly Predicate<object?>? _canExecute;
+
+    public static event EventHandler<CommandFaultedEventArgs>? CommandFaulted;
 
     public AsyncRelayCommand(Func<Task> execute, Func<bool>? canExecute = null)
         : this(_ => execute(), canExecute is null ? null : new Predicate<object?>(_ => canExecute()))
@@ -34,6 +41,14 @@ public sealed class AsyncRelayCommand : ICommand
         }
         catch (OperationCanceledException)
         {
+        }
+        catch (Exception ex)
+        {
+            var handler = CommandFaulted;
+            if (handler is not null)
+                handler(this, new CommandFaultedEventArgs(ex));
+            else
+                throw;
         }
     }
 

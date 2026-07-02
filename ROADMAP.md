@@ -13,10 +13,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 ## Audit-Surfaced Items
 
-- [ ] P2 — Add broader exception handling to AsyncRelayCommand or top-level command methods
-  Why: AsyncRelayCommand only catches OperationCanceledException. Any other exception from a command method (metadata parsing, folder preview, color analysis) propagates to DispatcherUnhandledException which terminates the app. Several command methods have try/finally but no catch.
-  Where: `src/Images/ViewModels/AsyncRelayCommand.cs`, `src/Images/ViewModels/MainViewModel.cs` command methods
-
 - [ ] P3 — Convert ApplyRotationToFile and ApplyCropSelection to async for operation status rendering
   Why: Both call BeginOperationStatus then immediately do synchronous file I/O. The UI thread never yields, so the status overlay never renders — user sees a freeze with no visual feedback on large images.
   Where: `src/Images/ViewModels/MainViewModel.cs` ApplyRotationToFile (line ~5013), ApplyCropSelection (line ~5902)

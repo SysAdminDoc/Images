@@ -164,6 +164,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _hintTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(2400) };
         _hintTimer.Tick += (_, _) => { _hintTimer.Stop(); ShowGestureHint = false; };
 
+        AsyncRelayCommand.CommandFaulted += OnCommandFaulted;
         BackgroundJobsService.Changed += OnBackgroundJobsChanged;
         RefreshBackgroundActivity();
 
@@ -3668,6 +3669,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     /// <summary>View-facing toast helper so the code-behind doesn't have to reach through Set().</summary>
     public void ShowToast(string message) => Toast(message);
+
+    private void OnCommandFaulted(object? sender, CommandFaultedEventArgs e)
+    {
+        _log.LogError(e.Exception, "Command failed: {Message}", e.Exception.Message);
+        Toast("Something went wrong — see log for details");
+    }
 
     private void ShowSecondaryStatus(
         string title,
@@ -7565,6 +7572,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _listenService?.Dispose();
         _externalEditReload.Dispose();
 
+        AsyncRelayCommand.CommandFaulted -= OnCommandFaulted;
         BackgroundJobsService.Changed -= OnBackgroundJobsChanged;
         _nav.ListChanged -= OnDirectoryListChanged;
         _ocrWorkflow.Dispose();
