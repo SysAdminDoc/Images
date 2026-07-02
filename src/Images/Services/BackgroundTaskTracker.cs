@@ -57,8 +57,7 @@ public static class BackgroundTaskTracker
             }
             finally
             {
-                counters.DecrementRunning();
-                _totals.DecrementRunning();
+                FinishRunning(taskName, counters);
             }
         });
     }
@@ -91,8 +90,7 @@ public static class BackgroundTaskTracker
             }
             finally
             {
-                counters.DecrementRunning();
-                _totals.DecrementRunning();
+                FinishRunning(taskName, counters);
             }
         });
     }
@@ -126,8 +124,7 @@ public static class BackgroundTaskTracker
         }
         finally
         {
-            counters.DecrementRunning();
-            _totals.DecrementRunning();
+            FinishRunning(taskName, counters);
         }
     }
 
@@ -135,6 +132,14 @@ public static class BackgroundTaskTracker
     {
         _totals.Reset();
         _byName.Clear();
+    }
+
+    private static void FinishRunning(string name, CounterSet counters)
+    {
+        var running = counters.DecrementRunning();
+        _totals.DecrementRunning();
+        if (running == 0)
+            _byName.TryRemove(name, out _);
     }
 
     private static string NormalizeName(string name)
@@ -197,7 +202,7 @@ public static class BackgroundTaskTracker
 
         public void MarkFaulted() => Interlocked.Increment(ref _faulted);
 
-        public void DecrementRunning() => Interlocked.Decrement(ref _running);
+        public long DecrementRunning() => Interlocked.Decrement(ref _running);
 
         public void Reset()
         {

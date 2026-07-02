@@ -5,22 +5,19 @@ namespace Images.Tests;
 public sealed class BackgroundTaskTrackerTests
 {
     [Fact]
-    public async Task Queue_WhenActionCompletes_RecordsCompletion()
+    public async Task Queue_WhenActionCompletes_EvictsIdleEntry()
     {
         var name = TestTaskName();
 
         await BackgroundTaskTracker.Queue(name, () => { });
 
         var snapshot = SnapshotFor(name);
-        Assert.Equal(1, snapshot.Started);
+        Assert.Equal(0, snapshot.Started);
         Assert.Equal(0, snapshot.Running);
-        Assert.Equal(1, snapshot.Completed);
-        Assert.Equal(0, snapshot.Faulted);
-        Assert.Equal(0, snapshot.Canceled);
     }
 
     [Fact]
-    public async Task Queue_WhenActionThrows_RecordsFaultWithoutThrowing()
+    public async Task Queue_WhenActionThrows_EvictsIdleEntry()
     {
         var name = TestTaskName();
 
@@ -30,15 +27,11 @@ public sealed class BackgroundTaskTrackerTests
         });
 
         var snapshot = SnapshotFor(name);
-        Assert.Equal(1, snapshot.Started);
-        Assert.Equal(0, snapshot.Running);
-        Assert.Equal(0, snapshot.Completed);
-        Assert.Equal(1, snapshot.Faulted);
-        Assert.Equal(0, snapshot.Canceled);
+        Assert.Equal(0, snapshot.Started);
     }
 
     [Fact]
-    public async Task Queue_WhenTokenIsCanceled_RecordsCancellationWithoutRunningAction()
+    public async Task Queue_WhenTokenIsCanceled_EvictsIdleEntry()
     {
         var name = TestTaskName();
         using var cts = new CancellationTokenSource();
@@ -53,11 +46,7 @@ public sealed class BackgroundTaskTrackerTests
             cts.Token);
 
         var snapshot = SnapshotFor(name);
-        Assert.Equal(1, snapshot.Started);
-        Assert.Equal(0, snapshot.Running);
-        Assert.Equal(0, snapshot.Completed);
-        Assert.Equal(0, snapshot.Faulted);
-        Assert.Equal(1, snapshot.Canceled);
+        Assert.Equal(0, snapshot.Started);
     }
 
     [Fact]
@@ -69,15 +58,11 @@ public sealed class BackgroundTaskTrackerTests
             BackgroundTaskTracker.Run<int>(name, () => throw new InvalidOperationException("boom")));
 
         var snapshot = SnapshotFor(name);
-        Assert.Equal(1, snapshot.Started);
-        Assert.Equal(0, snapshot.Running);
-        Assert.Equal(0, snapshot.Completed);
-        Assert.Equal(1, snapshot.Faulted);
-        Assert.Equal(0, snapshot.Canceled);
+        Assert.Equal(0, snapshot.Started);
     }
 
     [Fact]
-    public async Task RunAsync_WhenActionCompletes_RecordsCompletionAndReturnsResult()
+    public async Task RunAsync_WhenActionCompletes_ReturnsResult()
     {
         var name = TestTaskName();
 
@@ -85,13 +70,9 @@ public sealed class BackgroundTaskTrackerTests
             name,
             () => Task.FromResult(42));
 
-        var snapshot = SnapshotFor(name);
         Assert.Equal(42, result);
-        Assert.Equal(1, snapshot.Started);
-        Assert.Equal(0, snapshot.Running);
-        Assert.Equal(1, snapshot.Completed);
-        Assert.Equal(0, snapshot.Faulted);
-        Assert.Equal(0, snapshot.Canceled);
+        var snapshot = SnapshotFor(name);
+        Assert.Equal(0, snapshot.Started);
     }
 
     [Fact]
@@ -105,11 +86,7 @@ public sealed class BackgroundTaskTrackerTests
                 () => Task.FromException<int>(new InvalidOperationException("boom"))));
 
         var snapshot = SnapshotFor(name);
-        Assert.Equal(1, snapshot.Started);
-        Assert.Equal(0, snapshot.Running);
-        Assert.Equal(0, snapshot.Completed);
-        Assert.Equal(1, snapshot.Faulted);
-        Assert.Equal(0, snapshot.Canceled);
+        Assert.Equal(0, snapshot.Started);
     }
 
     [Fact]
@@ -135,7 +112,21 @@ public sealed class BackgroundTaskTrackerTests
 
         var completed = SnapshotFor(name);
         Assert.Equal(0, completed.Running);
-        Assert.Equal(1, completed.Completed);
+        Assert.Equal(0, completed.Started);
+    }
+
+    [Fact]
+    public async Task Queue_GlobalTotals_TrackAcrossAllTasks()
+    {
+        var before = BackgroundTaskTracker.Snapshot;
+
+        await BackgroundTaskTracker.Queue(TestTaskName(), () => { });
+        await BackgroundTaskTracker.Queue(TestTaskName(), () => { });
+
+        var after = BackgroundTaskTracker.Snapshot;
+        Assert.Equal(before.Started + 2, after.Started);
+        Assert.Equal(before.Completed + 2, after.Completed);
+        Assert.Equal(0, after.Running);
     }
 
     private static BackgroundTaskSnapshot SnapshotFor(string name)
