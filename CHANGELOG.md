@@ -26,6 +26,15 @@ All notable changes to **Images** are documented here.
 - **NetworkEgressService.LoadPersistedEntries dispatches to UI thread** — Called via `Task.Run` at startup; `_entries.Add` on the thread pool thread would throw `NotSupportedException` if the About panel was already bound.
 - **RestartSlideshowTimer reuses existing DispatcherTimer** — Previously allocated a new timer on every restart without unsubscribing the old Tick handler, causing redundant allocations during slideshows.
 - **AsyncRelayCommand catches non-cancellation exceptions** — Exceptions from command methods now log + toast instead of propagating through `async void` to `DispatcherUnhandledException` and terminating the app. Static `CommandFaulted` event enables graceful error reporting.
+- **ApplyRotationToFile and ApplyCropSelection converted to async** — Both now yield to the dispatcher after `BeginOperationStatus` so the operation status overlay renders before the heavy I/O begins. Previously the UI thread never yielded, causing a visible freeze with no feedback on large images.
+
+### Theme
+
+- **PerspectiveCorrectionWindow uses themed overlay brushes** — Handle strokes, polygon fills, and label backgrounds now use `AccentBrush`, `AccentSelectionBrush`, `TextBrush`, and `FloatingChromeBrush` instead of hardcoded Mocha hex values. Overlays now adapt correctly to Latte and HighContrast themes.
+
+### Internal
+
+- **BackgroundTaskTracker evicts idle per-name entries** — Completed task entries are removed from `_byName` when Running reaches 0, preventing unbounded dictionary growth during long sessions with many file operations.
 
 ## 0.2.13
 

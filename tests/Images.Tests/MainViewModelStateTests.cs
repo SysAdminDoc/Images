@@ -963,6 +963,7 @@ public sealed class MainViewModelStateTests
             Assert.True(viewModel.ApplyCropCommand.CanExecute(null));
 
             viewModel.ApplyCropCommand.Execute(null);
+            Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.SystemIdle);
 
             Assert.False(viewModel.IsCropMode);
             Assert.False(viewModel.HasCropSelection);
@@ -1005,6 +1006,7 @@ public sealed class MainViewModelStateTests
 
             viewModel.UpdateCropSelection(new PixelSelection(0, 0, 1, 1));
             viewModel.ApplyCropCommand.Execute(null);
+            Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.SystemIdle);
 
             Assert.Equal("Crop applied to file", viewModel.ToastMessage);
             Assert.Equal(1, viewModel.PixelWidth);
@@ -1867,6 +1869,8 @@ public sealed class MainViewModelStateTests
         Exception? exception = null;
         var thread = new Thread(() =>
         {
+            SynchronizationContext.SetSynchronizationContext(
+                new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
             try
             {
                 action();

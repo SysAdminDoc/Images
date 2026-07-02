@@ -194,14 +194,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RotateCwCommand = new RelayCommand(() => Rotate(90), () => CanUseDisplayImageCommands);
         RotateCcwCommand = new RelayCommand(() => Rotate(-90), () => CanUseDisplayImageCommands);
         Rotate180Command = new RelayCommand(() => Rotate(180), () => CanUseDisplayImageCommands);
-        ApplyRotationToFileCommand = new RelayCommand(ApplyRotationToFile, () => CanApplyRotationToFile);
+        ApplyRotationToFileCommand = new AsyncRelayCommand(ApplyRotationToFileAsync, () => CanApplyRotationToFile);
         ToggleInspectorCommand = new RelayCommand(() => IsInspectorMode = !IsInspectorMode, () => CanUseInspector);
         ToggleSelectionModeCommand = new RelayCommand(() => IsSelectionMode = !IsSelectionMode, () => CanUseSelection);
         CopySelectionCommand = new RelayCommand(CopyCanvasSelection, () => CanCopySelection);
         ClearSelectionCommand = new RelayCommand(ClearCanvasSelection, () => HasCanvasSelection);
         CancelSelectionCommand = new RelayCommand(CancelSelectionMode, () => IsSelectionMode || HasCanvasSelection);
         ToggleCropModeCommand = new RelayCommand(() => IsCropMode = !IsCropMode, () => CanUseCrop);
-        ApplyCropCommand = new RelayCommand(ApplyCropSelection, () => CanApplyCrop);
+        ApplyCropCommand = new AsyncRelayCommand(ApplyCropSelectionAsync, () => CanApplyCrop);
         CancelCropCommand = new RelayCommand(CancelCropMode, () => IsCropMode || HasCropSelection);
         SetCropAspectPresetCommand = new RelayCommand(SetCropAspectPreset);
         OpenResizeDialogCommand = new RelayCommand(OpenResizeDialog, () => CanUseResize);
@@ -4982,7 +4982,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Rotation = (Rotation + delta) % 360;
     }
 
-    private void ApplyRotationToFile()
+    private async Task ApplyRotationToFileAsync()
     {
         if (!CanApplyRotationToFile || CurrentPath is null)
             return;
@@ -5028,6 +5028,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         BeginOperationStatus(Strings.MainOpApplyingRotation, $"Overwriting {Path.GetFileName(path)}.");
         try
         {
+            await YieldForOperationStatusAsync();
             ImageExportService.Overwrite(path, operations, allowLosslessJpegTrim);
             _recoveryCenter.RecordWriteback(
                 path,
@@ -5875,7 +5876,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             SelectedCropAspectPreset = selectedPreset;
     }
 
-    private void ApplyCropSelection()
+    private async Task ApplyCropSelectionAsync()
     {
         if (!CanApplyCrop || CurrentPath is null || CropSelection is not { } crop)
             return;
@@ -5917,6 +5918,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         BeginOperationStatus(Strings.MainOpApplyingCrop, $"Overwriting {Path.GetFileName(path)}.");
         try
         {
+            await YieldForOperationStatusAsync();
             ImageExportService.Overwrite(path, operations, allowLosslessJpegTrim);
             _recoveryCenter.RecordWriteback(
                 path,

@@ -249,9 +249,9 @@ public partial class PerspectiveCorrectionWindow : Window
         var polygon = new Polygon
         {
             Points = new PointCollection(canvasPoints),
-            Stroke = Brushes.White,
+            Stroke = Brush("TextBrush"),
             StrokeThickness = 2,
-            Fill = new SolidColorBrush(Color.FromArgb(38, 137, 180, 250)),
+            Fill = Brush("AccentSelectionBrush"),
             StrokeLineJoin = PenLineJoin.Round,
             IsHitTestVisible = false
         };
@@ -284,8 +284,8 @@ public partial class PerspectiveCorrectionWindow : Window
         {
             Width = 16,
             Height = 16,
-            Fill = Brushes.White,
-            Stroke = new SolidColorBrush(Color.FromRgb(137, 180, 250)),
+            Fill = Brush("TextBrush"),
+            Stroke = Brush("AccentBrush"),
             StrokeThickness = 3,
             Cursor = Cursors.SizeAll,
             Tag = index
@@ -299,8 +299,8 @@ public partial class PerspectiveCorrectionWindow : Window
             Text = label,
             FontSize = 11,
             FontWeight = FontWeights.SemiBold,
-            Foreground = Brushes.White,
-            Background = new SolidColorBrush(Color.FromArgb(150, 17, 17, 27)),
+            Foreground = Brush("TextBrush"),
+            Background = Brush("FloatingChromeBrush"),
             Padding = new Thickness(4, 1, 4, 2),
             IsHitTestVisible = false
         };
@@ -373,4 +373,5 @@ public partial class PerspectiveCorrectionWindow : Window
         PreviewImage.Height = PreviewCanvas.ActualHeight;
     }
 
+    private Brush Brush(string key) => TryFindResource(key) as Brush ?? Brushes.Transparent;
 }
