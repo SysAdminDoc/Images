@@ -53,17 +53,25 @@ public partial class AnnotationsWindow : Window
             return;
         }
 
-        var bitmap = new BitmapImage();
-        bitmap.BeginInit();
-        bitmap.CacheOption = BitmapCacheOption.OnLoad;
-        bitmap.UriSource = new Uri(_imagePath);
-        bitmap.EndInit();
-        bitmap.Freeze();
+        try
+        {
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.UriSource = new Uri(_imagePath, UriKind.Absolute);
+            bitmap.EndInit();
+            bitmap.Freeze();
 
-        _imageWidth = bitmap.PixelWidth;
-        _imageHeight = bitmap.PixelHeight;
-        PreviewImage.Source = bitmap;
-        ResizePreviewImage();
+            _imageWidth = bitmap.PixelWidth;
+            _imageHeight = bitmap.PixelHeight;
+            PreviewImage.Source = bitmap;
+            ResizePreviewImage();
+        }
+        catch (Exception ex) when (ex is NotSupportedException or FileFormatException or InvalidOperationException or IOException or UriFormatException)
+        {
+            StatusText.Text = Strings.AnnotationUnavailableMissingFile;
+            ApplyButton.IsEnabled = false;
+        }
     }
 
     private void ToolButton_Click(object sender, RoutedEventArgs e)

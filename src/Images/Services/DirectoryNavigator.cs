@@ -242,13 +242,19 @@ public sealed class DirectoryNavigator : IDisposable
         if (_backStack.Count == 0) return false;
 
         var target = _backStack.First!.Value;
-        _backStack.RemoveFirst();
-        if (CurrentPath is not null)
-            PushForward(CurrentPath);
+        var previous = CurrentPath;
 
         _navigatingHistory = true;
-        try { return Open(target); }
+        try
+        {
+            if (!Open(target)) return false;
+        }
         finally { _navigatingHistory = false; }
+
+        _backStack.RemoveFirst();
+        if (previous is not null)
+            PushForward(previous);
+        return true;
     }
 
     public bool GoForward()
@@ -256,13 +262,19 @@ public sealed class DirectoryNavigator : IDisposable
         if (_forwardStack.Count == 0) return false;
 
         var target = _forwardStack.First!.Value;
-        _forwardStack.RemoveFirst();
-        if (CurrentPath is not null)
-            PushBack(CurrentPath);
+        var previous = CurrentPath;
 
         _navigatingHistory = true;
-        try { return Open(target); }
+        try
+        {
+            if (!Open(target)) return false;
+        }
         finally { _navigatingHistory = false; }
+
+        _forwardStack.RemoveFirst();
+        if (previous is not null)
+            PushBack(previous);
+        return true;
     }
 
     public IReadOnlyList<string> GetBackHistory() => [.. _backStack];

@@ -49,7 +49,7 @@ public partial class SemanticSearchWindow : Window
             var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
             WindowChrome.ApplyDarkCaption(hwnd);
         };
-        Closed += (_, _) => _indexCancellation?.Cancel();
+        Closed += (_, _) => { _indexCancellation?.Cancel(); _indexCancellation?.Dispose(); };
     }
 
     public void AddSearchRoot(string folder)

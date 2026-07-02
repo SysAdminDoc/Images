@@ -43,7 +43,7 @@ public partial class DuplicateCleanupWindow : Window
             var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
             WindowChrome.ApplyDarkCaption(hwnd);
         };
-        Closed += (_, _) => _scanCancellation?.Cancel();
+        Closed += (_, _) => { _scanCancellation?.Cancel(); _scanCancellation?.Dispose(); };
     }
 
     public void AddScanFolder(string folder)
@@ -248,6 +248,10 @@ public partial class DuplicateCleanupWindow : Window
             {
                 SetStatus(Strings.Format(nameof(Strings.DuplicateCleanupQuarantineSuccessFormat), result.MovedCount, Plural(result.MovedCount), result.BatchDirectory), CleanupStatus.Ready);
             }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or NotSupportedException)
+        {
+            SetStatus(ex.Message, CleanupStatus.Error);
         }
         finally
         {

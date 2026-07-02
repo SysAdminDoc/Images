@@ -69,7 +69,7 @@ public partial class MainWindow : Window
             if (e.PropertyName is nameof(MainViewModel.MotionVideoPath))
             {
                 if (Vm.MotionVideoPath is not null)
-                    MotionVideoPlayer.Source = new Uri(Vm.MotionVideoPath);
+                    MotionVideoPlayer.Source = new Uri(Vm.MotionVideoPath, UriKind.Absolute);
                 else
                 {
                     MotionVideoPlayer.Stop();
@@ -1576,7 +1576,7 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
-    private async void Window_Drop(object sender, DragEventArgs e)
+    private void Window_Drop(object sender, DragEventArgs e)
     {
         Vm.IsDropTargetActive = false;
         if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;

@@ -36,7 +36,7 @@ public partial class FileHealthScanWindow : Window
             var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
             WindowChrome.ApplyDarkCaption(hwnd);
         };
-        Closed += (_, _) => _scanCancellation?.Cancel();
+        Closed += (_, _) => { _scanCancellation?.Cancel(); _scanCancellation?.Dispose(); };
     }
 
     public void AddScanFolder(string folder)

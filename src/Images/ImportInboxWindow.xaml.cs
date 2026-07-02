@@ -34,7 +34,7 @@ public partial class ImportInboxWindow : Window
             var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
             WindowChrome.ApplyDarkCaption(hwnd);
         };
-        Closed += (_, _) => _loadCancellation?.Cancel();
+        Closed += (_, _) => { _loadCancellation?.Cancel(); _loadCancellation?.Dispose(); };
     }
 
     public void AddSource(string path)
