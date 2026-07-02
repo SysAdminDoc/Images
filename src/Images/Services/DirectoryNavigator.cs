@@ -22,8 +22,8 @@ public sealed class DirectoryNavigator : IDisposable
     private DispatcherTimer? _watchDebounce;
     private readonly Dispatcher _dispatcher;
     private readonly Func<string, IEnumerable<string>> _enumerateFiles;
-    private readonly Stack<string> _backStack = new();
-    private readonly Stack<string> _forwardStack = new();
+    private readonly LinkedList<string> _backStack = new();
+    private readonly LinkedList<string> _forwardStack = new();
     private bool _navigatingHistory;
 
     public IReadOnlyList<string> Files => _files;
@@ -241,7 +241,8 @@ public sealed class DirectoryNavigator : IDisposable
     {
         if (_backStack.Count == 0) return false;
 
-        var target = _backStack.Pop();
+        var target = _backStack.First!.Value;
+        _backStack.RemoveFirst();
         if (CurrentPath is not null)
             PushForward(CurrentPath);
 
@@ -254,7 +255,8 @@ public sealed class DirectoryNavigator : IDisposable
     {
         if (_forwardStack.Count == 0) return false;
 
-        var target = _forwardStack.Pop();
+        var target = _forwardStack.First!.Value;
+        _forwardStack.RemoveFirst();
         if (CurrentPath is not null)
             PushBack(CurrentPath);
 
@@ -263,32 +265,18 @@ public sealed class DirectoryNavigator : IDisposable
         finally { _navigatingHistory = false; }
     }
 
-    public IReadOnlyList<string> GetBackHistory() => _backStack.ToArray();
-    public IReadOnlyList<string> GetForwardHistory() => _forwardStack.ToArray();
+    public IReadOnlyList<string> GetBackHistory() => [.. _backStack];
+    public IReadOnlyList<string> GetForwardHistory() => [.. _forwardStack];
 
-    private void PushBack(string path)
+    private static void PushBounded(LinkedList<string> list, string path)
     {
-        _backStack.Push(path);
-        while (_backStack.Count > MaxHistoryDepth)
-        {
-            var temp = _backStack.ToArray();
-            _backStack.Clear();
-            for (var i = 0; i < MaxHistoryDepth; i++)
-                _backStack.Push(temp[temp.Length - 1 - i]);
-        }
+        list.AddFirst(path);
+        if (list.Count > MaxHistoryDepth)
+            list.RemoveLast();
     }
 
-    private void PushForward(string path)
-    {
-        _forwardStack.Push(path);
-        while (_forwardStack.Count > MaxHistoryDepth)
-        {
-            var temp = _forwardStack.ToArray();
-            _forwardStack.Clear();
-            for (var i = 0; i < MaxHistoryDepth; i++)
-                _forwardStack.Push(temp[temp.Length - 1 - i]);
-        }
-    }
+    private void PushBack(string path) => PushBounded(_backStack, path);
+    private void PushForward(string path) => PushBounded(_forwardStack, path);
 
     public bool SetSortMode(DirectorySortMode mode)
     {
