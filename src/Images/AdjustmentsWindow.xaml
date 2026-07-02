@@ -9,7 +9,7 @@
         MinHeight="560"
         WindowStartupLocation="CenterOwner"
         KeyDown="Window_KeyDown">
-    <Grid Background="{StaticResource BaseBrush}">
+    <Grid Background="{DynamicResource BaseBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -60,7 +60,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="{x:Static loc:Strings.AdjustmentsBlackPoint}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock x:Name="BlackPointText"
                                            Grid.Column="1"
                                            Style="{StaticResource Text.Caption}"
@@ -82,7 +82,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="{x:Static loc:Strings.AdjustmentsWhitePoint}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock x:Name="WhitePointText"
                                            Grid.Column="1"
                                            Style="{StaticResource Text.Caption}"
@@ -104,7 +104,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="{x:Static loc:Strings.AdjustmentsGamma}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock x:Name="GammaText"
                                            Grid.Column="1"
                                            Style="{StaticResource Text.Caption}"
@@ -126,7 +126,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="{x:Static loc:Strings.AdjustmentsCurve}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock x:Name="CurveText"
                                            Grid.Column="1"
                                            Style="{StaticResource Text.Caption}"
@@ -159,7 +159,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="{x:Static loc:Strings.AdjustmentsHue}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock x:Name="HueText"
                                            Grid.Column="1"
                                            Style="{StaticResource Text.Caption}"
@@ -181,7 +181,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="{x:Static loc:Strings.AdjustmentsSaturation}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock x:Name="SaturationText"
                                            Grid.Column="1"
                                            Style="{StaticResource Text.Caption}"
@@ -203,7 +203,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="{x:Static loc:Strings.AdjustmentsLightness}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock x:Name="LightnessText"
                                            Grid.Column="1"
                                            Style="{StaticResource Text.Caption}"
@@ -239,8 +239,8 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <Border Background="{StaticResource ViewerSurfaceBrush}"
-                            BorderBrush="{StaticResource HairlineBrush}"
+                    <Border Background="{DynamicResource ViewerSurfaceBrush}"
+                            BorderBrush="{DynamicResource HairlineBrush}"
                             BorderThickness="1"
                             CornerRadius="{StaticResource Radius.Md.CR}">
                         <Image x:Name="PreviewImage"

@@ -10,7 +10,7 @@
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         ResizeMode="CanResize"
-        Background="{StaticResource BaseBrush}"
+        Background="{DynamicResource BaseBrush}"
         TextOptions.TextFormattingMode="Display"
         UseLayoutRounding="True">
 
@@ -22,7 +22,7 @@
 
         <Style x:Key="SettingsDivider" TargetType="Border">
             <Setter Property="Height" Value="1" />
-            <Setter Property="Background" Value="{StaticResource HairlineBrush}" />
+            <Setter Property="Background" Value="{DynamicResource HairlineBrush}" />
             <Setter Property="Margin" Value="0,14" />
         </Style>
 
@@ -61,7 +61,7 @@
                 <TextBlock Text="&#xE713;"
                            FontFamily="{StaticResource IconFontFamily}"
                            FontSize="15"
-                           Foreground="{StaticResource AccentBrush}"
+                           Foreground="{DynamicResource AccentBrush}"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center" />
             </Border>
@@ -157,7 +157,7 @@
                                     <TextBlock Text="&#xE895;"
                                                FontFamily="{StaticResource IconFontFamily}"
                                                FontSize="14"
-                                               Foreground="{StaticResource AccentBrush}"
+                                               Foreground="{DynamicResource AccentBrush}"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center" />
                                 </Border>
@@ -440,7 +440,7 @@
                                                                     <Style.Triggers>
                                                                         <DataTrigger Binding="{Binding IsCustomized}" Value="True">
                                                                             <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                                            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                                            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                                                         </DataTrigger>
                                                                     </Style.Triggers>
                                                                 </Style>
@@ -450,10 +450,10 @@
                                                                        FontWeight="SemiBold">
                                                                 <TextBlock.Style>
                                                                     <Style TargetType="TextBlock">
-                                                                        <Setter Property="Foreground" Value="{StaticResource SubtextBrush}" />
+                                                                        <Setter Property="Foreground" Value="{DynamicResource SubtextBrush}" />
                                                                         <Style.Triggers>
                                                                             <DataTrigger Binding="{Binding IsCustomized}" Value="True">
-                                                                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                                                             </DataTrigger>
                                                                         </Style.Triggers>
                                                                     </Style>
@@ -518,7 +518,7 @@
                                     <TextBlock Text="&#xE8EA;"
                                                FontFamily="{StaticResource IconFontFamily}"
                                                FontSize="15"
-                                               Foreground="{StaticResource AccentBrush}"
+                                               Foreground="{DynamicResource AccentBrush}"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center" />
                                 </Border>
@@ -534,12 +534,12 @@
                                                 VerticalAlignment="Center">
                                             <Border.Style>
                                                 <Style TargetType="Border" BasedOn="{StaticResource Badge}">
-                                                    <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
-                                                    <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                                    <Setter Property="Background" Value="{DynamicResource WarningPanelBrush}" />
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsOcrAvailable}" Value="True">
                                                             <Setter Property="Background" Value="{DynamicResource SuccessPanelBrush}" />
-                                                            <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource GreenBrush}" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -547,7 +547,7 @@
                                             <TextBlock Text="{Binding OcrStatusBadge}"
                                                        FontSize="10.5"
                                                        FontWeight="SemiBold"
-                                                       Foreground="{StaticResource TextBrush}" />
+                                                       Foreground="{DynamicResource TextBrush}" />
                                         </Border>
                                     </StackPanel>
 
@@ -608,7 +608,7 @@
                                 <TextBlock Text="&#xE72E;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="12"
-                                           Foreground="{StaticResource OverlayBrush}"
+                                           Foreground="{DynamicResource OverlayBrush}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,9,0" />
                                 <TextBlock Text="{x:Static loc:Strings.SettingsOcrPrivacyNote}"
@@ -749,7 +749,7 @@
                                     <TextBlock Text="&#xE72E;"
                                                FontFamily="{StaticResource IconFontFamily}"
                                                FontSize="14"
-                                               Foreground="{StaticResource AccentBrush}"
+                                               Foreground="{DynamicResource AccentBrush}"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center" />
                                 </Border>
@@ -786,11 +786,11 @@
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding SettingsStatusTone}" Value="Success">
                                 <Setter Property="Background" Value="{DynamicResource SuccessPanelBrush}" />
-                                <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource GreenBrush}" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding SettingsStatusTone}" Value="Warning">
-                                <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
-                                <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                <Setter Property="Background" Value="{DynamicResource WarningPanelBrush}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -803,13 +803,13 @@
                                Margin="0,0,9,0">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding SettingsStatusTone}" Value="Success">
-                                        <Setter Property="Foreground" Value="{StaticResource GreenBrush}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource GreenBrush}" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding SettingsStatusTone}" Value="Warning">
-                                        <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource YellowBrush}" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>

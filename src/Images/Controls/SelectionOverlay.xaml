@@ -8,7 +8,7 @@
                 IsHitTestVisible="False">
             <Border x:Name="SelectionBox"
                     Visibility="Collapsed"
-                    BorderBrush="{StaticResource AccentBrush}"
+                    BorderBrush="{DynamicResource AccentBrush}"
                     BorderThickness="2"
                     CornerRadius="2"
                     Background="{DynamicResource AccentPanelBrush}"
@@ -26,8 +26,8 @@
                                Padding="7,3"
                                FontSize="11"
                                FontWeight="SemiBold"
-                               Foreground="{StaticResource FloatingChromeTextBrush}"
-                               Background="{StaticResource FloatingChromeBrush}" />
+                               Foreground="{DynamicResource FloatingChromeTextBrush}"
+                               Background="{DynamicResource FloatingChromeBrush}" />
                 </Grid>
             </Border>
         </Canvas>

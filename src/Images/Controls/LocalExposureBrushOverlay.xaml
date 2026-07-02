@@ -28,11 +28,11 @@
                                  SnapsToDevicePixels="True">
                             <Ellipse.Style>
                                 <Style TargetType="Ellipse">
-                                    <Setter Property="Stroke" Value="{StaticResource AccentBrush}" />
+                                    <Setter Property="Stroke" Value="{DynamicResource AccentBrush}" />
                                     <Setter Property="Opacity" Value="0.78" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsDodge}" Value="False">
-                                            <Setter Property="Stroke" Value="{StaticResource YellowBrush}" />
+                                            <Setter Property="Stroke" Value="{DynamicResource YellowBrush}" />
                                             <Setter Property="Fill" Value="#14F9E2AF" />
                                         </DataTrigger>
                                     </Style.Triggers>

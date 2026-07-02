@@ -9,7 +9,7 @@
         MinWidth="960"
         MinHeight="640"
         WindowStartupLocation="CenterOwner">
-    <Grid Background="{StaticResource BaseBrush}">
+    <Grid Background="{DynamicResource BaseBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -72,14 +72,14 @@
                                           AutomationProperties.Name="{x:Static loc:Strings.ExportPreviewPreset}" />
                                 <TextBlock Text="{x:Static loc:Strings.ExportPreviewExtension}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}"
+                                           Foreground="{DynamicResource TextBrush}"
                                            Margin="0,12,0,0" />
                                 <TextBox x:Name="ExtensionBox"
                                          TextChanged="SettingsChanged"
                                          AutomationProperties.Name="{x:Static loc:Strings.ExportPreviewExtension}" />
                                 <TextBlock Text="{x:Static loc:Strings.ExportPreviewQuality}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}"
+                                           Foreground="{DynamicResource TextBrush}"
                                            Margin="0,10,0,0" />
                                 <Slider x:Name="QualitySlider"
                                         Minimum="1"
@@ -90,7 +90,7 @@
                                 <TextBlock x:Name="QualityText" Style="{StaticResource Text.Caption}" />
                                 <TextBlock Text="{x:Static loc:Strings.ExportPreviewMaxDimensions}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}"
+                                           Foreground="{DynamicResource TextBrush}"
                                            Margin="0,10,0,0" />
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -146,7 +146,7 @@
                             <StackPanel>
                                 <TextBlock x:Name="C2paStatusText"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}"
+                                           Foreground="{DynamicResource TextBrush}"
                                            TextWrapping="Wrap" />
                                 <TextBlock x:Name="C2paDetailText"
                                            Style="{StaticResource Text.Caption}"
@@ -178,7 +178,7 @@
             <GridSplitter Grid.Column="1"
                           Width="1"
                           HorizontalAlignment="Stretch"
-                          Background="{StaticResource HairlineBrush}" />
+                          Background="{DynamicResource HairlineBrush}" />
 
             <Grid Grid.Column="2" Margin="18">
                 <Grid.ColumnDefinitions>
@@ -196,8 +196,8 @@
                         </Grid.RowDefinitions>
                         <TextBlock Text="{x:Static loc:Strings.ExportPreviewOriginal}" Style="{StaticResource SectionLabel}" />
                         <Border Grid.Row="1"
-                                Background="{StaticResource ViewportBrush}"
-                                BorderBrush="{StaticResource HairlineBrush}"
+                                Background="{DynamicResource ViewportBrush}"
+                                BorderBrush="{DynamicResource HairlineBrush}"
                                 BorderThickness="1"
                                 Margin="0,8,0,0">
                             <ctl:ZoomPanImage x:Name="OriginalCanvas"
@@ -211,7 +211,7 @@
                               Width="8"
                               HorizontalAlignment="Center"
                               VerticalAlignment="Stretch"
-                              Background="{StaticResource Surface0Brush}"
+                              Background="{DynamicResource Surface0Brush}"
                               Cursor="SizeWE"
                               AutomationProperties.Name="Comparison divider"
                               ToolTip="Drag to adjust comparison split" />
@@ -224,8 +224,8 @@
                         </Grid.RowDefinitions>
                         <TextBlock Text="{x:Static loc:Strings.ExportPreviewEncodedPreview}" Style="{StaticResource SectionLabel}" />
                         <Border Grid.Row="1"
-                                Background="{StaticResource ViewportBrush}"
-                                BorderBrush="{StaticResource HairlineBrush}"
+                                Background="{DynamicResource ViewportBrush}"
+                                BorderBrush="{DynamicResource HairlineBrush}"
                                 BorderThickness="1"
                                 Margin="0,8,0,0">
                             <ctl:ZoomPanImage x:Name="PreviewCanvas"
@@ -246,8 +246,8 @@
                         </Grid.RowDefinitions>
                         <TextBlock Text="{x:Static loc:Strings.ExportPreviewDifference}" Style="{StaticResource SectionLabel}" />
                         <Border Grid.Row="1"
-                                Background="{StaticResource ViewportBrush}"
-                                BorderBrush="{StaticResource HairlineBrush}"
+                                Background="{DynamicResource ViewportBrush}"
+                                BorderBrush="{DynamicResource HairlineBrush}"
                                 BorderThickness="1"
                                 Margin="0,8,0,0">
                             <ctl:ZoomPanImage x:Name="DifferenceCanvas"
@@ -264,7 +264,7 @@
                 <Ellipse x:Name="StatusDot"
                          Width="8"
                          Height="8"
-                         Fill="{StaticResource GreenBrush}"
+                         Fill="{DynamicResource GreenBrush}"
                          Margin="0,0,9,0"
                          VerticalAlignment="Center" />
                 <TextBlock x:Name="StatusText"

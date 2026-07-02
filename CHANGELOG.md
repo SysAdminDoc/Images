@@ -4,6 +4,10 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### Theme
+
+- **Runtime theme switching now updates all windows** — Converted 488 `StaticResource` brush references to `DynamicResource` across MainWindow and 27 secondary window/overlay XAML files so theme changes via Settings take effect immediately without restarting or re-opening windows.
+
 ### UX
 
 - **Premium main-viewer command polish** — Viewport context menus are now scroll-bounded, sectioned, and submenu-capable; first-run and side-panel launch actions use consistent ellipsis copy, icon semantics, and left-aligned compact tool buttons.

@@ -8,7 +8,7 @@
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         ResizeMode="CanResize"
-        Background="{StaticResource BaseBrush}"
+        Background="{DynamicResource BaseBrush}"
         TextOptions.TextFormattingMode="Display"
         UseLayoutRounding="True">
 
@@ -26,7 +26,7 @@
                 <TextBlock Text="&#xE783;"
                            FontFamily="{StaticResource IconFontFamily}"
                            FontSize="28"
-                           Foreground="{StaticResource RedBrush}"
+                           Foreground="{DynamicResource RedBrush}"
                            VerticalAlignment="Center" />
                 <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
                     <TextBlock Style="{StaticResource Text.Title}"
@@ -56,7 +56,7 @@
                              FontSize="11"
                              Background="Transparent"
                              BorderThickness="0"
-                             Foreground="{StaticResource SubtextBrush}" />
+                             Foreground="{DynamicResource SubtextBrush}" />
                 </ScrollViewer>
             </Border>
 
@@ -73,7 +73,7 @@
                                    Text="&#xE930;"
                                    FontFamily="{StaticResource IconFontFamily}"
                                    FontSize="12"
-                                   Foreground="{StaticResource AccentBrush}"
+                                   Foreground="{DynamicResource AccentBrush}"
                                    VerticalAlignment="Center"
                                    Margin="0,0,9,0" />
                         <TextBlock x:Name="StatusText"

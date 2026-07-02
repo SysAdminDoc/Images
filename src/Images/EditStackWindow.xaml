@@ -8,7 +8,7 @@
         MinWidth="820"
         MinHeight="560"
         WindowStartupLocation="CenterOwner">
-    <Grid Background="{StaticResource BaseBrush}">
+    <Grid Background="{DynamicResource BaseBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -114,10 +114,10 @@
             <GridSplitter Grid.Column="1"
                           Width="1"
                           HorizontalAlignment="Stretch"
-                          Background="{StaticResource HairlineBrush}" />
+                          Background="{DynamicResource HairlineBrush}" />
 
             <Grid Grid.Column="2"
-                  Background="{StaticResource ViewportBrush}"
+                  Background="{DynamicResource ViewportBrush}"
                   Margin="18">
                 <Border Style="{StaticResource Card}" Padding="14">
                     <Grid>

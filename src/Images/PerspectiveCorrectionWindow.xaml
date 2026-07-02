@@ -9,7 +9,7 @@
         MinHeight="560"
         WindowStartupLocation="CenterOwner"
         KeyDown="Window_KeyDown">
-    <Grid Background="{StaticResource BaseBrush}">
+    <Grid Background="{DynamicResource BaseBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -107,7 +107,7 @@
                         <StackPanel>
                             <TextBlock Text="{loc:Loc PerspectiveCorners}"
                                        FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextBrush}" />
+                                       Foreground="{DynamicResource TextBrush}" />
                             <TextBlock x:Name="CornerText"
                                        Style="{StaticResource Text.Caption}"
                                        TextWrapping="Wrap"
@@ -128,7 +128,7 @@
                     Padding="14"
                     ClipToBounds="True">
                 <Canvas x:Name="PreviewCanvas"
-                        Background="{StaticResource ViewerSurfaceBrush}"
+                        Background="{DynamicResource ViewerSurfaceBrush}"
                         ClipToBounds="True"
                         SizeChanged="PreviewCanvas_SizeChanged"
                         MouseLeftButtonDown="PreviewCanvas_MouseLeftButtonDown"

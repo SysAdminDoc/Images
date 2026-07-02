@@ -23,7 +23,7 @@
             </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type vm:OcrTextLine}">
-                    <Border BorderBrush="{StaticResource AccentBrush}"
+                    <Border BorderBrush="{DynamicResource AccentBrush}"
                             BorderThickness="1"
                             CornerRadius="2"
                             Width="{Binding BoundingBox.Width}"
@@ -34,10 +34,10 @@
                             AutomationProperties.HelpText="{loc:Loc OcrTextRegionHelpText}">
                         <Border.Style>
                             <Style TargetType="Border">
-                                <Setter Property="Background" Value="{StaticResource OcrRegionBrush}" />
+                                <Setter Property="Background" Value="{DynamicResource OcrRegionBrush}" />
                                 <Style.Triggers>
                                     <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource OcrRegionFocusBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource OcrRegionFocusBrush}" />
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
@@ -47,8 +47,8 @@
                                  IsReadOnlyCaretVisible="True"
                                  BorderThickness="0"
                                  Background="Transparent"
-                                 Foreground="{StaticResource TextBrush}"
-                                 SelectionBrush="{StaticResource AccentBrush}"
+                                 Foreground="{DynamicResource TextBrush}"
+                                 SelectionBrush="{DynamicResource AccentBrush}"
                                  SelectionOpacity="0.5"
                                  Padding="2,0"
                                  MinWidth="0"

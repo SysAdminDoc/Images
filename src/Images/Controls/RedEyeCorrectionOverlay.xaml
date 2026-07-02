@@ -23,14 +23,14 @@
                         <Grid Width="{Binding Diameter}"
                               Height="{Binding Diameter}"
                               SnapsToDevicePixels="True">
-                            <Ellipse Stroke="{StaticResource RedBrush}"
+                            <Ellipse Stroke="{DynamicResource RedBrush}"
                                      StrokeThickness="2"
                                      StrokeDashArray="2 2"
                                      Fill="#18FF4F64"
                                      Opacity="0.82" />
                             <Ellipse Width="8"
                                      Height="8"
-                                     Fill="{StaticResource RedBrush}"
+                                     Fill="{DynamicResource RedBrush}"
                                      HorizontalAlignment="Center"
                                      VerticalAlignment="Center"
                                      Opacity="0.9" />

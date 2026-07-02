@@ -8,7 +8,7 @@
         MinWidth="920"
         MinHeight="620"
         WindowStartupLocation="CenterOwner">
-    <Grid Background="{StaticResource BaseBrush}">
+    <Grid Background="{DynamicResource BaseBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -118,11 +118,11 @@
             <GridSplitter Grid.Column="1"
                           Width="1"
                           HorizontalAlignment="Stretch"
-                          Background="{StaticResource HairlineBrush}" />
+                          Background="{DynamicResource HairlineBrush}" />
 
             <!-- Right panel: pipeline steps + preview + action bar -->
             <Grid Grid.Column="2"
-                  Background="{StaticResource ViewportBrush}"
+                  Background="{DynamicResource ViewportBrush}"
                   Margin="18">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
@@ -328,7 +328,7 @@
                 <Ellipse x:Name="StatusDot"
                          Width="8"
                          Height="8"
-                         Fill="{StaticResource GreenBrush}"
+                         Fill="{DynamicResource GreenBrush}"
                          Margin="0,0,9,0"
                          VerticalAlignment="Center" />
                 <TextBlock x:Name="StatusText"

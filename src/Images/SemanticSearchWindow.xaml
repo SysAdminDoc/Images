@@ -8,7 +8,7 @@
         MinWidth="940"
         MinHeight="620"
         WindowStartupLocation="CenterOwner">
-    <Grid Background="{StaticResource BaseBrush}">
+    <Grid Background="{DynamicResource BaseBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -119,7 +119,7 @@
             <GridSplitter Grid.Column="1"
                           Width="1"
                           HorizontalAlignment="Stretch"
-                          Background="{StaticResource HairlineBrush}" />
+                          Background="{DynamicResource HairlineBrush}" />
 
             <Border Grid.Column="2"
                     Style="{StaticResource ToolWindowWorkspace}">
@@ -203,7 +203,7 @@
                                     <TextBlock Text="&#xE721;"
                                                FontFamily="{StaticResource IconFontFamily}"
                                                FontSize="18"
-                                               Foreground="{StaticResource AccentBrush}"
+                                               Foreground="{DynamicResource AccentBrush}"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center" />
                                 </Border>
@@ -265,7 +265,7 @@
                 <Ellipse x:Name="StatusDot"
                          Width="8"
                          Height="8"
-                         Fill="{StaticResource GreenBrush}"
+                         Fill="{DynamicResource GreenBrush}"
                          Margin="0,0,9,0"
                          VerticalAlignment="Center" />
                 <TextBlock x:Name="StatusText"

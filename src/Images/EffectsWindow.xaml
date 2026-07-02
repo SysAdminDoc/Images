@@ -9,7 +9,7 @@
         MinHeight="520"
         WindowStartupLocation="CenterOwner"
         KeyDown="Window_KeyDown">
-    <Grid Background="{StaticResource BaseBrush}">
+    <Grid Background="{DynamicResource BaseBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -85,7 +85,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="{loc:Loc EffectsSharpenLabel}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock x:Name="SharpenText"
                                            Grid.Column="1"
                                            Style="{StaticResource Text.Caption}"
@@ -107,7 +107,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="{loc:Loc EffectsNoiseReductionLabel}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock x:Name="NoiseText"
                                            Grid.Column="1"
                                            Style="{StaticResource Text.Caption}"
@@ -136,7 +136,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="{loc:Loc EffectsVignetteLabel}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock x:Name="VignetteText"
                                            Grid.Column="1"
                                            Style="{StaticResource Text.Caption}"
@@ -172,8 +172,8 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <Border Background="{StaticResource ViewerSurfaceBrush}"
-                            BorderBrush="{StaticResource HairlineBrush}"
+                    <Border Background="{DynamicResource ViewerSurfaceBrush}"
+                            BorderBrush="{DynamicResource HairlineBrush}"
                             BorderThickness="1"
                             CornerRadius="{StaticResource Radius.Md.CR}">
                         <Image x:Name="PreviewImage"

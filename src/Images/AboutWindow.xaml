@@ -8,7 +8,7 @@
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         ResizeMode="CanResizeWithGrip"
-        Background="{StaticResource BaseBrush}"
+        Background="{DynamicResource BaseBrush}"
         TextOptions.TextFormattingMode="Display"
         UseLayoutRounding="True">
 
@@ -91,11 +91,11 @@
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Tone}" Value="Ready">
                                             <Setter Property="Background" Value="{DynamicResource SuccessPanelBrush}" />
-                                            <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
+                                            <Setter Property="BorderBrush" Value="{DynamicResource GreenBrush}" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Tone}" Value="Warning">
-                                            <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
-                                            <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                            <Setter Property="Background" Value="{DynamicResource WarningPanelBrush}" />
+                                            <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -114,13 +114,13 @@
                                            VerticalAlignment="Top">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Tone}" Value="Ready">
-                                                    <Setter Property="Foreground" Value="{StaticResource GreenBrush}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource GreenBrush}" />
                                                 </DataTrigger>
                                                 <DataTrigger Binding="{Binding Tone}" Value="Warning">
-                                                    <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource YellowBrush}" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -138,7 +138,7 @@
                                                    Style="{StaticResource Text.Caption}"
                                                    FontSize="13"
                                                    FontWeight="SemiBold"
-                                                   Foreground="{StaticResource TextBrush}" />
+                                                   Foreground="{DynamicResource TextBrush}" />
                                         <Border Grid.Column="1"
                                                 Style="{StaticResource Badge}"
                                                 Padding="7,2"
@@ -146,7 +146,7 @@
                                             <TextBlock Text="{Binding Status}"
                                                        FontSize="10.5"
                                                        FontWeight="SemiBold"
-                                                       Foreground="{StaticResource TextBrush}" />
+                                                       Foreground="{DynamicResource TextBrush}" />
                                         </Border>
                                     </Grid>
                                     <TextBlock Text="{Binding Detail}"
@@ -257,14 +257,14 @@
                                 Height="34"
                                 CornerRadius="{StaticResource Radius.Md.CR}"
                                 Background="{DynamicResource AccentPanelBrush}"
-                                BorderBrush="{StaticResource AccentBrush}"
+                                BorderBrush="{DynamicResource AccentBrush}"
                                 BorderThickness="1"
                                 Margin="0,0,12,0"
                                 VerticalAlignment="Top">
                             <TextBlock Text="&#xE8B9;"
                                        FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="14"
-                                       Foreground="{StaticResource AccentBrush}"
+                                       Foreground="{DynamicResource AccentBrush}"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
                         </Border>
@@ -274,7 +274,7 @@
                                        Style="{StaticResource Text.Caption}"
                                        FontSize="13"
                                        FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextBrush}" />
+                                       Foreground="{DynamicResource TextBrush}" />
                             <TextBlock x:Name="OpenCapabilityDetailText"
                                        Style="{StaticResource Text.Hint}"
                                        TextWrapping="Wrap"
@@ -294,14 +294,14 @@
                                 Height="34"
                                 CornerRadius="{StaticResource Radius.Md.CR}"
                                 Background="{DynamicResource SuccessPanelBrush}"
-                                BorderBrush="{StaticResource GreenBrush}"
+                                BorderBrush="{DynamicResource GreenBrush}"
                                 BorderThickness="1"
                                 Margin="0,0,12,0"
                                 VerticalAlignment="Top">
                             <TextBlock Text="&#xE74E;"
                                        FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="14"
-                                       Foreground="{StaticResource GreenBrush}"
+                                       Foreground="{DynamicResource GreenBrush}"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
                         </Border>
@@ -311,7 +311,7 @@
                                        Style="{StaticResource Text.Caption}"
                                        FontSize="13"
                                        FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextBrush}" />
+                                       Foreground="{DynamicResource TextBrush}" />
                             <TextBlock x:Name="ExportCapabilityDetailText"
                                        Style="{StaticResource Text.Hint}"
                                        TextWrapping="Wrap"
@@ -332,7 +332,7 @@
                                 Height="34"
                                 CornerRadius="{StaticResource Radius.Md.CR}"
                                 Background="{DynamicResource WarningPanelBrush}"
-                                BorderBrush="{StaticResource YellowBrush}"
+                                BorderBrush="{DynamicResource YellowBrush}"
                                 BorderThickness="1"
                                 Margin="0,0,12,0"
                                 VerticalAlignment="Top">
@@ -340,7 +340,7 @@
                                        Text="&#xE783;"
                                        FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="14"
-                                       Foreground="{StaticResource YellowBrush}"
+                                       Foreground="{DynamicResource YellowBrush}"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
                         </Border>
@@ -350,7 +350,7 @@
                                        Style="{StaticResource Text.Caption}"
                                        FontSize="13"
                                        FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextBrush}" />
+                                       Foreground="{DynamicResource TextBrush}" />
                             <TextBlock x:Name="DocumentCapabilityDetailText"
                                        Style="{StaticResource Text.Hint}"
                                        TextWrapping="Wrap"
@@ -380,19 +380,19 @@
                                                Style="{StaticResource Text.Caption}"
                                                FontSize="13"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}"
+                                               Foreground="{DynamicResource TextBrush}"
                                                Text="{Binding Family}" />
                                     <TextBlock Grid.Column="1"
                                                Style="{StaticResource Text.Caption}"
-                                               Foreground="{StaticResource SubtextBrush}"
+                                               Foreground="{DynamicResource SubtextBrush}"
                                                Text="{Binding CountSummary}" />
                                 </Grid>
                                 <TextBlock Style="{StaticResource Text.Hint}"
-                                           Foreground="{StaticResource SubtextBrush}"
+                                           Foreground="{DynamicResource SubtextBrush}"
                                            Margin="0,4,0,0"
                                            Text="{Binding Facets}" />
                                 <TextBlock Style="{StaticResource Text.Hint}"
-                                           Foreground="{StaticResource SubtextBrush}"
+                                           Foreground="{DynamicResource SubtextBrush}"
                                            Margin="0,2,0,0"
                                            Text="{Binding RuntimeLine}" />
                                 <TextBlock Style="{StaticResource Text.Hint}"
@@ -440,13 +440,13 @@
                                Text="&#xE930;"
                                FontFamily="{StaticResource IconFontFamily}"
                                FontSize="13"
-                               Foreground="{StaticResource AccentBrush}"
+                               Foreground="{DynamicResource AccentBrush}"
                                Margin="0,1,10,0"
                                VerticalAlignment="Top" />
                     <TextBlock x:Name="UpdateStatusText"
                                Grid.Column="1"
                                Style="{StaticResource Text.Caption}"
-                               Foreground="{StaticResource SubtextBrush}"
+                               Foreground="{DynamicResource SubtextBrush}"
                                TextWrapping="Wrap" />
                     <Button x:Name="UpdateReleaseButton"
                             Grid.Column="2"
@@ -505,7 +505,7 @@
                                            Text="&#xE774;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="13"
-                                           Foreground="{StaticResource AccentBrush}"
+                                           Foreground="{DynamicResource AccentBrush}"
                                            Margin="0,1,10,0"
                                            VerticalAlignment="Top" />
 
@@ -520,7 +520,7 @@
                                                    Style="{StaticResource Text.Caption}"
                                                    FontSize="12.5"
                                                    FontWeight="SemiBold"
-                                                   Foreground="{StaticResource TextBrush}" />
+                                                   Foreground="{DynamicResource TextBrush}" />
                                         <TextBlock Grid.Column="1"
                                                    Text="{Binding TimestampDisplay}"
                                                    Style="{StaticResource Text.Hint}"
@@ -717,13 +717,13 @@
                                         <TextBlock Grid.Column="1"
                                                    Text="{Binding DurationText}"
                                                    Style="{StaticResource Text.Caption}"
-                                                   Foreground="{StaticResource SubtextBrush}"
+                                                   Foreground="{DynamicResource SubtextBrush}"
                                                    Margin="8,0"
                                                    VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="2"
                                                    Text="{Binding StateText}"
                                                    Style="{StaticResource Text.Caption}"
-                                                   Foreground="{StaticResource SubtextBrush}"
+                                                   Foreground="{DynamicResource SubtextBrush}"
                                                    VerticalAlignment="Center" />
                                     </Grid>
                                 </Border>

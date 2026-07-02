@@ -8,7 +8,7 @@
         MinWidth="940"
         MinHeight="620"
         WindowStartupLocation="CenterOwner">
-    <Grid Background="{StaticResource BaseBrush}">
+    <Grid Background="{DynamicResource BaseBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -141,7 +141,7 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
                                                     <Setter Property="Background" Value="{DynamicResource AccentSelectionBrush}" />
-                                                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -169,7 +169,7 @@
             <GridSplitter Grid.Column="1"
                           Width="1"
                           HorizontalAlignment="Stretch"
-                          Background="{StaticResource HairlineBrush}" />
+                          Background="{DynamicResource HairlineBrush}" />
 
             <Border Grid.Column="2"
                     Style="{StaticResource ToolWindowWorkspace}">
@@ -182,7 +182,7 @@
                                 <TextBlock Text="&#xE950;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="18"
-                                           Foreground="{StaticResource AccentBrush}"
+                                           Foreground="{DynamicResource AccentBrush}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center" />
                             </Border>
@@ -301,7 +301,7 @@
                                 <TextBlock Text="&#xE946;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="12"
-                                           Foreground="{StaticResource AccentBrush}"
+                                           Foreground="{DynamicResource AccentBrush}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,9,0" />
                                 <TextBlock Text="{x:Static loc:Strings.ModelManagerSecurityNotice}"
@@ -321,7 +321,7 @@
                 <Ellipse x:Name="StatusDot"
                          Width="8"
                          Height="8"
-                         Fill="{StaticResource GreenBrush}"
+                         Fill="{DynamicResource GreenBrush}"
                          Margin="0,0,9,0"
                          VerticalAlignment="Center" />
                 <TextBlock x:Name="StatusText"

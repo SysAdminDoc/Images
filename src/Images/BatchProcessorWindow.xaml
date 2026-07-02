@@ -8,7 +8,7 @@
         MinWidth="920"
         MinHeight="620"
         WindowStartupLocation="CenterOwner">
-    <Grid Background="{StaticResource BaseBrush}">
+    <Grid Background="{DynamicResource BaseBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -95,17 +95,17 @@
                                           AutomationProperties.Name="{x:Static loc:Strings.BatchPresetAutomationName}" />
                                 <TextBlock Text="{x:Static loc:Strings.BatchPresetName}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}"
+                                           Foreground="{DynamicResource TextBrush}"
                                            Margin="0,12,0,0" />
                                 <TextBox x:Name="PresetNameBox" TextChanged="SettingsChanged" />
                                 <TextBlock Text="{x:Static loc:Strings.BatchPresetExtension}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}"
+                                           Foreground="{DynamicResource TextBrush}"
                                            Margin="0,10,0,0" />
                                 <TextBox x:Name="ExtensionBox" TextChanged="SettingsChanged" />
                                 <TextBlock Text="{x:Static loc:Strings.BatchPresetQuality}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}"
+                                           Foreground="{DynamicResource TextBrush}"
                                            Margin="0,10,0,0" />
                                 <Slider x:Name="QualitySlider"
                                         Minimum="1"
@@ -116,7 +116,7 @@
                                 <TextBlock x:Name="QualityText" Style="{StaticResource Text.Caption}" />
                                 <TextBlock Text="{x:Static loc:Strings.BatchPresetMaxDimensions}"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}"
+                                           Foreground="{DynamicResource TextBrush}"
                                            Margin="0,10,0,0" />
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -159,14 +159,14 @@
                                     <TextBlock x:Name="OperationParamOneLabel"
                                                Grid.Row="0"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}" />
+                                               Foreground="{DynamicResource TextBrush}" />
                                     <TextBox x:Name="OperationParamOneBox"
                                              Grid.Row="1"
                                              Margin="0,4,0,8" />
                                     <TextBlock x:Name="OperationParamTwoLabel"
                                                Grid.Row="2"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}" />
+                                               Foreground="{DynamicResource TextBrush}" />
                                     <TextBox x:Name="OperationParamTwoBox"
                                              Grid.Row="3"
                                              Margin="0,4,0,0" />
@@ -185,7 +185,7 @@
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Margin="0,4">
-                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
                                                 <TextBlock Text="{Binding Summary}" Style="{StaticResource Text.Hint}" TextWrapping="Wrap" />
                                             </StackPanel>
                                         </DataTemplate>
@@ -241,10 +241,10 @@
             <GridSplitter Grid.Column="1"
                           Width="1"
                           HorizontalAlignment="Stretch"
-                          Background="{StaticResource HairlineBrush}" />
+                          Background="{DynamicResource HairlineBrush}" />
 
             <Grid Grid.Column="2"
-                  Background="{StaticResource ViewportBrush}"
+                  Background="{DynamicResource ViewportBrush}"
                   Margin="18">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -294,7 +294,7 @@
                                 <DataTemplate>
                                     <Border Padding="12,10" Style="{StaticResource Card}">
                                         <StackPanel>
-                                            <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
                                             <TextBlock Text="{Binding StatusText}" Style="{StaticResource Text.Caption}" Margin="0,3,0,0" />
                                             <TextBlock Text="{Binding OutputPath}" Style="{StaticResource Text.Hint}" TextWrapping="Wrap" Margin="0,3,0,0" />
                                             <TextBlock Text="{Binding OutputDimensions}" Style="{StaticResource Text.Hint}" Margin="0,3,0,0" />
@@ -367,7 +367,7 @@
                 <Ellipse x:Name="StatusDot"
                          Width="8"
                          Height="8"
-                         Fill="{StaticResource GreenBrush}"
+                         Fill="{DynamicResource GreenBrush}"
                          Margin="0,0,9,0"
                          VerticalAlignment="Center" />
                 <TextBlock x:Name="StatusText"

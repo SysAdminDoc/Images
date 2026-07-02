@@ -17,7 +17,7 @@
         PreviewKeyDown="Window_PreviewKeyDown"
         KeyDown="Window_KeyDown"
         PreviewMouseDown="Window_PreviewMouseDown"
-        Background="{StaticResource BaseBrush}"
+        Background="{DynamicResource BaseBrush}"
         TextOptions.TextFormattingMode="Display"
         UseLayoutRounding="True">
 
@@ -35,7 +35,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- ============ LEFT: Viewport, floating chrome, bottom toolbar ============ -->
-        <Grid Grid.Column="0" Background="{StaticResource ViewportBrush}">
+        <Grid Grid.Column="0" Background="{DynamicResource ViewportBrush}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
@@ -337,7 +337,7 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <Grid Grid.Column="0" Background="{StaticResource ViewportBrush}" ClipToBounds="True">
+                        <Grid Grid.Column="0" Background="{DynamicResource ViewportBrush}" ClipToBounds="True">
                             <ctl:ZoomPanImage x:Name="ComparePrimaryCanvas"
                                               Source="{Binding CurrentImage}"
                                               Rotation="{Binding Rotation}"
@@ -351,14 +351,14 @@
                                     Margin="16"
                                     Padding="10,7"
                                     CornerRadius="{StaticResource Radius.Sm.CR}"
-                                    Background="{StaticResource ToastBrush}"
-                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    Background="{DynamicResource ToastBrush}"
+                                    BorderBrush="{DynamicResource HairlineBrush}"
                                     BorderThickness="1">
                                 <StackPanel>
                                     <TextBlock Text="A"
                                                FontSize="11"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource AccentBrush}" />
+                                               Foreground="{DynamicResource AccentBrush}" />
                                     <TextBlock Text="{Binding ComparePrimaryFileName}"
                                                Style="{StaticResource Text.Caption}"
                                                TextTrimming="CharacterEllipsis"
@@ -367,9 +367,9 @@
                             </Border>
                         </Grid>
 
-                        <Border Grid.Column="1" Background="{StaticResource HairlineBrush}" />
+                        <Border Grid.Column="1" Background="{DynamicResource HairlineBrush}" />
 
-                        <Grid Grid.Column="2" Background="{StaticResource ViewportBrush}" ClipToBounds="True">
+                        <Grid Grid.Column="2" Background="{DynamicResource ViewportBrush}" ClipToBounds="True">
                             <ctl:ZoomPanImage x:Name="CompareSecondaryCanvas"
                                               Source="{Binding CompareImage}"
                                               Rotation="{Binding Rotation}"
@@ -383,14 +383,14 @@
                                     Margin="16"
                                     Padding="10,7"
                                     CornerRadius="{StaticResource Radius.Sm.CR}"
-                                    Background="{StaticResource ToastBrush}"
-                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    Background="{DynamicResource ToastBrush}"
+                                    BorderBrush="{DynamicResource HairlineBrush}"
                                     BorderThickness="1">
                                 <StackPanel>
                                     <TextBlock Text="B"
                                                FontSize="11"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource YellowBrush}" />
+                                               Foreground="{DynamicResource YellowBrush}" />
                                     <TextBlock Text="{Binding CompareSecondaryFileName}"
                                                Style="{StaticResource Text.Caption}"
                                                TextTrimming="CharacterEllipsis"
@@ -401,7 +401,7 @@
                     </Grid>
 
                     <Grid Visibility="{Binding IsCompareOverlayMode, Converter={StaticResource BoolToVis}}"
-                          Background="{StaticResource ViewportBrush}"
+                          Background="{DynamicResource ViewportBrush}"
                           ClipToBounds="True">
                         <ctl:ZoomPanImage x:Name="CompareOverlayPrimaryCanvas"
                                           Source="{Binding CurrentImage}"
@@ -426,14 +426,14 @@
                                 Margin="16"
                                 Padding="10,7"
                                 CornerRadius="{StaticResource Radius.Sm.CR}"
-                                Background="{StaticResource ToastBrush}"
-                                BorderBrush="{StaticResource HairlineBrush}"
+                                Background="{DynamicResource ToastBrush}"
+                                BorderBrush="{DynamicResource HairlineBrush}"
                                 BorderThickness="1">
                             <StackPanel>
                                 <TextBlock Text="Overlay A/B"
                                            FontSize="11"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource AccentBrush}" />
+                                           Foreground="{DynamicResource AccentBrush}" />
                                 <TextBlock Text="{Binding CompareStatusText}"
                                            Style="{StaticResource Text.Caption}"
                                            TextTrimming="CharacterEllipsis"
@@ -490,8 +490,8 @@
                         Margin="24,18,24,0"
                         Padding="13,9"
                         CornerRadius="{StaticResource Radius.Md.CR}"
-                        Background="{StaticResource ToastBrush}"
-                        BorderBrush="{StaticResource AccentBrush}"
+                        Background="{DynamicResource ToastBrush}"
+                        BorderBrush="{DynamicResource AccentBrush}"
                         BorderThickness="1"
                         Effect="{StaticResource Elevation.Low}"
                         IsHitTestVisible="False"
@@ -503,13 +503,13 @@
                                 Height="28"
                                 CornerRadius="{StaticResource Radius.Sm.CR}"
                                 Background="{DynamicResource AccentPanelBrush}"
-                                BorderBrush="{StaticResource HairlineBrush}"
+                                BorderBrush="{DynamicResource HairlineBrush}"
                                 BorderThickness="1"
                                 Margin="0,0,11,0">
                             <TextBlock Text="&#xE7B3;"
                                        FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="13"
-                                       Foreground="{StaticResource AccentBrush}"
+                                       Foreground="{DynamicResource AccentBrush}"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
                         </Border>
@@ -517,7 +517,7 @@
                             <TextBlock Text="{Binding OverlayModeText}"
                                        FontSize="12.5"
                                        FontWeight="SemiBold"
-                                       Foreground="{StaticResource FloatingChromeTextBrush}" />
+                                       Foreground="{DynamicResource FloatingChromeTextBrush}" />
                             <TextBlock Text="{Binding OverlayStatusText}"
                                        Style="{StaticResource Text.Caption}"
                                        TextWrapping="Wrap"
@@ -571,7 +571,7 @@
                                 <TextBlock Text="&#xE72E;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="13"
-                                           Foreground="{StaticResource AccentBrush}"
+                                           Foreground="{DynamicResource AccentBrush}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Top"
                                            Margin="0,2,0,0" />
@@ -591,7 +591,7 @@
                                 <TextBlock Text="&#xE8E5;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="13"
-                                           Foreground="{StaticResource AccentBrush}"
+                                           Foreground="{DynamicResource AccentBrush}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Top"
                                            Margin="0,2,0,0" />
@@ -611,7 +611,7 @@
                                 <TextBlock Text="&#xE8C8;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="13"
-                                           Foreground="{StaticResource AccentBrush}"
+                                           Foreground="{DynamicResource AccentBrush}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Top"
                                            Margin="0,2,0,0" />
@@ -631,7 +631,7 @@
                                 <TextBlock Text="&#xE8A5;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="13"
-                                           Foreground="{StaticResource AccentBrush}"
+                                           Foreground="{DynamicResource AccentBrush}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Top"
                                            Margin="0,2,0,0" />
@@ -651,7 +651,7 @@
                                 <TextBlock Text="&#xE946;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="13"
-                                           Foreground="{StaticResource AccentBrush}"
+                                           Foreground="{DynamicResource AccentBrush}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Top"
                                            Margin="0,2,0,0" />
@@ -794,7 +794,7 @@
                                                            TextTrimming="CharacterEllipsis" />
                                                 <TextBlock Text="{Binding ProgressText}"
                                                            Style="{StaticResource Text.Caption}"
-                                                           Foreground="{StaticResource SubtextBrush}"
+                                                           Foreground="{DynamicResource SubtextBrush}"
                                                            Margin="8,0,0,0" />
                                             </StackPanel>
                                         </Button>
@@ -816,15 +816,15 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         MaxWidth="500"
-                        Background="{StaticResource DangerPanelBrush}"
-                        BorderBrush="{StaticResource RedBrush}"
+                        Background="{DynamicResource DangerPanelBrush}"
+                        BorderBrush="{DynamicResource RedBrush}"
                         Visibility="{Binding HasLoadError, Converter={StaticResource BoolToVis}}">
                     <StackPanel>
                         <TextBlock Text="&#xE783;"
                                    FontFamily="{StaticResource IconFontFamily}"
                                    FontSize="38"
                                    HorizontalAlignment="Center"
-                                   Foreground="{StaticResource RedBrush}" />
+                                   Foreground="{DynamicResource RedBrush}" />
                         <TextBlock Style="{StaticResource Text.Title}"
                                    Text="{Binding LoadErrorTitle}"
                                    HorizontalAlignment="Center"
@@ -905,22 +905,22 @@
 
                 <!-- Drag-and-drop confidence layer -->
                 <Border Margin="32"
-                        Background="{StaticResource DropOverlayBrush}"
+                        Background="{DynamicResource DropOverlayBrush}"
                         BorderThickness="2"
                         CornerRadius="{StaticResource Radius.Xl.CR}"
                         Visibility="{Binding IsDropTargetActive, Converter={StaticResource BoolToVis}}">
                     <Border.Style>
                         <Style TargetType="Border">
-                            <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource RedBrush}" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsDropAccepted}" Value="True">
-                                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
                     <Border Style="{StaticResource ElevatedCard}"
-                            Background="{StaticResource DropOverlayPanelBrush}"
+                            Background="{DynamicResource DropOverlayPanelBrush}"
                             MaxWidth="420"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center">
@@ -931,10 +931,10 @@
                                        HorizontalAlignment="Center">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource RedBrush}" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsDropAccepted}" Value="True">
-                                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -953,7 +953,7 @@
                     </Border>
                 </Border>
 
-                <Border Background="{StaticResource BaseBrush}"
+                <Border Background="{DynamicResource BaseBrush}"
                         Padding="28,24"
                         Visibility="{Binding ShowGallery, Converter={StaticResource BoolToVis}}"
                         Panel.ZIndex="18"
@@ -977,13 +977,13 @@
                                     Height="34"
                                     CornerRadius="{StaticResource Radius.Lg.CR}"
                                     Background="{DynamicResource AccentPanelBrush}"
-                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    BorderBrush="{DynamicResource HairlineBrush}"
                                     BorderThickness="1"
                                     VerticalAlignment="Center">
                                 <TextBlock Text="&#xE8A9;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="15"
-                                           Foreground="{StaticResource AccentBrush}"
+                                           Foreground="{DynamicResource AccentBrush}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center" />
                             </Border>
@@ -1022,8 +1022,8 @@
                                     Margin="0,0,8,8"
                                     Padding="10,0"
                                     CornerRadius="{StaticResource Radius.Sm.CR}"
-                                    Background="{StaticResource PanelBrush}"
-                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    Background="{DynamicResource PanelBrush}"
+                                    BorderBrush="{DynamicResource HairlineBrush}"
                                     BorderThickness="1"
                                     ToolTip="{Binding GalleryFilterTooltip}">
                                 <Grid>
@@ -1035,7 +1035,7 @@
                                     <TextBlock Text="&#xE721;"
                                                FontFamily="{StaticResource IconFontFamily}"
                                                FontSize="11"
-                                               Foreground="{StaticResource OverlayBrush}"
+                                               Foreground="{DynamicResource OverlayBrush}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,8,0" />
                                     <TextBox Grid.Column="1"
@@ -1080,7 +1080,7 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding CurrentSortMode, Converter={StaticResource SortModeMatches}, ConverterParameter=NaturalName}" Value="True">
                                                 <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -1105,7 +1105,7 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding CurrentSortMode, Converter={StaticResource SortModeMatches}, ConverterParameter=ModifiedNewest}" Value="True">
                                                 <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -1130,7 +1130,7 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding CurrentSortMode, Converter={StaticResource SortModeMatches}, ConverterParameter=ExtensionThenName}" Value="True">
                                                 <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -1155,7 +1155,7 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding CurrentSortMode, Converter={StaticResource SortModeMatches}, ConverterParameter=SizeLargest}" Value="True">
                                                 <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -1270,7 +1270,7 @@
                                 <TextBlock Text="&#xE71E;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="12"
-                                           Foreground="{StaticResource OverlayBrush}"
+                                           Foreground="{DynamicResource OverlayBrush}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,6,0" />
                                 <Slider Minimum="80" Maximum="320"
@@ -1286,7 +1286,7 @@
                                 <TextBlock Text="&#xE8A3;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="16"
-                                           Foreground="{StaticResource OverlayBrush}"
+                                           Foreground="{DynamicResource OverlayBrush}"
                                            VerticalAlignment="Center"
                                            Margin="6,0,0,0" />
                             </StackPanel>
@@ -1370,20 +1370,20 @@
                                         </Button.ContextMenu>
                                         <Button.Style>
                                             <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
-                                                <Setter Property="Background" Value="{StaticResource Surface0Brush}" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+                                                <Setter Property="Background" Value="{DynamicResource Surface0Brush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsCurrent}" Value="True">
                                                         <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
                                                         <Setter Property="Background" Value="{DynamicResource AccentSelectionBrush}" />
-                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                                     </DataTrigger>
                                                     <Trigger Property="IsKeyboardFocusWithin" Value="True">
                                                         <Setter Property="Background" Value="{DynamicResource AccentSelectionBrush}" />
-                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                                     </Trigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -1391,8 +1391,8 @@
                                         <StackPanel>
                                             <Border Height="{Binding DataContext.GalleryTileImageHeight, RelativeSource={RelativeSource AncestorType=Window}}"
                                                     CornerRadius="{StaticResource Radius.Sm.CR}"
-                                                    Background="{StaticResource ViewportBrush}"
-                                                    BorderBrush="{StaticResource HairlineBrush}"
+                                                    Background="{DynamicResource ViewportBrush}"
+                                                    BorderBrush="{DynamicResource HairlineBrush}"
                                                     BorderThickness="1"
                                                     ClipToBounds="True">
                                                 <Grid>
@@ -1408,11 +1408,11 @@
                                                                Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
                                                         <TextBlock.Style>
                                                             <Style TargetType="{x:Type TextBlock}">
-                                                                <Setter Property="Foreground" Value="{StaticResource OverlayBrush}" />
+                                                                <Setter Property="Foreground" Value="{DynamicResource OverlayBrush}" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding ThumbnailFailed}" Value="True">
                                                                         <Setter Property="Text" Value="&#xE783;" />
-                                                                        <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                                        <Setter Property="Foreground" Value="{DynamicResource YellowBrush}" />
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
@@ -1421,13 +1421,13 @@
                                                 </Grid>
                                             </Border>
                                             <TextBlock Text="{Binding FileName}"
-                                                       Foreground="{StaticResource TextBrush}"
+                                                       Foreground="{DynamicResource TextBrush}"
                                                        FontSize="12"
                                                        FontWeight="SemiBold"
                                                        TextTrimming="CharacterEllipsis"
                                                        Margin="1,8,1,0" />
                                             <TextBlock Text="{Binding PositionText}"
-                                                       Foreground="{StaticResource OverlayBrush}"
+                                                       Foreground="{DynamicResource OverlayBrush}"
                                                        FontSize="10.5"
                                                        Margin="1,2,1,0" />
                                         </StackPanel>
@@ -1436,7 +1436,7 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
                         <Border Grid.Row="3"
-                                Background="{StaticResource BaseBrush}"
+                                Background="{DynamicResource BaseBrush}"
                                 Visibility="{Binding ShowGalleryFilterEmpty, Converter={StaticResource BoolToVis}}"
                                 AutomationProperties.Name="No gallery filter matches">
                             <StackPanel HorizontalAlignment="Center"
@@ -1445,7 +1445,7 @@
                                 <TextBlock Text="&#xE721;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="28"
-                                           Foreground="{StaticResource OverlayBrush}"
+                                           Foreground="{DynamicResource OverlayBrush}"
                                            HorizontalAlignment="Center" />
                                 <TextBlock Text="No matching images"
                                            Style="{StaticResource Text.Title}"
@@ -1483,14 +1483,14 @@
                                 VerticalAlignment="Center"
                                 Margin="18,0,0,0"
                                 CornerRadius="{StaticResource Radius.Lg.CR}"
-                                Background="{StaticResource FloatingChromeBrush}"
-                                BorderBrush="{StaticResource FloatingChromeBorderBrush}"
+                                Background="{DynamicResource FloatingChromeBrush}"
+                                BorderBrush="{DynamicResource FloatingChromeBorderBrush}"
                                 BorderThickness="1"
                                 Opacity="0.72">
                             <TextBlock Text="&#xE76B;"
                                        FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="18"
-                                       Foreground="{StaticResource FloatingChromeTextBrush}"
+                                       Foreground="{DynamicResource FloatingChromeTextBrush}"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
                         </Border>
@@ -1513,14 +1513,14 @@
                                 VerticalAlignment="Center"
                                 Margin="0,0,18,0"
                                 CornerRadius="{StaticResource Radius.Lg.CR}"
-                                Background="{StaticResource FloatingChromeBrush}"
-                                BorderBrush="{StaticResource FloatingChromeBorderBrush}"
+                                Background="{DynamicResource FloatingChromeBrush}"
+                                BorderBrush="{DynamicResource FloatingChromeBorderBrush}"
                                 BorderThickness="1"
                                 Opacity="0.72">
                             <TextBlock Text="&#xE76C;"
                                        FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="18"
-                                       Foreground="{StaticResource FloatingChromeTextBrush}"
+                                       Foreground="{DynamicResource FloatingChromeTextBrush}"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
                         </Border>
@@ -1556,7 +1556,7 @@
                             AutomationProperties.LiveSetting="Polite"
                             AutomationProperties.Name="Folder position">
                         <TextBlock Text="{Binding PositionText}"
-                                   Foreground="{StaticResource FloatingChromeTextBrush}"
+                                   Foreground="{DynamicResource FloatingChromeTextBrush}"
                                    FontSize="12"
                                    FontWeight="SemiBold" />
                     </Border>
@@ -1592,7 +1592,7 @@
                                     AutomationProperties.Name="Page scrubber"
                                     AutomationProperties.HelpText="Drag to jump to another page in the current document or archive." />
                             <TextBlock Text="{Binding PagePositionText}"
-                                       Foreground="{StaticResource FloatingChromeTextBrush}"
+                                       Foreground="{DynamicResource FloatingChromeTextBrush}"
                                        FontSize="12"
                                        FontWeight="SemiBold"
                                        Margin="8,0"
@@ -1625,11 +1625,11 @@
                                     <TextBlock Text="&#xE946;"
                                                FontFamily="{StaticResource IconFontFamily}"
                                                FontSize="12"
-                                               Foreground="{StaticResource AccentBrush}"
+                                               Foreground="{DynamicResource AccentBrush}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,8,0" />
                                     <TextBlock Text="Photo metadata"
-                                               Foreground="{StaticResource FloatingChromeTextBrush}"
+                                               Foreground="{DynamicResource FloatingChromeTextBrush}"
                                                FontSize="12"
                                                FontWeight="SemiBold"
                                                VerticalAlignment="Center" />
@@ -1667,12 +1667,12 @@
                                                 <TextBlock Text="{Binding Label}"
                                                            FontSize="10"
                                                            FontWeight="SemiBold"
-                                                           Foreground="{StaticResource OverlayBrush}"
+                                                           Foreground="{DynamicResource OverlayBrush}"
                                                            VerticalAlignment="Center"
                                                            Margin="0,0,6,0" />
                                                 <TextBlock Text="{Binding Value}"
                                                            FontSize="11"
-                                                           Foreground="{StaticResource FloatingChromeTextBrush}"
+                                                           Foreground="{DynamicResource FloatingChromeTextBrush}"
                                                            TextTrimming="CharacterEllipsis"
                                                            MaxWidth="170"
                                                            ToolTip="{Binding Value}"
@@ -1689,12 +1689,12 @@
                                 <TextBlock Text="&#xE946;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="11"
-                                           Foreground="{StaticResource OverlayBrush}"
+                                           Foreground="{DynamicResource OverlayBrush}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,8,0" />
                                 <TextBlock Text="{Binding MetadataStatusText}"
                                            Style="{StaticResource Text.Hint}"
-                                           Foreground="{StaticResource FloatingChromeTextBrush}"
+                                           Foreground="{DynamicResource FloatingChromeTextBrush}"
                                            VerticalAlignment="Center" />
                             </StackPanel>
                         </StackPanel>
@@ -1712,7 +1712,7 @@
                             <Style TargetType="Border" BasedOn="{StaticResource FloatingChrome}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsOcrBusy}" Value="True">
-                                        <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -1734,11 +1734,11 @@
                                 <Border.Style>
                                     <Style TargetType="Border">
                                         <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsOcrBusy}" Value="True">
-                                                <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                                <Setter Property="Background" Value="{DynamicResource WarningPanelBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -1750,10 +1750,10 @@
                                            VerticalAlignment="Center">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsOcrBusy}" Value="True">
-                                                    <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource YellowBrush}" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -1763,11 +1763,11 @@
 
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding OcrStatusTitle}"
-                                           Foreground="{StaticResource FloatingChromeTextBrush}"
+                                           Foreground="{DynamicResource FloatingChromeTextBrush}"
                                            FontSize="12.5"
                                            FontWeight="SemiBold" />
                                 <TextBlock Text="{Binding OcrStatusDetail}"
-                                           Foreground="{StaticResource SubtextBrush}"
+                                           Foreground="{DynamicResource SubtextBrush}"
                                            FontSize="11.5"
                                            LineHeight="16"
                                            TextWrapping="Wrap"
@@ -1816,11 +1816,11 @@
                             <TextBlock Text="&#xE7A5;"
                                        FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="13"
-                                       Foreground="{StaticResource AccentBrush}"
+                                       Foreground="{DynamicResource AccentBrush}"
                                        VerticalAlignment="Center"
                                        Margin="0,0,10,0" />
                             <TextBlock Text="Scroll to zoom  ·  drag to pan  ·  double-click to fit"
-                                       Foreground="{StaticResource FloatingChromeTextBrush}"
+                                       Foreground="{DynamicResource FloatingChromeTextBrush}"
                                        FontSize="12"
                                        VerticalAlignment="Center" />
                         </StackPanel>
@@ -1992,7 +1992,7 @@
 
                                 <!-- Search input -->
                                 <Border Grid.Row="0" Padding="14,12" BorderThickness="0,0,0,1"
-                                        BorderBrush="{StaticResource HairlineBrush}">
+                                        BorderBrush="{DynamicResource HairlineBrush}">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
@@ -2002,7 +2002,7 @@
                                                    Text="&#xE721;"
                                                    FontFamily="{StaticResource IconFontFamily}"
                                                    FontSize="14"
-                                                   Foreground="{StaticResource OverlayBrush}"
+                                                   Foreground="{DynamicResource OverlayBrush}"
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,10,0" />
                                         <TextBox x:Name="CommandPaletteInput"
@@ -2010,8 +2010,8 @@
                                                  Text="{Binding CommandPaletteFilterText, UpdateSourceTrigger=PropertyChanged}"
                                                  Background="Transparent"
                                                  BorderThickness="0"
-                                                 Foreground="{StaticResource TextBrush}"
-                                                 CaretBrush="{StaticResource AccentBrush}"
+                                                 Foreground="{DynamicResource TextBrush}"
+                                                 CaretBrush="{DynamicResource AccentBrush}"
                                                  FontSize="14"
                                                  Padding="0,4"
                                                  VerticalContentAlignment="Center"
@@ -2036,7 +2036,7 @@
                                         <Style TargetType="ListBoxItem">
                                             <Setter Property="Padding" Value="12,8" />
                                             <Setter Property="Margin" Value="2,1" />
-                                            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                                            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
                                             <Setter Property="Background" Value="Transparent" />
                                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                             <Setter Property="Template">
@@ -2050,10 +2050,10 @@
                                                         </Border>
                                                         <ControlTemplate.Triggers>
                                                             <Trigger Property="IsSelected" Value="True">
-                                                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource Surface0Brush}" />
+                                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface0Brush}" />
                                                             </Trigger>
                                                             <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource Surface0Brush}" />
+                                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface0Brush}" />
                                                             </Trigger>
                                                         </ControlTemplate.Triggers>
                                                     </ControlTemplate>
@@ -2071,20 +2071,20 @@
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Grid.Column="0"
                                                            Text="{Binding Category}"
-                                                           Foreground="{StaticResource SubtextBrush}"
+                                                           Foreground="{DynamicResource SubtextBrush}"
                                                            FontSize="11"
                                                            VerticalAlignment="Center"
                                                            Margin="0,0,8,0"
                                                            MinWidth="60" />
                                                 <TextBlock Grid.Column="1"
                                                            Text="{Binding Name}"
-                                                           Foreground="{StaticResource TextBrush}"
+                                                           Foreground="{DynamicResource TextBrush}"
                                                            FontSize="13"
                                                            VerticalAlignment="Center"
                                                            TextTrimming="CharacterEllipsis" />
                                                 <TextBlock Grid.Column="2"
                                                            Text="{Binding Shortcut}"
-                                                           Foreground="{StaticResource OverlayBrush}"
+                                                           Foreground="{DynamicResource OverlayBrush}"
                                                            FontSize="11"
                                                            VerticalAlignment="Center"
                                                            Margin="12,0,0,0" />
@@ -2106,7 +2106,7 @@
                         <Border Style="{StaticResource FloatingChrome}" Padding="14,8">
                             <StackPanel Orientation="Horizontal">
                                 <Ellipse Width="6" Height="6"
-                                         Fill="{StaticResource AccentBrush}"
+                                         Fill="{DynamicResource AccentBrush}"
                                          Margin="0,0,8,0"
                                          VerticalAlignment="Center">
                                     <Ellipse.Style>
@@ -2132,7 +2132,7 @@
                                 </Ellipse>
                                 <TextBlock Text="{x:Static loc:Strings.MainImageLoading}"
                                            Style="{StaticResource Text.Caption}"
-                                           Foreground="{StaticResource FloatingChromeTextBrush}"
+                                           Foreground="{DynamicResource FloatingChromeTextBrush}"
                                            VerticalAlignment="Center" />
                             </StackPanel>
                         </Border>
@@ -2149,7 +2149,7 @@
                             IsHitTestVisible="False">
                         <Border.Style>
                             <Style TargetType="Border" BasedOn="{StaticResource FloatingChrome}">
-                                <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}" />
                                 <Setter Property="Opacity" Value="0" />
                                 <Style.Triggers>
                                     <Trigger Property="IsVisible" Value="True">
@@ -2179,25 +2179,25 @@
                                     Height="32"
                                     CornerRadius="{StaticResource Radius.Sm.CR}"
                                     BorderThickness="1"
-                                    Background="{StaticResource WarningPanelBrush}"
-                                    BorderBrush="{StaticResource YellowBrush}"
+                                    Background="{DynamicResource WarningPanelBrush}"
+                                    BorderBrush="{DynamicResource YellowBrush}"
                                     VerticalAlignment="Center"
                                     Margin="0,0,12,0">
                                 <TextBlock Text="&#xE895;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="13"
-                                           Foreground="{StaticResource YellowBrush}"
+                                           Foreground="{DynamicResource YellowBrush}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center" />
                             </Border>
 
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding OperationStatusTitle}"
-                                           Foreground="{StaticResource FloatingChromeTextBrush}"
+                                           Foreground="{DynamicResource FloatingChromeTextBrush}"
                                            FontSize="12.5"
                                            FontWeight="SemiBold" />
                                 <TextBlock Text="{Binding OperationStatusDetail}"
-                                           Foreground="{StaticResource SubtextBrush}"
+                                           Foreground="{DynamicResource SubtextBrush}"
                                            FontSize="11.5"
                                            LineHeight="16"
                                            TextWrapping="Wrap"
@@ -2218,13 +2218,13 @@
                                 <Setter Property="Opacity" Value="0" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding ToastTone}" Value="Success">
-                                        <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource GreenBrush}" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding ToastTone}" Value="Warning">
-                                        <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding ToastTone}" Value="Error">
-                                        <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource RedBrush}" />
                                     </DataTrigger>
                                     <Trigger Property="IsVisible" Value="True">
                                         <Trigger.EnterActions>
@@ -2250,26 +2250,26 @@
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Text" Value="&#xE930;" />
-                                        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding ToastTone}" Value="Success">
                                                 <Setter Property="Text" Value="&#xE73E;" />
-                                                <Setter Property="Foreground" Value="{StaticResource GreenBrush}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource GreenBrush}" />
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding ToastTone}" Value="Warning">
                                                 <Setter Property="Text" Value="&#xE783;" />
-                                                <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource YellowBrush}" />
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding ToastTone}" Value="Error">
                                                 <Setter Property="Text" Value="&#xE783;" />
-                                                <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource RedBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
                             <TextBlock Text="{Binding ToastMessage}"
-                                       Foreground="{StaticResource FloatingChromeTextBrush}"
+                                       Foreground="{DynamicResource FloatingChromeTextBrush}"
                                        FontSize="13"
                                        VerticalAlignment="Center" />
                         </StackPanel>
@@ -2292,8 +2292,8 @@
                      gently lit edge like polished macOS / Win11 chrome. -->
                 <Border Grid.Row="0" Height="1" Background="{DynamicResource DividerBrush}" />
                 <Border Grid.Row="1"
-                        Background="{StaticResource MantleBrush}"
-                        BorderBrush="{StaticResource HairlineBrush}"
+                        Background="{DynamicResource MantleBrush}"
+                        BorderBrush="{DynamicResource HairlineBrush}"
                         BorderThickness="0,1,0,0">
                     <Grid Margin="20,10,20,12">
                         <Grid.RowDefinitions>
@@ -2383,16 +2383,16 @@
                                                 </Button.ContextMenu>
                                                 <Button.Style>
                                                     <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
-                                                        <Setter Property="Background" Value="{StaticResource Surface0Brush}" />
-                                                        <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+                                                        <Setter Property="Background" Value="{DynamicResource Surface0Brush}" />
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsCurrent}" Value="True">
                                                                 <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                                             </DataTrigger>
                                                             <Trigger Property="IsKeyboardFocused" Value="True">
                                                                 <Setter Property="Background" Value="{DynamicResource AccentSelectionBrush}" />
-                                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                                             </Trigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -2400,8 +2400,8 @@
                                                 <StackPanel>
                                                     <Border Height="48"
                                                             CornerRadius="{StaticResource Radius.Sm.CR}"
-                                                            Background="{StaticResource ViewportBrush}"
-                                                            BorderBrush="{StaticResource HairlineBrush}"
+                                                            Background="{DynamicResource ViewportBrush}"
+                                                            BorderBrush="{DynamicResource HairlineBrush}"
                                                             BorderThickness="1"
                                                             ClipToBounds="True">
                                                         <Grid>
@@ -2417,11 +2417,11 @@
                                                                        Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
                                                                 <TextBlock.Style>
                                                                     <Style TargetType="{x:Type TextBlock}">
-                                                                        <Setter Property="Foreground" Value="{StaticResource OverlayBrush}" />
+                                                                        <Setter Property="Foreground" Value="{DynamicResource OverlayBrush}" />
                                                                         <Style.Triggers>
                                                                             <DataTrigger Binding="{Binding ThumbnailFailed}" Value="True">
                                                                                 <Setter Property="Text" Value="&#xE783;" />
-                                                                                <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                                                <Setter Property="Foreground" Value="{DynamicResource YellowBrush}" />
                                                                             </DataTrigger>
                                                                         </Style.Triggers>
                                                                     </Style>
@@ -2430,13 +2430,13 @@
                                                         </Grid>
                                                     </Border>
                                                     <TextBlock Text="{Binding FileName}"
-                                                               Foreground="{StaticResource TextBrush}"
+                                                               Foreground="{DynamicResource TextBrush}"
                                                                FontSize="10.5"
                                                                FontWeight="SemiBold"
                                                                TextTrimming="CharacterEllipsis"
                                                                Margin="1,5,1,0" />
                                                     <TextBlock Text="{Binding PositionText}"
-                                                               Foreground="{StaticResource OverlayBrush}"
+                                                               Foreground="{DynamicResource OverlayBrush}"
                                                                FontSize="10"
                                                                Margin="1,1,1,0" />
                                                 </StackPanel>
@@ -2526,30 +2526,30 @@
                                     </StackPanel>
                                 </Button>
                                 <TextBlock Text="{Binding CurrentFileName}"
-                                           Foreground="{StaticResource TextBrush}"
+                                           Foreground="{DynamicResource TextBrush}"
                                            FontWeight="SemiBold"
                                            FontSize="13"
                                            MaxWidth="260"
                                            TextTrimming="CharacterEllipsis"
                                            VerticalAlignment="Center" />
                                 <TextBlock Text="  ·  "
-                                           Foreground="{StaticResource OverlayBrush}"
+                                           Foreground="{DynamicResource OverlayBrush}"
                                            VerticalAlignment="Center" />
                                 <TextBlock Text="{Binding DimensionsText}"
-                                           Foreground="{StaticResource SubtextBrush}"
+                                           Foreground="{DynamicResource SubtextBrush}"
                                            VerticalAlignment="Center" />
                                 <TextBlock Text="  ·  "
-                                           Foreground="{StaticResource OverlayBrush}"
+                                           Foreground="{DynamicResource OverlayBrush}"
                                            VerticalAlignment="Center" />
                                 <TextBlock Text="{Binding FileSizeText}"
-                                           Foreground="{StaticResource SubtextBrush}"
+                                           Foreground="{DynamicResource SubtextBrush}"
                                            VerticalAlignment="Center" />
 
                                 <Border Margin="10,0,0,0"
                                         Padding="8,2"
                                         CornerRadius="{StaticResource Radius.Sm.CR}"
                                         Background="{DynamicResource MauvePanelBrush}"
-                                        BorderBrush="{StaticResource MauveBrush}"
+                                        BorderBrush="{DynamicResource MauveBrush}"
                                         BorderThickness="1"
                                         VerticalAlignment="Center"
                                         Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}"
@@ -2558,13 +2558,13 @@
                                         <TextBlock Text="&#xE8A5;"
                                                    FontFamily="{StaticResource IconFontFamily}"
                                                    FontSize="10"
-                                                   Foreground="{StaticResource MauveBrush}"
+                                                   Foreground="{DynamicResource MauveBrush}"
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,5,0" />
                                         <TextBlock Text="{Binding PagePositionText}"
                                                    FontSize="10.5"
                                                    FontWeight="SemiBold"
-                                                   Foreground="{StaticResource MauveBrush}"
+                                                   Foreground="{DynamicResource MauveBrush}"
                                                    VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
@@ -2576,7 +2576,7 @@
                                         Padding="8,2"
                                         CornerRadius="{StaticResource Radius.Sm.CR}"
                                         Background="{DynamicResource SuccessPanelBrush}"
-                                        BorderBrush="{StaticResource GreenBrush}"
+                                        BorderBrush="{DynamicResource GreenBrush}"
                                         BorderThickness="1"
                                         VerticalAlignment="Center"
                                         Visibility="{Binding IsAnimated, Converter={StaticResource BoolToVis}}"
@@ -2585,13 +2585,13 @@
                                         <TextBlock Text="&#xE768;"
                                                    FontFamily="{StaticResource IconFontFamily}"
                                                    FontSize="10"
-                                                   Foreground="{StaticResource GreenBrush}"
+                                                   Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,5,0" />
                                         <TextBlock Text="{Binding AnimationFrameCountText}"
                                                    FontSize="10.5"
                                                    FontWeight="SemiBold"
-                                                   Foreground="{StaticResource GreenBrush}"
+                                                   Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
@@ -2603,7 +2603,7 @@
                                         MinHeight="24"
                                         CornerRadius="{StaticResource Radius.Sm.CR}"
                                         Background="{DynamicResource AccentSelectionBrush}"
-                                        BorderBrush="{StaticResource AccentBrush}"
+                                        BorderBrush="{DynamicResource AccentBrush}"
                                         BorderThickness="1"
                                         VerticalAlignment="Center"
                                         Visibility="{Binding IsChannelIsolated, Converter={StaticResource BoolToVis}}"
@@ -2613,7 +2613,7 @@
                                     <TextBlock Text="{Binding ChannelModeLabel}"
                                                FontSize="10.5"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource AccentBrush}"
+                                               Foreground="{DynamicResource AccentBrush}"
                                                VerticalAlignment="Center" />
                                 </Border>
 
@@ -2622,7 +2622,7 @@
                                         Padding="8,2"
                                         CornerRadius="{StaticResource Radius.Sm.CR}"
                                         Background="{DynamicResource SuccessPanelBrush}"
-                                        BorderBrush="{StaticResource GreenBrush}"
+                                        BorderBrush="{DynamicResource GreenBrush}"
                                         BorderThickness="1"
                                         VerticalAlignment="Center"
                                         Visibility="{Binding IsListening, Converter={StaticResource BoolToVis}}"
@@ -2632,13 +2632,13 @@
                                         <TextBlock Text="&#xE703;"
                                                    FontFamily="{StaticResource IconFontFamily}"
                                                    FontSize="10"
-                                                   Foreground="{StaticResource GreenBrush}"
+                                                   Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,4,0" />
                                         <TextBlock Text="{Binding ListenPortLabel}"
                                                    FontSize="10.5"
                                                    FontWeight="SemiBold"
-                                                   Foreground="{StaticResource GreenBrush}"
+                                                   Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
@@ -2650,7 +2650,7 @@
                                         MinHeight="24"
                                         CornerRadius="{StaticResource Radius.Sm.CR}"
                                         Background="{DynamicResource SuccessPanelBrush}"
-                                        BorderBrush="{StaticResource GreenBrush}"
+                                        BorderBrush="{DynamicResource GreenBrush}"
                                         BorderThickness="1"
                                         VerticalAlignment="Center"
                                         Visibility="{Binding IsSlideshowActive, Converter={StaticResource BoolToVis}}"
@@ -2664,13 +2664,13 @@
                                         <TextBlock Text="&#xE768;"
                                                    FontFamily="{StaticResource IconFontFamily}"
                                                    FontSize="10"
-                                                   Foreground="{StaticResource GreenBrush}"
+                                                   Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,4,0" />
                                         <TextBlock Text="{Binding SlideshowStatusText}"
                                                    FontSize="10.5"
                                                    FontWeight="SemiBold"
-                                                   Foreground="{StaticResource GreenBrush}"
+                                                   Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
@@ -2681,15 +2681,15 @@
                                         VerticalAlignment="Center"
                                         Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
                                 <TextBlock Text="Ready"
-                                           Foreground="{StaticResource TextBrush}"
+                                           Foreground="{DynamicResource TextBrush}"
                                            FontWeight="SemiBold"
                                            FontSize="13"
                                            VerticalAlignment="Center" />
                                 <TextBlock Text="  ·  "
-                                           Foreground="{StaticResource OverlayBrush}"
+                                           Foreground="{DynamicResource OverlayBrush}"
                                            VerticalAlignment="Center" />
                                 <TextBlock Text="Open or drop a supported file to start reviewing."
-                                           Foreground="{StaticResource SubtextBrush}"
+                                           Foreground="{DynamicResource SubtextBrush}"
                                            VerticalAlignment="Center" />
                             </StackPanel>
                         </Grid>
@@ -2714,8 +2714,8 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsFilmstripVisible}" Value="True">
                                                 <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
-                                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -2732,8 +2732,8 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsMetadataHudVisible}" Value="True">
                                                 <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
-                                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -2750,8 +2750,8 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsCompareMode}" Value="True">
                                                 <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
-                                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -2768,13 +2768,13 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsOcrMode}" Value="True">
                                                 <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
-                                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding IsOcrBusy}" Value="True">
-                                                <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
-                                                <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                <Setter Property="Background" Value="{DynamicResource WarningPanelBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource YellowBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -2782,7 +2782,7 @@
                             </Button>
                             <Border Width="1"
                                     Height="22"
-                                    Background="{StaticResource HairlineBrush}"
+                                    Background="{DynamicResource HairlineBrush}"
                                     Margin="12,6"
                                     Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}" />
                             <Button Style="{StaticResource ToolbarButton}"
@@ -2798,13 +2798,13 @@
                                     Margin="4,0,0,0"
                                     AutomationProperties.Name="Next page"
                                     Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}" />
-                            <Border Width="1" Height="22" Background="{StaticResource HairlineBrush}" Margin="12,6" />
+                            <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding DeleteCommand}" Content="&#xE74D;" ToolTip="Delete (Recycle Bin)" AutomationProperties.Name="Send image to Recycle Bin" />
-                            <Border Width="1" Height="22" Background="{StaticResource HairlineBrush}" Margin="12,6" />
+                            <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding SaveAsCopyCommand}" Content="&#xE74E;" ToolTip="{Binding ShortcutTexts[save-copy], StringFormat=Save a copy ({0})}" AutomationProperties.Name="Save a copy" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenExportWorkbenchCommand}" Content="&#xE8EF;" ToolTip="{Binding ShortcutTexts[export-workbench], StringFormat=Export workbench ({0})}" Margin="4,0,0,0" AutomationProperties.Name="Export workbench" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrintCommand}" Content="&#xE749;" ToolTip="{Binding ShortcutTexts[print], StringFormat=Print ({0})}" Margin="4,0,0,0" AutomationProperties.Name="Print image" />
-                            <Border Width="1" Height="22" Background="{StaticResource HairlineBrush}" Margin="12,6" />
+                            <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}" Content="&#xE838;" ToolTip="Reveal in Explorer" AutomationProperties.Name="Reveal image in Explorer" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="Copy path" Margin="4,0,0,0" AutomationProperties.Name="Copy file path" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding StripLocationCommand}" Content="&#xE707;" ToolTip="Strip GPS location from file" Margin="4,0,0,0" AutomationProperties.Name="Strip GPS location" />
@@ -2819,8 +2819,8 @@
         <Border x:Name="RightSidePanel" Grid.Column="1"
                 Width="320"
                 Visibility="{Binding IsFullscreen, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}"
-                Background="{StaticResource MantleBrush}"
-                BorderBrush="{StaticResource HairlineBrush}"
+                Background="{DynamicResource MantleBrush}"
+                BorderBrush="{DynamicResource HairlineBrush}"
                 BorderThickness="1,0,0,0">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
                 <StackPanel Margin="18,22,18,28">
@@ -2858,7 +2858,7 @@
 
                     <Border Style="{StaticResource Card}"
                             Background="{DynamicResource AccentPanelBrush}"
-                            BorderBrush="{StaticResource AccentBrush}"
+                            BorderBrush="{DynamicResource AccentBrush}"
                             Margin="0,0,0,20"
                             Visibility="{Binding HasUpdateAvailable, Converter={StaticResource BoolToVis}}">
                         <Grid>
@@ -2871,14 +2871,14 @@
                                        Text="&#xE895;"
                                        FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="14"
-                                       Foreground="{StaticResource AccentBrush}"
+                                       Foreground="{DynamicResource AccentBrush}"
                                        Margin="0,1,10,0"
                                        VerticalAlignment="Top" />
                             <StackPanel Grid.Column="1">
                                 <TextBlock Text="{Binding LatestUpdateTag, StringFormat=Update {0} is available}"
                                            FontSize="12.5"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock Text="Open the release page when you are ready to install it."
                                            Style="{StaticResource Text.Hint}"
                                            Margin="0,3,0,0" />
@@ -2904,7 +2904,7 @@
                     </Border>
 
                     <Border Style="{StaticResource Card}"
-                            BorderBrush="{StaticResource AccentBrush}"
+                            BorderBrush="{DynamicResource AccentBrush}"
                             Margin="0,0,0,20"
                             Visibility="{Binding IsCheckingForUpdates, Converter={StaticResource BoolToVis}}"
                             AutomationProperties.Name="Update check status"
@@ -2920,13 +2920,13 @@
                                     CornerRadius="{StaticResource Radius.Sm.CR}"
                                     BorderThickness="1"
                                     Background="{DynamicResource AccentPanelBrush}"
-                                    BorderBrush="{StaticResource AccentBrush}"
+                                    BorderBrush="{DynamicResource AccentBrush}"
                                     VerticalAlignment="Top"
                                     Margin="0,0,12,0">
                                 <TextBlock Text="&#xE895;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="13"
-                                           Foreground="{StaticResource AccentBrush}"
+                                           Foreground="{DynamicResource AccentBrush}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center" />
                             </Border>
@@ -2936,7 +2936,7 @@
                                            Style="{StaticResource Text.Caption}"
                                            FontSize="13"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock Text="{Binding UpdateCheckStatusText}"
                                            Style="{StaticResource Text.Hint}"
                                            TextWrapping="Wrap"
@@ -2951,20 +2951,20 @@
                             AutomationProperties.LiveSetting="Polite">
                         <Border.Style>
                             <Style TargetType="{x:Type Border}" BasedOn="{StaticResource Card}">
-                                <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Info">
-                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Success">
-                                        <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource GreenBrush}" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Warning">
-                                        <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
-                                        <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource WarningPanelBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Error">
-                                        <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource RedBrush}" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -2986,17 +2986,17 @@
                                 <Border.Style>
                                     <Style TargetType="{x:Type Border}">
                                         <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Success">
-                                                <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource GreenBrush}" />
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Warning">
-                                                <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+                                                <Setter Property="Background" Value="{DynamicResource WarningPanelBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}" />
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Error">
-                                                <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource RedBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -3009,16 +3009,16 @@
                                            VerticalAlignment="Center">
                                     <TextBlock.Style>
                                         <Style TargetType="{x:Type TextBlock}">
-                                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Success">
-                                                    <Setter Property="Foreground" Value="{StaticResource GreenBrush}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource GreenBrush}" />
                                                 </DataTrigger>
                                                 <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Warning">
-                                                    <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource YellowBrush}" />
                                                 </DataTrigger>
                                                 <DataTrigger Binding="{Binding SecondaryStatusTone}" Value="Error">
-                                                    <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource RedBrush}" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -3031,7 +3031,7 @@
                                            Style="{StaticResource Text.Caption}"
                                            FontSize="13"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock Text="{Binding SecondaryStatusDetail}"
                                            Style="{StaticResource Text.Hint}"
                                            TextWrapping="Wrap"
@@ -3046,7 +3046,7 @@
                             AutomationProperties.LiveSetting="Polite">
                         <Border.Style>
                             <Style TargetType="{x:Type Border}" BasedOn="{StaticResource Card}">
-                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                             </Style>
                         </Border.Style>
                         <StackPanel>
@@ -3063,11 +3063,11 @@
                                     <TextBlock.Style>
                                         <Style TargetType="{x:Type TextBlock}">
                                             <Setter Property="Text" Value="&#xE916;" />
-                                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding ActivityRunningCount}" Value="0">
                                                     <Setter Property="Text" Value="&#xE7BA;" />
-                                                    <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource YellowBrush}" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -3078,7 +3078,7 @@
                                                Style="{StaticResource Text.Caption}"
                                                FontSize="13"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}" />
+                                               Foreground="{DynamicResource TextBrush}" />
                                     <TextBlock Text="{Binding ActivitySummaryText}"
                                                Style="{StaticResource Text.Hint}"
                                                TextWrapping="Wrap"
@@ -3106,7 +3106,7 @@
                                                 <TextBlock Grid.Column="1"
                                                            Text="{Binding DurationText}"
                                                            Style="{StaticResource Text.Caption}"
-                                                           Foreground="{StaticResource SubtextBrush}"
+                                                           Foreground="{DynamicResource SubtextBrush}"
                                                            Margin="8,0"
                                                            VerticalAlignment="Center" />
                                                 <TextBlock Grid.Column="2"
@@ -3114,13 +3114,13 @@
                                                            VerticalAlignment="Center">
                                                     <TextBlock.Style>
                                                         <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource Text.Caption}">
-                                                            <Setter Property="Foreground" Value="{StaticResource SubtextBrush}" />
+                                                            <Setter Property="Foreground" Value="{DynamicResource SubtextBrush}" />
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding State}" Value="Running">
-                                                                    <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                                    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding State}" Value="Faulted">
-                                                                    <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
+                                                                    <Setter Property="Foreground" Value="{DynamicResource RedBrush}" />
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
@@ -3150,7 +3150,7 @@
                                     <TextBlock Text="{Binding ReviewStatusText}"
                                                Style="{StaticResource Text.Caption}"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}" />
+                                               Foreground="{DynamicResource TextBrush}" />
                                     <TextBlock Text="{Binding CurrentFileName}"
                                                Style="{StaticResource Text.Hint}"
                                                TextTrimming="CharacterEllipsis"
@@ -3183,8 +3183,8 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsReviewPick}" Value="True">
                                                     <Setter Property="Background" Value="{DynamicResource SuccessPanelBrush}" />
-                                                    <Setter Property="BorderBrush" Value="{StaticResource GreenBrush}" />
-                                                    <Setter Property="Foreground" Value="{StaticResource GreenBrush}" />
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource GreenBrush}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource GreenBrush}" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -3197,8 +3197,8 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsReviewReject}" Value="True">
                                                     <Setter Property="Background" Value="{DynamicResource DangerPanelBrush}" />
-                                                    <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
-                                                    <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource RedBrush}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource RedBrush}" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -3220,7 +3220,7 @@
                                     <TextBlock Text="Assisted culling"
                                                Style="{StaticResource Text.Caption}"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}" />
+                                               Foreground="{DynamicResource TextBrush}" />
                                     <TextBlock Text="{Binding CullingScoreStatusText}"
                                                Style="{StaticResource Text.Hint}"
                                                TextWrapping="Wrap"
@@ -3270,7 +3270,7 @@
                                                     Height="42"
                                                     CornerRadius="{StaticResource Radius.Sm.CR}"
                                                     BorderThickness="1"
-                                                    BorderBrush="{StaticResource HairlineBrush}"
+                                                    BorderBrush="{DynamicResource HairlineBrush}"
                                                     Background="{DynamicResource AccentPanelBrush}"
                                                     Margin="0,0,10,0"
                                                     VerticalAlignment="Top">
@@ -3278,12 +3278,12 @@
                                                     <TextBlock Text="{Binding RankText}"
                                                                FontSize="10"
                                                                FontWeight="SemiBold"
-                                                               Foreground="{StaticResource OverlayBrush}"
+                                                               Foreground="{DynamicResource OverlayBrush}"
                                                                HorizontalAlignment="Center" />
                                                     <TextBlock Text="{Binding ScoreText}"
                                                                FontSize="14"
                                                                FontWeight="SemiBold"
-                                                               Foreground="{StaticResource AccentBrush}"
+                                                               Foreground="{DynamicResource AccentBrush}"
                                                                HorizontalAlignment="Center" />
                                                 </StackPanel>
                                             </Border>
@@ -3293,7 +3293,7 @@
                                                            FontSize="12.5"
                                                            FontWeight="SemiBold"
                                                            TextTrimming="CharacterEllipsis"
-                                                           Foreground="{StaticResource TextBrush}" />
+                                                           Foreground="{DynamicResource TextBrush}" />
                                                 <TextBlock Text="{Binding PrimaryReason}"
                                                            Style="{StaticResource Text.Hint}"
                                                            TextTrimming="CharacterEllipsis"
@@ -3301,7 +3301,7 @@
                                                            Margin="0,2,0,0" />
                                                 <TextBlock Text="{Binding ReviewText}"
                                                            FontSize="11"
-                                                           Foreground="{StaticResource OverlayBrush}"
+                                                           Foreground="{DynamicResource OverlayBrush}"
                                                            TextTrimming="CharacterEllipsis"
                                                            Margin="0,2,0,0" />
                                             </StackPanel>
@@ -3428,16 +3428,16 @@
                                             </Button.ContextMenu>
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
-                                                    <Setter Property="Background" Value="{StaticResource Surface0Brush}" />
-                                                    <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+                                                    <Setter Property="Background" Value="{DynamicResource Surface0Brush}" />
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsCurrent}" Value="True">
                                                             <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                                         </DataTrigger>
                                                         <Trigger Property="IsKeyboardFocused" Value="True">
                                                             <Setter Property="Background" Value="{DynamicResource AccentSelectionBrush}" />
-                                                            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                                         </Trigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -3445,8 +3445,8 @@
                                             <StackPanel>
                                                 <Border Height="56"
                                                         CornerRadius="{StaticResource Radius.Sm.CR}"
-                                                        Background="{StaticResource ViewportBrush}"
-                                                        BorderBrush="{StaticResource HairlineBrush}"
+                                                        Background="{DynamicResource ViewportBrush}"
+                                                        BorderBrush="{DynamicResource HairlineBrush}"
                                                         BorderThickness="1"
                                                         ClipToBounds="True">
                                                     <Grid>
@@ -3462,11 +3462,11 @@
                                                                    Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="{x:Type TextBlock}">
-                                                                    <Setter Property="Foreground" Value="{StaticResource OverlayBrush}" />
+                                                                    <Setter Property="Foreground" Value="{DynamicResource OverlayBrush}" />
                                                                     <Style.Triggers>
                                                                         <DataTrigger Binding="{Binding ThumbnailFailed}" Value="True">
                                                                             <Setter Property="Text" Value="&#xE783;" />
-                                                                            <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+                                                                            <Setter Property="Foreground" Value="{DynamicResource YellowBrush}" />
                                                                         </DataTrigger>
                                                                     </Style.Triggers>
                                                                 </Style>
@@ -3475,13 +3475,13 @@
                                                     </Grid>
                                                 </Border>
                                                 <TextBlock Text="{Binding FileName}"
-                                                           Foreground="{StaticResource TextBrush}"
+                                                           Foreground="{DynamicResource TextBrush}"
                                                            FontSize="11.5"
                                                            FontWeight="SemiBold"
                                                            TextTrimming="CharacterEllipsis"
                                                            Margin="1,7,1,0" />
                                                 <TextBlock Text="{Binding PositionText}"
-                                                           Foreground="{StaticResource OverlayBrush}"
+                                                           Foreground="{DynamicResource OverlayBrush}"
                                                            FontSize="10.5"
                                                            Margin="1,1,1,0" />
                                             </StackPanel>
@@ -3526,8 +3526,8 @@
                                              Unlocked echoes the YellowBrush warning accent from the
                                              panel below so the two read as the same state. -->
                                         <DataTrigger Binding="{Binding IsExtensionUnlocked}" Value="True">
-                                            <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
-                                            <Setter Property="Background" Value="{StaticResource WarningPanelBrush}" />
+                                            <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}" />
+                                            <Setter Property="Background" Value="{DynamicResource WarningPanelBrush}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -3539,7 +3539,7 @@
                                            FontSize="11"
                                            VerticalAlignment="Center"
                                            Margin="0,0,7,0"
-                                           Foreground="{StaticResource SubtextBrush}"
+                                           Foreground="{DynamicResource SubtextBrush}"
                                            Visibility="{Binding IsExtensionUnlocked, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}" />
                                 <!-- Unlocked pencil-edit -->
                                 <TextBlock Text="&#xE70F;"
@@ -3547,7 +3547,7 @@
                                            FontSize="11"
                                            VerticalAlignment="Center"
                                            Margin="0,0,7,0"
-                                           Foreground="{StaticResource YellowBrush}"
+                                           Foreground="{DynamicResource YellowBrush}"
                                            Visibility="{Binding IsExtensionUnlocked, Converter={StaticResource BoolToVis}}" />
                                 <TextBlock Text="{Binding Extension}"
                                            VerticalAlignment="Center"
@@ -3560,14 +3560,14 @@
                     <!-- Extension-unlocked warning + editor -->
                     <Border Margin="0,12,0,0"
                             Padding="13,11"
-                            Background="{StaticResource WarningPanelBrush}"
-                            BorderBrush="{StaticResource YellowBrush}"
+                            Background="{DynamicResource WarningPanelBrush}"
+                            BorderBrush="{DynamicResource YellowBrush}"
                             BorderThickness="1"
                             CornerRadius="{StaticResource Radius.Sm.CR}"
                             Visibility="{Binding IsExtensionUnlocked, Converter={StaticResource BoolToVis}}">
                         <StackPanel>
                             <TextBlock Text="Changing the extension only renames the file. Use a supported Images format; this will not convert the image."
-                                       Foreground="{StaticResource YellowBrush}"
+                                       Foreground="{DynamicResource YellowBrush}"
                                        FontSize="12"
                                        LineHeight="17"
                                        TextWrapping="Wrap" />
@@ -3595,13 +3595,13 @@
                                 </Ellipse.RenderTransform>
                                 <Ellipse.Style>
                                     <Style TargetType="Ellipse" BasedOn="{StaticResource StatusDot}">
-                                        <Setter Property="Fill" Value="{StaticResource OverlayBrush}" />
+                                        <Setter Property="Fill" Value="{DynamicResource OverlayBrush}" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding RenameStatus}" Value="Pending">
-                                                <Setter Property="Fill" Value="{StaticResource YellowBrush}" />
+                                                <Setter Property="Fill" Value="{DynamicResource YellowBrush}" />
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding RenameStatus}" Value="Saved">
-                                                <Setter Property="Fill" Value="{StaticResource GreenBrush}" />
+                                                <Setter Property="Fill" Value="{DynamicResource GreenBrush}" />
                                                 <DataTrigger.EnterActions>
                                                     <BeginStoryboard>
                                                         <Storyboard>
@@ -3624,10 +3624,10 @@
                                                 </DataTrigger.EnterActions>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding RenameStatus}" Value="Conflict">
-                                                <Setter Property="Fill" Value="{StaticResource MauveBrush}" />
+                                                <Setter Property="Fill" Value="{DynamicResource MauveBrush}" />
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding RenameStatus}" Value="Error">
-                                                <Setter Property="Fill" Value="{StaticResource RedBrush}" />
+                                                <Setter Property="Fill" Value="{DynamicResource RedBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -3636,11 +3636,11 @@
 
                             <StackPanel Grid.Column="1">
                                 <TextBlock Text="{Binding RenameStatusText}"
-                                           Foreground="{StaticResource TextBrush}"
+                                           Foreground="{DynamicResource TextBrush}"
                                            FontSize="12.5"
                                            FontWeight="SemiBold" />
                                 <TextBlock Text="{Binding RenamePreview}"
-                                           Foreground="{StaticResource SubtextBrush}"
+                                           Foreground="{DynamicResource SubtextBrush}"
                                            FontSize="12"
                                            Margin="0,3,0,0"
                                            TextTrimming="CharacterEllipsis" />
@@ -3672,13 +3672,13 @@
                                             CornerRadius="{StaticResource Radius.Sm.CR}"
                                             BorderThickness="1"
                                             Background="{DynamicResource AccentPanelBrush}"
-                                            BorderBrush="{StaticResource AccentBrush}"
+                                            BorderBrush="{DynamicResource AccentBrush}"
                                             VerticalAlignment="Top"
                                             Margin="0,0,12,0">
                                         <TextBlock Text="&#xE8A5;"
                                                    FontFamily="{StaticResource IconFontFamily}"
                                                    FontSize="13"
-                                                   Foreground="{StaticResource AccentBrush}"
+                                                   Foreground="{DynamicResource AccentBrush}"
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center" />
                                     </Border>
@@ -3687,12 +3687,12 @@
                                         <TextBlock Text="{Binding CurrentArchiveProgressText}"
                                                    FontSize="12.5"
                                                    FontWeight="SemiBold"
-                                                   Foreground="{StaticResource TextBrush}"
+                                                   Foreground="{DynamicResource TextBrush}"
                                                    TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{Binding DecoderUsed}"
                                                    FontSize="11.5"
                                                    Margin="0,3,0,0"
-                                                   Foreground="{StaticResource OverlayBrush}"
+                                                   Foreground="{DynamicResource OverlayBrush}"
                                                    TextTrimming="CharacterEllipsis" />
                                     </StackPanel>
                                 </Grid>
@@ -3747,7 +3747,7 @@
                                         Padding="10,9"
                                         CornerRadius="{StaticResource Radius.Sm.CR}"
                                         Background="{DynamicResource SubtleSurfaceBrush}"
-                                        BorderBrush="{StaticResource HairlineBrush}"
+                                        BorderBrush="{DynamicResource HairlineBrush}"
                                         BorderThickness="1">
                                     <StackPanel>
                                         <CheckBox IsChecked="{Binding ArchiveRightToLeft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -3757,7 +3757,7 @@
                                         <TextBlock Text="{Binding ArchivePageTurnModeHint}"
                                                    Margin="28,5,0,0"
                                                    FontSize="11.5"
-                                                   Foreground="{StaticResource OverlayBrush}"
+                                                   Foreground="{DynamicResource OverlayBrush}"
                                                    TextWrapping="Wrap" />
                                         <CheckBox IsChecked="{Binding ArchiveOldScanFilterEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   Content="{Binding ArchiveOldScanFilterText}"
@@ -3767,7 +3767,7 @@
                                         <TextBlock Text="{Binding ArchiveOldScanFilterHint}"
                                                    Margin="28,5,0,0"
                                                    FontSize="11.5"
-                                                   Foreground="{StaticResource OverlayBrush}"
+                                                   Foreground="{DynamicResource OverlayBrush}"
                                                    TextWrapping="Wrap" />
                                         <CheckBox IsChecked="{Binding ArchiveSpreadModeEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   Content="{Binding ArchiveSpreadModeText}"
@@ -3777,7 +3777,7 @@
                                         <TextBlock Text="{Binding ArchiveSpreadModeHint}"
                                                    Margin="28,5,0,0"
                                                    FontSize="11.5"
-                                                   Foreground="{StaticResource OverlayBrush}"
+                                                   Foreground="{DynamicResource OverlayBrush}"
                                                    TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Border>
@@ -3794,11 +3794,11 @@
                             Visibility="{Binding RecentRenames.Count, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
                         <StackPanel>
                             <TextBlock Text="No renames yet"
-                                       Foreground="{StaticResource TextBrush}"
+                                       Foreground="{DynamicResource TextBrush}"
                                        FontSize="12.5"
                                        FontWeight="SemiBold" />
                             <TextBlock Text="Your undo list will appear here."
-                                       Foreground="{StaticResource OverlayBrush}"
+                                       Foreground="{DynamicResource OverlayBrush}"
                                        FontSize="12"
                                        LineHeight="17"
                                        TextWrapping="Wrap"
@@ -3823,12 +3823,12 @@
                                         <StackPanel Grid.Column="0">
                                             <TextBlock FontSize="12" TextTrimming="CharacterEllipsis">
                                                 <Run Text="{Binding FromPath, Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}"
-                                                     Foreground="{StaticResource SubtextBrush}" />
+                                                     Foreground="{DynamicResource SubtextBrush}" />
                                             </TextBlock>
                                             <TextBlock FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,2,0,0">
-                                                <Run Text="→ " Foreground="{StaticResource OverlayBrush}" />
+                                                <Run Text="→ " Foreground="{DynamicResource OverlayBrush}" />
                                                 <Run Text="{Binding ToPath, Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}"
-                                                     Foreground="{StaticResource TextBrush}" />
+                                                     Foreground="{DynamicResource TextBrush}" />
                                             </TextBlock>
                                         </StackPanel>
                                         <Button Grid.Column="1"
@@ -3884,7 +3884,7 @@
                                             <TextBlock Text="&#xE8B7;"
                                                        FontFamily="{StaticResource IconFontFamily}"
                                                        FontSize="13"
-                                                       Foreground="{StaticResource SubtextBrush}"
+                                                       Foreground="{DynamicResource SubtextBrush}"
                                                        VerticalAlignment="Center"
                                                        Margin="0,0,10,0" />
                                             <StackPanel Grid.Column="1">
@@ -3892,12 +3892,12 @@
                                                            FontSize="12.5"
                                                            FontWeight="SemiBold"
                                                            TextTrimming="CharacterEllipsis"
-                                                           Foreground="{StaticResource TextBrush}" />
+                                                           Foreground="{DynamicResource TextBrush}" />
                                                 <TextBlock Text="{Binding Converter={x:Static vm:PathToParentConverter.Instance}, Mode=OneWay}"
                                                            FontSize="11.5"
                                                            Margin="0,2,0,0"
                                                            TextTrimming="CharacterEllipsis"
-                                                           Foreground="{StaticResource OverlayBrush}" />
+                                                           Foreground="{DynamicResource OverlayBrush}" />
                                             </StackPanel>
                                         </Grid>
                                     </Button>
@@ -3938,13 +3938,13 @@
                                                     CornerRadius="{StaticResource Radius.Sm.CR}"
                                                     BorderThickness="1"
                                                     Background="{DynamicResource AccentPanelBrush}"
-                                                    BorderBrush="{StaticResource HairlineBrush}"
+                                                    BorderBrush="{DynamicResource HairlineBrush}"
                                                     VerticalAlignment="Center"
                                                     Margin="0,0,10,0">
                                                 <TextBlock Text="&#xE8A5;"
                                                            FontFamily="{StaticResource IconFontFamily}"
                                                            FontSize="12"
-                                                           Foreground="{StaticResource AccentBrush}"
+                                                           Foreground="{DynamicResource AccentBrush}"
                                                            HorizontalAlignment="Center"
                                                            VerticalAlignment="Center" />
                                             </Border>
@@ -3954,12 +3954,12 @@
                                                            FontSize="12.5"
                                                            FontWeight="SemiBold"
                                                            TextTrimming="CharacterEllipsis"
-                                                           Foreground="{StaticResource TextBrush}" />
+                                                           Foreground="{DynamicResource TextBrush}" />
                                                 <TextBlock Text="{Binding Path, Converter={x:Static vm:PathToParentConverter.Instance}, Mode=OneWay}"
                                                            FontSize="11.5"
                                                            Margin="0,2,0,0"
                                                            TextTrimming="CharacterEllipsis"
-                                                           Foreground="{StaticResource OverlayBrush}" />
+                                                           Foreground="{DynamicResource OverlayBrush}" />
                                             </StackPanel>
 
                                             <Border Grid.Column="2"
@@ -3969,7 +3969,7 @@
                                                 <TextBlock Text="{Binding ProgressText}"
                                                            FontSize="11"
                                                            FontWeight="SemiBold"
-                                                           Foreground="{StaticResource SubtextBrush}" />
+                                                           Foreground="{DynamicResource SubtextBrush}" />
                                             </Border>
                                         </Grid>
                                     </Button>
@@ -4024,7 +4024,7 @@
                             <TextBlock Text="{Binding DecoderUsed}"
                                        FontSize="11"
                                        FontWeight="SemiBold"
-                                       Foreground="{StaticResource SubtextBrush}" />
+                                       Foreground="{DynamicResource SubtextBrush}" />
                         </Border>
                     </Grid>
 
@@ -4043,7 +4043,7 @@
                             <StackPanel>
                                 <TextBlock Text="Tag relationships"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock Text="Manage private local tag namespaces, aliases, parents, and XMP sidecar tag export."
                                            Style="{StaticResource Text.Hint}"
                                            TextWrapping="Wrap"
@@ -4087,7 +4087,7 @@
                             <StackPanel>
                                 <TextBlock Text="Macro actions"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock Text="Build inspectable JSON actions, manage local model files, and search the current folder through the local semantic index."
                                            Style="{StaticResource Text.Hint}"
                                            TextWrapping="Wrap"
@@ -4149,7 +4149,7 @@
                             <StackPanel>
                                 <TextBlock Text="Cleanup tools"
                                            FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock Text="Find duplicate images, bad extensions, broken files, and temporary artifacts in local folders."
                                            Style="{StaticResource Text.Hint}"
                                            TextWrapping="Wrap"
@@ -4203,7 +4203,7 @@
                                 <StackPanel>
                                     <TextBlock Text="{Binding CompareModeText}"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}" />
+                                               Foreground="{DynamicResource TextBrush}" />
                                     <TextBlock Text="{Binding CompareStatusText}"
                                                Style="{StaticResource Text.Hint}"
                                                TextWrapping="Wrap"
@@ -4294,7 +4294,7 @@
                                 <StackPanel>
                                     <TextBlock Text="{Binding OverlayModeText}"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}" />
+                                               Foreground="{DynamicResource TextBrush}" />
                                     <TextBlock Text="{Binding OverlayStatusText}"
                                                Style="{StaticResource Text.Hint}"
                                                TextWrapping="Wrap"
@@ -4350,13 +4350,13 @@
                                     Padding="10"
                                     CornerRadius="{StaticResource Radius.Sm.CR}"
                                     Background="{DynamicResource SubtleSurfaceBrush}"
-                                    BorderBrush="{StaticResource HairlineBrush}"
+                                    BorderBrush="{DynamicResource HairlineBrush}"
                                     BorderThickness="1">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE946;"
                                                FontFamily="{StaticResource IconFontFamily}"
                                                FontSize="12"
-                                               Foreground="{StaticResource AccentBrush}"
+                                               Foreground="{DynamicResource AccentBrush}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,9,0" />
                                     <TextBlock Text="{Binding OverlayExitText}"
@@ -4394,7 +4394,7 @@
                                     <StackPanel>
                                         <TextBlock Text="{Binding SelectedAnimationFrameText}"
                                                    FontWeight="SemiBold"
-                                                   Foreground="{StaticResource TextBrush}" />
+                                                   Foreground="{DynamicResource TextBrush}" />
                                         <TextBlock Text="{Binding AnimationWorkbenchStatusText}"
                                                    Style="{StaticResource Text.Hint}"
                                                    TextWrapping="Wrap"
@@ -4518,11 +4518,11 @@
                                                             BorderThickness="1">
                                                         <Border.Style>
                                                             <Style TargetType="Border">
-                                                                <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
-                                                                <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+                                                                <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+                                                                <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                                                         <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
@@ -4583,7 +4583,7 @@
                                 <StackPanel>
                                     <TextBlock Text="{Binding SelectionModeText}"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}" />
+                                               Foreground="{DynamicResource TextBrush}" />
                                     <TextBlock Text="{Binding SelectionModeHelpText}"
                                                Style="{StaticResource Text.Hint}"
                                                TextWrapping="Wrap"
@@ -4599,8 +4599,8 @@
                                 </Button>
                             </Grid>
 
-                            <Border Background="{StaticResource PanelBrush}"
-                                    BorderBrush="{StaticResource HairlineBrush}"
+                            <Border Background="{DynamicResource PanelBrush}"
+                                    BorderBrush="{DynamicResource HairlineBrush}"
                                     BorderThickness="1"
                                     CornerRadius="{StaticResource Radius.Sm.CR}"
                                     Padding="10"
@@ -4654,7 +4654,7 @@
                                 <StackPanel>
                                     <TextBlock Text="{Binding CropModeText}"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}" />
+                                               Foreground="{DynamicResource TextBrush}" />
                                     <TextBlock Text="{Binding CropModeHelpText}"
                                                Style="{StaticResource Text.Hint}"
                                                TextWrapping="Wrap"
@@ -4670,8 +4670,8 @@
                                 </Button>
                             </Grid>
 
-                            <Border Background="{StaticResource PanelBrush}"
-                                    BorderBrush="{StaticResource HairlineBrush}"
+                            <Border Background="{DynamicResource PanelBrush}"
+                                    BorderBrush="{DynamicResource HairlineBrush}"
                                     BorderThickness="1"
                                     CornerRadius="{StaticResource Radius.Sm.CR}"
                                     Padding="10"
@@ -4792,7 +4792,7 @@
                                 <StackPanel>
                                     <TextBlock Text="{Binding ExposureBrushModeText}"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}" />
+                                               Foreground="{DynamicResource TextBrush}" />
                                     <TextBlock Text="{Binding ExposureBrushModeHelpText}"
                                                Style="{StaticResource Text.Hint}"
                                                TextWrapping="Wrap"
@@ -4808,8 +4808,8 @@
                                 </Button>
                             </Grid>
 
-                            <Border Background="{StaticResource PanelBrush}"
-                                    BorderBrush="{StaticResource HairlineBrush}"
+                            <Border Background="{DynamicResource PanelBrush}"
+                                    BorderBrush="{DynamicResource HairlineBrush}"
                                     BorderThickness="1"
                                     CornerRadius="{StaticResource Radius.Sm.CR}"
                                     Padding="10"
@@ -4923,7 +4923,7 @@
                                 <StackPanel>
                                     <TextBlock Text="{Binding RedEyeCorrectionModeText}"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}" />
+                                               Foreground="{DynamicResource TextBrush}" />
                                     <TextBlock Text="{Binding RedEyeCorrectionModeHelpText}"
                                                Style="{StaticResource Text.Hint}"
                                                TextWrapping="Wrap"
@@ -4939,8 +4939,8 @@
                                 </Button>
                             </Grid>
 
-                            <Border Background="{StaticResource PanelBrush}"
-                                    BorderBrush="{StaticResource HairlineBrush}"
+                            <Border Background="{DynamicResource PanelBrush}"
+                                    BorderBrush="{DynamicResource HairlineBrush}"
                                     BorderThickness="1"
                                     CornerRadius="{StaticResource Radius.Sm.CR}"
                                     Padding="10"
@@ -5048,7 +5048,7 @@
                                 <StackPanel>
                                     <TextBlock Text="{Binding RetouchModeText}"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}" />
+                                               Foreground="{DynamicResource TextBrush}" />
                                     <TextBlock Text="{Binding RetouchModeHelpText}"
                                                Style="{StaticResource Text.Hint}"
                                                TextWrapping="Wrap"
@@ -5064,8 +5064,8 @@
                                 </Button>
                             </Grid>
 
-                            <Border Background="{StaticResource PanelBrush}"
-                                    BorderBrush="{StaticResource HairlineBrush}"
+                            <Border Background="{DynamicResource PanelBrush}"
+                                    BorderBrush="{DynamicResource HairlineBrush}"
                                     BorderThickness="1"
                                     CornerRadius="{StaticResource Radius.Sm.CR}"
                                     Padding="10"
@@ -5188,7 +5188,7 @@
                                 <StackPanel>
                                     <TextBlock Text="{Binding InspectorModeText}"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextBrush}" />
+                                               Foreground="{DynamicResource TextBrush}" />
                                     <TextBlock Text="{Binding InspectorModeHelpText}"
                                                Style="{StaticResource Text.Hint}"
                                                TextWrapping="Wrap"
@@ -5210,8 +5210,8 @@
                                       ToolTip="Use crisp scaling for pixel-art inspection."
                                       AutomationProperties.Name="Use nearest-neighbor preview scaling" />
 
-                            <Border Background="{StaticResource PanelBrush}"
-                                    BorderBrush="{StaticResource HairlineBrush}"
+                            <Border Background="{DynamicResource PanelBrush}"
+                                    BorderBrush="{DynamicResource HairlineBrush}"
                                     BorderThickness="1"
                                     CornerRadius="{StaticResource Radius.Sm.CR}"
                                     Padding="10"
@@ -5332,7 +5332,7 @@
                                 <TextBlock Text="&#xE7BA;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="12"
-                                           Foreground="{StaticResource YellowBrush}"
+                                           Foreground="{DynamicResource YellowBrush}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,9,0" />
                                 <TextBlock Text="{Binding ColorAnalysisWarningText}"
@@ -5349,7 +5349,7 @@
                                 <TextBlock Text="&#xE946;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="12"
-                                           Foreground="{StaticResource OverlayBrush}"
+                                           Foreground="{DynamicResource OverlayBrush}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,9,0" />
                                 <TextBlock Text="{Binding ColorAnalysisStatusText}"
@@ -5372,7 +5372,7 @@
                                     <TextBlock Text="&#xE72E;"
                                                FontFamily="{StaticResource IconFontFamily}"
                                                FontSize="14"
-                                               Foreground="{StaticResource AccentBrush}"
+                                               Foreground="{DynamicResource AccentBrush}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,8,0" />
                                     <TextBlock Text="{Binding C2paTrustBadgeText}"
@@ -5422,7 +5422,7 @@
                             <TextBlock Text="&#xE946;"
                                        FontFamily="{StaticResource IconFontFamily}"
                                        FontSize="12"
-                                       Foreground="{StaticResource OverlayBrush}"
+                                       Foreground="{DynamicResource OverlayBrush}"
                                        VerticalAlignment="Center"
                                        Margin="0,0,9,0" />
                             <TextBlock Text="{Binding MetadataStatusText}"

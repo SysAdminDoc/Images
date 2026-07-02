@@ -8,7 +8,7 @@
         MinWidth="520"
         MinHeight="540"
         WindowStartupLocation="CenterOwner">
-    <Grid Background="{StaticResource BaseBrush}">
+    <Grid Background="{DynamicResource BaseBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -37,7 +37,7 @@
 
                         <TextBlock Text="{loc:Loc ResizeMode}"
                                    FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextBrush}"
+                                   Foreground="{DynamicResource TextBrush}"
                                    Margin="0,14,0,4" />
                         <ComboBox x:Name="ModeCombo"
                                   DisplayMemberPath="Label"
@@ -51,7 +51,7 @@
                         <StackPanel x:Name="PercentPanel" Margin="0,14,0,0">
                             <TextBlock Text="{loc:Loc ResizePercent}"
                                        FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextBrush}"
+                                       Foreground="{DynamicResource TextBrush}"
                                        Margin="0,0,0,4" />
                             <TextBox x:Name="PercentBox"
                                      TextChanged="InputChanged"
@@ -61,7 +61,7 @@
                         <StackPanel x:Name="PixelPanel" Margin="0,14,0,0">
                             <TextBlock Text="{loc:Loc ResizePixelSize}"
                                        FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextBrush}"
+                                       Foreground="{DynamicResource TextBrush}"
                                        Margin="0,0,0,4" />
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -91,7 +91,7 @@
                             <TextBlock x:Name="EdgeLabel"
                                        Text="{loc:Loc ResizeEdge}"
                                        FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextBrush}"
+                                       Foreground="{DynamicResource TextBrush}"
                                        Margin="0,0,0,4" />
                             <TextBox x:Name="EdgeBox"
                                      TextChanged="InputChanged"

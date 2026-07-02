@@ -10,7 +10,7 @@
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         ResizeMode="NoResize"
-        Background="{StaticResource BaseBrush}"
+        Background="{DynamicResource BaseBrush}"
         TextOptions.TextFormattingMode="Display"
         UseLayoutRounding="True">
 
@@ -33,15 +33,15 @@
                 <Border Width="44"
                         Height="44"
                         CornerRadius="{StaticResource Radius.Md.CR}"
-                        Background="{StaticResource DangerPanelBrush}"
-                        BorderBrush="{StaticResource RedBrush}"
+                        Background="{DynamicResource DangerPanelBrush}"
+                        BorderBrush="{DynamicResource RedBrush}"
                         BorderThickness="1"
                         VerticalAlignment="Top">
                     <TextBlock x:Name="IconText"
                                Text="&#xE74D;"
                                FontFamily="{StaticResource IconFontFamily}"
                                FontSize="20"
-                               Foreground="{StaticResource RedBrush}"
+                               Foreground="{DynamicResource RedBrush}"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center" />
                 </Border>
@@ -69,12 +69,12 @@
                     <TextBlock Text="&#xE8A5;"
                                FontFamily="{StaticResource IconFontFamily}"
                                FontSize="15"
-                               Foreground="{StaticResource OverlayBrush}"
+                               Foreground="{DynamicResource OverlayBrush}"
                                VerticalAlignment="Top"
                                Margin="0,1,11,0" />
                     <StackPanel Grid.Column="1">
                         <TextBlock x:Name="SubjectText"
-                                   Foreground="{StaticResource TextBrush}"
+                                   Foreground="{DynamicResource TextBrush}"
                                    FontSize="13"
                                    FontWeight="SemiBold"
                                    TextTrimming="CharacterEllipsis" />

@@ -9,7 +9,7 @@
         MinHeight="560"
         WindowStartupLocation="CenterOwner"
         KeyDown="Window_KeyDown">
-    <Grid Background="{StaticResource BaseBrush}">
+    <Grid Background="{DynamicResource BaseBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -85,7 +85,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="{loc:Loc Stroke}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                <TextBlock Text="{loc:Loc Stroke}" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock x:Name="StrokeText" Grid.Column="1" Style="{StaticResource Text.Caption}" />
                             </Grid>
                             <Slider x:Name="StrokeSlider"
@@ -103,7 +103,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="{loc:Loc AnnotationTextSize}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                <TextBlock Text="{loc:Loc AnnotationTextSize}" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock x:Name="FontText" Grid.Column="1" Style="{StaticResource Text.Caption}" />
                             </Grid>
                             <Slider x:Name="FontSlider"
@@ -117,11 +117,11 @@
                                     AutomationProperties.Name="{loc:Loc AnnotationFontSizeAutomationName}" />
 
                             <WrapPanel Margin="0,14,0,0">
-                                <Button Tag="#F38BA8" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#F38BA8" BorderBrush="{StaticResource HairlineBrush}" ToolTip="Red" AutomationProperties.Name="Red color" />
-                                <Button Tag="#F9E2AF" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#F9E2AF" BorderBrush="{StaticResource HairlineBrush}" ToolTip="Yellow" AutomationProperties.Name="Yellow color" />
-                                <Button Tag="#A6E3A1" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#A6E3A1" BorderBrush="{StaticResource HairlineBrush}" ToolTip="Green" AutomationProperties.Name="Green color" />
-                                <Button Tag="#89B4FA" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#89B4FA" BorderBrush="{StaticResource HairlineBrush}" ToolTip="Blue" AutomationProperties.Name="Blue color" />
-                                <Button Tag="#FFFFFF" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#FFFFFF" BorderBrush="{StaticResource HairlineBrush}" ToolTip="White" AutomationProperties.Name="White color" />
+                                <Button Tag="#F38BA8" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#F38BA8" BorderBrush="{DynamicResource HairlineBrush}" ToolTip="Red" AutomationProperties.Name="Red color" />
+                                <Button Tag="#F9E2AF" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#F9E2AF" BorderBrush="{DynamicResource HairlineBrush}" ToolTip="Yellow" AutomationProperties.Name="Yellow color" />
+                                <Button Tag="#A6E3A1" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#A6E3A1" BorderBrush="{DynamicResource HairlineBrush}" ToolTip="Green" AutomationProperties.Name="Green color" />
+                                <Button Tag="#89B4FA" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#89B4FA" BorderBrush="{DynamicResource HairlineBrush}" ToolTip="Blue" AutomationProperties.Name="Blue color" />
+                                <Button Tag="#FFFFFF" Click="ColorButton_Click" Width="34" Height="30" Margin="0,0,8,8" Background="#FFFFFF" BorderBrush="{DynamicResource HairlineBrush}" ToolTip="White" AutomationProperties.Name="White color" />
                             </WrapPanel>
                         </StackPanel>
                     </Border>
@@ -141,7 +141,7 @@
                     Padding="10"
                     ClipToBounds="True">
                 <Canvas x:Name="PreviewCanvas"
-                        Background="{StaticResource ViewerSurfaceBrush}"
+                        Background="{DynamicResource ViewerSurfaceBrush}"
                         ClipToBounds="True"
                         SizeChanged="PreviewCanvas_SizeChanged"
                         MouseLeftButtonDown="PreviewCanvas_MouseLeftButtonDown"
