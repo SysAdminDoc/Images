@@ -286,8 +286,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenBatchProcessorCommand = new RelayCommand(OpenBatchProcessor);
         OpenEditStackCommand = new RelayCommand(OpenEditStack, () => HasImage);
         OpenRecentFolderCommand = new RelayCommand(p => OpenRecentFolder(p as string), p => p is string);
-        OpenRecentArchiveCommand = new RelayCommand(
-            async p => await OpenRecentArchiveAsync(p as ArchiveReadPositionService.ArchiveReadHistoryItem),
+        OpenRecentArchiveCommand = new AsyncRelayCommand(
+            p => OpenRecentArchiveAsync(p as ArchiveReadPositionService.ArchiveReadHistoryItem),
             p => p is ArchiveReadPositionService.ArchiveReadHistoryItem && !IsOperationBusy);
         OpenPreviewItemCommand = new RelayCommand(p => OpenPreviewItem(p as FolderPreviewItem), p => p is FolderPreviewItem);
         RevealPreviewItemCommand = new RelayCommand(p => RevealPreviewItem(p as FolderPreviewItem), p => p is FolderPreviewItem);
@@ -6900,17 +6900,18 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private async Task SaveAsCopyAsync()
     {
         if (CurrentImage is not System.Windows.Media.Imaging.BitmapSource bs || CurrentPath is null) return;
+        var sourcePath = CurrentPath;
 
-        var sourceExtension = ImageExportService.NormalizeExportExtension(Path.GetExtension(CurrentPath));
+        var sourceExtension = ImageExportService.NormalizeExportExtension(Path.GetExtension(sourcePath));
 
         var dlg = new Microsoft.Win32.SaveFileDialog
         {
             Title = Strings.MainDialogSaveCopy,
-            FileName = Path.GetFileNameWithoutExtension(CurrentPath) + "_copy" + sourceExtension,
+            FileName = Path.GetFileNameWithoutExtension(sourcePath) + "_copy" + sourceExtension,
             Filter = ImageExportService.ExportFilter,
             DefaultExt = sourceExtension.TrimStart('.'),
             AddExtension = true,
-            InitialDirectory = Path.GetDirectoryName(CurrentPath),
+            InitialDirectory = Path.GetDirectoryName(sourcePath),
         };
         if (dlg.ShowDialog() != true) return;
 
@@ -6918,7 +6919,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         try
         {
             targetPath = ImageExportService.ResolveWritablePath(dlg.FileName);
-            if (PathsReferToSameFile(targetPath, CurrentPath))
+            if (PathsReferToSameFile(targetPath, sourcePath))
             {
                 Toast(Strings.MainChooseDifferentFilename);
                 return;
@@ -6934,7 +6935,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         try
         {
             await YieldForOperationStatusAsync();
-            var sourcePath = CurrentPath;
             if (_editStack.HasEnabledOperations(sourcePath))
             {
                 var result = await Task.Run(() => _editStack.Export(sourcePath, targetPath));
