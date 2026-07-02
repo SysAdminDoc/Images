@@ -13,6 +13,7 @@ All notable changes to **Images** are documented here.
 - **AsyncRelayCommand replaces async void command pattern** — 25 `RelayCommand(async () => await …)` usages in MainViewModel now use `AsyncRelayCommand` which accepts `Func<Task>`, catches `OperationCanceledException` (expected during navigation), and routes other exceptions through the dispatcher crash handler instead of terminating the process.
 - **Preload eviction now cancels in-flight decodes** — PreloadService uses per-entry linked `CancellationTokenSource` so evicted cache entries cancel their background decode immediately instead of running to completion.
 - **Navigation history uses O(1) bounded collection** — DirectoryNavigator back/forward stacks replaced with `LinkedList<string>` so push-past-cap drops the oldest entry in O(1) instead of O(n) stack-to-array-to-stack rebuild.
+- **Monitor work area fallback returns physical pixels** — `GetCurrentMonitorWorkArea` fallback paths now convert `SystemParameters.WorkArea` from logical to physical pixels, matching the method's contract and preventing double-conversion by callers.
 
 ### UX
 

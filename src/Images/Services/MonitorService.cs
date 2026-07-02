@@ -140,20 +140,26 @@ public static class MonitorService
 
     /// <summary>
     /// Returns the work area of the monitor the window is currently on, in physical pixels.
-    /// Falls back to <see cref="SystemParameters.WorkArea"/> (primary monitor, logical units)
-    /// if the P/Invoke call fails.
     /// </summary>
     public static Rect GetCurrentMonitorWorkArea(Window window)
     {
         var hwnd = new WindowInteropHelper(window).Handle;
         if (hwnd == IntPtr.Zero)
-            return SystemParameters.WorkArea;
+            return LogicalWorkAreaToPhysical(1.0);
 
         var hMonitor = MonitorFromWindow(hwnd, MonitorDefaultToNearest);
         var info = MonitorInfoEx.Create();
-        return GetMonitorInfo(hMonitor, ref info)
-            ? ToRect(info.WorkArea)
-            : SystemParameters.WorkArea;
+        if (GetMonitorInfo(hMonitor, ref info))
+            return ToRect(info.WorkArea);
+
+        var dpiScale = GetMonitorDpiScale(hMonitor, hwnd);
+        return LogicalWorkAreaToPhysical(dpiScale);
+    }
+
+    private static Rect LogicalWorkAreaToPhysical(double dpiScale)
+    {
+        var wa = SystemParameters.WorkArea;
+        return new Rect(wa.X * dpiScale, wa.Y * dpiScale, wa.Width * dpiScale, wa.Height * dpiScale);
     }
 
     /// <summary>
