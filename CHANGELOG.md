@@ -2,6 +2,62 @@
 
 All notable changes to **Images** are documented here.
 
+## 0.2.16
+
+Deep audit release: 40+ correctness, security, privacy, and quality fixes across the viewer, editing pipeline, import/export, AI services, theming, and accessibility.
+
+### Security & privacy
+
+- **GPS strip now removes XMP and IPTC location** — The privacy strip only removed EXIF GPS tags, leaving `exif:GPS*` in the XMP packet and IPTC City/Country records intact while reporting success. It now scrubs XMP/IPTC location for the GPS category and drops the XMP/IPTC/8BIM profiles for the All category.
+- **Import Inbox honors the GPS-strip contract for all formats** — The strip silently skipped non-JPEG/TIFF; it now covers PNG/WebP and fails the import when a format it cannot rewrite still carries location data instead of importing it.
+- **Listen-mode UNC bypass closed** — Forward-slash UNC paths (`//host/share`) slipped past the block and triggered an outbound SMB connection; the check now runs on the canonicalized path. Added a 10-second pre-auth deadline and an 8-connection concurrency cap.
+- **Support bundle redacts log paths** — Raw logs (which contain full image paths) are now streamed through `%USERPROFILE%` redaction, matching the bundle's own privacy claim.
+- **Model integrity re-verified on drift** — `ModelManagerService` rehashes when the on-disk length differs from the manifest, so post-import corruption no longer reports "SHA-256 verified".
+
+### Correctness
+
+- **"Max dimensions" resize is shrink-only** — Every max-dimension resize path (export, export preview, batch, macro, non-destructive edit) upscaled images smaller than the bound; all now use `Greater = true`.
+- **Q16 tensor scaling fixed** — The ONNX tensor converters divided saturated blue/green pixels by 255 instead of 65535 on the Q16 build, corrupting inpaint patches and CLIP embeddings. All four converters divide by `Quantum.Max`.
+- **Encrypted zip/cbz password prompt** — Password-protected archives went through a reader that cannot detect encryption; routing through SharpCompress restores the prompt.
+- **Preload cache leak and staleness** — Size/megapixel-skipped files leaked LRU entries that let the decoded cache exceed its cap; cached decodes are now invalidated when the source file changes on disk.
+- **Reload bypasses the preload cache** — Reload could serve a stale pre-edit decode; it now forces a fresh decode.
+- **Rename undo and cancel** — Undo "follow the file" compared the wrong path (dead code); a canceled extension edit was committed on the next navigation. Both fixed, and the external-edit watcher re-arms after rename/undo.
+- **Recycle-bin cancel no longer reports success** — A canceled shell error dialog returned as "deleted" and removed a still-present file from the list with a phantom recovery record.
+- **Explicit-list open matches by full path** — Opening a same-named file from another directory in a cross-directory list no longer silently shows the wrong image.
+- **Motion-photo detection scans the whole trailer** — Only the last 256 KB was scanned, missing real 1–4 MB Samsung/Pixel videos; it now walks backward in 1 MB chunks up to 128 MB.
+- **Picasa import** — Structural sections (`[Picasa]`, `[Contacts2]`, `[.album:*]`) are no longer reported as missing images; album IDs resolve to names; one unreadable sidecar no longer aborts the whole folder.
+- **Import-into-source-folder** no longer duplicates/renames the original (dead `SamePath` guard).
+
+### Crash prevention
+
+- **PerspectiveCorrectionWindow** guards its preview decode (WIC-rejected but Magick-decodable images crashed on open).
+- **NonDestructiveEditService** tolerates a malformed sidecar on the write path, matching the read path.
+- **EditStackWindow** copy-summary handles a busy clipboard instead of crashing.
+- **BatchProcessorWindow** cancels its run on window close.
+
+### Reliability
+
+- **ApplyInpaint hardened** — Now runs behind the operation-busy guard on `AsyncRelayCommand` with a writeback backup, recovery record, and preload reset.
+- **Writeback backup failures abort the write** — A failed backup under a configured policy no longer lets the lossy in-place write proceed silently.
+- **XMP sidecar writes are atomic** — Picasa, review-label, tag, and import-rating sidecars write via temp-then-swap so a crash can't truncate a merged sidecar.
+- **File-health scan skips reparse points** — A junction cycle no longer grows the scan unbounded.
+- **EML attachment** fills its buffer across short reads to avoid base64 corruption; **ExifTool** argfile sets `-charset filename=UTF8` for non-ANSI paths.
+- **Slideshow** skips ticks while an operation is busy; **OCR** extraction is canceled when switching modes so it can't resurrect its overlay.
+- **CLIP provider disposed** — Semantic Search disposes its ~600 MB of native ONNX sessions on window close.
+- **Network-egress log** caps in-memory entries and serializes JSONL appends.
+
+### Performance
+
+- **Catalog uses its NOCASE index** — Hot lookups wrapped both sides in `lower()`, defeating the unique index and making rebuild O(n²); they now compare the collated column directly.
+- **Gallery smart-filter builds off-thread** with a 64×64 decode hint instead of full-resolution decoding every image on the UI thread.
+
+### Accessibility & UX
+
+- **Zoom-at-cursor honors rotation and flip** — Wheel/pinch zoom no longer lurches away from the cursor on rotated or flipped images.
+- **Accessible names** added for unlabeled Batch Processor inputs, Import Inbox per-file checkboxes, and the archive password box.
+- **High Contrast** refreshes on Windows scheme change, hands the caption to the system scheme, and remaps `CrustColor` to a surface color; editing-overlay tints are now per-theme tokens.
+- **Microcopy** — localized the password-dialog "OK", `cancelled`→`canceled`, `directory`→`folder`, and title-cased the crash-dialog title.
+
 ## 0.2.15
 
 ### Internal
