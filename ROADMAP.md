@@ -30,6 +30,9 @@ Surfaced during the v0.2.16 deep audit but not fixed in that pass.
 - [ ] P3 — TileService background eviction can theoretically delete an in-use pyramid
   Why: `EvictIfOverCap` can remove a >1 GB single pyramid mid-display; bounded in practice by the 32768-px Magick dimension caps but not guarded explicitly.
   Where: `src/Images/Services/TileService.cs`
+- [ ] P3 — Test isolation: global BackgroundTaskTracker counters flake under parallel execution
+  Why: `UpdateCheckControllerTests.CheckAsync_WhenManualCheckRuns_RecordsTrackedUpdateTask` asserts `before.Started + 1 == after.Started` on the process-wide `BackgroundTaskTracker.Snapshot`; a concurrent preload/thumbnail task in another collection perturbs the counter, so it fails intermittently in full-suite runs (passes in isolation). Same class of flake seen once in `SemanticSearchServiceTests.Search_AppliesFolderFilter`. Fix by snapshotting per-name counters or serializing these tests into a dedicated collection.
+  Where: `tests/Images.Tests/UpdateCheckControllerTests.cs`, `src/Images/Services/BackgroundTaskTracker.cs`
 
 ## Research-Driven Additions
 
