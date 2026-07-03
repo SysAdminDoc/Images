@@ -568,10 +568,12 @@ public partial class MainWindow : Window
             FontSize = 14,
             Padding = new Thickness(8, 6, 8, 6)
         };
+        System.Windows.Automation.AutomationProperties.SetName(
+            passwordBox, Localization.Strings.ArchivePasswordTitle);
 
         var okButton = new System.Windows.Controls.Button
         {
-            Content = "OK",
+            Content = Localization.Strings.Ok,
             IsDefault = true,
             MinWidth = 80,
             Margin = new Thickness(8, 0, 0, 0),

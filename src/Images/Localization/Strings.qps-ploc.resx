@@ -97,7 +97,7 @@
     <value>[!!!!!!!!! Time:    {0:yyyy-MM-dd HH:mm:ss zzz} !!!!!!!!!]</value>
   </data>
   <data name="CrashDialogTitle" xml:space="preserve">
-    <value>[!!!!!!! Images - unexpected error !!!!!!!]</value>
+    <value>[!!!!!!! Images - Unexpected error !!!!!!!]</value>
   </data>
   <data name="CrashIssueBrowserAndCopyFailed" xml:space="preserve">
     <value>[!!!!!!!!!!!! Could not open the browser or copy the issue URL. !!!!!!!!!!!!]</value>
@@ -1638,16 +1638,16 @@ Details written to:
     <value>[!!!!!!!!!!!! Turn this back on if you used 'don't ask again' on the delete confirmation. !!!!!!!!!!!!]</value>
   </data>
   <data name="SettingsSiblingFolderTitle" xml:space="preserve">
-    <value>[!!!! Sibling folder auto-switch !!!!]</value>
+    <value>[!!!!!!! Sibling folder auto-switch !!!!!!!]</value>
   </data>
   <data name="SettingsSiblingFolderDescription" xml:space="preserve">
-    <value>[!!!!!!!!!!!!!!! When reaching the last or first image in a folder, continue into the next or previous sibling folder instead of wrapping. !!!!!!!!!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! When reaching the last or first image in a folder, continue into the next or previous sibling folder instead of wrapping. !!!!!!!!!!!!]</value>
   </data>
   <data name="SettingsSiblingFolderOnStatus" xml:space="preserve">
-    <value>[!!!!!!!!!!!!!!! Sibling folder auto-switch enabled. Navigation continues into adjacent folders. !!!!!!!!!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! Sibling folder auto-switch enabled. Navigation continues into adjacent folders. !!!!!!!!!!!!]</value>
   </data>
   <data name="SettingsSiblingFolderOffStatus" xml:space="preserve">
-    <value>[!!!!!!!!!!!!!!! Sibling folder auto-switch disabled. Navigation wraps within the current folder. !!!!!!!!!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! Sibling folder auto-switch disabled. Navigation wraps within the current folder. !!!!!!!!!!!!]</value>
   </data>
   <data name="SettingsSectionAccessibility" xml:space="preserve">
     <value>[!!!! Accessibility !!!!]</value>
@@ -2100,7 +2100,7 @@ Details written to:
     <value>[!!!!!!!! Could not open release page: {0} !!!!!!!!]</value>
   </data>
   <data name="AboutAppDirectoryLabel" xml:space="preserve">
-    <value>[!!!! App directory !!!!]</value>
+    <value>[!!! App folder !!!]</value>
   </data>
   <data name="AboutProcessArchLabel" xml:space="preserve">
     <value>[!!! Process arch !!!]</value>
@@ -2376,7 +2376,7 @@ Details written to:
     <value>[!!!!!!!!!! Preview complete: {0} file{1} processed. !!!!!!!!!!]</value>
   </data>
   <data name="MacroCancelled" xml:space="preserve">
-    <value>[!!!!! Operation cancelled. !!!!!]</value>
+    <value>[!!!!! Operation canceled. !!!!!]</value>
   </data>
   <data name="MacroStripMetadataCategories" xml:space="preserve">
     <value>[!!! Categories !!!]</value>
@@ -2397,10 +2397,10 @@ Details written to:
     <value>[!!!!!!!!!!!! Add at least one pipeline step before running. !!!!!!!!!!!!]</value>
   </data>
   <data name="MacroPreviewItemFormat" xml:space="preserve">
-    <value>[!!! {0} â†’ {1} !!!]</value>
+    <value>[!!! {0} → {1} !!!]</value>
   </data>
   <data name="MacroPreviewItemFailedFormat" xml:space="preserve">
-    <value>[!!!!! {0} â€” Error: {1} !!!!!]</value>
+    <value>[!!!! {0} — Error: {1} !!!!]</value>
   </data>
   <data name="ImportInboxWindowTitle" xml:space="preserve">
     <value>[!!!!!! Images - Import inbox !!!!!!]</value>
@@ -4091,7 +4091,7 @@ Details written to:
     <value>[!!! Open file... !!!]</value>
   </data>
   <data name="CommandPalette_BrowseFolder" xml:space="preserve">
-    <value>[!!!! Browse folderâ€¦ !!!!]</value>
+    <value>[!!!! Browse folder… !!!!]</value>
   </data>
   <data name="MainDialogBrowseFolder" xml:space="preserve">
     <value>[!!!!!! Browse folder for images !!!!!!]</value>
@@ -4112,7 +4112,7 @@ Details written to:
     <value>[!!! Last image !!!]</value>
   </data>
   <data name="CommandPalette_Refresh" xml:space="preserve">
-    <value>[!!!!! Refresh directory !!!!!]</value>
+    <value>[!!!! Refresh folder !!!!]</value>
   </data>
   <data name="CommandPalette_Filmstrip" xml:space="preserve">
     <value>[!!!! Toggle filmstrip !!!!]</value>
@@ -4392,11 +4392,14 @@ Details written to:
   <data name="ArchivePasswordTitle" xml:space="preserve">
     <value>[!!!! Archive password !!!!]</value>
   </data>
+  <data name="Ok" xml:space="preserve">
+    <value>[!! OK !!]</value>
+  </data>
   <data name="ArchivePasswordPrompt" xml:space="preserve">
     <value>[!!!!!! Enter password for {0}: !!!!!!]</value>
   </data>
   <data name="MainFormatMismatch" xml:space="preserve">
-    <value>[!!!!!!!!!!!! File content is {0} but extension is {1} â€” expected {2} !!!!!!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! File content is {0} but extension is {1} — expected {2} !!!!!!!!!!!!]</value>
   </data>
   <data name="MainImageLoading" xml:space="preserve">
     <value>[!!! Loading... !!!]</value>
@@ -4417,7 +4420,7 @@ Details written to:
     <value>[!!!!! Extract motion video !!!!!]</value>
   </data>
   <data name="MainOpStrippingMetadata" xml:space="preserve">
-    <value>[!!!!!! Removing {0} metadataâ€¦ !!!!!!]</value>
+    <value>[!!!!!! Removing {0} metadata… !!!!!!]</value>
   </data>
   <data name="MainToastNoMetadataFound" xml:space="preserve">
     <value>[!!!!!! No {0} metadata found !!!!!!]</value>

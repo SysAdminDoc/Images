@@ -97,7 +97,7 @@
     <value>Time:    {0:yyyy-MM-dd HH:mm:ss zzz}</value>
   </data>
   <data name="CrashDialogTitle" xml:space="preserve">
-    <value>Images - unexpected error</value>
+    <value>Images - Unexpected error</value>
   </data>
   <data name="CrashIssueBrowserAndCopyFailed" xml:space="preserve">
     <value>Could not open the browser or copy the issue URL.</value>
@@ -2100,7 +2100,7 @@ Details written to:
     <value>Could not open release page: {0}</value>
   </data>
   <data name="AboutAppDirectoryLabel" xml:space="preserve">
-    <value>App directory</value>
+    <value>App folder</value>
   </data>
   <data name="AboutProcessArchLabel" xml:space="preserve">
     <value>Process arch</value>
@@ -2376,7 +2376,7 @@ Details written to:
     <value>Preview complete: {0} file{1} processed.</value>
   </data>
   <data name="MacroCancelled" xml:space="preserve">
-    <value>Operation cancelled.</value>
+    <value>Operation canceled.</value>
   </data>
   <data name="MacroStripMetadataCategories" xml:space="preserve">
     <value>Categories</value>
@@ -4115,7 +4115,7 @@ Details written to:
     <value>Last image</value>
   </data>
   <data name="CommandPalette_Refresh" xml:space="preserve">
-    <value>Refresh directory</value>
+    <value>Refresh folder</value>
   </data>
   <data name="CommandPalette_Filmstrip" xml:space="preserve">
     <value>Toggle filmstrip</value>
@@ -4396,6 +4396,9 @@ Details written to:
   </data>
   <data name="ArchivePasswordTitle" xml:space="preserve">
     <value>Archive password</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
   </data>
   <data name="ArchivePasswordPrompt" xml:space="preserve">
     <value>Enter password for {0}:</value>

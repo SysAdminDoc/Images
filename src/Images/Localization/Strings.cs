@@ -1301,6 +1301,7 @@ public static class Strings
 
     // ---- Archive password ----
     public static string ArchivePasswordTitle => Get(nameof(ArchivePasswordTitle));
+    public static string Ok => Get(nameof(Ok));
     public static string ArchivePasswordPrompt => Get(nameof(ArchivePasswordPrompt));
 
     // ---- Granular metadata strip ----

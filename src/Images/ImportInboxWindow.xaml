@@ -143,6 +143,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <CheckBox IsChecked="{Binding IsIncluded, Mode=TwoWay}"
+                                                  AutomationProperties.Name="{Binding FileName}"
                                                   VerticalAlignment="Top"
                                                   Margin="0,2,10,0" />
                                         <StackPanel Grid.Column="1">
