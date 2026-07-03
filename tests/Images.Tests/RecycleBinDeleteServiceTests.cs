@@ -76,6 +76,25 @@ public sealed class RecycleBinDeleteServiceTests
     }
 
     [Fact]
+    public void Delete_WhenSendReportsCancel_ReturnsCanceled()
+    {
+        using var temp = TestDirectory.Create();
+        var image = temp.WriteFile("photo.jpg");
+        var settings = CreateSettings(temp);
+        settings.SetBool(Keys.ConfirmRecycleBinDelete, false);
+        var service = new RecycleBinDeleteService(
+            settings,
+            // Simulates the shell error dialog being canceled: the file is not
+            // actually deleted.
+            sendToRecycleBin: _ => throw new OperationCanceledException());
+
+        var result = service.Delete(image);
+
+        Assert.Equal(RecycleBinDeleteStatus.Canceled, result.Status);
+        Assert.True(File.Exists(image));
+    }
+
+    [Fact]
     public void Delete_WhenPathIsMissing_ReturnsMissing()
     {
         using var temp = TestDirectory.Create();

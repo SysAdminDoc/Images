@@ -58,6 +58,43 @@ public sealed class PicasaImportServiceTests
     }
 
     [Fact]
+    public void ImportFolder_SkipsStructuralSectionsAndResolvesAlbumNames()
+    {
+        using var temp = TestDirectory.Create();
+        var photo = temp.WriteFile("photo.jpg", "image bytes");
+        temp.WriteFile(".picasa.ini", """
+        [Picasa]
+        name=My Folder
+
+        [encoding]
+        1=UTF-8
+
+        [.album:9a7c]
+        name=Summer Trip
+        token=9a7c
+
+        [Contacts2]
+        abc123=Ada Lovelace;;
+
+        [photo.jpg]
+        star=yes
+        albums=9a7c
+        """);
+
+        var result = new PicasaImportService().ImportFolder(temp.Path);
+        var imported = new XmpSidecarImportService().ImportForImage(photo);
+
+        Assert.True(result.Success, result.Message);
+        // Only the real image row is imported; structural sections are not
+        // reported as missing images.
+        Assert.Equal(0, result.MissingImages);
+        Assert.Equal(1, result.SidecarsWritten);
+        // The album ID resolves to its display name, not the raw ID.
+        Assert.Contains("album:Summer Trip", imported.FlatKeywords);
+        Assert.DoesNotContain(imported.FlatKeywords, k => k.Contains("9a7c", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void ImportFolder_MissingIni_ReturnsFailureWithoutWritingSidecar()
     {
         using var temp = TestDirectory.Create();

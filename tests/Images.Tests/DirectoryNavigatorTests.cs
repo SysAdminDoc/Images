@@ -301,4 +301,27 @@ public sealed class DirectoryNavigatorTests
         Assert.Equal(1, nav.Count);
         Assert.Equal(valid, nav.CurrentPath);
     }
+
+    [Fact]
+    public void Open_InExplicitList_DoesNotMatchSameNameFromDifferentDirectory()
+    {
+        using var parent = TestDirectory.Create();
+        var folderA = Directory.CreateDirectory(Path.Combine(parent.Path, "a")).FullName;
+        var folderB = Directory.CreateDirectory(Path.Combine(parent.Path, "b")).FullName;
+        var inList = Path.Combine(folderA, "IMG_0001.jpg");
+        var elsewhere = Path.Combine(folderB, "IMG_0001.jpg");
+        var other = Path.Combine(folderA, "IMG_0002.jpg");
+        File.WriteAllBytes(inList, [0xFF, 0xD8]);
+        File.WriteAllBytes(elsewhere, [0xFF, 0xD8]);
+        File.WriteAllBytes(other, [0xFF, 0xD8]);
+
+        using var nav = new DirectoryNavigator();
+        Assert.True(nav.OpenExplicitList([inList, other]));
+
+        // Opening a same-named file from a different directory must rescan its
+        // own folder, not silently match the in-list entry by filename.
+        Assert.True(nav.Open(elsewhere));
+        Assert.Equal(elsewhere, nav.CurrentPath);
+        Assert.Equal(folderB, nav.Folder);
+    }
 }

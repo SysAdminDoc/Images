@@ -76,6 +76,39 @@ public sealed class MotionPhotoServiceTests
     }
 
     [Fact]
+    public void Detect_FindsEmbeddedMp4BeyondTailWindow()
+    {
+        using var temp = TestDirectory.Create();
+        var path = Path.Combine(temp.Path, "motion.jpg");
+
+        var jpegData = new byte[] { 0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46 };
+        var ftypBox = new byte[]
+        {
+            0x00, 0x00, 0x00, 0x14,
+            0x66, 0x74, 0x79, 0x70, // "ftyp"
+            0x6D, 0x70, 0x34, 0x32, // "mp42" brand
+            0x00, 0x00, 0x02, 0x00,
+            0x6D, 0x70, 0x34, 0x32
+        };
+        // A realistic ~2 MB motion video: the ftyp box sits far past the old
+        // 256 KB tail scan window.
+        var mp4Payload = new byte[2 * 1024 * 1024];
+
+        using (var stream = File.Create(path))
+        {
+            stream.Write(jpegData);
+            stream.Write(new byte[512 * 1024]);
+            stream.Write(ftypBox);
+            stream.Write(mp4Payload);
+        }
+
+        var result = MotionPhotoService.Detect(path);
+        Assert.NotNull(result);
+        Assert.Equal("mp42", result.ContainerType);
+        Assert.True(result.VideoLength > 2 * 1024 * 1024);
+    }
+
+    [Fact]
     public void FindCompanionVideo_ReturnsNullWhenNoCompanion()
     {
         using var temp = TestDirectory.Create();
