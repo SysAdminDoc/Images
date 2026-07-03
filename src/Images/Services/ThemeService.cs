@@ -61,7 +61,11 @@ public static class ThemeService
             SystemParameters.HighContrast) || resolvedMode == AppThemeMode.HighContrast;
         var effectiveMode = ResolveEffectiveMode(resolvedMode, highContrast);
 
-        SetHighContrastDictionary(application.Resources, highContrast);
+        // refresh: true recreates the dictionary when HC is already active —
+        // its tokens are one-time SystemColors snapshots, so switching between
+        // Windows HC schemes (Black/White) would otherwise keep stale colors
+        // until restart.
+        SetHighContrastDictionary(application.Resources, highContrast, refresh: highContrast);
         SetLatteOverlay(application.Resources, effectiveMode == AppThemeMode.Latte);
         CurrentMode = effectiveMode;
         ReapplyCaptionsToOpenWindows(application);

@@ -24,7 +24,7 @@
                                  Height="{Binding Diameter}"
                                  StrokeThickness="2"
                                  StrokeDashArray="2 2"
-                                 Fill="#0F89B4FA"
+                                 Fill="{DynamicResource BrushTintAccentBrush}"
                                  SnapsToDevicePixels="True">
                             <Ellipse.Style>
                                 <Style TargetType="Ellipse">
@@ -33,7 +33,7 @@
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsDodge}" Value="False">
                                             <Setter Property="Stroke" Value="{DynamicResource YellowBrush}" />
-                                            <Setter Property="Fill" Value="#14F9E2AF" />
+                                            <Setter Property="Fill" Value="{DynamicResource BrushTintYellowBrush}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>

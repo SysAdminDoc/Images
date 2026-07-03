@@ -73,6 +73,9 @@
     <SolidColorBrush x:Key="DropOverlayPanelBrush" Color="#F211111B" />
     <SolidColorBrush x:Key="OcrRegionBrush" Color="#4D89B4FA" />
     <SolidColorBrush x:Key="OcrRegionFocusBrush" Color="#9989B4FA" />
+    <SolidColorBrush x:Key="BrushTintYellowBrush" Color="#14F9E2AF" />
+    <SolidColorBrush x:Key="BrushTintAccentBrush" Color="#1289B4FA" />
+    <SolidColorBrush x:Key="BrushTintRedBrush" Color="#18FF4F64" />
     <SolidColorBrush x:Key="AccentPanelBrush" Color="#1F89B4FA" />
     <SolidColorBrush x:Key="AccentSelectionBrush" Color="#2689B4FA" />
     <SolidColorBrush x:Key="StatusPanelBrush" Color="#66313244" />

@@ -26,7 +26,7 @@
                             <Ellipse Stroke="{DynamicResource RedBrush}"
                                      StrokeThickness="2"
                                      StrokeDashArray="2 2"
-                                     Fill="#18FF4F64"
+                                     Fill="{DynamicResource BrushTintRedBrush}"
                                      Opacity="0.82" />
                             <Ellipse Width="8"
                                      Height="8"

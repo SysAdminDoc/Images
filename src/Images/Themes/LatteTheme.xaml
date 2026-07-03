@@ -73,5 +73,8 @@
     <SolidColorBrush x:Key="OverlayGuideStrongBrush" Color="#B84C4F69" />
     <SolidColorBrush x:Key="OverlayDimmerBrush" Color="#99000000" />
     <SolidColorBrush x:Key="SubtleSurfaceBrush" Color="#0DACE0F9" />
+    <SolidColorBrush x:Key="BrushTintYellowBrush" Color="#24DF8E1D" />
+    <SolidColorBrush x:Key="BrushTintAccentBrush" Color="#1F1E66F5" />
+    <SolidColorBrush x:Key="BrushTintRedBrush" Color="#24D20F39" />
 
 </ResourceDictionary>

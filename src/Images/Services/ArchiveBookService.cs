@@ -1,5 +1,4 @@
 using System.IO;
-using System.IO.Compression;
 using System.Runtime.InteropServices;
 using SharpCompress.Archives;
 using SharpCompress.Common;
@@ -129,14 +128,11 @@ public static class ArchiveBookService
 
     private static IArchiveReader OpenReader(string path, string? password = null)
     {
-        var ext = Path.GetExtension(path);
-        if (password is not null)
-            return new ManagedArchiveReader(path, password);
-
-        return ext.Equals(".zip", StringComparison.OrdinalIgnoreCase) ||
-               ext.Equals(".cbz", StringComparison.OrdinalIgnoreCase)
-            ? new ZipArchiveReader(path)
-            : new ManagedArchiveReader(path);
+        // Zip/CBZ goes through SharpCompress like every other format: the
+        // System.IO.Compression reader could not report entry encryption, so
+        // password-protected zips failed with a generic read error instead of
+        // raising ArchivePasswordRequiredException for the password prompt.
+        return new ManagedArchiveReader(path, password);
     }
 
     private static List<ArchiveEntrySource> GetSortedPageEntries(IArchiveReader reader)
@@ -296,54 +292,6 @@ public static class ArchiveBookService
         var normalized = NormalizeEntryName(entryName);
         var index = normalized.LastIndexOf('/');
         return index >= 0 ? normalized[(index + 1)..] : normalized;
-    }
-
-    private sealed class ZipArchiveReader : IArchiveReader
-    {
-        private readonly FileStream _stream;
-        private readonly ZipArchive _archive;
-
-        public ZipArchiveReader(string path)
-        {
-            _stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-            try
-            {
-                _archive = new ZipArchive(_stream, ZipArchiveMode.Read, leaveOpen: true);
-            }
-            catch
-            {
-                _stream.Dispose();
-                throw;
-            }
-        }
-
-        public IReadOnlyList<ArchiveEntrySource> ListPageEntries()
-        {
-            var pages = new List<ArchiveEntrySource>();
-            foreach (var entry in _archive.Entries)
-            {
-                if (string.IsNullOrWhiteSpace(entry.Name)) continue;
-                if (TryCreatePageEntry(
-                        entry.FullName,
-                        entry.Length,
-                        isDirectory: false,
-                        isEncrypted: false,
-                        entry.Open,
-                        out var page) &&
-                    page is not null)
-                {
-                    pages.Add(page);
-                }
-            }
-
-            return pages;
-        }
-
-        public void Dispose()
-        {
-            _archive.Dispose();
-            _stream.Dispose();
-        }
     }
 
     private sealed class ManagedArchiveReader : IArchiveReader

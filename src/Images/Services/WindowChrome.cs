@@ -26,6 +26,9 @@ internal static class WindowChrome
     [DllImport("dwmapi.dll", PreserveSig = true)]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
+    // DWMWA_COLOR_DEFAULT per dwmapi.h — resets a color attribute to the system default.
+    private const int DwmColorDefault = unchecked((int)0xFFFFFFFF);
+
     public static void ApplyDarkCaption(IntPtr hwnd)
     {
         if (hwnd == IntPtr.Zero) return;
@@ -33,6 +36,14 @@ internal static class WindowChrome
         if (ThemeService.CurrentMode == AppThemeMode.Latte)
         {
             ApplyLightCaption(hwnd);
+            return;
+        }
+
+        if (ThemeService.CurrentMode == AppThemeMode.HighContrast)
+        {
+            // The system HC scheme owns the caption; painting Mocha colors
+            // over it breaks contrast for the users who need it most.
+            ApplySystemCaption(hwnd);
             return;
         }
 
@@ -55,6 +66,18 @@ internal static class WindowChrome
         SetAttribute(hwnd, DWMWA_CAPTION_COLOR, LatteBaseColorRef);
         SetAttribute(hwnd, DWMWA_TEXT_COLOR, LatteTextColorRef);
         SetAttribute(hwnd, DWMWA_BORDER_COLOR, LatteSurfaceColorRef);
+    }
+
+    private static void ApplySystemCaption(IntPtr hwnd)
+    {
+        if (hwnd == IntPtr.Zero) return;
+        int value = 0;
+        try { DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref value, sizeof(int)); }
+        catch { /* pre-20H1 silently no-ops */ }
+
+        SetAttribute(hwnd, DWMWA_CAPTION_COLOR, DwmColorDefault);
+        SetAttribute(hwnd, DWMWA_TEXT_COLOR, DwmColorDefault);
+        SetAttribute(hwnd, DWMWA_BORDER_COLOR, DwmColorDefault);
     }
 
     private static void SetAttribute(IntPtr hwnd, int attribute, int value)

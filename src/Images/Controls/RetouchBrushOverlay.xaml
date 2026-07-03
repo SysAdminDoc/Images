@@ -30,7 +30,7 @@
                                      Stroke="{DynamicResource YellowBrush}"
                                      StrokeThickness="1.5"
                                      StrokeDashArray="2 2"
-                                     Fill="#10F9E2AF"
+                                     Fill="{DynamicResource BrushTintYellowBrush}"
                                      Opacity="0.78" />
                             <Ellipse Canvas.Left="{Binding TargetLeft}"
                                      Canvas.Top="{Binding TargetTop}"
@@ -39,7 +39,7 @@
                                      Stroke="{DynamicResource AccentBrush}"
                                      StrokeThickness="2"
                                      StrokeDashArray="2 2"
-                                     Fill="#1289B4FA"
+                                     Fill="{DynamicResource BrushTintAccentBrush}"
                                      Opacity="0.84" />
                         </Canvas>
                     </DataTemplate>

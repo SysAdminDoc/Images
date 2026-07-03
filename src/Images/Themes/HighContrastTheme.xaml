@@ -7,7 +7,7 @@
 
     <x:Static x:Key="BaseColor" Member="SystemColors.WindowColor" />
     <x:Static x:Key="MantleColor" Member="SystemColors.ControlColor" />
-    <x:Static x:Key="CrustColor" Member="SystemColors.HighlightTextColor" />
+    <x:Static x:Key="CrustColor" Member="SystemColors.ControlColor" />
     <x:Static x:Key="Surface0Color" Member="SystemColors.ControlColor" />
     <x:Static x:Key="Surface1Color" Member="SystemColors.ActiveBorderColor" />
     <x:Static x:Key="Surface2Color" Member="SystemColors.ControlDarkColor" />
@@ -65,4 +65,7 @@
     <SolidColorBrush x:Key="OverlayGuideStrongBrush" Color="{StaticResource TextColor}" />
     <SolidColorBrush x:Key="OverlayDimmerBrush" Color="#CC000000" />
     <SolidColorBrush x:Key="SubtleSurfaceBrush" Color="{StaticResource BaseColor}" />
+    <SolidColorBrush x:Key="BrushTintYellowBrush" Color="Transparent" />
+    <SolidColorBrush x:Key="BrushTintAccentBrush" Color="Transparent" />
+    <SolidColorBrush x:Key="BrushTintRedBrush" Color="Transparent" />
 </ResourceDictionary>
