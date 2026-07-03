@@ -42,6 +42,11 @@ public static class TileService
         Log.Get("Images.TileService");
     private static readonly ConcurrentDictionary<string, object> BuildLocks = new(StringComparer.OrdinalIgnoreCase);
 
+    // The cache directory of the pyramid currently backing the display. Eviction
+    // must never delete it — a single pyramid larger than the cap would otherwise
+    // be pruned out from under the viewer.
+    private static volatile string? _activeCacheDir;
+
     public static bool ShouldUseTileEngine(string path)
     {
         try
@@ -75,6 +80,10 @@ public static class TileService
         cacheRoot ??= GetDefaultCacheRoot();
         var sourceKey = ComputeSourceKey(sourcePath, pageIndex);
         var cacheDir = Path.Combine(cacheRoot, sourceKey);
+
+        // Mark active for all return paths (reuse and fresh build) so eviction
+        // skips the pyramid the viewer is about to display.
+        _activeCacheDir = Path.GetFullPath(cacheDir);
 
         var infoPath = Path.Combine(cacheDir, "pyramid.json");
         if (TryReadReusablePyramidInfo(infoPath, sourcePath) is { } existing)
@@ -510,9 +519,10 @@ public static class TileService
         return (deleted, deletedBytes);
     }
 
-    public static void EvictIfOverCap()
+    public static void EvictIfOverCap() => EvictIfOverCap(GetDefaultCacheRoot(), _activeCacheDir);
+
+    internal static void EvictIfOverCap(string root, string? activeCacheDir, long capBytes = DefaultCapBytes)
     {
-        var root = GetDefaultCacheRoot();
         if (!Directory.Exists(root)) return;
 
         try
@@ -526,11 +536,18 @@ public static class TileService
                 d.EnumerateFiles("*", SearchOption.AllDirectories).Sum(f => f.Length));
 
             var cutoffUtc = DateTime.UtcNow.AddDays(-MaxAgeDays);
+            var active = string.IsNullOrEmpty(activeCacheDir) ? null : Path.GetFullPath(activeCacheDir);
 
             foreach (var dir in dirs)
             {
-                if (totalBytes <= DefaultCapBytes && dir.LastWriteTimeUtc >= cutoffUtc)
+                if (totalBytes <= capBytes && dir.LastWriteTimeUtc >= cutoffUtc)
                     break;
+
+                // Never evict the pyramid currently backing the display, even
+                // when it alone exceeds the cap.
+                if (active is not null &&
+                    string.Equals(dir.FullName, active, StringComparison.OrdinalIgnoreCase))
+                    continue;
 
                 var size = dir.EnumerateFiles("*", SearchOption.AllDirectories)
                     .Sum(f => f.Length);

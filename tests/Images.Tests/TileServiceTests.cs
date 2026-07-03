@@ -89,6 +89,27 @@ public sealed class TileServiceTests
     }
 
     [Fact]
+    public void EvictIfOverCap_NeverEvictsActivePyramidEvenWhenOverCap()
+    {
+        using var temp = TestDirectory.Create();
+        var cacheRoot = Directory.CreateDirectory(Path.Combine(temp.Path, "tiles")).FullName;
+        var active = Directory.CreateDirectory(Path.Combine(cacheRoot, "active")).FullName;
+        var stale = Directory.CreateDirectory(Path.Combine(cacheRoot, "stale")).FullName;
+
+        // Each pyramid alone exceeds a tiny 1 KB cap.
+        File.WriteAllBytes(Path.Combine(active, "tile.bin"), new byte[4096]);
+        File.WriteAllBytes(Path.Combine(stale, "tile.bin"), new byte[4096]);
+        // Make the active dir the newest so it would sort last anyway; the guard
+        // is what protects it once it alone still exceeds the cap.
+        Directory.SetLastWriteTimeUtc(stale, DateTime.UtcNow.AddDays(-2));
+
+        TileService.EvictIfOverCap(cacheRoot, active, capBytes: 1024);
+
+        Assert.True(Directory.Exists(active));
+        Assert.False(Directory.Exists(stale));
+    }
+
+    [Fact]
     public void BuildPyramid_WhenDecodeFails_RemovesPartialCacheDirectory()
     {
         using var temp = TestDirectory.Create();
