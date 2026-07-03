@@ -20,6 +20,9 @@ public sealed class ListenServiceTests
     [Theory]
     [InlineData("relative\\photo.png")]
     [InlineData(@"\\server\share\photo.png")]
+    [InlineData("//server/share/photo.png")]
+    [InlineData(@"\\?\UNC\server\share\photo.png")]
+    [InlineData(@"//server\share/photo.png")]
     public void TryNormalizeIncomingPath_RejectsUnsafeOrAmbiguousPaths(string input)
     {
         var accepted = ListenService.TryNormalizeIncomingPath(input, out _);

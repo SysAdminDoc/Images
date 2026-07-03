@@ -15,6 +15,8 @@ public sealed class ListenService : IDisposable
 
     private const int MaxLineLength = 32_768;
     private const int MaxConnectionsPerSecond = 20;
+    private const int MaxConcurrentConnections = 8;
+    private const int PreAuthTimeoutSeconds = 10;
 
     private TcpListener? _listener;
     private CancellationTokenSource? _cts;
@@ -23,6 +25,7 @@ public sealed class ListenService : IDisposable
 
     private int _connectionsThisSecond;
     private long _lastRateTick;
+    private int _activeConnections;
 
     public int Port { get; private set; }
     public string SessionToken { get; private set; } = string.Empty;
@@ -76,6 +79,13 @@ public sealed class ListenService : IDisposable
                     continue;
                 }
 
+                if (Volatile.Read(ref _activeConnections) >= MaxConcurrentConnections)
+                {
+                    _log.LogWarning("listen-mode: concurrent connection cap reached, dropping");
+                    client.Dispose();
+                    continue;
+                }
+
                 _ = HandleClient(client, ct);
             }
             catch (OperationCanceledException) { break; }
@@ -91,6 +101,7 @@ public sealed class ListenService : IDisposable
 
     private async Task HandleClient(TcpClient client, CancellationToken ct)
     {
+        Interlocked.Increment(ref _activeConnections);
         try
         {
             using (client)
@@ -102,12 +113,21 @@ public sealed class ListenService : IDisposable
                 var authenticated = false;
                 while (!ct.IsCancellationRequested)
                 {
-                    idleCts.CancelAfter(TimeSpan.FromSeconds(ConnectionIdleTimeoutSeconds));
+                    // Unauthenticated clients get a short window: without a
+                    // deadline, keepalive bytes hold sockets and tasks open
+                    // indefinitely before the token check ever runs.
+                    idleCts.CancelAfter(TimeSpan.FromSeconds(
+                        authenticated ? ConnectionIdleTimeoutSeconds : PreAuthTimeoutSeconds));
                     var line = await ReadBoundedLine(reader, idleCts.Token);
                     if (line is null) break;
 
                     var trimmed = line.Trim();
-                    if (string.IsNullOrEmpty(trimmed)) continue;
+                    if (string.IsNullOrEmpty(trimmed))
+                    {
+                        if (authenticated) continue;
+                        _log.LogWarning("listen-mode: dropped client that sent a blank line before authenticating");
+                        return;
+                    }
 
                     if (!authenticated)
                     {
@@ -143,6 +163,10 @@ public sealed class ListenService : IDisposable
         catch (Exception ex)
         {
             _log.LogWarning(ex, "listen-mode: client error");
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _activeConnections);
         }
     }
 
@@ -193,6 +217,16 @@ public sealed class ListenService : IDisposable
         catch (Exception ex) when (ex is ArgumentException or IOException or NotSupportedException or UnauthorizedAccessException or System.Security.SecurityException)
         {
             _log.LogWarning(ex, "listen-mode: rejected path that could not be canonicalized");
+            return false;
+        }
+
+        // Re-check after canonicalization: forward-slash UNC forms
+        // (//host/share, \\?\UNC\...) only normalize to a leading backslash
+        // pair at this point, and File.Exists on a UNC path would already
+        // initiate an outbound SMB connection.
+        if (path.StartsWith("\\\\", StringComparison.Ordinal))
+        {
+            _log.LogDebug("listen-mode: rejected UNC path after canonicalization");
             return false;
         }
 

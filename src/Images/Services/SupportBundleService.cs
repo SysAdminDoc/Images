@@ -44,7 +44,7 @@ public static class SupportBundleService
         AddCrashLog(archive, manifest);
 
         manifest.AppendLine();
-        manifest.AppendLine("No image bytes, no file contents, no user-identifiable paths beyond local storage roots.");
+        manifest.AppendLine("No image bytes, no file contents. User-profile paths are redacted to %USERPROFILE% throughout, including log lines.");
 
         var manifestEntry = archive.CreateEntry("bundle-info.txt", CompressionLevel.Optimal);
         using (var writer = new StreamWriter(manifestEntry.Open(), Encoding.UTF8))
@@ -217,7 +217,7 @@ public static class SupportBundleService
                     using var source = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                     var entry = archive.CreateEntry(name, CompressionLevel.Optimal);
                     using var dest = entry.Open();
-                    source.CopyTo(dest);
+                    CopyRedacted(source, dest);
                     count++;
                 }
                 catch (IOException)
@@ -248,7 +248,7 @@ public static class SupportBundleService
             using var source = new FileStream(crashPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             var entry = archive.CreateEntry("crash.log", CompressionLevel.Optimal);
             using var dest = entry.Open();
-            source.CopyTo(dest);
+            CopyRedacted(source, dest);
 
             var size = new FileInfo(crashPath).Length;
             manifest.AppendLine($"  crash.log — {size:N0} bytes");
@@ -257,6 +257,28 @@ public static class SupportBundleService
         {
             _log.LogWarning(ex, "Failed to add crash log to support bundle");
             manifest.AppendLine($"  crash.log — FAILED: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Streams a log file into the bundle with user-profile paths replaced by
+    /// %USERPROFILE%. Raw logs contain full image paths (loader, listen-mode,
+    /// egress lines), and the bundle manifest promises they are redacted.
+    /// </summary>
+    private static void CopyRedacted(Stream source, Stream destination)
+    {
+        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        using var reader = new StreamReader(source, Encoding.UTF8);
+        using var writer = new StreamWriter(destination, Encoding.UTF8, leaveOpen: true);
+        while (reader.ReadLine() is { } line)
+        {
+            if (!string.IsNullOrEmpty(userProfile))
+            {
+                line = line.Replace(userProfile, "%USERPROFILE%", StringComparison.OrdinalIgnoreCase);
+                line = line.Replace(userProfile.Replace('\\', '/'), "%USERPROFILE%", StringComparison.OrdinalIgnoreCase);
+            }
+
+            writer.WriteLine(line);
         }
     }
 
