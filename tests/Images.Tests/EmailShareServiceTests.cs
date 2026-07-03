@@ -29,6 +29,31 @@ public sealed class EmailShareServiceTests
     }
 
     [Fact]
+    public void CreateDraftWithAttachmentCore_EncodesNonAsciiSubjectAndFilename()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Path.Combine(temp.Path, "café français.png");
+        var draftFolder = Path.Combine(temp.Path, "drafts");
+        File.WriteAllBytes(source, [9, 8, 7]);
+
+        var result = EmailShareService.CreateDraftWithAttachmentCore(
+            source,
+            () => draftFolder,
+            new DateTimeOffset(2026, 5, 14, 12, 30, 0, TimeSpan.Zero),
+            () => Guid.Parse("22222222-2222-2222-2222-222222222222"));
+
+        var draft = File.ReadAllText(result.DraftPath);
+        // Subject uses an RFC 2047 encoded word, not raw UTF-8 bytes.
+        Assert.Contains("Subject: =?UTF-8?B?", draft);
+        Assert.DoesNotContain("Subject: Image: café", draft, StringComparison.Ordinal);
+        // Filename uses the RFC 2231 extended parameter.
+        Assert.Contains("filename*=UTF-8''", draft);
+        Assert.Contains("caf%C3%A9%20fran%C3%A7ais.png", draft);
+        // Attachment bytes are still present and correct.
+        Assert.Contains(Convert.ToBase64String([9, 8, 7]), draft);
+    }
+
+    [Fact]
     public void CreateDraftWithAttachmentCore_WhenSourceMissingThrows()
     {
         using var temp = TestDirectory.Create();

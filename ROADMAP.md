@@ -15,12 +15,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 Surfaced during the v0.2.16 deep audit but not fixed in that pass.
 
-- [ ] P2 — Metadata strip re-encodes JPEG pixels (documented as lossless)
-  Why: `MetadataEditService` uses `image.Write`, which fully re-encodes the JPEG (a generation of quality loss) even though the doc and UI imply pixel preservation. A lossless metadata path (jpegtran `-copy`, segment-level rewrite) would honor the contract.
-  Where: `src/Images/Services/MetadataEditService.cs`
-- [ ] P3 — EML draft headers/body not RFC-2047/quoted-printable encoded
-  Why: `Subject:` and `filename=` headers are raw UTF-8 and the text part is declared `quoted-printable` but written raw, so non-ASCII filenames garble in mail clients. Attachment bytes are already safe.
-  Where: `src/Images/Services/EmailShareService.cs`
 - [ ] P3 — SuperResolution/BackgroundRemoval are dead code with a latent tile-compositing bug
   Why: Neither service has callers or an approved model group, so `IsAvailable()` is always false. When wired up, `SuperResolutionService` composites tiles at the caller's assumed scale factor rather than the model's actual output ratio.
   Where: `src/Images/Services/SuperResolutionService.cs`, `BackgroundRemovalService.cs`

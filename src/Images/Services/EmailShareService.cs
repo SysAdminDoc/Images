@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -45,7 +46,7 @@ public static class EmailShareService
         writer.NewLine = "\r\n";
         writer.WriteLine("X-Unsent: 1");
         writer.WriteLine("To:");
-        writer.WriteLine("Subject: " + EscapeHeader("Image: " + fileName));
+        writer.WriteLine("Subject: " + EncodeHeaderValue("Image: " + fileName));
         writer.WriteLine("MIME-Version: 1.0");
         writer.WriteLine($"Content-Type: multipart/mixed; boundary=\"{boundary}\"");
         writer.WriteLine();
@@ -53,13 +54,13 @@ public static class EmailShareService
         writer.WriteLine("Content-Type: text/plain; charset=utf-8");
         writer.WriteLine("Content-Transfer-Encoding: quoted-printable");
         writer.WriteLine();
-        writer.WriteLine("Attached from Images.");
-        writer.WriteLine("Source path: " + sourcePath);
+        writer.WriteLine(EncodeQuotedPrintable("Attached from Images."));
+        writer.WriteLine(EncodeQuotedPrintable("Source path: " + sourcePath));
         writer.WriteLine();
         writer.WriteLine($"--{boundary}");
-        writer.WriteLine($"Content-Type: application/octet-stream; name=\"{EscapeQuoted(fileName)}\"");
+        writer.WriteLine($"Content-Type: application/octet-stream; {EncodeFileNameParameter("name", fileName)}");
         writer.WriteLine("Content-Transfer-Encoding: base64");
-        writer.WriteLine($"Content-Disposition: attachment; filename=\"{EscapeQuoted(fileName)}\"");
+        writer.WriteLine($"Content-Disposition: attachment; {EncodeFileNameParameter("filename", fileName)}");
         writer.WriteLine();
         WriteAttachmentBase64(sourcePath, writer);
         writer.WriteLine();
@@ -106,10 +107,120 @@ public static class EmailShareService
         }
     }
 
-    private static string EscapeHeader(string value)
+    private static string StripCrlf(string value)
         => value.Replace("\r", "", StringComparison.Ordinal)
             .Replace("\n", "", StringComparison.Ordinal);
 
-    private static string EscapeQuoted(string value)
-        => EscapeHeader(value).Replace("\"", "'", StringComparison.Ordinal);
+    private static bool IsAscii(string value)
+    {
+        foreach (var c in value)
+        {
+            if (c > '\x7F')
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// RFC 2047 encoded-word for a header value. ASCII values pass through so
+    /// clients render them verbatim; non-ASCII values are B-encoded in UTF-8,
+    /// chunked so each encoded word stays within the 75-char limit and folded
+    /// with continuation whitespace.
+    /// </summary>
+    private static string EncodeHeaderValue(string value)
+    {
+        value = StripCrlf(value);
+        if (IsAscii(value))
+            return value;
+
+        var sb = new StringBuilder();
+        var chunk = new List<byte>(48);
+
+        void FlushChunk()
+        {
+            if (chunk.Count == 0)
+                return;
+            if (sb.Length > 0)
+                sb.Append("\r\n "); // folding whitespace between encoded words
+            sb.Append("=?UTF-8?B?").Append(Convert.ToBase64String(chunk.ToArray())).Append("?=");
+            chunk.Clear();
+        }
+
+        foreach (var rune in value.EnumerateRunes())
+        {
+            Span<byte> runeBytes = stackalloc byte[4];
+            var written = rune.EncodeToUtf8(runeBytes);
+            // Keep the base64 payload (chunk*4/3) under ~63 chars so the whole
+            // encoded word fits in 75; never split a UTF-8 rune across words.
+            if (chunk.Count + written > 45)
+                FlushChunk();
+            for (var i = 0; i < written; i++)
+                chunk.Add(runeBytes[i]);
+        }
+
+        FlushChunk();
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Emits a MIME parameter (name=/filename=). ASCII values use a normal
+    /// quoted-string; non-ASCII values use the RFC 2231 extended syntax
+    /// (<c>name*=UTF-8''pct-encoded</c>) so mail clients decode them correctly.
+    /// </summary>
+    private static string EncodeFileNameParameter(string parameter, string value)
+    {
+        value = StripCrlf(value);
+        if (IsAscii(value) && !value.Contains('"', StringComparison.Ordinal))
+            return $"{parameter}=\"{value}\"";
+
+        var sb = new StringBuilder();
+        foreach (var b in Encoding.UTF8.GetBytes(value))
+        {
+            // RFC 2231 attribute-char set: keep unreserved token chars literal.
+            if ((b >= 'A' && b <= 'Z') || (b >= 'a' && b <= 'z') || (b >= '0' && b <= '9') ||
+                b is (byte)'-' or (byte)'.' or (byte)'_' or (byte)'~')
+                sb.Append((char)b);
+            else
+                sb.Append('%').Append(b.ToString("X2", CultureInfo.InvariantCulture));
+        }
+
+        return $"{parameter}*=UTF-8''{sb}";
+    }
+
+    /// <summary>
+    /// Quoted-printable encoding for a text-body line, with soft line breaks so
+    /// no line exceeds 76 characters (RFC 2045). The body declares
+    /// quoted-printable, so non-ASCII source paths must actually be encoded.
+    /// </summary>
+    private static string EncodeQuotedPrintable(string text)
+    {
+        text = StripCrlf(text);
+        var sb = new StringBuilder();
+        var lineLength = 0;
+
+        void Emit(string token)
+        {
+            if (lineLength + token.Length > 75)
+            {
+                sb.Append("=\r\n");
+                lineLength = 0;
+            }
+
+            sb.Append(token);
+            lineLength += token.Length;
+        }
+
+        foreach (var b in Encoding.UTF8.GetBytes(text))
+        {
+            if (b is >= 33 and <= 126 && b != (byte)'=')
+                Emit(((char)b).ToString());
+            else if (b is (byte)' ' or (byte)'\t')
+                Emit(((char)b).ToString());
+            else
+                Emit("=" + b.ToString("X2", CultureInfo.InvariantCulture));
+        }
+
+        return sb.ToString();
+    }
 }
