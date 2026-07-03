@@ -67,7 +67,9 @@ public sealed class ThemeServiceTests
         Assert.True(ThemeService.IsHighContrastDictionary(dictionary));
         Assert.Equal(SystemColors.ControlTextColor, Assert.IsType<SolidColorBrush>(dictionary["TextBrush"]).Color);
         Assert.Equal(SystemColors.HighlightColor, Assert.IsType<SolidColorBrush>(dictionary["AccentBrush"]).Color);
-        Assert.Equal(SystemColors.HighlightTextColor, Assert.IsType<SolidColorBrush>(dictionary["CrustBrush"]).Color);
+        // Crust is a surface token; it maps to ControlColor (not HighlightTextColor,
+        // a text color that rendered invisible when used as an image-well background).
+        Assert.Equal(SystemColors.ControlColor, Assert.IsType<SolidColorBrush>(dictionary["CrustBrush"]).Color);
         Assert.Equal(SystemColors.HighlightColor, Assert.IsType<SolidColorBrush>(dictionary["AccentSelectionBrush"]).Color);
         Assert.Equal(SystemColors.WindowColor, Assert.IsType<SolidColorBrush>(dictionary["StatusPanelBrush"]).Color);
     }

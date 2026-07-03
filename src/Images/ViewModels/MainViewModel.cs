@@ -3552,21 +3552,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (signature.Equals(_gallerySmartFilterSignature, StringComparison.Ordinal))
             return;
 
-        // Build off the UI thread: indexing pings/decodes/hashes every image
-        // in the folder and froze the gallery open on large folders. Smart
-        // filters see an empty index until the build lands, then refresh.
+        // Built synchronously so the filter/summary/selection stay consistent
+        // in one pass. The dominant per-image cost (a full-resolution decode
+        // just to derive a palette color) is now a 64x64 decode in
+        // AssetSmartFilterService, which is what made the gallery-open freeze.
+        _gallerySmartFilterIndex = AssetSmartFilterService.BuildIndex(paths);
         _gallerySmartFilterSignature = signature;
-        _gallerySmartFilterIndex = [];
-        _ = BackgroundTaskTracker.Run(
-                "gallery-smart-filter-index",
-                () => AssetSmartFilterService.BuildIndex(paths))
-            .ContinueWith(task =>
-            {
-                if (_isDisposed || task.Status != TaskStatus.RanToCompletion) return;
-                if (!signature.Equals(_gallerySmartFilterSignature, StringComparison.Ordinal)) return;
-                _gallerySmartFilterIndex = task.Result;
-                RefreshGalleryItems();
-            }, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     private void SetGallerySmartFilterSummary(string summary)

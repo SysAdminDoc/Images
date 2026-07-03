@@ -49,7 +49,7 @@ Deep audit release: 40+ correctness, security, privacy, and quality fixes across
 ### Performance
 
 - **Catalog uses its NOCASE index** — Hot lookups wrapped both sides in `lower()`, defeating the unique index and making rebuild O(n²); they now compare the collated column directly.
-- **Gallery smart-filter builds off-thread** with a 64×64 decode hint instead of full-resolution decoding every image on the UI thread.
+- **Gallery smart-filter uses a 64×64 decode hint** instead of decoding every folder image at full resolution just to derive a palette color — the dominant cost behind the gallery-open freeze.
 
 ### Accessibility & UX
 
