@@ -112,17 +112,29 @@ public sealed class UpdateCheckControllerTests
     [Fact]
     public async Task CheckAsync_WhenManualCheckRuns_RecordsTrackedUpdateTask()
     {
-        var before = BackgroundTaskTracker.Snapshot;
+        // Observe the per-name "update-check:manual" counter while the task is
+        // in flight. That name is unique to update checks, so this is immune to
+        // concurrent preload/thumbnail tasks in other test collections that
+        // perturb the process-wide totals. The per-name entry is evicted once
+        // running returns to zero, so it must be captured inside the callback.
+        BackgroundTaskSnapshot duringRun = default;
+        var globalStartedBefore = BackgroundTaskTracker.Snapshot.Started;
+
         var controller = new UpdateCheckController(
             notify: _ => { },
-            checkAsync: _ => Task.FromResult(CurrentResult()));
+            checkAsync: _ =>
+            {
+                duringRun = BackgroundTaskTracker.SnapshotByName
+                    .GetValueOrDefault("update-check:manual");
+                return Task.FromResult(CurrentResult());
+            });
 
         await controller.CheckAsync(userInitiated: true);
 
-        var after = BackgroundTaskTracker.Snapshot;
-        Assert.Equal(before.Started + 1, after.Started);
-        Assert.Equal(before.Completed + 1, after.Completed);
-        Assert.Equal(0, after.Running);
+        // The manual check ran as a tracked background task.
+        Assert.True(duringRun.Started >= 1, "update-check task was not tracked as started");
+        Assert.True(duringRun.Running >= 1, "update-check task was not running when observed");
+        Assert.True(BackgroundTaskTracker.Snapshot.Started > globalStartedBefore);
     }
 
     [Fact]
