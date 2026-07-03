@@ -361,17 +361,31 @@ public sealed class ZoomPanImage : ContentControl
 
         var factor = e.Delta > 0 ? 1.15 : 1 / 1.15;
         var newScale = Math.Clamp(_scale.ScaleX * factor, 0.1, 20);
-        var rel = e.GetPosition(_image);
-        var cx = _image.ActualWidth / 2;
-        var cy = _image.ActualHeight / 2;
-        var dx = (rel.X - cx) * (newScale - _scale.ScaleX);
-        var dy = (rel.Y - cy) * (newScale - _scale.ScaleY);
-        _translate.X -= dx;
-        _translate.Y -= dy;
-        _scale.ScaleX = _scale.ScaleY = newScale;
+        ZoomAroundViewportPoint(e.GetPosition(this), newScale);
         QueueTileRefresh();
         RaiseViewChanged();
         e.Handled = true;
+    }
+
+    /// <summary>
+    /// Rescales while keeping the content under <paramref name="anchor"/>
+    /// (viewport coordinates) fixed. The anchor offset is measured in the
+    /// post-transform frame, so rotation, flips, and the current pan are all
+    /// accounted for — compensating with raw image-local offsets made zoom
+    /// lurch away from the cursor on rotated or flipped images.
+    /// </summary>
+    private void ZoomAroundViewportPoint(Point anchor, double newScale)
+    {
+        var currentScale = _scale.ScaleX;
+        if (currentScale > 0.0001)
+        {
+            var offsetX = anchor.X - ActualWidth / 2 - _translate.X;
+            var offsetY = anchor.Y - ActualHeight / 2 - _translate.Y;
+            _translate.X -= offsetX * (newScale - currentScale) / currentScale;
+            _translate.Y -= offsetY * (newScale - currentScale) / currentScale;
+        }
+
+        _scale.ScaleX = _scale.ScaleY = newScale;
     }
 
     private void OnDown(object sender, MouseButtonEventArgs e)
@@ -433,14 +447,7 @@ public sealed class ZoomPanImage : ContentControl
         if (Math.Abs(pinchScale - 1.0) > 0.001)
         {
             var newScale = Math.Clamp(_scale.ScaleX * pinchScale, 0.1, 20);
-            var center = e.ManipulationOrigin;
-            var cx = ActualWidth / 2;
-            var cy = ActualHeight / 2;
-            var dx = (center.X - cx) * (newScale - _scale.ScaleX);
-            var dy = (center.Y - cy) * (newScale - _scale.ScaleY);
-            _translate.X -= dx;
-            _translate.Y -= dy;
-            _scale.ScaleX = _scale.ScaleY = newScale;
+            ZoomAroundViewportPoint(e.ManipulationOrigin, newScale);
         }
 
         if (IsZoomed)

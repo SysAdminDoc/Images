@@ -71,8 +71,16 @@ public partial class EditStackWindow : Window
             return;
         }
 
-        Clipboard.SetText(BuildSummary(_snapshot));
-        SetStatus(Strings.EditHistorySummaryCopied);
+        try
+        {
+            ClipboardService.SetText(BuildSummary(_snapshot));
+            SetStatus(Strings.EditHistorySummaryCopied);
+        }
+        catch (System.Runtime.InteropServices.COMException)
+        {
+            // Another process holds the clipboard (clipboard managers, RDP).
+            SetStatus(Strings.ClipboardBusyRetry);
+        }
     }
 
     private void CreateVirtualCopyButton_Click(object sender, RoutedEventArgs e)

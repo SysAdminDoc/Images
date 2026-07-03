@@ -53,6 +53,14 @@ public partial class BatchProcessorWindow : Window
         };
     }
 
+    protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+    {
+        // Closing the window must stop the batch — it writes files, and
+        // without this the run keeps producing output with no way to cancel.
+        _batchCts?.Cancel();
+        base.OnClosing(e);
+    }
+
     public void AddSource(string path)
     {
         if (string.IsNullOrWhiteSpace(path))
