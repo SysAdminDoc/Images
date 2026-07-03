@@ -58,6 +58,24 @@ public static class WritebackGuardService
         }
     }
 
+    /// <summary>
+    /// Creates a backup and throws when the user has configured a backup policy
+    /// but the copy could not be made. Destructive in-place writes must abort in
+    /// that case instead of silently proceeding without the safety net the user
+    /// opted into. Returns null (no throw) when the policy is None.
+    /// </summary>
+    public static string? EnsureBackup(string sourcePath, WritebackBackupMode mode)
+    {
+        if (mode == WritebackBackupMode.None)
+            return null;
+
+        var backupPath = CreateBackup(sourcePath, mode);
+        if (backupPath is null && File.Exists(sourcePath))
+            throw new IOException("A backup could not be created before overwriting the file. The write was canceled to protect your original.");
+
+        return backupPath;
+    }
+
     private static string BuildSameFolderBackupPath(string sourcePath)
     {
         var dir = Path.GetDirectoryName(sourcePath) ?? ".";

@@ -83,6 +83,7 @@ public sealed class PicasaImportService
             var contactsPath = ResolveContactsPath(folder, contactsXmlPath);
             var contacts = LoadContacts(contactsPath);
             var entries = ParseIni(iniPath);
+            var albumNames = BuildAlbumNameMap(entries);
             var results = new List<PicasaImageImportResult>();
             var sidecarsWritten = 0;
             var ratingsWritten = 0;
@@ -95,6 +96,15 @@ public sealed class PicasaImportService
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
+                // Real .picasa.ini files always carry structural sections —
+                // [Picasa], [Contacts2], [encoding], [.album:<id>] — that are
+                // not image references. Treating them as missing images floods
+                // the results with false "not found" rows.
+                if (IsNonFileSection(entry.FileName))
+                    continue;
+
+                try
+                {
                 if (!TryResolveImagePath(folder, entry.FileName, out var imagePath))
                 {
                     missingImages++;
@@ -126,7 +136,7 @@ public sealed class PicasaImportService
                 }
 
                 var rating = ReadRating(entry.Values);
-                var albums = ReadAlbums(entry.Values);
+                var albums = ReadAlbums(entry.Values, albumNames);
                 var faces = ReadFaces(entry.Values, contacts);
                 var hasMetadata = rating is not null || albums.Count > 0 || faces.Count > 0;
                 if (!hasMetadata)
@@ -156,6 +166,23 @@ public sealed class PicasaImportService
                     albums,
                     faces,
                     $"Wrote Picasa metadata sidecar with {DescribeImageMetadata(rating, albums.Count, faces.Count)}."));
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or System.Xml.XmlException or ArgumentException or NotSupportedException)
+                {
+                    // One unreadable sidecar (foreign tool, malformed XML) must
+                    // not discard every other image's result; record it and
+                    // continue so partial imports still report progress.
+                    var failedPath = Path.Combine(folder, entry.FileName);
+                    Log.LogWarning(ex, "Could not import Picasa metadata for {Path}", failedPath);
+                    results.Add(new PicasaImageImportResult(
+                        false,
+                        failedPath,
+                        failedPath + ".xmp",
+                        null,
+                        [],
+                        [],
+                        $"Could not write metadata sidecar: {ex.Message}"));
+                }
             }
 
             var message = sidecarsWritten == 0
@@ -333,7 +360,9 @@ public sealed class PicasaImportService
         return null;
     }
 
-    private static IReadOnlyList<string> ReadAlbums(IReadOnlyDictionary<string, string> values)
+    private static IReadOnlyList<string> ReadAlbums(
+        IReadOnlyDictionary<string, string> values,
+        IReadOnlyDictionary<string, string> albumNames)
     {
         var albums = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var key in new[] { "albums", "album" })
@@ -342,11 +371,38 @@ public sealed class PicasaImportService
                 continue;
 
             foreach (var album in SplitList(raw))
-                albums.Add(album);
+            {
+                // Picasa records album IDs here; the display name lives in the
+                // matching [.album:<id>] section. Prefer the resolved name.
+                albums.Add(albumNames.TryGetValue(album, out var name) ? name : album);
+            }
         }
 
         return albums.ToList();
     }
+
+    private static IReadOnlyDictionary<string, string> BuildAlbumNameMap(IReadOnlyList<PicasaIniEntry> entries)
+    {
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in entries)
+        {
+            if (!entry.FileName.StartsWith(".album:", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var id = entry.FileName[".album:".Length..];
+            if (id.Length > 0 && entry.Values.TryGetValue("name", out var name) && !string.IsNullOrWhiteSpace(name))
+                map[id] = name.Trim();
+        }
+
+        return map;
+    }
+
+    private static bool IsNonFileSection(string sectionName)
+        => sectionName.Equals("Picasa", StringComparison.OrdinalIgnoreCase)
+            || sectionName.Equals("Contacts", StringComparison.OrdinalIgnoreCase)
+            || sectionName.Equals("Contacts2", StringComparison.OrdinalIgnoreCase)
+            || sectionName.Equals("encoding", StringComparison.OrdinalIgnoreCase)
+            || sectionName.StartsWith(".album:", StringComparison.OrdinalIgnoreCase);
 
     private static IEnumerable<string> SplitList(string raw)
         => raw.Split([',', ';', '|'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -423,8 +479,7 @@ public sealed class PicasaImportService
             ReplaceRegions(description, faces);
 
         description.SetAttributeValue(Imv + "PicasaImportedUtc", DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture));
-        Directory.CreateDirectory(Path.GetDirectoryName(sidecarPath)!);
-        document.Save(sidecarPath);
+        SidecarWriter.SaveAtomically(document, sidecarPath);
     }
 
     private static IReadOnlyList<string> MergeExisting(XElement description, XName arrayName, IEnumerable<string> additions)

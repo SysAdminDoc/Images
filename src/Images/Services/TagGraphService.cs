@@ -314,8 +314,7 @@ public sealed class TagGraphService
                 : CreateEmptySidecar();
 
             ReplaceSubjectTags(document, expandedTags);
-            Directory.CreateDirectory(Path.GetDirectoryName(sidecarPath)!);
-            document.Save(sidecarPath);
+            SidecarWriter.SaveAtomically(document, sidecarPath);
 
             return new TagSidecarExportResult(
                 true,

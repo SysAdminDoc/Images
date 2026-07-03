@@ -47,7 +47,14 @@ internal static class ExifToolService
         if (targetPaths.Count == 0)
             return Failed("ExifTool target paths are required.");
 
-        var lines = new List<string>(arguments.Count + targetPaths.Count);
+        var lines = new List<string>(arguments.Count + targetPaths.Count + 2);
+
+        // Windows ExifTool interprets filename arguments in the system code page
+        // unless told otherwise; without this a non-ANSI target path (CJK,
+        // Cyrillic, emoji) resolves to "file not found" or the wrong file.
+        lines.Add("-charset");
+        lines.Add("filename=UTF8");
+
         foreach (var argument in arguments)
         {
             if (!TryValidateArgfileLine(argument, "argument", out var error))

@@ -344,7 +344,16 @@ public sealed class FileHealthScanService
                 try
                 {
                     foreach (var child in Directory.EnumerateDirectories(directory))
+                    {
+                        // Skip junctions/symlinks: a reparse point that targets
+                        // an ancestor produces infinitely deepening paths that
+                        // the full-path dedup can't catch.
+                        var attributes = File.GetAttributes(child);
+                        if ((attributes & FileAttributes.ReparsePoint) != 0)
+                            continue;
+
                         pending.Push(child);
+                    }
                 }
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
                 {

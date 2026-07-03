@@ -73,11 +73,18 @@ public static class EmailShareService
         using var stream = File.OpenRead(sourcePath);
         var buffer = new byte[BinaryReadChunkSize];
         int read;
-        while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
+        // ReadAtLeast fills the buffer across short reads (permitted by the
+        // Stream contract on network/SMB files); encoding a partial buffer
+        // whose length isn't a multiple of 3 would emit '=' padding mid-stream
+        // and corrupt the attachment.
+        while ((read = stream.ReadAtLeast(buffer, buffer.Length, throwOnEndOfStream: false)) > 0)
         {
             var encoded = Convert.ToBase64String(buffer, 0, read);
             for (var offset = 0; offset < encoded.Length; offset += MaxBase64LineLength)
                 writer.WriteLine(encoded.Substring(offset, Math.Min(MaxBase64LineLength, encoded.Length - offset)));
+
+            if (read < buffer.Length)
+                break;
         }
     }
 

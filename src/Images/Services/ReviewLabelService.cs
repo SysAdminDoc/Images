@@ -130,8 +130,7 @@ public sealed class ReviewLabelService
                 ? XDocument.Load(sidecarPath, LoadOptions.None)
                 : CreateEmptySidecar();
             WriteState(document, current);
-            Directory.CreateDirectory(Path.GetDirectoryName(sidecarPath)!);
-            document.Save(sidecarPath);
+            SidecarWriter.SaveAtomically(document, sidecarPath);
 
             return new ReviewLabelMutationResult(true, sidecarPath, previous, current, successMessage);
         }

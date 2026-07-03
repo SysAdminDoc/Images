@@ -39,6 +39,10 @@ public sealed class RecycleBinDeleteService
             _sendToRecycleBin(path);
             return RecycleBinDeleteResult.Deleted(Path.GetFileName(path));
         }
+        catch (OperationCanceledException)
+        {
+            return RecycleBinDeleteResult.Canceled();
+        }
         catch (Exception ex)
         {
             return RecycleBinDeleteResult.Failed(ex.Message);
@@ -47,11 +51,20 @@ public sealed class RecycleBinDeleteService
 
     private static void SendToRecycleBin(string path)
     {
+        // ThrowException (not DoNothing): when the shell surfaces an error
+        // dialog (file locked, slow share) and the user cancels there,
+        // DeleteFile returns normally without deleting — reporting Deleted
+        // would remove a still-existing file from the navigator and log a
+        // phantom recovery record. The existence re-check covers any silent
+        // no-op path the shell doesn't signal.
         Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
             path,
             Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
             Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin,
-            Microsoft.VisualBasic.FileIO.UICancelOption.DoNothing);
+            Microsoft.VisualBasic.FileIO.UICancelOption.ThrowException);
+
+        if (File.Exists(path))
+            throw new OperationCanceledException("The file was not moved to the Recycle Bin.");
     }
 }
 
