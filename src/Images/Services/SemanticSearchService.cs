@@ -49,7 +49,7 @@ public sealed record SemanticSearchStatus(
     string ProviderStatus,
     string? ProviderFallbackReason);
 
-public sealed class SemanticSearchService
+public sealed class SemanticSearchService : IDisposable
 {
     private const int CurrentSchemaVersion = 1;
     private static readonly ILogger Log = Images.Services.Log.Get(nameof(SemanticSearchService));
@@ -57,6 +57,7 @@ public sealed class SemanticSearchService
     private readonly string _connectionString;
     private readonly CatalogService _catalog;
     private readonly ISemanticEmbeddingProvider _provider;
+    private readonly bool _ownsProvider;
     private readonly Func<DateTimeOffset> _clock;
     private readonly bool _isAvailable;
 
@@ -80,6 +81,7 @@ public sealed class SemanticSearchService
             ? (clipProviderFactory?.Invoke() ?? TryCreateClipProvider())
             : (provider, null);
         _provider = clipProvider.Provider ?? new DeterministicSemanticEmbeddingProvider();
+        _ownsProvider = provider is null;
         ClipFallbackReason = _provider is DeterministicSemanticEmbeddingProvider
             ? (clipProvider.FallbackReason ?? "CLIP models not available; using deterministic metadata embeddings.")
             : null;
@@ -587,6 +589,17 @@ public sealed class SemanticSearchService
             Log.LogWarning(ex, "Semantic search falling back to deterministic embeddings: {Reason}", fallbackReason);
             return (null, fallbackReason);
         }
+    }
+
+    /// <summary>
+    /// Releases the embedding provider when this service created it. The CLIP
+    /// provider holds two native ONNX sessions (~600 MB); leaving them to the
+    /// finalizer stacks native memory on every Semantic Search window open.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_ownsProvider && _provider is IDisposable disposable)
+            disposable.Dispose();
     }
 }
 

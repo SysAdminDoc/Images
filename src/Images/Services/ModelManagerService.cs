@@ -521,6 +521,17 @@ public sealed class ModelManagerService
             var sha256 = manifest?.Sha256;
             var size = manifest?.SizeBytes;
             var imported = manifest?.ImportedUtc;
+
+            // The manifest hash was computed at import time; if the file has
+            // drifted since (truncated write, disk error, manual replacement),
+            // trusting it would report "SHA-256 verified" for corrupt bytes.
+            // The length probe is near-free — rehash on drift.
+            if (!string.IsNullOrWhiteSpace(sha256) && size is not null &&
+                new FileInfo(modelPath).Length != size.Value)
+            {
+                sha256 = null;
+            }
+
             if (string.IsNullOrWhiteSpace(sha256))
             {
                 sha256 = ComputeSha256(modelPath);

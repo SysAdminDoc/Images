@@ -69,17 +69,19 @@ public sealed class ClipImagePreprocessor
                 var pixel = pixels.GetPixel(x, y)!;
                 var channels = pixel.ToArray();
 
+                // Q16 build: quantum values are always 0-65535. A per-pixel
+                // heuristic keyed on the first channel divides saturated
+                // blues/greens by 255 and corrupts the embedding.
+                var scale = (float)Quantum.Max;
                 float r, g, b;
                 if (channels.Length >= 3)
                 {
-                    var scale = pixel.Channels >= 1 && channels[0] > 255 ? 65535f : 255f;
                     r = channels[0] / scale;
                     g = channels[1] / scale;
                     b = channels[2] / scale;
                 }
                 else
                 {
-                    var scale = channels[0] > 255 ? 65535f : 255f;
                     r = g = b = channels[0] / scale;
                 }
 

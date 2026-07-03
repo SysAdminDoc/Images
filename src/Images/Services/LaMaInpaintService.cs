@@ -143,7 +143,10 @@ public static class LaMaInpaintService
             {
                 var pixel = pixels.GetPixel(x, y)!;
                 var channels = pixel.ToArray();
-                var scale = channels.Length >= 1 && channels[0] > 255 ? 65535f : 255f;
+                // Q16 build: quantum values are always 0-65535. A per-pixel
+                // heuristic keyed on the first channel divides saturated
+                // blues/greens by 255 and blows normalization up ~257x.
+                var scale = (float)Quantum.Max;
                 var idx = y * size + x;
 
                 tensor[0 * size * size + idx] = channels.Length >= 1 ? channels[0] / scale : 0;

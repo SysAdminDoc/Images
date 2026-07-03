@@ -49,7 +49,15 @@ public partial class SemanticSearchWindow : Window
             var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
             WindowChrome.ApplyDarkCaption(hwnd);
         };
-        Closed += (_, _) => { _indexCancellation?.Cancel(); _indexCancellation?.Dispose(); };
+        Closed += (_, _) =>
+        {
+            _indexCancellation?.Cancel();
+            _indexCancellation?.Dispose();
+            // Release the window-owned CLIP provider's native ONNX sessions;
+            // injected services stay alive for their owner (tests).
+            if (semanticSearch is null)
+                _semanticSearch.Dispose();
+        };
     }
 
     public void AddSearchRoot(string folder)

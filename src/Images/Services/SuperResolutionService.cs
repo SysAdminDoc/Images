@@ -195,7 +195,8 @@ public static class SuperResolutionService
             {
                 var pixel = pixels.GetPixel(x, y)!;
                 var channels = pixel.ToArray();
-                var scale = channels.Length >= 1 && channels[0] > 255 ? 65535f : 255f;
+                // Q16 build: quantum values are always 0-65535 (see LaMaInpaintService).
+                var scale = (float)Quantum.Max;
                 var idx = y * width + x;
 
                 tensor[0 * height * width + idx] = channels.Length >= 1 ? channels[0] / scale : 0;
