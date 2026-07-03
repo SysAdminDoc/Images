@@ -226,7 +226,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         SetRetouchModeCommand = new RelayCommand(SetRetouchMode, parameter => parameter is string);
         ClearRetouchSourceCommand = new RelayCommand(ClearRetouchSource, () => HasRetouchSource);
         ToggleInpaintModeCommand = new RelayCommand(ToggleInpaintMode, () => CanUseInpaint);
-        ApplyInpaintCommand = new RelayCommand(ApplyInpaint, () => HasInpaintMaskRegions && !IsOperationBusy);
+        ApplyInpaintCommand = new AsyncRelayCommand(ApplyInpaintAsync, () => HasInpaintMaskRegions && !IsOperationBusy);
         CancelInpaintCommand = new RelayCommand(CancelInpaintMode, () => IsInpaintMode || HasInpaintMaskRegions);
         ClearInpaintMaskCommand = new RelayCommand(ClearInpaintMask, () => HasInpaintMaskRegions);
         CopyInspectorHexCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hex, "HEX"), () => HasInspectorSample);
@@ -3541,8 +3541,21 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (signature.Equals(_gallerySmartFilterSignature, StringComparison.Ordinal))
             return;
 
-        _gallerySmartFilterIndex = AssetSmartFilterService.BuildIndex(paths);
+        // Build off the UI thread: indexing pings/decodes/hashes every image
+        // in the folder and froze the gallery open on large folders. Smart
+        // filters see an empty index until the build lands, then refresh.
         _gallerySmartFilterSignature = signature;
+        _gallerySmartFilterIndex = [];
+        _ = BackgroundTaskTracker.Run(
+                "gallery-smart-filter-index",
+                () => AssetSmartFilterService.BuildIndex(paths))
+            .ContinueWith(task =>
+            {
+                if (_isDisposed || task.Status != TaskStatus.RanToCompletion) return;
+                if (!signature.Equals(_gallerySmartFilterSignature, StringComparison.Ordinal)) return;
+                _gallerySmartFilterIndex = task.Result;
+                RefreshGalleryItems();
+            }, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     private void SetGallerySmartFilterSummary(string summary)
@@ -3593,10 +3606,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             RecentRenames.Remove(entry);
 
             // If the reverted file is the currently open one, follow it.
-            if (string.Equals(CurrentPath, entry.FromPath, StringComparison.OrdinalIgnoreCase))
+            // The open file sits at the entry's post-rename path (ToPath).
+            if (string.Equals(CurrentPath, entry.ToPath, StringComparison.OrdinalIgnoreCase))
             {
                 CurrentPath = result.ToPath;
                 _nav.UpdateCurrentPath(result.ToPath);
+                _externalEditReload.Arm(result.ToPath);
                 SyncRenameEditorFromDisk();
             }
             Toast($"Reverted to {Path.GetFileName(result.ToPath)}");
@@ -4877,6 +4892,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
             _nav.UpdateCurrentPath(newPath);
             CurrentPath = newPath;
+            _externalEditReload.Arm(newPath);
             _committedStemOnDisk = Path.GetFileNameWithoutExtension(newPath);
             Extension = Path.GetExtension(newPath);
 
@@ -4933,6 +4949,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _suppressStemChange = true;
         EditableStem = _committedStemOnDisk;
         _suppressStemChange = false;
+        // Relock and restore the extension too, or FlushPendingRename treats
+        // the canceled edit as pending work and commits it on navigation.
+        IsExtensionUnlocked = false;
+        if (CurrentPath is not null)
+            Extension = Path.GetExtension(CurrentPath);
         RenameStatus = RenameStatusKind.Idle;
         Raise(nameof(RenamePreview));
     }
@@ -5023,7 +5044,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 $"Rotate {degrees} degrees"))
             .ToList();
 
-        WritebackGuardService.CreateBackup(path, WritebackGuardService.GetBackupMode(_settings));
+        WritebackGuardService.EnsureBackup(path, WritebackGuardService.GetBackupMode(_settings));
 
         BeginOperationStatus(Strings.MainOpApplyingRotation, $"Overwriting {Path.GetFileName(path)}.");
         try
@@ -5913,7 +5934,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             .ToList();
 
         var backupMode = WritebackGuardService.GetBackupMode(_settings);
-        var backupPath = WritebackGuardService.CreateBackup(path, backupMode);
+        var backupPath = WritebackGuardService.EnsureBackup(path, backupMode);
 
         BeginOperationStatus(Strings.MainOpApplyingCrop, $"Overwriting {Path.GetFileName(path)}.");
         try
@@ -6372,9 +6393,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Toast(Strings.MainToastAiRepaintMode);
     }
 
-    private async void ApplyInpaint()
+    private async Task ApplyInpaintAsync()
     {
-        if (!HasInpaintMaskRegions || CurrentPath is null) return;
+        if (!HasInpaintMaskRegions || CurrentPath is null || IsOperationBusy) return;
 
         var path = CurrentPath;
         var regions = _inpaintMaskRegions.ToList();
@@ -6382,38 +6403,52 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var height = PixelHeight;
         if (width <= 0 || height <= 0) return;
 
-        Toast(Strings.MainToastAiRepairRunning);
-
-        InpaintResult result;
+        BeginOperationStatus(Strings.MainToastAiRepairRunning, $"Overwriting {Path.GetFileName(path)}.");
         try
         {
-            result = await Task.Run(() =>
-                LaMaInpaintService.Inpaint(path, regions, width, height));
-        }
-        catch (Exception ex)
-        {
-            Toast($"Repair failed: {ex.Message}");
-            return;
-        }
+            await YieldForOperationStatusAsync();
 
-        if (!result.Success || result.RepairedImage is null)
-        {
-            Toast(result.ErrorMessage ?? Strings.MainToastRepairFailed);
-            return;
-        }
+            InpaintResult result;
+            try
+            {
+                result = await Task.Run(() =>
+                    LaMaInpaintService.Inpaint(path, regions, width, height));
+            }
+            catch (Exception ex)
+            {
+                Toast($"Repair failed: {ex.Message}");
+                return;
+            }
 
-        try
-        {
-            using var repaired = result.RepairedImage;
-            repaired.Write(path);
-            ShellChangeNotificationService.NotifyFileUpdated(path);
-            await ReloadCurrentAsync();
-            ClearInpaintMask();
-            Toast(Strings.MainToastAiRepairApplied);
+            if (!result.Success || result.RepairedImage is null)
+            {
+                Toast(result.ErrorMessage ?? Strings.MainToastRepairFailed);
+                return;
+            }
+
+            try
+            {
+                WritebackGuardService.EnsureBackup(path, WritebackGuardService.GetBackupMode(_settings));
+                using var repaired = result.RepairedImage;
+                repaired.Write(path);
+                _recoveryCenter.RecordWriteback(
+                    path,
+                    Strings.MainToastAiRepairApplied,
+                    $"Overwrote {Path.GetFileName(path)} with an AI repair.");
+                _preload.Reset();
+                ShellChangeNotificationService.NotifyFileUpdated(path);
+                ReloadCurrentPreservingViewState(resetPreload: false);
+                ClearInpaintMask();
+                Toast(Strings.MainToastAiRepairApplied);
+            }
+            catch (Exception ex)
+            {
+                Toast($"Failed to save repair: {ex.Message}");
+            }
         }
-        catch (Exception ex)
+        finally
         {
-            Toast($"Failed to save repair: {ex.Message}");
+            EndOperationStatus();
         }
     }
 
@@ -6650,7 +6685,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         try
         {
             await YieldForOperationStatusAsync();
-            if (ReloadCurrentPreservingViewState(resetPreload: false))
+            // Explicit reload must bypass the preload cache: a cached decode of
+            // the pre-edit file would make reload a silent no-op.
+            if (ReloadCurrentPreservingViewState(resetPreload: true))
                 Toast(Strings.MainToastReloaded);
         }
         finally
@@ -7304,7 +7341,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (CurrentPath is null || IsOperationBusy) return;
         var path = CurrentPath;
 
-        WritebackGuardService.CreateBackup(path, WritebackGuardService.GetBackupMode(_settings));
+        WritebackGuardService.EnsureBackup(path, WritebackGuardService.GetBackupMode(_settings));
 
         BeginOperationStatus(Strings.MainOpRemovingLocation, $"Updating {Path.GetFileName(path)}.");
         try
@@ -7341,7 +7378,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var path = CurrentPath;
         var label = MetadataEditService.CategoryLabel(categories);
 
-        WritebackGuardService.CreateBackup(path, WritebackGuardService.GetBackupMode(_settings));
+        WritebackGuardService.EnsureBackup(path, WritebackGuardService.GetBackupMode(_settings));
 
         BeginOperationStatus(
             string.Format(System.Globalization.CultureInfo.InvariantCulture, Strings.MainOpStrippingMetadata, label),

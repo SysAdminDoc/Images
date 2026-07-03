@@ -26,6 +26,8 @@ public sealed class PreloadService : IDisposable
         new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, DateTime> _lastAccess =
         new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, (DateTime WriteTimeUtc, long Length)> _sourceStamp =
+        new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _entryCts =
         new(StringComparer.OrdinalIgnoreCase);
     private CancellationTokenSource _cts = new();
@@ -58,12 +60,16 @@ public sealed class PreloadService : IDisposable
 
         // Probe size first — if it's a monster RAW / panorama / layered production file, skip.
         // The on-demand path will decode it only if the user actually navigates there.
+        // Skip paths must drop the _lastAccess entry set above: a phantom key with no
+        // matching _cache entry becomes the LRU victim on every eviction and lets the
+        // decoded-image cache grow past its slot cap.
         try
         {
             var fi = new FileInfo(path);
             if (!fi.Exists || fi.Length >= FileSizeSkipThreshold)
             {
                 _log.LogDebug("preload skip: {Path} is {Bytes} bytes", path, fi.Exists ? fi.Length : 0);
+                _lastAccess.TryRemove(path, out _);
                 return;
             }
 
@@ -71,8 +77,11 @@ public sealed class PreloadService : IDisposable
             if ((long)w * h > MegapixelSkipThreshold)
             {
                 _log.LogDebug("preload skip: {Path} is {W}x{H} (> 40 MP)", path, w, h);
+                _lastAccess.TryRemove(path, out _);
                 return;
             }
+
+            _sourceStamp[path] = (fi.LastWriteTimeUtc, fi.Length);
         }
         catch { /* quick dims is best-effort */ }
 
@@ -125,14 +134,16 @@ public sealed class PreloadService : IDisposable
     public ImageLoader.LoadResult? TryGet(string path)
     {
         if (!_cache.TryGetValue(path, out var lazy)) return null;
+        if (IsStale(path))
+        {
+            Evict(path);
+            return null;
+        }
         _lastAccess[path] = DateTime.UtcNow;
         var task = lazy.Value;
         if (task.IsFaulted || task.IsCanceled)
         {
-            _cache.TryRemove(path, out _);
-            _lastAccess.TryRemove(path, out _);
-            if (_entryCts.TryRemove(path, out var cts))
-                _ = DisposeCanceledSourceLaterAsync(cts);
+            Evict(path);
             return null;
         }
         if (!task.IsCompletedSuccessfully) return null;
@@ -146,17 +157,53 @@ public sealed class PreloadService : IDisposable
     public Task<ImageLoader.LoadResult?>? TryGetInFlight(string path)
     {
         if (!_cache.TryGetValue(path, out var lazy)) return null;
+        if (IsStale(path))
+        {
+            Evict(path);
+            return null;
+        }
         _lastAccess[path] = DateTime.UtcNow;
         var task = lazy.Value;
         if (task.IsFaulted || task.IsCanceled)
         {
-            _cache.TryRemove(path, out _);
-            _lastAccess.TryRemove(path, out _);
-            if (_entryCts.TryRemove(path, out var cts))
-                _ = DisposeCanceledSourceLaterAsync(cts);
+            Evict(path);
             return null;
         }
         return task;
+    }
+
+    /// <summary>
+    /// A cached decode is stale when the file on disk changed after enqueue
+    /// (external editor save, in-app writeback). Serving it would show the
+    /// pre-edit pixels with a "Reloaded" toast.
+    /// </summary>
+    private bool IsStale(string path)
+    {
+        if (!_sourceStamp.TryGetValue(path, out var stamp))
+            return false;
+        try
+        {
+            var fi = new FileInfo(path);
+            if (!fi.Exists)
+                return true;
+            return fi.LastWriteTimeUtc != stamp.WriteTimeUtc || fi.Length != stamp.Length;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private void Evict(string path)
+    {
+        _cache.TryRemove(path, out _);
+        _lastAccess.TryRemove(path, out _);
+        _sourceStamp.TryRemove(path, out _);
+        if (_entryCts.TryRemove(path, out var cts))
+        {
+            cts.Cancel();
+            _ = DisposeCanceledSourceLaterAsync(cts);
+        }
     }
 
     /// <summary>
@@ -180,21 +227,21 @@ public sealed class PreloadService : IDisposable
         _entryCts.Clear();
         _cache.Clear();
         _lastAccess.Clear();
+        _sourceStamp.Clear();
     }
 
     private void EvictIfNeeded()
     {
-        if (_cache.Count <= SlotCap) return;
-        var victim = _lastAccess.OrderBy(kv => kv.Value).FirstOrDefault();
-        if (victim.Key is not null)
+        // Victims come from keys actually present in _cache — selecting from
+        // _lastAccess alone lets a stale timestamp burn the eviction on a
+        // phantom key while the cache stays over cap.
+        while (_cache.Count > SlotCap)
         {
-            _cache.TryRemove(victim.Key, out _);
-            _lastAccess.TryRemove(victim.Key, out _);
-            if (_entryCts.TryRemove(victim.Key, out var cts))
-            {
-                cts.Cancel();
-                _ = DisposeCanceledSourceLaterAsync(cts);
-            }
+            var victim = _cache.Keys
+                .OrderBy(k => _lastAccess.TryGetValue(k, out var ts) ? ts : DateTime.MinValue)
+                .FirstOrDefault();
+            if (victim is null) return;
+            Evict(victim);
         }
     }
 
@@ -215,6 +262,7 @@ public sealed class PreloadService : IDisposable
         _entryCts.Clear();
         _cache.Clear();
         _lastAccess.Clear();
+        _sourceStamp.Clear();
     }
 
     private static async Task DisposeCanceledSourceLaterAsync(CancellationTokenSource source)
