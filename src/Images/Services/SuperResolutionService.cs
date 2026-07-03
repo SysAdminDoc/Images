@@ -111,44 +111,64 @@ public static class SuperResolutionService
         InferenceSession session, MagickImage source,
         int origWidth, int origHeight, int scaleFactor)
     {
-        var outWidth = origWidth * scaleFactor;
-        var outHeight = origHeight * scaleFactor;
-        var result = new MagickImage(MagickColors.Black, (uint)outWidth, (uint)outHeight);
+        // Canvas is sized once we know the model's true scale (from the first
+        // tile's output/input ratio). Trusting the caller's scaleFactor when
+        // the model upscales by a different factor leaves gaps/overlaps.
+        MagickImage? result = null;
+        var actualScale = scaleFactor;
 
         var tileSize = DefaultTileSize;
         var overlap = 16;
 
-        for (var ty = 0; ty < origHeight; ty += tileSize - overlap)
+        try
         {
-            for (var tx = 0; tx < origWidth; tx += tileSize - overlap)
+            for (var ty = 0; ty < origHeight; ty += tileSize - overlap)
             {
-                var tw = Math.Min(tileSize, origWidth - tx);
-                var th = Math.Min(tileSize, origHeight - ty);
-
-                using var tile = (MagickImage)source.Clone();
-                tile.Crop(new MagickGeometry(tx, ty, (uint)tw, (uint)th));
-                tile.ResetPage();
-
-                var tensor = ImageToTensor(tile, tw, th);
-                var inputName = session.InputNames.First();
-                var inputs = new List<NamedOnnxValue>
+                for (var tx = 0; tx < origWidth; tx += tileSize - overlap)
                 {
-                    NamedOnnxValue.CreateFromTensor(inputName,
-                        new DenseTensor<float>(tensor, [1, 3, th, tw]))
-                };
+                    var tw = Math.Min(tileSize, origWidth - tx);
+                    var th = Math.Min(tileSize, origHeight - ty);
 
-                using var results = session.Run(inputs);
-                var output = results.First().AsTensor<float>();
-                var outTileW = output.Dimensions[3];
-                var outTileH = output.Dimensions[2];
+                    using var tile = (MagickImage)source.Clone();
+                    tile.Crop(new MagickGeometry(tx, ty, (uint)tw, (uint)th));
+                    tile.ResetPage();
 
-                using var upscaledTile = TensorToImage(output, outTileW, outTileH);
-                result.Composite(upscaledTile, tx * scaleFactor, ty * scaleFactor,
-                    CompositeOperator.Over);
+                    var tensor = ImageToTensor(tile, tw, th);
+                    var inputName = session.InputNames.First();
+                    var inputs = new List<NamedOnnxValue>
+                    {
+                        NamedOnnxValue.CreateFromTensor(inputName,
+                            new DenseTensor<float>(tensor, [1, 3, th, tw]))
+                    };
+
+                    using var results = session.Run(inputs);
+                    var output = results.First().AsTensor<float>();
+                    var outTileW = output.Dimensions[3];
+                    var outTileH = output.Dimensions[2];
+
+                    if (result is null)
+                    {
+                        // Derive the true integer scale from the model output.
+                        actualScale = tw > 0 ? Math.Max(1, outTileW / tw) : scaleFactor;
+                        result = new MagickImage(
+                            MagickColors.Black,
+                            (uint)(origWidth * actualScale),
+                            (uint)(origHeight * actualScale));
+                    }
+
+                    using var upscaledTile = TensorToImage(output, outTileW, outTileH);
+                    result.Composite(upscaledTile, tx * actualScale, ty * actualScale,
+                        CompositeOperator.Over);
+                }
             }
         }
+        catch
+        {
+            result?.Dispose();
+            throw;
+        }
 
-        return result;
+        return result ?? new MagickImage(MagickColors.Black, (uint)origWidth, (uint)origHeight);
     }
 
     private static MagickImage InferFixedSize(

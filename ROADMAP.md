@@ -15,9 +15,6 @@ Only the two blocked credential items remain. Promote to `1.0.0` when unblocked.
 
 Surfaced during the v0.2.16 deep audit but not fixed in that pass.
 
-- [ ] P3 — SuperResolution/BackgroundRemoval are dead code with a latent tile-compositing bug
-  Why: Neither service has callers or an approved model group, so `IsAvailable()` is always false. When wired up, `SuperResolutionService` composites tiles at the caller's assumed scale factor rather than the model's actual output ratio.
-  Where: `src/Images/Services/SuperResolutionService.cs`, `BackgroundRemovalService.cs`
 - [ ] P3 — Listen-mode `--perf-report` mode and ExifTool write path lack live callers
   Why: `ExifToolService.Run` has no production caller (scaffolding); its UTF-8 safety is only exercised by tests. Track for when a writer is wired up.
   Where: `src/Images/Services/ExifToolService.cs`
