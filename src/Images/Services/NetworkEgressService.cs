@@ -29,6 +29,12 @@ public static class NetworkEgressService
     {
         // Insert at 0 so newest is first.
         _entries.Insert(0, entry);
+
+        // The startup load and the JSONL file are capped, but a long-lived
+        // listen-mode session records an entry per received path — trim the
+        // in-memory list too or it grows for the life of the process.
+        while (_entries.Count > MaxLoadedEntries)
+            _entries.RemoveAt(_entries.Count - 1);
     }
 
     public static void RecordInbound(string url, string purpose, long bytes)
@@ -210,6 +216,8 @@ public static class NetworkEgressService
         return buffer.ToArray();
     }
 
+    private static readonly object _persistLock = new();
+
     private static void PersistEntry(NetworkEgressEntry entry)
     {
         try
@@ -218,9 +226,14 @@ public static class NetworkEgressService
             if (path is null) return;
 
             var json = JsonSerializer.Serialize(entry, EgressJsonContext.Default.NetworkEgressEntry);
-            File.AppendAllText(path, json + Environment.NewLine);
 
-            RotateIfNeeded(path);
+            // Concurrent appends throw sharing violations and silently drop
+            // the entry from the JSONL; serialize writers.
+            lock (_persistLock)
+            {
+                File.AppendAllText(path, json + Environment.NewLine);
+                RotateIfNeeded(path);
+            }
         }
         catch (Exception ex)
         {

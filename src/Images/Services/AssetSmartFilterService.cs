@@ -165,7 +165,17 @@ public static class AssetSmartFilterService
     {
         try
         {
-            using var image = new MagickImage(new FileInfo(path), readSettings);
+            var paletteSettings = new MagickReadSettings
+            {
+                FrameIndex = readSettings.FrameIndex,
+                FrameCount = readSettings.FrameCount,
+                BackgroundColor = readSettings.BackgroundColor,
+                // Decode hint: the palette needs a dominant color, not a
+                // full-resolution decode of every image in the folder.
+                Width = 64,
+                Height = 64
+            };
+            using var image = new MagickImage(new FileInfo(path), paletteSettings);
             image.Resize(new MagickGeometry(1, 1) { IgnoreAspectRatio = true });
             var color = image.Histogram()
                 .OrderByDescending(pair => pair.Value)

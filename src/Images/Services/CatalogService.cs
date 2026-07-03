@@ -179,7 +179,7 @@ public sealed class CatalogService
 
             using var cmd = conn.CreateCommand();
             cmd.Transaction = tx;
-            cmd.CommandText = "DELETE FROM catalog_assets WHERE lower(source_path) = lower($path);";
+            cmd.CommandText = "DELETE FROM catalog_assets WHERE source_path = $path;";
             cmd.Parameters.AddWithValue("$path", path);
             removed += cmd.ExecuteNonQuery();
         }
@@ -196,7 +196,7 @@ public sealed class CatalogService
 
             using var cmd = conn.CreateCommand();
             cmd.Transaction = tx;
-            cmd.CommandText = "UPDATE catalog_assets SET scanned_utc = $scanned WHERE lower(source_path) = lower($path);";
+            cmd.CommandText = "UPDATE catalog_assets SET scanned_utc = $scanned WHERE source_path = $path;";
             cmd.Parameters.AddWithValue("$scanned", scannedUtc.ToUnixTimeSeconds());
             cmd.Parameters.AddWithValue("$path", path);
             cmd.ExecuteNonQuery();
@@ -217,7 +217,7 @@ public sealed class CatalogService
                 SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
                        width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette
                 FROM catalog_assets
-                WHERE lower(source_path) = lower($path)
+                WHERE source_path = $path
                 LIMIT 1;
                 """;
             cmd.Parameters.AddWithValue("$path", normalizedPath);
@@ -249,7 +249,7 @@ public sealed class CatalogService
                 SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
                        width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette
                 FROM catalog_assets
-                ORDER BY lower(source_path)
+                ORDER BY source_path COLLATE NOCASE
                 LIMIT $limit;
                 """;
             cmd.Parameters.AddWithValue("$limit", limit);
@@ -774,7 +774,7 @@ public sealed class CatalogService
         cmd.ExecuteNonQuery();
 
         cmd.Parameters.Clear();
-        cmd.CommandText = "SELECT id FROM catalog_assets WHERE lower(source_path) = lower($path) LIMIT 1;";
+        cmd.CommandText = "SELECT id FROM catalog_assets WHERE source_path = $path LIMIT 1;";
         cmd.Parameters.AddWithValue("$path", asset.SourcePath);
         var assetId = Convert.ToInt64(cmd.ExecuteScalar() ?? 0, CultureInfo.InvariantCulture);
 
