@@ -194,6 +194,9 @@ public static class CliReport
         sb.AppendLine("  Images.exe --codec-report");
         sb.AppendLine("    Print the per-format capability matrix and supported-extension list.");
         sb.AppendLine();
+        sb.AppendLine("  Images.exe --perf-report");
+        sb.AppendLine("    Print the performance-budget report (launch timings and thresholds).");
+        sb.AppendLine();
         sb.AppendLine("  Images.exe --version");
         sb.AppendLine("    Print the version and exit.");
         sb.AppendLine();

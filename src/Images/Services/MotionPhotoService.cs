@@ -118,36 +118,48 @@ public static class MotionPhotoService
         }
     }
 
+    // Real Samsung/Pixel motion-photo videos are 1-4 MB, so the ftyp box sits
+    // that far before EOF — a single 256 KB tail scan misses virtually all of
+    // them. Walk backward in overlapping chunks up to this cap.
+    private const int ChunkSize = 1024 * 1024;
+    private const long MaxVideoScan = 128L * 1024 * 1024;
+
     /// <summary>
     /// Searches backward from the end of the stream for an MP4 ftyp box.
     /// </summary>
     private static MotionPhotoInfo? FindEmbeddedMp4(FileStream stream)
     {
-        const int scanSize = 256 * 1024;
         var fileLength = stream.Length;
         if (fileLength < 12)
             return null;
 
-        var bufferSize = (int)Math.Min(scanSize, fileLength);
-        var buffer = new byte[bufferSize];
-        var startPos = Math.Max(0, fileLength - bufferSize);
+        // Overlap consecutive chunks by 8 bytes so an ftyp box straddling a
+        // chunk boundary is not missed.
+        const int overlap = 8;
+        var scanFloor = Math.Max(0, fileLength - MaxVideoScan);
+        var chunkStart = Math.Max(scanFloor, fileLength - ChunkSize);
+        var buffer = new byte[ChunkSize];
 
-        stream.Seek(startPos, SeekOrigin.Begin);
-        var bytesRead = stream.Read(buffer, 0, bufferSize);
-        if (bytesRead < 12)
-            return null;
-
-        for (var i = 0; i < bytesRead - 8; i++)
+        while (true)
         {
-            if (buffer[i + 4] == FtypSignature[0] &&
-                buffer[i + 5] == FtypSignature[1] &&
-                buffer[i + 6] == FtypSignature[2] &&
-                buffer[i + 7] == FtypSignature[3])
+            var length = (int)Math.Min(ChunkSize, fileLength - chunkStart);
+            stream.Seek(chunkStart, SeekOrigin.Begin);
+            var bytesRead = ReadFully(stream, buffer, length);
+            if (bytesRead < 12)
+                return null;
+
+            for (var i = 0; i < bytesRead - 8; i++)
             {
+                if (buffer[i + 4] != FtypSignature[0] ||
+                    buffer[i + 5] != FtypSignature[1] ||
+                    buffer[i + 6] != FtypSignature[2] ||
+                    buffer[i + 7] != FtypSignature[3])
+                    continue;
+
                 var boxSize = (buffer[i] << 24) | (buffer[i + 1] << 16) | (buffer[i + 2] << 8) | buffer[i + 3];
                 if (boxSize < 8 || boxSize > 64) continue;
 
-                var absoluteOffset = startPos + i;
+                var absoluteOffset = chunkStart + i;
                 if (absoluteOffset <= 2) continue;
 
                 var brand = Encoding.ASCII.GetString(buffer, i + 8, Math.Min(4, bytesRead - i - 8));
@@ -155,8 +167,24 @@ public static class MotionPhotoService
 
                 return new MotionPhotoInfo(absoluteOffset, videoLength, brand.TrimEnd('\0'));
             }
+
+            if (chunkStart <= scanFloor)
+                return null;
+
+            chunkStart = Math.Max(scanFloor, chunkStart - (ChunkSize - overlap));
+        }
+    }
+
+    private static int ReadFully(FileStream stream, byte[] buffer, int count)
+    {
+        var total = 0;
+        while (total < count)
+        {
+            var read = stream.Read(buffer, total, count - total);
+            if (read == 0) break;
+            total += read;
         }
 
-        return null;
+        return total;
     }
 }

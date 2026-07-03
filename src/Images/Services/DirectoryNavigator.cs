@@ -119,8 +119,10 @@ public sealed class DirectoryNavigator : IDisposable
 
         // Explicit-list mode: the file list was set via OpenExplicitList (e.g., recursive folder
         // browse). If the target is already in the list, just move the index — never rescan a
-        // single folder and destroy the cross-directory list.
-        if (_folder is null && _files.Count > 0 && TrySetCurrentIndex(full))
+        // single folder and destroy the cross-directory list. Exact-path only: the filename
+        // fallback would match a same-named file from a different directory (camera names like
+        // IMG_0001.jpg collide across folders) and silently show the wrong image.
+        if (_folder is null && _files.Count > 0 && TrySetCurrentIndex(full, allowFileNameFallback: false))
             return true;
 
         // Short-circuit: if we're already watching this folder, move to the exact file. If the
@@ -155,12 +157,14 @@ public sealed class DirectoryNavigator : IDisposable
         return true;
     }
 
-    private bool TrySetCurrentIndex(string full)
+    private bool TrySetCurrentIndex(string full, bool allowFileNameFallback = true)
     {
         var idx = _files.FindIndex(f => string.Equals(f, full, StringComparison.OrdinalIgnoreCase));
-        if (idx < 0)
+        if (idx < 0 && allowFileNameFallback)
         {
-            // Fallback match on filename only — handles case where normalization differs on comparison.
+            // Fallback match on filename only — handles case where normalization differs on
+            // comparison. Safe only for a single watched folder, where filenames are unique;
+            // never in a cross-directory explicit list.
             var name = Path.GetFileName(full);
             idx = _files.FindIndex(f => string.Equals(Path.GetFileName(f), name, StringComparison.OrdinalIgnoreCase));
         }

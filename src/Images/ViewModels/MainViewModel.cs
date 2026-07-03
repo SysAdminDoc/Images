@@ -1879,7 +1879,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 IsInspectorMode = false;
                 IsCropMode = false;
-                IsOcrMode = false;
+                _ocrWorkflow.Clear(cancelExtraction: true);
                 IsExposureBrushMode = false;
                 IsRedEyeCorrectionMode = false;
                 IsRetouchMode = false;
@@ -1938,7 +1938,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 IsInspectorMode = false;
                 IsSelectionMode = false;
-                IsOcrMode = false;
+                _ocrWorkflow.Clear(cancelExtraction: true);
                 IsExposureBrushMode = false;
                 IsRedEyeCorrectionMode = false;
                 IsRetouchMode = false;
@@ -2047,7 +2047,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 IsInspectorMode = false;
                 IsSelectionMode = false;
                 IsCropMode = false;
-                IsOcrMode = false;
+                _ocrWorkflow.Clear(cancelExtraction: true);
                 IsRedEyeCorrectionMode = false;
                 IsRetouchMode = false;
                 ClearCanvasSelection();
@@ -2140,7 +2140,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 IsCropMode = false;
                 IsExposureBrushMode = false;
                 IsRetouchMode = false;
-                IsOcrMode = false;
+                _ocrWorkflow.Clear(cancelExtraction: true);
                 ClearCanvasSelection();
                 ClearCropSelection();
                 ClearExposureBrushStrokes(showToast: false);
@@ -2233,7 +2233,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 IsCropMode = false;
                 IsExposureBrushMode = false;
                 IsRedEyeCorrectionMode = false;
-                IsOcrMode = false;
+                _ocrWorkflow.Clear(cancelExtraction: true);
                 ClearCanvasSelection();
                 ClearCropSelection();
                 ClearExposureBrushStrokes(showToast: false);
@@ -2487,6 +2487,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         if (_isDisposed || !IsSlideshowActive || IsSlideshowPaused)
             return;
+
+        // Timers keep pumping during modal dialogs and awaited operations. If a
+        // write/decode is in flight, advancing the navigator now desyncs the
+        // position chip from the displayed image (LoadCurrent... early-returns
+        // when busy) and can make DeleteCurrent remove the wrong entry. Skip
+        // this tick and try again on the next.
+        if (IsOperationBusy)
+        {
+            _slideshowTimer?.Start();
+            return;
+        }
 
         _slideshowTimer?.Stop();
 
@@ -5215,7 +5226,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         IsInspectorMode = false;
         IsSelectionMode = false;
         IsCropMode = false;
-        IsOcrMode = false;
+        _ocrWorkflow.Clear(cancelExtraction: true);
         IsExposureBrushMode = false;
         IsRedEyeCorrectionMode = false;
         IsRetouchMode = false;
