@@ -2,6 +2,20 @@
 
 All notable changes to **Images** are documented here.
 
+## 0.2.17
+
+Roadmap drain: resolves the remaining code-ready items from the v0.2.16 deep audit.
+
+### Fixed
+
+- **Email drafts encode non-ASCII correctly** — Subject headers use RFC 2047 encoded-words, the attachment name/filename parameters use the RFC 2231 extended syntax, and the quoted-printable-declared body is now actually QP-encoded with soft line breaks. Non-ASCII filenames and source paths previously garbled in mail clients; ASCII values are unchanged.
+- **Super-resolution tiling uses the model's true scale** — The tiled upscale path sized its canvas and positioned composited tiles by the caller's assumed scale factor; a model whose real output ratio differed produced gaps or overlaps. The scale is now derived from the model's output/input dimension ratio. (Staged path; no live caller yet.)
+- **Tile cache never evicts the active pyramid** — `EvictIfOverCap` could prune a single pyramid larger than the 1 GB cap out from under the viewer. The directory backing the current display is now tracked and skipped during eviction.
+
+### Internal
+
+- **Deterministic update-check tracker test** — Observes the per-name `update-check:manual` counter mid-run instead of the process-wide totals, removing a parallel-execution flake.
+
 ## 0.2.16
 
 Deep audit release: 40+ correctness, security, privacy, and quality fixes across the viewer, editing pipeline, import/export, AI services, theming, and accessibility.
