@@ -123,7 +123,7 @@ public sealed class NonDestructiveEditService
                 $"Added {operation.Kind} to the non-destructive edit stack.",
                 operation);
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or System.Xml.XmlException)
         {
             Log.LogWarning(ex, "Could not append edit operation for {Path}", imagePath);
             return new EditStackMutationResult(false, "", ex.Message);
@@ -160,7 +160,7 @@ public sealed class NonDestructiveEditService
                 enabled ? "Edit operation enabled." : "Edit operation disabled.",
                 FromDocument(operation));
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or System.Xml.XmlException)
         {
             Log.LogWarning(ex, "Could not update edit operation for {Path}", imagePath);
             return new EditStackMutationResult(false, "", ex.Message);
@@ -193,7 +193,7 @@ public sealed class NonDestructiveEditService
                 $"Created {copyName} without duplicating pixels.",
                 VirtualCopy: FromDocument(copy));
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or System.Xml.XmlException)
         {
             Log.LogWarning(ex, "Could not create virtual copy for {Path}", imagePath);
             return new EditStackMutationResult(false, "", ex.Message);
@@ -217,7 +217,7 @@ public sealed class NonDestructiveEditService
                 PrimarySidecarPath(normalizedPath),
                 $"Cleared {removedCount} baked edit operation{Plural(removedCount)}.");
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or System.Xml.XmlException)
         {
             Log.LogWarning(ex, "Could not clear edit operations for {Path}", imagePath);
             return new EditStackMutationResult(false, "", ex.Message);
@@ -261,7 +261,7 @@ public sealed class NonDestructiveEditService
         {
             throw;
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or MagickException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or System.Xml.XmlException or MagickException)
         {
             Log.LogWarning(ex, "Could not export edit stack for {Path}", imagePath);
             return new EditExportResult(false, "", "", 0, ex.Message);
@@ -383,7 +383,9 @@ public sealed class NonDestructiveEditService
         {
             image.Resize(new MagickGeometry(maxWidth == 0 ? image.Width : maxWidth, maxHeight == 0 ? image.Height : maxHeight)
             {
-                IgnoreAspectRatio = false
+                IgnoreAspectRatio = false,
+                // "Max dimensions" is a bound, never an upscale target.
+                Greater = true
             }, filter);
         }
     }
@@ -502,9 +504,20 @@ public sealed class NonDestructiveEditService
         editDocument.UpdatedUtc = DateTimeOffset.UtcNow;
 
         var sidecarPath = PrimarySidecarPath(imagePath);
-        var xmpDocument = File.Exists(sidecarPath)
-            ? XDocument.Load(sidecarPath, LoadOptions.PreserveWhitespace)
-            : CreateEmptySidecar();
+        XDocument xmpDocument;
+        try
+        {
+            xmpDocument = File.Exists(sidecarPath)
+                ? XDocument.Load(sidecarPath, LoadOptions.PreserveWhitespace)
+                : CreateEmptySidecar();
+        }
+        catch (System.Xml.XmlException ex)
+        {
+            // The read path already treats a malformed sidecar as an empty
+            // stack; writing must not crash where reading recovered.
+            Log.LogWarning(ex, "Replacing malformed edit sidecar {Path}", sidecarPath);
+            xmpDocument = CreateEmptySidecar();
+        }
 
         ReplaceJsonElement(xmpDocument, "EditStack", editDocument);
         SaveAtomically(xmpDocument, sidecarPath);

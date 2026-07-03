@@ -344,7 +344,9 @@ public sealed class MacroActionService
         var height = maxHeight > 0 ? (uint)maxHeight : image.Height;
         image.Resize(new MagickGeometry(width, height)
         {
-            IgnoreAspectRatio = false
+            IgnoreAspectRatio = false,
+            // "Max dimensions" is a bound, never an upscale target.
+            Greater = true
         });
     }
 

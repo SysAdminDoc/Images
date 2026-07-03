@@ -172,7 +172,9 @@ public sealed class ExportPreviewService
         var height = request.MaxHeight > 0 ? (uint)request.MaxHeight : image.Height;
         image.Resize(new MagickGeometry(width, height)
         {
-            IgnoreAspectRatio = false
+            IgnoreAspectRatio = false,
+            // "Max dimensions" is a bound, never an upscale target.
+            Greater = true
         });
     }
 

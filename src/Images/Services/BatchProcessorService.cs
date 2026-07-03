@@ -380,7 +380,9 @@ public sealed class BatchProcessorService
             maxWidth > 0 ? (uint)maxWidth : image.Width,
             maxHeight > 0 ? (uint)maxHeight : image.Height)
         {
-            IgnoreAspectRatio = false
+            IgnoreAspectRatio = false,
+            // "Max dimensions" is a bound, never an upscale target.
+            Greater = true
         });
     }
 
