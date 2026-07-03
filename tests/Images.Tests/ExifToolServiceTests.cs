@@ -27,6 +27,10 @@ public sealed class ExifToolServiceTests
                 var lines = File.ReadAllLines(capturedArgFile);
                 Assert.Equal(
                     [
+                        // Non-ANSI filenames on Windows require this prefix, or
+                        // ExifTool interprets paths in the system code page.
+                        "-charset",
+                        "filename=UTF8",
                         "-overwrite_original",
                         "-XMP-dc:Subject+=portrait",
                         Path.GetFullPath(target)
