@@ -1,4 +1,7 @@
 using System.IO;
+using System.Text;
+using System.Xml;
+using System.Xml.Linq;
 using ImageMagick;
 
 namespace Images.Services;
@@ -17,16 +20,35 @@ public enum MetadataStripCategory
 public sealed record MetadataStripResult(int RemovedCount, IReadOnlyList<string> RemovedTagNames);
 
 /// <summary>
-/// In-place metadata editing operations that preserve pixel data.
+/// In-place metadata editing operations. Lossless formats keep their pixel
+/// data bit-identical; JPEG strips re-encode at the source's estimated
+/// quality (ImageMagick has no metadata-only JPEG rewrite).
 /// Writes are atomic: a temp file is produced alongside the source and
 /// then swapped on success, so a crash mid-write leaves the original
 /// file untouched.
+/// GPS strips cover EXIF GPS tags, XMP GPS/location properties, and IPTC
+/// location records; "All" removes the XMP, IPTC, and Photoshop (8BIM)
+/// profiles wholesale.
 /// </summary>
 public static class MetadataEditService
 {
-    private static readonly HashSet<string> GpsPrefixes = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly IptcTag[] IptcLocationTags =
+    [
+        IptcTag.City, IptcTag.SubLocation, IptcTag.ProvinceState,
+        IptcTag.CountryCode, IptcTag.Country
+    ];
+
+    private static readonly HashSet<string> XmpLocationLocalNames = new(StringComparer.OrdinalIgnoreCase)
     {
-        "Gps"
+        "City", "State", "Country", "CountryCode", "CountryName",
+        "Location", "LocationShown", "LocationCreated", "ProvinceState", "Sublocation"
+    };
+
+    private static readonly HashSet<string> XmpLocationNamespaces = new(StringComparer.Ordinal)
+    {
+        "http://ns.adobe.com/photoshop/1.0/",
+        "http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/",
+        "http://iptc.org/std/Iptc4xmpExt/2008-02-29/"
     };
 
     private static readonly HashSet<string> DeviceInfoTags = new(StringComparer.OrdinalIgnoreCase)
@@ -71,24 +93,9 @@ public static class MetadataEditService
 
         using var image = new MagickImage(path);
 
-        var exif = image.GetExifProfile();
-        if (exif is null)
-            return new MetadataStripResult(0, []);
-
-        var tagsToRemove = exif.Values
-            .Where(v => ShouldRemoveTag(v.Tag.ToString(), categories))
-            .Select(v => v.Tag)
-            .ToList();
-
-        if (tagsToRemove.Count == 0)
-            return new MetadataStripResult(0, []);
-
-        var removedNames = tagsToRemove.Select(t => t.ToString()).ToList();
-
-        foreach (var tag in tagsToRemove)
-            exif.RemoveValue(tag);
-
-        image.SetProfile(exif);
+        var result = StripCore(image, categories);
+        if (result.RemovedCount == 0)
+            return result;
 
         var dir = Path.GetDirectoryName(path) ?? Path.GetTempPath();
         var tmp = Path.Combine(dir, $".images-{Guid.NewGuid():N}{Path.GetExtension(path)}.tmp");
@@ -103,11 +110,11 @@ public static class MetadataEditService
             throw;
         }
 
-        return new MetadataStripResult(tagsToRemove.Count, removedNames);
+        return result;
     }
 
     /// <summary>
-    /// Removes EXIF tags matching the specified categories from an in-memory image.
+    /// Removes metadata matching the specified categories from an in-memory image.
     /// Used by copy/export workflows so source files are not changed.
     /// </summary>
     public static MetadataStripResult StripMetadata(MagickImage image, MetadataStripCategory categories)
@@ -116,29 +123,11 @@ public static class MetadataEditService
         if (categories == MetadataStripCategory.None)
             return new MetadataStripResult(0, []);
 
-        var exif = image.GetExifProfile();
-        if (exif is null)
-            return new MetadataStripResult(0, []);
-
-        var tagsToRemove = exif.Values
-            .Where(v => ShouldRemoveTag(v.Tag.ToString(), categories))
-            .Select(v => v.Tag)
-            .ToList();
-
-        if (tagsToRemove.Count == 0)
-            return new MetadataStripResult(0, []);
-
-        var removedNames = tagsToRemove.Select(t => t.ToString()).ToList();
-
-        foreach (var tag in tagsToRemove)
-            exif.RemoveValue(tag);
-
-        image.SetProfile(exif);
-        return new MetadataStripResult(tagsToRemove.Count, removedNames);
+        return StripCore(image, categories);
     }
 
     /// <summary>
-    /// Previews which EXIF tags would be removed for the given categories without modifying the file.
+    /// Previews which metadata entries would be removed for the given categories without modifying the file.
     /// </summary>
     public static MetadataStripResult PreviewStrip(string path, MetadataStripCategory categories)
     {
@@ -147,23 +136,158 @@ public static class MetadataEditService
 
         try
         {
+            // StripCore mutates only the in-memory image, which is discarded.
             using var image = new MagickImage(path);
-            var exif = image.GetExifProfile();
-            if (exif is null)
-                return new MetadataStripResult(0, []);
-
-            var matching = exif.Values
-                .Where(v => ShouldRemoveTag(v.Tag.ToString(), categories))
-                .Select(v => v.Tag.ToString())
-                .ToList();
-
-            return new MetadataStripResult(matching.Count, matching);
+            return StripCore(image, categories);
         }
         catch
         {
             return new MetadataStripResult(0, []);
         }
     }
+
+    private static MetadataStripResult StripCore(MagickImage image, MetadataStripCategory categories)
+    {
+        var removedNames = new List<string>();
+
+        var exif = image.GetExifProfile();
+        if (exif is not null)
+        {
+            var tagsToRemove = exif.Values
+                .Where(v => ShouldRemoveTag(v.Tag.ToString(), categories))
+                .Select(v => v.Tag)
+                .ToList();
+
+            if (tagsToRemove.Count > 0)
+            {
+                removedNames.AddRange(tagsToRemove.Select(t => t.ToString()));
+                foreach (var tag in tagsToRemove)
+                    exif.RemoveValue(tag);
+                image.SetProfile(exif);
+            }
+        }
+
+        if (categories.HasFlag(MetadataStripCategory.All))
+            removedNames.AddRange(RemoveSidecarProfiles(image));
+        else if (categories.HasFlag(MetadataStripCategory.Gps))
+            removedNames.AddRange(StripLocationData(image));
+
+        return new MetadataStripResult(removedNames.Count, removedNames);
+    }
+
+    /// <summary>
+    /// Removes the XMP, IPTC, and Photoshop resource profiles entirely.
+    /// Used by the "All metadata" category, where partial preservation
+    /// would leak fields the EXIF tag lists don't cover.
+    /// </summary>
+    private static List<string> RemoveSidecarProfiles(MagickImage image)
+    {
+        var removed = new List<string>();
+        foreach (var name in new[] { "xmp", "iptc", "8bim" })
+        {
+            if (image.HasProfile(name))
+            {
+                image.RemoveProfile(name);
+                removed.Add($"Profile:{name}");
+            }
+        }
+
+        return removed;
+    }
+
+    /// <summary>
+    /// Removes GPS/location data that lives outside EXIF: XMP GPS properties
+    /// (exif namespace) plus photoshop/IPTC-XMP location fields, and IPTC
+    /// City/Sublocation/Province/Country records. Non-location XMP content
+    /// (ratings, labels, edit provenance) is preserved.
+    /// </summary>
+    private static List<string> StripLocationData(MagickImage image)
+    {
+        var removed = new List<string>();
+
+        var iptc = image.GetIptcProfile();
+        if (iptc is not null)
+        {
+            var touched = false;
+            foreach (var tag in IptcLocationTags)
+            {
+                if (iptc.RemoveValue(tag))
+                {
+                    removed.Add($"Iptc:{tag}");
+                    touched = true;
+                }
+            }
+
+            if (touched)
+                image.SetProfile(iptc);
+        }
+
+        var xmp = image.GetXmpProfile();
+        if (xmp is null)
+            return removed;
+
+        XDocument? doc;
+        try
+        {
+            doc = xmp.ToXDocument();
+        }
+        catch (XmlException)
+        {
+            doc = null;
+        }
+
+        if (doc is null)
+        {
+            // Unparseable XMP can't be selectively scrubbed; fail closed for
+            // a privacy strip and drop the whole packet.
+            image.RemoveProfile("xmp");
+            removed.Add("Profile:xmp");
+            return removed;
+        }
+
+        var elements = doc.Descendants().Where(e => IsLocationName(e.Name)).ToList();
+        var elementSet = new HashSet<XElement>(elements);
+        var changed = false;
+        foreach (var element in elements)
+        {
+            if (element.Ancestors().Any(elementSet.Contains))
+                continue;
+            removed.Add($"Xmp:{element.Name.LocalName}");
+            element.Remove();
+            changed = true;
+        }
+
+        var attributes = doc.Descendants()
+            .SelectMany(e => e.Attributes())
+            .Where(a => !a.IsNamespaceDeclaration && IsLocationName(a.Name))
+            .ToList();
+        foreach (var attribute in attributes)
+        {
+            removed.Add($"Xmp:{attribute.Name.LocalName}");
+            attribute.Remove();
+            changed = true;
+        }
+
+        if (changed)
+        {
+            var settings = new XmlWriterSettings
+            {
+                OmitXmlDeclaration = true,
+                Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)
+            };
+            using var buffer = new MemoryStream();
+            using (var writer = XmlWriter.Create(buffer, settings))
+                doc.Save(writer);
+            image.SetProfile(new XmpProfile(buffer.ToArray()));
+        }
+
+        return removed;
+    }
+
+    private static bool IsLocationName(XName name) =>
+        name.LocalName.StartsWith("GPS", StringComparison.OrdinalIgnoreCase) ||
+        (XmpLocationNamespaces.Contains(name.NamespaceName) &&
+         XmpLocationLocalNames.Contains(name.LocalName));
 
     private static bool ShouldRemoveTag(string tagName, MetadataStripCategory categories)
     {

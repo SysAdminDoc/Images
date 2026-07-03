@@ -182,14 +182,19 @@ public sealed class ImportInboxService
                 var destinationFolder = Path.GetFullPath(request.DestinationFolder);
                 Directory.CreateDirectory(destinationFolder);
                 var sourcePath = Path.GetFullPath(request.SourcePath);
-                var destinationPath = ResolveUniqueDestination(destinationFolder, Path.GetFileName(sourcePath));
+                var fileName = Path.GetFileName(sourcePath);
 
-                if (SamePath(sourcePath, destinationPath))
+                // Importing into the file's own folder applies edits in place;
+                // checking after ResolveUniqueDestination would always see the
+                // source itself as a collision and duplicate/rename it.
+                if (SamePath(sourcePath, Path.Combine(destinationFolder, fileName)))
                 {
-                    ApplyPostImportEdits(destinationPath, request);
-                    imported.Add(new ImportInboxCommitMove(sourcePath, destinationPath, MovedOriginal: false));
+                    ApplyPostImportEdits(sourcePath, request);
+                    imported.Add(new ImportInboxCommitMove(sourcePath, sourcePath, MovedOriginal: false));
                     continue;
                 }
+
+                var destinationPath = ResolveUniqueDestination(destinationFolder, fileName);
 
                 if (request.MoveOriginal)
                     File.Move(sourcePath, destinationPath);
@@ -231,16 +236,28 @@ public sealed class ImportInboxService
         if (request.Rating is not null)
             WriteRatingSidecar(destinationPath, Math.Clamp(request.Rating.Value, -1, 5));
 
-        if (request.StripGps && SupportsMetadataWrite(destinationPath))
+        if (request.StripGps)
         {
-            try
+            if (SupportsMetadataWrite(destinationPath))
             {
-                MetadataEditService.StripGpsMetadata(destinationPath);
+                try
+                {
+                    MetadataEditService.StripGpsMetadata(destinationPath);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or NotSupportedException or InvalidOperationException or MagickException)
+                {
+                    Log.LogWarning(ex, "Could not strip GPS metadata from imported file {Path}", destinationPath);
+                    throw new InvalidOperationException("GPS metadata could not be stripped from the imported file.", ex);
+                }
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or NotSupportedException or InvalidOperationException or MagickException)
+            else
             {
-                Log.LogWarning(ex, "Could not strip GPS metadata from imported file {Path}", destinationPath);
-                throw new InvalidOperationException("GPS metadata could not be stripped from the imported file.", ex);
+                // Formats we can't rewrite: honor the strip contract by failing
+                // the import when location data is actually present instead of
+                // silently importing it.
+                var residual = MetadataEditService.PreviewStrip(destinationPath, MetadataStripCategory.Gps);
+                if (residual.RemovedCount > 0)
+                    throw new InvalidOperationException("This file format carries location metadata that Images cannot rewrite, so the import was not completed.");
             }
         }
     }
@@ -251,13 +268,22 @@ public sealed class ImportInboxService
         return extension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
                extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
                extension.Equals(".tif", StringComparison.OrdinalIgnoreCase) ||
-               extension.Equals(".tiff", StringComparison.OrdinalIgnoreCase);
+               extension.Equals(".tiff", StringComparison.OrdinalIgnoreCase) ||
+               extension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+               extension.Equals(".webp", StringComparison.OrdinalIgnoreCase);
     }
 
     private static void RollBackFailedTransfer(string sourcePath, string destinationPath, bool movedOriginal)
     {
         try
         {
+            // The destination is always a fresh unique path, so any sidecar at
+            // destination + ".xmp" was written by this import's post-edits and
+            // must not survive the rollback as an orphan.
+            var sidecarPath = destinationPath + ".xmp";
+            if (File.Exists(sidecarPath))
+                File.Delete(sidecarPath);
+
             if (!File.Exists(destinationPath))
                 return;
 
@@ -472,7 +498,7 @@ public sealed class ImportInboxService
         }
 
         description.SetAttributeValue(xmp + "Rating", rating.ToString(CultureInfo.InvariantCulture));
-        document.Save(sidecarPath);
+        SidecarWriter.SaveAtomically(document, sidecarPath);
     }
 
     private sealed record ImportSnapshot(

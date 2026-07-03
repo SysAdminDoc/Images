@@ -71,6 +71,83 @@ public sealed class MetadataEditServiceTests
         }
     }
 
+    [Fact]
+    public void StripMetadata_GpsCategory_RemovesXmpLocationButKeepsRating()
+    {
+        using var image = CreateImageWithExif();
+        image.SetProfile(new XmpProfile(System.Text.Encoding.UTF8.GetBytes(XmpWithLocation)));
+
+        var result = MetadataEditService.StripMetadata(image, MetadataStripCategory.Gps);
+
+        Assert.Contains(result.RemovedTagNames, n => n == "Xmp:GPSLatitude");
+        Assert.Contains(result.RemovedTagNames, n => n == "Xmp:GPSLongitude");
+        Assert.Contains(result.RemovedTagNames, n => n == "Xmp:City");
+
+        var xmp = image.GetXmpProfile();
+        Assert.NotNull(xmp);
+        var xml = xmp!.ToXDocument()!.ToString();
+        Assert.DoesNotContain("GPSLatitude", xml, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("GPSLongitude", xml, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Seattle", xml, StringComparison.Ordinal);
+        Assert.Contains("Rating", xml, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void StripMetadata_GpsCategory_RemovesIptcLocationRecords()
+    {
+        using var image = CreateImageWithExif();
+        var iptc = new IptcProfile();
+        iptc.SetValue(IptcTag.City, "Seattle");
+        iptc.SetValue(IptcTag.Country, "USA");
+        iptc.SetValue(IptcTag.Caption, "Keep me");
+        image.SetProfile(iptc);
+
+        var result = MetadataEditService.StripMetadata(image, MetadataStripCategory.Gps);
+
+        Assert.Contains(result.RemovedTagNames, n => n == "Iptc:City");
+        Assert.Contains(result.RemovedTagNames, n => n == "Iptc:Country");
+
+        var reloaded = image.GetIptcProfile();
+        Assert.NotNull(reloaded);
+        Assert.Null(reloaded!.GetValue(IptcTag.City));
+        Assert.Null(reloaded.GetValue(IptcTag.Country));
+        Assert.NotNull(reloaded.GetValue(IptcTag.Caption));
+    }
+
+    [Fact]
+    public void StripMetadata_All_RemovesXmpAndIptcProfiles()
+    {
+        using var image = CreateImageWithExif();
+        image.SetProfile(new XmpProfile(System.Text.Encoding.UTF8.GetBytes(XmpWithLocation)));
+        var iptc = new IptcProfile();
+        iptc.SetValue(IptcTag.City, "Seattle");
+        image.SetProfile(iptc);
+
+        var result = MetadataEditService.StripMetadata(image, MetadataStripCategory.All);
+
+        Assert.Contains(result.RemovedTagNames, n => n == "Profile:xmp");
+        Assert.Contains(result.RemovedTagNames, n => n == "Profile:iptc");
+        Assert.Null(image.GetXmpProfile());
+        Assert.Null(image.GetIptcProfile());
+    }
+
+    private const string XmpWithLocation =
+        """
+        <x:xmpmeta xmlns:x="adobe:ns:meta/">
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about=""
+                xmlns:exif="http://ns.adobe.com/exif/1.0/"
+                xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/"
+                xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+                exif:GPSLatitude="47,36.0N"
+                photoshop:City="Seattle">
+              <exif:GPSLongitude>122,19.0W</exif:GPSLongitude>
+              <xmp:Rating>5</xmp:Rating>
+            </rdf:Description>
+          </rdf:RDF>
+        </x:xmpmeta>
+        """;
+
     private static MagickImage CreateImageWithExif()
     {
         var image = new MagickImage(MagickColors.Blue, 8, 8) { Format = MagickFormat.Jpeg };
