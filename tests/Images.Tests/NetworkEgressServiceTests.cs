@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text.Json;
 using Images.Services;
 
@@ -38,6 +39,24 @@ public sealed class NetworkEgressServiceTests
     public void TakeLatestLines_WhenLimitIsNotPositive_ReturnsEmpty(int maxLines)
     {
         Assert.Empty(NetworkEgressService.TakeLatestLines(["old", "new"], maxLines));
+    }
+
+    [Fact]
+    public void RotateIfNeeded_TrimsOnlyWhenPersistedCountExceedsLimit()
+    {
+        using var temp = TestDirectory.Create();
+        var path = Path.Combine(temp.Path, "network-egress.jsonl");
+        File.WriteAllLines(path, Enumerable.Range(0, NetworkEgressService.MaxPersistedEntries + 1)
+            .Select(index => $"line-{index}"));
+
+        NetworkEgressService.RotateIfNeeded(path, NetworkEgressService.MaxPersistedEntries);
+        Assert.Equal(NetworkEgressService.MaxPersistedEntries + 1, File.ReadAllLines(path).Length);
+
+        NetworkEgressService.RotateIfNeeded(path, NetworkEgressService.MaxPersistedEntries + 1);
+
+        var lines = File.ReadAllLines(path);
+        Assert.Equal(NetworkEgressService.MaxPersistedEntries, lines.Length);
+        Assert.Equal("line-1", lines[0]);
     }
 
     private static NetworkEgressEntry Entry(int index)

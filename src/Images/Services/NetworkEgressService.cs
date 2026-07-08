@@ -94,8 +94,13 @@ public static class NetworkEgressService
         try
         {
             var path = GetJsonlPath();
-            if (path is not null && File.Exists(path))
-                File.Delete(path);
+            lock (_persistLock)
+            {
+                if (path is not null && File.Exists(path))
+                    File.Delete(path);
+                _persistedLineCountPath = null;
+                _persistedLineCount = null;
+            }
         }
         catch (Exception ex)
         {
@@ -175,7 +180,7 @@ public static class NetworkEgressService
     }
 
     internal const int MaxLoadedEntries = 500;
-    private const int MaxPersistedEntries = 2000;
+    internal const int MaxPersistedEntries = 2000;
 
     internal static IReadOnlyList<NetworkEgressEntry> ReadPersistedEntriesForDisplay(
         IEnumerable<string> lines,
@@ -217,6 +222,8 @@ public static class NetworkEgressService
     }
 
     private static readonly object _persistLock = new();
+    private static string? _persistedLineCountPath;
+    private static int? _persistedLineCount;
 
     private static void PersistEntry(NetworkEgressEntry entry)
     {
@@ -231,8 +238,11 @@ public static class NetworkEgressService
             // the entry from the JSONL; serialize writers.
             lock (_persistLock)
             {
+                var lineCount = GetPersistedLineCount(path);
                 File.AppendAllText(path, json + Environment.NewLine);
-                RotateIfNeeded(path);
+                lineCount++;
+                _persistedLineCount = lineCount;
+                RotateIfNeeded(path, lineCount);
             }
         }
         catch (Exception ex)
@@ -241,15 +251,50 @@ public static class NetworkEgressService
         }
     }
 
-    private static void RotateIfNeeded(string path)
+    private static int GetPersistedLineCount(string path)
+    {
+        if (_persistedLineCountPath is not null &&
+            _persistedLineCountPath.Equals(path, StringComparison.OrdinalIgnoreCase) &&
+            _persistedLineCount is not null)
+        {
+            return _persistedLineCount.Value;
+        }
+
+        _persistedLineCountPath = path;
+        _persistedLineCount = CountPersistedLines(path);
+        return _persistedLineCount.Value;
+    }
+
+    private static int CountPersistedLines(string path)
     {
         try
         {
+            return File.Exists(path) ? File.ReadLines(path).Count() : 0;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
+    internal static void RotateIfNeeded(string path, int lineCount)
+    {
+        try
+        {
+            if (lineCount <= MaxPersistedEntries) return;
+
             var lines = File.ReadAllLines(path);
-            if (lines.Length <= MaxPersistedEntries) return;
+            if (lines.Length <= MaxPersistedEntries)
+            {
+                _persistedLineCountPath = path;
+                _persistedLineCount = lines.Length;
+                return;
+            }
 
             var trimmed = lines[^MaxPersistedEntries..];
             File.WriteAllLines(path, trimmed);
+            _persistedLineCountPath = path;
+            _persistedLineCount = trimmed.Length;
         }
         catch
         {

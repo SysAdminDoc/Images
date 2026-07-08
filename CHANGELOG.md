@@ -36,6 +36,7 @@ All notable changes to **Images** are documented here.
 - **Model Manager no longer trusts stale same-length hashes** — Imported model manifests now store file modified time, and snapshot inspection rehashes modified files before reporting readiness.
 - **Ghostscript version probing drains process output while waiting** — The version probe now reads stdout and stderr asynchronously before `WaitForExit`, avoiding pipe-buffer stalls from chatty `gs` builds.
 - **Listen mode binds its socket exclusively** — The loopback TCP listener now sets `ExclusiveAddressUse` before binding so another same-user socket cannot reuse the listen port.
+- **Network egress log rotation avoids per-entry full-file reads** — The JSONL writer now tracks persisted line count in memory and only reads/trims the log when the cached count exceeds the cap.
 
 ## 0.2.17
 
