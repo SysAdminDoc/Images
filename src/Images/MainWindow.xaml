@@ -2025,7 +2025,8 @@
                                          VirtualizingStackPanel.IsVirtualizing="True"
                                          MouseDoubleClick="CommandPaletteList_MouseDoubleClick"
                                          MaxHeight="380"
-                                         Padding="4,4">
+                                         Padding="4,4"
+                                         AutomationProperties.Name="{x:Static loc:Strings.CommandPaletteCommandListAutomationName}">
                                     <ListBox.ItemContainerStyle>
                                         <Style TargetType="ListBoxItem">
                                             <Setter Property="Padding" Value="12,8" />
@@ -2033,6 +2034,7 @@
                                             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
                                             <Setter Property="Background" Value="Transparent" />
                                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                            <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
                                             <Setter Property="Template">
                                                 <Setter.Value>
                                                     <ControlTemplate TargetType="ListBoxItem">

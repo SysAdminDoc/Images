@@ -568,6 +568,7 @@ public static class Strings
     public static string CommandPalette_Category_Review => Get(nameof(CommandPalette_Category_Review));
     public static string CommandPalette_Category_Compare => Get(nameof(CommandPalette_Category_Compare));
     public static string CommandPalette_Category_Help => Get(nameof(CommandPalette_Category_Help));
+    public static string CommandPaletteCommandListAutomationName => Get(nameof(CommandPaletteCommandListAutomationName));
     public static string CommandPalette_Open => Get(nameof(CommandPalette_Open));
     public static string CommandPalette_BrowseFolder => Get(nameof(CommandPalette_BrowseFolder));
     public static string MainDialogBrowseFolder => Get(nameof(MainDialogBrowseFolder));

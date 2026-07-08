@@ -7,4 +7,6 @@ public sealed class CommandPaletteItem
     public string Shortcut { get; init; } = "";
     public string Category { get; init; } = "";
     public System.Windows.Input.ICommand? Command { get; init; }
+
+    public override string ToString() => Name;
 }

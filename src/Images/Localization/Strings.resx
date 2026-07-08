@@ -4093,6 +4093,9 @@ Details written to:
   <data name="CommandPalette_Category_Help" xml:space="preserve">
     <value>Help</value>
   </data>
+  <data name="CommandPaletteCommandListAutomationName" xml:space="preserve">
+    <value>Command palette results</value>
+  </data>
   <data name="CommandPalette_Open" xml:space="preserve">
     <value>Open file...</value>
   </data>
