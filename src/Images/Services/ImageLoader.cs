@@ -609,7 +609,7 @@ public static class ImageLoader
                 // up to 100 ms to stop "0-delay" GIFs from pinning a CPU core — we match that
                 // convention rather than shipping a faster-than-browser playback.
                 var ms = (int)frame.AnimationDelay * 10;
-                if (ms <= 20) ms = 100;
+                if (ms < 20) ms = 100;
                 delays.Add(TimeSpan.FromMilliseconds(ms));
             }
 
