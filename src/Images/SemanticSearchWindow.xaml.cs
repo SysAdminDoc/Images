@@ -7,6 +7,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Images.Localization;
 using Images.Services;
+using Microsoft.Data.Sqlite;
+using Microsoft.ML.OnnxRuntime;
 using Microsoft.Win32;
 
 namespace Images;
@@ -23,9 +25,12 @@ public sealed record SemanticSearchResultRow(
 public partial class SemanticSearchWindow : Window
 {
     private readonly SemanticSearchService _semanticSearch;
+    private readonly bool _ownsSemanticSearch;
     private readonly ObservableCollection<string> _roots = [];
     private readonly ObservableCollection<SemanticSearchResultRow> _results = [];
     private CancellationTokenSource? _indexCancellation;
+    private Task<SemanticSearchIndexResult>? _indexTask;
+    private bool _isClosed;
 
     public event EventHandler<SemanticSearchOpenRequestedEventArgs>? OpenRequested;
 
@@ -37,6 +42,7 @@ public partial class SemanticSearchWindow : Window
     internal SemanticSearchWindow(SemanticSearchService? semanticSearch)
     {
         _semanticSearch = semanticSearch ?? new SemanticSearchService();
+        _ownsSemanticSearch = semanticSearch is null;
         InitializeComponent();
 
         RootsList.ItemsSource = _roots;
@@ -49,15 +55,7 @@ public partial class SemanticSearchWindow : Window
             var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
             WindowChrome.ApplyDarkCaption(hwnd);
         };
-        Closed += (_, _) =>
-        {
-            _indexCancellation?.Cancel();
-            _indexCancellation?.Dispose();
-            // Release the window-owned CLIP provider's native ONNX sessions;
-            // injected services stay alive for their owner (tests).
-            if (semanticSearch is null)
-                _semanticSearch.Dispose();
-        };
+        Closed += (_, _) => CancelAndDisposeAfterIndexing();
     }
 
     public void AddSearchRoot(string folder)
@@ -98,9 +96,15 @@ public partial class SemanticSearchWindow : Window
         SetBusy(true);
         SetStatus(Strings.SemanticSearchBuildingIndex, SearchStatus.Busy);
 
+        Task<SemanticSearchIndexResult>? indexTask = null;
         try
         {
-            var result = await Task.Run(() => _semanticSearch.Rebuild(roots, token), token);
+            indexTask = Task.Run(() => _semanticSearch.Rebuild(roots, token), token);
+            _indexTask = indexTask;
+            var result = await indexTask;
+            if (_isClosed)
+                return;
+
             RefreshStatus();
             SetStatus(
                 Strings.Format(nameof(Strings.SemanticSearchIndexedResultFormat), result.IndexedCount, result.CatalogedCount, Plural(result.CatalogedCount), result.FailedCount, Plural(result.FailedCount)),
@@ -108,14 +112,33 @@ public partial class SemanticSearchWindow : Window
         }
         catch (OperationCanceledException)
         {
-            SetStatus(Strings.SemanticSearchIndexingCanceled, SearchStatus.Warning);
-            RefreshStatus();
+            if (!_isClosed)
+            {
+                SetStatus(Strings.SemanticSearchIndexingCanceled, SearchStatus.Warning);
+                RefreshStatus();
+            }
+        }
+        catch (Exception ex) when (IsSemanticOperationFailure(ex))
+        {
+            if (!_isClosed)
+            {
+                SetStatus(Strings.Format(nameof(Strings.SemanticSearchOperationFailedFormat), ex.Message), SearchStatus.Error);
+                RefreshStatus();
+            }
         }
         finally
         {
+            if (ReferenceEquals(_indexTask, indexTask))
+                _indexTask = null;
             if (ReferenceEquals(_indexCancellation, indexCancellation))
+            {
                 _indexCancellation = null;
-            SetBusy(false);
+                if (!_isClosed)
+                    indexCancellation.Dispose();
+            }
+
+            if (!_isClosed)
+                SetBusy(false);
         }
     }
 
@@ -136,7 +159,13 @@ public partial class SemanticSearchWindow : Window
 
     private void ClearIndexButton_Click(object sender, RoutedEventArgs e)
     {
-        _semanticSearch.Clear();
+        if (!_semanticSearch.Clear())
+        {
+            RefreshStatus();
+            SetStatus(Strings.Format(nameof(Strings.SemanticSearchOperationFailedFormat), Strings.SemanticSearchStorageUnavailable), SearchStatus.Error);
+            return;
+        }
+
         _results.Clear();
         RefreshStatus();
         UpdateResultState();
@@ -218,7 +247,19 @@ public partial class SemanticSearchWindow : Window
             return;
         }
 
-        var matches = _semanticSearch.Search(query, folderFilter: FolderFilterTextBox.Text);
+        IReadOnlyList<SemanticSearchResult> matches;
+        try
+        {
+            matches = _semanticSearch.Search(query, folderFilter: FolderFilterTextBox.Text);
+        }
+        catch (Exception ex) when (IsSemanticOperationFailure(ex))
+        {
+            _results.Clear();
+            UpdateResultState();
+            SetStatus(Strings.Format(nameof(Strings.SemanticSearchOperationFailedFormat), ex.Message), SearchStatus.Error);
+            return;
+        }
+
         _results.Clear();
         foreach (var match in matches)
         {
@@ -318,6 +359,43 @@ public partial class SemanticSearchWindow : Window
     }
 
     private static string Plural(int count) => count == 1 ? string.Empty : "s";
+
+    private void CancelAndDisposeAfterIndexing()
+    {
+        _isClosed = true;
+        var indexCancellation = _indexCancellation;
+        var indexTask = _indexTask;
+        indexCancellation?.Cancel();
+
+        if (indexTask is null || indexTask.IsCompleted)
+        {
+            indexCancellation?.Dispose();
+            if (_ownsSemanticSearch)
+                _semanticSearch.Dispose();
+            return;
+        }
+
+        _ = indexTask.ContinueWith(
+            _ =>
+            {
+                indexCancellation?.Dispose();
+                if (_ownsSemanticSearch)
+                    _semanticSearch.Dispose();
+            },
+            CancellationToken.None,
+            TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
+    }
+
+    private static bool IsSemanticOperationFailure(Exception ex)
+        => ex is IOException
+            or UnauthorizedAccessException
+            or System.Security.SecurityException
+            or ArgumentException
+            or InvalidOperationException
+            or NotSupportedException
+            or SqliteException
+            or OnnxRuntimeException;
 
     private enum SearchStatus
     {

@@ -20,7 +20,8 @@ public sealed class ClipEmbeddingProvider : ISemanticEmbeddingProvider, IDisposa
     private readonly ClipTokenizer _tokenizer;
     private readonly ClipImagePreprocessor _preprocessor;
     private readonly string _statusText;
-    private bool _disposed;
+    private readonly ReaderWriterLockSlim _sessionLock = new();
+    private volatile bool _disposed;
 
     private ClipEmbeddingProvider(
         InferenceSession textSession,
@@ -70,9 +71,12 @@ public sealed class ClipEmbeddingProvider : ISemanticEmbeddingProvider, IDisposa
             var tokenizer = ClipTokenizer.Load(tokenizerModel.InstalledPath!);
             var preprocessor = ClipImagePreprocessor.Load(preprocessorModel.InstalledPath!);
 
-            var sessionOptions = OnnxRuntimeService.CreateSessionOptions();
-            var textSession = new InferenceSession(textModel.InstalledPath!, sessionOptions);
-            var visionSession = new InferenceSession(visionModel.InstalledPath!, sessionOptions);
+            using var sessionOptions = OnnxRuntimeService.CreateSessionOptions();
+            var (textSession, visionSession) = CreateSessionPair(
+                sessionOptions,
+                options => new InferenceSession(textModel.InstalledPath!, options),
+                options => new InferenceSession(visionModel.InstalledPath!, options),
+                session => session.Dispose());
 
             var statusText = $"CLIP ViT-B/32 ready ({OnnxRuntimeService.ProviderLabel})";
 
@@ -92,32 +96,40 @@ public sealed class ClipEmbeddingProvider : ISemanticEmbeddingProvider, IDisposa
         var tokenIds = _tokenizer.Encode(query);
         var inputTensor = new DenseTensor<long>(tokenIds, [1, ClipTokenizer.ContextLength]);
 
-        var textInputName = _textSession.InputNames.FirstOrDefault() ?? "input_ids";
-        var inputs = new List<NamedOnnxValue>
+        _sessionLock.EnterReadLock();
+        try
         {
-            NamedOnnxValue.CreateFromTensor(textInputName, inputTensor)
-        };
+            ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (_textSession.InputNames.Count > 1)
-        {
-            var attentionMask = new long[ClipTokenizer.ContextLength];
-            for (var i = 0; i < tokenIds.Length && tokenIds[i] != 0; i++)
-                attentionMask[i] = 1;
-            var maskTensor = new DenseTensor<long>(attentionMask, [1, ClipTokenizer.ContextLength]);
-            inputs.Add(NamedOnnxValue.CreateFromTensor(
-                _textSession.InputNames[1], maskTensor));
+            var textInputName = _textSession.InputNames.FirstOrDefault() ?? "input_ids";
+            var inputs = new List<NamedOnnxValue>
+            {
+                NamedOnnxValue.CreateFromTensor(textInputName, inputTensor)
+            };
+
+            if (_textSession.InputNames.Count > 1)
+            {
+                var attentionMask = BuildAttentionMask(tokenIds);
+                var maskTensor = new DenseTensor<long>(attentionMask, [1, ClipTokenizer.ContextLength]);
+                inputs.Add(NamedOnnxValue.CreateFromTensor(
+                    _textSession.InputNames[1], maskTensor));
+            }
+
+            using var results = _textSession.Run(inputs);
+            var outputName = _textSession.OutputNames.FirstOrDefault() ?? "output";
+            var output = results.First(r => r.Name == outputName);
+            var tensor = output.AsTensor<float>();
+
+            var embedding = new float[EmbeddingDimensions];
+            for (var i = 0; i < EmbeddingDimensions; i++)
+                embedding[i] = tensor[0, i];
+
+            return embedding;
         }
-
-        using var results = _textSession.Run(inputs);
-        var outputName = _textSession.OutputNames.FirstOrDefault() ?? "output";
-        var output = results.First(r => r.Name == outputName);
-        var tensor = output.AsTensor<float>();
-
-        var embedding = new float[EmbeddingDimensions];
-        for (var i = 0; i < EmbeddingDimensions; i++)
-            embedding[i] = tensor[0, i];
-
-        return embedding;
+        finally
+        {
+            _sessionLock.ExitReadLock();
+        }
     }
 
     public IReadOnlyList<float> EmbedImage(SemanticAssetEmbeddingInput input)
@@ -142,22 +154,32 @@ public sealed class ClipEmbeddingProvider : ISemanticEmbeddingProvider, IDisposa
         var inputTensor = new DenseTensor<float>(pixelData,
             [1, 3, ClipImagePreprocessor.ImageSize, ClipImagePreprocessor.ImageSize]);
 
-        var visionInputName = _visionSession.InputNames.FirstOrDefault() ?? "pixel_values";
-        var inputs = new List<NamedOnnxValue>
+        _sessionLock.EnterReadLock();
+        try
         {
-            NamedOnnxValue.CreateFromTensor(visionInputName, inputTensor)
-        };
+            ObjectDisposedException.ThrowIf(_disposed, this);
 
-        using var results = _visionSession.Run(inputs);
-        var outputName = _visionSession.OutputNames.FirstOrDefault() ?? "output";
-        var output = results.First(r => r.Name == outputName);
-        var tensor = output.AsTensor<float>();
+            var visionInputName = _visionSession.InputNames.FirstOrDefault() ?? "pixel_values";
+            var inputs = new List<NamedOnnxValue>
+            {
+                NamedOnnxValue.CreateFromTensor(visionInputName, inputTensor)
+            };
 
-        var embedding = new float[EmbeddingDimensions];
-        for (var i = 0; i < EmbeddingDimensions; i++)
-            embedding[i] = tensor[0, i];
+            using var results = _visionSession.Run(inputs);
+            var outputName = _visionSession.OutputNames.FirstOrDefault() ?? "output";
+            var output = results.First(r => r.Name == outputName);
+            var tensor = output.AsTensor<float>();
 
-        return embedding;
+            var embedding = new float[EmbeddingDimensions];
+            for (var i = 0; i < EmbeddingDimensions; i++)
+                embedding[i] = tensor[0, i];
+
+            return embedding;
+        }
+        finally
+        {
+            _sessionLock.ExitReadLock();
+        }
     }
 
     public string DescribeAsset(CatalogAssetRecord asset)
@@ -172,9 +194,74 @@ public sealed class ClipEmbeddingProvider : ISemanticEmbeddingProvider, IDisposa
 
     public void Dispose()
     {
-        if (_disposed) return;
-        _disposed = true;
-        _textSession.Dispose();
-        _visionSession.Dispose();
+        _sessionLock.EnterWriteLock();
+        try
+        {
+            if (_disposed) return;
+            _disposed = true;
+            _textSession.Dispose();
+            _visionSession.Dispose();
+        }
+        finally
+        {
+            _sessionLock.ExitWriteLock();
+        }
+    }
+
+    internal static long[] BuildAttentionMask(IReadOnlyList<long> tokenIds)
+    {
+        var attentionMask = new long[ClipTokenizer.ContextLength];
+        var count = Math.Min(tokenIds.Count, ClipTokenizer.ContextLength);
+        for (var i = 0; i < count; i++)
+        {
+            attentionMask[i] = 1;
+            if (tokenIds[i] == ClipTokenizer.EndOfTextId)
+                break;
+        }
+
+        return attentionMask;
+    }
+
+    internal static (TSession TextSession, TSession VisionSession) CreateSessionPair<TOptions, TSession>(
+        TOptions sessionOptions,
+        Func<TOptions, TSession> createTextSession,
+        Func<TOptions, TSession> createVisionSession,
+        Action<TSession> disposeSession)
+        where TSession : class
+    {
+        ArgumentNullException.ThrowIfNull(createTextSession);
+        ArgumentNullException.ThrowIfNull(createVisionSession);
+        ArgumentNullException.ThrowIfNull(disposeSession);
+
+        TSession? textSession = null;
+        TSession? visionSession = null;
+        try
+        {
+            textSession = createTextSession(sessionOptions);
+            visionSession = createVisionSession(sessionOptions);
+            return (textSession, visionSession);
+        }
+        catch
+        {
+            DisposePartialSession(visionSession, disposeSession);
+            DisposePartialSession(textSession, disposeSession);
+            throw;
+        }
+    }
+
+    private static void DisposePartialSession<TSession>(TSession? session, Action<TSession> disposeSession)
+        where TSession : class
+    {
+        if (session is null)
+            return;
+
+        try
+        {
+            disposeSession(session);
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "CLIP provider partial session cleanup failed");
+        }
     }
 }

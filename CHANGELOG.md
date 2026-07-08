@@ -9,6 +9,7 @@ All notable changes to **Images** are documented here.
 - **XMP sidecars follow rename and quarantine moves** — Rename, undo, file-health rename/quarantine, and duplicate-cleanup quarantine now carry both `image.ext.xmp` and `stem.xmp` companion files without overwriting existing sidecars, and recovery records can restore moved sidecars with the image.
 - **Case-only renames are real renames** — Renaming `photo.jpg` to `PHOTO.jpg` now performs the NTFS case-only move and updates the viewer instead of reporting a no-op.
 - **Rename/navigation races no longer corrupt the folder list** — Rename and undo now update the navigator by captured source path instead of the current index, rename commits are busy-gated during in-flight loads, dead back-history entries are dropped, and external renames from supported to unsupported extensions refresh the folder list.
+- **Semantic Search shutdown and CLIP inference are hardened** — Closing the window during indexing now cancels first and disposes ONNX sessions after the in-flight task finishes, CLIP inference is serialized against disposal, partial provider creation cleans up native sessions, text attention masks no longer truncate at token id `0`, and semantic/settings SQLite connections use private WAL cache mode.
 
 ## 0.2.17
 

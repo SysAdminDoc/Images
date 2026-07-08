@@ -2906,6 +2906,9 @@ Details written to:
   <data name="SemanticSearchStorageUnavailable" xml:space="preserve">
     <value>[!!!!!!!!!!!! Semantic search storage is unavailable for this session. !!!!!!!!!!!!]</value>
   </data>
+  <data name="SemanticSearchOperationFailedFormat" xml:space="preserve">
+    <value>[!!!!!! Semantic search failed: {0} !!!!!!]</value>
+  </data>
   <data name="TagGraphWindowTitle" xml:space="preserve">
     <value>[!!!!!!! Images - Tag relationships !!!!!!!]</value>
   </data>

@@ -3,6 +3,7 @@ using System.IO;
 using System.Security;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
+using Microsoft.ML.OnnxRuntime;
 
 namespace Images.Services;
 
@@ -98,7 +99,7 @@ public sealed class SemanticSearchService : IDisposable
         {
             DataSource = _dbPath,
             Mode = SqliteOpenMode.ReadWriteCreate,
-            Cache = SqliteCacheMode.Shared,
+            Cache = SqliteCacheMode.Private,
             DefaultTimeout = 5
         }.ToString();
         _isAvailable = TryEnsureSchema(_dbPath);
@@ -107,6 +108,7 @@ public sealed class SemanticSearchService : IDisposable
     public string? IndexPath => _dbPath;
     public bool IsAvailable => _isAvailable;
     public ISemanticEmbeddingProvider Provider => _provider;
+    internal string ConnectionStringForTests => _connectionString;
 
     public string? ClipFallbackReason { get; }
 
@@ -141,7 +143,7 @@ public sealed class SemanticSearchService : IDisposable
                     _provider.DescribeAsset(asset),
                     indexedUtc));
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or InvalidOperationException or NotSupportedException)
+            catch (Exception ex) when (IsRecoverableSemanticFailure(ex))
             {
                 Log.LogDebug(ex, "Could not embed semantic asset {Path}", asset.SourcePath);
             }
@@ -177,16 +179,16 @@ public sealed class SemanticSearchService : IDisposable
         if (!_isAvailable || string.IsNullOrWhiteSpace(query))
             return [];
 
-        var queryVector = Normalize(_provider.EmbedText(query));
-        if (queryVector.Length != _provider.Dimensions || IsZeroVector(queryVector))
-            return [];
-
-        var normalizedFilter = NormalizeFolderFilter(folderFilter);
-        limit = Math.Clamp(limit, 1, 500);
-        var results = new List<SemanticSearchResult>();
-
         try
         {
+            var queryVector = Normalize(_provider.EmbedText(query));
+            if (queryVector.Length != _provider.Dimensions || IsZeroVector(queryVector))
+                return [];
+
+            var normalizedFilter = NormalizeFolderFilter(folderFilter);
+            limit = Math.Clamp(limit, 1, 500);
+            var results = new List<SemanticSearchResult>();
+
             using var conn = Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
@@ -225,18 +227,18 @@ public sealed class SemanticSearchService : IDisposable
                     reader.GetString(3),
                     FromUnix(reader.GetInt64(7))));
             }
+
+            return results
+                .OrderByDescending(result => result.Score)
+                .ThenBy(result => result.FileName, StringComparer.OrdinalIgnoreCase)
+                .Take(limit)
+                .ToArray();
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or InvalidOperationException or NotSupportedException or SqliteException)
+        catch (Exception ex) when (IsRecoverableSemanticFailure(ex))
         {
             Log.LogWarning(ex, "Semantic search failed");
             return [];
         }
-
-        return results
-            .OrderByDescending(result => result.Score)
-            .ThenBy(result => result.FileName, StringComparer.OrdinalIgnoreCase)
-            .Take(limit)
-            .ToArray();
     }
 
     public SemanticSearchStatus GetStatus()
@@ -290,15 +292,24 @@ public sealed class SemanticSearchService : IDisposable
         }
     }
 
-    public void Clear()
+    public bool Clear()
     {
         if (!_isAvailable)
-            return;
+            return false;
 
-        using var conn = Open();
-        using var tx = conn.BeginTransaction();
-        ClearIndex(conn, tx);
-        tx.Commit();
+        try
+        {
+            using var conn = Open();
+            using var tx = conn.BeginTransaction();
+            ClearIndex(conn, tx);
+            tx.Commit();
+            return true;
+        }
+        catch (Exception ex) when (IsRecoverableSemanticFailure(ex))
+        {
+            Log.LogWarning(ex, "Semantic search index clear failed");
+            return false;
+        }
     }
 
     private static string? CreateDefaultPath()
@@ -528,6 +539,16 @@ public sealed class SemanticSearchService : IDisposable
 
     private static bool IsZeroVector(IReadOnlyList<float> vector)
         => vector.All(value => Math.Abs(value) < 0.000001f);
+
+    private static bool IsRecoverableSemanticFailure(Exception ex)
+        => ex is IOException
+            or UnauthorizedAccessException
+            or SecurityException
+            or ArgumentException
+            or InvalidOperationException
+            or NotSupportedException
+            or SqliteException
+            or OnnxRuntimeException;
 
     private static double Dot(IReadOnlyList<float> left, IReadOnlyList<float> right)
     {

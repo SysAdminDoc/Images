@@ -55,12 +55,14 @@ public sealed class SettingsService
             {
                 DataSource = dbPath,
                 Mode = SqliteOpenMode.ReadWriteCreate,
-                Cache = SqliteCacheMode.Shared,
+                Cache = SqliteCacheMode.Private,
                 DefaultTimeout = 5,
             }.ToString();
 
         _isAvailable = TryEnsureSchema(dbPath);
     }
+
+    internal string ConnectionStringForTests => _connectionString;
 
     private bool TryEnsureSchema(string dbPath)
     {

@@ -1,6 +1,7 @@
 using System.IO;
 using ImageMagick;
 using Images.Services;
+using Microsoft.Data.Sqlite;
 
 namespace Images.Tests;
 
@@ -101,6 +102,34 @@ public sealed class SemanticSearchServiceTests
         Assert.Equal(0, service.GetStatus().IndexedCount);
     }
 
+    [Fact]
+    public void Search_WhenTextEmbeddingFails_ReturnsEmptyMatches()
+    {
+        using var temp = TestDirectory.Create();
+        WriteImage(temp.Path, "sunset-over-water.png", 16, 8);
+        var service = new SemanticSearchService(
+            Path.Combine(temp.Path, "semantic-index.db"),
+            new CatalogService(Path.Combine(temp.Path, "catalog.db")),
+            new ThrowingTextEmbeddingProvider(),
+            clock: () => new DateTimeOffset(2026, 5, 17, 12, 0, 0, TimeSpan.Zero));
+        service.Rebuild([temp.Path]);
+
+        var matches = service.Search("sunset");
+
+        Assert.Empty(matches);
+    }
+
+    [Fact]
+    public void ConnectionString_UsesPrivateCacheForWalConcurrency()
+    {
+        using var temp = TestDirectory.Create();
+        var service = CreateService(temp.Path);
+
+        var builder = new SqliteConnectionStringBuilder(service.ConnectionStringForTests);
+
+        Assert.Equal(SqliteCacheMode.Private, builder.Cache);
+    }
+
     private static SemanticSearchService CreateService(string root)
     {
         var catalog = new CatalogService(Path.Combine(root, "catalog.db"));
@@ -119,5 +148,20 @@ public sealed class SemanticSearchServiceTests
         };
         image.Write(path);
         return path;
+    }
+
+    private sealed class ThrowingTextEmbeddingProvider : ISemanticEmbeddingProvider
+    {
+        public string ProviderId => "throwing-text";
+        public string ModelId => "test";
+        public int Dimensions => 2;
+        public string StatusText => "Test provider";
+
+        public IReadOnlyList<float> EmbedImage(SemanticAssetEmbeddingInput input) => [1.0f, 0.0f];
+
+        public IReadOnlyList<float> EmbedText(string query)
+            => throw new InvalidOperationException("text embedding failed");
+
+        public string DescribeAsset(CatalogAssetRecord asset) => Path.GetFileName(asset.SourcePath);
     }
 }

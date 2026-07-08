@@ -154,6 +154,17 @@ public sealed class SettingsServiceTests
     }
 
     [Fact]
+    public void ConnectionString_UsesPrivateCacheForWalConcurrency()
+    {
+        using var temp = TestDirectory.Create();
+        var service = new SettingsService(Path.Combine(temp.Path, "settings.db"));
+
+        var builder = new SqliteConnectionStringBuilder(service.ConnectionStringForTests);
+
+        Assert.Equal(SqliteCacheMode.Private, builder.Cache);
+    }
+
+    [Fact]
     public void PrimitiveSettings_RoundTripUsingInvariantStorage()
     {
         using var temp = TestDirectory.Create();

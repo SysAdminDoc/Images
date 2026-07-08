@@ -896,6 +896,7 @@ public static class Strings
     public static string SemanticSearchIndexStatusFormat => Get(nameof(SemanticSearchIndexStatusFormat));
     public static string SemanticSearchIndexStatusNever => Get(nameof(SemanticSearchIndexStatusNever));
     public static string SemanticSearchStorageUnavailable => Get(nameof(SemanticSearchStorageUnavailable));
+    public static string SemanticSearchOperationFailedFormat => Get(nameof(SemanticSearchOperationFailedFormat));
 
     // ---- Tag graph window ----
     public static string TagGraphWindowTitle => Get(nameof(TagGraphWindowTitle));
