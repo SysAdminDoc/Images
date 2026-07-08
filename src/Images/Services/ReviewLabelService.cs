@@ -170,6 +170,13 @@ public sealed class ReviewLabelService
             description.SetAttributeValue(photoshop + "Country", state.Location.Country);
             description.SetAttributeValue(iptcCore + "Location", state.Location.Location);
         }
+        else
+        {
+            description.SetAttributeValue(photoshop + "City", null);
+            description.SetAttributeValue(photoshop + "State", null);
+            description.SetAttributeValue(photoshop + "Country", null);
+            description.SetAttributeValue(iptcCore + "Location", null);
+        }
     }
 
     private static int? ReadRating(XDocument document)

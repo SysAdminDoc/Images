@@ -12,6 +12,7 @@ All notable changes to **Images** are documented here.
 - **Semantic Search shutdown and CLIP inference are hardened** — Closing the window during indexing now cancels first and disposes ONNX sessions after the in-flight task finishes, CLIP inference is serialized against disposal, partial provider creation cleans up native sessions, text attention masks no longer truncate at token id `0`, and semantic/settings SQLite connections use private WAL cache mode.
 - **C2PA inspection cannot fetch remote manifests** — c2patool reads now pass a no-network settings file, the child-process inspection is recorded in the network-egress log, system PATH is no longer searched for auto-run c2patool binaries, and only actual no-manifest output is classified as no-manifest.
 - **Import Inbox keeps processing after malformed sidecars** — A corrupt pre-existing XMP sidecar now fails only that import request, rolls back any moved original, and preserves the rest of the batch result.
+- **Review location clears remove stale XMP values** — Clearing a review location now removes the Photoshop City/State/Country and IPTC Location attributes instead of leaving old place metadata behind while reporting success.
 
 ## 0.2.17
 

@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Xml.Linq;
 using Images.Services;
 
 namespace Images.Tests;
@@ -89,6 +90,31 @@ public sealed class ReviewLabelServiceTests
         Assert.Equal("NY", state.Location.StateProvince);
         Assert.Equal("USA", state.Location.Country);
         Assert.Equal("Central Park", state.Location.Location);
+    }
+
+    [Fact]
+    public void SetLocation_EmptyClearsExistingLocationAttributes()
+    {
+        using var temp = TestDirectory.Create();
+        var image = WritePng(temp.Path, "clear-location.png");
+        var service = new ReviewLabelService();
+        service.SetRating(image, 5);
+        service.SetLocation(image, new SidecarLocation("Central Park", "New York", "NY", "USA"));
+
+        var result = service.SetLocation(image, SidecarLocation.Empty);
+        var state = service.ReadState(image);
+        var sidecar = XDocument.Load(image + ".xmp");
+        XNamespace photoshop = "http://ns.adobe.com/photoshop/1.0/";
+        XNamespace iptcCore = "http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/";
+
+        Assert.True(result.Success);
+        Assert.Equal("Location cleared.", result.Message);
+        Assert.Equal(5, state.Rating);
+        Assert.False(state.Location.HasAnyField);
+        Assert.DoesNotContain(sidecar.Descendants().Attributes(), attribute => attribute.Name == photoshop + "City");
+        Assert.DoesNotContain(sidecar.Descendants().Attributes(), attribute => attribute.Name == photoshop + "State");
+        Assert.DoesNotContain(sidecar.Descendants().Attributes(), attribute => attribute.Name == photoshop + "Country");
+        Assert.DoesNotContain(sidecar.Descendants().Attributes(), attribute => attribute.Name == iptcCore + "Location");
     }
 
     [Fact]
