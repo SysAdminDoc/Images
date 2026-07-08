@@ -56,6 +56,7 @@ All notable changes to **Images** are documented here.
 - **Tile and drag-over UI stalls reduced** — Huge-image tile bitmaps now decode on worker tasks before being attached to the canvas, and drag-over file verdicts are cached for the current file list instead of re-enumerating directories per mouse move.
 - **Gallery refresh no longer blocks on smart filters** — Gallery navigation now reconciles thumbnails in place, and smart-filter indexing runs on a worker task with an indexing chip instead of synchronously rebuilding the collection on the dispatcher.
 - **Unresolved visibility bindings collapse safely** — `BoolToVis` now treats `DependencyProperty.UnsetValue` like `null` while preserving the existing nonzero integer behavior used by count bindings.
+- **Multi-file drops open the full supported set** — Dropping multiple image files now routes through the same file-list open path as multi-file argv instead of silently opening only the first dropped file.
 
 ## 0.2.17
 

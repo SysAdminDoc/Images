@@ -17,6 +17,21 @@ public partial class MainWindow : Window
 {
     private const double WorkAreaMargin = 24;
 
+    internal enum DropOpenKind
+    {
+        None,
+        Folder,
+        SingleFile,
+        FileList
+    }
+
+    internal sealed record DropOpenRequest(DropOpenKind Kind, IReadOnlyList<string> Paths)
+    {
+        public static DropOpenRequest None { get; } = new(DropOpenKind.None, []);
+        public bool IsAccepted => Kind != DropOpenKind.None;
+        public string? FirstPath => Paths.Count > 0 ? Paths[0] : null;
+    }
+
     private MainViewModel Vm => (MainViewModel)DataContext;
     private PixelCoordinate? _inspectorSelectionStart;
     private PixelCoordinate? _canvasSelectionStart;
@@ -1594,19 +1609,21 @@ public partial class MainWindow : Window
         ClearDragPathVerdict();
         if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
         var paths = (string[]?)e.Data.GetData(DataFormats.FileDrop);
-        if (paths is null || paths.Length == 0) return;
-        var first = paths[0];
+        var request = ResolveDropOpenRequest(paths);
+        if (!request.IsAccepted) return;
 
-        if (Directory.Exists(first))
+        if (request.Kind == DropOpenKind.Folder)
         {
             e.Handled = true;
-            Vm.BrowseFolderCommand.Execute(first);
+            Vm.BrowseFolderCommand.Execute(request.FirstPath);
             return;
         }
 
-        var resolved = GetDroppedFilePath(first);
-        if (resolved is null) return;
-        Vm.OpenFile(resolved);
+        if (request.Kind == DropOpenKind.FileList)
+            Vm.OpenFileList(request.Paths);
+        else
+            Vm.OpenFile(request.FirstPath!);
+
         e.Handled = true;
     }
 
@@ -1619,11 +1636,7 @@ public partial class MainWindow : Window
         if (string.Equals(_dragPathVerdictKey, key, StringComparison.Ordinal))
             return _dragPathVerdict;
 
-        var first = paths[0];
-        var verdict = Directory.Exists(first)
-            ? Directory.EnumerateFiles(first)
-                .FirstOrDefault(f => Services.DirectoryNavigator.SupportedExtensions.Contains(Path.GetExtension(f)))
-            : GetDroppedFilePath(first);
+        var verdict = ResolveDropOpenRequest(paths).FirstPath;
 
         _dragPathVerdictKey = key;
         _dragPathVerdict = verdict;
@@ -1641,6 +1654,30 @@ public partial class MainWindow : Window
         if (!File.Exists(path)) return null;
         var ext = Path.GetExtension(path);
         return Services.DirectoryNavigator.SupportedExtensions.Contains(ext) ? path : null;
+    }
+
+    internal static DropOpenRequest ResolveDropOpenRequest(IReadOnlyList<string>? paths)
+    {
+        if (paths is null || paths.Count == 0)
+            return DropOpenRequest.None;
+
+        var first = paths[0];
+        if (Directory.Exists(first))
+            return new DropOpenRequest(DropOpenKind.Folder, [first]);
+
+        var supportedFiles = paths
+            .Select(GetDroppedFilePath)
+            .Where(path => path is not null)
+            .Select(path => path!)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        return supportedFiles.Length switch
+        {
+            0 => DropOpenRequest.None,
+            1 => new DropOpenRequest(DropOpenKind.SingleFile, supportedFiles),
+            _ => new DropOpenRequest(DropOpenKind.FileList, supportedFiles)
+        };
     }
 
     // ---- V20-29: Command palette event handlers ----
