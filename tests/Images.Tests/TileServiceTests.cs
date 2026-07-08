@@ -1,4 +1,6 @@
+using System.Collections.Concurrent;
 using System.IO;
+using System.Reflection;
 using Images.Services;
 using ImageMagick;
 
@@ -86,6 +88,25 @@ public sealed class TileServiceTests
         Assert.False(Directory.Exists(page0));
         Assert.False(Directory.Exists(page1));
         Assert.True(Directory.Exists(unrelated));
+    }
+
+    [Fact]
+    public void ClearCache_KeepsBuildLockForDeletedCacheDirectory()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Path.Combine(temp.Path, "source.png");
+        using (var image = new MagickImage(MagickColors.Red, 64, 64))
+            image.Write(source);
+        var cacheRoot = Path.Combine(temp.Path, "tiles");
+        var pyramid = TileService.BuildPyramid(source, cacheRoot, tileSize: 16);
+        var buildLocks = GetBuildLocks();
+
+        Assert.True(buildLocks.ContainsKey(pyramid.CacheDirectory));
+
+        TileService.ClearCache(source, cacheRoot);
+
+        Assert.False(Directory.Exists(pyramid.CacheDirectory));
+        Assert.True(buildLocks.ContainsKey(pyramid.CacheDirectory));
     }
 
     [Fact]
@@ -252,5 +273,11 @@ public sealed class TileServiceTests
             flipVertical: false);
 
         Assert.Equal(16, tiles.Count);
+    }
+
+    private static ConcurrentDictionary<string, object> GetBuildLocks()
+    {
+        var field = typeof(TileService).GetField("BuildLocks", BindingFlags.NonPublic | BindingFlags.Static);
+        return Assert.IsType<ConcurrentDictionary<string, object>>(field?.GetValue(null));
     }
 }

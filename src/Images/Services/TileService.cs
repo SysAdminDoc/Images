@@ -322,7 +322,6 @@ public static class TileService
             {
                 if (Directory.Exists(cacheDir))
                     Directory.Delete(cacheDir, recursive: true);
-                BuildLocks.TryRemove(cacheDir, out _);
             }
             catch (Exception ex) { _log.LogDebug(ex, "tile-cache: could not remove {Dir}", cacheDir); }
         }
@@ -511,7 +510,6 @@ public static class TileService
                     deleted++;
                     deletedBytes += size;
                     UnprotectCacheDirectory(dir);
-                    BuildLocks.TryRemove(dir, out _);
                 }
                 catch (Exception ex) { _log.LogDebug(ex, "tile-cache: could not clear {Dir}", dir); }
             }
@@ -572,7 +570,6 @@ public static class TileService
                     dir.Delete(recursive: true);
                     totalBytes -= size;
                     UnprotectCacheDirectory(dir.FullName);
-                    BuildLocks.TryRemove(dir.FullName, out _);
                     _log.LogDebug("tile-cache: evicted {Dir} ({Size} bytes)", dir.Name, size);
                 }
                 catch (Exception ex) { _log.LogDebug(ex, "tile-cache: could not evict {Dir}", dir.Name); }
