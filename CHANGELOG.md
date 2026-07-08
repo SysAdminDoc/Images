@@ -25,6 +25,7 @@ All notable changes to **Images** are documented here.
 - **Command palette results are announced by name** — The command palette list now has a localized automation name, and command items expose their display title instead of the view-model type name to assistive technologies.
 - **Tool-window inputs have accessible labels** — Export preview, tag graph, reference board zoom, and crash details controls now expose localized automation names or `LabeledBy` associations.
 - **Hint-tier text clears AA contrast** — `Text.Hint`, `SectionLabel`, and `MetaLabel` now use a dedicated per-theme `HintTextBrush` instead of decorative overlay colors.
+- **Archive password prompts are themed** — The implicit `PasswordBox` style now mirrors the app's TextBox chrome, including dark surfaces, accent focus, caret, and selection brushes.
 
 ## 0.2.17
 

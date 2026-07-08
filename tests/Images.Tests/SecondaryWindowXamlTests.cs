@@ -19,7 +19,7 @@ public sealed class SecondaryWindowXamlTests
 
     [Fact]
     [Trait("Category", "SmokeGate")]
-    public void ThemedButtonStylesReplaceDefaultChrome()
+    public void ThemedControlStylesReplaceDefaultChrome()
     {
         Exception? exception = null;
 
@@ -45,6 +45,7 @@ public sealed class SecondaryWindowXamlTests
                     "AnnotationColorSwatchButton",
                     ["Swatch"],
                     Brushes.Red);
+                AssertThemedPasswordBoxTemplate();
 
                 if (createdApplication)
                     application.Shutdown();
@@ -279,6 +280,20 @@ public sealed class SecondaryWindowXamlTests
             var swatch = Assert.IsType<Border>(button.Template.FindName("Swatch", button));
             Assert.Same(background, swatch.Background);
         }
+    }
+
+    private static void AssertThemedPasswordBoxTemplate()
+    {
+        var style = Assert.IsType<Style>(Application.Current!.Resources[typeof(PasswordBox)]);
+        var passwordBox = new PasswordBox
+        {
+            Style = style
+        };
+
+        passwordBox.ApplyTemplate();
+        Assert.NotNull(passwordBox.Template);
+        Assert.NotNull(passwordBox.Template.FindName("Bd", passwordBox));
+        Assert.NotNull(passwordBox.Template.FindName("PART_ContentHost", passwordBox));
     }
 
     private static void AssertThemeContrast(string themeFileName, string foregroundKey, string backgroundKey, double minimumRatio)
