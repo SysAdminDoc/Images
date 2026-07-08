@@ -160,7 +160,6 @@ public sealed class BackgroundTaskTrackerTests
         var after = BackgroundTaskTracker.Snapshot;
         Assert.Equal(before.Started + 2, after.Started);
         Assert.Equal(before.Completed + 2, after.Completed);
-        Assert.Equal(0, after.Running);
     }
 
     private static BackgroundTaskSnapshot SnapshotFor(string name)

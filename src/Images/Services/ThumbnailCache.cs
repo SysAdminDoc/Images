@@ -391,11 +391,9 @@ public sealed class ThumbnailCache
             if (!Directory.Exists(_root)) return;
             DeleteStaleTempFiles();
 
-            var files = Directory.EnumerateFiles(_root, "*.webp", SearchOption.AllDirectories)
-                                 .Where(p => !Path.GetFileName(p).Contains(".tmp-", StringComparison.OrdinalIgnoreCase))
-                                 .Select(p => new FileInfo(p))
-                                 .OrderBy(fi => fi.LastAccessTimeUtc)
-                                 .ToList();
+            var files = SnapshotEvictableFiles(Directory.EnumerateFiles(_root, "*.webp", SearchOption.AllDirectories))
+                .OrderBy(file => file.LastAccessTimeUtc)
+                .ToList();
             long total = 0;
             foreach (var f in files) total += f.Length;
             if (total <= _capBytes) return;
@@ -405,13 +403,46 @@ public sealed class ThumbnailCache
             foreach (var f in files)
             {
                 if (total <= _capBytes) break;
-                try { var len = f.Length; f.Delete(); total -= len; } catch { /* best-effort */ }
+                try
+                {
+                    File.Delete(f.Path);
+                    total -= f.Length;
+                }
+                catch
+                {
+                    // Eviction is best-effort; one locked/deleted file must not abort the sweep.
+                }
             }
         }
         catch (Exception ex)
         {
             _log.LogWarning(ex, "EvictIfOverCap failed");
         }
+    }
+
+    internal static IReadOnlyList<ThumbnailCacheFileSnapshot> SnapshotEvictableFiles(IEnumerable<string> paths)
+    {
+        var files = new List<ThumbnailCacheFileSnapshot>();
+        foreach (var path in paths)
+        {
+            if (Path.GetFileName(path).Contains(".tmp-", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            try
+            {
+                var info = new FileInfo(path);
+                if (!info.Exists)
+                    continue;
+
+                files.Add(new ThumbnailCacheFileSnapshot(path, info.Length, info.LastAccessTimeUtc));
+            }
+            catch
+            {
+                // The file can vanish or become inaccessible between enumeration and stat.
+            }
+        }
+
+        return files;
     }
 
     private void DeleteStaleTempFiles()
@@ -489,3 +520,8 @@ public sealed class ThumbnailCache
     private DateTime? LastEvictionSweepForHealth()
         => _lastEvictionSweepUtc == DateTime.MinValue ? null : _lastEvictionSweepUtc;
 }
+
+internal sealed record ThumbnailCacheFileSnapshot(
+    string Path,
+    long Length,
+    DateTime LastAccessTimeUtc);

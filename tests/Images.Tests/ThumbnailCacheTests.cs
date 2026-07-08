@@ -106,4 +106,21 @@ public sealed class ThumbnailCacheTests
         Assert.Equal(0, result.DeletedBytes);
         Assert.Equal(0, result.FailedCount);
     }
+
+    [Fact]
+    public void SnapshotEvictableFiles_SkipsTempAndVanishedFiles()
+    {
+        using var temp = TestDirectory.Create();
+        var cached = Path.Combine(temp.Path, "cached.webp");
+        var tempCached = Path.Combine(temp.Path, "cached.tmp-001.webp");
+        var vanished = Path.Combine(temp.Path, "vanished.webp");
+        File.WriteAllBytes(cached, new byte[1024]);
+        File.WriteAllBytes(tempCached, new byte[512]);
+
+        var files = ThumbnailCache.SnapshotEvictableFiles([cached, tempCached, vanished]);
+
+        var file = Assert.Single(files);
+        Assert.Equal(cached, file.Path);
+        Assert.Equal(1024, file.Length);
+    }
 }
