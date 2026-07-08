@@ -15,6 +15,7 @@ public static class BackgroundTaskTracker
 {
     private static readonly ILogger _log = Log.Get(nameof(BackgroundTaskTracker));
     private static readonly CounterSet _totals = new();
+    private static readonly object _byNameGate = new();
     private static readonly ConcurrentDictionary<string, CounterSet> _byName = new(StringComparer.OrdinalIgnoreCase);
 
     public static BackgroundTaskSnapshot Snapshot => _totals.Snapshot;
@@ -130,16 +131,22 @@ public static class BackgroundTaskTracker
 
     internal static void ResetForTests()
     {
-        _totals.Reset();
-        _byName.Clear();
+        lock (_byNameGate)
+        {
+            _totals.Reset();
+            _byName.Clear();
+        }
     }
 
     private static void FinishRunning(string name, CounterSet counters)
     {
-        var running = counters.DecrementRunning();
-        _totals.DecrementRunning();
-        if (running == 0)
-            _byName.TryRemove(name, out _);
+        lock (_byNameGate)
+        {
+            var running = counters.DecrementRunning();
+            _totals.DecrementRunning();
+            if (running == 0)
+                TryRemoveExact(name, counters);
+        }
     }
 
     private static string NormalizeName(string name)
@@ -147,12 +154,20 @@ public static class BackgroundTaskTracker
 
     private static CounterSet MarkStarted(string name)
     {
-        var counters = _byName.GetOrAdd(name, _ => new CounterSet());
-        counters.MarkStarted();
-        _totals.MarkStarted();
+        CounterSet counters;
+        lock (_byNameGate)
+        {
+            counters = _byName.GetOrAdd(name, _ => new CounterSet());
+            counters.MarkStarted();
+            _totals.MarkStarted();
+        }
         _log.LogDebug("background task started: {Name}", name);
         return counters;
     }
+
+    private static bool TryRemoveExact(string name, CounterSet counters)
+        => ((ICollection<KeyValuePair<string, CounterSet>>)_byName)
+            .Remove(new KeyValuePair<string, CounterSet>(name, counters));
 
     private static void MarkCompleted(string name, CounterSet counters, TimeSpan elapsed)
     {

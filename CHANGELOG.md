@@ -41,6 +41,7 @@ All notable changes to **Images** are documented here.
 - **Reveal in Explorer handles comma paths** — File selection now uses `SHParseDisplayName` plus `SHOpenFolderAndSelectItems` before falling back to Explorer's `/select,` command line.
 - **Email draft cleanup on startup** — Local `.eml` share drafts are now pruned on app startup as well as draft creation, and the share status explains the seven-day local attachment-copy retention.
 - **Magick write policy alignment** — Magick format writes now derive from the same high-risk delegate blocklist as extension checks, preventing future policy drift for PS/AI/SVGZ/MVG/MSL-style targets.
+- **Background task diagnostics race fix** — Named background counters now serialize start/finish eviction, preventing same-name restarts from losing their running diagnostics entry.
 
 ## 0.2.17
 

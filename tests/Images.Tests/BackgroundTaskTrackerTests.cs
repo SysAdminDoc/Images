@@ -116,6 +116,40 @@ public sealed class BackgroundTaskTrackerTests
     }
 
     [Fact]
+    public async Task Queue_WhenSameNameOverlaps_KeepsRemainingRunningSnapshot()
+    {
+        var name = TestTaskName();
+        using var firstStarted = new ManualResetEventSlim();
+        using var secondStarted = new ManualResetEventSlim();
+        using var releaseFirst = new ManualResetEventSlim();
+        using var releaseSecond = new ManualResetEventSlim();
+
+        var first = BackgroundTaskTracker.Queue(name, () =>
+        {
+            firstStarted.Set();
+            Assert.True(releaseFirst.Wait(TimeSpan.FromSeconds(3)));
+        });
+        Assert.True(firstStarted.Wait(TimeSpan.FromSeconds(3)));
+
+        var second = BackgroundTaskTracker.Queue(name, () =>
+        {
+            secondStarted.Set();
+            Assert.True(releaseSecond.Wait(TimeSpan.FromSeconds(3)));
+        });
+        Assert.True(secondStarted.Wait(TimeSpan.FromSeconds(3)));
+
+        releaseFirst.Set();
+        await first.WaitAsync(TimeSpan.FromSeconds(3));
+
+        var running = SnapshotFor(name);
+        Assert.Equal(2, running.Started);
+        Assert.Equal(1, running.Running);
+
+        releaseSecond.Set();
+        await second.WaitAsync(TimeSpan.FromSeconds(3));
+    }
+
+    [Fact]
     public async Task Queue_GlobalTotals_TrackAcrossAllTasks()
     {
         var before = BackgroundTaskTracker.Snapshot;
