@@ -334,8 +334,29 @@ public sealed class DirectoryNavigator : IDisposable
     public void RemoveCurrent()
     {
         if (CurrentIndex < 0) return;
-        _files.RemoveAt(CurrentIndex);
+        RemoveAt(CurrentIndex);
+    }
+
+    public bool RemovePath(string path)
+    {
+        if (_files.Count == 0 || string.IsNullOrWhiteSpace(path))
+            return false;
+
+        var fullPath = Path.GetFullPath(path);
+        var index = _files.FindIndex(candidate => string.Equals(candidate, fullPath, StringComparison.OrdinalIgnoreCase));
+        if (index < 0)
+            return false;
+
+        RemoveAt(index);
+        return true;
+    }
+
+    private void RemoveAt(int index)
+    {
+        if (index < 0 || index >= _files.Count) return;
+        _files.RemoveAt(index);
         if (_files.Count == 0) { CurrentIndex = -1; return; }
+        if (CurrentIndex > index) CurrentIndex--;
         if (CurrentIndex >= _files.Count) CurrentIndex = _files.Count - 1;
     }
 

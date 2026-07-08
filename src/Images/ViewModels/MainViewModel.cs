@@ -4971,18 +4971,18 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void DeleteCurrent()
     {
-        if (CurrentPath is null) return;
+        if (CurrentPath is null || IsOperationBusy) return;
         _renameTimer.Stop();
 
         var toDelete = CurrentPath;
-        var result = _recycleBinDelete.Delete(toDelete, Application.Current?.MainWindow);
+        var result = RunWithOperationBusyGuard(() => _recycleBinDelete.Delete(toDelete, Application.Current?.MainWindow));
         switch (result.Status)
         {
             case RecycleBinDeleteStatus.Canceled:
                 Toast(Strings.MainToastDeleteCanceled);
                 return;
             case RecycleBinDeleteStatus.Missing:
-                _nav.RemoveCurrent();
+                _nav.RemovePath(toDelete);
                 Toast($"File no longer exists: {Path.GetFileName(toDelete)}");
                 AdvanceAfterRemovedCurrent();
                 return;
@@ -4991,7 +4991,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 return;
         }
 
-        _nav.RemoveCurrent();
+        _nav.RemovePath(toDelete);
         _recoveryCenter.RecordRecycleBin(
             toDelete,
             Strings.MainSentToRecycleBin,
@@ -5030,7 +5030,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 losslessRotation,
                 existingOperations) is { } trimPlan)
         {
-            var choice = _confirmLosslessJpegTrim(LosslessJpegTrimConfirmation.ForRotation(trimPlan));
+            var choice = RunWithOperationBusyGuard(() => _confirmLosslessJpegTrim(LosslessJpegTrimConfirmation.ForRotation(trimPlan)));
             if (choice == LosslessJpegTrimChoice.Cancel)
             {
                 Toast(Strings.MainToastRotationCanceled);
@@ -5921,7 +5921,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 PixelHeight,
                 existingOperations) is { } trimPlan)
         {
-            var choice = _confirmLosslessJpegTrim(LosslessJpegTrimConfirmation.ForCrop(trimPlan));
+            var choice = RunWithOperationBusyGuard(() => _confirmLosslessJpegTrim(LosslessJpegTrimConfirmation.ForCrop(trimPlan)));
             if (choice == LosslessJpegTrimChoice.Cancel)
             {
                 CropStatusText = Strings.MainCropCanceledStatus;
@@ -6946,6 +6946,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OperationStatusTitle = title;
         OperationStatusDetail = detail;
         IsOperationBusy = true;
+    }
+
+    private T RunWithOperationBusyGuard<T>(Func<T> action)
+    {
+        var wasBusy = IsOperationBusy;
+        if (!wasBusy)
+            IsOperationBusy = true;
+
+        try
+        {
+            return action();
+        }
+        finally
+        {
+            if (!wasBusy)
+                IsOperationBusy = false;
+        }
     }
 
     private Task YieldForOperationStatusAsync()

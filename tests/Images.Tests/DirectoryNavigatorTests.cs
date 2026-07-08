@@ -214,6 +214,26 @@ public sealed class DirectoryNavigatorTests
     }
 
     [Fact]
+    public void RemovePath_RemovesCapturedPathWithoutDroppingCurrentItem()
+    {
+        using var temp = TestDirectory.Create();
+        var first = temp.WriteFile("a.jpg");
+        var second = temp.WriteFile("b.jpg");
+        var third = temp.WriteFile("c.jpg");
+
+        using var nav = new DirectoryNavigator();
+        Assert.True(nav.Open(first));
+        Assert.True(nav.MoveNext());
+        Assert.Equal(second, nav.CurrentPath);
+
+        Assert.True(nav.RemovePath(first));
+
+        Assert.Equal([second, third], nav.Files);
+        Assert.Equal(0, nav.CurrentIndex);
+        Assert.Equal(second, nav.CurrentPath);
+    }
+
+    [Fact]
     public void GoBack_WhenTopHistoryEntryIsMissing_PopsItAndOpensNextEntry()
     {
         using var parent = TestDirectory.Create();

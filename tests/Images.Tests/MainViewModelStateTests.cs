@@ -811,6 +811,44 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void DeleteCommand_WhenNavigationChangesDuringConfirmation_RemovesOriginalPath()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var first = WritePng(temp.Path, "a.png");
+            var second = WritePng(temp.Path, "b.png");
+            var settings = CreateSettings(temp);
+            MainViewModel? viewModel = null;
+            var deleteService = new RecycleBinDeleteService(
+                settings,
+                sendToRecycleBin: File.Delete,
+                confirmRecycleBinMove: (_, path) =>
+                {
+                    Assert.Equal(first, path);
+                    Assert.True(viewModel!.IsOperationBusy);
+                    viewModel.OpenFile(second);
+                    return new ConfirmDialog.ConfirmationResult(Confirmed: true, DoNotAskAgain: false);
+                });
+            viewModel = new MainViewModel(
+                settings,
+                recycleBinDelete: deleteService);
+            using (viewModel)
+            {
+                viewModel.OpenFile(first);
+
+                viewModel.DeleteCommand.Execute(null);
+
+                Assert.False(File.Exists(first));
+                Assert.True(File.Exists(second));
+                Assert.Equal(second, viewModel.CurrentPath);
+                Assert.Equal("1 / 1", viewModel.PositionText);
+                Assert.Equal("Sent to Recycle Bin: a.png", viewModel.ToastMessage);
+            }
+        });
+    }
+
+    [Fact]
     public void FlushPendingRename_WhenExtensionUnsupported_DoesNotMoveSource()
     {
         RunOnSta(() =>

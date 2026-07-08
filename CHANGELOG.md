@@ -17,6 +17,7 @@ All notable changes to **Images** are documented here.
 - **GPS-strip import fails closed on unreadable files** — Metadata preview read failures are now surfaced separately from "no GPS fields," so Import Inbox rolls back unreadable non-rewritable files when GPS stripping was requested.
 - **Recursive scanners skip reparse-point directories** — Duplicate Cleanup, Import Inbox, and Catalog rebuild now avoid junction/symlink directories so cyclic folder links cannot trigger runaway traversal.
 - **Tile cache eviction protects every active pyramid** — Eviction now skips all tile cache directories in active use or mid-build, so secondary huge-image previews cannot evict the main viewer's displayed pyramid.
+- **Delete confirmations cannot remove the wrong file during slideshow** — Delete and lossless-JPEG trim confirmations now run under the operation-busy guard, and deletes remove the captured path instead of the current index if navigation changes while a modal dialog is open.
 
 ## 0.2.17
 
