@@ -241,7 +241,7 @@ public static class CodecCapabilityService
                     : "Optional child-process runtime is not installed; C2PA inspection is unavailable.",
                 Action: provenance.C2paToolAvailable
                     ? "C2PA provenance shows who created or edited a file, not whether the content is truthful."
-                    : "Install c2patool (cargo install c2patool), place under Codecs\\C2paTool, or set IMAGES_C2PATOOL_EXE."),
+                    : "Place an approved c2patool binary under Codecs\\C2paTool or set IMAGES_C2PATOOL_EXE."),
 
             new(
                 Name: "Windows.Media.Ocr",

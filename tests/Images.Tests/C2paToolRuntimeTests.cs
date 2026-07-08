@@ -68,4 +68,26 @@ public sealed class C2paToolRuntimeTests
         Assert.False(status.Available);
         Assert.Contains(C2paToolRuntime.EnvironmentVariable, status.StatusText, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void ResolveExecutable_WithoutAppLocalOrOverride_DoesNotSearchPath()
+    {
+        using var temp = TestDirectory.Create();
+        var pathDir = Directory.CreateDirectory(Path.Combine(temp.Path, "PathBin")).FullName;
+        File.WriteAllText(Path.Combine(pathDir, "c2patool.exe"), "fake path runtime");
+        var previousPath = Environment.GetEnvironmentVariable("PATH");
+
+        try
+        {
+            Environment.SetEnvironmentVariable("PATH", pathDir);
+
+            var location = C2paToolRuntime.ResolveExecutable(temp.Path, environmentExecutablePath: null);
+
+            Assert.Null(location);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("PATH", previousPath);
+        }
+    }
 }

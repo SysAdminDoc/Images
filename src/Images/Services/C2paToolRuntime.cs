@@ -63,32 +63,6 @@ public static class C2paToolRuntime
                 return new C2paToolRuntimeLocation(candidate, "app-local Codecs\\C2paTool");
         }
 
-        var pathExe = FindOnPath("c2patool.exe") ?? FindOnPath("c2patool");
-        if (pathExe is not null)
-            return new C2paToolRuntimeLocation(pathExe, "system PATH");
-
-        return null;
-    }
-
-    private static string? FindOnPath(string executableName)
-    {
-        var pathVar = Environment.GetEnvironmentVariable("PATH");
-        if (string.IsNullOrWhiteSpace(pathVar)) return null;
-
-        foreach (var dir in pathVar.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
-        {
-            try
-            {
-                var candidate = Path.Combine(dir.Trim(), executableName);
-                if (File.Exists(candidate))
-                    return Path.GetFullPath(candidate);
-            }
-            catch (Exception ex) when (ex is ArgumentException or IOException or NotSupportedException or UnauthorizedAccessException or System.Security.SecurityException)
-            {
-                _log.LogWarning(ex, "Could not inspect PATH entry for c2patool: {Directory}", dir);
-            }
-        }
-
         return null;
     }
 

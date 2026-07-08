@@ -123,7 +123,7 @@ public static class DiagnosticsStatusService
     private static string BuildC2paToolDetail(CodecCapabilityService.RuntimeProvenance provenance)
     {
         if (!provenance.C2paToolAvailable)
-            return $"{provenance.C2paToolStatus} C2PA inspection is degraded until c2patool is installed app-local, on PATH, or configured with IMAGES_C2PATOOL_EXE.";
+            return $"{provenance.C2paToolStatus} C2PA inspection is degraded until c2patool is installed app-local or configured with IMAGES_C2PATOOL_EXE.";
 
         var version = string.IsNullOrWhiteSpace(provenance.C2paToolVersion)
             ? "version unavailable"

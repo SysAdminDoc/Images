@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
@@ -9,6 +10,16 @@ namespace Images.Services;
 public static class C2paManifestService
 {
     private const int ReadTimeoutMilliseconds = 10_000;
+    private const string NoRemoteSettingsFileName = "c2patool-no-remote-settings.json";
+    internal const string NoRemoteSettingsJson = """
+        {
+          "version": 1,
+          "verify": {
+            "remote_manifest_fetch": false,
+            "ocsp_fetch": false
+          }
+        }
+        """;
     private static readonly ILogger _log = Log.Get(nameof(C2paManifestService));
 
     private static readonly HashSet<string> SupportedExtensionSet = new(StringComparer.OrdinalIgnoreCase)
@@ -196,6 +207,13 @@ public static class C2paManifestService
 
         try
         {
+            var settingsPath = EnsureNoRemoteManifestSettingsFile();
+            if (settingsPath is null)
+            {
+                return C2paInspectionResult.Error(
+                    "C2PA inspection skipped because Images could not create the no-network c2patool settings file.");
+            }
+
             var psi = new ProcessStartInfo
             {
                 FileName = runtime.ExecutablePath,
@@ -207,52 +225,67 @@ public static class C2paManifestService
                 StandardErrorEncoding = System.Text.Encoding.UTF8,
             };
             psi.ArgumentList.Add(NormalizePath(path));
+            psi.ArgumentList.Add("--settings");
+            psi.ArgumentList.Add(settingsPath);
             EnsureEnvironmentVariable(psi, "C2PATOOL_TRUST_ANCHORS", "");
             EnsureEnvironmentVariable(psi, "C2PATOOL_TRUST_CONFIG", "");
 
             int exitCode;
-            string stdout, stderr;
+            string stdout = "";
+            string stderr = "";
+            var stopwatch = Stopwatch.StartNew();
 
-            if (processRunner is not null)
+            try
             {
-                (exitCode, stdout, stderr) = processRunner(psi);
+                if (processRunner is not null)
+                {
+                    (exitCode, stdout, stderr) = processRunner(psi);
+                }
+                else
+                {
+                    using var process = Process.Start(psi);
+                    if (process is null)
+                    {
+                        _log.LogWarning("Failed to start c2patool process for {Path}", path);
+                        return C2paInspectionResult.Error("Failed to start c2patool process.");
+                    }
+
+                    var stdoutTask = process.StandardOutput.ReadToEndAsync();
+                    var stderrTask = process.StandardError.ReadToEndAsync();
+                    if (!process.WaitForExit(ReadTimeoutMilliseconds))
+                    {
+                        _log.LogWarning("c2patool timed out reading {Path}", path);
+                        try
+                        {
+                            process.Kill(entireProcessTree: true);
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.LogWarning(ex, "Could not kill timed-out c2patool process for {Path}", path);
+                        }
+
+                        return C2paInspectionResult.Error("c2patool timed out reading this file.");
+                    }
+
+                    exitCode = process.ExitCode;
+                    stdout = stdoutTask.GetAwaiter().GetResult();
+                    stderr = stderrTask.GetAwaiter().GetResult();
+                }
             }
-            else
+            finally
             {
-                using var process = Process.Start(psi);
-                if (process is null)
-                {
-                    _log.LogWarning("Failed to start c2patool process for {Path}", path);
-                    return C2paInspectionResult.Error("Failed to start c2patool process.");
-                }
-
-                var stdoutTask = process.StandardOutput.ReadToEndAsync();
-                var stderrTask = process.StandardError.ReadToEndAsync();
-                if (!process.WaitForExit(ReadTimeoutMilliseconds))
-                {
-                    _log.LogWarning("c2patool timed out reading {Path}", path);
-                    try
-                    {
-                        process.Kill(entireProcessTree: true);
-                    }
-                    catch (Exception ex)
-                    {
-                        _log.LogWarning(ex, "Could not kill timed-out c2patool process for {Path}", path);
-                    }
-
-                    return C2paInspectionResult.Error("c2patool timed out reading this file.");
-                }
-
-                exitCode = process.ExitCode;
-                stdout = stdoutTask.GetAwaiter().GetResult();
-                stderr = stderrTask.GetAwaiter().GetResult();
+                stopwatch.Stop();
+                NetworkEgressService.Record(
+                    "process://c2patool/inspect",
+                    "C2PA inspection via c2patool (remote manifest fetch disabled)",
+                    Encoding.UTF8.GetByteCount(stdout) + Encoding.UTF8.GetByteCount(stderr),
+                    stopwatch.ElapsedMilliseconds);
             }
 
             if (exitCode != 0)
             {
                 if (stderr.Contains("no claim found", StringComparison.OrdinalIgnoreCase) ||
                     stderr.Contains("no manifest", StringComparison.OrdinalIgnoreCase) ||
-                    stderr.Contains("not found", StringComparison.OrdinalIgnoreCase) ||
                     stdout.Contains("no claim found", StringComparison.OrdinalIgnoreCase))
                 {
                     return C2paInspectionResult.NoManifest("No C2PA content credentials found in this file.");
@@ -488,6 +521,30 @@ public static class C2paManifestService
         {
             _log.LogWarning(ex, "Could not normalize C2PA target path {Path}", path);
             return path;
+        }
+    }
+
+    private static string? EnsureNoRemoteManifestSettingsFile()
+    {
+        try
+        {
+            var settingsDirectory = AppStorage.TryGetAppDirectory("c2patool");
+            if (settingsDirectory is null)
+                return null;
+
+            var settingsPath = Path.Combine(settingsDirectory, NoRemoteSettingsFileName);
+            if (!File.Exists(settingsPath) ||
+                !string.Equals(File.ReadAllText(settingsPath, Encoding.UTF8), NoRemoteSettingsJson, StringComparison.Ordinal))
+            {
+                File.WriteAllText(settingsPath, NoRemoteSettingsJson, Encoding.UTF8);
+            }
+
+            return settingsPath;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or NotSupportedException)
+        {
+            _log.LogWarning(ex, "Could not create c2patool no-network settings file");
+            return null;
         }
     }
 

@@ -10,6 +10,7 @@ All notable changes to **Images** are documented here.
 - **Case-only renames are real renames** — Renaming `photo.jpg` to `PHOTO.jpg` now performs the NTFS case-only move and updates the viewer instead of reporting a no-op.
 - **Rename/navigation races no longer corrupt the folder list** — Rename and undo now update the navigator by captured source path instead of the current index, rename commits are busy-gated during in-flight loads, dead back-history entries are dropped, and external renames from supported to unsupported extensions refresh the folder list.
 - **Semantic Search shutdown and CLIP inference are hardened** — Closing the window during indexing now cancels first and disposes ONNX sessions after the in-flight task finishes, CLIP inference is serialized against disposal, partial provider creation cleans up native sessions, text attention masks no longer truncate at token id `0`, and semantic/settings SQLite connections use private WAL cache mode.
+- **C2PA inspection cannot fetch remote manifests** — c2patool reads now pass a no-network settings file, the child-process inspection is recorded in the network-egress log, system PATH is no longer searched for auto-run c2patool binaries, and only actual no-manifest output is classified as no-manifest.
 
 ## 0.2.17
 

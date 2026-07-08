@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.IO;
 using Images.Services;
 
 namespace Images.Tests;
@@ -267,6 +269,52 @@ public sealed class C2paManifestServiceTests
             processRunner: null);
 
         Assert.Equal(C2paStatus.NoManifest, result.Status);
+    }
+
+    [Fact]
+    public void Read_PassesNoRemoteSettingsAndRecordsC2paInvocation()
+    {
+        using var temp = TestDirectory.Create();
+        var path = temp.WriteFile("plain.jpg", "fake image bytes");
+        ProcessStartInfo? captured = null;
+        NetworkEgressService.Clear();
+
+        var result = C2paManifestService.Read(
+            path,
+            executableOverride: @"C:\Tools\c2patool.exe",
+            processRunner: psi =>
+            {
+                captured = psi;
+                return (0, "", "");
+            });
+
+        Assert.Equal(C2paStatus.NoManifest, result.Status);
+        Assert.NotNull(captured);
+        var args = captured.ArgumentList.ToArray();
+        var settingsIndex = Array.IndexOf(args, "--settings");
+        Assert.True(settingsIndex >= 0, "c2patool should receive a settings file.");
+        Assert.True(settingsIndex + 1 < args.Length, "settings file path should follow --settings.");
+        var settingsJson = File.ReadAllText(args[settingsIndex + 1]);
+        Assert.Contains("\"remote_manifest_fetch\": false", settingsJson, StringComparison.Ordinal);
+        Assert.Contains("\"ocsp_fetch\": false", settingsJson, StringComparison.Ordinal);
+        Assert.Contains(NetworkEgressService.Entries, entry =>
+            entry.Url == "process://c2patool/inspect" &&
+            entry.Purpose.Contains("remote manifest fetch disabled", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Read_WhenC2paToolReportsTrustAnchorNotFound_ReturnsError()
+    {
+        using var temp = TestDirectory.Create();
+        var path = temp.WriteFile("credentialed.jpg", "fake image bytes");
+
+        var result = C2paManifestService.Read(
+            path,
+            executableOverride: @"C:\Tools\c2patool.exe",
+            processRunner: _ => (1, "", "trust anchor not found"));
+
+        Assert.Equal(C2paStatus.Error, result.Status);
+        Assert.Contains("trust anchor not found", result.ErrorMessage, StringComparison.OrdinalIgnoreCase);
     }
 
     private static C2paToolRuntimeStatus ReadyRuntime() => new(
