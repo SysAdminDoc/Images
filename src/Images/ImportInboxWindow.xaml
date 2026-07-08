@@ -95,7 +95,8 @@
                                                TextWrapping="Wrap"
                                                Margin="0,3,0,0" />
                                 </StackPanel>
-                                <Button Grid.Column="1"
+                                <Button x:Name="ChooseDestinationButton"
+                                        Grid.Column="1"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="12,0,0,0"
                                         Click="ChooseDestinationButton_Click"

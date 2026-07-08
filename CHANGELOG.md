@@ -61,6 +61,7 @@ All notable changes to **Images** are documented here.
 - **Right-click double-clicks no longer reset zoom** — The viewer's double-click zoom toggle now only handles the left mouse button, leaving right-button context-menu gestures alone.
 - **Annotation editing keeps text input and load errors intact** — Enter/Escape no longer apply or close the annotation window while text-entry controls have focus, and missing-file preview failures keep their error status instead of being overwritten by the empty-state message.
 - **Batch Processor reports unexpected item faults** — Non-cancellation item failures now become failed run rows, partial result slots are compacted before summary/reporting, and the window shows a failed status instead of crashing on unexpected run exceptions.
+- **Import Inbox destination changes wait for scans** — The destination chooser is now disabled during busy scans/import work, preventing overlapping reloads from re-enabling the window early.
 
 ## 0.2.17
 

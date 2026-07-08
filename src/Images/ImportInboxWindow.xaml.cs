@@ -369,11 +369,12 @@ public partial class ImportInboxWindow : Window
         }
     }
 
-    private void SetBusy(bool busy)
+    internal void SetBusy(bool busy)
     {
         AddFilesButton.IsEnabled = !busy;
         AddFolderButton.IsEnabled = !busy;
         ImportPicasaButton.IsEnabled = !busy;
+        ChooseDestinationButton.IsEnabled = !busy;
         RefreshButton.IsEnabled = !busy;
         InboxList.IsEnabled = !busy;
         ImportButton.IsEnabled = !busy;
