@@ -15,9 +15,12 @@ namespace Images;
 public partial class ExportPreviewWindow : Window
 {
     private readonly ExportPreviewService _previewService = new();
+    private readonly Func<BitmapSource, string?, ExportPreviewRequest, CancellationToken, ExportPreviewResult> _buildPreview;
     private readonly BitmapSource _source;
     private readonly string? _sourcePath;
     private readonly ObservableCollection<string> _warnings = [];
+    private CancellationTokenSource? _previewCts;
+    private int _previewGeneration;
     private bool _loadingPreset;
     private bool _hasPreview;
     private bool _syncingCanvases;
@@ -25,11 +28,22 @@ public partial class ExportPreviewWindow : Window
     private BitmapSource? _previewImage;
 
     public ExportPreviewWindow(BitmapSource source, string? sourcePath, string initialExtension)
+        : this(source, sourcePath, initialExtension, null)
     {
+    }
+
+    internal ExportPreviewWindow(
+        BitmapSource source,
+        string? sourcePath,
+        string initialExtension,
+        Func<BitmapSource, string?, ExportPreviewRequest, CancellationToken, ExportPreviewResult>? buildPreview)
+    {
+        _loadingPreset = true;
         InitializeComponent();
 
         _source = source ?? throw new ArgumentNullException(nameof(source));
         _sourcePath = string.IsNullOrWhiteSpace(sourcePath) ? null : sourcePath;
+        _buildPreview = buildPreview ?? BuildPreviewCore;
 
         OriginalCanvas.Source = _source;
         WarningsList.ItemsSource = _warnings;
@@ -48,6 +62,7 @@ public partial class ExportPreviewWindow : Window
         };
 
         Loaded += async (_, _) => await BuildPreviewAsync();
+        Closed += (_, _) => CancelActivePreview();
     }
 
     private ExportPreviewPreset PickInitialPreset(string initialExtension)
@@ -162,14 +177,20 @@ public partial class ExportPreviewWindow : Window
         SetStatus(Strings.ExportPreviewPresetReady, ExportPreviewStatus.Ready);
     }
 
-    private async Task BuildPreviewAsync()
+    internal async Task BuildPreviewAsync()
     {
+        using var previewOperation = BeginPreviewOperation();
         SetBusy(true);
         SetStatus(Strings.ExportPreviewEncoding, ExportPreviewStatus.Busy);
         try
         {
             var request = ReadRequest();
-            var result = await Task.Run(() => _previewService.BuildPreview(_source, _sourcePath, request));
+            var result = await Task.Run(
+                () => _buildPreview(_source, _sourcePath, request, previewOperation.Token),
+                previewOperation.Token);
+            if (!IsCurrentPreview(previewOperation))
+                return;
+
             _previewImage = result.PreviewImage;
             PreviewCanvas.Source = _previewImage;
             ApplySummary(result.Summary);
@@ -181,8 +202,14 @@ public partial class ExportPreviewWindow : Window
 
             SetStatus(Strings.ExportPreviewReady, ExportPreviewStatus.Ready);
         }
+        catch (OperationCanceledException) when (!IsCurrentPreview(previewOperation))
+        {
+        }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
         {
+            if (!IsCurrentPreview(previewOperation))
+                return;
+
             _hasPreview = false;
             _previewImage = null;
             _differenceMode = false;
@@ -191,8 +218,44 @@ public partial class ExportPreviewWindow : Window
         }
         finally
         {
-            SetBusy(false);
+            if (IsCurrentPreview(previewOperation))
+                SetBusy(false);
+            CompletePreviewOperation(previewOperation);
         }
+    }
+
+    private ExportPreviewResult BuildPreviewCore(
+        BitmapSource source,
+        string? sourcePath,
+        ExportPreviewRequest request,
+        CancellationToken cancellationToken)
+        => _previewService.BuildPreview(source, sourcePath, request, cancellationToken);
+
+    private PreviewOperation BeginPreviewOperation()
+    {
+        _previewCts?.Cancel();
+        var cts = new CancellationTokenSource();
+        var generation = unchecked(++_previewGeneration);
+        _previewCts = cts;
+        return new PreviewOperation(generation, cts);
+    }
+
+    private void CancelActivePreview()
+    {
+        unchecked
+        {
+            _previewGeneration++;
+        }
+        _previewCts?.Cancel();
+    }
+
+    private bool IsCurrentPreview(PreviewOperation previewOperation)
+        => previewOperation.Generation == _previewGeneration && !previewOperation.Token.IsCancellationRequested;
+
+    private void CompletePreviewOperation(PreviewOperation previewOperation)
+    {
+        if (ReferenceEquals(_previewCts, previewOperation.CancellationSource))
+            _previewCts = null;
     }
 
     private void ExportCanvas_ViewChanged(object sender, EventArgs e)
@@ -347,5 +410,23 @@ public partial class ExportPreviewWindow : Window
         Busy,
         Warning,
         Error
+    }
+
+    private sealed class PreviewOperation : IDisposable
+    {
+        public PreviewOperation(int generation, CancellationTokenSource cancellationSource)
+        {
+            Generation = generation;
+            CancellationSource = cancellationSource;
+        }
+
+        public int Generation { get; }
+
+        public CancellationTokenSource CancellationSource { get; }
+
+        public CancellationToken Token => CancellationSource.Token;
+
+        public void Dispose()
+            => CancellationSource.Dispose();
     }
 }

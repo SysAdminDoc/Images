@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using ImageMagick;
@@ -78,6 +79,20 @@ public sealed class ExportPreviewServiceTests
             new ExportPreviewRequest(".png", 92, 0, 0));
 
         Assert.Equal(handoff, result.Summary.C2paHandoff);
+    }
+
+    [Fact]
+    public void BuildPreview_WhenCanceledBeforeEncoding_Throws()
+    {
+        var bitmap = CreateBitmap(16, 8);
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        Assert.Throws<OperationCanceledException>(() => new ExportPreviewService().BuildPreview(
+            bitmap,
+            sourcePath: null,
+            new ExportPreviewRequest(".jpg", 80, 8, 8),
+            cts.Token));
     }
 
     [Fact]

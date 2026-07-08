@@ -63,6 +63,7 @@ All notable changes to **Images** are documented here.
 - **Batch Processor reports unexpected item faults** — Non-cancellation item failures now become failed run rows, partial result slots are compacted before summary/reporting, and the window shows a failed status instead of crashing on unexpected run exceptions.
 - **Import Inbox destination changes wait for scans** — The destination chooser is now disabled during busy scans/import work, preventing overlapping reloads from re-enabling the window early.
 - **Reference Board drag state recovers after capture loss** — Drag handles now clear stale state when mouse capture is lost, and mouse-up events are only handled for an active drag.
+- **Export Preview cancels superseded encodes** — Preview rebuilds now cancel prior work, ignore stale completions, cancel on close, and suppress constructor-time setting events until the window has finished loading.
 
 ## 0.2.17
 

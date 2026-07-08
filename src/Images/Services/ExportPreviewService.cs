@@ -57,15 +57,25 @@ public sealed class ExportPreviewService
         _planC2paExport = planC2paExport ?? C2paManifestService.PlanExportHandoff;
     }
 
-    public ExportPreviewResult BuildPreview(BitmapSource source, string? sourcePath, ExportPreviewRequest request)
+    public ExportPreviewResult BuildPreview(
+        BitmapSource source,
+        string? sourcePath,
+        ExportPreviewRequest request,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(source);
+        cancellationToken.ThrowIfCancellationRequested();
         request = NormalizeRequest(request);
 
         using var image = ImageExportService.CreateMagickImage(source);
+        cancellationToken.ThrowIfCancellationRequested();
+
         var sourceBytes = TryGetSourceBytes(sourcePath) ?? EstimateDecodedBytes(source.PixelWidth, source.PixelHeight);
-        var encoded = Encode(image, request);
+        var encoded = Encode(image, request, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+
         var summary = CreateSummary(image, encoded, sourceBytes, request, sourcePath);
+        cancellationToken.ThrowIfCancellationRequested();
 
         using var preview = new MagickImage(encoded.Bytes);
         return new ExportPreviewResult(ImageExportService.CreateBitmapSource(preview), summary);
@@ -83,7 +93,7 @@ public sealed class ExportPreviewService
         request = NormalizeRequest(request);
         using var image = new MagickImage(normalizedPath);
         var sourceBytes = TryGetSourceBytes(normalizedPath) ?? 0;
-        var encoded = Encode(image, request);
+        var encoded = Encode(image, request, CancellationToken.None);
         return CreateSummary(image, encoded, sourceBytes, request, normalizedPath);
     }
 
@@ -154,13 +164,22 @@ public sealed class ExportPreviewService
             _planC2paExport(sourcePath, request.Extension));
     }
 
-    private static EncodedPreview Encode(MagickImage image, ExportPreviewRequest request)
+    private static EncodedPreview Encode(MagickImage image, ExportPreviewRequest request, CancellationToken cancellationToken)
     {
         var format = ImageExportService.TryResolveFormat(request.Extension) ?? MagickFormat.Png;
+        cancellationToken.ThrowIfCancellationRequested();
+
         using var copy = image.Clone();
+        cancellationToken.ThrowIfCancellationRequested();
+
         ApplyResize(copy, request);
+        cancellationToken.ThrowIfCancellationRequested();
+
         PrepareForPreview(copy, format, (uint)request.Quality);
-        return new EncodedPreview(copy.ToByteArray(format), copy.Width, copy.Height);
+        var bytes = copy.ToByteArray(format);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return new EncodedPreview(bytes, copy.Width, copy.Height);
     }
 
     private static void ApplyResize(IMagickImage<ushort> image, ExportPreviewRequest request)
