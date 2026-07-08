@@ -177,14 +177,8 @@ public partial class BatchProcessorWindow : Window
             var progress = new Progress<BatchProgressUpdate>(update =>
                 SetStatus($"{update.CompletedCount}/{update.TotalCount} — {update.FileName}", BatchProcessorStatus.Busy));
             var result = await _batch.RunAsync(sources, preset, _outputFolder, dryRun, progress: progress, cancellationToken: token);
-            foreach (var item in result.Items)
-            {
-                _resultRows.Add(item.Success
-                    ? Strings.Format("BatchResultOkFormat", Path.GetFileName(item.SourcePath), item.FinalPath)
-                    : Strings.Format("BatchResultFailedFormat", Path.GetFileName(item.SourcePath), item.Error));
-                foreach (var message in item.Messages)
-                    _resultRows.Add("  " + message);
-            }
+            foreach (var row in BuildResultRows(result.Items))
+                _resultRows.Add(row);
 
             SetStatus(
                 Strings.Format("BatchCompleteFormat", result.SuccessCount, result.FailedCount),
@@ -194,12 +188,36 @@ public partial class BatchProcessorWindow : Window
         {
             SetStatus(Strings.BatchCanceled, BatchProcessorStatus.Warning);
         }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            var message = Strings.Format("BatchResultFailedFormat", Strings.BatchRunBatch, ex.Message);
+            _resultRows.Add(message);
+            SetStatus(message, BatchProcessorStatus.Error);
+        }
         finally
         {
             _batchCts?.Dispose();
             _batchCts = null;
             SetBusy(false);
         }
+    }
+
+    internal static IReadOnlyList<string> BuildResultRows(IEnumerable<MacroRunItemResult?> items)
+    {
+        var rows = new List<string>();
+        foreach (var item in items)
+        {
+            if (item is null)
+                continue;
+
+            rows.Add(item.Success
+                ? Strings.Format("BatchResultOkFormat", Path.GetFileName(item.SourcePath), item.FinalPath)
+                : Strings.Format("BatchResultFailedFormat", Path.GetFileName(item.SourcePath), item.Error));
+            foreach (var message in item.Messages)
+                rows.Add("  " + message);
+        }
+
+        return rows;
     }
 
     private async Task BuildPreviewAsync()

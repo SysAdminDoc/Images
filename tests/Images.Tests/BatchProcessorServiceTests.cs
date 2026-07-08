@@ -223,6 +223,18 @@ public sealed class BatchProcessorServiceTests
         Assert.Empty(Directory.EnumerateFiles(output));
     }
 
+    [Fact]
+    public void CompactResults_DropsNullPartialResults()
+    {
+        var success = new MacroRunItemResult("source.png", "output.png", ["Wrote output.png."], null);
+        var failure = new MacroRunItemResult("broken.png", "broken.png", [], "failed");
+        MacroRunItemResult?[] partial = [null, success, null, failure];
+
+        var result = BatchProcessorService.CompactResults(partial);
+
+        Assert.Equal([success, failure], result);
+    }
+
     private static string WriteImage(string folder, string name, uint width, uint height)
     {
         var path = Path.Combine(folder, name);

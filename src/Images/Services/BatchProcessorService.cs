@@ -221,7 +221,7 @@ public sealed class BatchProcessorService
         }
 
         await Task.WhenAll(tasks);
-        return new BatchRunResult(results);
+        return new BatchRunResult(CompactResults(results));
     }
 
     private static BatchPreviewItem BuildPreviewItem(
@@ -314,11 +314,20 @@ public sealed class BatchProcessorService
         {
             throw;
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or MagickException)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             Log.LogWarning(ex, "Batch operation chain failed for {Path}", sourcePath);
             return new MacroRunItemResult(sourcePath, currentPath, messages, ex.Message);
         }
+    }
+
+    internal static IReadOnlyList<MacroRunItemResult> CompactResults(IEnumerable<MacroRunItemResult?> results)
+    {
+        ArgumentNullException.ThrowIfNull(results);
+        return results
+            .Where(result => result is not null)
+            .Select(result => result!)
+            .ToList();
     }
 
     private static void ApplyPipelineOperations(
