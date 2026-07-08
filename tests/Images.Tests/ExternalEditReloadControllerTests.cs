@@ -22,7 +22,7 @@ public sealed class ExternalEditReloadControllerTests
                 reload: () =>
                 {
                     reloadCount++;
-                    return true;
+                    return Task.FromResult(true);
                 },
                 notify: messages.Add,
                 debounceInterval: TimeSpan.FromMilliseconds(20));
@@ -52,7 +52,7 @@ public sealed class ExternalEditReloadControllerTests
                 reload: () =>
                 {
                     reloadCount++;
-                    return false;
+                    return Task.FromResult(false);
                 },
                 notify: messages.Add,
                 debounceInterval: TimeSpan.FromMilliseconds(20));
@@ -79,7 +79,7 @@ public sealed class ExternalEditReloadControllerTests
                 reload: () =>
                 {
                     reloadCount++;
-                    return true;
+                    return Task.FromResult(true);
                 },
                 notify: _ => { },
                 debounceInterval: TimeSpan.FromMilliseconds(20));
@@ -104,7 +104,7 @@ public sealed class ExternalEditReloadControllerTests
             using var controller = new ExternalEditReloadController(
                 Dispatcher.CurrentDispatcher,
                 isDisposed: () => false,
-                reload: () => true,
+                reload: () => Task.FromResult(true),
                 notify: _ => { },
                 watcherFactory: (_, _) => throw new IOException("Watcher unavailable."));
 
@@ -131,7 +131,7 @@ public sealed class ExternalEditReloadControllerTests
                 reload: () =>
                 {
                     reloadCount++;
-                    return true;
+                    return Task.FromResult(true);
                 },
                 notify: _ => { },
                 debounceInterval: TimeSpan.FromMilliseconds(20));
@@ -162,7 +162,7 @@ public sealed class ExternalEditReloadControllerTests
             using var controller = new ExternalEditReloadController(
                 Dispatcher.CurrentDispatcher,
                 isDisposed: () => false,
-                reload: () => true,
+                reload: () => Task.FromResult(true),
                 notify: _ => { },
                 watcherFactory: (directory, fileName) =>
                 {

@@ -125,7 +125,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _externalEditReload = externalEditReload ?? new ExternalEditReloadController(
             _uiDispatcher,
             () => _isDisposed,
-            ReloadCurrentSilent,
+            ReloadCurrentSilentAsync,
             Toast);
         _updateCheck = updateCheck ?? new UpdateCheckController(
             Toast,
@@ -248,8 +248,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         CopyPathCommand = new RelayCommand(CopyPath, () => HasImage);
         CopyImageCommand = new RelayCommand(CopyCurrentImage, () => CanUseDisplayImageCommands);
         CopyImageAndPathCommand = new RelayCommand(CopyCurrentImageAndPath, () => CanUseDisplayImageCommands && HasImage);
-        CopyToFolderCommand = new RelayCommand(p => TransferCurrentImage(ImageFileTransferMode.Copy, p as string), _ => CanUseImageCommands);
-        MoveToFolderCommand = new RelayCommand(p => TransferCurrentImage(ImageFileTransferMode.Move, p as string), _ => CanUseImageCommands);
+        CopyToFolderCommand = new AsyncRelayCommand(p => TransferCurrentImageAsync(ImageFileTransferMode.Copy, p as string), _ => CanUseImageCommands);
+        MoveToFolderCommand = new AsyncRelayCommand(p => TransferCurrentImageAsync(ImageFileTransferMode.Move, p as string), _ => CanUseImageCommands);
         SetAsWallpaperCommand = new RelayCommand(SetAsWallpaper, _ => CanUseImageCommands);
         ReloadCommand = new AsyncRelayCommand(ReloadCurrentAsync, () => CanUseImageCommands);
         PrintCommand = new RelayCommand(PrintCurrent, () => CanUseDisplayImageCommands);
@@ -370,7 +370,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (CurrentPath is not null && !HasImage)
         {
             // Current file was deleted externally — pick whatever slot the navigator landed on.
-            if (_nav.CurrentPath is not null) { ResetPageState(); LoadCurrent(); }
+            if (_nav.CurrentPath is not null)
+            {
+                ResetPageState();
+                _ = LoadCurrentWithOperationStatusAsync(
+                    Strings.MainOpLoadingNext,
+                    BuildDecodeOperationDetail(_nav.CurrentPath));
+            }
             else ClearCurrentState();
         }
         else
@@ -3998,6 +4004,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     public void OpenFileList(IReadOnlyList<string> paths)
+        => _ = OpenFileListAsync(paths);
+
+    public Task OpenFileListAsync(IReadOnlyList<string> paths)
+        => OpenFileListAsync(paths, showOperationStatus: true);
+
+    private async Task OpenFileListAsync(IReadOnlyList<string> paths, bool showOperationStatus)
     {
         if (paths is null || paths.Count == 0) return;
 
@@ -4010,8 +4022,27 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         _preload.Reset();
         ResetPageState();
-        var loaded = LoadCurrent();
-        CompletePreparedOpenFile(paths[0], 0, loaded);
+        var path = _nav.CurrentPath ?? paths[0];
+        bool loaded;
+        if (showOperationStatus && !IsOperationBusy)
+        {
+            BeginOperationStatus(Strings.MainOpOpeningFile, BuildDecodeOperationDetail(path));
+            try
+            {
+                await YieldForOperationStatusAsync();
+                loaded = await LoadCurrentAsync();
+            }
+            finally
+            {
+                EndOperationStatus();
+            }
+        }
+        else
+        {
+            loaded = await LoadCurrentAsync();
+        }
+
+        CompletePreparedOpenFile(path, 0, loaded);
     }
 
     private async Task OpenFileAsync(string path)
@@ -4343,7 +4374,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 return;
             }
 
-            OpenFileList(files);
+            await OpenFileListAsync(files, showOperationStatus: false);
             IsGalleryOpen = true;
             Toast($"Loaded {files.Count:N0} images from {Path.GetFileName(folder)}");
         }
@@ -5103,7 +5134,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         if (_nav.CurrentPath is null) { ClearCurrentState(); return; }
         ResetPageState();
-        LoadCurrent();
+        _ = LoadCurrentWithOperationStatusAsync(
+            Strings.MainOpLoadingNext,
+            BuildDecodeOperationDetail(_nav.CurrentPath));
     }
 
     private void Rotate(double delta)
@@ -6802,7 +6835,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             await YieldForOperationStatusAsync();
             // Explicit reload must bypass the preload cache: a cached decode of
             // the pre-edit file would make reload a silent no-op.
-            if (ReloadCurrentPreservingViewState(resetPreload: true))
+            if (await ReloadCurrentPreservingViewStateAsync(resetPreload: true))
                 Toast(Strings.MainToastReloaded);
         }
         finally
@@ -6892,7 +6925,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private void TransferCurrentImage(ImageFileTransferMode mode, string? destinationFolder)
+    private async Task TransferCurrentImageAsync(ImageFileTransferMode mode, string? destinationFolder)
     {
         if (CurrentPath is null || IsOperationBusy) return;
 
@@ -6919,8 +6952,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         BeginOperationStatus($"{verb} image", $"{verb} {Path.GetFileName(sourcePath)} to {DisplayFolderName(destinationFolder)}.");
         try
         {
-            var result = _fileTransfer.Transfer(sourcePath, destinationFolder, mode);
-            HandleTransferResult(result, destinationFolder);
+            await YieldForOperationStatusAsync();
+            var result = await Task.Run(() => _fileTransfer.Transfer(sourcePath, destinationFolder, mode));
+            await HandleTransferResultAsync(result, destinationFolder);
         }
         finally
         {
@@ -6928,12 +6962,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private void HandleTransferResult(ImageFileTransferResult result, string requestedDestinationFolder)
+    private async Task HandleTransferResultAsync(ImageFileTransferResult result, string requestedDestinationFolder)
     {
         switch (result.Status)
         {
             case ImageFileTransferStatus.Succeeded:
-                HandleSuccessfulTransfer(result, requestedDestinationFolder);
+                await HandleSuccessfulTransferAsync(result, requestedDestinationFolder);
                 break;
             case ImageFileTransferStatus.AlreadyInDestination:
                 Toast($"Already in {DisplayFolderName(requestedDestinationFolder)}");
@@ -6974,7 +7008,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private void HandleSuccessfulTransfer(ImageFileTransferResult result, string requestedDestinationFolder)
+    private async Task HandleSuccessfulTransferAsync(ImageFileTransferResult result, string requestedDestinationFolder)
     {
         var destinationFolder = Path.GetDirectoryName(result.DestinationPath) ?? requestedDestinationFolder;
         _settings.TouchRecentTransferFolder(destinationFolder);
@@ -6993,7 +7027,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Strings.MainMovedImage,
                 $"Moved {Path.GetFileName(result.SourcePath)} to {DisplayFolderName(destinationFolder)}.",
                 BuildRecoverySidecarMoves(result));
-            OpenFile(result.DestinationPath);
+            await OpenFileAsync(result.DestinationPath);
             Toast($"Moved to {destinationLabel}");
             return;
         }
@@ -7621,10 +7655,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     // Item 61: silent reload used by the external-edit debounce so the position/rotation state
     // is preserved but no "Reloaded" toast is emitted. The caller decides whether to show a
     // success message based on the returned decode result.
-    private bool ReloadCurrentSilent()
-    {
-        return ReloadCurrentPreservingViewState(resetPreload: true);
-    }
+    private Task<bool> ReloadCurrentSilentAsync()
+        => ReloadCurrentPreservingViewStateAsync(resetPreload: true);
 
     private bool ReloadCurrentPreservingViewState(bool resetPreload)
     {
@@ -7634,6 +7666,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (resetPreload)
             _preload.Reset();
         var loaded = LoadCurrent();
+        Rotation = savedRotation;
+        FlipHorizontal = savedFlipH;
+        FlipVertical = savedFlipV;
+        return loaded;
+    }
+
+    private async Task<bool> ReloadCurrentPreservingViewStateAsync(bool resetPreload)
+    {
+        var savedRotation = Rotation;
+        var savedFlipH = FlipHorizontal;
+        var savedFlipV = FlipVertical;
+        if (resetPreload)
+            _preload.Reset();
+        var loaded = await LoadCurrentAsync();
         Rotation = savedRotation;
         FlipHorizontal = savedFlipH;
         FlipVertical = savedFlipV;

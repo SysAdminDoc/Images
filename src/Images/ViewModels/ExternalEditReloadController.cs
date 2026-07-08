@@ -15,7 +15,7 @@ public sealed class ExternalEditReloadController : IDisposable
 
     private readonly Dispatcher _uiDispatcher;
     private readonly Func<bool> _isDisposed;
-    private readonly Func<bool> _reload;
+    private readonly Func<Task<bool>> _reload;
     private readonly Action<string> _notify;
     private readonly Func<string, string, FileSystemWatcher> _watcherFactory;
     private readonly DispatcherTimer _debounceTimer;
@@ -26,7 +26,7 @@ public sealed class ExternalEditReloadController : IDisposable
     public ExternalEditReloadController(
         Dispatcher uiDispatcher,
         Func<bool> isDisposed,
-        Func<bool> reload,
+        Func<Task<bool>> reload,
         Action<string> notify,
         TimeSpan? debounceInterval = null,
         Func<string, string, FileSystemWatcher>? watcherFactory = null)
@@ -159,7 +159,7 @@ public sealed class ExternalEditReloadController : IDisposable
         ScheduleReload(e.FullPath);
     }
 
-    private void OnDebounceTimerTick(object? sender, EventArgs e)
+    private async void OnDebounceTimerTick(object? sender, EventArgs e)
     {
         _debounceTimer.Stop();
         if (IsInactive()) return;
@@ -168,7 +168,7 @@ public sealed class ExternalEditReloadController : IDisposable
         if (pendingReloadPath is not null && !IsCurrentWatchedPath(pendingReloadPath))
             return;
 
-        if (_reload())
+        if (await _reload())
             _notify(ReloadedToastMessage);
     }
 

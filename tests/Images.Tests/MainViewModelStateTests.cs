@@ -691,6 +691,8 @@ public sealed class MainViewModelStateTests
             viewModel.CopyToFolderCommand.Execute(null);
 
             var copied = Path.Combine(destination, "a.png");
+            PumpUntil(() => !viewModel.IsOperationBusy && File.Exists(copied));
+
             Assert.True(File.Exists(image));
             Assert.True(File.Exists(copied));
             Assert.Equal("edit-stack", File.ReadAllText(copied + ".xmp"));
@@ -714,6 +716,8 @@ public sealed class MainViewModelStateTests
             viewModel.MoveToFolderCommand.Execute(destination);
 
             var moved = Path.Combine(destination, "a.png");
+            PumpUntil(() => !viewModel.IsOperationBusy && string.Equals(viewModel.CurrentPath, moved, StringComparison.OrdinalIgnoreCase));
+
             Assert.False(File.Exists(image));
             Assert.True(File.Exists(moved));
             Assert.Equal(moved, viewModel.CurrentPath);
@@ -2067,6 +2071,7 @@ public sealed class MainViewModelStateTests
             using var viewModel = CreateViewModelWithFastPreview(temp);
 
             viewModel.OpenFileList([a, b, c]);
+            PumpUntil(() => !viewModel.IsOperationBusy && string.Equals(viewModel.CurrentPath, a, StringComparison.OrdinalIgnoreCase));
 
             Assert.Equal(a, viewModel.CurrentPath);
             Assert.Equal("1 / 3", viewModel.PositionText);
