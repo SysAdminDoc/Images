@@ -205,14 +205,37 @@ public sealed class SmartCollectionService
 
             var store = new SmartCollectionStore(_collections);
             var json = JsonSerializer.Serialize(store, JsonOptions);
-            var tempPath = _storagePath + ".tmp";
-            File.WriteAllText(tempPath, json, System.Text.Encoding.UTF8);
-            File.Move(tempPath, _storagePath, overwrite: true);
+            var tempPath = CreateTempPath(_storagePath);
+            try
+            {
+                File.WriteAllText(tempPath, json, System.Text.Encoding.UTF8);
+                File.Move(tempPath, _storagePath, overwrite: true);
+            }
+            finally
+            {
+                try
+                {
+                    if (File.Exists(tempPath))
+                        File.Delete(tempPath);
+                }
+                catch
+                {
+                    // Stale temp files are harmless; the next save uses a fresh GUID name.
+                }
+            }
         }
         catch (Exception ex)
         {
             _log.LogWarning(ex, "Could not save smart collections to {Path}", _storagePath);
         }
+    }
+
+    private static string CreateTempPath(string storagePath)
+    {
+        var directory = Path.GetDirectoryName(storagePath);
+        return Path.Combine(
+            string.IsNullOrEmpty(directory) ? "." : directory,
+            $"{Path.GetFileName(storagePath)}.{Guid.NewGuid():N}.tmp");
     }
 
     private static string? DefaultPath()

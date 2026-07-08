@@ -416,9 +416,24 @@ public sealed class TagGraphService
             if (!string.IsNullOrWhiteSpace(directory))
                 Directory.CreateDirectory(directory);
 
-            var tempPath = _storePath + ".tmp";
-            File.WriteAllText(tempPath, JsonSerializer.Serialize(_document, JsonOptions), Encoding.UTF8);
-            File.Move(tempPath, _storePath, overwrite: true);
+            var tempPath = CreateTempPath(_storePath);
+            try
+            {
+                File.WriteAllText(tempPath, JsonSerializer.Serialize(_document, JsonOptions), Encoding.UTF8);
+                File.Move(tempPath, _storePath, overwrite: true);
+            }
+            finally
+            {
+                try
+                {
+                    if (File.Exists(tempPath))
+                        File.Delete(tempPath);
+                }
+                catch
+                {
+                    // Stale temp files are harmless; the next save uses a fresh GUID name.
+                }
+            }
             return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or NotSupportedException)
@@ -426,6 +441,14 @@ public sealed class TagGraphService
             Log.LogWarning(ex, "Could not persist local tag graph {Path}", _storePath);
             return false;
         }
+    }
+
+    private static string CreateTempPath(string storePath)
+    {
+        var directory = Path.GetDirectoryName(storePath);
+        return Path.Combine(
+            string.IsNullOrEmpty(directory) ? "." : directory,
+            $"{Path.GetFileName(storePath)}.{Guid.NewGuid():N}.tmp");
     }
 
     private static string? CreateDefaultStorePath()

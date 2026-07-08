@@ -87,4 +87,19 @@ public sealed class TagGraphServiceTests
         Assert.Contains(snapshot.Namespaces, item => item.Prefix == "project");
         Assert.True(Directory.EnumerateFiles(temp.Path, "tag-graph.json.corrupt-*").Any());
     }
+
+    [Fact]
+    public void AddAlias_UsesGuidTempFileAndLeavesFixedTempUntouched()
+    {
+        using var temp = TestDirectory.Create();
+        var storePath = Path.Combine(temp.Path, "tag-graph.json");
+        var fixedTemp = storePath + ".tmp";
+        File.WriteAllText(fixedTemp, "sentinel");
+        var service = new TagGraphService(storePath);
+
+        Assert.True(service.AddAlias("ally", "person:Alice").Success);
+
+        Assert.Equal("sentinel", File.ReadAllText(fixedTemp));
+        Assert.Empty(Directory.EnumerateFiles(temp.Path, "tag-graph.json.*.tmp"));
+    }
 }

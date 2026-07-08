@@ -126,6 +126,21 @@ public sealed class SmartCollectionServiceTests
     }
 
     [Fact]
+    public void Add_UsesGuidTempFileAndLeavesFixedTempUntouched()
+    {
+        using var temp = TestDirectory.Create();
+        var path = Path.Combine(temp.Path, "c.json");
+        var fixedTemp = path + ".tmp";
+        File.WriteAllText(fixedTemp, "sentinel");
+        var service = new SmartCollectionService(path);
+
+        Assert.True(service.Add("Persisted", new SmartCollectionCriteria(MinRating: 3)));
+
+        Assert.Equal("sentinel", File.ReadAllText(fixedTemp));
+        Assert.Empty(Directory.EnumerateFiles(temp.Path, "c.json.*.tmp"));
+    }
+
+    [Fact]
     public void Criteria_SummaryDescribesFilters()
     {
         var criteria = new SmartCollectionCriteria(
