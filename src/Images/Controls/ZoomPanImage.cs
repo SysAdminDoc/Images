@@ -440,7 +440,7 @@ public sealed class ZoomPanImage : ContentControl
 
     private void OnDouble(object sender, MouseButtonEventArgs e)
     {
-        if (InspectorMode)
+        if (InspectorMode || e.ChangedButton != MouseButton.Left)
             return;
 
         if (Math.Abs(_scale.ScaleX - 1) > 0.001) ResetView(); else OneToOne();

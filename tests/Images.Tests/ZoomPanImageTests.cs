@@ -1,5 +1,7 @@
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using Images.Controls;
 
 namespace Images.Tests;
@@ -33,6 +35,28 @@ public sealed class ZoomPanImageTests
             Arrange(control, 520, 360);
 
             Assert.Equal(new ZoomPanViewState(1, 0, 0), control.GetViewState());
+        });
+    }
+
+    [Fact]
+    public void RightDoubleClick_DoesNotResetViewState()
+    {
+        RunOnSta(() =>
+        {
+            var control = new ZoomPanImage();
+            Arrange(control, 400, 300);
+            var expected = new ZoomPanViewState(2, 24, -16);
+            control.SetViewState(expected);
+
+            var args = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Right)
+            {
+                RoutedEvent = Control.MouseDoubleClickEvent,
+                Source = control
+            };
+            control.RaiseEvent(args);
+
+            Assert.False(args.Handled);
+            Assert.Equal(expected, control.GetViewState());
         });
     }
 
