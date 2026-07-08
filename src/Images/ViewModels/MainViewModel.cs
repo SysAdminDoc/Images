@@ -4886,7 +4886,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             }
 
             var newPath = _rename.Commit(CurrentPath, EditableStem, Extension);
-            if (string.Equals(newPath, CurrentPath, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(newPath, CurrentPath, StringComparison.Ordinal))
             {
                 RenameStatus = RenameStatusKind.Idle;
                 return;

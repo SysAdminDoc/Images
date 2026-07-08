@@ -61,18 +61,22 @@ public enum FileHealthActionStatus
 
 public sealed record FileHealthActionResult(
     FileHealthActionStatus Status,
-    string? SourcePath = null,
-    string? DestinationPath = null,
-    string? Error = null)
+    string? SourcePath,
+    string? DestinationPath,
+    string? Error,
+    IReadOnlyList<RecoverySidecarMove> Sidecars)
 {
-    public static FileHealthActionResult Completed(string sourcePath, string destinationPath) =>
-        new(FileHealthActionStatus.Completed, sourcePath, destinationPath);
+    public static FileHealthActionResult Completed(
+        string sourcePath,
+        string destinationPath,
+        IReadOnlyList<RecoverySidecarMove>? sidecars = null) =>
+        new(FileHealthActionStatus.Completed, sourcePath, destinationPath, null, sidecars ?? []);
 
     public static FileHealthActionResult Unavailable(string error) =>
-        new(FileHealthActionStatus.Unavailable, Error: error);
+        new(FileHealthActionStatus.Unavailable, null, null, error, []);
 
     public static FileHealthActionResult Failed(string sourcePath, string error) =>
-        new(FileHealthActionStatus.Failed, sourcePath, Error: error);
+        new(FileHealthActionStatus.Failed, sourcePath, null, error, []);
 }
 
 public sealed class FileHealthScanService
@@ -148,11 +152,13 @@ public sealed class FileHealthScanService
                 return FileHealthActionResult.Failed(finding.Path, "File no longer exists.");
 
             var target = ResolveUniquePath(
+                finding.Path,
                 System.IO.Path.GetDirectoryName(finding.Path) ?? string.Empty,
                 System.IO.Path.GetFileNameWithoutExtension(finding.Path),
                 finding.SuggestedExtension);
             File.Move(finding.Path, target);
-            return FileHealthActionResult.Completed(finding.Path, target);
+            var sidecars = SidecarCompanionFiles.TryMoveAlongside(finding.Path, target);
+            return FileHealthActionResult.Completed(finding.Path, target, sidecars);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
@@ -179,12 +185,14 @@ public sealed class FileHealthScanService
             Directory.CreateDirectory(batch);
 
             var destination = ResolveUniquePath(
+                finding.Path,
                 batch,
                 System.IO.Path.GetFileNameWithoutExtension(finding.Path),
                 System.IO.Path.GetExtension(finding.Path));
             File.Move(finding.Path, destination);
+            var sidecars = SidecarCompanionFiles.TryMoveAlongside(finding.Path, destination);
             WriteManifest(batch, finding, destination);
-            return FileHealthActionResult.Completed(finding.Path, destination);
+            return FileHealthActionResult.Completed(finding.Path, destination, sidecars);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
@@ -373,7 +381,7 @@ public sealed class FileHealthScanService
     }
 
 
-    private static string ResolveUniquePath(string directory, string stem, string extension)
+    private static string ResolveUniquePath(string sourcePath, string directory, string stem, string extension)
     {
         if (string.IsNullOrWhiteSpace(directory))
             throw new IOException("Destination directory is not available.");
@@ -382,18 +390,21 @@ public sealed class FileHealthScanService
 
         var normalizedExtension = extension.StartsWith('.') ? extension : "." + extension;
         var target = System.IO.Path.Combine(directory, stem + normalizedExtension);
-        if (!File.Exists(target))
+        if (!TargetUnavailable(sourcePath, target))
             return target;
 
         for (var i = 2; i < 10_000; i++)
         {
             target = System.IO.Path.Combine(directory, $"{stem} ({i}){normalizedExtension}");
-            if (!File.Exists(target))
+            if (!TargetUnavailable(sourcePath, target))
                 return target;
         }
 
         return System.IO.Path.Combine(directory, $"{stem}-{Guid.NewGuid():N}{normalizedExtension}");
     }
+
+    private static bool TargetUnavailable(string sourcePath, string targetPath)
+        => File.Exists(targetPath) || SidecarCompanionFiles.WouldOverwriteDestination(sourcePath, targetPath);
 
     private static void WriteManifest(string batch, FileHealthFinding finding, string destination)
     {

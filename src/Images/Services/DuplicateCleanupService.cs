@@ -81,7 +81,10 @@ public sealed record DuplicateCleanupScanResult(
     public bool HasFindings => Findings.Count > 0;
 }
 
-public sealed record DuplicateCleanupMoveResult(string SourcePath, string DestinationPath);
+public sealed record DuplicateCleanupMoveResult(
+    string SourcePath,
+    string DestinationPath,
+    IReadOnlyList<RecoverySidecarMove> Sidecars);
 
 public sealed record DuplicateCleanupFailure(string Path, string Error);
 
@@ -214,7 +217,8 @@ public sealed class DuplicateCleanupService
 
                 var destination = ResolveUniqueDestination(batch, System.IO.Path.GetFileName(path));
                 File.Move(path, destination);
-                moved.Add(new DuplicateCleanupMoveResult(path, destination));
+                var sidecars = SidecarCompanionFiles.TryMoveAlongside(path, destination);
+                moved.Add(new DuplicateCleanupMoveResult(path, destination, sidecars));
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
             {

@@ -78,6 +78,28 @@ public sealed class FileHealthScanServiceTests
     }
 
     [Fact]
+    public void RenameToSuggestedExtension_MovesMatchingFullNameSidecar()
+    {
+        using var temp = TestDirectory.Create();
+        var wrong = Path.Combine(temp.Path, "wrong.jpg");
+        WritePng(wrong);
+        File.WriteAllText(wrong + ".xmp", "rating");
+        var service = new FileHealthScanService();
+        var finding = Assert.Single(service.Scan([temp.Path]).Findings, item => item.Path == wrong);
+
+        var result = service.RenameToSuggestedExtension(finding);
+
+        var target = Path.Combine(temp.Path, "wrong.png");
+        Assert.Equal(FileHealthActionStatus.Completed, result.Status);
+        Assert.Equal(target, result.DestinationPath);
+        Assert.False(File.Exists(wrong + ".xmp"));
+        Assert.Equal("rating", File.ReadAllText(target + ".xmp"));
+        var sidecar = Assert.Single(result.Sidecars);
+        Assert.Equal(wrong + ".xmp", sidecar.OriginalPath);
+        Assert.Equal(target + ".xmp", sidecar.CurrentPath);
+    }
+
+    [Fact]
     public void Quarantine_MovesFileAndWritesManifest()
     {
         using var temp = TestDirectory.Create();
@@ -94,6 +116,28 @@ public sealed class FileHealthScanServiceTests
         Assert.NotNull(result.DestinationPath);
         Assert.True(File.Exists(result.DestinationPath));
         Assert.True(File.Exists(Path.Combine(Path.GetDirectoryName(result.DestinationPath)!, "manifest.tsv")));
+    }
+
+    [Fact]
+    public void Quarantine_MovesMatchingSidecars()
+    {
+        using var temp = TestDirectory.Create();
+        var quarantineRoot = Path.Combine(temp.Path, "quarantine");
+        var broken = Path.Combine(temp.Path, "broken.png");
+        File.WriteAllText(broken, "not an image");
+        File.WriteAllText(broken + ".xmp", "full-name sidecar");
+        File.WriteAllText(Path.Combine(temp.Path, "broken.xmp"), "stem sidecar");
+        var service = new FileHealthScanService(() => quarantineRoot);
+        var finding = Assert.Single(service.Scan([temp.Path]).Findings, item => item.Kind == FileHealthFindingKind.BrokenImage);
+
+        var result = service.Quarantine(finding);
+
+        Assert.Equal(FileHealthActionStatus.Completed, result.Status);
+        Assert.NotNull(result.DestinationPath);
+        var destination = result.DestinationPath!;
+        Assert.Equal(2, result.Sidecars.Count);
+        Assert.Equal("full-name sidecar", File.ReadAllText(destination + ".xmp"));
+        Assert.Equal("stem sidecar", File.ReadAllText(Path.Combine(Path.GetDirectoryName(destination)!, "broken.xmp")));
     }
 
     private static void WritePng(

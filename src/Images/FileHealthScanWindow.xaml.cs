@@ -140,7 +140,8 @@ public partial class FileHealthScanWindow : Window
                 result.SourcePath ?? finding.Path,
                 result.DestinationPath ?? finding.Path,
                 Strings.FileHealthScanRenameRecoveryReason,
-                Strings.Format(nameof(Strings.FileHealthScanRenameRecoveryDetailFormat), finding.FileName, finding.DetectedFormat));
+                Strings.Format(nameof(Strings.FileHealthScanRenameRecoveryDetailFormat), finding.FileName, finding.DetectedFormat),
+                result.Sidecars);
             RemoveFinding(finding);
             SetStatus(Strings.Format(nameof(Strings.FileHealthScanRenamedFormat), Path.GetFileName(result.DestinationPath)), FileHealthStatus.Ready);
             return;
@@ -172,7 +173,8 @@ public partial class FileHealthScanWindow : Window
                 result.SourcePath ?? finding.Path,
                 result.DestinationPath ?? finding.Path,
                 Strings.FileHealthScanQuarantineRecoveryReason,
-                Strings.Format(nameof(Strings.FileHealthScanQuarantineRecoveryDetailFormat), finding.FileName, finding.Title.ToLowerInvariant()));
+                Strings.Format(nameof(Strings.FileHealthScanQuarantineRecoveryDetailFormat), finding.FileName, finding.Title.ToLowerInvariant()),
+                result.Sidecars);
             RemoveFinding(finding);
             SetStatus(Strings.Format(nameof(Strings.FileHealthScanQuarantinedFormat), result.DestinationPath), FileHealthStatus.Ready);
             return;

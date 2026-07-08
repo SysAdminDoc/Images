@@ -230,7 +230,8 @@ public partial class DuplicateCleanupWindow : Window
                     moved.SourcePath,
                     moved.DestinationPath,
                     Strings.DuplicateCleanupQuarantineRecoveryReason,
-                    Strings.Format(nameof(Strings.DuplicateCleanupQuarantineRecoveryDetailFormat), Path.GetFileName(moved.SourcePath), Path.GetFileName(result.BatchDirectory ?? string.Empty)));
+                    Strings.Format(nameof(Strings.DuplicateCleanupQuarantineRecoveryDetailFormat), Path.GetFileName(moved.SourcePath), Path.GetFileName(result.BatchDirectory ?? string.Empty)),
+                    moved.Sidecars);
             }
 
             if (result.MovedCount > 0 && finding is not null)

@@ -2,6 +2,13 @@
 
 All notable changes to **Images** are documented here.
 
+## Unreleased
+
+### Fixed
+
+- **XMP sidecars follow rename and quarantine moves** — Rename, undo, file-health rename/quarantine, and duplicate-cleanup quarantine now carry both `image.ext.xmp` and `stem.xmp` companion files without overwriting existing sidecars, and recovery records can restore moved sidecars with the image.
+- **Case-only renames are real renames** — Renaming `photo.jpg` to `PHOTO.jpg` now performs the NTFS case-only move and updates the viewer instead of reporting a no-op.
+
 ## 0.2.17
 
 Roadmap drain: resolves the remaining code-ready items from the v0.2.16 deep audit.

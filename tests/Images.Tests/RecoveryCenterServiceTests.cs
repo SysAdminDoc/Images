@@ -75,6 +75,33 @@ public sealed class RecoveryCenterServiceTests
     }
 
     [Fact]
+    public void Restore_QuarantineRecordRestoresSidecarsBesideImage()
+    {
+        using var temp = TestDirectory.Create();
+        var original = Path.Combine(temp.Path, "source", "photo.jpg");
+        var quarantine = Path.Combine(temp.Path, "quarantine", "photo.jpg");
+        var quarantineSidecar = quarantine + ".xmp";
+        Directory.CreateDirectory(Path.GetDirectoryName(quarantine)!);
+        File.WriteAllText(quarantine, "image");
+        File.WriteAllText(quarantineSidecar, "sidecar");
+        var service = CreateService(temp.Path);
+        var record = service.RecordQuarantine(
+            original,
+            quarantine,
+            "Quarantined image",
+            "Moved image and sidecar.",
+            [new RecoverySidecarMove(original + ".xmp", quarantineSidecar)]);
+
+        var result = service.Restore(record.Id);
+
+        Assert.Equal(RecoveryRestoreStatus.Restored, result.Status);
+        Assert.True(File.Exists(original));
+        Assert.True(File.Exists(original + ".xmp"));
+        Assert.Equal("sidecar", File.ReadAllText(original + ".xmp"));
+        Assert.False(File.Exists(quarantineSidecar));
+    }
+
+    [Fact]
     public void Restore_WhenCurrentPathIsMissingMarksRecordMissing()
     {
         using var temp = TestDirectory.Create();

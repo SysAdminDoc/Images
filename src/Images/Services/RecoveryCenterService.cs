@@ -140,7 +140,8 @@ public sealed class RecoveryCenterService
         string sourcePath,
         string destinationPath,
         string title,
-        string description)
+        string description,
+        IEnumerable<RecoverySidecarMove>? sidecars = null)
         => AppendNew(
             RecoveryOperationKind.Rename,
             sourcePath,
@@ -149,13 +150,14 @@ public sealed class RecoveryCenterService
             description,
             isRestorable: true,
             restoreHint: "Renames can be restored while the renamed file still exists.",
-            sidecars: null);
+            sidecars);
 
     public RecoveryActionRecord RecordQuarantine(
         string sourcePath,
         string destinationPath,
         string title,
-        string description)
+        string description,
+        IEnumerable<RecoverySidecarMove>? sidecars = null)
         => AppendNew(
             RecoveryOperationKind.Quarantine,
             sourcePath,
@@ -164,7 +166,7 @@ public sealed class RecoveryCenterService
             description,
             isRestorable: true,
             restoreHint: "Quarantined files can be restored while the quarantine copy still exists.",
-            sidecars: null);
+            sidecars);
 
     public RecoveryActionRecord RecordWriteback(
         string path,

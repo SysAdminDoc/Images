@@ -86,6 +86,25 @@ public sealed class DuplicateCleanupServiceTests
     }
 
     [Fact]
+    public void Quarantine_MovesMatchingSidecars()
+    {
+        using var temp = TestDirectory.Create();
+        var quarantineRoot = Path.Combine(temp.Path, "quarantine-root");
+        var image = Path.Combine(temp.Path, "duplicate.png");
+        WriteImage(image, MagickColors.Yellow);
+        File.WriteAllText(image + ".xmp", "full-name sidecar");
+        File.WriteAllText(Path.Combine(temp.Path, "duplicate.xmp"), "stem sidecar");
+        var service = new DuplicateCleanupService(() => quarantineRoot);
+
+        var result = service.Quarantine([image]);
+
+        var moved = Assert.Single(result.Moved);
+        Assert.Equal(2, moved.Sidecars.Count);
+        Assert.Equal("full-name sidecar", File.ReadAllText(moved.DestinationPath + ".xmp"));
+        Assert.Equal("stem sidecar", File.ReadAllText(Path.Combine(Path.GetDirectoryName(moved.DestinationPath)!, "duplicate.xmp")));
+    }
+
+    [Fact]
     public void HammingDistance_CountsChangedBits()
     {
         Assert.Equal(4, DuplicateCleanupService.HammingDistance(0b1111UL, 0b0000UL));

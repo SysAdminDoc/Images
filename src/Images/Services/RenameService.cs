@@ -106,7 +106,7 @@ public sealed class RenameService
         if (IsSame(candidate, currentPath)) return candidate;
 
         var counter = 2;
-        while (File.Exists(candidate) && !IsSame(candidate, currentPath))
+        while (TargetUnavailable(candidate, currentPath))
         {
             candidate = Path.Combine(folder, $"{baseName} ({counter}){ext}");
             counter++;
@@ -125,6 +125,25 @@ public sealed class RenameService
 
     private static bool IsSame(string a, string? b)
         => b is not null && string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsExactSame(string a, string? b)
+        => b is not null && string.Equals(NormalizePath(a), NormalizePath(b), StringComparison.Ordinal);
+
+    private static bool TargetUnavailable(string candidate, string? currentPath)
+        => (File.Exists(candidate) && !IsSame(candidate, currentPath)) ||
+           (currentPath is not null && SidecarCompanionFiles.WouldOverwriteDestination(currentPath, candidate));
+
+    private static string NormalizePath(string path)
+    {
+        try
+        {
+            return Path.GetFullPath(path);
+        }
+        catch
+        {
+            return path;
+        }
+    }
 
     /// <summary>
     /// Move the file from <paramref name="currentPath"/> to the resolved target.
@@ -148,11 +167,12 @@ public sealed class RenameService
         {
             target = ResolveTargetPath(folder, clean, extension, currentPath);
 
-            if (IsSame(target, currentPath)) return currentPath;
+            if (IsExactSame(target, currentPath)) return currentPath;
 
             try
             {
                 File.Move(currentPath, target);
+                SidecarCompanionFiles.TryMoveAlongside(currentPath, target);
                 moved = true;
                 break;
             }
@@ -193,6 +213,7 @@ public sealed class RenameService
             try
             {
                 File.Move(entry.ToPath, restoreTo);
+                SidecarCompanionFiles.TryMoveAlongside(entry.ToPath, restoreTo);
                 moved = true;
                 break;
             }
