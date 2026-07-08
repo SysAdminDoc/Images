@@ -27,6 +27,8 @@ public partial class MainWindow : Window
     private HwndSource? _hwndSource;
     private bool _overlayExitHotKeyRegistered;
     private bool _syncingCompareCanvases;
+    private string? _dragPathVerdictKey;
+    private string? _dragPathVerdict;
 
     public MainWindow()
     {
@@ -1582,12 +1584,14 @@ public partial class MainWindow : Window
     private void Window_DragLeave(object sender, DragEventArgs e)
     {
         Vm.IsDropTargetActive = false;
+        ClearDragPathVerdict();
         e.Handled = true;
     }
 
     private void Window_Drop(object sender, DragEventArgs e)
     {
         Vm.IsDropTargetActive = false;
+        ClearDragPathVerdict();
         if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
         var paths = (string[]?)e.Data.GetData(DataFormats.FileDrop);
         if (paths is null || paths.Length == 0) return;
@@ -1606,16 +1610,30 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
-    private static string? GetDroppedPath(DragEventArgs e)
+    private string? GetDroppedPath(DragEventArgs e)
     {
         if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return null;
         var paths = (string[]?)e.Data.GetData(DataFormats.FileDrop);
         if (paths is null || paths.Length == 0) return null;
+        var key = string.Join('\u001f', paths);
+        if (string.Equals(_dragPathVerdictKey, key, StringComparison.Ordinal))
+            return _dragPathVerdict;
+
         var first = paths[0];
-        if (Directory.Exists(first))
-            return Directory.EnumerateFiles(first)
-                .FirstOrDefault(f => Services.DirectoryNavigator.SupportedExtensions.Contains(Path.GetExtension(f)));
-        return GetDroppedFilePath(first);
+        var verdict = Directory.Exists(first)
+            ? Directory.EnumerateFiles(first)
+                .FirstOrDefault(f => Services.DirectoryNavigator.SupportedExtensions.Contains(Path.GetExtension(f)))
+            : GetDroppedFilePath(first);
+
+        _dragPathVerdictKey = key;
+        _dragPathVerdict = verdict;
+        return verdict;
+    }
+
+    private void ClearDragPathVerdict()
+    {
+        _dragPathVerdictKey = null;
+        _dragPathVerdict = null;
     }
 
     private static string? GetDroppedFilePath(string path)

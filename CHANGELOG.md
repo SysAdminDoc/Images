@@ -53,6 +53,7 @@ All notable changes to **Images** are documented here.
 - **Command predicate file-state cache** — Hot command and palette predicates now use cached current, compare, and culling-item availability instead of probing the file system on every WPF requery.
 - **Main-view long operations yield to the busy panel** — Explicit file-list opens, external-edit reloads, delete advancement, and copy/move transfers now use async decode or worker-thread transfer paths so the dispatcher can render status before heavy work starts.
 - **Secondary previews are capped and asynchronous** — Duplicate Cleanup, File Health Scan, Import Inbox, and Reference Board now load bounded preview images off the dispatcher instead of decoding full-size images during selection or card creation.
+- **Tile and drag-over UI stalls reduced** — Huge-image tile bitmaps now decode on worker tasks before being attached to the canvas, and drag-over file verdicts are cached for the current file list instead of re-enumerating directories per mouse move.
 
 ## 0.2.17
 

@@ -25,6 +25,7 @@ public sealed class ZoomPanImage : ContentControl
     private readonly Viewbox _tileViewbox = new() { Stretch = Stretch.Uniform, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
     private readonly Canvas _tileCanvas = new() { IsHitTestVisible = false };
     private readonly Dictionary<TileKey, Image> _tileImages = new();
+    private readonly HashSet<TileKey> _loadingTiles = [];
     // Flip lives BEFORE rotate in the transform stack so a horizontal flip flips the image in
     // its own canvas frame rather than the post-rotation frame — that's what users expect.
     // Order: flip → rotate → zoom-scale → pan-translate (TransformGroup applies children in order).
@@ -37,6 +38,7 @@ public sealed class ZoomPanImage : ContentControl
     private Point _dragOrigin;
     private int? _renderedTileLevel;
     private bool _tileRefreshQueued;
+    private int _tileLoadGeneration;
     public event EventHandler? ViewChanged;
     public event EventHandler<SwipeDirection>? SwipeNavigate;
 
@@ -586,36 +588,57 @@ public sealed class ZoomPanImage : ContentControl
             _tileCanvas.Children.Remove(_tileImages[existing]);
             _tileImages.Remove(existing);
         }
+        _loadingTiles.RemoveWhere(key => !visibleSet.Contains(key));
 
         foreach (var key in visibleTiles)
         {
-            if (_tileImages.ContainsKey(key))
+            if (_tileImages.ContainsKey(key) || _loadingTiles.Contains(key))
                 continue;
 
-            var bitmap = TileService.LoadTileBitmap(pyramid, key);
-            if (bitmap is null)
-                continue;
-
-            var tile = new Image
-            {
-                Source = bitmap,
-                Width = bitmap.PixelWidth,
-                Height = bitmap.PixelHeight,
-                Stretch = Stretch.None,
-                IsHitTestVisible = false,
-            };
-
-            Canvas.SetLeft(tile, key.Column * pyramid.TileSize - (key.Column > 0 ? pyramid.Overlap : 0));
-            Canvas.SetTop(tile, key.Row * pyramid.TileSize - (key.Row > 0 ? pyramid.Overlap : 0));
-            _tileImages[key] = tile;
-            _tileCanvas.Children.Add(tile);
+            _loadingTiles.Add(key);
+            _ = LoadTileBitmapAsync(pyramid, key, _tileLoadGeneration);
         }
+    }
+
+    private async Task LoadTileBitmapAsync(TilePyramidInfo pyramid, TileKey key, int generation)
+    {
+        var bitmap = await Task.Run(() => TileService.LoadTileBitmap(pyramid, key));
+        if (generation != _tileLoadGeneration ||
+            TilePyramid != pyramid ||
+            _renderedTileLevel != key.Level ||
+            !_loadingTiles.Remove(key) ||
+            bitmap is null ||
+            _tileImages.ContainsKey(key))
+        {
+            return;
+        }
+
+        AddTileImage(pyramid, key, bitmap);
+    }
+
+    private void AddTileImage(TilePyramidInfo pyramid, TileKey key, BitmapSource bitmap)
+    {
+        var tile = new Image
+        {
+            Source = bitmap,
+            Width = bitmap.PixelWidth,
+            Height = bitmap.PixelHeight,
+            Stretch = Stretch.None,
+            IsHitTestVisible = false,
+        };
+
+        Canvas.SetLeft(tile, key.Column * pyramid.TileSize - (key.Column > 0 ? pyramid.Overlap : 0));
+        Canvas.SetTop(tile, key.Row * pyramid.TileSize - (key.Row > 0 ? pyramid.Overlap : 0));
+        _tileImages[key] = tile;
+        _tileCanvas.Children.Add(tile);
     }
 
     private void ClearTileImages()
     {
+        _tileLoadGeneration++;
         _tileCanvas.Children.Clear();
         _tileImages.Clear();
+        _loadingTiles.Clear();
     }
 
     // A-01: surface custom UIA peer so screen readers announce "Image, W by H pixels" on focus
