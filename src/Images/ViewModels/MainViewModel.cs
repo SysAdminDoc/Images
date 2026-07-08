@@ -226,7 +226,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         SetRetouchModeCommand = new RelayCommand(SetRetouchMode, parameter => parameter is string);
         ClearRetouchSourceCommand = new RelayCommand(ClearRetouchSource, () => HasRetouchSource);
         ToggleInpaintModeCommand = new RelayCommand(ToggleInpaintMode, () => CanUseInpaint);
-        ApplyInpaintCommand = new AsyncRelayCommand(ApplyInpaintAsync, () => HasInpaintMaskRegions && !IsOperationBusy);
+        ApplyInpaintCommand = new AsyncRelayCommand(ApplyInpaintAsync, () => CanUseInpaint && HasInpaintMaskRegions && !IsOperationBusy);
         CancelInpaintCommand = new RelayCommand(CancelInpaintMode, () => IsInpaintMode || HasInpaintMaskRegions);
         ClearInpaintMaskCommand = new RelayCommand(ClearInpaintMask, () => HasInpaintMaskRegions);
         CopyInspectorHexCommand = new RelayCommand(() => CopyInspectorValue(s => s.Hex, "HEX"), () => HasInspectorSample);
@@ -4591,6 +4591,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 ClearRedEyeCorrectionMarks(showToast: false);
                 IsRetouchMode = false;
                 ClearRetouchState(showToast: false);
+                ResetInpaintState();
                 ApplyPageSequence(result.Pages);
                 ArchiveReadPositionService.SaveLastPageIndex(_settings, path, PageIndex, PageCount);
                 if (isArchiveBookPage)
@@ -4714,6 +4715,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClearRedEyeCorrectionMarks(showToast: false);
         IsRetouchMode = false;
         ClearRetouchState(showToast: false);
+        ResetInpaintState();
         ResetPageState();
         SetLoadError(ex);
     }
@@ -6442,7 +6444,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private async Task ApplyInpaintAsync()
     {
-        if (!HasInpaintMaskRegions || CurrentPath is null || IsOperationBusy) return;
+        if (!CanUseInpaint || !HasInpaintMaskRegions || CurrentPath is null || IsOperationBusy) return;
 
         var path = CurrentPath;
         var regions = _inpaintMaskRegions.ToList();
@@ -6510,6 +6512,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         _inpaintMaskRegions.Clear();
         Raise(nameof(HasInpaintMaskRegions));
+    }
+
+    private void ResetInpaintState()
+    {
+        IsInpaintMode = false;
+        ClearInpaintMask();
+        Raise(nameof(CanUseInpaint));
     }
 
     private void CancelCropMode()
@@ -7610,6 +7619,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClearRedEyeCorrectionMarks(showToast: false);
         IsRetouchMode = false;
         ClearRetouchState(showToast: false);
+        ResetInpaintState();
         ResetPageState();
         ClearPhotoMetadata();
         ClearColorAnalysis();
