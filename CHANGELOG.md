@@ -57,6 +57,7 @@ All notable changes to **Images** are documented here.
 - **Gallery refresh no longer blocks on smart filters** — Gallery navigation now reconciles thumbnails in place, and smart-filter indexing runs on a worker task with an indexing chip instead of synchronously rebuilding the collection on the dispatcher.
 - **Unresolved visibility bindings collapse safely** — `BoolToVis` now treats `DependencyProperty.UnsetValue` like `null` while preserving the existing nonzero integer behavior used by count bindings.
 - **Multi-file drops open the full supported set** — Dropping multiple image files now routes through the same file-list open path as multi-file argv instead of silently opening only the first dropped file.
+- **Zoom survives layout changes** — `ZoomPanImage` now preserves user-modified zoom and pan through resize, fullscreen edge reveal, and gallery/filmstrip layout changes while untouched fit views still stay fitted.
 
 ## 0.2.17
 

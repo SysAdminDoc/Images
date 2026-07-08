@@ -188,12 +188,7 @@ public sealed class ZoomPanImage : ContentControl
         ManipulationInertiaStarting += OnManipulationInertiaStarting;
 
         Loaded += (_, _) => QueueTileRefresh();
-        SizeChanged += (_, _) =>
-        {
-            ResetView();
-            QueueTileRefresh();
-            RaiseViewChanged();
-        };
+        SizeChanged += (_, _) => HandleSizeChanged();
     }
 
     protected override Size MeasureOverride(Size constraint)
@@ -259,6 +254,21 @@ public sealed class ZoomPanImage : ContentControl
         _translate.X = _translate.Y = 0;
         QueueTileRefresh();
     }
+
+    private void HandleSizeChanged()
+    {
+        if (IsUntouchedFitView)
+            ResetView();
+        else
+            QueueTileRefresh();
+
+        RaiseViewChanged();
+    }
+
+    private bool IsUntouchedFitView =>
+        Math.Abs(_scale.ScaleX - 1.0) < 0.0001 &&
+        Math.Abs(_translate.X) < 0.0001 &&
+        Math.Abs(_translate.Y) < 0.0001;
 
     public Matrix GetImageToViewportMatrix()
     {
