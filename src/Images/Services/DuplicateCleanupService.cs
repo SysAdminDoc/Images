@@ -360,7 +360,21 @@ public sealed class DuplicateCleanupService
             try
             {
                 foreach (var child in Directory.EnumerateDirectories(directory))
+                {
+                    try
+                    {
+                        var attributes = File.GetAttributes(child);
+                        if ((attributes & FileAttributes.ReparsePoint) != 0)
+                            continue;
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
+                    {
+                        failures++;
+                        continue;
+                    }
+
                     pending.Push(child);
+                }
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
             {

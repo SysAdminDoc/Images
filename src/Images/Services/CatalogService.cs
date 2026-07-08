@@ -714,6 +714,7 @@ public sealed class CatalogService
                     {
                         RecurseSubdirectories = true,
                         IgnoreInaccessible = true,
+                        AttributesToSkip = FileAttributes.ReparsePoint
                     });
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)

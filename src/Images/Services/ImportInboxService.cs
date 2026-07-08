@@ -331,11 +331,55 @@ public sealed class ImportInboxService
                     continue;
                 }
 
-                foreach (var file in Directory.EnumerateFiles(fullRoot, "*", SearchOption.AllDirectories))
+                var pending = new Stack<string>();
+                pending.Push(fullRoot);
+
+                while (pending.Count > 0)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    if (SupportedImageFormats.IsSupported(file))
-                        files.Add(Path.GetFullPath(file));
+                    var directory = pending.Pop();
+
+                    try
+                    {
+                        foreach (var file in Directory.EnumerateFiles(directory))
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            if (SupportedImageFormats.IsSupported(file))
+                                files.Add(Path.GetFullPath(file));
+                        }
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
+                    {
+                        failed++;
+                        Log.LogDebug(ex, "Could not enumerate import inbox files under {Path}", directory);
+                    }
+
+                    try
+                    {
+                        foreach (var child in Directory.EnumerateDirectories(directory))
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            try
+                            {
+                                var attributes = File.GetAttributes(child);
+                                if ((attributes & FileAttributes.ReparsePoint) != 0)
+                                    continue;
+                            }
+                            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
+                            {
+                                failed++;
+                                Log.LogDebug(ex, "Could not inspect import inbox child directory {Path}", child);
+                                continue;
+                            }
+
+                            pending.Push(child);
+                        }
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
+                    {
+                        failed++;
+                        Log.LogDebug(ex, "Could not enumerate import inbox directories under {Path}", directory);
+                    }
                 }
             }
             catch (OperationCanceledException)

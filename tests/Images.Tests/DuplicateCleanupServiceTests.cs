@@ -63,6 +63,22 @@ public sealed class DuplicateCleanupServiceTests
     }
 
     [Fact]
+    public void Scan_SkipsReparsePointDirectories()
+    {
+        using var temp = TestDirectory.Create();
+        var scan = Directory.CreateDirectory(Path.Combine(temp.Path, "scan")).FullName;
+        var linkedTarget = Directory.CreateDirectory(Path.Combine(temp.Path, "linked-target")).FullName;
+        WriteImage(Path.Combine(scan, "real.png"), MagickColors.Green);
+        WriteImage(Path.Combine(linkedTarget, "linked.png"), MagickColors.Green);
+        ReparsePointTestHelper.CreateDirectoryLinkOrSkip(Path.Combine(scan, "linked"), linkedTarget);
+
+        var result = new DuplicateCleanupService().Scan([scan], similarityThreshold: 4);
+
+        Assert.Equal(1, result.FileCount);
+        Assert.Empty(result.Findings);
+    }
+
+    [Fact]
     public void Quarantine_MovesFilesIntoUniqueBatchAndWritesManifest()
     {
         using var temp = TestDirectory.Create();

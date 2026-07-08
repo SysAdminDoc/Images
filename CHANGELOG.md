@@ -15,6 +15,7 @@ All notable changes to **Images** are documented here.
 - **Review location clears remove stale XMP values** — Clearing a review location now removes the Photoshop City/State/Country and IPTC Location attributes instead of leaving old place metadata behind while reporting success.
 - **Picasa face regions accept omitted leading zeros** — `rect64(...)` values with 1-15 hex digits are left-padded before parsing, so faces near the top or left edge are no longer dropped.
 - **GPS-strip import fails closed on unreadable files** — Metadata preview read failures are now surfaced separately from "no GPS fields," so Import Inbox rolls back unreadable non-rewritable files when GPS stripping was requested.
+- **Recursive scanners skip reparse-point directories** — Duplicate Cleanup, Import Inbox, and Catalog rebuild now avoid junction/symlink directories so cyclic folder links cannot trigger runaway traversal.
 
 ## 0.2.17
 

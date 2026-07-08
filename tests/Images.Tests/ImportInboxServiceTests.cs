@@ -28,6 +28,24 @@ public sealed class ImportInboxServiceTests
     }
 
     [Fact]
+    public void BuildInbox_SkipsReparsePointDirectories()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Directory.CreateDirectory(Path.Combine(temp.Path, "source")).FullName;
+        var linkedTarget = Directory.CreateDirectory(Path.Combine(temp.Path, "linked-target")).FullName;
+        var destination = Directory.CreateDirectory(Path.Combine(temp.Path, "library")).FullName;
+        var real = WriteFile(source, "real.png", [1, 2, 3]);
+        WriteFile(linkedTarget, "linked.png", [4, 5, 6]);
+        ReparsePointTestHelper.CreateDirectoryLinkOrSkip(Path.Combine(source, "linked"), linkedTarget);
+
+        var result = new ImportInboxService().BuildInbox([source], destination);
+
+        var item = Assert.Single(result.Items);
+        Assert.Equal(real, item.Path);
+        Assert.Equal(1, result.SourceCount);
+    }
+
+    [Fact]
     public void Commit_CopiesFileWritesExpandedTagsAndRatingSidecar()
     {
         using var temp = TestDirectory.Create();

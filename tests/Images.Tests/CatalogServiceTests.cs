@@ -79,6 +79,24 @@ public sealed class CatalogServiceTests
     }
 
     [Fact]
+    public void Rebuild_SkipsReparsePointDirectories()
+    {
+        using var temp = TestDirectory.Create();
+        var root = Directory.CreateDirectory(Path.Combine(temp.Path, "root")).FullName;
+        var linkedTarget = Directory.CreateDirectory(Path.Combine(temp.Path, "linked-target")).FullName;
+        var source = WriteImage(root, "source.png", 8, 8);
+        WriteImage(linkedTarget, "linked.png", 8, 8);
+        ReparsePointTestHelper.CreateDirectoryLinkOrSkip(Path.Combine(root, "linked"), linkedTarget);
+        var service = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+
+        var result = service.Rebuild([root]);
+
+        var asset = Assert.Single(result.Assets);
+        Assert.Equal(Path.GetFullPath(source), asset.SourcePath);
+        Assert.Equal(0, result.FailedCount);
+    }
+
+    [Fact]
     public void EnsureSchema_BackupsExistingVersionZeroCatalogBeforeMigration()
     {
         using var temp = TestDirectory.Create();
