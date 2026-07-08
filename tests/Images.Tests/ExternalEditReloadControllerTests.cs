@@ -115,6 +115,71 @@ public sealed class ExternalEditReloadControllerTests
         });
     }
 
+    [Fact]
+    public void ScheduleReload_WhenQueuedPathNoLongerMatchesWatchedPath_DoesNotReload()
+    {
+        RunOnSta(() =>
+        {
+            using var tempDir = TestDirectory.Create();
+            var oldPath = tempDir.WriteFile("old.png", "old");
+            var newPath = tempDir.WriteFile("new.png", "new");
+            var reloadCount = 0;
+
+            using var controller = new ExternalEditReloadController(
+                Dispatcher.CurrentDispatcher,
+                isDisposed: () => false,
+                reload: () =>
+                {
+                    reloadCount++;
+                    return true;
+                },
+                notify: _ => { },
+                debounceInterval: TimeSpan.FromMilliseconds(20));
+
+            controller.Arm(newPath);
+            controller.ScheduleReload(oldPath);
+
+            PumpFor(TimeSpan.FromMilliseconds(75));
+
+            Assert.Equal(0, reloadCount);
+
+            controller.ScheduleReload(newPath);
+            PumpUntil(() => reloadCount == 1);
+
+            Assert.Equal(1, reloadCount);
+        });
+    }
+
+    [Fact]
+    public void Arm_ConfiguresWatcherForRenameOverSaves()
+    {
+        RunOnSta(() =>
+        {
+            using var tempDir = TestDirectory.Create();
+            var path = tempDir.WriteFile("image.png", "not an image");
+            FileSystemWatcher? capturedWatcher = null;
+
+            using var controller = new ExternalEditReloadController(
+                Dispatcher.CurrentDispatcher,
+                isDisposed: () => false,
+                reload: () => true,
+                notify: _ => { },
+                watcherFactory: (directory, fileName) =>
+                {
+                    capturedWatcher = new FileSystemWatcher(directory, fileName);
+                    return capturedWatcher;
+                });
+
+            controller.Arm(path);
+
+            Assert.True(controller.IsArmed);
+            Assert.NotNull(capturedWatcher);
+            Assert.True(capturedWatcher.NotifyFilter.HasFlag(NotifyFilters.LastWrite));
+            Assert.True(capturedWatcher.NotifyFilter.HasFlag(NotifyFilters.Size));
+            Assert.True(capturedWatcher.NotifyFilter.HasFlag(NotifyFilters.FileName));
+        });
+    }
+
     private static void PumpUntil(Func<bool> condition)
     {
         var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(3);

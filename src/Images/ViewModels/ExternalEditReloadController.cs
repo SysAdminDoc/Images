@@ -20,6 +20,7 @@ public sealed class ExternalEditReloadController : IDisposable
     private readonly Func<string, string, FileSystemWatcher> _watcherFactory;
     private readonly DispatcherTimer _debounceTimer;
     private FileSystemWatcher? _watcher;
+    private string? _pendingReloadPath;
     private bool _isControllerDisposed;
 
     public ExternalEditReloadController(
@@ -66,13 +67,14 @@ public sealed class ExternalEditReloadController : IDisposable
         try
         {
             watcher = _watcherFactory(directory, fileName);
-            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size;
+            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName;
             watcher.Changed += OnExternalEdit;
+            watcher.Renamed += OnExternalEdit;
             watcher.EnableRaisingEvents = true;
 
             _watcher = watcher;
             watcher = null;
-            WatchedPath = path;
+            WatchedPath = Path.GetFullPath(path);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
         {
@@ -81,6 +83,7 @@ public sealed class ExternalEditReloadController : IDisposable
             if (watcher is not null)
             {
                 watcher.Changed -= OnExternalEdit;
+                watcher.Renamed -= OnExternalEdit;
                 watcher.Dispose();
             }
 
@@ -92,6 +95,7 @@ public sealed class ExternalEditReloadController : IDisposable
     public void Disarm()
     {
         _debounceTimer.Stop();
+        _pendingReloadPath = null;
 
         var watcher = _watcher;
         if (watcher is null)
@@ -112,25 +116,33 @@ public sealed class ExternalEditReloadController : IDisposable
         }
 
         watcher.Changed -= OnExternalEdit;
+        watcher.Renamed -= OnExternalEdit;
         watcher.Dispose();
     }
 
     public void ScheduleReload()
+        => ScheduleReloadCore(changedPath: null, requirePathMatch: false);
+
+    internal void ScheduleReload(string changedPath)
+        => ScheduleReloadCore(changedPath, requirePathMatch: true);
+
+    private void ScheduleReloadCore(string? changedPath, bool requirePathMatch)
     {
         if (IsInactive()) return;
+        var normalizedChangedPath = NormalizePath(changedPath);
 
         try
         {
             if (_uiDispatcher.CheckAccess())
             {
-                RestartDebounce();
+                RestartDebounce(normalizedChangedPath, requirePathMatch);
             }
             else
             {
                 _ = _uiDispatcher.BeginInvoke(() =>
                 {
                     if (!IsInactive())
-                        RestartDebounce();
+                        RestartDebounce(normalizedChangedPath, requirePathMatch);
                 });
             }
         }
@@ -144,25 +156,63 @@ public sealed class ExternalEditReloadController : IDisposable
 
     private void OnExternalEdit(object sender, FileSystemEventArgs e)
     {
-        ScheduleReload();
+        ScheduleReload(e.FullPath);
     }
 
     private void OnDebounceTimerTick(object? sender, EventArgs e)
     {
         _debounceTimer.Stop();
         if (IsInactive()) return;
+        var pendingReloadPath = _pendingReloadPath;
+        _pendingReloadPath = null;
+        if (pendingReloadPath is not null && !IsCurrentWatchedPath(pendingReloadPath))
+            return;
 
         if (_reload())
             _notify(ReloadedToastMessage);
     }
 
-    private void RestartDebounce()
+    private void RestartDebounce(string? changedPath, bool requirePathMatch)
     {
+        if (requirePathMatch)
+        {
+            if (changedPath is null || !IsCurrentWatchedPath(changedPath))
+                return;
+
+            _pendingReloadPath = changedPath;
+        }
+        else
+        {
+            _pendingReloadPath = null;
+        }
+
         _debounceTimer.Stop();
         _debounceTimer.Start();
     }
 
     private bool IsInactive() => _isControllerDisposed || _isDisposed();
+
+    private bool IsCurrentWatchedPath(string changedPath)
+    {
+        var watchedPath = NormalizePath(WatchedPath);
+        return watchedPath is not null &&
+               string.Equals(watchedPath, changedPath, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string? NormalizePath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return null;
+
+        try
+        {
+            return Path.GetFullPath(path);
+        }
+        catch
+        {
+            return path;
+        }
+    }
 
     public void Dispose()
     {
