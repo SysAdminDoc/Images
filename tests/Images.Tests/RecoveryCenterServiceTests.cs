@@ -134,6 +134,62 @@ public sealed class RecoveryCenterServiceTests
         Assert.Contains("No automatic restore", result.Message, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void Restore_FindsRecordsBeyondDefaultRecentLimit()
+    {
+        using var temp = TestDirectory.Create();
+        var now = new DateTimeOffset(2026, 5, 17, 12, 0, 0, TimeSpan.Zero);
+        var service = new RecoveryCenterService(() => temp.Path, () => now);
+        var original = Path.Combine(temp.Path, "photo.png");
+        var moved = Path.Combine(temp.Path, "moved", "photo.png");
+        Directory.CreateDirectory(Path.GetDirectoryName(moved)!);
+        File.WriteAllText(moved, "image");
+        var record = service.RecordMove(original, moved, "Moved image", "Moved to another folder.");
+
+        for (var i = 0; i < 205; i++)
+        {
+            now = now.AddMinutes(1);
+            service.RecordWriteback(
+                Path.Combine(temp.Path, $"writeback-{i}.png"),
+                "Writeback",
+                "Later writeback record.");
+        }
+
+        Assert.DoesNotContain(service.ListRecent(), item => item.Id == record.Id);
+        Assert.Equal(moved, service.ResolveRevealPath(record.Id));
+
+        var result = service.Restore(record.Id);
+
+        Assert.Equal(RecoveryRestoreStatus.Restored, result.Status);
+        Assert.Equal(original, result.RestoredPath);
+        Assert.True(File.Exists(original));
+        Assert.Equal("image", File.ReadAllText(original));
+    }
+
+    [Fact]
+    public void Restore_RepeatedStatusUpdatesCompactDuplicateLogRecords()
+    {
+        using var temp = TestDirectory.Create();
+        var service = CreateService(temp.Path);
+        var record = service.RecordMove(
+            Path.Combine(temp.Path, "source.png"),
+            Path.Combine(temp.Path, "missing.png"),
+            "Moved image",
+            "Moved to another folder.");
+
+        for (var i = 0; i < 600; i++)
+        {
+            var result = service.Restore(record.Id);
+            Assert.Equal(RecoveryRestoreStatus.MissingCurrentPath, result.Status);
+        }
+
+        var logPath = Path.Combine(temp.Path, "recovery-log.jsonl");
+        Assert.InRange(File.ReadAllLines(logPath).Length, 1, 200);
+
+        var afterCompaction = service.Restore(record.Id);
+        Assert.Equal(RecoveryRestoreStatus.MissingCurrentPath, afterCompaction.Status);
+    }
+
     private static RecoveryCenterService CreateService(string root)
         => new(() => root, () => new DateTimeOffset(2026, 5, 17, 12, 0, 0, TimeSpan.Zero));
 }

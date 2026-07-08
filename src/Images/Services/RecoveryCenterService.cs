@@ -100,6 +100,8 @@ public sealed record RecoveryRestoreResult(
 public sealed class RecoveryCenterService
 {
     private const string LogFileName = "recovery-log.jsonl";
+    private const int CompactAfterLineCount = 512;
+    private const int CompactExcessLineCount = 128;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.General)
     {
         WriteIndented = false,
@@ -205,25 +207,7 @@ public sealed class RecoveryCenterService
         if (path is null || !File.Exists(path))
             return [];
 
-        var records = new Dictionary<string, RecoveryActionRecord>(StringComparer.OrdinalIgnoreCase);
-        foreach (var line in ReadLines(path))
-        {
-            if (string.IsNullOrWhiteSpace(line))
-                continue;
-
-            try
-            {
-                var record = JsonSerializer.Deserialize<RecoveryActionRecord>(line, JsonOptions);
-                if (record is not null && !string.IsNullOrWhiteSpace(record.Id))
-                    records[record.Id] = record;
-            }
-            catch (JsonException)
-            {
-                // Keep the recovery center usable if one record is corrupt.
-            }
-        }
-
-        return records.Values
+        return LoadLatestRecords(path).Values
             .OrderByDescending(record => record.CreatedUtc)
             .ThenByDescending(record => record.Id, StringComparer.OrdinalIgnoreCase)
             .Take(maxCount)
@@ -232,7 +216,7 @@ public sealed class RecoveryCenterService
 
     public string? ResolveRevealPath(string id)
     {
-        var record = ListRecent().FirstOrDefault(item => item.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+        var record = FindLatestRecord(id);
         if (record is null)
             return null;
 
@@ -254,7 +238,7 @@ public sealed class RecoveryCenterService
 
     public RecoveryRestoreResult Restore(string id)
     {
-        var record = ListRecent().FirstOrDefault(item => item.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+        var record = FindLatestRecord(id);
         if (record is null)
             return new RecoveryRestoreResult(RecoveryRestoreStatus.NotFound, null, "Recovery record was not found.", null);
 
@@ -357,10 +341,79 @@ public sealed class RecoveryCenterService
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             File.AppendAllText(path, JsonSerializer.Serialize(record, JsonOptions) + Environment.NewLine);
+            CompactLogIfNeeded(path);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
         {
             // Recovery logging should never block the destructive operation that already succeeded.
+        }
+    }
+
+    private RecoveryActionRecord? FindLatestRecord(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+            return null;
+
+        var path = TryGetLogPath();
+        if (path is null || !File.Exists(path))
+            return null;
+
+        return LoadLatestRecords(path).GetValueOrDefault(id);
+    }
+
+    private static Dictionary<string, RecoveryActionRecord> LoadLatestRecords(string path)
+    {
+        var records = new Dictionary<string, RecoveryActionRecord>(StringComparer.OrdinalIgnoreCase);
+        foreach (var line in ReadLines(path))
+        {
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
+
+            try
+            {
+                var record = JsonSerializer.Deserialize<RecoveryActionRecord>(line, JsonOptions);
+                if (record is not null && !string.IsNullOrWhiteSpace(record.Id))
+                    records[record.Id] = record;
+            }
+            catch (JsonException)
+            {
+                // Keep the recovery center usable if one record is corrupt.
+            }
+        }
+
+        return records;
+    }
+
+    private static void CompactLogIfNeeded(string path)
+    {
+        var lines = ReadLines(path).ToArray();
+        if (lines.Length < CompactAfterLineCount)
+            return;
+
+        var records = LoadLatestRecords(path);
+        if (records.Count == 0 || lines.Length <= records.Count + CompactExcessLineCount)
+            return;
+
+        var tempPath = path + ".compact-" + Guid.NewGuid().ToString("N");
+        try
+        {
+            var compacted = records.Values
+                .OrderBy(record => record.CreatedUtc)
+                .ThenBy(record => record.Id, StringComparer.OrdinalIgnoreCase)
+                .Select(record => JsonSerializer.Serialize(record, JsonOptions));
+            File.WriteAllLines(tempPath, compacted);
+            File.Move(tempPath, path, overwrite: true);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
+        {
+            try
+            {
+                if (File.Exists(tempPath))
+                    File.Delete(tempPath);
+            }
+            catch (Exception cleanupEx) when (cleanupEx is IOException or UnauthorizedAccessException or SecurityException)
+            {
+            }
         }
     }
 
