@@ -204,7 +204,8 @@
                         TickFrequency="0.05"
                         IsSnapToTickEnabled="False"
                         VerticalAlignment="Center"
-                        ValueChanged="ZoomSlider_ValueChanged" />
+                        ValueChanged="ZoomSlider_ValueChanged"
+                        AutomationProperties.Name="{x:Static loc:Strings.ReferenceBoardZoomAutomationName}" />
 
                 <TextBlock Grid.Column="3"
                            x:Name="ZoomText"

@@ -23,6 +23,7 @@ All notable changes to **Images** are documented here.
 - **Loop-local stack buffers are hoisted** — Culling ranking and duplicate cleanup now allocate their 8x8 average-hash luminance buffer once per scan/rank operation instead of once per image, and the email header encoder reuses its UTF-8 rune buffer across header characters.
 - **Dark-theme hover chrome is consistent on edge controls** — Archive book page-turn zones and annotation color swatches now use custom themed button templates instead of falling back to the default Aero2 hover paint.
 - **Command palette results are announced by name** — The command palette list now has a localized automation name, and command items expose their display title instead of the view-model type name to assistive technologies.
+- **Tool-window inputs have accessible labels** — Export preview, tag graph, reference board zoom, and crash details controls now expose localized automation names or `LabeledBy` associations.
 
 ## 0.2.17
 

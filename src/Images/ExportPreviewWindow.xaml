@@ -77,7 +77,8 @@
                                 <TextBox x:Name="ExtensionBox"
                                          TextChanged="SettingsChanged"
                                          AutomationProperties.Name="{x:Static loc:Strings.ExportPreviewExtension}" />
-                                <TextBlock Text="{x:Static loc:Strings.ExportPreviewQuality}"
+                                <TextBlock x:Name="QualityLabel"
+                                           Text="{x:Static loc:Strings.ExportPreviewQuality}"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextBrush}"
                                            Margin="0,10,0,0" />
@@ -86,7 +87,8 @@
                                         Maximum="100"
                                         TickFrequency="1"
                                         IsSnapToTickEnabled="True"
-                                        ValueChanged="QualitySlider_ValueChanged" />
+                                        ValueChanged="QualitySlider_ValueChanged"
+                                        AutomationProperties.LabeledBy="{Binding ElementName=QualityLabel}" />
                                 <TextBlock x:Name="QualityText" Style="{StaticResource Text.Caption}" />
                                 <TextBlock Text="{x:Static loc:Strings.ExportPreviewMaxDimensions}"
                                            FontWeight="SemiBold"
@@ -100,10 +102,12 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBox x:Name="MaxWidthBox"
                                              Grid.Column="0"
-                                             TextChanged="SettingsChanged" />
+                                             TextChanged="SettingsChanged"
+                                             AutomationProperties.Name="{x:Static loc:Strings.ExportPreviewMaxWidthAutomationName}" />
                                     <TextBox x:Name="MaxHeightBox"
                                              Grid.Column="2"
-                                             TextChanged="SettingsChanged" />
+                                             TextChanged="SettingsChanged"
+                                             AutomationProperties.Name="{x:Static loc:Strings.ExportPreviewMaxHeightAutomationName}" />
                                 </Grid>
                             </StackPanel>
                         </Border>

@@ -56,7 +56,8 @@
                              FontSize="11"
                              Background="Transparent"
                              BorderThickness="0"
-                             Foreground="{DynamicResource SubtextBrush}" />
+                             Foreground="{DynamicResource SubtextBrush}"
+                             AutomationProperties.Name="{loc:Loc CrashDetailsTextAutomationName}" />
                 </ScrollViewer>
             </Border>
 

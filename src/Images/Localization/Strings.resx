@@ -81,6 +81,9 @@
   <data name="CrashDetailsDescription" xml:space="preserve">
     <value>Full details are written to the crash log. Use the buttons below to copy a shareable summary, open the log folder, or open a GitHub issue with the context pre-filled.</value>
   </data>
+  <data name="CrashDetailsTextAutomationName" xml:space="preserve">
+    <value>Crash details</value>
+  </data>
   <data name="CrashDetailsDumpFormat" xml:space="preserve">
     <value>Dump:    {0}</value>
   </data>
@@ -2588,6 +2591,12 @@ Details written to:
   <data name="ExportPreviewMaxDimensions" xml:space="preserve">
     <value>Max dimensions</value>
   </data>
+  <data name="ExportPreviewMaxWidthAutomationName" xml:space="preserve">
+    <value>Maximum width</value>
+  </data>
+  <data name="ExportPreviewMaxHeightAutomationName" xml:space="preserve">
+    <value>Maximum height</value>
+  </data>
   <data name="ExportPreviewSize" xml:space="preserve">
     <value>Size</value>
   </data>
@@ -2948,6 +2957,12 @@ Details written to:
   <data name="TagGraphNamespacesHint" xml:space="preserve">
     <value>Prefixes keep large tag sets readable, such as person:alice or place:seattle.</value>
   </data>
+  <data name="TagGraphNamespacePrefixAutomationName" xml:space="preserve">
+    <value>Namespace prefix</value>
+  </data>
+  <data name="TagGraphNamespaceLabelAutomationName" xml:space="preserve">
+    <value>Namespace label</value>
+  </data>
   <data name="TagGraphAddNamespace" xml:space="preserve">
     <value>Add namespace</value>
   </data>
@@ -2963,6 +2978,12 @@ Details written to:
   <data name="TagGraphAliasHint" xml:space="preserve">
     <value>Use aliases for equivalent tags. Example: nyc -&gt; place:new-york.</value>
   </data>
+  <data name="TagGraphAliasTagAutomationName" xml:space="preserve">
+    <value>Alias tag</value>
+  </data>
+  <data name="TagGraphAliasTargetAutomationName" xml:space="preserve">
+    <value>Alias target tag</value>
+  </data>
   <data name="TagGraphAddAlias" xml:space="preserve">
     <value>Add alias</value>
   </data>
@@ -2971,6 +2992,12 @@ Details written to:
   </data>
   <data name="TagGraphParentHint" xml:space="preserve">
     <value>Use parents to make searches broader. Example: person:alice -&gt; people.</value>
+  </data>
+  <data name="TagGraphParentTagAutomationName" xml:space="preserve">
+    <value>Child tag</value>
+  </data>
+  <data name="TagGraphParentTargetAutomationName" xml:space="preserve">
+    <value>Parent tag</value>
   </data>
   <data name="TagGraphAddParent" xml:space="preserve">
     <value>Add parent</value>
@@ -3058,6 +3085,9 @@ Details written to:
   </data>
   <data name="ReferenceBoardPinOnTop" xml:space="preserve">
     <value>Pin on top</value>
+  </data>
+  <data name="ReferenceBoardZoomAutomationName" xml:space="preserve">
+    <value>Reference board zoom</value>
   </data>
   <data name="ReferenceBoardAddedReferencesFormat" xml:space="preserve">
     <value>Added {0} reference{1}.</value>

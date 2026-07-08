@@ -787,6 +787,8 @@ public static class Strings
     public static string ExportPreviewExtension => Get(nameof(ExportPreviewExtension));
     public static string ExportPreviewQuality => Get(nameof(ExportPreviewQuality));
     public static string ExportPreviewMaxDimensions => Get(nameof(ExportPreviewMaxDimensions));
+    public static string ExportPreviewMaxWidthAutomationName => Get(nameof(ExportPreviewMaxWidthAutomationName));
+    public static string ExportPreviewMaxHeightAutomationName => Get(nameof(ExportPreviewMaxHeightAutomationName));
     public static string ExportPreviewSize => Get(nameof(ExportPreviewSize));
     public static string ExportPreviewSource => Get(nameof(ExportPreviewSource));
     public static string ExportPreviewOutput => Get(nameof(ExportPreviewOutput));
@@ -913,14 +915,20 @@ public static class Strings
     public static string TagGraphExportSidecar => Get(nameof(TagGraphExportSidecar));
     public static string TagGraphNamespaces => Get(nameof(TagGraphNamespaces));
     public static string TagGraphNamespacesHint => Get(nameof(TagGraphNamespacesHint));
+    public static string TagGraphNamespacePrefixAutomationName => Get(nameof(TagGraphNamespacePrefixAutomationName));
+    public static string TagGraphNamespaceLabelAutomationName => Get(nameof(TagGraphNamespaceLabelAutomationName));
     public static string TagGraphAddNamespace => Get(nameof(TagGraphAddNamespace));
     public static string TagGraphPreview => Get(nameof(TagGraphPreview));
     public static string TagGraphPreviewExpansion => Get(nameof(TagGraphPreviewExpansion));
     public static string TagGraphAliasSibling => Get(nameof(TagGraphAliasSibling));
     public static string TagGraphAliasHint => Get(nameof(TagGraphAliasHint));
+    public static string TagGraphAliasTagAutomationName => Get(nameof(TagGraphAliasTagAutomationName));
+    public static string TagGraphAliasTargetAutomationName => Get(nameof(TagGraphAliasTargetAutomationName));
     public static string TagGraphAddAlias => Get(nameof(TagGraphAddAlias));
     public static string TagGraphParent => Get(nameof(TagGraphParent));
     public static string TagGraphParentHint => Get(nameof(TagGraphParentHint));
+    public static string TagGraphParentTagAutomationName => Get(nameof(TagGraphParentTagAutomationName));
+    public static string TagGraphParentTargetAutomationName => Get(nameof(TagGraphParentTargetAutomationName));
     public static string TagGraphAddParent => Get(nameof(TagGraphAddParent));
     public static string TagGraphNamespacesAndAliases => Get(nameof(TagGraphNamespacesAndAliases));
     public static string TagGraphParentGraph => Get(nameof(TagGraphParentGraph));
@@ -952,6 +960,7 @@ public static class Strings
     public static string ReferenceBoardEmptyDescription => Get(nameof(ReferenceBoardEmptyDescription));
     public static string ReferenceBoardReadyStatus => Get(nameof(ReferenceBoardReadyStatus));
     public static string ReferenceBoardPinOnTop => Get(nameof(ReferenceBoardPinOnTop));
+    public static string ReferenceBoardZoomAutomationName => Get(nameof(ReferenceBoardZoomAutomationName));
     public static string ReferenceBoardAddedReferencesFormat => Get(nameof(ReferenceBoardAddedReferencesFormat));
     public static string ReferenceBoardAddedAndSkippedFormat => Get(nameof(ReferenceBoardAddedAndSkippedFormat));
     public static string ReferenceBoardAddedNote => Get(nameof(ReferenceBoardAddedNote));
