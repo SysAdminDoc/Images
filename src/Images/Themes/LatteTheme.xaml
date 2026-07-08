@@ -38,6 +38,7 @@
     <SolidColorBrush x:Key="OverlayBrush" Color="{StaticResource OverlayColor}" />
     <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
     <SolidColorBrush x:Key="SubtextBrush" Color="{StaticResource SubtextColor}" />
+    <SolidColorBrush x:Key="HintTextBrush" Color="#FF5C5F77" />
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource BlueColor}" />
     <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource LavenderColor}" />
     <SolidColorBrush x:Key="MauveBrush" Color="{StaticResource MauveColor}" />

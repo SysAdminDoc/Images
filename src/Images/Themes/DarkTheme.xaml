@@ -46,6 +46,7 @@
     <SolidColorBrush x:Key="OverlayBrush" Color="{StaticResource OverlayColor}" />
     <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
     <SolidColorBrush x:Key="SubtextBrush" Color="{StaticResource SubtextColor}" />
+    <SolidColorBrush x:Key="HintTextBrush" Color="#FF9399B2" />
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource BlueColor}" />
     <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource LavenderColor}" />
     <SolidColorBrush x:Key="MauveBrush" Color="{StaticResource MauveColor}" />
@@ -191,21 +192,21 @@
     <Style x:Key="Text.Hint" TargetType="TextBlock">
         <Setter Property="FontSize" Value="11" />
         <Setter Property="LineHeight" Value="16" />
-        <Setter Property="Foreground" Value="{DynamicResource OverlayBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource HintTextBrush}" />
     </Style>
 
     <!-- Section label — uppercase, medium weight, subtle tracking via extra spacing in markup -->
     <Style x:Key="SectionLabel" TargetType="TextBlock">
         <Setter Property="FontSize" Value="10.5" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{DynamicResource OverlayBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource HintTextBrush}" />
         <Setter Property="Margin" Value="1,0,0,10" />
         <Setter Property="Typography.Capitals" Value="AllSmallCaps" />
     </Style>
 
     <!-- Metadata row labels -->
     <Style x:Key="MetaLabel" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{DynamicResource OverlayBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource HintTextBrush}" />
         <Setter Property="Margin" Value="0,0,16,10" />
         <Setter Property="FontSize" Value="12" />
     </Style>

@@ -24,6 +24,7 @@ All notable changes to **Images** are documented here.
 - **Dark-theme hover chrome is consistent on edge controls** — Archive book page-turn zones and annotation color swatches now use custom themed button templates instead of falling back to the default Aero2 hover paint.
 - **Command palette results are announced by name** — The command palette list now has a localized automation name, and command items expose their display title instead of the view-model type name to assistive technologies.
 - **Tool-window inputs have accessible labels** — Export preview, tag graph, reference board zoom, and crash details controls now expose localized automation names or `LabeledBy` associations.
+- **Hint-tier text clears AA contrast** — `Text.Hint`, `SectionLabel`, and `MetaLabel` now use a dedicated per-theme `HintTextBrush` instead of decorative overlay colors.
 
 ## 0.2.17
 

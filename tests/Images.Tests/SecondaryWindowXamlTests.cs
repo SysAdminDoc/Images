@@ -65,6 +65,36 @@ public sealed class SecondaryWindowXamlTests
 
     [Fact]
     [Trait("Category", "SmokeGate")]
+    public void HintTextBrushMeetsAaContrastInCustomThemes()
+    {
+        Exception? exception = null;
+
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                AssertThemeContrast("DarkTheme.xaml", "HintTextBrush", "BaseBrush", minimumRatio: 4.5);
+                AssertThemeContrast("LatteTheme.xaml", "HintTextBrush", "BaseBrush", minimumRatio: 4.5);
+
+                var highContrast = LoadThemeDictionary("HighContrastTheme.xaml");
+                Assert.True(highContrast.Contains("HintTextBrush"));
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        if (exception is not null)
+            throw new InvalidOperationException("Hint text contrast smoke failed.", exception);
+    }
+
+    [Fact]
+    [Trait("Category", "SmokeGate")]
     public void SecondaryWindowsOpenAndExposeAutomationContract()
     {
         if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("RUN_SMOKE_TESTS")))
@@ -249,6 +279,40 @@ public sealed class SecondaryWindowXamlTests
             var swatch = Assert.IsType<Border>(button.Template.FindName("Swatch", button));
             Assert.Same(background, swatch.Background);
         }
+    }
+
+    private static void AssertThemeContrast(string themeFileName, string foregroundKey, string backgroundKey, double minimumRatio)
+    {
+        var dictionary = LoadThemeDictionary(themeFileName);
+        var foreground = Assert.IsType<SolidColorBrush>(dictionary[foregroundKey]).Color;
+        var background = Assert.IsType<SolidColorBrush>(dictionary[backgroundKey]).Color;
+        var contrast = ContrastRatio(foreground, background);
+
+        Assert.True(
+            contrast >= minimumRatio,
+            $"{themeFileName} {foregroundKey} contrast {contrast:0.##}:1 is below {minimumRatio:0.##}:1.");
+    }
+
+    private static ResourceDictionary LoadThemeDictionary(string themeFileName)
+        => (ResourceDictionary)Application.LoadComponent(
+            new Uri($"/Images;component/Themes/{themeFileName}", UriKind.Relative));
+
+    private static double ContrastRatio(Color foreground, Color background)
+    {
+        var lighter = Math.Max(RelativeLuminance(foreground), RelativeLuminance(background));
+        var darker = Math.Min(RelativeLuminance(foreground), RelativeLuminance(background));
+        return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    private static double RelativeLuminance(Color color)
+        => (0.2126 * Linearize(color.R)) + (0.7152 * Linearize(color.G)) + (0.0722 * Linearize(color.B));
+
+    private static double Linearize(byte channel)
+    {
+        var value = channel / 255.0;
+        return value <= 0.03928
+            ? value / 12.92
+            : Math.Pow((value + 0.055) / 1.055, 2.4);
     }
 
     private static void AssertWindowContract(WindowContractCase testCase)
