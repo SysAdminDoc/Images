@@ -39,10 +39,12 @@ public sealed class MagickSecurityPolicyTests
     public void IsWriteFormatAllowed_BlocksDocumentAndVectorFormats()
     {
         Assert.True(MagickSecurityPolicy.IsWriteFormatAllowed(MagickFormat.Png));
-        Assert.False(MagickSecurityPolicy.IsWriteFormatAllowed(MagickFormat.Pdf));
-        Assert.False(MagickSecurityPolicy.IsWriteFormatAllowed(MagickFormat.Pdfa));
-        Assert.False(MagickSecurityPolicy.IsWriteFormatAllowed(MagickFormat.Eps));
-        Assert.False(MagickSecurityPolicy.IsWriteFormatAllowed(MagickFormat.Svg));
+        foreach (var extension in MagickSecurityPolicy.DisallowedWriteExtensions)
+        {
+            var formatName = extension.TrimStart('.');
+            if (Enum.TryParse<MagickFormat>(formatName, ignoreCase: true, out var format))
+                Assert.False(MagickSecurityPolicy.IsWriteFormatAllowed(format), extension);
+        }
     }
 
     [Theory]

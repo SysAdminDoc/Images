@@ -31,6 +31,10 @@ public static class MagickSecurityPolicy
         DisallowedWriteExtensions,
         StringComparer.OrdinalIgnoreCase);
 
+    private static readonly HashSet<string> DisallowedWriteFormatSet = new(
+        DisallowedWriteExtensions.Select(extension => extension.TrimStart('.')),
+        StringComparer.OrdinalIgnoreCase);
+
     public static MagickSecurityPolicyReport Configure(
         bool documentDelegateAvailable,
         string documentDelegateSource)
@@ -119,7 +123,7 @@ public static class MagickSecurityPolicy
     }
 
     public static bool IsWriteFormatAllowed(MagickFormat format)
-        => format is not (MagickFormat.Pdf or MagickFormat.Pdfa or MagickFormat.Eps or MagickFormat.Svg);
+        => !DisallowedWriteFormatSet.Contains(format.ToString());
 
     private static string NormalizeExtension(string extension)
     {
