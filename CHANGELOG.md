@@ -30,6 +30,7 @@ All notable changes to **Images** are documented here.
 - **Catalog rescans notice sidecar-only edits** — Incremental catalog rebuilds now compare cached sidecar path and modified time, so XMP rating/tag creation, edits, or removal refresh stale rows even when the image file itself is unchanged.
 - **Import Inbox fails cleanly when tag sidecars cannot be written** — Tag export failures now fail the individual import, transfer rollbacks preserve any pre-existing destination sidecar, and in-place imports remove sidecars they created if a later post-import step fails.
 - **Recovery restores are no longer limited to the newest 200 records** — Restore and reveal now look up the requested recovery id across the full log, while repeated status updates compact duplicate JSONL rows to the latest record state.
+- **MicrosoftPhoto ratings map to the correct star value** — XMP imports, catalog sidecar reads, and review labels now interpret `MicrosoftPhoto:Rating` as the 0-99 Windows scale, and clearing a review rating removes stale element-form rating nodes too.
 
 ## 0.2.17
 

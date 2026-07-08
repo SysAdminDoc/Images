@@ -953,27 +953,7 @@ public sealed class CatalogService
     }
 
     private static int? ReadRating(XDocument document)
-    {
-        foreach (var attribute in document.Descendants().Attributes())
-        {
-            if (attribute.Name.LocalName.Equals("Rating", StringComparison.OrdinalIgnoreCase) &&
-                int.TryParse(attribute.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var rating))
-            {
-                return Math.Clamp(rating, -1, 5);
-            }
-        }
-
-        foreach (var element in document.Descendants())
-        {
-            if (element.Name.LocalName.Equals("Rating", StringComparison.OrdinalIgnoreCase) &&
-                int.TryParse(element.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var rating))
-            {
-                return Math.Clamp(rating, -1, 5);
-            }
-        }
-
-        return null;
-    }
+        => XmpRating.Read(document, minRating: -1);
 
     private static IReadOnlyList<string> ReadTags(XDocument document)
         => document.Descendants()

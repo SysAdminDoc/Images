@@ -151,9 +151,9 @@ public sealed class ReviewLabelService
         EnsureNamespace(document, "xmp", xmp);
         EnsureNamespace(document, "imv", imv);
 
-        description.SetAttributeValue(xmp + "Rating", state.Rating is null
-            ? null
-            : state.Rating.Value.ToString(CultureInfo.InvariantCulture));
+        XmpRating.RemoveAll(document);
+        if (state.Rating is not null)
+            description.SetAttributeValue(xmp + "Rating", state.Rating.Value.ToString(CultureInfo.InvariantCulture));
         description.SetAttributeValue(imv + "ReviewLabel", state.Label == ReviewLabelKind.None
             ? null
             : state.Label.ToString().ToLowerInvariant());
@@ -180,27 +180,7 @@ public sealed class ReviewLabelService
     }
 
     private static int? ReadRating(XDocument document)
-    {
-        foreach (var attribute in document.Descendants().Attributes())
-        {
-            if (attribute.Name.LocalName.Equals("Rating", StringComparison.OrdinalIgnoreCase) &&
-                int.TryParse(attribute.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var rating))
-            {
-                return Math.Clamp(rating, 0, 5);
-            }
-        }
-
-        foreach (var element in document.Descendants())
-        {
-            if (element.Name.LocalName.Equals("Rating", StringComparison.OrdinalIgnoreCase) &&
-                int.TryParse(element.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var rating))
-            {
-                return Math.Clamp(rating, 0, 5);
-            }
-        }
-
-        return null;
-    }
+        => XmpRating.Read(document, minRating: 0);
 
     private static ReviewLabelKind ReadLabel(XDocument document)
     {

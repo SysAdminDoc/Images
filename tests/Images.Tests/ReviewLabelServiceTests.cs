@@ -60,6 +60,38 @@ public sealed class ReviewLabelServiceTests
     }
 
     [Fact]
+    public void SetRating_NullClearsElementAndMicrosoftPhotoRatings()
+    {
+        using var temp = TestDirectory.Create();
+        var image = WritePng(temp.Path, "element-rating.png");
+        File.WriteAllText(
+            image + ".xmp",
+            """
+            <x:xmpmeta xmlns:x="adobe:ns:meta/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xmp="http://ns.adobe.com/xap/1.0/" xmlns:MicrosoftPhoto="http://ns.microsoft.com/photo/1.0/">
+              <rdf:RDF>
+                <rdf:Description MicrosoftPhoto:Rating="50">
+                  <xmp:Rating>5</xmp:Rating>
+                </rdf:Description>
+              </rdf:RDF>
+            </x:xmpmeta>
+            """);
+        var service = new ReviewLabelService();
+
+        var result = service.SetRating(image, null);
+        var state = service.ReadState(image);
+        var sidecar = XDocument.Load(image + ".xmp");
+
+        Assert.True(result.Success);
+        Assert.Null(state.Rating);
+        Assert.DoesNotContain(
+            sidecar.Descendants().Attributes(),
+            attribute => attribute.Name.LocalName.Equals("Rating", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(
+            sidecar.Descendants(),
+            element => element.Name.LocalName.Equals("Rating", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public void SetColorLabel_WriteAndReadXmpSidecar()
     {
         using var temp = TestDirectory.Create();

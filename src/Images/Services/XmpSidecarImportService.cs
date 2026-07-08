@@ -287,36 +287,7 @@ public sealed class XmpSidecarImportService
     }
 
     private static int? ReadRating(XDocument document)
-    {
-        // xmp:Rating as attribute on rdf:Description
-        foreach (var attribute in document.Descendants().Attributes())
-        {
-            if (attribute.Name == NsXmp + "Rating" ||
-                (attribute.Name.Namespace == XNamespace.None &&
-                 attribute.Name.LocalName.Equals("Rating", StringComparison.OrdinalIgnoreCase) &&
-                 IsDescriptionElement(attribute.Parent)))
-            {
-                if (int.TryParse(attribute.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var rating))
-                    return Math.Clamp(rating, -1, 5);
-            }
-        }
-
-        // xmp:Rating as child element
-        foreach (var element in document.Descendants())
-        {
-            if (element.Name == NsXmp + "Rating" ||
-                element.Name.LocalName.Equals("Rating", StringComparison.OrdinalIgnoreCase))
-            {
-                if (!element.HasElements &&
-                    int.TryParse(element.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var rating))
-                {
-                    return Math.Clamp(rating, -1, 5);
-                }
-            }
-        }
-
-        return null;
-    }
+        => XmpRating.Read(document, minRating: -1);
 
     private static string? ReadColorLabel(XDocument document)
     {

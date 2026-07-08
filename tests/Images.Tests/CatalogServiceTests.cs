@@ -51,6 +51,27 @@ public sealed class CatalogServiceTests
     }
 
     [Fact]
+    public void Rebuild_MapsMicrosoftPhotoRatingScale()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteImage(temp.Path, "source.png", 16, 8);
+        File.WriteAllText(
+            source + ".xmp",
+            """
+            <x:xmpmeta xmlns:x="adobe:ns:meta/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:MicrosoftPhoto="http://ns.microsoft.com/photo/1.0/">
+              <rdf:RDF>
+                <rdf:Description MicrosoftPhoto:Rating="50" />
+              </rdf:RDF>
+            </x:xmpmeta>
+            """);
+        var service = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+
+        var result = service.Rebuild([temp.Path]);
+
+        Assert.Equal(3, Assert.Single(result.Assets).Rating);
+    }
+
+    [Fact]
     public void Rebuild_ClearsPreviousRowsBecauseCatalogIsRebuildableCache()
     {
         using var temp = TestDirectory.Create();

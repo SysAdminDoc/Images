@@ -79,6 +79,23 @@ public sealed class XmpSidecarImportServiceTests
         Assert.Equal(5, result.Rating);
     }
 
+    [Theory]
+    [InlineData(1, 1)]
+    [InlineData(25, 2)]
+    [InlineData(50, 3)]
+    [InlineData(75, 4)]
+    [InlineData(99, 5)]
+    public void ImportSidecar_MapsMicrosoftPhotoRatingScale(int storedRating, int expectedStars)
+    {
+        using var temp = TestDirectory.Create();
+        var xmpPath = temp.WriteFile("microsoft-rating.xmp", BuildMicrosoftPhotoRatingSidecar(storedRating));
+
+        var result = _service.ImportSidecar(xmpPath);
+
+        Assert.True(result.Success);
+        Assert.Equal(expectedStars, result.Rating);
+    }
+
     [Fact]
     public void ImportSidecar_ParsesColorLabelString()
     {
@@ -618,6 +635,24 @@ public sealed class XmpSidecarImportServiceTests
                 new XElement(rdf + "RDF",
                     new XAttribute(XNamespace.Xmlns + "rdf", rdf.NamespaceName),
                     description)));
+
+        return doc.ToString();
+    }
+
+    private static string BuildMicrosoftPhotoRatingSidecar(int rating)
+    {
+        XNamespace x = "adobe:ns:meta/";
+        XNamespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+        XNamespace microsoftPhoto = "http://ns.microsoft.com/photo/1.0/";
+
+        var doc = new XDocument(
+            new XElement(x + "xmpmeta",
+                new XAttribute(XNamespace.Xmlns + "x", x.NamespaceName),
+                new XAttribute(XNamespace.Xmlns + "MicrosoftPhoto", microsoftPhoto.NamespaceName),
+                new XElement(rdf + "RDF",
+                    new XAttribute(XNamespace.Xmlns + "rdf", rdf.NamespaceName),
+                    new XElement(rdf + "Description",
+                        new XAttribute(microsoftPhoto + "Rating", rating.ToString())))));
 
         return doc.ToString();
     }
