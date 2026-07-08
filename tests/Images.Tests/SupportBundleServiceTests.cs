@@ -60,4 +60,23 @@ public sealed class SupportBundleServiceTests
             try { File.Delete(zipPath); } catch { }
         }
     }
+
+    [Fact]
+    public void RedactProfilePaths_RedactsShortAndUriUserProfileForms()
+    {
+        var text = """
+            opened C:\Users\MATTHE~1\Pictures\a,b.jpg
+            uri file:///C:/Users/Matthew%20Parker/Pictures/a.jpg
+            slash C:/Users/Somebody/Pictures/a.jpg
+            """;
+
+        var redacted = SupportBundleService.RedactProfilePaths(text);
+
+        Assert.DoesNotContain(@"C:\Users\MATTHE~1", redacted, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("C:/Users/Matthew%20Parker", redacted, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("C:/Users/Somebody", redacted, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(@"%USERPROFILE%\Pictures\a,b.jpg", redacted);
+        Assert.Contains("file:///%USERPROFILE%/Pictures/a.jpg", redacted);
+        Assert.Contains("%USERPROFILE%/Pictures/a.jpg", redacted);
+    }
 }

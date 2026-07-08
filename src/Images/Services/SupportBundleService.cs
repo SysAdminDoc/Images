@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
@@ -10,6 +11,12 @@ namespace Images.Services;
 public static class SupportBundleService
 {
     private static readonly ILogger _log = Log.Get(nameof(SupportBundleService));
+    private static readonly Regex FileUriProfileRegex = new(
+        @"\bfile:///[A-Z]:/Users/[^/\s""'<>]+",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    private static readonly Regex WindowsProfileRegex = new(
+        @"\b[A-Z]:[\\/]+Users[\\/]+[^\\/\s""'<>]+",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     public static string Build()
     {
@@ -267,32 +274,32 @@ public static class SupportBundleService
     /// </summary>
     private static void CopyRedacted(Stream source, Stream destination)
     {
-        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         using var reader = new StreamReader(source, Encoding.UTF8);
         using var writer = new StreamWriter(destination, Encoding.UTF8, leaveOpen: true);
         while (reader.ReadLine() is { } line)
         {
-            if (!string.IsNullOrEmpty(userProfile))
-            {
-                line = line.Replace(userProfile, "%USERPROFILE%", StringComparison.OrdinalIgnoreCase);
-                line = line.Replace(userProfile.Replace('\\', '/'), "%USERPROFILE%", StringComparison.OrdinalIgnoreCase);
-            }
-
-            writer.WriteLine(line);
+            writer.WriteLine(RedactProfilePaths(line));
         }
     }
 
     private static string? RedactPath(string? path)
     {
         if (string.IsNullOrWhiteSpace(path)) return path;
+        return RedactProfilePaths(path);
+    }
+
+    internal static string RedactProfilePaths(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return value;
 
         var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        if (!string.IsNullOrEmpty(userProfile) &&
-            path.StartsWith(userProfile, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrEmpty(userProfile))
         {
-            return "%USERPROFILE%" + path[userProfile.Length..];
+            value = value.Replace(userProfile, "%USERPROFILE%", StringComparison.OrdinalIgnoreCase);
+            value = value.Replace(userProfile.Replace('\\', '/'), "%USERPROFILE%", StringComparison.OrdinalIgnoreCase);
         }
 
-        return path;
+        value = FileUriProfileRegex.Replace(value, "file:///%USERPROFILE%");
+        return WindowsProfileRegex.Replace(value, "%USERPROFILE%");
     }
 }
