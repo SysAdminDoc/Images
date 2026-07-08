@@ -241,6 +241,13 @@ public sealed class DirectoryNavigator : IDisposable
         return true;
     }
 
+    public bool MoveToIndex(int index)
+    {
+        if (index < 0 || index >= _files.Count) return false;
+        CurrentIndex = index;
+        return true;
+    }
+
     public bool GoBack()
     {
         return NavigateHistory(_backStack, _forwardStack);

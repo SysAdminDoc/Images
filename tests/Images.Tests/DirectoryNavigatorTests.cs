@@ -214,6 +214,31 @@ public sealed class DirectoryNavigatorTests
     }
 
     [Fact]
+    public void MoveToIndex_JumpsWithinCurrentListWithoutRescanning()
+    {
+        var scanCount = 0;
+        using var temp = TestDirectory.Create();
+        var first = temp.WriteFile("a.jpg");
+        _ = temp.WriteFile("b.jpg");
+        var third = temp.WriteFile("c.jpg");
+        using var nav = new DirectoryNavigator(folder =>
+        {
+            scanCount++;
+            return Directory.EnumerateFiles(folder, "*.*", SearchOption.TopDirectoryOnly);
+        });
+
+        Assert.True(nav.Open(first));
+        Assert.Equal(1, scanCount);
+
+        Assert.True(nav.MoveToIndex(2));
+
+        Assert.Equal(third, nav.CurrentPath);
+        Assert.Equal(1, scanCount);
+        Assert.False(nav.MoveToIndex(3));
+        Assert.Equal(third, nav.CurrentPath);
+    }
+
+    [Fact]
     public void RemovePath_RemovesCapturedPathWithoutDroppingCurrentItem()
     {
         using var temp = TestDirectory.Create();

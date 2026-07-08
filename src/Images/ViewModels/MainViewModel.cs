@@ -2406,6 +2406,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     public void StopSlideshow()
+        => StopSlideshow(showToast: true);
+
+    private void StopSlideshow(bool showToast)
     {
         if (!IsSlideshowActive) return;
         _slideshowTimer?.Stop();
@@ -2413,7 +2416,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         IsSlideshowActive = false;
         IsSlideshowPaused = false;
         _slideshowHoverPaused = false;
-        Toast(Strings.MainToastSlideshowStopped);
+        _slideshowRandom = null;
+        if (showToast)
+            Toast(Strings.MainToastSlideshowStopped);
     }
 
     private void ToggleSlideshow()
@@ -2505,24 +2510,37 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             FlushPendingRename();
 
+            var count = _nav.Files.Count;
+            if (count == 0 || _nav.CurrentIndex < 0)
+            {
+                StopSlideshow(showToast: false);
+                return;
+            }
+
+            if (count == 1)
+            {
+                if (!_slideshowLoop)
+                    StopSlideshow(showToast: true);
+                return;
+            }
+
             if (_slideshowShuffle && _slideshowRandom is not null)
             {
-                var files = _nav.Files;
-                var count = files.Count;
-                if (count > 1)
-                {
-                    var nextIndex = _slideshowRandom.Next(count);
-                    while (nextIndex == _nav.CurrentIndex && count > 1)
-                        nextIndex = _slideshowRandom.Next(count);
+                var nextIndex = _slideshowRandom.Next(count);
+                while (nextIndex == _nav.CurrentIndex)
+                    nextIndex = _slideshowRandom.Next(count);
 
-                    if (nextIndex >= files.Count) return;
-                    var targetPath = files[nextIndex];
-                    _nav.Open(targetPath);
-                    ResetPageState();
-                    await LoadCurrentWithOperationStatusAsync(
-                        Strings.MainOpLoadingNext,
-                        BuildDecodeOperationDetail(targetPath));
+                if (!_nav.MoveToIndex(nextIndex))
+                {
+                    StopSlideshow(showToast: false);
+                    return;
                 }
+
+                var targetPath = _nav.CurrentPath ?? "";
+                ResetPageState();
+                await LoadCurrentWithOperationStatusAsync(
+                    Strings.MainOpLoadingNext,
+                    BuildDecodeOperationDetail(targetPath));
             }
             else
             {
@@ -2530,7 +2548,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 {
                     if (_slideshowLoop)
                     {
-                        if (!_nav.MoveFirst()) return;
+                        if (!_nav.MoveFirst())
+                        {
+                            StopSlideshow(showToast: false);
+                            return;
+                        }
                     }
                     else
                     {
@@ -2540,7 +2562,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 }
                 else
                 {
-                    if (!_nav.MoveNext()) return;
+                    if (!_nav.MoveNext())
+                    {
+                        StopSlideshow(showToast: false);
+                        return;
+                    }
                 }
 
                 ResetPageState();
@@ -7557,6 +7583,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void ClearCurrentState()
     {
+        StopSlideshow(showToast: false);
         _renameTimer.Stop();
         _externalEditReload.Disarm();
         IsPinnedOverlayMode = false;
