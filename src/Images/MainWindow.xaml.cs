@@ -762,8 +762,8 @@ public partial class MainWindow : Window
     // are untouched so drag-pan + the V15-02 context menu coexist.
     private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-        // TextBoxes should not be hijacked — rename-in-progress shouldn't eat XButton events.
-        if (Keyboard.FocusedElement is TextBox) return;
+        // Text entry controls should not be hijacked — rename-in-progress shouldn't eat XButton events.
+        if (IsTextEntryElement(Keyboard.FocusedElement)) return;
 
         switch (e.ChangedButton)
         {
@@ -794,6 +794,7 @@ public partial class MainWindow : Window
 
         if (shortcutKey != Key.Enter ||
             !Vm.IsCropMode ||
+            IsTextEntryElement(Keyboard.FocusedElement) ||
             !Vm.ApplyCropCommand.CanExecute(null))
         {
             return;
@@ -812,6 +813,12 @@ public partial class MainWindow : Window
             Key.ImeProcessed => e.ImeProcessedKey,
             _ => e.Key
         };
+
+    internal static bool IsTextEntryElement(object? focusedElement)
+        => focusedElement is TextBox
+            or PasswordBox
+            or RichTextBox
+            or ComboBox { IsEditable: true };
 
     private void ToggleCommandPaletteFocus()
     {
@@ -833,8 +840,8 @@ public partial class MainWindow : Window
     {
         var shortcutKey = GetShortcutKey(e);
 
-        // Don't steal keys from the rename editor.
-        if (Keyboard.FocusedElement is TextBox) return;
+        // Don't steal keys from text entry controls.
+        if (IsTextEntryElement(Keyboard.FocusedElement)) return;
 
         // V15-03: any key while the cheatsheet is open dismisses it and swallows the key so
         // the user doesn't trigger whatever shortcut they pressed by accident.
@@ -847,7 +854,7 @@ public partial class MainWindow : Window
 
         // V20-29: when the command palette is open but focus is NOT in its TextBox, dismiss
         // on any keypress so stray shortcuts don't fire through the overlay.
-        if (Vm.ShowCommandPalette && Keyboard.FocusedElement is not TextBox)
+        if (Vm.ShowCommandPalette && !IsTextEntryElement(Keyboard.FocusedElement))
         {
             Vm.ShowCommandPalette = false;
             e.Handled = true;
