@@ -71,6 +71,7 @@ All notable changes to **Images** are documented here.
 - **Latte native caption matches the window body** — The DWM caption color now uses Latte Base instead of Mantle, and the dead non-adaptive focus elevation token was removed.
 - **Open tool windows repaint on theme changes** — Status dots, status cards, reference-board cards, perspective handles, and the archive-password dialog now bind code-behind theme brushes through live resource references instead of stale brush snapshots.
 - **Screen-reader names are localizable** — Remaining literal `AutomationProperties.Name` values in the main shell and secondary windows now resolve through localization resources, and the localization script fails on new hardcoded automation names.
+- **Grid splitters have usable hit targets** — Tool-window splitters now use a shared 6px transparent hit area with a centered 1px themed hairline and visible keyboard focus styling.
 
 ## 0.2.17
 

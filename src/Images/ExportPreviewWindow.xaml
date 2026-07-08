@@ -180,9 +180,7 @@
             </Border>
 
             <GridSplitter Grid.Column="1"
-                          Width="1"
-                          HorizontalAlignment="Stretch"
-                          Background="{DynamicResource HairlineBrush}" />
+                          Style="{StaticResource VerticalGridSplitter}" />
 
             <Grid Grid.Column="2" Margin="18">
                 <Grid.ColumnDefinitions>

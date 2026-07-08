@@ -273,10 +273,7 @@
             </Border>
 
             <GridSplitter Grid.Column="1"
-                          Width="1"
-                          HorizontalAlignment="Stretch"
-                          Background="{DynamicResource HairlineBrush}"
-                          ShowsPreview="False" />
+                          Style="{StaticResource VerticalGridSplitter}" />
 
             <Border Grid.Column="2"
                     Style="{StaticResource ToolWindowWorkspace}">

@@ -50,6 +50,7 @@ public sealed class SecondaryWindowXamlTests
                 AssertCustomButtonTemplate(
                     "NavRailButton",
                     ["Bd"]);
+                AssertVerticalGridSplitterTemplate();
                 AssertThemedPasswordBoxTemplate();
 
                 if (createdApplication)
@@ -431,6 +432,25 @@ public sealed class SecondaryWindowXamlTests
         Assert.NotNull(passwordBox.Template);
         Assert.NotNull(passwordBox.Template.FindName("Bd", passwordBox));
         Assert.NotNull(passwordBox.Template.FindName("PART_ContentHost", passwordBox));
+    }
+
+    private static void AssertVerticalGridSplitterTemplate()
+    {
+        var style = Assert.IsType<Style>(Application.Current!.Resources["VerticalGridSplitter"]);
+        var splitter = new GridSplitter
+        {
+            Style = style
+        };
+
+        splitter.ApplyTemplate();
+
+        Assert.Equal(6, splitter.Width);
+        Assert.Equal(6, splitter.MinWidth);
+        Assert.Equal(Cursors.SizeWE, splitter.Cursor);
+        Assert.NotNull(splitter.Template);
+        Assert.NotNull(splitter.Template.FindName("HitArea", splitter));
+        var hairline = Assert.IsType<Border>(splitter.Template.FindName("Hairline", splitter));
+        Assert.Equal(1, hairline.Width);
     }
 
     private static void AssertThemeContrast(string themeFileName, string foregroundKey, string backgroundKey, double minimumRatio)
