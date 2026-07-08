@@ -237,21 +237,38 @@ public static class CodecRuntime
             };
             psi.ArgumentList.Add("--version");
 
-            using var process = Process.Start(psi);
-            if (process is null) return null;
-            if (!process.WaitForExit(1500))
-            {
-                try { process.Kill(entireProcessTree: true); } catch { }
-                return null;
-            }
-
-            var version = process.StandardOutput.ReadToEnd().Trim();
-            return string.IsNullOrWhiteSpace(version) ? null : version;
+            return RunVersionProbe(psi, timeoutMs: 1500);
         }
         catch
         {
             return null;
         }
+    }
+
+    internal static string? RunVersionProbe(ProcessStartInfo psi, int timeoutMs)
+    {
+        using var process = Process.Start(psi);
+        if (process is null) return null;
+
+        var stdout = process.StandardOutput.ReadToEndAsync();
+        var stderr = process.StandardError.ReadToEndAsync();
+        if (!process.WaitForExit(timeoutMs))
+        {
+            try
+            {
+                process.Kill(entireProcessTree: true);
+                process.WaitForExit();
+            }
+            catch
+            {
+            }
+
+            return null;
+        }
+
+        _ = stderr.GetAwaiter().GetResult();
+        var version = stdout.GetAwaiter().GetResult().Trim();
+        return string.IsNullOrWhiteSpace(version) ? null : version;
     }
 }
 

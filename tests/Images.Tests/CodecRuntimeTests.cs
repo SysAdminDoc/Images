@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Images.Services;
 
 namespace Images.Tests;
@@ -37,5 +38,25 @@ public sealed class CodecRuntimeTests
 
         Assert.NotNull(status.DocumentStatus);
         Assert.NotEmpty(status.DocumentStatus);
+    }
+
+    [Fact]
+    public void RunVersionProbe_DrainsStderrWhileWaiting()
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = "powershell",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        psi.ArgumentList.Add("-NoProfile");
+        psi.ArgumentList.Add("-Command");
+        psi.ArgumentList.Add("$payload = 'x' * 200000; [Console]::Error.Write($payload); [Console]::Out.Write('10.02.1')");
+
+        var version = CodecRuntime.RunVersionProbe(psi, timeoutMs: 5000);
+
+        Assert.Equal("10.02.1", version);
     }
 }
