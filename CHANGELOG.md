@@ -4,6 +4,12 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+## 0.2.19
+
+### Fixed
+
+- **Viewer top command bar removed** — The floating image command bar with Compare and Export actions no longer covers the top of the image viewport; the existing position/page/HUD chips now sit closer to the top edge.
+
 ## 0.2.18
 
 ### Fixed
@@ -66,7 +72,7 @@ All notable changes to **Images** are documented here.
 - **Import Inbox destination changes wait for scans** — The destination chooser is now disabled during busy scans/import work, preventing overlapping reloads from re-enabling the window early.
 - **Reference Board drag state recovers after capture loss** — Drag handles now clear stale state when mouse capture is lost, and mouse-up events are only handled for an active drag.
 - **Export Preview cancels superseded encodes** — Preview rebuilds now cancel prior work, ignore stale completions, cancel on close, and suppress constructor-time setting events until the window has finished loading.
-- **Main workspace shell feels more premium** — The viewer now has a persistent workflow rail, elevated top image command bar, warmer accent hierarchy, and a denser inspector surface aligned with the generated premium mockup.
+- **Main workspace shell feels more premium** — The viewer now has a persistent workflow rail, warmer accent hierarchy, and a denser inspector surface aligned with the generated premium mockup.
 - **Filled-button contrast is theme-safe** — Primary and danger buttons now use a per-theme `OnAccentBrush`, Latte clears AA contrast, and high-contrast mode uses system highlight text.
 - **Latte native caption matches the window body** — The DWM caption color now uses Latte Base instead of Mantle, and the dead non-adaptive focus elevation token was removed.
 - **Open tool windows repaint on theme changes** — Status dots, status cards, reference-board cards, perspective handles, and the archive-password dialog now bind code-behind theme brushes through live resource references instead of stale brush snapshots.

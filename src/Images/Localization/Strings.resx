@@ -4688,9 +4688,6 @@ Details written to:
   <data name="AutomationMainWindowNoGalleryFilterMatches" xml:space="preserve">
     <value>No gallery filter matches</value>
   </data>
-  <data name="AutomationMainWindowImageCommandBar" xml:space="preserve">
-    <value>Image command bar</value>
-  </data>
   <data name="AutomationMainWindowFolderPosition" xml:space="preserve">
     <value>Folder position</value>
   </data>

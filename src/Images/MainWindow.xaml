@@ -1581,114 +1581,6 @@
                 <!-- Floating chrome (only when an image is present) -->
                 <Grid Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}">
 
-                    <Border Style="{StaticResource WorkspaceTopCommandBar}"
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Top"
-                            Margin="20,18,20,0"
-                            AutomationProperties.Name="{loc:Loc AutomationMainWindowImageCommandBar}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel Grid.Column="0"
-                                        Orientation="Horizontal"
-                                        VerticalAlignment="Center"
-                                        MinWidth="0">
-                                <Border Width="34"
-                                        Height="34"
-                                        CornerRadius="{StaticResource Radius.Sm.CR}"
-                                        Background="{DynamicResource AccentWarmPanelBrush}"
-                                        BorderBrush="{DynamicResource AccentWarmBrush}"
-                                        BorderThickness="1"
-                                        Margin="0,0,10,0">
-                                    <TextBlock Text="&#xEB9F;"
-                                               FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="14"
-                                               Foreground="{DynamicResource AccentWarmBrush}"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
-                                </Border>
-                                <StackPanel VerticalAlignment="Center" MinWidth="0">
-                                    <TextBlock Text="{Binding CurrentFileName}"
-                                               FontWeight="SemiBold"
-                                               FontSize="13.5"
-                                               Foreground="{DynamicResource FloatingChromeTextBrush}"
-                                               TextTrimming="CharacterEllipsis"
-                                               MaxWidth="360" />
-                                    <TextBlock Text="{Binding CurrentFolder}"
-                                               Style="{StaticResource Text.Hint}"
-                                               FontSize="11"
-                                               TextTrimming="CharacterEllipsis"
-                                               MaxWidth="360"
-                                               Margin="0,2,0,0" />
-                                </StackPanel>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="1"
-                                        Orientation="Horizontal"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center">
-                                <Border Style="{StaticResource Badge}"
-                                        Background="{DynamicResource AccentPanelBrush}"
-                                        BorderBrush="{DynamicResource AccentBrush}"
-                                        Margin="0,0,8,0"
-                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowFolderPosition}">
-                                    <TextBlock Text="{Binding PositionText}"
-                                               FontSize="11"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource AccentBrush}" />
-                                </Border>
-                                <Border Style="{StaticResource Badge}"
-                                        Background="{DynamicResource SurfacePanelBrush}"
-                                        Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}"
-                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowPagePosition}">
-                                    <TextBlock Text="{Binding PagePositionText}"
-                                               FontSize="11"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource SubtextBrush}" />
-                                </Border>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="2"
-                                        Orientation="Horizontal"
-                                        VerticalAlignment="Center">
-                                <Button Command="{Binding StartCompareCommand}"
-                                        Style="{StaticResource ChromeButton}"
-                                        Padding="11,6"
-                                        MinHeight="30"
-                                        Visibility="{Binding CanUseCompareMode, Converter={StaticResource BoolToVis}}"
-                                        ToolTip="{Binding CompareStatusText}"
-                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareWithNextImage}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="&#xE8AB;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,7,0" VerticalAlignment="Center" />
-                                        <TextBlock Text="Compare" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </Button>
-                                <Button Command="{Binding OpenExportWorkbenchCommand}"
-                                        Style="{StaticResource PrimaryButton}"
-                                        Padding="13,6"
-                                        MinHeight="30"
-                                        Margin="8,0,0,0"
-                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowExportWorkbench}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="&#xE74E;"
-                                                   FontFamily="{StaticResource IconFontFamily}"
-                                                   FontSize="11"
-                                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                                   Margin="0,0,7,0"
-                                                   VerticalAlignment="Center" />
-                                        <TextBlock Text="Export"
-                                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                                   VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
                     <!-- Archive book page-turn zones. Narrow edge targets keep drag-pan available
                          across the center of the canvas while giving books a natural tap/click turn. -->
                     <Button Command="{Binding LeftBookPageTurnCommand}"
@@ -1771,7 +1663,7 @@
                     <Border Style="{StaticResource FloatingChrome}"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Top"
-                            Margin="0,80,0,0"
+                            Margin="0,18,0,0"
                             AutomationProperties.LiveSetting="Polite"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowFolderPosition}">
                         <TextBlock Text="{Binding PositionText}"
@@ -1783,7 +1675,7 @@
                     <Border Style="{StaticResource FloatingChrome}"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Top"
-                            Margin="0,122,0,0"
+                            Margin="0,60,0,0"
                             Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}"
                             AutomationProperties.LiveSetting="Polite"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowPagePosition}">
@@ -1831,7 +1723,7 @@
                     <Border Style="{StaticResource FloatingChrome}"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top"
-                            Margin="22,82,0,0"
+                            Margin="22,20,0,0"
                             MaxWidth="560"
                             Visibility="{Binding ShowMetadataHud, Converter={StaticResource BoolToVis}}"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowMetadataHUD}"

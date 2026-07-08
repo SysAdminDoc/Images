@@ -1594,15 +1594,6 @@
         </Setter>
     </Style>
 
-    <Style x:Key="WorkspaceTopCommandBar" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource WorkspaceTopBarBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource WorkspaceTopBarBorderBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{StaticResource Radius.Lg.CR}" />
-        <Setter Property="Padding" Value="12,10" />
-        <Setter Property="Effect" Value="{StaticResource Elevation.Low}" />
-    </Style>
-
     <Style x:Key="EmptyStateCard" TargetType="Border" BasedOn="{StaticResource ElevatedCard}">
         <Setter Property="Width" Value="500" />
         <Setter Property="Padding" Value="30,27" />
