@@ -210,6 +210,38 @@ public sealed class CatalogServiceTests
     }
 
     [Fact]
+    public void Rebuild_IncrementalUpdatesWhenSidecarAppearsOrDisappears()
+    {
+        using var temp = TestDirectory.Create();
+        var image = WriteImage(temp.Path, "rated.png", 8, 8);
+        var sidecar = image + ".xmp";
+        var dbPath = Path.Combine(temp.Path, "catalog.db");
+        var service = new CatalogService(dbPath);
+
+        var first = service.Rebuild([temp.Path]);
+        Assert.Equal(1, first.UpdatedCount);
+        Assert.Null(Assert.Single(first.Assets).Rating);
+
+        WriteRatingSidecar(sidecar, 4);
+
+        var withSidecar = service.Rebuild([temp.Path]);
+        Assert.Equal(0, withSidecar.ReusedCount);
+        Assert.Equal(1, withSidecar.UpdatedCount);
+        var withSidecarAsset = Assert.Single(withSidecar.Assets);
+        Assert.Equal(4, withSidecarAsset.Rating);
+        Assert.Equal(sidecar, withSidecarAsset.SidecarPath);
+
+        File.Delete(sidecar);
+
+        var withoutSidecar = service.Rebuild([temp.Path]);
+        Assert.Equal(0, withoutSidecar.ReusedCount);
+        Assert.Equal(1, withoutSidecar.UpdatedCount);
+        var withoutSidecarAsset = Assert.Single(withoutSidecar.Assets);
+        Assert.Null(withoutSidecarAsset.Rating);
+        Assert.Null(withoutSidecarAsset.SidecarPath);
+    }
+
+    [Fact]
     public void Rebuild_IncrementalRemovesDeletedFiles()
     {
         using var temp = TestDirectory.Create();
@@ -226,6 +258,19 @@ public sealed class CatalogServiceTests
         Assert.Equal(1, result.ReusedCount);
         Assert.Equal(0, result.UpdatedCount);
         Assert.Equal(1, result.RemovedCount);
+    }
+
+    private static void WriteRatingSidecar(string path, int rating)
+    {
+        File.WriteAllText(
+            path,
+            $$"""
+            <x:xmpmeta xmlns:x="adobe:ns:meta/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xmp="http://ns.adobe.com/xap/1.0/">
+              <rdf:RDF>
+                <rdf:Description xmp:Rating="{{rating}}" />
+              </rdf:RDF>
+            </x:xmpmeta>
+            """);
     }
 
     private static string ReadString(string dbPath, string sql)

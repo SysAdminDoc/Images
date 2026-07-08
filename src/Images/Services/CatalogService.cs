@@ -160,13 +160,40 @@ public sealed class CatalogService
             if (!info.Exists || info.Length != cached.SizeBytes) return false;
             var diskMtimeSeconds = ToOffset(info.LastWriteTimeUtc).ToUnixTimeSeconds();
             var cachedMtimeSeconds = cached.ModifiedUtc.ToUnixTimeSeconds();
-            return diskMtimeSeconds == cachedMtimeSeconds;
+            if (diskMtimeSeconds != cachedMtimeSeconds)
+                return false;
+
+            var sidecar = ReadSidecarFileSummary(path);
+            if (!string.Equals(sidecar.Path, cached.SidecarPath, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            return ToUnixOrNull(sidecar.ModifiedUtc) == ToUnixOrNull(cached.SidecarModifiedUtc);
         }
         catch
         {
             return false;
         }
     }
+
+    private static CatalogSidecarFileSummary ReadSidecarFileSummary(string imagePath)
+    {
+        foreach (var sidecarPath in SidecarPaths(imagePath))
+        {
+            if (!File.Exists(sidecarPath))
+                continue;
+
+            var info = new FileInfo(sidecarPath);
+            if (!info.Exists)
+                continue;
+
+            return new CatalogSidecarFileSummary(sidecarPath, ToOffset(info.LastWriteTimeUtc));
+        }
+
+        return new CatalogSidecarFileSummary(null, null);
+    }
+
+    private static long? ToUnixOrNull(DateTimeOffset? value)
+        => value?.ToUnixTimeSeconds();
 
     private static int RemoveStalePaths(
         SqliteConnection conn, SqliteTransaction tx,
@@ -988,7 +1015,13 @@ public sealed class CatalogService
         return normalized;
     }
 
-    private sealed record CatalogFileSummary(long SizeBytes, DateTimeOffset ModifiedUtc);
+    private sealed record CatalogFileSummary(
+        long SizeBytes,
+        DateTimeOffset ModifiedUtc,
+        string? SidecarPath,
+        DateTimeOffset? SidecarModifiedUtc);
+
+    private sealed record CatalogSidecarFileSummary(string? Path, DateTimeOffset? ModifiedUtc);
 
     private Dictionary<string, CatalogFileSummary> LoadExistingState()
     {
@@ -999,14 +1032,16 @@ public sealed class CatalogService
         {
             using var conn = Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT source_path, size_bytes, modified_utc FROM catalog_assets;";
+            cmd.CommandText = "SELECT source_path, size_bytes, modified_utc, sidecar_path, sidecar_modified_utc FROM catalog_assets;";
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
                 var path = reader.GetString(0);
                 var size = reader.GetInt64(1);
                 var mtime = FromUnix(reader.GetInt64(2));
-                map[path] = new CatalogFileSummary(size, mtime);
+                var sidecarPath = reader.IsDBNull(3) ? null : reader.GetString(3);
+                DateTimeOffset? sidecarModifiedUtc = reader.IsDBNull(4) ? null : FromUnix(reader.GetInt64(4));
+                map[path] = new CatalogFileSummary(size, mtime, sidecarPath, sidecarModifiedUtc);
             }
         }
         catch (Exception ex) when (ex is SqliteException or IOException)

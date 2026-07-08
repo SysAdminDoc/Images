@@ -27,6 +27,7 @@ All notable changes to **Images** are documented here.
 - **Hint-tier text clears AA contrast** — `Text.Hint`, `SectionLabel`, and `MetaLabel` now use a dedicated per-theme `HintTextBrush` instead of decorative overlay colors.
 - **Archive password prompts are themed** — The implicit `PasswordBox` style now mirrors the app's TextBox chrome, including dark surfaces, accent focus, caret, and selection brushes.
 - **20 ms GIF frame delays stay fast** — Animated GIF playback now preserves valid 2-centisecond frame delays while still clamping shorter hostile delays.
+- **Catalog rescans notice sidecar-only edits** — Incremental catalog rebuilds now compare cached sidecar path and modified time, so XMP rating/tag creation, edits, or removal refresh stale rows even when the image file itself is unchanged.
 
 ## 0.2.17
 
