@@ -996,6 +996,26 @@
                                 <TextBlock Text="{Binding GalleryStatusText}"
                                            Style="{StaticResource Text.Hint}"
                                            Margin="0,3,0,0" />
+                                <Border Margin="0,6,0,0"
+                                        Padding="8,2"
+                                        HorizontalAlignment="Left"
+                                        CornerRadius="{StaticResource Radius.Sm.CR}"
+                                        Background="{DynamicResource PanelBrush}"
+                                        BorderBrush="{DynamicResource HairlineBrush}"
+                                        BorderThickness="1"
+                                        Visibility="{Binding IsGallerySmartFilterIndexing, Converter={StaticResource BoolToVis}}"
+                                        AutomationProperties.Name="Indexing gallery filters">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE895;"
+                                                   FontFamily="{StaticResource IconFontFamily}"
+                                                   FontSize="10"
+                                                   Margin="0,0,6,0"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Text="Indexing filters..."
+                                                   Style="{StaticResource Text.Hint}"
+                                                   VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
                             <Button Grid.Column="2"
                                     Style="{StaticResource ChromeButton}"

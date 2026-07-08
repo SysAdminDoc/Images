@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
@@ -199,6 +200,39 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void GalleryCommand_RefreshesCurrentItemWithoutResettingCollection()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var first = WritePng(temp.Path, "a.png");
+            var second = WritePng(temp.Path, "b.png");
+            var third = WritePng(temp.Path, "c.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(second);
+            viewModel.ToggleGalleryCommand.Execute(null);
+
+            var resets = 0;
+            viewModel.GalleryItems.CollectionChanged += (_, e) =>
+            {
+                if (e.Action == NotifyCollectionChangedAction.Reset)
+                    resets++;
+            };
+
+            viewModel.NextCommand.Execute(null);
+
+            PumpUntil(() =>
+                !viewModel.IsOperationBusy &&
+                string.Equals(viewModel.CurrentPath, third, StringComparison.OrdinalIgnoreCase));
+
+            Assert.Equal(0, resets);
+            Assert.Equal([first, second, third], viewModel.GalleryItems.Select(item => item.Path));
+            Assert.Contains(viewModel.GalleryItems, item => item.Path == third && item.IsCurrent);
+        });
+    }
+
+    [Fact]
     public void GalleryFilter_NarrowsItemsAndShowsEmptyFilterState()
     {
         RunOnSta(() =>
@@ -213,6 +247,8 @@ public sealed class MainViewModelStateTests
             viewModel.ToggleGalleryCommand.Execute(null);
 
             viewModel.GalleryFilterText = "format:png image2";
+
+            PumpUntil(() => !viewModel.IsGallerySmartFilterIndexing && viewModel.GalleryItems.Count == 1);
 
             Assert.True(viewModel.HasGalleryFilter);
             Assert.False(viewModel.ShowGalleryFilterEmpty);
@@ -229,6 +265,8 @@ public sealed class MainViewModelStateTests
 
             viewModel.ApplyGallerySmartFilterCommand.Execute("format:png");
 
+            PumpUntil(() => !viewModel.IsGallerySmartFilterIndexing);
+
             Assert.Equal("format:png", viewModel.GalleryFilterText);
             Assert.True(viewModel.HasGalleryFilter);
             Assert.Equal(3, viewModel.GalleryItems.Count);
@@ -238,6 +276,8 @@ public sealed class MainViewModelStateTests
             Assert.Equal("", viewModel.GalleryFilterText);
 
             viewModel.GalleryFilterText = "missing";
+
+            PumpUntil(() => !viewModel.IsGallerySmartFilterIndexing && viewModel.GalleryItems.Count == 0);
 
             Assert.Empty(viewModel.GalleryItems);
             Assert.Null(viewModel.SelectedGalleryItem);

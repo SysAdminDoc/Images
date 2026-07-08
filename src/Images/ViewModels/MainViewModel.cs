@@ -3015,7 +3015,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ObservableCollection<CullingScoreItem> CullingScoreItems { get; } = [];
     private IReadOnlyList<AssetSmartFilterItem> _gallerySmartFilterIndex = [];
     private string _gallerySmartFilterSignature = "";
+    private string? _gallerySmartFilterPendingSignature;
+    private int _gallerySmartFilterGeneration;
     private string _galleryFilterSummaryText = "";
+    private bool _isGallerySmartFilterIndexing;
 
     private double _galleryTileSize = 180;
     public double GalleryTileSize
@@ -3087,7 +3090,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
     public bool HasGalleryFilter => !string.IsNullOrWhiteSpace(GalleryFilterText);
-    public bool ShowGalleryFilterEmpty => ShowGallery && HasGalleryFilter && GalleryItems.Count == 0;
+    public bool ShowGalleryFilterEmpty => ShowGallery && HasGalleryFilter && !IsGallerySmartFilterIndexing && GalleryItems.Count == 0;
+    public bool IsGallerySmartFilterIndexing
+    {
+        get => _isGallerySmartFilterIndexing;
+        private set
+        {
+            if (!Set(ref _isGallerySmartFilterIndexing, value))
+                return;
+
+            Raise(nameof(ShowGalleryFilterEmpty));
+            Raise(nameof(GalleryStatusText));
+        }
+    }
     public string GalleryFilterSummaryText => _galleryFilterSummaryText;
     public string GalleryFilterTooltip => Strings.MainGalleryFilterTooltip;
 
@@ -3569,7 +3584,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void InvalidateGallerySmartFilterIndex()
     {
+        _gallerySmartFilterGeneration++;
         _gallerySmartFilterSignature = "";
+        _gallerySmartFilterPendingSignature = null;
+        _gallerySmartFilterIndex = [];
+        IsGallerySmartFilterIndexing = false;
         if (IsGalleryOpen || HasGalleryFilter)
             RefreshGalleryItems();
         Raise(nameof(GalleryStatusText));
@@ -3605,12 +3624,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var previousSelectedPath = SelectedGalleryItem?.Path;
         var filter = GalleryFilterText.Trim();
-        EnsureGallerySmartFilterIndex();
 
-        IEnumerable<FolderPreviewItem> visible;
+        IReadOnlyList<FolderPreviewItem> visible;
         if (string.IsNullOrEmpty(filter))
         {
-            visible = FolderPreviewItems;
+            visible = FolderPreviewItems.ToList();
+            SetGallerySmartFilterSummary("");
+        }
+        else if (!EnsureGallerySmartFilterIndex())
+        {
+            visible = FolderPreviewItems.ToList();
             SetGallerySmartFilterSummary("");
         }
         else
@@ -3619,13 +3642,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             var visiblePaths = result.Items
                 .Select(item => item.Path)
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
-            visible = FolderPreviewItems.Where(item => visiblePaths.Contains(item.Path));
+            visible = FolderPreviewItems
+                .Where(item => visiblePaths.Contains(item.Path))
+                .ToList();
             SetGallerySmartFilterSummary(result.Summary);
         }
 
-        GalleryItems.Clear();
-        foreach (var item in visible)
-            GalleryItems.Add(item);
+        ApplyGalleryItems(visible);
 
         var selected =
             GalleryItems.FirstOrDefault(item => string.Equals(item.Path, previousSelectedPath, StringComparison.OrdinalIgnoreCase)) ??
@@ -3636,19 +3659,103 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             SelectedGalleryItem = selected;
     }
 
-    private void EnsureGallerySmartFilterIndex()
+    private bool EnsureGallerySmartFilterIndex()
     {
         var paths = FolderPreviewItems.Select(item => item.Path).ToArray();
         var signature = string.Join('\u001f', paths);
         if (signature.Equals(_gallerySmartFilterSignature, StringComparison.Ordinal))
+            return true;
+
+        if (string.Equals(_gallerySmartFilterPendingSignature, signature, StringComparison.Ordinal))
+            return false;
+
+        var generation = ++_gallerySmartFilterGeneration;
+        _gallerySmartFilterPendingSignature = signature;
+        IsGallerySmartFilterIndexing = true;
+        _ = BuildGallerySmartFilterIndexAsync(paths, signature, generation);
+        return false;
+    }
+
+    private async Task BuildGallerySmartFilterIndexAsync(string[] paths, string signature, int generation)
+    {
+        IReadOnlyList<AssetSmartFilterItem> index = [];
+        Exception? failure = null;
+
+        try
+        {
+            index = await Task.Run(() => AssetSmartFilterService.BuildIndex(paths)).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or System.Security.SecurityException)
+        {
+            failure = ex;
+        }
+
+        if (_isDisposed)
             return;
 
-        // Built synchronously so the filter/summary/selection stay consistent
-        // in one pass. The dominant per-image cost (a full-resolution decode
-        // just to derive a palette color) is now a 64x64 decode in
-        // AssetSmartFilterService, which is what made the gallery-open freeze.
-        _gallerySmartFilterIndex = AssetSmartFilterService.BuildIndex(paths);
-        _gallerySmartFilterSignature = signature;
+        try
+        {
+            await _uiDispatcher.InvokeAsync(
+                () =>
+                {
+                    if (_isDisposed || generation != _gallerySmartFilterGeneration)
+                        return;
+
+                    if (failure is not null)
+                        _log.LogWarning(failure, "Could not build gallery smart-filter index.");
+
+                    _gallerySmartFilterIndex = failure is null ? index : [];
+                    _gallerySmartFilterSignature = signature;
+                    _gallerySmartFilterPendingSignature = null;
+                    IsGallerySmartFilterIndexing = false;
+                    RefreshGalleryItems();
+                },
+                DispatcherPriority.Background);
+        }
+        catch (TaskCanceledException)
+        {
+        }
+        catch (InvalidOperationException) when (_isDisposed)
+        {
+        }
+    }
+
+    private void ApplyGalleryItems(IReadOnlyList<FolderPreviewItem> visible)
+    {
+        for (var targetIndex = 0; targetIndex < visible.Count; targetIndex++)
+        {
+            var desired = visible[targetIndex];
+            if (targetIndex < GalleryItems.Count && AreSamePath(GalleryItems[targetIndex].Path, desired.Path))
+            {
+                if (!ReferenceEquals(GalleryItems[targetIndex], desired))
+                    GalleryItems[targetIndex] = desired;
+                continue;
+            }
+
+            var existingIndex = -1;
+            for (var i = targetIndex + 1; i < GalleryItems.Count; i++)
+            {
+                if (!AreSamePath(GalleryItems[i].Path, desired.Path))
+                    continue;
+
+                existingIndex = i;
+                break;
+            }
+
+            if (existingIndex >= 0)
+            {
+                GalleryItems.Move(existingIndex, targetIndex);
+                if (!ReferenceEquals(GalleryItems[targetIndex], desired))
+                    GalleryItems[targetIndex] = desired;
+            }
+            else
+            {
+                GalleryItems.Insert(targetIndex, desired);
+            }
+        }
+
+        while (GalleryItems.Count > visible.Count)
+            GalleryItems.RemoveAt(GalleryItems.Count - 1);
     }
 
     private void SetGallerySmartFilterSummary(string summary)
