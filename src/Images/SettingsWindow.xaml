@@ -686,7 +686,7 @@
                                             Padding="12,6"
                                             MinHeight="32"
                                             Margin="0,0,8,8"
-                                            AutomationProperties.Name="Clear thumbnail cache">
+                                            AutomationProperties.Name="{loc:Loc AutomationSettingsWindowClearThumbnailCache}">
                                         <TextBlock Text="Clear thumbnails" VerticalAlignment="Center" />
                                     </Button>
 
@@ -695,7 +695,7 @@
                                             Padding="12,6"
                                             MinHeight="32"
                                             Margin="0,0,8,8"
-                                            AutomationProperties.Name="Clear log files">
+                                            AutomationProperties.Name="{loc:Loc AutomationSettingsWindowClearLogFiles}">
                                         <TextBlock Text="Clear logs" VerticalAlignment="Center" />
                                     </Button>
 
@@ -704,7 +704,7 @@
                                             Padding="12,6"
                                             MinHeight="32"
                                             Margin="0,0,8,8"
-                                            AutomationProperties.Name="Clear recovery action log">
+                                            AutomationProperties.Name="{loc:Loc AutomationSettingsWindowClearRecoveryActionLog}">
                                         <TextBlock Text="Clear recovery log" VerticalAlignment="Center" />
                                     </Button>
 
@@ -713,7 +713,7 @@
                                             Padding="12,6"
                                             MinHeight="32"
                                             Margin="0,0,8,8"
-                                            AutomationProperties.Name="Clear network activity log">
+                                            AutomationProperties.Name="{loc:Loc AutomationSettingsWindowClearNetworkActivityLog}">
                                         <TextBlock Text="Clear network log" VerticalAlignment="Center" />
                                     </Button>
 
@@ -722,7 +722,7 @@
                                             Padding="12,6"
                                             MinHeight="32"
                                             Margin="0,0,8,8"
-                                            AutomationProperties.Name="Refresh storage sizes">
+                                            AutomationProperties.Name="{loc:Loc AutomationSettingsWindowRefreshStorageSizes}">
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="&#xE72C;"
                                                        FontFamily="{StaticResource IconFontFamily}"

@@ -202,8 +202,15 @@ $xamlFiles = @(Get-ChildItem -LiteralPath $SourceRoot -Filter '*.xaml' -Recurse 
     Where-Object { $_.Name -notmatch 'Theme|\.g\.' })
 
 $hardCodedCount = 0
+$hardCodedAutomationNameMatches = New-Object System.Collections.Generic.List[string]
 foreach ($xamlFile in $xamlFiles) {
     $content = Get-Content -LiteralPath $xamlFile.FullName -Raw
+    $automationNameMatches = [regex]::Matches($content,
+        'AutomationProperties\.Name\s*=\s*"([^"{][^"]*)"')
+    foreach ($m in $automationNameMatches) {
+        $hardCodedAutomationNameMatches.Add("$($xamlFile.Name): $($m.Groups[1].Value)")
+    }
+
     $hardCodedMatches = [regex]::Matches($content,
         '(?:Content|Text|Header|Title|ToolTip|AutomationProperties\.Name)\s*=\s*"([^"{][^"]{3,})"')
     foreach ($m in $hardCodedMatches) {
@@ -220,6 +227,11 @@ foreach ($xamlFile in $xamlFiles) {
 
 if ($hardCodedCount -gt 0) {
     Write-Warning "Found $hardCodedCount potential hard-coded UI strings in XAML files. Review for localization."
+}
+
+if ($hardCodedAutomationNameMatches.Count -gt 0) {
+    Write-Error "Hard-coded AutomationProperties.Name values must use localization resources: $($hardCodedAutomationNameMatches -join '; ')"
+    $failed = $true
 }
 
 if ($failed) {

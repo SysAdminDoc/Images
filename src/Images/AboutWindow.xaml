@@ -366,7 +366,7 @@
                        Margin="1,18,0,10" />
 
             <ItemsControl x:Name="CapabilityMatrixItems"
-                          AutomationProperties.Name="Codec capability matrix">
+                          AutomationProperties.Name="{loc:Loc AutomationAboutWindowCodecCapabilityMatrix}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border Style="{StaticResource Card}" Margin="0,0,0,8">
@@ -420,7 +420,7 @@
                       HorizontalAlignment="Center"
                       Margin="0,16,0,0"
                       ToolTip="Off by default. When enabled, Images checks GitHub Releases at startup."
-                      AutomationProperties.Name="Check for updates automatically"
+                      AutomationProperties.Name="{loc:Loc AutomationAboutWindowCheckForUpdatesAutomatically}"
                       AutomationProperties.HelpText="Off by default. When enabled, Images checks GitHub Releases at startup. No image, file, or folder metadata is sent."
                       Checked="UpdateCheckOptIn_Changed"
                       Unchecked="UpdateCheckOptIn_Changed" />
@@ -457,7 +457,7 @@
                             Margin="12,0,0,0"
                             VerticalAlignment="Center"
                             Visibility="Collapsed"
-                            AutomationProperties.Name="View available update">
+                            AutomationProperties.Name="{loc:Loc AutomationAboutWindowViewAvailableUpdate}">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <TextBlock Text="&#xE8A7;"
                                        FontFamily="{StaticResource IconFontFamily}"
@@ -584,7 +584,7 @@
                 <Button Style="{StaticResource ChromeButton}"
                         Click="CheckUpdatesButton_Click"
                         Margin="0,0,6,8"
-                        AutomationProperties.Name="Check for updates">
+                        AutomationProperties.Name="{loc:Loc AutomationAboutWindowCheckForUpdates}">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="&#xE72C;"
                                    FontFamily="{StaticResource IconFontFamily}"
@@ -599,7 +599,7 @@
                 <Button Style="{StaticResource ChromeButton}"
                         Click="GitHubButton_Click"
                         Margin="6,0,0,8"
-                        AutomationProperties.Name="Open GitHub project page">
+                        AutomationProperties.Name="{loc:Loc AutomationAboutWindowOpenGitHubProjectPage}">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="&#xE71B;"
                                    FontFamily="{StaticResource IconFontFamily}"
@@ -612,7 +612,7 @@
                 <Button Style="{StaticResource ChromeButton}"
                         Click="CrashLogButton_Click"
                         Margin="0,0,6,0"
-                        AutomationProperties.Name="Open crash log folder">
+                        AutomationProperties.Name="{loc:Loc AutomationAboutWindowOpenCrashLogFolder}">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="&#xE838;"
                                    FontFamily="{StaticResource IconFontFamily}"
@@ -625,7 +625,7 @@
                 <Button Style="{StaticResource ChromeButton}"
                         Click="CopyCodecReportButton_Click"
                         Margin="6,0,0,0"
-                        AutomationProperties.Name="Copy codec report">
+                        AutomationProperties.Name="{loc:Loc AutomationAboutWindowCopyCodecReport}">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="&#xE8C8;"
                                    FontFamily="{StaticResource IconFontFamily}"
@@ -641,7 +641,7 @@
                 <Button Style="{StaticResource ChromeButton}"
                         Click="SaveSystemInfoButton_Click"
                         Margin="0,0,6,0"
-                        AutomationProperties.Name="Save system info to a text file"
+                        AutomationProperties.Name="{loc:Loc AutomationAboutWindowSaveSystemInfoToATextFile}"
                         ToolTip="Writes Images --system-info output to a text file in your temp folder and reveals it in Explorer.">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="&#xE74E;"
@@ -655,7 +655,7 @@
                 <Button Style="{StaticResource ChromeButton}"
                         Click="OpenAppDataButton_Click"
                         Margin="6,0,0,0"
-                        AutomationProperties.Name="Open Images data folder"
+                        AutomationProperties.Name="{loc:Loc AutomationAboutWindowOpenImagesDataFolder}"
                         ToolTip="Opens %LOCALAPPDATA%\Images — logs, settings.db, thumbs, update-check.json all live here.">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="&#xE8DA;"
@@ -672,7 +672,7 @@
                     Click="ExportSupportBundleButton_Click"
                     Margin="0,8,0,0"
                     HorizontalAlignment="Stretch"
-                    AutomationProperties.Name="Export a redacted support bundle for bug reports"
+                    AutomationProperties.Name="{loc:Loc AutomationAboutWindowExportARedactedSupportBundleForBugReports}"
                     ToolTip="Saves a ZIP with system info, codec report, recent logs, crash log, recovery records, and redacted settings. No image bytes or private paths.">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <TextBlock Text="&#xE721;"
@@ -687,7 +687,7 @@
             <Border Style="{StaticResource Card}"
                     Padding="16,14"
                     Margin="0,14,0,0"
-                    AutomationProperties.Name="Background jobs">
+                    AutomationProperties.Name="{loc:Loc AutomationAboutWindowBackgroundJobs}">
                 <StackPanel>
                     <TextBlock Text="Background jobs"
                                Style="{StaticResource Text.Body}"
@@ -739,7 +739,7 @@
                     HorizontalAlignment="Stretch"
                     IsDefault="True"
                     IsCancel="True"
-                    AutomationProperties.Name="Close About window">
+                    AutomationProperties.Name="{loc:Loc AutomationAboutWindowCloseAboutWindow}">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <TextBlock Text="&#xE711;"
                                FontFamily="{StaticResource IconFontFamily}"

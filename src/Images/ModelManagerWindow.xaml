@@ -76,7 +76,7 @@
                             Style="{StaticResource ChromeButton}"
                             Margin="8,0,0,0"
                             Click="ValidateButton_Click"
-                            AutomationProperties.Name="Validate CLIP pipeline runtime">
+                            AutomationProperties.Name="{loc:Loc AutomationModelManagerWindowValidateCLIPPipelineRuntime}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE9D5;"
                                        FontFamily="{StaticResource IconFontFamily}"

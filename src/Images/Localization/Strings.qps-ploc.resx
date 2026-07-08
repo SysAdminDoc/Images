@@ -2400,10 +2400,10 @@ Details written to:
     <value>[!!!!!!!!!!!! Add at least one pipeline step before running. !!!!!!!!!!!!]</value>
   </data>
   <data name="MacroPreviewItemFormat" xml:space="preserve">
-    <value>[!!! {0} → {1} !!!]</value>
+    <value>[!!! {0} â†’ {1} !!!]</value>
   </data>
   <data name="MacroPreviewItemFailedFormat" xml:space="preserve">
-    <value>[!!!! {0} — Error: {1} !!!!]</value>
+    <value>[!!!!! {0} â€” Error: {1} !!!!!]</value>
   </data>
   <data name="ImportInboxWindowTitle" xml:space="preserve">
     <value>[!!!!!! Images - Import inbox !!!!!!]</value>
@@ -2916,7 +2916,7 @@ Details written to:
     <value>[!!!!!!!!!!!! Semantic search storage is unavailable for this session. !!!!!!!!!!!!]</value>
   </data>
   <data name="SemanticSearchOperationFailedFormat" xml:space="preserve">
-    <value>[!!!!!! Semantic search failed: {0} !!!!!!]</value>
+    <value>[!!!!!!! Semantic search failed: {0} !!!!!!!]</value>
   </data>
   <data name="TagGraphWindowTitle" xml:space="preserve">
     <value>[!!!!!!! Images - Tag relationships !!!!!!!]</value>
@@ -4124,13 +4124,13 @@ Details written to:
     <value>[!! Help !!]</value>
   </data>
   <data name="CommandPaletteCommandListAutomationName" xml:space="preserve">
-    <value>[!!!! Command palette results !!!!]</value>
+    <value>[!!!!!! Command palette results !!!!!!]</value>
   </data>
   <data name="CommandPalette_Open" xml:space="preserve">
     <value>[!!! Open file... !!!]</value>
   </data>
   <data name="CommandPalette_BrowseFolder" xml:space="preserve">
-    <value>[!!!! Browse folder… !!!!]</value>
+    <value>[!!!! Browse folderâ€¦ !!!!]</value>
   </data>
   <data name="MainDialogBrowseFolder" xml:space="preserve">
     <value>[!!!!!! Browse folder for images !!!!!!]</value>
@@ -4438,7 +4438,7 @@ Details written to:
     <value>[!!!!!! Enter password for {0}: !!!!!!]</value>
   </data>
   <data name="MainFormatMismatch" xml:space="preserve">
-    <value>[!!!!!!!!!!!! File content is {0} but extension is {1} — expected {2} !!!!!!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! File content is {0} but extension is {1} â€” expected {2} !!!!!!!!!!!!]</value>
   </data>
   <data name="MainImageLoading" xml:space="preserve">
     <value>[!!! Loading... !!!]</value>
@@ -4459,7 +4459,7 @@ Details written to:
     <value>[!!!!! Extract motion video !!!!!]</value>
   </data>
   <data name="MainOpStrippingMetadata" xml:space="preserve">
-    <value>[!!!!!! Removing {0} metadata… !!!!!!]</value>
+    <value>[!!!!!! Removing {0} metadataâ€¦ !!!!!!]</value>
   </data>
   <data name="MainToastNoMetadataFound" xml:space="preserve">
     <value>[!!!!!! No {0} metadata found !!!!!!]</value>
@@ -4484,5 +4484,665 @@ Details written to:
   </data>
   <data name="MainToastXmpNoSidecars" xml:space="preserve">
     <value>[!!!!!!!!!!! No XMP sidecar files found in that folder !!!!!!!!!!!]</value>
+  </data>
+  <data name="AutomationAboutWindowCodecCapabilityMatrix" xml:space="preserve">
+    <value>[!!!!!! Codec capability matrix !!!!!!]</value>
+  </data>
+  <data name="AutomationAboutWindowCheckForUpdatesAutomatically" xml:space="preserve">
+    <value>[!!!!!!!! Check for updates automatically !!!!!!!!]</value>
+  </data>
+  <data name="AutomationAboutWindowViewAvailableUpdate" xml:space="preserve">
+    <value>[!!!!!! View available update !!!!!!]</value>
+  </data>
+  <data name="AutomationAboutWindowCheckForUpdates" xml:space="preserve">
+    <value>[!!!!! Check for updates !!!!!]</value>
+  </data>
+  <data name="AutomationAboutWindowOpenGitHubProjectPage" xml:space="preserve">
+    <value>[!!!!!! Open GitHub project page !!!!!!]</value>
+  </data>
+  <data name="AutomationAboutWindowOpenCrashLogFolder" xml:space="preserve">
+    <value>[!!!!!! Open crash log folder !!!!!!]</value>
+  </data>
+  <data name="AutomationAboutWindowCopyCodecReport" xml:space="preserve">
+    <value>[!!!!! Copy codec report !!!!!]</value>
+  </data>
+  <data name="AutomationAboutWindowSaveSystemInfoToATextFile" xml:space="preserve">
+    <value>[!!!!!!!! Save system info to a text file !!!!!!!!]</value>
+  </data>
+  <data name="AutomationAboutWindowOpenImagesDataFolder" xml:space="preserve">
+    <value>[!!!!!! Open Images data folder !!!!!!]</value>
+  </data>
+  <data name="AutomationAboutWindowExportARedactedSupportBundleForBugReports" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Export a redacted support bundle for bug reports !!!!!!!!!!!!]</value>
+  </data>
+  <data name="AutomationAboutWindowBackgroundJobs" xml:space="preserve">
+    <value>[!!!! Background jobs !!!!]</value>
+  </data>
+  <data name="AutomationAboutWindowCloseAboutWindow" xml:space="preserve">
+    <value>[!!!!! Close About window !!!!!]</value>
+  </data>
+  <data name="AutomationAnnotationsWindowRedColor" xml:space="preserve">
+    <value>[!!! Red color !!!]</value>
+  </data>
+  <data name="AutomationAnnotationsWindowYellowColor" xml:space="preserve">
+    <value>[!!! Yellow color !!!]</value>
+  </data>
+  <data name="AutomationAnnotationsWindowGreenColor" xml:space="preserve">
+    <value>[!!! Green color !!!]</value>
+  </data>
+  <data name="AutomationAnnotationsWindowBlueColor" xml:space="preserve">
+    <value>[!!! Blue color !!!]</value>
+  </data>
+  <data name="AutomationAnnotationsWindowWhiteColor" xml:space="preserve">
+    <value>[!!! White color !!!]</value>
+  </data>
+  <data name="AutomationExportPreviewWindowComparisonDivider" xml:space="preserve">
+    <value>[!!!!! Comparison divider !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowWorkflowNavigation" xml:space="preserve">
+    <value>[!!!!! Workflow navigation !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowLibrary" xml:space="preserve">
+    <value>[!! Library !!]</value>
+  </data>
+  <data name="AutomationMainWindowReviewMode" xml:space="preserve">
+    <value>[!!! Review mode !!!]</value>
+  </data>
+  <data name="AutomationMainWindowSemanticSearch" xml:space="preserve">
+    <value>[!!!! Semantic search !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowBatchProcessor" xml:space="preserve">
+    <value>[!!!! Batch processor !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowExportWorkbench" xml:space="preserve">
+    <value>[!!!! Export workbench !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowSettings" xml:space="preserve">
+    <value>[!! Settings !!]</value>
+  </data>
+  <data name="AutomationMainWindowViewportContextMenu" xml:space="preserve">
+    <value>[!!!!!! Viewport context menu !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowStopMotionVideo" xml:space="preserve">
+    <value>[!!!!! Stop motion video !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowImageCompareMode" xml:space="preserve">
+    <value>[!!!!! Image compare mode !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCompareAImage" xml:space="preserve">
+    <value>[!!!! Compare A image !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCompareBImage" xml:space="preserve">
+    <value>[!!!! Compare B image !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCompareOverlayAImage" xml:space="preserve">
+    <value>[!!!!!! Compare overlay A image !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCompareOverlayBImage" xml:space="preserve">
+    <value>[!!!!!! Compare overlay B image !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOCRTextOverlay" xml:space="preserve">
+    <value>[!!!! OCR text overlay !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowPixelSelectionOverlay" xml:space="preserve">
+    <value>[!!!!!! Pixel selection overlay !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCropSelectionOverlay" xml:space="preserve">
+    <value>[!!!!!! Crop selection overlay !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowLocalExposureBrushOverlay" xml:space="preserve">
+    <value>[!!!!!!! Local exposure brush overlay !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRedEyeCorrectionOverlay" xml:space="preserve">
+    <value>[!!!!!!! Red-eye correction overlay !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRetouchBrushOverlay" xml:space="preserve">
+    <value>[!!!!!! Retouch brush overlay !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowPinnedOverlayStatus" xml:space="preserve">
+    <value>[!!!!!! Pinned overlay status !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenImage" xml:space="preserve">
+    <value>[!!! Open image !!!]</value>
+  </data>
+  <data name="AutomationMainWindowPasteFromClipboard" xml:space="preserve">
+    <value>[!!!!! Paste from clipboard !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenSettings" xml:space="preserve">
+    <value>[!!!! Open settings !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenDiagnostics" xml:space="preserve">
+    <value>[!!!! Open diagnostics !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenImportInbox" xml:space="preserve">
+    <value>[!!!!! Open import inbox !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowTryAnotherImage" xml:space="preserve">
+    <value>[!!!!! Try another image !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenCodecDetails" xml:space="preserve">
+    <value>[!!!!! Open codec details !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenMicrosoftStoreToInstallCodecExtension" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Open Microsoft Store to install codec extension !!!!!!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRevealCurrentFileInExplorer" xml:space="preserve">
+    <value>[!!!!!!!! Reveal current file in Explorer !!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowGalleryWorkbench" xml:space="preserve">
+    <value>[!!!!! Gallery workbench !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowIndexingGalleryFilters" xml:space="preserve">
+    <value>[!!!!!! Indexing gallery filters !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCloseGallery" xml:space="preserve">
+    <value>[!!!! Close gallery !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowGallerySortControls" xml:space="preserve">
+    <value>[!!!!!! Gallery sort controls !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFilterGallery" xml:space="preserve">
+    <value>[!!!! Filter gallery !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowClearGalleryFilter" xml:space="preserve">
+    <value>[!!!!! Clear gallery filter !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowSortGalleryByName" xml:space="preserve">
+    <value>[!!!!! Sort gallery by name !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowSortGalleryByNewestModifiedDate" xml:space="preserve">
+    <value>[!!!!!!!!! Sort gallery by newest modified date !!!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowSortGalleryByType" xml:space="preserve">
+    <value>[!!!!! Sort gallery by type !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowSortGalleryByLargestFileSize" xml:space="preserve">
+    <value>[!!!!!!!!! Sort gallery by largest file size !!!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFilterGalleryToLandscapeImages" xml:space="preserve">
+    <value>[!!!!!!!!! Filter gallery to landscape images !!!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFilterGalleryToPortraitImages" xml:space="preserve">
+    <value>[!!!!!!!!! Filter gallery to portrait images !!!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFilterGalleryToRecentlyModifiedImages" xml:space="preserve">
+    <value>[!!!!!!!!!!! Filter gallery to recently modified images !!!!!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFilterGalleryToLargeImages" xml:space="preserve">
+    <value>[!!!!!!!! Filter gallery to large images !!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFilterGalleryToExactDuplicates" xml:space="preserve">
+    <value>[!!!!!!!!! Filter gallery to exact duplicates !!!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowThumbnailSize" xml:space="preserve">
+    <value>[!!!! Thumbnail size !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowGalleryThumbnails" xml:space="preserve">
+    <value>[!!!!! Gallery thumbnails !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowNoGalleryFilterMatches" xml:space="preserve">
+    <value>[!!!!!!! No gallery filter matches !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowImageCommandBar" xml:space="preserve">
+    <value>[!!!!! Image command bar !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFolderPosition" xml:space="preserve">
+    <value>[!!!! Folder position !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowPagePosition" xml:space="preserve">
+    <value>[!!!! Page position !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCompareWithNextImage" xml:space="preserve">
+    <value>[!!!!!! Compare with next image !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowPreviousImage" xml:space="preserve">
+    <value>[!!!! Previous image !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowNextImage" xml:space="preserve">
+    <value>[!!! Next image !!!]</value>
+  </data>
+  <data name="AutomationMainWindowPreviousPage" xml:space="preserve">
+    <value>[!!!! Previous page !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowPageScrubber" xml:space="preserve">
+    <value>[!!!! Page scrubber !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowNextPage" xml:space="preserve">
+    <value>[!!! Next page !!!]</value>
+  </data>
+  <data name="AutomationMainWindowMetadataHUD" xml:space="preserve">
+    <value>[!!! Metadata HUD !!!]</value>
+  </data>
+  <data name="AutomationMainWindowHideMetadataHUD" xml:space="preserve">
+    <value>[!!!!! Hide metadata HUD !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowTextExtractionStatus" xml:space="preserve">
+    <value>[!!!!!! Text extraction status !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCommandPaletteSearch" xml:space="preserve">
+    <value>[!!!!!! Command palette search !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowBottomFolderFilmstrip" xml:space="preserve">
+    <value>[!!!!!! Bottom folder filmstrip !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFolderSort" xml:space="preserve">
+    <value>[!!! Folder sort !!!]</value>
+  </data>
+  <data name="AutomationMainWindowPagedFile" xml:space="preserve">
+    <value>[!!! Paged file !!!]</value>
+  </data>
+  <data name="AutomationMainWindowAnimatedImage" xml:space="preserve">
+    <value>[!!!! Animated image !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowChannelIsolationActive" xml:space="preserve">
+    <value>[!!!!!! Channel isolation active !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowListenModeActive" xml:space="preserve">
+    <value>[!!!!! Listen mode active !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowSlideshowActive" xml:space="preserve">
+    <value>[!!!! Slideshow active !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRotateLeft" xml:space="preserve">
+    <value>[!!! Rotate left !!!]</value>
+  </data>
+  <data name="AutomationMainWindowRotateRight" xml:space="preserve">
+    <value>[!!! Rotate right !!!]</value>
+  </data>
+  <data name="AutomationMainWindowToggleFilmstrip" xml:space="preserve">
+    <value>[!!!! Toggle filmstrip !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowToggleMetadataHUD" xml:space="preserve">
+    <value>[!!!!! Toggle metadata HUD !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowExtractText" xml:space="preserve">
+    <value>[!!! Extract text !!!]</value>
+  </data>
+  <data name="AutomationMainWindowSendImageToRecycleBin" xml:space="preserve">
+    <value>[!!!!!!! Send image to Recycle Bin !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowSaveACopy" xml:space="preserve">
+    <value>[!!! Save a copy !!!]</value>
+  </data>
+  <data name="AutomationMainWindowPrintImage" xml:space="preserve">
+    <value>[!!! Print image !!!]</value>
+  </data>
+  <data name="AutomationMainWindowRevealImageInExplorer" xml:space="preserve">
+    <value>[!!!!!! Reveal image in Explorer !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCopyFilePath" xml:space="preserve">
+    <value>[!!!! Copy file path !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowStripGPSLocation" xml:space="preserve">
+    <value>[!!!!! Strip GPS location !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRefreshFolder" xml:space="preserve">
+    <value>[!!!! Refresh folder !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowAboutImages" xml:space="preserve">
+    <value>[!!! About Images !!!]</value>
+  </data>
+  <data name="AutomationMainWindowViewAvailableUpdate" xml:space="preserve">
+    <value>[!!!!!! View available update !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowUpdateCheckStatus" xml:space="preserve">
+    <value>[!!!!! Update check status !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowReviewLabels" xml:space="preserve">
+    <value>[!!!! Review labels !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowToggleReviewMode" xml:space="preserve">
+    <value>[!!!!! Toggle review mode !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRateOneStar" xml:space="preserve">
+    <value>[!!!! Rate one star !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRateTwoStars" xml:space="preserve">
+    <value>[!!!! Rate two stars !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRateThreeStars" xml:space="preserve">
+    <value>[!!!! Rate three stars !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRateFourStars" xml:space="preserve">
+    <value>[!!!! Rate four stars !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRateFiveStars" xml:space="preserve">
+    <value>[!!!! Rate five stars !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowClearRating" xml:space="preserve">
+    <value>[!!! Clear rating !!!]</value>
+  </data>
+  <data name="AutomationMainWindowMarkPick" xml:space="preserve">
+    <value>[!!! Mark pick !!!]</value>
+  </data>
+  <data name="AutomationMainWindowMarkReject" xml:space="preserve">
+    <value>[!!! Mark reject !!!]</value>
+  </data>
+  <data name="AutomationMainWindowClearReviewLabel" xml:space="preserve">
+    <value>[!!!!! Clear review label !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowUndoReviewLabel" xml:space="preserve">
+    <value>[!!!!! Undo review label !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowScoreFolderForAssistedCulling" xml:space="preserve">
+    <value>[!!!!!!!!! Score folder for assisted culling !!!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowAssistedCullingScores" xml:space="preserve">
+    <value>[!!!!!! Assisted culling scores !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenCullingCandidate" xml:space="preserve">
+    <value>[!!!!!! Open culling candidate !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowKeepCullingCandidate" xml:space="preserve">
+    <value>[!!!!!! Keep culling candidate !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRejectCullingCandidate" xml:space="preserve">
+    <value>[!!!!!! Reject culling candidate !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFolderPreviewThumbnails" xml:space="preserve">
+    <value>[!!!!!!! Folder preview thumbnails !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFileNameWithoutExtension" xml:space="preserve">
+    <value>[!!!!!!! File name without extension !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFileExtension" xml:space="preserve">
+    <value>[!!!! File extension !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowArchiveBookControls" xml:space="preserve">
+    <value>[!!!!!! Archive book controls !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFirstBookPage" xml:space="preserve">
+    <value>[!!!! First book page !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowPreviousBookPage" xml:space="preserve">
+    <value>[!!!!! Previous book page !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowNextBookPage" xml:space="preserve">
+    <value>[!!!! Next book page !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowLastBookPage" xml:space="preserve">
+    <value>[!!!! Last book page !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRightToLeftBookPageTurns" xml:space="preserve">
+    <value>[!!!!!!!! Right-to-left book page turns !!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCleanOldArchiveScans" xml:space="preserve">
+    <value>[!!!!!! Clean old archive scans !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowTwoPageArchiveSpreads" xml:space="preserve">
+    <value>[!!!!!! Two-page archive spreads !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRecentRenames" xml:space="preserve">
+    <value>[!!!! Recent renames !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowUndoRename" xml:space="preserve">
+    <value>[!!! Undo rename !!!]</value>
+  </data>
+  <data name="AutomationMainWindowRecentFolders" xml:space="preserve">
+    <value>[!!!! Recent folders !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowArchiveBookHistory" xml:space="preserve">
+    <value>[!!!!! Archive book history !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOrganizationControls" xml:space="preserve">
+    <value>[!!!!!! Organization controls !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenTagRelationships" xml:space="preserve">
+    <value>[!!!!!! Open tag relationships !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowAutomationControls" xml:space="preserve">
+    <value>[!!!!! Automation controls !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenMacroActions" xml:space="preserve">
+    <value>[!!!!! Open macro actions !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenBatchProcessor" xml:space="preserve">
+    <value>[!!!!! Open batch processor !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenModelManager" xml:space="preserve">
+    <value>[!!!!! Open model manager !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenSemanticSearch" xml:space="preserve">
+    <value>[!!!!! Open semantic search !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCleanupControls" xml:space="preserve">
+    <value>[!!!! Cleanup controls !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenDuplicateCleanup" xml:space="preserve">
+    <value>[!!!!!! Open duplicate cleanup !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenFileHealthScan" xml:space="preserve">
+    <value>[!!!!!! Open file health scan !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowOpenRecoveryCenter" xml:space="preserve">
+    <value>[!!!!! Open recovery center !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCompareControls" xml:space="preserve">
+    <value>[!!!! Compare controls !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCompareWithChosenImage" xml:space="preserve">
+    <value>[!!!!!!! Compare with chosen image !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowToggleCompareLayout" xml:space="preserve">
+    <value>[!!!!!! Toggle compare layout !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowSwapCompareAAndB" xml:space="preserve">
+    <value>[!!!!! Swap compare A and B !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowExitCompareMode" xml:space="preserve">
+    <value>[!!!!! Exit compare mode !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCompareBOpacity" xml:space="preserve">
+    <value>[!!!!! Compare B opacity !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowPinnedOverlayControls" xml:space="preserve">
+    <value>[!!!!!! Pinned overlay controls !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowTogglePinnedOverlayMode" xml:space="preserve">
+    <value>[!!!!!!! Toggle pinned overlay mode !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowPinnedOverlayOpacity" xml:space="preserve">
+    <value>[!!!!!! Pinned overlay opacity !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowToggleClickThroughOverlay" xml:space="preserve">
+    <value>[!!!!!!! Toggle click-through overlay !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowExitPinnedOverlayMode" xml:space="preserve">
+    <value>[!!!!!! Exit pinned overlay mode !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowAnimationFrameWorkbench" xml:space="preserve">
+    <value>[!!!!!!! Animation frame workbench !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowPlayOrPauseAnimation" xml:space="preserve">
+    <value>[!!!!!! Play or pause animation !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowAnimationFrameScrubber" xml:space="preserve">
+    <value>[!!!!!! Animation frame scrubber !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFirstAnimationFrame" xml:space="preserve">
+    <value>[!!!!!! First animation frame !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowPreviousAnimationFrame" xml:space="preserve">
+    <value>[!!!!!! Previous animation frame !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowNextAnimationFrame" xml:space="preserve">
+    <value>[!!!!! Next animation frame !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowLastAnimationFrame" xml:space="preserve">
+    <value>[!!!!! Last animation frame !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowAnimationPlaybackSpeed" xml:space="preserve">
+    <value>[!!!!!! Animation playback speed !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowAnimationFrameTimeline" xml:space="preserve">
+    <value>[!!!!!! Animation frame timeline !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCopySelectedAnimationFrame" xml:space="preserve">
+    <value>[!!!!!!!! Copy selected animation frame !!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowExportSelectedAnimationFrame" xml:space="preserve">
+    <value>[!!!!!!!! Export selected animation frame !!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowTogglePixelSelectionMode" xml:space="preserve">
+    <value>[!!!!!!! Toggle pixel selection mode !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCopySelectedPixels" xml:space="preserve">
+    <value>[!!!!! Copy selected pixels !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowClearSelectedPixels" xml:space="preserve">
+    <value>[!!!!!! Clear selected pixels !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCancelPixelSelectionMode" xml:space="preserve">
+    <value>[!!!!!!! Cancel pixel selection mode !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowToggleCropMode" xml:space="preserve">
+    <value>[!!!! Toggle crop mode !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFreeCropAspect" xml:space="preserve">
+    <value>[!!!! Free crop aspect !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowSquareCropAspect" xml:space="preserve">
+    <value>[!!!!! Square crop aspect !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowThreeByTwoCropAspect" xml:space="preserve">
+    <value>[!!!!!! Three by two crop aspect !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowFourByThreeCropAspect" xml:space="preserve">
+    <value>[!!!!!!! Four by three crop aspect !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowSixteenByNineCropAspect" xml:space="preserve">
+    <value>[!!!!!!! Sixteen by nine crop aspect !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCustomCropAspect" xml:space="preserve">
+    <value>[!!!!! Custom crop aspect !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCustomCropAspectWidth" xml:space="preserve">
+    <value>[!!!!!! Custom crop aspect width !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCustomCropAspectHeight" xml:space="preserve">
+    <value>[!!!!!!! Custom crop aspect height !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowApplyCropToFile" xml:space="preserve">
+    <value>[!!!!! Apply crop to file !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCancelCrop" xml:space="preserve">
+    <value>[!!! Cancel crop !!!]</value>
+  </data>
+  <data name="AutomationMainWindowToggleLocalExposureBrush" xml:space="preserve">
+    <value>[!!!!!!! Toggle local exposure brush !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowUseDodgeBrush" xml:space="preserve">
+    <value>[!!!! Use dodge brush !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowUseBurnBrush" xml:space="preserve">
+    <value>[!!!! Use burn brush !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowExposureBrushRadius" xml:space="preserve">
+    <value>[!!!!!! Exposure brush radius !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowExposureBrushStrength" xml:space="preserve">
+    <value>[!!!!!! Exposure brush strength !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowApplyLocalExposureBrushToEditHistory" xml:space="preserve">
+    <value>[!!!!!!!!!!! Apply local exposure brush to edit history !!!!!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowClearLocalExposureBrushStrokes" xml:space="preserve">
+    <value>[!!!!!!!!! Clear local exposure brush strokes !!!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCancelLocalExposureBrush" xml:space="preserve">
+    <value>[!!!!!!! Cancel local exposure brush !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowToggleRedEyeCorrection" xml:space="preserve">
+    <value>[!!!!!!! Toggle red-eye correction !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRedEyeCorrectionRadius" xml:space="preserve">
+    <value>[!!!!!!! Red-eye correction radius !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRedEyeCorrectionStrength" xml:space="preserve">
+    <value>[!!!!!!! Red-eye correction strength !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRedEyeCorrectionRedThreshold" xml:space="preserve">
+    <value>[!!!!!!!! Red-eye correction red threshold !!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowApplyRedEyeCorrectionToEditHistory" xml:space="preserve">
+    <value>[!!!!!!!!!! Apply red-eye correction to edit history !!!!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowClearRedEyeCorrectionMarks" xml:space="preserve">
+    <value>[!!!!!!!! Clear red-eye correction marks !!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCancelRedEyeCorrection" xml:space="preserve">
+    <value>[!!!!!!! Cancel red-eye correction !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowToggleCloneAndHealRetouch" xml:space="preserve">
+    <value>[!!!!!!!! Toggle clone and heal retouch !!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowUseCloneStamp" xml:space="preserve">
+    <value>[!!!! Use clone stamp !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowUseHealingBrush" xml:space="preserve">
+    <value>[!!!!! Use healing brush !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRetouchBrushRadius" xml:space="preserve">
+    <value>[!!!!! Retouch brush radius !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowRetouchBrushStrength" xml:space="preserve">
+    <value>[!!!!!! Retouch brush strength !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowApplyRetouchToEditHistory" xml:space="preserve">
+    <value>[!!!!!!!! Apply retouch to edit history !!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowClearRetouchStrokes" xml:space="preserve">
+    <value>[!!!!!! Clear retouch strokes !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowClearRetouchSource" xml:space="preserve">
+    <value>[!!!!! Clear retouch source !!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCancelRetouch" xml:space="preserve">
+    <value>[!!!! Cancel retouch !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowTogglePixelInspector" xml:space="preserve">
+    <value>[!!!!!! Toggle pixel inspector !!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowUseNearestNeighborPreviewScaling" xml:space="preserve">
+    <value>[!!!!!!!!! Use nearest-neighbor preview scaling !!!!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCopyHEXColor" xml:space="preserve">
+    <value>[!!!! Copy HEX color !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCopyRGBColor" xml:space="preserve">
+    <value>[!!!! Copy RGB color !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowCopyHSVColor" xml:space="preserve">
+    <value>[!!!! Copy HSV color !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowClearInspectorMeasurement" xml:space="preserve">
+    <value>[!!!!!!! Clear inspector measurement !!!!!!!]</value>
+  </data>
+  <data name="AutomationMainWindowPhotoMetadata" xml:space="preserve">
+    <value>[!!!! Photo metadata !!!!]</value>
+  </data>
+  <data name="AutomationMainWindowColorProfileAndHistogram" xml:space="preserve">
+    <value>[!!!!!!! Color profile and histogram !!!!!!!]</value>
+  </data>
+  <data name="AutomationModelManagerWindowValidateCLIPPipelineRuntime" xml:space="preserve">
+    <value>[!!!!!!!! Validate CLIP pipeline runtime !!!!!!!!]</value>
+  </data>
+  <data name="AutomationSemanticSearchWindowSemanticSearchEmptyState" xml:space="preserve">
+    <value>[!!!!!!! Semantic search empty state !!!!!!!]</value>
+  </data>
+  <data name="AutomationSettingsWindowClearThumbnailCache" xml:space="preserve">
+    <value>[!!!!!! Clear thumbnail cache !!!!!!]</value>
+  </data>
+  <data name="AutomationSettingsWindowClearLogFiles" xml:space="preserve">
+    <value>[!!!! Clear log files !!!!]</value>
+  </data>
+  <data name="AutomationSettingsWindowClearRecoveryActionLog" xml:space="preserve">
+    <value>[!!!!!!! Clear recovery action log !!!!!!!]</value>
+  </data>
+  <data name="AutomationSettingsWindowClearNetworkActivityLog" xml:space="preserve">
+    <value>[!!!!!!! Clear network activity log !!!!!!!]</value>
+  </data>
+  <data name="AutomationSettingsWindowRefreshStorageSizes" xml:space="preserve">
+    <value>[!!!!!! Refresh storage sizes !!!!!!]</value>
   </data>
 </root>

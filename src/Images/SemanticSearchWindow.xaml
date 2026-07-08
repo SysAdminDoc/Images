@@ -197,7 +197,7 @@
                     <Grid Grid.Row="1">
                         <Border x:Name="EmptyState"
                                 Style="{StaticResource EmptyStateCard}"
-                                AutomationProperties.Name="Semantic search empty state">
+                                AutomationProperties.Name="{loc:Loc AutomationSemanticSearchWindowSemanticSearchEmptyState}">
                             <StackPanel>
                                 <Border Style="{StaticResource EmptyStateIcon}">
                                     <TextBlock Text="&#xE721;"

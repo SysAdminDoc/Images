@@ -42,7 +42,7 @@
                 BorderBrush="{DynamicResource NavRailBorderBrush}"
                 BorderThickness="0,0,1,0"
                 Visibility="{Binding IsFullscreen, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}"
-                AutomationProperties.Name="Workflow navigation">
+                AutomationProperties.Name="{loc:Loc AutomationMainWindowWorkflowNavigation}">
             <Grid Margin="10,14,10,14">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -72,7 +72,7 @@
                     <Button Style="{StaticResource NavRailButton}"
                             Command="{Binding OpenCommand}"
                             ToolTip="Open an image or folder"
-                            AutomationProperties.Name="Library">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowLibrary}">
                         <StackPanel>
                             <TextBlock Text="&#xE8E5;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                             <TextBlock Text="Library" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
@@ -82,7 +82,7 @@
                             Command="{Binding ToggleReviewModeCommand}"
                             Tag="{Binding IsReviewMode}"
                             ToolTip="{Binding ReviewModeText}"
-                            AutomationProperties.Name="Review mode">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowReviewMode}">
                         <StackPanel>
                             <TextBlock Text="&#xE8EC;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                             <TextBlock Text="Review" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
@@ -91,7 +91,7 @@
                     <Button Style="{StaticResource NavRailButton}"
                             Command="{Binding OpenSemanticSearchCommand}"
                             ToolTip="Search this collection"
-                            AutomationProperties.Name="Semantic search">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowSemanticSearch}">
                         <StackPanel>
                             <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                             <TextBlock Text="Search" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
@@ -100,7 +100,7 @@
                     <Button Style="{StaticResource NavRailButton}"
                             Command="{Binding OpenBatchProcessorCommand}"
                             ToolTip="Batch processor"
-                            AutomationProperties.Name="Batch processor">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowBatchProcessor}">
                         <StackPanel>
                             <TextBlock Text="&#xE8EF;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                             <TextBlock Text="Batch" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
@@ -109,7 +109,7 @@
                     <Button Style="{StaticResource NavRailButton}"
                             Command="{Binding OpenExportWorkbenchCommand}"
                             ToolTip="Export workbench"
-                            AutomationProperties.Name="Export workbench">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowExportWorkbench}">
                         <StackPanel>
                             <TextBlock Text="&#xE74E;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                             <TextBlock Text="Export" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
@@ -121,7 +121,7 @@
                     <Button Style="{StaticResource NavRailButton}"
                             Command="{Binding SettingsCommand}"
                             ToolTip="Settings"
-                            AutomationProperties.Name="Settings">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowSettings}">
                         <StackPanel>
                             <TextBlock Text="&#xE713;" FontFamily="{StaticResource IconFontFamily}" FontSize="15" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                             <TextBlock Text="Settings" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
@@ -149,7 +149,7 @@
                 <Grid.ContextMenu>
                     <ContextMenu Style="{StaticResource ViewportContextMenu}"
                                  AutomationProperties.AutomationId="ViewportContextMenu"
-                                 AutomationProperties.Name="Viewport context menu">
+                                 AutomationProperties.Name="{loc:Loc AutomationMainWindowViewportContextMenu}">
                         <MenuItem Header="Open…" Command="{Binding OpenCommand}" InputGestureText="{Binding ShortcutTexts[open]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
@@ -420,12 +420,12 @@
                             Width="36" Height="36"
                             Style="{DynamicResource ChromeButton}"
                             Command="{Binding StopMotionVideoCommand}"
-                            AutomationProperties.Name="Stop motion video"
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowStopMotionVideo}"
                             ToolTip="Stop video" />
                 </Grid>
 
                 <Grid Visibility="{Binding ShowCompareMode, Converter={StaticResource BoolToVis}}"
-                      AutomationProperties.Name="Image compare mode"
+                      AutomationProperties.Name="{loc:Loc AutomationMainWindowImageCompareMode}"
                       AutomationProperties.HelpText="{Binding CompareStatusText}">
                     <Grid Visibility="{Binding IsCompareOverlayMode, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
                         <Grid.ColumnDefinitions>
@@ -442,7 +442,7 @@
                                               FlipVertical="{Binding FlipVertical}"
                                               UseNearestNeighborScaling="{Binding InspectorNearestNeighborPreview}"
                                               ViewChanged="CompareCanvas_ViewChanged"
-                                              AutomationProperties.Name="Compare A image" />
+                                              AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareAImage}" />
                             <Border HorizontalAlignment="Left"
                                     VerticalAlignment="Top"
                                     Margin="16"
@@ -474,7 +474,7 @@
                                               FlipVertical="{Binding FlipVertical}"
                                               UseNearestNeighborScaling="{Binding InspectorNearestNeighborPreview}"
                                               ViewChanged="CompareCanvas_ViewChanged"
-                                              AutomationProperties.Name="Compare B image" />
+                                              AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareBImage}" />
                             <Border HorizontalAlignment="Left"
                                     VerticalAlignment="Top"
                                     Margin="16"
@@ -507,7 +507,7 @@
                                           FlipVertical="{Binding FlipVertical}"
                                           UseNearestNeighborScaling="{Binding InspectorNearestNeighborPreview}"
                                           ViewChanged="CompareCanvas_ViewChanged"
-                                          AutomationProperties.Name="Compare overlay A image" />
+                                          AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareOverlayAImage}" />
                         <ctl:ZoomPanImage x:Name="CompareOverlaySecondaryCanvas"
                                           Source="{Binding CompareImage}"
                                           Rotation="{Binding Rotation}"
@@ -517,7 +517,7 @@
                                           IsHitTestVisible="False"
                                           UseNearestNeighborScaling="{Binding InspectorNearestNeighborPreview}"
                                           ViewChanged="CompareCanvas_ViewChanged"
-                                          AutomationProperties.Name="Compare overlay B image" />
+                                          AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareOverlayBImage}" />
                         <Border HorizontalAlignment="Left"
                                 VerticalAlignment="Top"
                                 Margin="16"
@@ -546,7 +546,7 @@
                                 Target="{Binding ElementName=Canvas}"
                                 IsHitTestVisible="{Binding IsOcrMode}"
                                 Opacity="0.95"
-                                AutomationProperties.Name="OCR text overlay" />
+                                AutomationProperties.Name="{loc:Loc AutomationMainWindowOCRTextOverlay}" />
 
                 <ctl:SelectionOverlay Visibility="{Binding ShowSelectionOverlay, Converter={StaticResource BoolToVis}}"
                                       Target="{Binding ElementName=Canvas}"
@@ -554,32 +554,32 @@
                                       CopyCommand="{Binding CopySelectionCommand}"
                                       ClearCommand="{Binding ClearSelectionCommand}"
                                       Opacity="0.98"
-                                      AutomationProperties.Name="Pixel selection overlay" />
+                                      AutomationProperties.Name="{loc:Loc AutomationMainWindowPixelSelectionOverlay}" />
 
                 <ctl:CropOverlay Visibility="{Binding ShowCropOverlay, Converter={StaticResource BoolToVis}}"
                                  Target="{Binding ElementName=Canvas}"
                                  Selection="{Binding CropSelection}"
                                  ApplyCommand="{Binding ApplyCropCommand}"
                                  Opacity="0.98"
-                                 AutomationProperties.Name="Crop selection overlay" />
+                                 AutomationProperties.Name="{loc:Loc AutomationMainWindowCropSelectionOverlay}" />
 
                 <ctl:LocalExposureBrushOverlay Visibility="{Binding ShowExposureBrushOverlay, Converter={StaticResource BoolToVis}}"
                                                Target="{Binding ElementName=Canvas}"
                                                Strokes="{Binding ExposureBrushStrokes}"
                                                Opacity="0.92"
-                                               AutomationProperties.Name="Local exposure brush overlay" />
+                                               AutomationProperties.Name="{loc:Loc AutomationMainWindowLocalExposureBrushOverlay}" />
 
                 <ctl:RedEyeCorrectionOverlay Visibility="{Binding ShowRedEyeCorrectionOverlay, Converter={StaticResource BoolToVis}}"
                                              Target="{Binding ElementName=Canvas}"
                                              Marks="{Binding RedEyeCorrectionMarks}"
                                              Opacity="0.94"
-                                             AutomationProperties.Name="Red-eye correction overlay" />
+                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowRedEyeCorrectionOverlay}" />
 
                 <ctl:RetouchBrushOverlay Visibility="{Binding ShowRetouchOverlay, Converter={StaticResource BoolToVis}}"
                                          Target="{Binding ElementName=Canvas}"
                                          Strokes="{Binding RetouchStrokes}"
                                          Opacity="0.92"
-                                         AutomationProperties.Name="Retouch brush overlay" />
+                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowRetouchBrushOverlay}" />
 
                 <Border HorizontalAlignment="Center"
                         VerticalAlignment="Top"
@@ -593,7 +593,7 @@
                         Effect="{StaticResource Elevation.Low}"
                         IsHitTestVisible="False"
                         Visibility="{Binding ShowOverlayBanner, Converter={StaticResource BoolToVis}}"
-                        AutomationProperties.Name="Pinned overlay status"
+                        AutomationProperties.Name="{loc:Loc AutomationMainWindowPinnedOverlayStatus}"
                         AutomationProperties.HelpText="{Binding OverlayStatusText}">
                     <StackPanel Orientation="Horizontal">
                         <Border Width="28"
@@ -766,7 +766,7 @@
                                     Style="{StaticResource PrimaryButton}"
                                     Margin="0,0,10,8"
                                     ToolTip="{Binding ShortcutTexts[open], StringFormat=Open image ({0})}"
-                                    AutomationProperties.Name="Open image"
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenImage}"
                                     AutomationProperties.HelpText="{Binding ShortcutTexts[open], StringFormat=Choose an image file from disk. Shortcut: {0}.}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE8E5;"
@@ -784,7 +784,7 @@
                                     Style="{StaticResource ChromeButton}"
                                     Margin="0,0,10,8"
                                     ToolTip="{Binding ShortcutTexts[paste], StringFormat=Paste image or supported file from clipboard ({0})}"
-                                    AutomationProperties.Name="Paste from clipboard"
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowPasteFromClipboard}"
                                     AutomationProperties.HelpText="{Binding ShortcutTexts[paste], StringFormat=Open a supported image file from the clipboard or save and open clipboard bitmap data. Shortcut: {0}.}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE77F;"
@@ -799,7 +799,7 @@
                                     Style="{StaticResource ChromeButton}"
                                     Margin="0,0,10,8"
                                     ToolTip="{Binding ShortcutTexts[settings], StringFormat=Open Settings ({0})}"
-                                    AutomationProperties.Name="Open settings">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenSettings}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE713;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -813,7 +813,7 @@
                                     Style="{StaticResource ChromeButton}"
                                     Margin="0,0,0,8"
                                     ToolTip="Open diagnostics and app information"
-                                    AutomationProperties.Name="Open diagnostics">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenDiagnostics}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE946;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -829,7 +829,7 @@
                             <Button Command="{Binding OpenImportInboxCommand}"
                                     Style="{StaticResource ChromeButton}"
                                     Margin="0,0,10,8"
-                                    AutomationProperties.Name="Open import inbox">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenImportInbox}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE8B5;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -939,7 +939,7 @@
                             <Button Command="{Binding OpenCommand}"
                                     Style="{StaticResource PrimaryButton}"
                                     Margin="0,0,12,8"
-                                    AutomationProperties.Name="Try another image">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowTryAnotherImage}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE8E5;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -956,7 +956,7 @@
                                     Style="{StaticResource ChromeButton}"
                                     Margin="0,0,12,8"
                                     Visibility="{Binding LoadErrorShowsCodecDetails, Converter={StaticResource BoolToVis}}"
-                                    AutomationProperties.Name="Open codec details">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenCodecDetails}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE946;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -970,7 +970,7 @@
                                     Style="{StaticResource PrimaryButton}"
                                     Margin="0,0,12,8"
                                     Visibility="{Binding HasLoadErrorStoreAction, Converter={StaticResource BoolToVis}}"
-                                    AutomationProperties.Name="Open Microsoft Store to install codec extension">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenMicrosoftStoreToInstallCodecExtension}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE719;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -986,7 +986,7 @@
                             <Button Command="{Binding RevealCommand}"
                                     Style="{StaticResource ChromeButton}"
                                     Margin="0,0,0,8"
-                                    AutomationProperties.Name="Reveal current file in Explorer">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowRevealCurrentFileInExplorer}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE838;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -1054,7 +1054,7 @@
                         Padding="28,24"
                         Visibility="{Binding ShowGallery, Converter={StaticResource BoolToVis}}"
                         Panel.ZIndex="18"
-                        AutomationProperties.Name="Gallery workbench"
+                        AutomationProperties.Name="{loc:Loc AutomationMainWindowGalleryWorkbench}"
                         AutomationProperties.LiveSetting="Polite">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -1101,7 +1101,7 @@
                                         BorderBrush="{DynamicResource HairlineBrush}"
                                         BorderThickness="1"
                                         Visibility="{Binding IsGallerySmartFilterIndexing, Converter={StaticResource BoolToVis}}"
-                                        AutomationProperties.Name="Indexing gallery filters">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowIndexingGalleryFilters}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE895;"
                                                    FontFamily="{StaticResource IconFontFamily}"
@@ -1121,7 +1121,7 @@
                                     Height="34"
                                     Padding="0"
                                     ToolTip="Close gallery"
-                                    AutomationProperties.Name="Close gallery">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowCloseGallery}">
                                 <TextBlock Text="&#xE8BB;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="12"
@@ -1133,7 +1133,7 @@
                         <WrapPanel Grid.Row="1"
                                    Margin="0,0,0,18"
                                    KeyboardNavigation.TabNavigation="Continue"
-                                   AutomationProperties.Name="Gallery sort controls">
+                                   AutomationProperties.Name="{loc:Loc AutomationMainWindowGallerySortControls}">
                             <Border Width="280"
                                     Height="32"
                                     Margin="0,0,8,8"
@@ -1162,7 +1162,7 @@
                                              Padding="0"
                                              MinHeight="24"
                                              VerticalContentAlignment="Center"
-                                             AutomationProperties.Name="Filter gallery" />
+                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowFilterGallery}" />
                                     <Button Grid.Column="2"
                                             Command="{Binding ClearGalleryFilterCommand}"
                                             Width="24"
@@ -1171,7 +1171,7 @@
                                             Margin="6,0,0,0"
                                             Visibility="{Binding HasGalleryFilter, Converter={StaticResource BoolToVis}}"
                                             ToolTip="Clear filter"
-                                            AutomationProperties.Name="Clear gallery filter">
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowClearGalleryFilter}">
                                         <Button.Style>
                                             <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                                 <Setter Property="BorderThickness" Value="0" />
@@ -1191,7 +1191,7 @@
                                     Padding="12,6"
                                     MinHeight="30"
                                     Margin="0,0,8,8"
-                                    AutomationProperties.Name="Sort gallery by name">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowSortGalleryByName}">
                                 <Button.Style>
                                     <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                         <Style.Triggers>
@@ -1216,7 +1216,7 @@
                                     Padding="12,6"
                                     MinHeight="30"
                                     Margin="0,0,8,8"
-                                    AutomationProperties.Name="Sort gallery by newest modified date">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowSortGalleryByNewestModifiedDate}">
                                 <Button.Style>
                                     <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                         <Style.Triggers>
@@ -1241,7 +1241,7 @@
                                     Padding="12,6"
                                     MinHeight="30"
                                     Margin="0,0,8,8"
-                                    AutomationProperties.Name="Sort gallery by type">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowSortGalleryByType}">
                                 <Button.Style>
                                     <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                         <Style.Triggers>
@@ -1266,7 +1266,7 @@
                                     Padding="12,6"
                                     MinHeight="30"
                                     Margin="0,0,8,8"
-                                    AutomationProperties.Name="Sort gallery by largest file size">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowSortGalleryByLargestFileSize}">
                                 <Button.Style>
                                     <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                         <Style.Triggers>
@@ -1293,7 +1293,7 @@
                                     MinHeight="30"
                                     Margin="0,0,8,8"
                                     ToolTip="{Binding GalleryFilterTooltip}"
-                                    AutomationProperties.Name="Filter gallery to landscape images">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowFilterGalleryToLandscapeImages}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE809;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -1310,7 +1310,7 @@
                                     MinHeight="30"
                                     Margin="0,0,8,8"
                                     ToolTip="{Binding GalleryFilterTooltip}"
-                                    AutomationProperties.Name="Filter gallery to portrait images">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowFilterGalleryToPortraitImages}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE91B;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -1327,7 +1327,7 @@
                                     MinHeight="30"
                                     Margin="0,0,8,8"
                                     ToolTip="{Binding GalleryFilterTooltip}"
-                                    AutomationProperties.Name="Filter gallery to recently modified images">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowFilterGalleryToRecentlyModifiedImages}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE823;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -1344,7 +1344,7 @@
                                     MinHeight="30"
                                     Margin="0,0,8,8"
                                     ToolTip="{Binding GalleryFilterTooltip}"
-                                    AutomationProperties.Name="Filter gallery to large images">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowFilterGalleryToLargeImages}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE740;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -1361,7 +1361,7 @@
                                     MinHeight="30"
                                     Margin="0,0,8,8"
                                     ToolTip="{Binding GalleryFilterTooltip}"
-                                    AutomationProperties.Name="Filter gallery to exact duplicates">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowFilterGalleryToExactDuplicates}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE8C8;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -1398,7 +1398,7 @@
                                         IsSnapToTickEnabled="False"
                                         SmallChange="10"
                                         LargeChange="40"
-                                        AutomationProperties.Name="Thumbnail size"
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowThumbnailSize}"
                                         ToolTip="Thumbnail size" />
                                 <TextBlock Text="&#xE8A3;"
                                            FontFamily="{StaticResource IconFontFamily}"
@@ -1423,7 +1423,7 @@
                                  KeyboardNavigation.DirectionalNavigation="Contained"
                                  MouseDoubleClick="GalleryItems_MouseDoubleClick"
                                  KeyboardNavigation.TabNavigation="Cycle"
-                                 AutomationProperties.Name="Gallery thumbnails"
+                                 AutomationProperties.Name="{loc:Loc AutomationMainWindowGalleryThumbnails}"
                                  AutomationProperties.HelpText="{Binding GalleryStatusText}">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -1555,7 +1555,7 @@
                         <Border Grid.Row="3"
                                 Background="{DynamicResource BaseBrush}"
                                 Visibility="{Binding ShowGalleryFilterEmpty, Converter={StaticResource BoolToVis}}"
-                                AutomationProperties.Name="No gallery filter matches">
+                                AutomationProperties.Name="{loc:Loc AutomationMainWindowNoGalleryFilterMatches}">
                             <StackPanel HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         MaxWidth="340">
@@ -1585,7 +1585,7 @@
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Top"
                             Margin="20,18,20,0"
-                            AutomationProperties.Name="Image command bar">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowImageCommandBar}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -1635,7 +1635,7 @@
                                         Background="{DynamicResource AccentPanelBrush}"
                                         BorderBrush="{DynamicResource AccentBrush}"
                                         Margin="0,0,8,0"
-                                        AutomationProperties.Name="Folder position">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowFolderPosition}">
                                     <TextBlock Text="{Binding PositionText}"
                                                FontSize="11"
                                                FontWeight="SemiBold"
@@ -1644,7 +1644,7 @@
                                 <Border Style="{StaticResource Badge}"
                                         Background="{DynamicResource SurfacePanelBrush}"
                                         Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}"
-                                        AutomationProperties.Name="Page position">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowPagePosition}">
                                     <TextBlock Text="{Binding PagePositionText}"
                                                FontSize="11"
                                                FontWeight="SemiBold"
@@ -1661,7 +1661,7 @@
                                         MinHeight="30"
                                         Visibility="{Binding CanUseCompareMode, Converter={StaticResource BoolToVis}}"
                                         ToolTip="{Binding CompareStatusText}"
-                                        AutomationProperties.Name="Compare with next image">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareWithNextImage}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE8AB;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,7,0" VerticalAlignment="Center" />
                                         <TextBlock Text="Compare" VerticalAlignment="Center" />
@@ -1672,7 +1672,7 @@
                                         Padding="13,6"
                                         MinHeight="30"
                                         Margin="8,0,0,0"
-                                        AutomationProperties.Name="Export workbench">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowExportWorkbench}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE74E;"
                                                    FontFamily="{StaticResource IconFontFamily}"
@@ -1754,7 +1754,7 @@
                             Margin="22,0,0,0"
                             Content="&#xE76B;"
                             Opacity="0"
-                            AutomationProperties.Name="Previous image"
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousImage}"
                             AutomationProperties.HelpText="Left arrow or Backspace" />
                     <Button x:Name="NextArrow"
                             Style="{StaticResource NavArrowButton}"
@@ -1764,7 +1764,7 @@
                             Margin="0,0,22,0"
                             Content="&#xE76C;"
                             Opacity="0"
-                            AutomationProperties.Name="Next image"
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowNextImage}"
                             AutomationProperties.HelpText="Right arrow or Space" />
 
                     <!-- Position chip — elevated floating chrome -->
@@ -1773,7 +1773,7 @@
                             VerticalAlignment="Top"
                             Margin="0,80,0,0"
                             AutomationProperties.LiveSetting="Polite"
-                            AutomationProperties.Name="Folder position">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowFolderPosition}">
                         <TextBlock Text="{Binding PositionText}"
                                    Foreground="{DynamicResource FloatingChromeTextBrush}"
                                    FontSize="12"
@@ -1786,7 +1786,7 @@
                             Margin="0,122,0,0"
                             Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}"
                             AutomationProperties.LiveSetting="Polite"
-                            AutomationProperties.Name="Page position">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowPagePosition}">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Button Style="{StaticResource ToolbarButton}"
                                     Width="30"
@@ -1795,7 +1795,7 @@
                                     Content="&#xE76B;"
                                     Command="{Binding PrevPageCommand}"
                                     ToolTip="Previous page"
-                                    AutomationProperties.Name="Previous page" />
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousPage}" />
                             <Slider Width="152"
                                     Minimum="1"
                                     Maximum="{Binding PageCount}"
@@ -1808,7 +1808,7 @@
                                     VerticalAlignment="Center"
                                     Margin="8,0,0,0"
                                     ToolTip="{Binding PagePositionText}"
-                                    AutomationProperties.Name="Page scrubber"
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowPageScrubber}"
                                     AutomationProperties.HelpText="Drag to jump to another page in the current document or archive." />
                             <TextBlock Text="{Binding PagePositionText}"
                                        Foreground="{DynamicResource FloatingChromeTextBrush}"
@@ -1823,7 +1823,7 @@
                                     Content="&#xE76C;"
                                     Command="{Binding NextPageCommand}"
                                     ToolTip="Next page"
-                                    AutomationProperties.Name="Next page" />
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowNextPage}" />
                         </StackPanel>
                     </Border>
 
@@ -1834,7 +1834,7 @@
                             Margin="22,82,0,0"
                             MaxWidth="560"
                             Visibility="{Binding ShowMetadataHud, Converter={StaticResource BoolToVis}}"
-                            AutomationProperties.Name="Metadata HUD"
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowMetadataHUD}"
                             AutomationProperties.LiveSetting="Polite">
                         <StackPanel>
                             <DockPanel LastChildFill="False">
@@ -1858,7 +1858,7 @@
                                         ToolTip="Hide metadata HUD"
                                         DockPanel.Dock="Right"
                                         Margin="16,-3,-7,-3"
-                                        AutomationProperties.Name="Hide metadata HUD">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowHideMetadataHUD}">
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
                                             <Setter Property="Width" Value="28" />
@@ -1925,7 +1925,7 @@
                             Margin="28,24,0,0"
                             MaxWidth="360"
                             Visibility="{Binding ShowOcrStatusPanel, Converter={StaticResource BoolToVis}}"
-                            AutomationProperties.Name="Text extraction status"
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowTextExtractionStatus}"
                             AutomationProperties.LiveSetting="Polite">
                         <Border.Style>
                             <Style TargetType="Border" BasedOn="{StaticResource FloatingChrome}">
@@ -2235,7 +2235,7 @@
                                                  Padding="0,4"
                                                  VerticalContentAlignment="Center"
                                                  PreviewKeyDown="CommandPaletteInput_PreviewKeyDown"
-                                                 AutomationProperties.Name="Command palette search" />
+                                                 AutomationProperties.Name="{loc:Loc AutomationMainWindowCommandPaletteSearch}" />
                                     </Grid>
                                 </Border>
 
@@ -2541,7 +2541,7 @@
                                      VirtualizingPanel.CacheLengthUnit="Item"
                                      KeyboardNavigation.DirectionalNavigation="Cycle"
                                      KeyboardNavigation.TabNavigation="Continue"
-                                     AutomationProperties.Name="Bottom folder filmstrip">
+                                     AutomationProperties.Name="{loc:Loc AutomationMainWindowBottomFolderFilmstrip}">
                                     <ListBox.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <VirtualizingStackPanel Orientation="Horizontal" />
@@ -2681,7 +2681,7 @@
                                         MinHeight="26"
                                         Margin="0,0,10,0"
                                         ToolTip="{Binding FolderSortTooltip}"
-                                        AutomationProperties.Name="Folder sort"
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowFolderSort}"
                                         AutomationProperties.HelpText="{Binding FolderSortTooltip}">
                                     <Button.ContextMenu>
                                         <ContextMenu Style="{StaticResource ViewportContextMenu}">
@@ -2774,7 +2774,7 @@
                                         BorderThickness="1"
                                         VerticalAlignment="Center"
                                         Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}"
-                                        AutomationProperties.Name="Paged file">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowPagedFile}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE8A5;"
                                                    FontFamily="{StaticResource IconFontFamily}"
@@ -2801,7 +2801,7 @@
                                         BorderThickness="1"
                                         VerticalAlignment="Center"
                                         Visibility="{Binding IsAnimated, Converter={StaticResource BoolToVis}}"
-                                        AutomationProperties.Name="Animated image">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowAnimatedImage}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE768;"
                                                    FontFamily="{StaticResource IconFontFamily}"
@@ -2828,7 +2828,7 @@
                                         BorderThickness="1"
                                         VerticalAlignment="Center"
                                         Visibility="{Binding IsChannelIsolated, Converter={StaticResource BoolToVis}}"
-                                        AutomationProperties.Name="Channel isolation active"
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowChannelIsolationActive}"
                                         Cursor="Hand"
                                         MouseLeftButtonUp="ChannelChip_Click">
                                     <TextBlock Text="{Binding ChannelModeLabel}"
@@ -2848,7 +2848,7 @@
                                         VerticalAlignment="Center"
                                         Visibility="{Binding IsListening, Converter={StaticResource BoolToVis}}"
                                         ToolTip="{Binding ListenPortTooltip}"
-                                        AutomationProperties.Name="Listen mode active">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowListenModeActive}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE703;"
                                                    FontFamily="{StaticResource IconFontFamily}"
@@ -2880,7 +2880,7 @@
                                         MouseEnter="SlideshowChip_MouseEnter"
                                         MouseLeave="SlideshowChip_MouseLeave"
                                         MouseLeftButtonDown="SlideshowChip_MouseLeftButtonDown"
-                                        AutomationProperties.Name="Slideshow active">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowSlideshowActive}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE768;"
                                                    FontFamily="{StaticResource IconFontFamily}"
@@ -2919,17 +2919,17 @@
                         <WrapPanel Grid.Row="2"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center">
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrevCommand}" Content="&#xE76B;" ToolTip="Previous (Left)" AutomationProperties.Name="Previous image" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCcwCommand}" Content="&#xE7AD;" ToolTip="Rotate left" Margin="4,0,0,0" AutomationProperties.Name="Rotate left" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenCommand}" Content="&#xE8E5;" ToolTip="Open…" Margin="4,0,0,0" AutomationProperties.Name="Open image" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCwCommand}" Content="&#xE7AC;" ToolTip="Rotate right" Margin="4,0,0,0" AutomationProperties.Name="Rotate right" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding NextCommand}" Content="&#xE76C;" ToolTip="Next (Right)" Margin="4,0,0,0" AutomationProperties.Name="Next image" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrevCommand}" Content="&#xE76B;" ToolTip="Previous (Left)" AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousImage}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCcwCommand}" Content="&#xE7AD;" ToolTip="Rotate left" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowRotateLeft}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenCommand}" Content="&#xE8E5;" ToolTip="Open…" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenImage}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCwCommand}" Content="&#xE7AC;" ToolTip="Rotate right" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowRotateRight}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding NextCommand}" Content="&#xE76C;" ToolTip="Next (Right)" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowNextImage}" />
                             <Button Command="{Binding ToggleFilmstripCommand}"
                                     Content="&#xEB9F;"
                                     ToolTip="{Binding FilmstripToggleTooltip}"
                                     Margin="4,0,0,0"
                                     Visibility="{Binding CanToggleFilmstrip, Converter={StaticResource BoolToVis}}"
-                                    AutomationProperties.Name="Toggle filmstrip">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowToggleFilmstrip}">
                                 <Button.Style>
                                     <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
                                         <Style.Triggers>
@@ -2947,7 +2947,7 @@
                                     ToolTip="{Binding MetadataHudToggleTooltip}"
                                     Margin="4,0,0,0"
                                     Visibility="{Binding CanToggleMetadataHud, Converter={StaticResource BoolToVis}}"
-                                    AutomationProperties.Name="Toggle metadata HUD">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowToggleMetadataHUD}">
                                 <Button.Style>
                                     <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
                                         <Style.Triggers>
@@ -2965,7 +2965,7 @@
                                     ToolTip="{Binding CompareStatusText}"
                                     Margin="4,0,0,0"
                                     Visibility="{Binding CanUseCompareMode, Converter={StaticResource BoolToVis}}"
-                                    AutomationProperties.Name="Compare with next image">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareWithNextImage}">
                                 <Button.Style>
                                     <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
                                         <Style.Triggers>
@@ -2983,7 +2983,7 @@
                                     ToolTip="{Binding OcrModeTooltip}"
                                     Margin="4,0,0,0"
                                     Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}"
-                                    AutomationProperties.Name="Extract text">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowExtractText}">
                                 <Button.Style>
                                     <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
                                         <Style.Triggers>
@@ -3010,26 +3010,26 @@
                                     Command="{Binding PrevPageCommand}"
                                     Content="&#xE76B;"
                                     ToolTip="Previous page"
-                                    AutomationProperties.Name="Previous page"
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousPage}"
                                     Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}" />
                             <Button Style="{StaticResource ToolbarButton}"
                                     Command="{Binding NextPageCommand}"
                                     Content="&#xE76C;"
                                     ToolTip="Next page"
                                     Margin="4,0,0,0"
-                                    AutomationProperties.Name="Next page"
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowNextPage}"
                                     Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}" />
                             <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding DeleteCommand}" Content="&#xE74D;" ToolTip="Delete (Recycle Bin)" AutomationProperties.Name="Send image to Recycle Bin" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding DeleteCommand}" Content="&#xE74D;" ToolTip="Delete (Recycle Bin)" AutomationProperties.Name="{loc:Loc AutomationMainWindowSendImageToRecycleBin}" />
                             <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding SaveAsCopyCommand}" Content="&#xE74E;" ToolTip="{Binding ShortcutTexts[save-copy], StringFormat=Save a copy ({0})}" AutomationProperties.Name="Save a copy" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenExportWorkbenchCommand}" Content="&#xE8EF;" ToolTip="{Binding ShortcutTexts[export-workbench], StringFormat=Export workbench ({0})}" Margin="4,0,0,0" AutomationProperties.Name="Export workbench" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrintCommand}" Content="&#xE749;" ToolTip="{Binding ShortcutTexts[print], StringFormat=Print ({0})}" Margin="4,0,0,0" AutomationProperties.Name="Print image" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding SaveAsCopyCommand}" Content="&#xE74E;" ToolTip="{Binding ShortcutTexts[save-copy], StringFormat=Save a copy ({0})}" AutomationProperties.Name="{loc:Loc AutomationMainWindowSaveACopy}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenExportWorkbenchCommand}" Content="&#xE8EF;" ToolTip="{Binding ShortcutTexts[export-workbench], StringFormat=Export workbench ({0})}" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowExportWorkbench}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrintCommand}" Content="&#xE749;" ToolTip="{Binding ShortcutTexts[print], StringFormat=Print ({0})}" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowPrintImage}" />
                             <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}" Content="&#xE838;" ToolTip="Reveal in Explorer" AutomationProperties.Name="Reveal image in Explorer" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="Copy path" Margin="4,0,0,0" AutomationProperties.Name="Copy file path" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding StripLocationCommand}" Content="&#xE707;" ToolTip="Strip GPS location from file" Margin="4,0,0,0" AutomationProperties.Name="Strip GPS location" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RefreshCommand}" Content="&#xE72C;" ToolTip="{Binding ShortcutTexts[refresh], StringFormat=Refresh folder ({0})}" Margin="4,0,0,0" AutomationProperties.Name="Refresh folder" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}" Content="&#xE838;" ToolTip="Reveal in Explorer" AutomationProperties.Name="{loc:Loc AutomationMainWindowRevealImageInExplorer}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="Copy path" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowCopyFilePath}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding StripLocationCommand}" Content="&#xE707;" ToolTip="Strip GPS location from file" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowStripGPSLocation}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RefreshCommand}" Content="&#xE72C;" ToolTip="{Binding ShortcutTexts[refresh], StringFormat=Refresh folder ({0})}" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowRefreshFolder}" />
                         </WrapPanel>
                     </Grid>
                 </Border>
@@ -3067,12 +3067,12 @@
                                     Style="{StaticResource ToolbarButton}"
                                     Content="&#xE713;"
                                     ToolTip="{Binding ShortcutTexts[settings], StringFormat=Settings ({0})}"
-                                    AutomationProperties.Name="Settings" />
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowSettings}" />
                             <Button Command="{Binding AboutCommand}"
                                     Style="{StaticResource ToolbarButton}"
                                     Content="&#xE946;"
                                     ToolTip="About Images"
-                                    AutomationProperties.Name="About Images"
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowAboutImages}"
                                     Margin="4,0,0,0" />
                         </StackPanel>
                     </Grid>
@@ -3111,7 +3111,7 @@
                                     MinHeight="28"
                                     Margin="12,0,0,0"
                                     VerticalAlignment="Center"
-                                    AutomationProperties.Name="View available update">
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowViewAvailableUpdate}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE8A7;"
                                                FontFamily="{StaticResource IconFontFamily}"
@@ -3128,7 +3128,7 @@
                             BorderBrush="{DynamicResource AccentBrush}"
                             Margin="0,0,0,20"
                             Visibility="{Binding IsCheckingForUpdates, Converter={StaticResource BoolToVis}}"
-                            AutomationProperties.Name="Update check status"
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowUpdateCheckStatus}"
                             AutomationProperties.LiveSetting="Polite">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -3360,7 +3360,7 @@
                             Padding="12"
                             Margin="0,0,0,20"
                             Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}"
-                            AutomationProperties.Name="Review labels">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowReviewLabels}">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -3383,22 +3383,22 @@
                                         Padding="10,4"
                                         MinHeight="28"
                                         Margin="10,0,0,0"
-                                        AutomationProperties.Name="Toggle review mode">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowToggleReviewMode}">
                                     <TextBlock Text="{Binding ReviewModeText}" />
                                 </Button>
                             </Grid>
 
                             <WrapPanel Margin="0,10,0,0" IsEnabled="{Binding CanUseReviewLabels}">
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="1" Margin="0,0,6,6" AutomationProperties.Name="Rate one star"><TextBlock Text="1" /></Button>
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="2" Margin="0,0,6,6" AutomationProperties.Name="Rate two stars"><TextBlock Text="2" /></Button>
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="3" Margin="0,0,6,6" AutomationProperties.Name="Rate three stars"><TextBlock Text="3" /></Button>
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="4" Margin="0,0,6,6" AutomationProperties.Name="Rate four stars"><TextBlock Text="4" /></Button>
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="5" Margin="0,0,6,6" AutomationProperties.Name="Rate five stars"><TextBlock Text="5" /></Button>
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" Margin="0,0,6,6" AutomationProperties.Name="Clear rating"><TextBlock Text="0" /></Button>
+                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="1" Margin="0,0,6,6" AutomationProperties.Name="{loc:Loc AutomationMainWindowRateOneStar}"><TextBlock Text="1" /></Button>
+                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="2" Margin="0,0,6,6" AutomationProperties.Name="{loc:Loc AutomationMainWindowRateTwoStars}"><TextBlock Text="2" /></Button>
+                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="3" Margin="0,0,6,6" AutomationProperties.Name="{loc:Loc AutomationMainWindowRateThreeStars}"><TextBlock Text="3" /></Button>
+                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="4" Margin="0,0,6,6" AutomationProperties.Name="{loc:Loc AutomationMainWindowRateFourStars}"><TextBlock Text="4" /></Button>
+                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="5" Margin="0,0,6,6" AutomationProperties.Name="{loc:Loc AutomationMainWindowRateFiveStars}"><TextBlock Text="5" /></Button>
+                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" Margin="0,0,6,6" AutomationProperties.Name="{loc:Loc AutomationMainWindowClearRating}"><TextBlock Text="0" /></Button>
                             </WrapPanel>
 
                             <WrapPanel Margin="0,4,0,0" IsEnabled="{Binding CanUseReviewLabels}">
-                                <Button Command="{Binding MarkReviewPickCommand}" Margin="0,0,8,0" AutomationProperties.Name="Mark pick">
+                                <Button Command="{Binding MarkReviewPickCommand}" Margin="0,0,8,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowMarkPick}">
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                             <Style.Triggers>
@@ -3412,7 +3412,7 @@
                                     </Button.Style>
                                     <TextBlock Text="Pick" />
                                 </Button>
-                                <Button Command="{Binding MarkReviewRejectCommand}" Margin="0,0,8,0" AutomationProperties.Name="Mark reject">
+                                <Button Command="{Binding MarkReviewRejectCommand}" Margin="0,0,8,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowMarkReject}">
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
                                             <Style.Triggers>
@@ -3426,8 +3426,8 @@
                                     </Button.Style>
                                     <TextBlock Text="Reject" />
                                 </Button>
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding ClearReviewLabelCommand}" Margin="0,0,8,0" AutomationProperties.Name="Clear review label"><TextBlock Text="Clear" /></Button>
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding UndoReviewLabelCommand}" AutomationProperties.Name="Undo review label"><TextBlock Text="Undo" /></Button>
+                                <Button Style="{StaticResource ChromeButton}" Command="{Binding ClearReviewLabelCommand}" Margin="0,0,8,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowClearReviewLabel}"><TextBlock Text="Clear" /></Button>
+                                <Button Style="{StaticResource ChromeButton}" Command="{Binding UndoReviewLabelCommand}" AutomationProperties.Name="{loc:Loc AutomationMainWindowUndoReviewLabel}"><TextBlock Text="Undo" /></Button>
                             </WrapPanel>
 
                             <Border Style="{StaticResource Divider}" Margin="0,12,0,10" />
@@ -3453,7 +3453,7 @@
                                         Padding="10,4"
                                         MinHeight="28"
                                         Margin="10,0,0,0"
-                                        AutomationProperties.Name="Score folder for assisted culling">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowScoreFolderForAssistedCulling}">
                                     <TextBlock Text="{Binding CullingScoreActionText}" />
                                 </Button>
                             </Grid>
@@ -3469,7 +3469,7 @@
                                      VirtualizingPanel.IsVirtualizing="True"
                                      VirtualizingPanel.VirtualizationMode="Recycling"
                                      Visibility="{Binding HasCullingScores, Converter={StaticResource BoolToVis}}"
-                                     AutomationProperties.Name="Assisted culling scores">
+                                     AutomationProperties.Name="{loc:Loc AutomationMainWindowAssistedCullingScores}">
                                 <ListBox.ItemContainerStyle>
                                     <Style TargetType="ListBoxItem">
                                         <Setter Property="Padding" Value="0" />
@@ -3536,7 +3536,7 @@
                                                         Padding="8,4"
                                                         MinWidth="58"
                                                         MinHeight="26"
-                                                        AutomationProperties.Name="Open culling candidate">
+                                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenCullingCandidate}">
                                                     <TextBlock Text="Open" />
                                                 </Button>
                                                 <Button Command="{Binding DataContext.ApplyCullingPickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -3546,7 +3546,7 @@
                                                         MinWidth="58"
                                                         MinHeight="26"
                                                         Margin="0,4,0,0"
-                                                        AutomationProperties.Name="Keep culling candidate">
+                                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowKeepCullingCandidate}">
                                                     <TextBlock Text="Keep" />
                                                 </Button>
                                                 <Button Command="{Binding DataContext.ApplyCullingRejectCommand, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -3556,7 +3556,7 @@
                                                         MinWidth="58"
                                                         MinHeight="26"
                                                         Margin="0,4,0,0"
-                                                        AutomationProperties.Name="Reject culling candidate">
+                                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowRejectCullingCandidate}">
                                                     <TextBlock Text="Reject" />
                                                 </Button>
                                             </StackPanel>
@@ -3586,7 +3586,7 @@
                                  VirtualizingPanel.CacheLengthUnit="Item"
                                  KeyboardNavigation.DirectionalNavigation="Cycle"
                                  KeyboardNavigation.TabNavigation="Continue"
-                                 AutomationProperties.Name="Folder preview thumbnails">
+                                 AutomationProperties.Name="{loc:Loc AutomationMainWindowFolderPreviewThumbnails}">
                                 <ListBox.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <VirtualizingStackPanel Orientation="Horizontal" />
@@ -3729,7 +3729,7 @@
                                  PreviewKeyDown="StemEditor_PreviewKeyDown"
                                  SelectionChanged="StemEditor_SelectionChanged"
                                  AutomationProperties.AutomationId="StemEditor"
-                                 AutomationProperties.Name="File name without extension" />
+                                 AutomationProperties.Name="{loc:Loc AutomationMainWindowFileNameWithoutExtension}" />
                         <Button Grid.Column="1"
                                 Margin="10,0,0,0"
                                 Padding="11,0"
@@ -3795,7 +3795,7 @@
                             <TextBox Text="{Binding Extension, UpdateSourceTrigger=PropertyChanged}"
                                      Margin="0,8,0,0"
                                      FontFamily="Consolas"
-                                     AutomationProperties.Name="File extension" />
+                                     AutomationProperties.Name="{loc:Loc AutomationMainWindowFileExtension}" />
                         </StackPanel>
                     </Border>
 
@@ -3878,7 +3878,7 @@
                         <TextBlock Text="Book controls" Style="{StaticResource SectionLabel}" />
 
                         <Border Style="{StaticResource Card}"
-                                AutomationProperties.Name="Archive book controls"
+                                AutomationProperties.Name="{loc:Loc AutomationMainWindowArchiveBookControls}"
                                 AutomationProperties.LiveSetting="Polite">
                             <StackPanel>
                                 <Grid>
@@ -3924,7 +3924,7 @@
                                             Margin="0,0,6,0"
                                             Command="{Binding FirstPageCommand}"
                                             ToolTip="First page"
-                                            AutomationProperties.Name="First book page">
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowFirstBookPage}">
                                         <TextBlock Text="&#xE892;"
                                                    FontFamily="{StaticResource IconFontFamily}"
                                                    FontSize="12"
@@ -3935,7 +3935,7 @@
                                             Margin="0,0,6,0"
                                             Command="{Binding PrevPageCommand}"
                                             ToolTip="Previous page"
-                                            AutomationProperties.Name="Previous book page">
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousBookPage}">
                                         <TextBlock Text="&#xE76B;"
                                                    FontFamily="{StaticResource IconFontFamily}"
                                                    FontSize="12"
@@ -3946,7 +3946,7 @@
                                             Margin="0,0,6,0"
                                             Command="{Binding NextPageCommand}"
                                             ToolTip="Next page"
-                                            AutomationProperties.Name="Next book page">
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowNextBookPage}">
                                         <TextBlock Text="&#xE76C;"
                                                    FontFamily="{StaticResource IconFontFamily}"
                                                    FontSize="12"
@@ -3956,7 +3956,7 @@
                                             MinHeight="32"
                                             Command="{Binding LastPageCommand}"
                                             ToolTip="Last page"
-                                            AutomationProperties.Name="Last book page">
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowLastBookPage}">
                                         <TextBlock Text="&#xE893;"
                                                    FontFamily="{StaticResource IconFontFamily}"
                                                    FontSize="12"
@@ -3974,7 +3974,7 @@
                                         <CheckBox IsChecked="{Binding ArchiveRightToLeft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   Content="{Binding ArchivePageTurnModeText}"
                                                   ToolTip="{Binding ArchivePageTurnModeHint}"
-                                                  AutomationProperties.Name="Right-to-left book page turns" />
+                                                  AutomationProperties.Name="{loc:Loc AutomationMainWindowRightToLeftBookPageTurns}" />
                                         <TextBlock Text="{Binding ArchivePageTurnModeHint}"
                                                    Margin="28,5,0,0"
                                                    FontSize="11.5"
@@ -3984,7 +3984,7 @@
                                                   Content="{Binding ArchiveOldScanFilterText}"
                                                   ToolTip="{Binding ArchiveOldScanFilterHint}"
                                                   Margin="0,12,0,0"
-                                                  AutomationProperties.Name="Clean old archive scans" />
+                                                  AutomationProperties.Name="{loc:Loc AutomationMainWindowCleanOldArchiveScans}" />
                                         <TextBlock Text="{Binding ArchiveOldScanFilterHint}"
                                                    Margin="28,5,0,0"
                                                    FontSize="11.5"
@@ -3994,7 +3994,7 @@
                                                   Content="{Binding ArchiveSpreadModeText}"
                                                   ToolTip="{Binding ArchiveSpreadModeHint}"
                                                   Margin="0,12,0,0"
-                                                  AutomationProperties.Name="Two-page archive spreads" />
+                                                  AutomationProperties.Name="{loc:Loc AutomationMainWindowTwoPageArchiveSpreads}" />
                                         <TextBlock Text="{Binding ArchiveSpreadModeHint}"
                                                    Margin="28,5,0,0"
                                                    FontSize="11.5"
@@ -4030,7 +4030,7 @@
                     <ItemsControl ItemsSource="{Binding RecentRenames}"
                                   KeyboardNavigation.DirectionalNavigation="Cycle"
                                   KeyboardNavigation.TabNavigation="Continue"
-                                  AutomationProperties.Name="Recent renames">
+                                  AutomationProperties.Name="{loc:Loc AutomationMainWindowRecentRenames}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Style="{StaticResource InteractiveCard}"
@@ -4060,7 +4060,7 @@
                                                 Margin="12,0,0,0"
                                                 Command="{Binding DataContext.UndoRenameCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                 CommandParameter="{Binding}"
-                                                AutomationProperties.Name="Undo rename">
+                                                AutomationProperties.Name="{loc:Loc AutomationMainWindowUndoRename}">
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                 <TextBlock Text="&#xE7A7;"
                                                            FontFamily="{StaticResource IconFontFamily}"
@@ -4085,7 +4085,7 @@
                         <ItemsControl ItemsSource="{Binding RecentFolders}"
                                       KeyboardNavigation.DirectionalNavigation="Cycle"
                                       KeyboardNavigation.TabNavigation="Continue"
-                                      AutomationProperties.Name="Recent folders">
+                                      AutomationProperties.Name="{loc:Loc AutomationMainWindowRecentFolders}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Button Style="{StaticResource ChromeButton}"
@@ -4133,7 +4133,7 @@
                         <ItemsControl ItemsSource="{Binding RecentArchiveBooks}"
                                       KeyboardNavigation.DirectionalNavigation="Cycle"
                                       KeyboardNavigation.TabNavigation="Continue"
-                                      AutomationProperties.Name="Archive book history">
+                                      AutomationProperties.Name="{loc:Loc AutomationMainWindowArchiveBookHistory}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Button Style="{StaticResource ChromeButton}"
@@ -4255,7 +4255,7 @@
                     <TextBlock Text="Organization" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
-                            AutomationProperties.Name="Organization controls">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowOrganizationControls}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -4274,7 +4274,7 @@
                                         Margin="12,0,0,0">
                                 <Button Command="{Binding OpenTagGraphCommand}"
                                         Style="{StaticResource SidePanelToolButton}"
-                                        AutomationProperties.Name="Open tag relationships">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenTagRelationships}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE8EC;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="Tags" VerticalAlignment="Center" />
@@ -4283,7 +4283,7 @@
                                 <Button Command="{Binding OpenImportInboxCommand}"
                                         Style="{StaticResource SidePanelToolButton}"
                                         Margin="0,8,0,0"
-                                        AutomationProperties.Name="Open import inbox">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenImportInbox}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE8B7;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="Inbox" VerticalAlignment="Center" />
@@ -4299,7 +4299,7 @@
                     <TextBlock Text="Automation" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
-                            AutomationProperties.Name="Automation controls">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowAutomationControls}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -4318,7 +4318,7 @@
                                         Margin="12,0,0,0">
                                 <Button Command="{Binding OpenMacroActionsCommand}"
                                         Style="{StaticResource SidePanelToolButton}"
-                                        AutomationProperties.Name="Open macro actions">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenMacroActions}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE945;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="Macros" VerticalAlignment="Center" />
@@ -4327,7 +4327,7 @@
                                 <Button Command="{Binding OpenBatchProcessorCommand}"
                                         Style="{StaticResource SidePanelToolButton}"
                                         Margin="0,8,0,0"
-                                        AutomationProperties.Name="Open batch processor">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenBatchProcessor}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE8EF;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="Batch" VerticalAlignment="Center" />
@@ -4336,7 +4336,7 @@
                                 <Button Command="{Binding OpenModelManagerCommand}"
                                         Style="{StaticResource SidePanelToolButton}"
                                         Margin="0,8,0,0"
-                                        AutomationProperties.Name="Open model manager">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenModelManager}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE950;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="Models" VerticalAlignment="Center" />
@@ -4345,7 +4345,7 @@
                                 <Button Command="{Binding OpenSemanticSearchCommand}"
                                         Style="{StaticResource SidePanelToolButton}"
                                         Margin="0,8,0,0"
-                                        AutomationProperties.Name="Open semantic search">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenSemanticSearch}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="Search" VerticalAlignment="Center" />
@@ -4361,7 +4361,7 @@
                     <TextBlock Text="Cleanup" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
-                            AutomationProperties.Name="Cleanup controls">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowCleanupControls}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -4380,7 +4380,7 @@
                                         Margin="12,0,0,0">
                                 <Button Command="{Binding OpenDuplicateCleanupCommand}"
                                         Style="{StaticResource SidePanelToolButton}"
-                                        AutomationProperties.Name="Open duplicate cleanup">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenDuplicateCleanup}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE8C8;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="Duplicates" VerticalAlignment="Center" />
@@ -4389,7 +4389,7 @@
                                 <Button Command="{Binding OpenFileHealthScanCommand}"
                                         Style="{StaticResource SidePanelToolButton}"
                                         Margin="0,8,0,0"
-                                        AutomationProperties.Name="Open file health scan">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenFileHealthScan}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="File health" VerticalAlignment="Center" />
@@ -4398,7 +4398,7 @@
                                 <Button Command="{Binding OpenRecoveryCenterCommand}"
                                         Style="{StaticResource SidePanelToolButton}"
                                         Margin="0,8,0,0"
-                                        AutomationProperties.Name="Open recovery center">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenRecoveryCenter}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE777;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="Recovery" VerticalAlignment="Center" />
@@ -4414,7 +4414,7 @@
                     <TextBlock Text="Compare" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
-                            AutomationProperties.Name="Compare controls">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareControls}">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -4435,14 +4435,14 @@
                                     <Button Command="{Binding StartCompareCommand}"
                                             Style="{StaticResource ChromeButton}"
                                             MinWidth="92"
-                                            AutomationProperties.Name="Compare with next image">
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareWithNextImage}">
                                         <TextBlock Text="Next" />
                                     </Button>
                                     <Button Command="{Binding CompareWithCommand}"
                                             Style="{StaticResource ChromeButton}"
                                             MinWidth="92"
                                             Margin="0,8,0,0"
-                                            AutomationProperties.Name="Compare with chosen image">
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareWithChosenImage}">
                                         <TextBlock Text="Choose" />
                                     </Button>
                                 </StackPanel>
@@ -4453,19 +4453,19 @@
                                 <Button Command="{Binding ToggleCompareOverlayCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Toggle compare layout">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowToggleCompareLayout}">
                                     <TextBlock Text="{Binding CompareLayoutToggleText}" />
                                 </Button>
                                 <Button Command="{Binding SwapCompareCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Swap compare A and B">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowSwapCompareAAndB}">
                                     <TextBlock Text="Swap A/B" />
                                 </Button>
                                 <Button Command="{Binding ExitCompareCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Exit compare mode">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowExitCompareMode}">
                                     <TextBlock Text="Exit" />
                                 </Button>
                             </WrapPanel>
@@ -4489,7 +4489,7 @@
                                         SmallChange="0.05"
                                         LargeChange="0.1"
                                         Value="{Binding CompareOverlayOpacity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        AutomationProperties.Name="Compare B opacity" />
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareBOpacity}" />
                                 <TextBlock Grid.Column="2"
                                            Text="{Binding CompareOverlayOpacityText}"
                                            Style="{StaticResource Text.Caption}"
@@ -4505,7 +4505,7 @@
                     <TextBlock Text="Overlay" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
-                            AutomationProperties.Name="Pinned overlay controls">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowPinnedOverlayControls}">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -4526,7 +4526,7 @@
                                         Style="{StaticResource ChromeButton}"
                                         MinWidth="74"
                                         Margin="12,0,0,0"
-                                        AutomationProperties.Name="Toggle pinned overlay mode"
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowTogglePinnedOverlayMode}"
                                         AutomationProperties.HelpText="{Binding OverlayStatusText}">
                                     <TextBlock Text="{Binding OverlayToggleText}" />
                                 </Button>
@@ -4551,7 +4551,7 @@
                                         SmallChange="0.05"
                                         LargeChange="0.1"
                                         Value="{Binding OverlayOpacity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        AutomationProperties.Name="Pinned overlay opacity" />
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowPinnedOverlayOpacity}" />
                                 <TextBlock Grid.Column="2"
                                            Text="{Binding OverlayOpacityText}"
                                            Style="{StaticResource Text.Caption}"
@@ -4564,7 +4564,7 @@
                                       IsEnabled="{Binding IsPinnedOverlayMode}"
                                       Margin="0,12,0,0"
                                       ToolTip="{Binding OverlayExitText}"
-                                      AutomationProperties.Name="Toggle click-through overlay"
+                                      AutomationProperties.Name="{loc:Loc AutomationMainWindowToggleClickThroughOverlay}"
                                       AutomationProperties.HelpText="{Binding OverlayStatusText}" />
 
                             <Border Margin="0,12,0,0"
@@ -4591,7 +4591,7 @@
                                 <Button Command="{Binding ExitOverlayModeCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,0"
-                                        AutomationProperties.Name="Exit pinned overlay mode">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowExitPinnedOverlayMode}">
                                     <TextBlock Text="Exit overlay" />
                                 </Button>
                             </WrapPanel>
@@ -4605,7 +4605,7 @@
                         <TextBlock Text="Animation" Style="{StaticResource SectionLabel}" />
                         <Border Style="{StaticResource Card}"
                                 Padding="13,12"
-                                AutomationProperties.Name="Animation frame workbench">
+                                AutomationProperties.Name="{loc:Loc AutomationMainWindowAnimationFrameWorkbench}">
                             <StackPanel>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -4626,7 +4626,7 @@
                                             Style="{StaticResource ChromeButton}"
                                             MinWidth="62"
                                             Margin="12,0,0,0"
-                                            AutomationProperties.Name="Play or pause animation">
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowPlayOrPauseAnimation}">
                                         <TextBlock Text="{Binding AnimationPlaybackText}" />
                                     </Button>
                                 </Grid>
@@ -4650,7 +4650,7 @@
                                             IsSnapToTickEnabled="True"
                                             SmallChange="1"
                                             LargeChange="5"
-                                            AutomationProperties.Name="Animation frame scrubber" />
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowAnimationFrameScrubber}" />
                                     <TextBlock Grid.Column="2"
                                                Text="{Binding SelectedAnimationFrameDelayText}"
                                                Style="{StaticResource Text.Caption}"
@@ -4663,27 +4663,27 @@
                                             Style="{StaticResource ChromeButton}"
                                             Margin="0,0,6,0"
                                             ToolTip="First frame"
-                                            AutomationProperties.Name="First animation frame">
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowFirstAnimationFrame}">
                                         <TextBlock Text="First" />
                                     </Button>
                                     <Button Command="{Binding PreviousAnimationFrameCommand}"
                                             Style="{StaticResource ChromeButton}"
                                             Margin="0,0,6,0"
                                             ToolTip="Previous frame"
-                                            AutomationProperties.Name="Previous animation frame">
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousAnimationFrame}">
                                         <TextBlock Text="Prev" />
                                     </Button>
                                     <Button Command="{Binding NextAnimationFrameCommand}"
                                             Style="{StaticResource ChromeButton}"
                                             Margin="0,0,6,0"
                                             ToolTip="Next frame"
-                                            AutomationProperties.Name="Next animation frame">
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowNextAnimationFrame}">
                                         <TextBlock Text="Next" />
                                     </Button>
                                     <Button Command="{Binding LastAnimationFrameCommand}"
                                             Style="{StaticResource ChromeButton}"
                                             ToolTip="Last frame"
-                                            AutomationProperties.Name="Last animation frame">
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowLastAnimationFrame}">
                                         <TextBlock Text="Last" />
                                     </Button>
                                 </UniformGrid>
@@ -4705,7 +4705,7 @@
                                             TickFrequency="0.25"
                                             IsSnapToTickEnabled="True"
                                             Value="{Binding AnimationPlaybackSpeed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                            AutomationProperties.Name="Animation playback speed" />
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowAnimationPlaybackSpeed}" />
                                     <TextBlock Grid.Column="2"
                                                Text="{Binding AnimationPlaybackSpeedText}"
                                                Style="{StaticResource Text.Caption}"
@@ -4716,7 +4716,7 @@
                                 <ScrollViewer HorizontalScrollBarVisibility="Auto"
                                               VerticalScrollBarVisibility="Disabled"
                                               Margin="0,12,0,0"
-                                              AutomationProperties.Name="Animation frame timeline">
+                                              AutomationProperties.Name="{loc:Loc AutomationMainWindowAnimationFrameTimeline}">
                                     <ItemsControl ItemsSource="{Binding AnimationFrames}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
@@ -4774,13 +4774,13 @@
                                     <Button Command="{Binding CopyAnimationFrameCommand}"
                                             Style="{StaticResource ChromeButton}"
                                             Margin="0,0,8,8"
-                                            AutomationProperties.Name="Copy selected animation frame">
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowCopySelectedAnimationFrame}">
                                         <TextBlock Text="Copy frame" />
                                     </Button>
                                     <Button Command="{Binding ExportAnimationFrameCommand}"
                                             Style="{StaticResource ChromeButton}"
                                             Margin="0,0,8,8"
-                                            AutomationProperties.Name="Export selected animation frame">
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowExportSelectedAnimationFrame}">
                                         <TextBlock Text="Export frame" />
                                     </Button>
                                 </WrapPanel>
@@ -4815,7 +4815,7 @@
                                         Style="{StaticResource ChromeButton}"
                                         MinWidth="72"
                                         Margin="12,0,0,0"
-                                        AutomationProperties.Name="Toggle pixel selection mode">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowTogglePixelSelectionMode}">
                                     <TextBlock Text="{Binding SelectionModeText}" />
                                 </Button>
                             </Grid>
@@ -4840,19 +4840,19 @@
                                 <Button Command="{Binding CopySelectionCommand}"
                                         Style="{StaticResource AccentButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Copy selected pixels">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowCopySelectedPixels}">
                                     <TextBlock Text="Copy selection" />
                                 </Button>
                                 <Button Command="{Binding ClearSelectionCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Clear selected pixels">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowClearSelectedPixels}">
                                     <TextBlock Text="Clear" />
                                 </Button>
                                 <Button Command="{Binding CancelSelectionCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
-                                        AutomationProperties.Name="Cancel pixel selection mode">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowCancelPixelSelectionMode}">
                                     <TextBlock Text="Cancel" />
                                 </Button>
                             </WrapPanel>
@@ -4886,7 +4886,7 @@
                                         Style="{StaticResource ChromeButton}"
                                         MinWidth="72"
                                         Margin="12,0,0,0"
-                                        AutomationProperties.Name="Toggle crop mode">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowToggleCropMode}">
                                     <TextBlock Text="{Binding CropModeText}" />
                                 </Button>
                             </Grid>
@@ -4915,42 +4915,42 @@
                                         CommandParameter="free"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Free crop aspect">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowFreeCropAspect}">
                                     <TextBlock Text="Free" />
                                 </Button>
                                 <Button Command="{Binding SetCropAspectPresetCommand}"
                                         CommandParameter="square"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Square crop aspect">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowSquareCropAspect}">
                                     <TextBlock Text="1:1" />
                                 </Button>
                                 <Button Command="{Binding SetCropAspectPresetCommand}"
                                         CommandParameter="3x2"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Three by two crop aspect">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowThreeByTwoCropAspect}">
                                     <TextBlock Text="3:2" />
                                 </Button>
                                 <Button Command="{Binding SetCropAspectPresetCommand}"
                                         CommandParameter="4x3"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Four by three crop aspect">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowFourByThreeCropAspect}">
                                     <TextBlock Text="4:3" />
                                 </Button>
                                 <Button Command="{Binding SetCropAspectPresetCommand}"
                                         CommandParameter="16x9"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Sixteen by nine crop aspect">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowSixteenByNineCropAspect}">
                                     <TextBlock Text="16:9" />
                                 </Button>
                                 <Button Command="{Binding SetCropAspectPresetCommand}"
                                         CommandParameter="custom"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
-                                        AutomationProperties.Name="Custom crop aspect">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowCustomCropAspect}">
                                     <TextBlock Text="Custom" />
                                 </Button>
                             </WrapPanel>
@@ -4965,7 +4965,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBox Grid.Column="0"
                                          Text="{Binding CustomCropAspectWidth, UpdateSourceTrigger=PropertyChanged}"
-                                         AutomationProperties.Name="Custom crop aspect width" />
+                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowCustomCropAspectWidth}" />
                                 <TextBlock Grid.Column="1"
                                            Text=":"
                                            Style="{StaticResource Text.Body}"
@@ -4973,7 +4973,7 @@
                                            Margin="8,0" />
                                 <TextBox Grid.Column="2"
                                          Text="{Binding CustomCropAspectHeight, UpdateSourceTrigger=PropertyChanged}"
-                                         AutomationProperties.Name="Custom crop aspect height" />
+                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowCustomCropAspectHeight}" />
                             </Grid>
 
                             <TextBlock Text="{Binding CropAspectHelpText}"
@@ -4984,13 +4984,13 @@
                                 <Button Command="{Binding ApplyCropCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Apply crop to file">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowApplyCropToFile}">
                                     <TextBlock Text="Apply crop" />
                                 </Button>
                                 <Button Command="{Binding CancelCropCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
-                                        AutomationProperties.Name="Cancel crop">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowCancelCrop}">
                                     <TextBlock Text="Cancel" />
                                 </Button>
                             </WrapPanel>
@@ -5024,7 +5024,7 @@
                                         Style="{StaticResource ChromeButton}"
                                         MinWidth="72"
                                         Margin="12,0,0,0"
-                                        AutomationProperties.Name="Toggle local exposure brush">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowToggleLocalExposureBrush}">
                                     <TextBlock Text="{Binding ExposureBrushModeText}" />
                                 </Button>
                             </Grid>
@@ -5053,14 +5053,14 @@
                                         CommandParameter="dodge"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Use dodge brush">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowUseDodgeBrush}">
                                     <TextBlock Text="Dodge" />
                                 </Button>
                                 <Button Command="{Binding SetExposureBrushModeCommand}"
                                         CommandParameter="burn"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Use burn brush">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowUseBurnBrush}">
                                     <TextBlock Text="Burn" />
                                 </Button>
                                 <TextBlock Text="{Binding ExposureBrushToneText}"
@@ -5085,7 +5085,7 @@
                                     TickFrequency="4"
                                     IsSnapToTickEnabled="False"
                                     Value="{Binding ExposureBrushRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    AutomationProperties.Name="Exposure brush radius" />
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowExposureBrushRadius}" />
 
                             <Grid Margin="0,10,0,0">
                                 <Grid.ColumnDefinitions>
@@ -5103,25 +5103,25 @@
                                     TickFrequency="1"
                                     IsSnapToTickEnabled="False"
                                     Value="{Binding ExposureBrushStrength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    AutomationProperties.Name="Exposure brush strength" />
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowExposureBrushStrength}" />
 
                             <WrapPanel Margin="0,12,0,0">
                                 <Button Command="{Binding ApplyExposureBrushCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Apply local exposure brush to edit history">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowApplyLocalExposureBrushToEditHistory}">
                                     <TextBlock Text="Apply brush" />
                                 </Button>
                                 <Button Command="{Binding ClearExposureBrushCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Clear local exposure brush strokes">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowClearLocalExposureBrushStrokes}">
                                     <TextBlock Text="Clear" />
                                 </Button>
                                 <Button Command="{Binding CancelExposureBrushCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
-                                        AutomationProperties.Name="Cancel local exposure brush">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowCancelLocalExposureBrush}">
                                     <TextBlock Text="Cancel" />
                                 </Button>
                             </WrapPanel>
@@ -5155,7 +5155,7 @@
                                         Style="{StaticResource ChromeButton}"
                                         MinWidth="72"
                                         Margin="12,0,0,0"
-                                        AutomationProperties.Name="Toggle red-eye correction">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowToggleRedEyeCorrection}">
                                     <TextBlock Text="{Binding RedEyeCorrectionModeText}" />
                                 </Button>
                             </Grid>
@@ -5192,7 +5192,7 @@
                                     TickFrequency="2"
                                     IsSnapToTickEnabled="False"
                                     Value="{Binding RedEyeCorrectionRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    AutomationProperties.Name="Red-eye correction radius" />
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowRedEyeCorrectionRadius}" />
 
                             <Grid Margin="0,10,0,0">
                                 <Grid.ColumnDefinitions>
@@ -5210,7 +5210,7 @@
                                     TickFrequency="1"
                                     IsSnapToTickEnabled="False"
                                     Value="{Binding RedEyeCorrectionStrength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    AutomationProperties.Name="Red-eye correction strength" />
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowRedEyeCorrectionStrength}" />
 
                             <Grid Margin="0,10,0,0">
                                 <Grid.ColumnDefinitions>
@@ -5228,25 +5228,25 @@
                                     TickFrequency="1"
                                     IsSnapToTickEnabled="False"
                                     Value="{Binding RedEyeCorrectionThreshold, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    AutomationProperties.Name="Red-eye correction red threshold" />
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowRedEyeCorrectionRedThreshold}" />
 
                             <WrapPanel Margin="0,12,0,0">
                                 <Button Command="{Binding ApplyRedEyeCorrectionCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Apply red-eye correction to edit history">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowApplyRedEyeCorrectionToEditHistory}">
                                     <TextBlock Text="Apply red-eye" />
                                 </Button>
                                 <Button Command="{Binding ClearRedEyeCorrectionCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Clear red-eye correction marks">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowClearRedEyeCorrectionMarks}">
                                     <TextBlock Text="Clear" />
                                 </Button>
                                 <Button Command="{Binding CancelRedEyeCorrectionCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
-                                        AutomationProperties.Name="Cancel red-eye correction">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowCancelRedEyeCorrection}">
                                     <TextBlock Text="Cancel" />
                                 </Button>
                             </WrapPanel>
@@ -5280,7 +5280,7 @@
                                         Style="{StaticResource ChromeButton}"
                                         MinWidth="72"
                                         Margin="12,0,0,0"
-                                        AutomationProperties.Name="Toggle clone and heal retouch">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowToggleCloneAndHealRetouch}">
                                     <TextBlock Text="{Binding RetouchModeText}" />
                                 </Button>
                             </Grid>
@@ -5312,14 +5312,14 @@
                                         CommandParameter="clone"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Use clone stamp">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowUseCloneStamp}">
                                     <TextBlock Text="Clone" />
                                 </Button>
                                 <Button Command="{Binding SetRetouchModeCommand}"
                                         CommandParameter="heal"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Use healing brush">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowUseHealingBrush}">
                                     <TextBlock Text="Heal" />
                                 </Button>
                                 <TextBlock Text="{Binding RetouchBrushModeText}"
@@ -5344,7 +5344,7 @@
                                     TickFrequency="2"
                                     IsSnapToTickEnabled="False"
                                     Value="{Binding RetouchRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    AutomationProperties.Name="Retouch brush radius" />
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowRetouchBrushRadius}" />
 
                             <Grid Margin="0,10,0,0">
                                 <Grid.ColumnDefinitions>
@@ -5362,31 +5362,31 @@
                                     TickFrequency="1"
                                     IsSnapToTickEnabled="False"
                                     Value="{Binding RetouchStrength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    AutomationProperties.Name="Retouch brush strength" />
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowRetouchBrushStrength}" />
 
                             <WrapPanel Margin="0,12,0,0">
                                 <Button Command="{Binding ApplyRetouchCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Apply retouch to edit history">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowApplyRetouchToEditHistory}">
                                     <TextBlock Text="Apply retouch" />
                                 </Button>
                                 <Button Command="{Binding ClearRetouchCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Clear retouch strokes">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowClearRetouchStrokes}">
                                     <TextBlock Text="Clear" />
                                 </Button>
                                 <Button Command="{Binding ClearRetouchSourceCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Clear retouch source">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowClearRetouchSource}">
                                     <TextBlock Text="Source" />
                                 </Button>
                                 <Button Command="{Binding CancelRetouchCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
-                                        AutomationProperties.Name="Cancel retouch">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowCancelRetouch}">
                                     <TextBlock Text="Cancel" />
                                 </Button>
                             </WrapPanel>
@@ -5420,7 +5420,7 @@
                                         Style="{StaticResource ChromeButton}"
                                         MinWidth="72"
                                         Margin="12,0,0,0"
-                                        AutomationProperties.Name="Toggle pixel inspector">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowTogglePixelInspector}">
                                     <TextBlock Text="{Binding InspectorModeText}" />
                                 </Button>
                             </Grid>
@@ -5429,7 +5429,7 @@
                                       Content="Nearest-neighbor preview"
                                       Margin="0,12,0,0"
                                       ToolTip="Use crisp scaling for pixel-art inspection."
-                                      AutomationProperties.Name="Use nearest-neighbor preview scaling" />
+                                      AutomationProperties.Name="{loc:Loc AutomationMainWindowUseNearestNeighborPreviewScaling}" />
 
                             <Border Background="{DynamicResource PanelBrush}"
                                     BorderBrush="{DynamicResource HairlineBrush}"
@@ -5470,25 +5470,25 @@
                                 <Button Command="{Binding CopyInspectorHexCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Copy HEX color">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowCopyHEXColor}">
                                     <TextBlock Text="Copy HEX" />
                                 </Button>
                                 <Button Command="{Binding CopyInspectorRgbCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Copy RGB color">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowCopyRGBColor}">
                                     <TextBlock Text="Copy RGB" />
                                 </Button>
                                 <Button Command="{Binding CopyInspectorHsvCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
-                                        AutomationProperties.Name="Copy HSV color">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowCopyHSVColor}">
                                     <TextBlock Text="Copy HSV" />
                                 </Button>
                                 <Button Command="{Binding ClearInspectorSelectionCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
-                                        AutomationProperties.Name="Clear inspector measurement">
+                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowClearInspectorMeasurement}">
                                     <TextBlock Text="Clear measure" />
                                 </Button>
                             </WrapPanel>
@@ -5499,7 +5499,7 @@
                         <Border Style="{StaticResource Divider}" />
                         <TextBlock Text="Photo metadata" Style="{StaticResource SectionLabel}" />
                         <ItemsControl ItemsSource="{Binding PhotoMetadataRows}"
-                                      AutomationProperties.Name="Photo metadata">
+                                      AutomationProperties.Name="{loc:Loc AutomationMainWindowPhotoMetadata}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Margin="1,0,0,0">
@@ -5526,7 +5526,7 @@
 
                         <ItemsControl ItemsSource="{Binding ColorAnalysisRows}"
                                       Visibility="{Binding ColorAnalysisRows.Count, Converter={StaticResource BoolToVis}}"
-                                      AutomationProperties.Name="Color profile and histogram">
+                                      AutomationProperties.Name="{loc:Loc AutomationMainWindowColorProfileAndHistogram}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Margin="1,0,0,0">

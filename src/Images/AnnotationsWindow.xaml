@@ -117,11 +117,11 @@
                                     AutomationProperties.Name="{loc:Loc AnnotationFontSizeAutomationName}" />
 
                             <WrapPanel Margin="0,14,0,0">
-                                <Button Style="{StaticResource AnnotationColorSwatchButton}" Tag="#F38BA8" Click="ColorButton_Click" Background="#F38BA8" ToolTip="Red" AutomationProperties.Name="Red color" />
-                                <Button Style="{StaticResource AnnotationColorSwatchButton}" Tag="#F9E2AF" Click="ColorButton_Click" Background="#F9E2AF" ToolTip="Yellow" AutomationProperties.Name="Yellow color" />
-                                <Button Style="{StaticResource AnnotationColorSwatchButton}" Tag="#A6E3A1" Click="ColorButton_Click" Background="#A6E3A1" ToolTip="Green" AutomationProperties.Name="Green color" />
-                                <Button Style="{StaticResource AnnotationColorSwatchButton}" Tag="#89B4FA" Click="ColorButton_Click" Background="#89B4FA" ToolTip="Blue" AutomationProperties.Name="Blue color" />
-                                <Button Style="{StaticResource AnnotationColorSwatchButton}" Tag="#FFFFFF" Click="ColorButton_Click" Background="#FFFFFF" ToolTip="White" AutomationProperties.Name="White color" />
+                                <Button Style="{StaticResource AnnotationColorSwatchButton}" Tag="#F38BA8" Click="ColorButton_Click" Background="#F38BA8" ToolTip="Red" AutomationProperties.Name="{loc:Loc AutomationAnnotationsWindowRedColor}" />
+                                <Button Style="{StaticResource AnnotationColorSwatchButton}" Tag="#F9E2AF" Click="ColorButton_Click" Background="#F9E2AF" ToolTip="Yellow" AutomationProperties.Name="{loc:Loc AutomationAnnotationsWindowYellowColor}" />
+                                <Button Style="{StaticResource AnnotationColorSwatchButton}" Tag="#A6E3A1" Click="ColorButton_Click" Background="#A6E3A1" ToolTip="Green" AutomationProperties.Name="{loc:Loc AutomationAnnotationsWindowGreenColor}" />
+                                <Button Style="{StaticResource AnnotationColorSwatchButton}" Tag="#89B4FA" Click="ColorButton_Click" Background="#89B4FA" ToolTip="Blue" AutomationProperties.Name="{loc:Loc AutomationAnnotationsWindowBlueColor}" />
+                                <Button Style="{StaticResource AnnotationColorSwatchButton}" Tag="#FFFFFF" Click="ColorButton_Click" Background="#FFFFFF" ToolTip="White" AutomationProperties.Name="{loc:Loc AutomationAnnotationsWindowWhiteColor}" />
                             </WrapPanel>
                         </StackPanel>
                     </Border>
