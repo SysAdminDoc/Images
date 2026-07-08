@@ -35,6 +35,7 @@ All notable changes to **Images** are documented here.
 - **Catalog root stats are per-root again** — Multi-root catalog rebuilds now store each root's own indexed and failed counts instead of writing global totals into every `catalog_roots` row.
 - **Model Manager no longer trusts stale same-length hashes** — Imported model manifests now store file modified time, and snapshot inspection rehashes modified files before reporting readiness.
 - **Ghostscript version probing drains process output while waiting** — The version probe now reads stdout and stderr asynchronously before `WaitForExit`, avoiding pipe-buffer stalls from chatty `gs` builds.
+- **Listen mode binds its socket exclusively** — The loopback TCP listener now sets `ExclusiveAddressUse` before binding so another same-user socket cannot reuse the listen port.
 
 ## 0.2.17
 

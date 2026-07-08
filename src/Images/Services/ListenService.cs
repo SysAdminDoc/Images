@@ -41,7 +41,7 @@ public sealed class ListenService : IDisposable
         if (_listener is not null) return;
 
         var cts = new CancellationTokenSource();
-        var listener = new TcpListener(IPAddress.Loopback, port);
+        var listener = CreateLoopbackListener(port);
         try
         {
             listener.Start();
@@ -62,6 +62,13 @@ public sealed class ListenService : IDisposable
             Port, SessionToken.Length > 8 ? SessionToken[..8] + "..." : SessionToken);
 
         Task.Run(() => AcceptLoop(_cts.Token));
+    }
+
+    internal static TcpListener CreateLoopbackListener(int port)
+    {
+        var listener = new TcpListener(IPAddress.Loopback, port);
+        listener.Server.ExclusiveAddressUse = true;
+        return listener;
     }
 
     private async Task AcceptLoop(CancellationToken ct)

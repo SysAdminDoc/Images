@@ -6,6 +6,20 @@ namespace Images.Tests;
 public sealed class ListenServiceTests
 {
     [Fact]
+    public void CreateLoopbackListener_BindsExclusively()
+    {
+        var listener = ListenService.CreateLoopbackListener(0);
+        try
+        {
+            Assert.True(listener.Server.ExclusiveAddressUse);
+        }
+        finally
+        {
+            listener.Stop();
+        }
+    }
+
+    [Fact]
     public void TryNormalizeIncomingPath_AcceptsExistingLocalFile()
     {
         using var temp = TestDirectory.Create();
