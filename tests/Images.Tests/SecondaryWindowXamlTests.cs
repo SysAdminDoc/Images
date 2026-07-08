@@ -19,6 +19,52 @@ public sealed class SecondaryWindowXamlTests
 
     [Fact]
     [Trait("Category", "SmokeGate")]
+    public void ThemedButtonStylesReplaceDefaultChrome()
+    {
+        Exception? exception = null;
+
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                var createdApplication = Application.Current is null;
+                var application = Application.Current ?? new Application
+                {
+                    ShutdownMode = ShutdownMode.OnExplicitShutdown
+                };
+
+                application.Resources.MergedDictionaries.Clear();
+                application.Resources.MergedDictionaries.Add(
+                    (ResourceDictionary)Application.LoadComponent(
+                        new Uri("/Images;component/Themes/DarkTheme.xaml", UriKind.Relative)));
+
+                AssertCustomButtonTemplate(
+                    "BookPageTurnButton",
+                    ["HitZone", "HoverOverlay", "FocusBorder"]);
+                AssertCustomButtonTemplate(
+                    "AnnotationColorSwatchButton",
+                    ["Swatch"],
+                    Brushes.Red);
+
+                if (createdApplication)
+                    application.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        if (exception is not null)
+            throw new InvalidOperationException("Themed button style smoke failed.", exception);
+    }
+
+    [Fact]
+    [Trait("Category", "SmokeGate")]
     public void SecondaryWindowsOpenAndExposeAutomationContract()
     {
         if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("RUN_SMOKE_TESTS")))
@@ -178,6 +224,32 @@ public sealed class SecondaryWindowXamlTests
                 Strings.ImportInboxStagedFiles
             ])
     ];
+
+    private static void AssertCustomButtonTemplate(string styleKey, string[] requiredTemplateParts, Brush? background = null)
+    {
+        var style = Assert.IsType<Style>(Application.Current!.Resources[styleKey]);
+        var button = new Button
+        {
+            Style = style,
+            Background = background ?? Brushes.Transparent,
+            Content = new TextBlock { Text = "Template probe" }
+        };
+
+        button.ApplyTemplate();
+        Assert.NotNull(button.Template);
+
+        foreach (var partName in requiredTemplateParts)
+        {
+            var part = button.Template.FindName(partName, button);
+            Assert.NotNull(part);
+        }
+
+        if (background is not null)
+        {
+            var swatch = Assert.IsType<Border>(button.Template.FindName("Swatch", button));
+            Assert.Same(background, swatch.Background);
+        }
+    }
 
     private static void AssertWindowContract(WindowContractCase testCase)
     {

@@ -1467,13 +1467,10 @@
                     <!-- Archive book page-turn zones. Narrow edge targets keep drag-pan available
                          across the center of the canvas while giving books a natural tap/click turn. -->
                     <Button Command="{Binding LeftBookPageTurnCommand}"
+                            Style="{StaticResource BookPageTurnButton}"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Stretch"
                             Width="112"
-                            Padding="0"
-                            BorderThickness="0"
-                            Background="#01000000"
-                            Cursor="Hand"
                             Visibility="{Binding IsArchiveBook, Converter={StaticResource BoolToVis}}"
                             ToolTip="{Binding LeftBookPageTurnTooltip}"
                             AutomationProperties.Name="{Binding LeftBookPageTurnTooltip}">
@@ -1497,13 +1494,10 @@
                     </Button>
 
                     <Button Command="{Binding RightBookPageTurnCommand}"
+                            Style="{StaticResource BookPageTurnButton}"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Stretch"
                             Width="112"
-                            Padding="0"
-                            BorderThickness="0"
-                            Background="#01000000"
-                            Cursor="Hand"
                             Visibility="{Binding IsArchiveBook, Converter={StaticResource BoolToVis}}"
                             ToolTip="{Binding RightBookPageTurnTooltip}"
                             AutomationProperties.Name="{Binding RightBookPageTurnTooltip}">
