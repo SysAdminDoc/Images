@@ -153,4 +153,22 @@ public sealed class PicasaImportServiceTests
         Assert.Equal(0.5, faces[0].X, precision: 3);
         Assert.Equal(1, faces[0].Width, precision: 3);
     }
+
+    [Fact]
+    public void ReadFaces_AcceptsRect64WithOmittedLeadingZeros()
+    {
+        var faces = PicasaImportService.ReadFaces(
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["faces"] = "rect64(ffffffff),face1"
+            },
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { ["face1"] = "Face One" });
+
+        var face = Assert.Single(faces);
+        Assert.Equal("Face One", face.Name);
+        Assert.Equal(0.5, face.X, precision: 3);
+        Assert.Equal(0.5, face.Y, precision: 3);
+        Assert.Equal(1, face.Width, precision: 3);
+        Assert.Equal(1, face.Height, precision: 3);
+    }
 }

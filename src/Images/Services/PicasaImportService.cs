@@ -41,7 +41,7 @@ public sealed class PicasaImportService
 {
     private static readonly ILogger Log = Images.Services.Log.Get(nameof(PicasaImportService));
     private static readonly Regex FaceRegex = new(
-        @"rect64\(([0-9a-fA-F]{16})\)\s*,\s*([^;,\s]+)",
+        @"rect64\(([0-9a-fA-F]{1,16})\)\s*,\s*([^;,\s]+)",
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     private static readonly XNamespace X = "adobe:ns:meta/";
@@ -417,11 +417,12 @@ public sealed class PicasaImportService
     private static bool TryParseRect64(string hex, out double x, out double y, out double width, out double height)
     {
         x = y = width = height = 0;
-        if (hex.Length != 16)
+        if (hex.Length is < 1 or > 16)
             return false;
 
         try
         {
+            hex = hex.PadLeft(16, '0');
             var left = Convert.ToInt32(hex[..4], 16);
             var top = Convert.ToInt32(hex[4..8], 16);
             var right = Convert.ToInt32(hex[8..12], 16);
