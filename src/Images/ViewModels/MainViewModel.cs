@@ -260,10 +260,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         CheckForUpdatesCommand = new AsyncRelayCommand(() => CheckForUpdatesAsync(userInitiated: true), () => !IsCheckingForUpdates);
         OpenLatestUpdateCommand = new RelayCommand(_updateCheck.OpenLatestUpdate, () => HasUpdateAvailable && !IsCheckingForUpdates);
         RefreshCommand = new RelayCommand(RefreshFolder, () => CanRefreshFolder);
-        CommitRenameCommand = new RelayCommand(() => { _renameTimer.Stop(); FlushPendingRename(); });
+        CommitRenameCommand = new RelayCommand(() => { _renameTimer.Stop(); FlushPendingRename(); }, () => !IsOperationBusy);
         CancelRenameCommand = new RelayCommand(CancelRenameEdit);
         UnlockExtensionCommand = new RelayCommand(() => IsExtensionUnlocked = !IsExtensionUnlocked);
-        UndoRenameCommand = new RelayCommand(p => UndoOne(p as RenameService.UndoEntry), p => p is RenameService.UndoEntry);
+        UndoRenameCommand = new RelayCommand(p => UndoOne(p as RenameService.UndoEntry), p => p is RenameService.UndoEntry && !IsOperationBusy);
         AboutCommand = new RelayCommand(ShowAboutWindow);
         StartCompareCommand = new RelayCommand(StartCompareWithNext, () => CanStartCompareWithNext);
         CompareWithCommand = new RelayCommand(StartCompareWithPickedFile, () => CanUseCompareMode);
@@ -3612,7 +3612,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (string.Equals(CurrentPath, entry.ToPath, StringComparison.OrdinalIgnoreCase))
             {
                 CurrentPath = result.ToPath;
-                _nav.UpdateCurrentPath(result.ToPath);
+                _nav.UpdateCurrentPath(entry.ToPath, result.ToPath);
                 _externalEditReload.Arm(result.ToPath);
                 SyncRenameEditorFromDisk();
             }
@@ -4870,6 +4870,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         _renameTimer.Stop();
         if (CurrentPath is null) return;
+        if (IsOperationBusy)
+        {
+            _renameTimer.Start();
+            return;
+        }
+
+        var originalPath = CurrentPath;
         if (string.Equals(EditableStem, _committedStemOnDisk, StringComparison.Ordinal) && !IsExtensionUnlocked)
         {
             RenameStatus = RenameStatusKind.Idle;
@@ -4892,7 +4899,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 return;
             }
 
-            _nav.UpdateCurrentPath(newPath);
+            _nav.UpdateCurrentPath(originalPath, newPath);
             CurrentPath = newPath;
             _externalEditReload.Arm(newPath);
             _committedStemOnDisk = Path.GetFileNameWithoutExtension(newPath);

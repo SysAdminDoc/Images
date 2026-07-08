@@ -193,6 +193,66 @@ public sealed class DirectoryNavigatorTests
     }
 
     [Fact]
+    public void UpdateCurrentPath_WithOldPath_UpdatesMatchingSlotInsteadOfCurrentIndex()
+    {
+        using var temp = TestDirectory.Create();
+        var first = temp.WriteFile("a.jpg");
+        var second = temp.WriteFile("b.jpg");
+        var third = temp.WriteFile("c.jpg");
+        var renamedFirst = Path.Combine(temp.Path, "renamed-a.jpg");
+
+        using var nav = new DirectoryNavigator();
+        Assert.True(nav.Open(first));
+        Assert.True(nav.MoveNext());
+        Assert.Equal(second, nav.CurrentPath);
+
+        File.Move(first, renamedFirst);
+        nav.UpdateCurrentPath(first, renamedFirst);
+
+        Assert.Equal([renamedFirst, second, third], nav.Files);
+        Assert.Equal(second, nav.CurrentPath);
+    }
+
+    [Fact]
+    public void GoBack_WhenTopHistoryEntryIsMissing_PopsItAndOpensNextEntry()
+    {
+        using var parent = TestDirectory.Create();
+        var firstDir = Directory.CreateDirectory(Path.Combine(parent.Path, "first")).FullName;
+        var secondDir = Directory.CreateDirectory(Path.Combine(parent.Path, "second")).FullName;
+        var thirdDir = Directory.CreateDirectory(Path.Combine(parent.Path, "third")).FullName;
+        var first = Path.Combine(firstDir, "a.jpg");
+        var second = Path.Combine(secondDir, "b.jpg");
+        var third = Path.Combine(thirdDir, "c.jpg");
+        File.WriteAllText(first, "first");
+        File.WriteAllText(second, "second");
+        File.WriteAllText(third, "third");
+
+        using var nav = new DirectoryNavigator();
+        Assert.True(nav.Open(first));
+        Assert.True(nav.Open(second));
+        Assert.True(nav.Open(third));
+        File.Delete(second);
+
+        Assert.True(nav.GoBack());
+
+        Assert.Equal(first, nav.CurrentPath);
+        Assert.False(nav.CanGoBack);
+        Assert.Equal([third], nav.GetForwardHistory());
+    }
+
+    [Fact]
+    public void ShouldHandleFileSystemEvent_WhenRenamedFromSupportedToUnsupported_ReturnsTrue()
+    {
+        var args = new RenamedEventArgs(
+            WatcherChangeTypes.Renamed,
+            "C:\\images",
+            "photo.jpg.bak",
+            "photo.jpg");
+
+        Assert.True(DirectoryNavigator.ShouldHandleFileSystemEvent(args));
+    }
+
+    [Fact]
     public void OpenExplicitList_SetsFilesAndNavigates()
     {
         using var dir1 = TestDirectory.Create();

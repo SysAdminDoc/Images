@@ -243,42 +243,12 @@ public sealed class DirectoryNavigator : IDisposable
 
     public bool GoBack()
     {
-        if (_backStack.Count == 0) return false;
-
-        var target = _backStack.First!.Value;
-        var previous = CurrentPath;
-
-        _navigatingHistory = true;
-        try
-        {
-            if (!Open(target)) return false;
-        }
-        finally { _navigatingHistory = false; }
-
-        _backStack.RemoveFirst();
-        if (previous is not null)
-            PushForward(previous);
-        return true;
+        return NavigateHistory(_backStack, _forwardStack);
     }
 
     public bool GoForward()
     {
-        if (_forwardStack.Count == 0) return false;
-
-        var target = _forwardStack.First!.Value;
-        var previous = CurrentPath;
-
-        _navigatingHistory = true;
-        try
-        {
-            if (!Open(target)) return false;
-        }
-        finally { _navigatingHistory = false; }
-
-        _forwardStack.RemoveFirst();
-        if (previous is not null)
-            PushBack(previous);
-        return true;
+        return NavigateHistory(_forwardStack, _backStack);
     }
 
     public IReadOnlyList<string> GetBackHistory() => [.. _backStack];
@@ -294,6 +264,31 @@ public sealed class DirectoryNavigator : IDisposable
     private void PushBack(string path) => PushBounded(_backStack, path);
     private void PushForward(string path) => PushBounded(_forwardStack, path);
 
+    private bool NavigateHistory(LinkedList<string> source, LinkedList<string> destination)
+    {
+        var previous = CurrentPath;
+
+        while (source.Count > 0)
+        {
+            var target = source.First!.Value;
+            source.RemoveFirst();
+
+            _navigatingHistory = true;
+            try
+            {
+                if (!Open(target))
+                    continue;
+            }
+            finally { _navigatingHistory = false; }
+
+            if (previous is not null)
+                PushBounded(destination, previous);
+            return true;
+        }
+
+        return false;
+    }
+
     public bool SetSortMode(DirectorySortMode mode)
     {
         if (SortMode == mode) return false;
@@ -308,11 +303,18 @@ public sealed class DirectoryNavigator : IDisposable
 
     public void UpdateCurrentPath(string newPath)
     {
-        if (CurrentIndex < 0) return;
+        var currentPath = CurrentPath;
+        if (currentPath is null) return;
+
+        UpdateCurrentPath(currentPath, newPath);
+    }
+
+    public void UpdateCurrentPath(string oldPath, string newPath)
+    {
+        if (_files.Count == 0) return;
         if (CurrentIndex >= _files.Count)
         {
             CurrentIndex = ClampIndex(CurrentIndex);
-            if (CurrentIndex < 0) return;
         }
 
         var fullPath = Path.GetFullPath(newPath);
@@ -321,7 +323,12 @@ public sealed class DirectoryNavigator : IDisposable
         if (!SupportedExtensions.Contains(Path.GetExtension(fullPath)))
             throw new InvalidOperationException("The renamed file extension is not supported by Images.");
 
-        _files[CurrentIndex] = fullPath;
+        var oldFullPath = Path.GetFullPath(oldPath);
+        var index = _files.FindIndex(path => string.Equals(path, oldFullPath, StringComparison.OrdinalIgnoreCase));
+        if (index < 0)
+            throw new FileNotFoundException("The renamed source is no longer in the navigator list.", oldFullPath);
+
+        _files[index] = fullPath;
     }
 
     public void RemoveCurrent()
@@ -518,8 +525,7 @@ public sealed class DirectoryNavigator : IDisposable
     private void OnFsEvent(object sender, FileSystemEventArgs e)
     {
         // Filter early on the background thread — ignore non-image changes.
-        var ext = Path.GetExtension(e.Name ?? string.Empty);
-        if (!string.IsNullOrEmpty(ext) && !SupportedExtensions.Contains(ext)) return;
+        if (!ShouldHandleFileSystemEvent(e)) return;
 
         // Debounce on the UI thread: FSW often fires a burst (create + several write events)
         // for a single file copy. One Refresh per quiet period is enough.
@@ -538,6 +544,20 @@ public sealed class DirectoryNavigator : IDisposable
         {
             // Dispatcher is shutting down; ignore late file-system notifications.
         }
+    }
+
+    internal static bool ShouldHandleFileSystemEvent(FileSystemEventArgs e)
+    {
+        if (HasSupportedOrEmptyExtension(e.Name))
+            return true;
+
+        return e is RenamedEventArgs renamed && HasSupportedOrEmptyExtension(renamed.OldName);
+    }
+
+    private static bool HasSupportedOrEmptyExtension(string? name)
+    {
+        var ext = Path.GetExtension(name ?? string.Empty);
+        return string.IsNullOrEmpty(ext) || SupportedExtensions.Contains(ext);
     }
 
     private void WatchDebounce_Tick(object? sender, EventArgs e)
