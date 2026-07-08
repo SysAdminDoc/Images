@@ -60,6 +60,31 @@ public sealed class ModelManagerServiceTests
     }
 
     [Fact]
+    public void Snapshot_RehashesSameLengthModelWhenModifiedTimeDiffers()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Path.Combine(temp.Path, "source.onnx");
+        File.WriteAllText(source, "model-data");
+        var originalSha = Sha256(source);
+        var definition = TestDefinition(expectedSha256: originalSha);
+        var service = CreateService(temp.Path, definition);
+        var import = service.ImportLocalModel(definition.Id, source);
+        var installedPath = import.Model!.InstalledPath!;
+        var manifestPath = Path.Combine(temp.Path, "test", definition.Id, "model-manifest.json");
+
+        File.WriteAllText(installedPath, "tamper!!!!");
+        File.SetLastWriteTimeUtc(installedPath, DateTime.UtcNow.AddMinutes(5));
+
+        var status = Assert.Single(service.GetSnapshot().Models);
+
+        Assert.Equal(LocalModelAvailability.HashMismatch, status.Availability);
+        Assert.False(status.IsReady);
+        Assert.NotEqual(originalSha, status.Sha256);
+        Assert.Equal(Sha256(installedPath), status.Sha256);
+        Assert.Contains(status.Sha256!, File.ReadAllText(manifestPath), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void DeleteLocalModel_RemovesImportedModelDirectory()
     {
         using var temp = TestDirectory.Create();

@@ -283,6 +283,7 @@ public sealed class ModelManagerService
 
                 var sha256 = ComputeSha256(destination);
                 var info = new FileInfo(destination);
+                var modifiedUtc = ToOffset(info.LastWriteTimeUtc);
                 var availability = sha256.Equals(definition.ExpectedSha256, StringComparison.OrdinalIgnoreCase)
                     ? LocalModelAvailability.Ready
                     : LocalModelAvailability.HashMismatch;
@@ -293,7 +294,8 @@ public sealed class ModelManagerService
                     sha256,
                     info.Length,
                     _clock(),
-                    availability));
+                    availability,
+                    modifiedUtc));
 
                 var status = InspectModel(root, definition);
                 return new LocalModelImportResult(
@@ -521,26 +523,46 @@ public sealed class ModelManagerService
             var sha256 = manifest?.Sha256;
             var size = manifest?.SizeBytes;
             var imported = manifest?.ImportedUtc;
+            var info = new FileInfo(modelPath);
+            var modifiedUtc = ToOffset(info.LastWriteTimeUtc);
+            var refreshManifest = false;
 
             // The manifest hash was computed at import time; if the file has
             // drifted since (truncated write, disk error, manual replacement),
             // trusting it would report "SHA-256 verified" for corrupt bytes.
-            // The length probe is near-free — rehash on drift.
+            // Size and mtime probes are near-free; rehash on drift.
             if (!string.IsNullOrWhiteSpace(sha256) && size is not null &&
-                new FileInfo(modelPath).Length != size.Value)
+                (info.Length != size.Value || !SameModifiedUtc(manifest?.ModifiedUtc, modifiedUtc)))
             {
                 sha256 = null;
+                refreshManifest = true;
             }
 
             if (string.IsNullOrWhiteSpace(sha256))
             {
                 sha256 = ComputeSha256(modelPath);
-                size = new FileInfo(modelPath).Length;
+                info.Refresh();
+                size = info.Length;
+                modifiedUtc = ToOffset(info.LastWriteTimeUtc);
+                refreshManifest = manifest is not null;
             }
 
             var availability = sha256.Equals(definition.ExpectedSha256, StringComparison.OrdinalIgnoreCase)
                 ? LocalModelAvailability.Ready
                 : LocalModelAvailability.HashMismatch;
+            if (refreshManifest)
+            {
+                TryWriteManifest(directory, new LocalModelManifest(
+                    definition.Id,
+                    definition.FileName,
+                    modelPath,
+                    sha256,
+                    size.GetValueOrDefault(info.Length),
+                    imported ?? _clock(),
+                    availability,
+                    modifiedUtc));
+            }
+
             return new LocalModelStatus(
                 definition,
                 availability,
@@ -601,6 +623,18 @@ public sealed class ModelManagerService
             Path.Combine(directory, ManifestFileName),
             JsonSerializer.Serialize(manifest, JsonOptions));
 
+    private static void TryWriteManifest(string directory, LocalModelManifest manifest)
+    {
+        try
+        {
+            WriteManifest(directory, manifest);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
+        {
+            // The model status still reflects the freshly computed hash.
+        }
+    }
+
     private static LocalModelManifest? ReadManifest(string path)
     {
         if (!File.Exists(path))
@@ -618,6 +652,17 @@ public sealed class ModelManagerService
         using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
         return Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
     }
+
+    private static DateTimeOffset ToOffset(DateTime utc)
+    {
+        var normalized = utc.Kind == DateTimeKind.Utc
+            ? utc
+            : DateTime.SpecifyKind(utc, DateTimeKind.Utc);
+        return new DateTimeOffset(normalized);
+    }
+
+    private static bool SameModifiedUtc(DateTimeOffset? cached, DateTimeOffset disk)
+        => cached is not null && cached.Value.ToUniversalTime().Ticks == disk.ToUniversalTime().Ticks;
 
     internal static string FormatBytes(long bytes)
     {
@@ -667,5 +712,6 @@ public sealed class ModelManagerService
         string Sha256,
         long SizeBytes,
         DateTimeOffset ImportedUtc,
-        LocalModelAvailability Availability);
+        LocalModelAvailability Availability,
+        DateTimeOffset? ModifiedUtc = null);
 }
