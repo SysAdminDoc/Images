@@ -41,6 +41,7 @@
     <SolidColorBrush x:Key="HintTextBrush" Color="#FF5C5F77" />
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource BlueColor}" />
     <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource LavenderColor}" />
+    <SolidColorBrush x:Key="OnAccentBrush" Color="#FFFFFFFF" />
     <SolidColorBrush x:Key="MauveBrush" Color="{StaticResource MauveColor}" />
     <SolidColorBrush x:Key="RedBrush" Color="{StaticResource RedColor}" />
     <SolidColorBrush x:Key="RedHoverBrush" Color="{StaticResource RedHoverColor}" />
@@ -77,5 +78,12 @@
     <SolidColorBrush x:Key="BrushTintYellowBrush" Color="#24DF8E1D" />
     <SolidColorBrush x:Key="BrushTintAccentBrush" Color="#1F1E66F5" />
     <SolidColorBrush x:Key="BrushTintRedBrush" Color="#24D20F39" />
+    <SolidColorBrush x:Key="AccentWarmBrush" Color="#FFB7791F" />
+    <SolidColorBrush x:Key="AccentWarmPanelBrush" Color="#26B7791F" />
+    <SolidColorBrush x:Key="NavRailBrush" Color="#F5DCE0E8" />
+    <SolidColorBrush x:Key="NavRailBorderBrush" Color="#7CBCC0CC" />
+    <SolidColorBrush x:Key="WorkspaceTopBarBrush" Color="#F8EFF1F5" />
+    <SolidColorBrush x:Key="WorkspaceTopBarBorderBrush" Color="#8C7C7F93" />
+    <SolidColorBrush x:Key="InspectorPanelBrush" Color="#FAE6E9EF" />
 
 </ResourceDictionary>

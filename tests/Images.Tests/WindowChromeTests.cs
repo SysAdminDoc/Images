@@ -1,4 +1,5 @@
 using Images.Services;
+using System.Reflection;
 
 namespace Images.Tests;
 
@@ -24,5 +25,14 @@ public sealed class WindowChromeTests
         });
 
         Assert.Null(ex);
+    }
+
+    [Fact]
+    public void LatteCaptionColor_UsesLatteBase()
+    {
+        var field = typeof(WindowChrome).GetField("LatteBaseColorRef", BindingFlags.NonPublic | BindingFlags.Static);
+
+        Assert.NotNull(field);
+        Assert.Equal(0x00F5F1EF, Assert.IsType<int>(field.GetRawConstantValue()));
     }
 }

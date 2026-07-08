@@ -27,15 +27,112 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <!-- V15-07: side panel column collapses to 0 in fullscreen. Width="Auto" + the
-                 Border's Visibility binding below drops the column to zero width when the
-                 Border is Collapsed (Auto sizes to hidden-content width). -->
+                  Border's Visibility binding below drops the column to zero width when the
+                  Border is Collapsed (Auto sizes to hidden-content width). -->
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
+        <Border x:Name="WorkflowRail"
+                Grid.Column="0"
+                Width="82"
+                Background="{DynamicResource NavRailBrush}"
+                BorderBrush="{DynamicResource NavRailBorderBrush}"
+                BorderThickness="0,0,1,0"
+                Visibility="{Binding IsFullscreen, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}"
+                AutomationProperties.Name="Workflow navigation">
+            <Grid Margin="10,14,10,14">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Width="42"
+                        Height="42"
+                        CornerRadius="{StaticResource Radius.Md.CR}"
+                        Background="{DynamicResource AccentPanelBrush}"
+                        BorderBrush="{DynamicResource AccentBrush}"
+                        BorderThickness="1"
+                        HorizontalAlignment="Center"
+                        ToolTip="Images workspace">
+                    <TextBlock Text="&#xEB9F;"
+                               FontFamily="{StaticResource IconFontFamily}"
+                               FontSize="18"
+                               Foreground="{DynamicResource AccentBrush}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+                </Border>
+
+                <StackPanel Grid.Row="1"
+                            VerticalAlignment="Top"
+                            Margin="0,24,0,0">
+                    <Button Style="{StaticResource NavRailButton}"
+                            Command="{Binding OpenCommand}"
+                            ToolTip="Open an image or folder"
+                            AutomationProperties.Name="Library">
+                        <StackPanel>
+                            <TextBlock Text="&#xE8E5;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                            <TextBlock Text="Library" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRailButton}"
+                            Command="{Binding ToggleReviewModeCommand}"
+                            Tag="{Binding IsReviewMode}"
+                            ToolTip="{Binding ReviewModeText}"
+                            AutomationProperties.Name="Review mode">
+                        <StackPanel>
+                            <TextBlock Text="&#xE8EC;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                            <TextBlock Text="Review" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRailButton}"
+                            Command="{Binding OpenSemanticSearchCommand}"
+                            ToolTip="Search this collection"
+                            AutomationProperties.Name="Semantic search">
+                        <StackPanel>
+                            <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                            <TextBlock Text="Search" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRailButton}"
+                            Command="{Binding OpenBatchProcessorCommand}"
+                            ToolTip="Batch processor"
+                            AutomationProperties.Name="Batch processor">
+                        <StackPanel>
+                            <TextBlock Text="&#xE8EF;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                            <TextBlock Text="Batch" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRailButton}"
+                            Command="{Binding OpenExportWorkbenchCommand}"
+                            ToolTip="Export workbench"
+                            AutomationProperties.Name="Export workbench">
+                        <StackPanel>
+                            <TextBlock Text="&#xE74E;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                            <TextBlock Text="Export" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2">
+                    <Button Style="{StaticResource NavRailButton}"
+                            Command="{Binding SettingsCommand}"
+                            ToolTip="Settings"
+                            AutomationProperties.Name="Settings">
+                        <StackPanel>
+                            <TextBlock Text="&#xE713;" FontFamily="{StaticResource IconFontFamily}" FontSize="15" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                            <TextBlock Text="Settings" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
         <!-- ============ LEFT: Viewport, floating chrome, bottom toolbar ============ -->
-        <Grid Grid.Column="0" Background="{DynamicResource ViewportBrush}">
+        <Grid Grid.Column="1" Background="{DynamicResource ViewportBrush}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
@@ -1484,6 +1581,114 @@
                 <!-- Floating chrome (only when an image is present) -->
                 <Grid Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}">
 
+                    <Border Style="{StaticResource WorkspaceTopCommandBar}"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Top"
+                            Margin="20,18,20,0"
+                            AutomationProperties.Name="Image command bar">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                        MinWidth="0">
+                                <Border Width="34"
+                                        Height="34"
+                                        CornerRadius="{StaticResource Radius.Sm.CR}"
+                                        Background="{DynamicResource AccentWarmPanelBrush}"
+                                        BorderBrush="{DynamicResource AccentWarmBrush}"
+                                        BorderThickness="1"
+                                        Margin="0,0,10,0">
+                                    <TextBlock Text="&#xEB9F;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="14"
+                                               Foreground="{DynamicResource AccentWarmBrush}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel VerticalAlignment="Center" MinWidth="0">
+                                    <TextBlock Text="{Binding CurrentFileName}"
+                                               FontWeight="SemiBold"
+                                               FontSize="13.5"
+                                               Foreground="{DynamicResource FloatingChromeTextBrush}"
+                                               TextTrimming="CharacterEllipsis"
+                                               MaxWidth="360" />
+                                    <TextBlock Text="{Binding CurrentFolder}"
+                                               Style="{StaticResource Text.Hint}"
+                                               FontSize="11"
+                                               TextTrimming="CharacterEllipsis"
+                                               MaxWidth="360"
+                                               Margin="0,2,0,0" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                <Border Style="{StaticResource Badge}"
+                                        Background="{DynamicResource AccentPanelBrush}"
+                                        BorderBrush="{DynamicResource AccentBrush}"
+                                        Margin="0,0,8,0"
+                                        AutomationProperties.Name="Folder position">
+                                    <TextBlock Text="{Binding PositionText}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource AccentBrush}" />
+                                </Border>
+                                <Border Style="{StaticResource Badge}"
+                                        Background="{DynamicResource SurfacePanelBrush}"
+                                        Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}"
+                                        AutomationProperties.Name="Page position">
+                                    <TextBlock Text="{Binding PagePositionText}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource SubtextBrush}" />
+                                </Border>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <Button Command="{Binding StartCompareCommand}"
+                                        Style="{StaticResource ChromeButton}"
+                                        Padding="11,6"
+                                        MinHeight="30"
+                                        Visibility="{Binding CanUseCompareMode, Converter={StaticResource BoolToVis}}"
+                                        ToolTip="{Binding CompareStatusText}"
+                                        AutomationProperties.Name="Compare with next image">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE8AB;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,7,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Compare" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Command="{Binding OpenExportWorkbenchCommand}"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Padding="13,6"
+                                        MinHeight="30"
+                                        Margin="8,0,0,0"
+                                        AutomationProperties.Name="Export workbench">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE74E;"
+                                                   FontFamily="{StaticResource IconFontFamily}"
+                                                   FontSize="11"
+                                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                   Margin="0,0,7,0"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Text="Export"
+                                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                   VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
                     <!-- Archive book page-turn zones. Narrow edge targets keep drag-pan available
                          across the center of the canvas while giving books a natural tap/click turn. -->
                     <Button Command="{Binding LeftBookPageTurnCommand}"
@@ -1566,7 +1771,7 @@
                     <Border Style="{StaticResource FloatingChrome}"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Top"
-                            Margin="0,20,0,0"
+                            Margin="0,80,0,0"
                             AutomationProperties.LiveSetting="Polite"
                             AutomationProperties.Name="Folder position">
                         <TextBlock Text="{Binding PositionText}"
@@ -1578,7 +1783,7 @@
                     <Border Style="{StaticResource FloatingChrome}"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Top"
-                            Margin="0,62,0,0"
+                            Margin="0,122,0,0"
                             Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}"
                             AutomationProperties.LiveSetting="Polite"
                             AutomationProperties.Name="Page position">
@@ -1626,7 +1831,7 @@
                     <Border Style="{StaticResource FloatingChrome}"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top"
-                            Margin="22,22,0,0"
+                            Margin="22,82,0,0"
                             MaxWidth="560"
                             Visibility="{Binding ShowMetadataHud, Converter={StaticResource BoolToVis}}"
                             AutomationProperties.Name="Metadata HUD"
@@ -2308,8 +2513,8 @@
                      gently lit edge like polished macOS / Win11 chrome. -->
                 <Border Grid.Row="0" Height="1" Background="{DynamicResource DividerBrush}" />
                 <Border Grid.Row="1"
-                        Background="{DynamicResource MantleBrush}"
-                        BorderBrush="{DynamicResource HairlineBrush}"
+                        Background="{DynamicResource WorkspaceTopBarBrush}"
+                        BorderBrush="{DynamicResource WorkspaceTopBarBorderBrush}"
                         BorderThickness="0,1,0,0">
                     <Grid Margin="20,10,20,12">
                         <Grid.RowDefinitions>
@@ -2832,10 +3037,10 @@
         </Grid>
 
         <!-- ============ RIGHT: Rename + Recent + Details panel ============ -->
-        <Border x:Name="RightSidePanel" Grid.Column="1"
-                Width="320"
+        <Border x:Name="RightSidePanel" Grid.Column="2"
+                Width="350"
                 Visibility="{Binding IsFullscreen, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}"
-                Background="{DynamicResource MantleBrush}"
+                Background="{DynamicResource InspectorPanelBrush}"
                 BorderBrush="{DynamicResource HairlineBrush}"
                 BorderThickness="1,0,0,0">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
@@ -2849,9 +3054,9 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Style="{StaticResource Text.Display}"
-                                       Text="Images" />
+                                       Text="Inspector" />
                             <TextBlock Style="{StaticResource Text.Subtitle}"
-                                       Text="Review, rename, and move through a folder without breaking flow."
+                                       Text="Metadata, review state, workflow tools, and local automation."
                                        TextWrapping="Wrap"
                                        Margin="0,6,0,0" />
                         </StackPanel>

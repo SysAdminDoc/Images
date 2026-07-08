@@ -19,7 +19,7 @@ internal static class WindowChrome
     private const int MochaSurfaceColorRef = 0x00443231;
     private const int MochaTextColorRef = 0x00F4D6CD;
 
-    private const int LatteBaseColorRef = 0x00EFE9E6;
+    private const int LatteBaseColorRef = 0x00F5F1EF;
     private const int LatteSurfaceColorRef = 0x00DAD0CC;
     private const int LatteTextColorRef = 0x00694F4C;
 

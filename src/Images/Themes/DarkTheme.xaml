@@ -49,6 +49,7 @@
     <SolidColorBrush x:Key="HintTextBrush" Color="#FF9399B2" />
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource BlueColor}" />
     <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource LavenderColor}" />
+    <SolidColorBrush x:Key="OnAccentBrush" Color="{StaticResource CrustColor}" />
     <SolidColorBrush x:Key="MauveBrush" Color="{StaticResource MauveColor}" />
     <SolidColorBrush x:Key="RedBrush" Color="{StaticResource RedColor}" />
     <SolidColorBrush x:Key="RedHoverBrush" Color="{StaticResource RedHoverColor}" />
@@ -86,6 +87,13 @@
     <SolidColorBrush x:Key="OverlayGuideStrongBrush" Color="#B8F5F5F8" />
     <SolidColorBrush x:Key="OverlayDimmerBrush" Color="#CC000000" />
     <SolidColorBrush x:Key="SubtleSurfaceBrush" Color="#10313244" />
+    <SolidColorBrush x:Key="AccentWarmBrush" Color="#FFF6C177" />
+    <SolidColorBrush x:Key="AccentWarmPanelBrush" Color="#22F6C177" />
+    <SolidColorBrush x:Key="NavRailBrush" Color="#F411111B" />
+    <SolidColorBrush x:Key="NavRailBorderBrush" Color="#3345475A" />
+    <SolidColorBrush x:Key="WorkspaceTopBarBrush" Color="#E8181825" />
+    <SolidColorBrush x:Key="WorkspaceTopBarBorderBrush" Color="#4DCDD6F4" />
+    <SolidColorBrush x:Key="InspectorPanelBrush" Color="#F2181825" />
 
     <!-- ============ Radius scale ============ -->
     <!-- Restrained geometry keeps dense tool surfaces professional and compact. -->
@@ -109,10 +117,6 @@
     <DropShadowEffect x:Key="Elevation.High"
                       BlurRadius="24" ShadowDepth="7"
                       Direction="270" Opacity="0.40" Color="#FF000000" />
-    <DropShadowEffect x:Key="Elevation.Focus"
-                      BlurRadius="18" ShadowDepth="0"
-                      Opacity="0.55" Color="#FF89B4FA" />
-
     <!-- ============ Motion tokens ============ -->
     <!-- Consistent 140ms / CubicEase EaseOut across all interaction state changes -->
     <Duration x:Key="Motion.Fast">0:0:0.12</Duration>
@@ -366,7 +370,7 @@
     <!-- ============ Primary action button ============ -->
     <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource ChromeButton}">
         <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource CrustBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource OnAccentBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Padding" Value="20,9" />
@@ -413,7 +417,7 @@
     <!-- ============ Destructive action button ============ -->
     <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource ChromeButton}">
         <Setter Property="Background" Value="{DynamicResource RedBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource CrustBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource OnAccentBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource RedBrush}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Padding" Value="18,9" />
@@ -1507,6 +1511,71 @@
         <Setter Property="MinHeight" Value="32" />
         <Setter Property="Padding" Value="10,6" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
+    </Style>
+
+    <Style x:Key="NavRailButton" TargetType="Button">
+        <Setter Property="Width" Value="62" />
+        <Setter Property="MinHeight" Value="58" />
+        <Setter Property="Margin" Value="0,0,0,8" />
+        <Setter Property="Padding" Value="6,7" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{DynamicResource SubtextBrush}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            CornerRadius="{StaticResource Radius.Md.CR}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SurfacePanelBrush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentSelectionBrush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource FocusRingBrush}" />
+                            <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
+                        </Trigger>
+                        <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentWarmPanelBrush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentWarmBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource AccentWarmBrush}" />
+                        </DataTrigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.42" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="WorkspaceTopCommandBar" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource WorkspaceTopBarBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource WorkspaceTopBarBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.Lg.CR}" />
+        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="Effect" Value="{StaticResource Elevation.Low}" />
     </Style>
 
     <Style x:Key="EmptyStateCard" TargetType="Border" BasedOn="{StaticResource ElevatedCard}">

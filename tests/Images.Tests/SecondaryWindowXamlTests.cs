@@ -45,6 +45,9 @@ public sealed class SecondaryWindowXamlTests
                     "AnnotationColorSwatchButton",
                     ["Swatch"],
                     Brushes.Red);
+                AssertCustomButtonTemplate(
+                    "NavRailButton",
+                    ["Bd"]);
                 AssertThemedPasswordBoxTemplate();
 
                 if (createdApplication)
@@ -62,6 +65,72 @@ public sealed class SecondaryWindowXamlTests
 
         if (exception is not null)
             throw new InvalidOperationException("Themed button style smoke failed.", exception);
+    }
+
+    [Fact]
+    [Trait("Category", "SmokeGate")]
+    public void PremiumShellResourcesExistInEveryTheme()
+    {
+        Exception? exception = null;
+
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                foreach (var themeFileName in new[] { "DarkTheme.xaml", "LatteTheme.xaml", "HighContrastTheme.xaml" })
+                {
+                    var dictionary = LoadThemeDictionary(themeFileName);
+                    Assert.IsType<SolidColorBrush>(dictionary["NavRailBrush"]);
+                    Assert.IsType<SolidColorBrush>(dictionary["WorkspaceTopBarBrush"]);
+                    Assert.IsType<SolidColorBrush>(dictionary["WorkspaceTopBarBorderBrush"]);
+                    Assert.IsType<SolidColorBrush>(dictionary["InspectorPanelBrush"]);
+                    Assert.IsType<SolidColorBrush>(dictionary["AccentWarmBrush"]);
+                    Assert.IsType<SolidColorBrush>(dictionary["AccentWarmPanelBrush"]);
+                    Assert.IsType<SolidColorBrush>(dictionary["OnAccentBrush"]);
+                }
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        if (exception is not null)
+            throw new InvalidOperationException("Premium shell resource smoke failed.", exception);
+    }
+
+    [Fact]
+    [Trait("Category", "SmokeGate")]
+    public void FilledButtonTextMeetsAaContrastInCustomThemes()
+    {
+        Exception? exception = null;
+
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                foreach (var themeFileName in new[] { "DarkTheme.xaml", "LatteTheme.xaml", "HighContrastTheme.xaml" })
+                {
+                    AssertThemeContrast(themeFileName, "OnAccentBrush", "AccentBrush", minimumRatio: 4.5);
+                    AssertThemeContrast(themeFileName, "OnAccentBrush", "RedBrush", minimumRatio: 4.5);
+                }
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        if (exception is not null)
+            throw new InvalidOperationException("Filled button contrast smoke failed.", exception);
     }
 
     [Fact]
