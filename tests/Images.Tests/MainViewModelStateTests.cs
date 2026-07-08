@@ -51,6 +51,33 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void HasImage_UsesCachedAvailabilityUntilNavigatorRefresh()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var first = WritePng(temp.Path, "a.png");
+            var second = WritePng(temp.Path, "b.png");
+            var navigator = new DirectoryNavigator();
+            navigator.OpenExplicitList([first, second]);
+            using var viewModel = CreateViewModelWithFastPreview(temp, navigator: navigator);
+
+            viewModel.OpenFile(first);
+
+            Assert.True(viewModel.HasImage);
+
+            File.Delete(first);
+
+            Assert.True(viewModel.HasImage);
+
+            navigator.OpenExplicitList([second]);
+
+            Assert.Equal(second, viewModel.CurrentPath);
+            Assert.True(viewModel.HasImage);
+        });
+    }
+
+    [Fact]
     public void SetFolderSort_PersistsAndRestoresOnNewInstance()
     {
         RunOnSta(() =>
@@ -283,6 +310,34 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void CullingScoreItemCommands_UseNavigatorAvailabilityCache()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var first = WritePng(temp.Path, "a.png");
+            var second = WritePng(temp.Path, "b.png");
+            var navigator = new DirectoryNavigator();
+            navigator.OpenExplicitList([first, second]);
+            using var viewModel = CreateViewModelWithFastPreview(temp, navigator: navigator);
+
+            viewModel.OpenFile(first);
+            viewModel.RunCullingScoresCommand.Execute(null);
+            PumpUntil(() => !viewModel.IsCullingScoreBusy && viewModel.HasCullingScores);
+
+            var candidate = viewModel.CullingScoreItems.Single(item => item.Path == second);
+
+            File.Delete(second);
+
+            Assert.True(viewModel.ApplyCullingRejectCommand.CanExecute(candidate));
+
+            navigator.OpenExplicitList([first]);
+
+            Assert.False(viewModel.ApplyCullingRejectCommand.CanExecute(candidate));
+        });
+    }
+
+    [Fact]
     public void AnimatedImageWorkbench_LoadsTimelineAndFrameCommands()
     {
         RunOnSta(() =>
@@ -424,6 +479,34 @@ public sealed class MainViewModelStateTests
             Assert.False(viewModel.ShowCompareMode);
             Assert.Null(viewModel.CompareImage);
             Assert.Null(viewModel.ComparePath);
+        });
+    }
+
+    [Fact]
+    public void CompareSwapCommand_UsesCachedComparePathAvailability()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var first = WritePng(temp.Path, "a.png");
+            var second = WritePng(temp.Path, "b.png");
+            var navigator = new DirectoryNavigator();
+            navigator.OpenExplicitList([first, second]);
+            using var viewModel = CreateViewModelWithFastPreview(temp, navigator: navigator);
+
+            viewModel.OpenFile(first);
+            viewModel.StartCompareCommand.Execute(null);
+
+            Assert.Equal(second, viewModel.ComparePath);
+            Assert.True(viewModel.CanSwapComparePair);
+
+            File.Delete(second);
+
+            Assert.True(viewModel.CanSwapComparePair);
+
+            navigator.OpenExplicitList([first]);
+
+            Assert.False(viewModel.CanSwapComparePair);
         });
     }
 
@@ -1717,6 +1800,7 @@ public sealed class MainViewModelStateTests
     private static MainViewModel CreateViewModelWithFastPreview(
         TestDirectory temp,
         ClipboardImportService? clipboardImport = null,
+        DirectoryNavigator? navigator = null,
         Func<string, string?>? pickFolder = null,
         Func<string, WallpaperLayout, string>? setWallpaper = null,
         Action<BitmapSource>? copyImageToClipboard = null,
@@ -1727,7 +1811,7 @@ public sealed class MainViewModelStateTests
         => new(
             CreateSettings(temp),
             clipboardImport,
-            navigator: null,
+            navigator: navigator,
             recycleBinDelete: null,
             folderPreview: new FolderPreviewController(
                 Dispatcher.CurrentDispatcher,

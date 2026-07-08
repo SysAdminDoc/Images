@@ -50,6 +50,7 @@ All notable changes to **Images** are documented here.
 - **Slideshow state-machine hardening** — Empty or cleared image lists now stop slideshow state, single-image slideshows skip redundant reloads, and shuffle jumps within the current navigator list without folder re-enumeration.
 - **Inpaint state guard** — Latent inpaint mask state now resets on navigation, load failure, and clear, and apply is gated by the same current-image capability check as entering inpaint mode.
 - **Async command reentrancy guard** — Async commands now disable while their current execution is running, preventing duplicate motion-photo extraction or playback launches from racing to the same output.
+- **Command predicate file-state cache** — Hot command and palette predicates now use cached current, compare, and culling-item availability instead of probing the file system on every WPF requery.
 
 ## 0.2.17
 

@@ -363,7 +363,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (_isDisposed) return;
 
         Raise(nameof(PositionText));
-        if (CurrentPath is not null && !File.Exists(CurrentPath))
+        var currentAvailabilityChanged = RefreshCurrentPathExists();
+        var compareAvailabilityChanged = RefreshComparePathExists();
+        RefreshCullingScoreAvailabilityFromNavigator();
+
+        if (CurrentPath is not null && !HasImage)
         {
             // Current file was deleted externally — pick whatever slot the navigator landed on.
             if (_nav.CurrentPath is not null) { ResetPageState(); LoadCurrent(); }
@@ -372,6 +376,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         else
         {
             RefreshFolderPreview();
+            if (currentAvailabilityChanged)
+                RaiseCurrentPathState();
+            if (compareAvailabilityChanged)
+                RaiseCompareState();
         }
     }
 
@@ -770,38 +778,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     private string? _currentPath;
+    private bool _currentPathExists;
     public string? CurrentPath
     {
         get => _currentPath;
         private set
         {
-            if (Set(ref _currentPath, value))
-            {
-                Raise(nameof(HasImage));
-                Raise(nameof(CurrentFileName));
-                Raise(nameof(CurrentFolder));
-                Raise(nameof(PositionText));
-                Raise(nameof(IsViewerEmpty));
-                Raise(nameof(CanRefreshFolder));
-                Raise(nameof(WindowTitle));
-                Raise(nameof(IsArchiveBook));
-                Raise(nameof(CanTurnLeftBookPage));
-                Raise(nameof(CanTurnRightBookPage));
-                Raise(nameof(CurrentArchiveProgressText));
-                Raise(nameof(CanUseCrop));
-                Raise(nameof(CurrentFormatSupportsCrop));
-                Raise(nameof(CanApplyRotationToFile));
-                Raise(nameof(CanUseExposureBrush));
-                Raise(nameof(CanUseRedEyeCorrection));
-                Raise(nameof(CanUseRetouch));
-                RaiseCompareState();
-                RefreshReviewState(value);
-                CommandManager.InvalidateRequerySuggested();
-            }
+            if (EqualityComparer<string?>.Default.Equals(_currentPath, value))
+                return;
+
+            _currentPath = value;
+            RefreshCurrentPathExists();
+            Raise(nameof(CurrentPath));
+            RaiseCurrentPathState();
         }
     }
 
-    public bool HasImage => !string.IsNullOrEmpty(CurrentPath) && File.Exists(CurrentPath);
+    public bool HasImage => _currentPathExists;
     public bool HasDisplayImage => CurrentImage is not null || IsTilePyramidActive;
     public bool CanUseInspector => CurrentImage is not null && !IsTilePyramidActive && !IsOperationBusy && !IsCompareMode;
     public bool CanUseSelection => CurrentImage is not null && !IsTilePyramidActive && !IsOperationBusy && !IsCompareMode;
@@ -827,6 +820,40 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private bool CanUseImageCommands => HasImage && !IsOperationBusy;
     private bool CanUseDisplayImageCommands => CurrentImage is not null && !IsTilePyramidActive && !IsOperationBusy;
+
+    private bool RefreshCurrentPathExists()
+    {
+        var exists = !string.IsNullOrEmpty(_currentPath) && File.Exists(_currentPath);
+        if (_currentPathExists == exists)
+            return false;
+
+        _currentPathExists = exists;
+        return true;
+    }
+
+    private void RaiseCurrentPathState()
+    {
+        Raise(nameof(HasImage));
+        Raise(nameof(CurrentFileName));
+        Raise(nameof(CurrentFolder));
+        Raise(nameof(PositionText));
+        Raise(nameof(IsViewerEmpty));
+        Raise(nameof(CanRefreshFolder));
+        Raise(nameof(WindowTitle));
+        Raise(nameof(IsArchiveBook));
+        Raise(nameof(CanTurnLeftBookPage));
+        Raise(nameof(CanTurnRightBookPage));
+        Raise(nameof(CurrentArchiveProgressText));
+        Raise(nameof(CanUseCrop));
+        Raise(nameof(CurrentFormatSupportsCrop));
+        Raise(nameof(CanApplyRotationToFile));
+        Raise(nameof(CanUseExposureBrush));
+        Raise(nameof(CanUseRedEyeCorrection));
+        Raise(nameof(CanUseRetouch));
+        RaiseCompareState();
+        RefreshReviewState(CurrentPath);
+        CommandManager.InvalidateRequerySuggested();
+    }
 
     private string _operationStatusTitle = "";
     public string OperationStatusTitle
@@ -1600,13 +1627,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     private string? _comparePath;
+    private bool _comparePathExists;
     public string? ComparePath
     {
         get => _comparePath;
         private set
         {
-            if (Set(ref _comparePath, value))
-                RaiseCompareState();
+            if (EqualityComparer<string?>.Default.Equals(_comparePath, value))
+                return;
+
+            _comparePath = value;
+            RefreshComparePathExists();
+            Raise(nameof(ComparePath));
+            RaiseCompareState();
         }
     }
 
@@ -1656,7 +1689,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public bool CanUseCompareMode => HasImage && CurrentImage is not null && !IsTilePyramidActive && !IsOperationBusy && !IsPeekMode;
     public bool CanStartCompareWithNext => CanUseCompareMode && TryGetNextComparePath() is not null;
-    public bool CanSwapComparePair => IsCompareMode && CurrentPath is not null && ComparePath is not null && File.Exists(ComparePath);
+    public bool CanSwapComparePair => IsCompareMode && CurrentPath is not null && ComparePath is not null && _comparePathExists;
     public bool ShowCompareMode => IsCompareMode && CurrentImage is not null && !IsTilePyramidActive && CompareImage is not null && !IsPeekMode;
     public string CompareModeText => IsCompareMode ? Strings.MainCompareOn : Strings.MainCompareWithNext;
     public string CompareLayoutText => IsCompareOverlayMode ? Strings.MainCompareOverlay : Strings.MainCompare2Up;
@@ -1675,6 +1708,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
             return $"{ComparePrimaryFileName} vs {CompareSecondaryFileName} - {CompareLayoutText} - B opacity {CompareOverlayOpacityText}";
         }
+    }
+
+    private bool RefreshComparePathExists()
+    {
+        var exists = !string.IsNullOrEmpty(_comparePath) && File.Exists(_comparePath);
+        if (_comparePathExists == exists)
+            return false;
+
+        _comparePathExists = exists;
+        return true;
     }
 
     public string CurrentFileName => CurrentPath is null ? "" : Path.GetFileName(CurrentPath);
@@ -3064,6 +3107,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool IsReviewReject => _currentReviewState.Label == ReviewLabelKind.Reject;
 
     private CullingScoreItem? _selectedCullingScore;
+    private readonly HashSet<string> _availableCullingScorePaths = new(StringComparer.OrdinalIgnoreCase);
     public CullingScoreItem? SelectedCullingScore
     {
         get => _selectedCullingScore;
@@ -3350,8 +3394,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             var result = await Task.Run(() => _cullingScores.RankFiles(files));
             CullingScoreItems.Clear();
+            _availableCullingScorePaths.Clear();
             foreach (var item in result.Items)
+            {
                 CullingScoreItems.Add(item);
+                _availableCullingScorePaths.Add(item.Path);
+            }
 
             SelectedCullingScore = result.Items.FirstOrDefault(item => AreSamePath(item.Path, CurrentPath))
                                    ?? result.Items.FirstOrDefault();
@@ -3400,11 +3448,22 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return false;
 
         var item = ResolveCullingScoreItem(parameter);
-        return item is not null && File.Exists(item.Path);
+        return item is not null && _availableCullingScorePaths.Contains(item.Path);
     }
 
     private CullingScoreItem? ResolveCullingScoreItem(object? parameter)
         => parameter as CullingScoreItem ?? SelectedCullingScore;
+
+    private void RefreshCullingScoreAvailabilityFromNavigator()
+    {
+        if (_availableCullingScorePaths.Count == 0)
+            return;
+
+        var available = _nav.Files.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var removed = _availableCullingScorePaths.RemoveWhere(path => !available.Contains(path));
+        if (removed > 0)
+            CommandManager.InvalidateRequerySuggested();
+    }
 
     private void ApplyReviewMutation(string path, ReviewLabelMutationResult result)
     {
@@ -3446,7 +3505,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void RefreshReviewState(string? path)
     {
-        _currentReviewState = path is not null && File.Exists(path)
+        _currentReviewState = path is not null && _currentPathExists
             ? _reviewLabels.ReadState(path)
             : new ReviewLabelState(null, ReviewLabelKind.None, "");
         RaiseReviewState();
