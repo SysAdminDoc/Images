@@ -22,6 +22,7 @@ public sealed class BooleanToVisibilityConverter : IValueConverter
             bool x => x,
             int n => n != 0,
             string s => !string.IsNullOrEmpty(s),
+            var x when ReferenceEquals(x, DependencyProperty.UnsetValue) => false,
             null => false,
             _ => true
         };
