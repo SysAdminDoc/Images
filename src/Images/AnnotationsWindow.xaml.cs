@@ -24,6 +24,7 @@ public partial class AnnotationsWindow : Window
     private int _imageHeight;
     private Point? _dragStart;
     private bool _isDragging;
+    private bool _hasLoadError;
 
     public AnnotationsWindow(string imagePath, Action<ImageAnnotationPlan> apply)
     {
@@ -48,8 +49,7 @@ public partial class AnnotationsWindow : Window
     {
         if (!File.Exists(_imagePath))
         {
-            StatusText.Text = Strings.AnnotationUnavailableMissingFile;
-            ApplyButton.IsEnabled = false;
+            ShowLoadErrorStatus();
             return;
         }
 
@@ -64,13 +64,13 @@ public partial class AnnotationsWindow : Window
 
             _imageWidth = bitmap.PixelWidth;
             _imageHeight = bitmap.PixelHeight;
+            _hasLoadError = false;
             PreviewImage.Source = bitmap;
             ResizePreviewImage();
         }
         catch (Exception ex) when (ex is NotSupportedException or FileFormatException or InvalidOperationException or IOException or UriFormatException)
         {
-            StatusText.Text = Strings.AnnotationUnavailableMissingFile;
-            ApplyButton.IsEnabled = false;
+            ShowLoadErrorStatus();
         }
     }
 
@@ -194,6 +194,9 @@ public partial class AnnotationsWindow : Window
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
+        if (!ShouldHandleWindowKey(e.Key, Keyboard.FocusedElement))
+            return;
+
         if (e.Key == Key.Enter)
         {
             ApplyAndClose();
@@ -206,8 +209,14 @@ public partial class AnnotationsWindow : Window
         }
     }
 
+    internal static bool ShouldHandleWindowKey(Key key, object? focusedElement)
+        => key is Key.Enter or Key.Escape && !MainWindow.IsTextEntryElement(focusedElement);
+
     private void ApplyAndClose()
     {
+        if (_hasLoadError)
+            return;
+
         var plan = ImageAnnotationService.Normalize(new ImageAnnotationPlan(_items.ToList()));
         if (plan.IsEmpty)
         {
@@ -594,10 +603,23 @@ public partial class AnnotationsWindow : Window
 
     private void UpdateStatus()
     {
+        if (_hasLoadError)
+        {
+            ApplyButton.IsEnabled = false;
+            return;
+        }
+
         ApplyButton.IsEnabled = _items.Count > 0;
         StatusText.Text = _items.Count == 0
             ? Strings.AnnotationNoItemsStatus
             : Strings.Format("AnnotationReadyStatusFormat", _items.Count, _items.Count == 1 ? "" : "s");
+    }
+
+    private void ShowLoadErrorStatus()
+    {
+        _hasLoadError = true;
+        StatusText.Text = Strings.AnnotationUnavailableMissingFile;
+        ApplyButton.IsEnabled = false;
     }
 
     private static Brush BrushFor(string color, double opacity)

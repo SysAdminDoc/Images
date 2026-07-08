@@ -59,6 +59,7 @@ All notable changes to **Images** are documented here.
 - **Multi-file drops open the full supported set** — Dropping multiple image files now routes through the same file-list open path as multi-file argv instead of silently opening only the first dropped file.
 - **Zoom survives layout changes** — `ZoomPanImage` now preserves user-modified zoom and pan through resize, fullscreen edge reveal, and gallery/filmstrip layout changes while untouched fit views still stay fitted.
 - **Right-click double-clicks no longer reset zoom** — The viewer's double-click zoom toggle now only handles the left mouse button, leaving right-button context-menu gestures alone.
+- **Annotation editing keeps text input and load errors intact** — Enter/Escape no longer apply or close the annotation window while text-entry controls have focus, and missing-file preview failures keep their error status instead of being overwritten by the empty-state message.
 
 ## 0.2.17
 
