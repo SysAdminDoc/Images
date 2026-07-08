@@ -17,7 +17,11 @@ public enum MetadataStripCategory
     All = Gps | DeviceInfo | Timestamps | Software
 }
 
-public sealed record MetadataStripResult(int RemovedCount, IReadOnlyList<string> RemovedTagNames);
+public sealed record MetadataStripResult(int RemovedCount, IReadOnlyList<string> RemovedTagNames)
+{
+    public bool ReadFailed { get; init; }
+    public string? ErrorMessage { get; init; }
+}
 
 /// <summary>
 /// In-place metadata editing operations. Lossless formats keep their pixel
@@ -140,9 +144,13 @@ public static class MetadataEditService
             using var image = new MagickImage(path);
             return StripCore(image, categories);
         }
-        catch
+        catch (Exception ex)
         {
-            return new MetadataStripResult(0, []);
+            return new MetadataStripResult(0, [])
+            {
+                ReadFailed = true,
+                ErrorMessage = ex.Message
+            };
         }
     }
 

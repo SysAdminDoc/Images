@@ -257,6 +257,8 @@ public sealed class ImportInboxService
                 // the import when location data is actually present instead of
                 // silently importing it.
                 var residual = MetadataEditService.PreviewStrip(destinationPath, MetadataStripCategory.Gps);
+                if (residual.ReadFailed)
+                    throw new InvalidOperationException("GPS metadata could not be inspected, so the import was not completed.");
                 if (residual.RemovedCount > 0)
                     throw new InvalidOperationException("This file format carries location metadata that Images cannot rewrite, so the import was not completed.");
             }
