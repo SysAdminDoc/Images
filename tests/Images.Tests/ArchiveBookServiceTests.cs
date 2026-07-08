@@ -6,6 +6,8 @@ using Images.Services;
 using SharpCompress.Common;
 using SharpCompress.Writers;
 using SharpCompress.Writers.SevenZip;
+using SharpCryptographicException = SharpCompress.Common.CryptographicException;
+using SystemCryptographicException = System.Security.Cryptography.CryptographicException;
 
 namespace Images.Tests;
 
@@ -181,6 +183,18 @@ public sealed class ArchiveBookServiceTests
         var ex = Assert.Throws<InvalidOperationException>(() => ArchiveBookService.LoadPage(archivePath, 0));
 
         Assert.Contains("does not contain supported image pages", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ArchiveReadClassifier_TreatsCryptographicFailuresAsPasswordFailures()
+    {
+        var sharpCompress = new SharpCryptographicException("Bad password.");
+        var system = new SystemCryptographicException("Bad password.");
+
+        Assert.True(ArchiveBookService.IsArchiveReadException(sharpCompress));
+        Assert.True(ArchiveBookService.IsArchivePasswordException(sharpCompress));
+        Assert.True(ArchiveBookService.IsArchiveReadException(system));
+        Assert.True(ArchiveBookService.IsArchivePasswordException(system));
     }
 
     [Fact]

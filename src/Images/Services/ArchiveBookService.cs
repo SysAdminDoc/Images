@@ -66,6 +66,10 @@ public static class ArchiveBookService
         {
             throw;
         }
+        catch (Exception ex) when (IsArchivePasswordException(ex))
+        {
+            throw new ArchivePasswordRequiredException(fileName);
+        }
         catch (Exception ex) when (IsArchiveReadException(ex))
         {
             throw new InvalidOperationException($"Could not read archive '{fileName}': {ex.Message}", ex);
@@ -101,6 +105,10 @@ public static class ArchiveBookService
         catch (ArchivePasswordRequiredException)
         {
             throw;
+        }
+        catch (Exception ex) when (IsArchivePasswordException(ex))
+        {
+            throw new ArchivePasswordRequiredException(fileName);
         }
         catch (Exception ex) when (IsArchiveReadException(ex))
         {
@@ -200,9 +208,16 @@ public static class ArchiveBookService
             throw new InvalidOperationException(
                 $"Archive page '{entry.Name}' is too large to preview safely.");
 
-        using var entryStream = entry.OpenStream();
-        var bytes = ReadBounded(entryStream, entry.DeclaredSize, entry.Name);
-        return new ArchivePage(entry.Name, bytes, pageIndex, pageCount, IsCoverEntry(entry.Name));
+        try
+        {
+            using var entryStream = entry.OpenStream();
+            var bytes = ReadBounded(entryStream, entry.DeclaredSize, entry.Name);
+            return new ArchivePage(entry.Name, bytes, pageIndex, pageCount, IsCoverEntry(entry.Name));
+        }
+        catch (Exception ex) when (IsArchivePasswordException(ex))
+        {
+            throw new ArchivePasswordRequiredException(entry.Name);
+        }
     }
 
     private static byte[] ReadBounded(Stream stream, long declaredSize, string entryName)
@@ -281,8 +296,11 @@ public static class ArchiveBookService
         return normalized is "cover" or "front" or "frontcover" or "coverfront" or "folder";
     }
 
-    private static bool IsArchiveReadException(Exception ex)
-        => ex is InvalidDataException or SharpCompressException;
+    internal static bool IsArchiveReadException(Exception ex)
+        => ex is InvalidDataException or SharpCompressException or SharpCompress.Common.CryptographicException or System.Security.Cryptography.CryptographicException;
+
+    internal static bool IsArchivePasswordException(Exception ex)
+        => ex is SharpCompress.Common.CryptographicException or System.Security.Cryptography.CryptographicException;
 
     private static string NormalizeEntryName(string entryName)
         => entryName.Replace('\\', '/');
