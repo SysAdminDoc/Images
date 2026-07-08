@@ -19,6 +19,7 @@ All notable changes to **Images** are documented here.
 - **Tile cache eviction protects every active pyramid** — Eviction now skips all tile cache directories in active use or mid-build, so secondary huge-image previews cannot evict the main viewer's displayed pyramid.
 - **Delete confirmations cannot remove the wrong file during slideshow** — Delete and lossless-JPEG trim confirmations now run under the operation-busy guard, and deletes remove the captured path instead of the current index if navigation changes while a modal dialog is open.
 - **Crop Enter respects text entry focus** — Pressing Enter while a text box, password box, rich text box, or editable combo box has focus no longer applies an active crop selection.
+- **Auto crop starts after busy-wrapped loads** — Freehand crop mode now starts after async/open-dialog/page-turn/slideshow loads clear their operation-busy status instead of only on synchronous open paths.
 
 ## 0.2.17
 

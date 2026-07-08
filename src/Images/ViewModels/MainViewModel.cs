@@ -4425,6 +4425,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     private bool _isImageLoading;
+    private bool _pendingAutoStartCropMode;
     public bool IsImageLoading
     {
         get => _isImageLoading;
@@ -4515,6 +4516,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Exception? error = null,
         bool startCropMode = true)
     {
+        _pendingAutoStartCropMode = false;
         var loaded = false;
 
         if (error is null && result is not null)
@@ -4626,7 +4628,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             CropStatusText = CropUnavailableStatusText;
 
         if (loaded && startCropMode && !IsTilePyramidActive)
-            StartFreehandCropModeForCurrentImage();
+        {
+            if (IsOperationBusy)
+                _pendingAutoStartCropMode = CurrentFormatSupportsCrop;
+            else
+                StartFreehandCropModeForCurrentImage();
+        }
 
         SyncRenameEditorFromDisk();
 
@@ -6973,6 +6980,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         IsOperationBusy = false;
         OperationStatusTitle = "";
         OperationStatusDetail = "";
+        if (_pendingAutoStartCropMode)
+        {
+            _pendingAutoStartCropMode = false;
+            StartFreehandCropModeForCurrentImage();
+        }
     }
 
     // E6/V100-01: save a copy of the decoded frame, applying persisted edit-stack operations

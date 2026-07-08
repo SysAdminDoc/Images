@@ -1021,6 +1021,33 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void CropMode_StartsAutomaticallyAfterBusyWrappedNavigation()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var first = WritePng(temp.Path, "a.png");
+            var second = WritePng(temp.Path, "b.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(first);
+            Assert.True(viewModel.IsCropMode);
+            viewModel.ToggleCropModeCommand.Execute(null);
+            Assert.False(viewModel.IsCropMode);
+
+            viewModel.NextCommand.Execute(null);
+
+            Assert.True(viewModel.IsOperationBusy);
+            PumpUntil(() => !viewModel.IsOperationBusy);
+
+            Assert.Equal(second, viewModel.CurrentPath);
+            Assert.True(viewModel.IsCropMode);
+            Assert.Equal("Free", viewModel.CropAspectText);
+            Assert.Contains("Freehand crop is ready", viewModel.CropStatusText);
+        });
+    }
+
+    [Fact]
     public void CropMode_BakesExistingCropPreviewIntoSourceAndClearsEditStack()
     {
         RunOnSta(() =>
