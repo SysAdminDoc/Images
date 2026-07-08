@@ -52,6 +52,7 @@ All notable changes to **Images** are documented here.
 - **Async command reentrancy guard** — Async commands now disable while their current execution is running, preventing duplicate motion-photo extraction or playback launches from racing to the same output.
 - **Command predicate file-state cache** — Hot command and palette predicates now use cached current, compare, and culling-item availability instead of probing the file system on every WPF requery.
 - **Main-view long operations yield to the busy panel** — Explicit file-list opens, external-edit reloads, delete advancement, and copy/move transfers now use async decode or worker-thread transfer paths so the dispatcher can render status before heavy work starts.
+- **Secondary previews are capped and asynchronous** — Duplicate Cleanup, File Health Scan, Import Inbox, and Reference Board now load bounded preview images off the dispatcher instead of decoding full-size images during selection or card creation.
 
 ## 0.2.17
 

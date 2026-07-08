@@ -717,6 +717,64 @@ public static class ImageLoader
         }
     }
 
+    public static ImageSource LoadPreviewImage(string path, int maxPixelDimension = 1024)
+    {
+        if (maxPixelDimension <= 0)
+            throw new ArgumentOutOfRangeException(nameof(maxPixelDimension), "Preview dimension cap must be positive.");
+
+        if (TryLoadWicPreview(path, maxPixelDimension) is { } preview)
+            return preview;
+
+        CodecRuntime.Configure();
+        using var image = new MagickImage(path);
+        image.AutoOrient();
+        image.Resize(new MagickGeometry((uint)maxPixelDimension, (uint)maxPixelDimension) { Greater = true });
+        return MagickToBitmap(image);
+    }
+
+    private static BitmapSource? TryLoadWicPreview(string path, int maxPixelDimension)
+    {
+        try
+        {
+            int width;
+            int height;
+            using (var metadata = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+            {
+                var frame = BitmapFrame.Create(metadata, BitmapCreateOptions.DelayCreation, BitmapCacheOption.None);
+                width = frame.PixelWidth;
+                height = frame.PixelHeight;
+            }
+
+            if (width <= 0 || height <= 0)
+                return null;
+
+            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            var bmp = new BitmapImage();
+            bmp.BeginInit();
+            bmp.CacheOption = BitmapCacheOption.OnLoad;
+            bmp.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+            bmp.StreamSource = stream;
+            if (width >= height)
+                bmp.DecodePixelWidth = Math.Min(width, maxPixelDimension);
+            else
+                bmp.DecodePixelHeight = Math.Min(height, maxPixelDimension);
+            bmp.EndInit();
+            bmp.Freeze();
+            return bmp;
+        }
+        catch (Exception ex) when (
+            ex is IOException or
+                  UnauthorizedAccessException or
+                  NotSupportedException or
+                  System.Runtime.InteropServices.COMException or
+                  FileFormatException or
+                  InvalidOperationException or
+                  ArgumentException)
+        {
+            return null;
+        }
+    }
+
     public static bool IsRawExtension(string path)
         => SupportedImageFormats.RawExtensions.Contains(
             Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);

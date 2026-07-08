@@ -220,24 +220,25 @@ public partial class ReferenceBoardWindow : Window
 
     private void AddImageCard(string path)
     {
-        var loaded = ImageLoader.Load(path);
-        var size = FitWithin(loaded.PixelWidth, loaded.PixelHeight, MaxImageWidth, MaxImageHeight);
+        var dimensions = ImageLoader.QuickDimensions(path);
+        var pixelWidth = dimensions.width > 0 ? dimensions.width : (int)MaxImageWidth;
+        var pixelHeight = dimensions.height > 0 ? dimensions.height : (int)MaxImageHeight;
+        var size = FitWithin(pixelWidth, pixelHeight, MaxImageWidth, MaxImageHeight);
         var fileName = Path.GetFileName(path);
         var family = SupportedImageFormats.FormatFamily(path);
 
         var image = new Image
         {
-            Source = loaded.Image,
             Width = size.Width,
             Height = size.Height,
             Stretch = Stretch.Uniform,
             SnapsToDevicePixels = true,
-            UseLayoutRounding = true
+            UseLayoutRounding = true,
+            Tag = path
         };
 
         RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.HighQuality);
-        if (loaded.Image is BitmapSource sampleSource)
-            RegisterImageInspector(image, sampleSource, fileName);
+        _ = LoadBoardPreviewAsync(path, image, fileName);
 
         var caption = new TextBlock
         {
@@ -250,7 +251,7 @@ public partial class ReferenceBoardWindow : Window
 
         var detail = new TextBlock
         {
-            Text = $"{loaded.PixelWidth} x {loaded.PixelHeight} - {family}",
+            Text = $"{pixelWidth} x {pixelHeight} - {family}",
             Foreground = Brush("SubtextBrush"),
             FontSize = 12,
             TextTrimming = TextTrimming.CharacterEllipsis,
@@ -272,6 +273,25 @@ public partial class ReferenceBoardWindow : Window
         card.ToolTip = path;
         AutomationProperties.SetName(card, Strings.Format(nameof(Strings.ReferenceBoardReferenceImageFormat), fileName));
         AddBoardElement(card, draggableHandle: card, zIndex: 20);
+    }
+
+    private async Task LoadBoardPreviewAsync(string path, Image image, string fileName)
+    {
+        try
+        {
+            var source = await Task.Run(() => ImageLoader.LoadPreviewImage(path));
+            if (!string.Equals(image.Tag as string, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            image.Source = source;
+            if (source is BitmapSource sampleSource)
+                RegisterImageInspector(image, sampleSource, fileName);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException or InvalidOperationException or ImageMagick.MagickException)
+        {
+            if (string.Equals(image.Tag as string, path, StringComparison.OrdinalIgnoreCase))
+                SetStatus($"Could not preview {Path.GetFileName(path)}: {ex.Message}");
+        }
     }
 
     private void AddNoteCard()

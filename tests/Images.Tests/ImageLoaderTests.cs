@@ -1,4 +1,5 @@
 using System.IO;
+using System.Windows.Media.Imaging;
 using ImageMagick;
 using Images.Services;
 
@@ -37,6 +38,19 @@ public sealed class ImageLoaderTests
         Assert.All(
             result.Animation.Delays,
             delay => Assert.Equal(TimeSpan.FromMilliseconds(expectedMilliseconds), delay));
+    }
+
+    [Fact]
+    public void LoadPreviewImage_CapsLongestEdge()
+    {
+        using var temp = TestDirectory.Create();
+        var path = Path.Combine(temp.Path, "large.png");
+        using (var image = new MagickImage(MagickColors.Red, 2000, 1000))
+            image.Write(path);
+
+        var preview = Assert.IsAssignableFrom<BitmapSource>(ImageLoader.LoadPreviewImage(path, maxPixelDimension: 320));
+
+        Assert.Equal(320, Math.Max(preview.PixelWidth, preview.PixelHeight));
     }
 
     private static void WriteAnimatedGif(string path, int centiseconds)

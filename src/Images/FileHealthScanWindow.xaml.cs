@@ -210,13 +210,28 @@ public partial class FileHealthScanWindow : Window
             ? Strings.Format(nameof(Strings.FileHealthScanDetectedRenameHelpFormat), finding.DetectedFormat, Path.ChangeExtension(finding.Path, finding.SuggestedExtension))
             : Strings.FileHealthScanNoRenameHelp;
 
+        PreviewImage.Source = null;
+        PreviewImage.ToolTip = finding.Path;
+        PreviewImage.Tag = finding.Path;
+        _ = LoadFindingPreviewAsync(finding.Path);
+    }
+
+    private async Task LoadFindingPreviewAsync(string path)
+    {
         try
         {
-            PreviewImage.Source = ImageLoader.Load(finding.Path).Image;
-            PreviewImage.ToolTip = finding.Path;
+            var source = await Task.Run(() => ImageLoader.LoadPreviewImage(path));
+            if (!string.Equals(PreviewImage.Tag as string, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            PreviewImage.Source = source;
+            PreviewImage.ToolTip = path;
         }
         catch
         {
+            if (!string.Equals(PreviewImage.Tag as string, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
             PreviewImage.Source = null;
             PreviewImage.ToolTip = Strings.FileHealthScanPreviewUnavailable;
         }
@@ -227,6 +242,7 @@ public partial class FileHealthScanWindow : Window
         EmptyState.Visibility = Visibility.Visible;
         DetailPanel.Visibility = Visibility.Collapsed;
         PreviewImage.Source = null;
+        PreviewImage.Tag = null;
     }
 
     private void RemoveFinding(FileHealthFinding finding)

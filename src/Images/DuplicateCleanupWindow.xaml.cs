@@ -350,15 +350,30 @@ public partial class DuplicateCleanupWindow : Window
         if (badge.Child is TextBlock badgeText)
             badgeText.Text = candidate.IsReference ? Strings.DuplicateCleanupReferenceCandidate : role;
 
+        preview.Source = null;
+        preview.ToolTip = candidate.Path;
+        preview.Tag = candidate.Path;
+        _ = LoadCandidatePreviewAsync(candidate.Path, preview, Strings.DuplicateCleanupPreviewUnavailable);
+    }
+
+    private static async Task LoadCandidatePreviewAsync(string path, Image preview, string unavailableText)
+    {
         try
         {
-            preview.Source = ImageLoader.Load(candidate.Path).Image;
-            preview.ToolTip = candidate.Path;
+            var source = await Task.Run(() => ImageLoader.LoadPreviewImage(path));
+            if (!string.Equals(preview.Tag as string, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            preview.Source = source;
+            preview.ToolTip = path;
         }
         catch
         {
+            if (!string.Equals(preview.Tag as string, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
             preview.Source = null;
-            preview.ToolTip = Strings.DuplicateCleanupPreviewUnavailable;
+            preview.ToolTip = unavailableText;
         }
     }
 
@@ -368,6 +383,8 @@ public partial class DuplicateCleanupWindow : Window
         DetailPanel.Visibility = Visibility.Collapsed;
         PrimaryPreview.Source = null;
         SecondaryPreview.Source = null;
+        PrimaryPreview.Tag = null;
+        SecondaryPreview.Tag = null;
     }
 
     private void RemoveFinding(DuplicateCleanupFinding finding)

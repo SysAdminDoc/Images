@@ -338,16 +338,32 @@ public partial class ImportInboxWindow : Window
         if (string.IsNullOrWhiteSpace(path))
         {
             PreviewImage.Source = null;
+            PreviewImage.Tag = null;
             return;
         }
 
+        PreviewImage.Source = null;
+        PreviewImage.ToolTip = path;
+        PreviewImage.Tag = path;
+        _ = LoadImagePreviewAsync(path);
+    }
+
+    private async Task LoadImagePreviewAsync(string path)
+    {
         try
         {
-            PreviewImage.Source = ImageLoader.Load(path).Image;
+            var source = await Task.Run(() => ImageLoader.LoadPreviewImage(path));
+            if (!string.Equals(PreviewImage.Tag as string, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            PreviewImage.Source = source;
             PreviewImage.ToolTip = path;
         }
         catch
         {
+            if (!string.Equals(PreviewImage.Tag as string, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
             PreviewImage.Source = null;
             PreviewImage.ToolTip = Strings.ImportInboxPreviewUnavailable;
         }
