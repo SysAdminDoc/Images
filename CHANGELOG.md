@@ -32,6 +32,7 @@ All notable changes to **Images** are documented here.
 - **Recovery restores are no longer limited to the newest 200 records** — Restore and reveal now look up the requested recovery id across the full log, while repeated status updates compact duplicate JSONL rows to the latest record state.
 - **MicrosoftPhoto ratings map to the correct star value** — XMP imports, catalog sidecar reads, and review labels now interpret `MicrosoftPhoto:Rating` as the 0-99 Windows scale, and clearing a review rating removes stale element-form rating nodes too.
 - **Wrong archive passwords reopen the password prompt** — SharpCompress cryptographic failures now map to `ArchivePasswordRequiredException` instead of escaping as generic archive read errors.
+- **Catalog root stats are per-root again** — Multi-root catalog rebuilds now store each root's own indexed and failed counts instead of writing global totals into every `catalog_roots` row.
 
 ## 0.2.17
 

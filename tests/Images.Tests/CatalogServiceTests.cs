@@ -100,6 +100,29 @@ public sealed class CatalogServiceTests
     }
 
     [Fact]
+    public void Rebuild_StoresPerRootIndexedAndFailedCounts()
+    {
+        using var temp = TestDirectory.Create();
+        var root1 = Directory.CreateDirectory(Path.Combine(temp.Path, "root1")).FullName;
+        var root2 = Directory.CreateDirectory(Path.Combine(temp.Path, "root2")).FullName;
+        WriteImage(root1, "first.png", 8, 8);
+        WriteImage(root1, "second.png", 8, 8);
+        WriteImage(root2, "third.png", 8, 8);
+        File.WriteAllText(Path.Combine(root2, "broken.png"), "not an image");
+        var dbPath = Path.Combine(temp.Path, "catalog.db");
+        var service = new CatalogService(dbPath);
+
+        var result = service.Rebuild([root1, root2]);
+
+        Assert.Equal(3, result.IndexedCount);
+        Assert.Equal(1, result.FailedCount);
+        Assert.Equal(2, ReadRootInt(dbPath, root1, "indexed_count"));
+        Assert.Equal(0, ReadRootInt(dbPath, root1, "failed_count"));
+        Assert.Equal(1, ReadRootInt(dbPath, root2, "indexed_count"));
+        Assert.Equal(1, ReadRootInt(dbPath, root2, "failed_count"));
+    }
+
+    [Fact]
     public void Rebuild_SkipsReparsePointDirectories()
     {
         using var temp = TestDirectory.Create();
@@ -205,6 +228,20 @@ public sealed class CatalogServiceTests
 
     private static int ReadInt(string dbPath, string sql)
         => Convert.ToInt32(ReadScalar(dbPath, sql));
+
+    private static int ReadRootInt(string dbPath, string rootPath, string columnName)
+    {
+        using var conn = new SqliteConnection(new SqliteConnectionStringBuilder
+        {
+            DataSource = dbPath,
+            Mode = SqliteOpenMode.ReadOnly
+        }.ToString());
+        conn.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = $"SELECT {columnName} FROM catalog_roots WHERE root_path = $root;";
+        cmd.Parameters.AddWithValue("$root", rootPath);
+        return Convert.ToInt32(cmd.ExecuteScalar());
+    }
 
     [Fact]
     public void Rebuild_IncrementalReusesUnchangedRows()

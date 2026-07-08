@@ -99,15 +99,22 @@ public sealed class CatalogService
         var reused = 0;
         var updated = 0;
         var assets = new List<CatalogAssetRecord>();
+        var rootStats = normalizedRoots.ToDictionary(
+            root => root,
+            _ => new CatalogRootScanStats(),
+            StringComparer.OrdinalIgnoreCase);
 
-        foreach (var path in CollectCandidateFiles(normalizedRoots, cancellationToken))
+        foreach (var candidate in CollectCandidateFiles(normalizedRoots, cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
+            var path = candidate.Path;
+            var stats = rootStats[candidate.Root];
             currentPaths.Add(path);
 
             if (existing.TryGetValue(path, out var cached) && IsUnchanged(path, cached))
             {
                 reused++;
+                stats.IndexedCount++;
                 continue;
             }
 
@@ -115,6 +122,7 @@ public sealed class CatalogService
             {
                 assets.Add(BuildAsset(path, scannedUtc, cancellationToken));
                 updated++;
+                stats.IndexedCount++;
             }
             catch (OperationCanceledException)
             {
@@ -123,6 +131,7 @@ public sealed class CatalogService
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or MagickException)
             {
                 failed++;
+                stats.FailedCount++;
                 Log.LogDebug(ex, "Could not catalog asset {Path}", path);
             }
         }
@@ -139,7 +148,10 @@ public sealed class CatalogService
             UpsertAsset(conn, tx, asset);
         }
         foreach (var root in normalizedRoots)
-            UpsertRoot(conn, tx, root, scannedUtc, reused + updated, failed);
+        {
+            var stats = rootStats[root];
+            UpsertRoot(conn, tx, root, scannedUtc, stats.IndexedCount, stats.FailedCount);
+        }
         tx.Commit();
 
         var allAssets = LoadAllAssets(conn);
@@ -715,7 +727,7 @@ public sealed class CatalogService
         }
     }
 
-    private static IEnumerable<string> CollectCandidateFiles(
+    private static IEnumerable<CatalogCandidateFile> CollectCandidateFiles(
         IEnumerable<string> roots,
         CancellationToken cancellationToken)
     {
@@ -726,7 +738,7 @@ public sealed class CatalogService
             if (File.Exists(root))
             {
                 if (SupportedImageFormats.IsSupported(root) && seen.Add(root))
-                    yield return root;
+                    yield return new CatalogCandidateFile(root, root);
                 continue;
             }
 
@@ -753,7 +765,7 @@ public sealed class CatalogService
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 if (SupportedImageFormats.IsSupported(file) && seen.Add(file))
-                    yield return file;
+                    yield return new CatalogCandidateFile(root, file);
             }
         }
     }
@@ -1002,6 +1014,14 @@ public sealed class CatalogService
         DateTimeOffset? SidecarModifiedUtc);
 
     private sealed record CatalogSidecarFileSummary(string? Path, DateTimeOffset? ModifiedUtc);
+
+    private sealed record CatalogCandidateFile(string Root, string Path);
+
+    private sealed class CatalogRootScanStats
+    {
+        public int IndexedCount { get; set; }
+        public int FailedCount { get; set; }
+    }
 
     private Dictionary<string, CatalogFileSummary> LoadExistingState()
     {
