@@ -38,6 +38,7 @@ All notable changes to **Images** are documented here.
 - **Listen mode binds its socket exclusively** — The loopback TCP listener now sets `ExclusiveAddressUse` before binding so another same-user socket cannot reuse the listen port.
 - **Network egress log rotation avoids per-entry full-file reads** — The JSONL writer now tracks persisted line count in memory and only reads/trims the log when the cached count exceeds the cap.
 - **Support bundles redact more profile path forms** — Redaction now catches Windows short-name profile paths and `file:///C:/Users/...` URI forms in logs and manifest text.
+- **Reveal in Explorer handles comma paths** — File selection now uses `SHParseDisplayName` plus `SHOpenFolderAndSelectItems` before falling back to Explorer's `/select,` command line.
 
 ## 0.2.17
 

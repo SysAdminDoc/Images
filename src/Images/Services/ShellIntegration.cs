@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Images.Services;
 
@@ -59,9 +60,32 @@ public static class ShellIntegration
 
     private static void SelectPath(string fullPath)
     {
+        if (TrySelectPathWithShellApi(fullPath))
+            return;
+
         var psi = CreateExplorerStartInfo();
         psi.ArgumentList.Add("/select," + fullPath);
         Process.Start(psi);
+    }
+
+    internal static bool TrySelectPathWithShellApi(string fullPath)
+    {
+        if (!OperatingSystem.IsWindows())
+            return false;
+
+        var hr = SHParseDisplayName(fullPath, IntPtr.Zero, out var pidl, 0, out _);
+        if (hr < 0 || pidl == IntPtr.Zero)
+            return false;
+
+        try
+        {
+            hr = SHOpenFolderAndSelectItems(pidl, 0, IntPtr.Zero, 0);
+            return hr >= 0;
+        }
+        finally
+        {
+            CoTaskMemFree(pidl);
+        }
     }
 
     private static ProcessStartInfo CreateExplorerStartInfo()
@@ -70,4 +94,22 @@ public static class ShellIntegration
             FileName = "explorer.exe",
             UseShellExecute = false,
         };
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern int SHParseDisplayName(
+        string pszName,
+        IntPtr pbc,
+        out IntPtr ppidl,
+        uint sfgaoIn,
+        out uint psfgaoOut);
+
+    [DllImport("shell32.dll")]
+    private static extern int SHOpenFolderAndSelectItems(
+        IntPtr pidlFolder,
+        uint cidl,
+        IntPtr apidl,
+        uint dwFlags);
+
+    [DllImport("ole32.dll")]
+    private static extern void CoTaskMemFree(IntPtr pv);
 }

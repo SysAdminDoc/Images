@@ -1,3 +1,4 @@
+using System.IO;
 using Images.Services;
 
 namespace Images.Tests;
@@ -32,5 +33,14 @@ public sealed class ShellIntegrationTests
     public void RevealPathInExplorer_WithEmpty_ThrowsArgumentException()
     {
         Assert.Throws<ArgumentException>(() => ShellIntegration.RevealPathInExplorer(""));
+    }
+
+    [Fact]
+    public void TrySelectPathWithShellApi_WithMissingCommaPath_ReturnsFalse()
+    {
+        using var temp = TestDirectory.Create();
+        var path = Path.Combine(temp.Path, "a,b.png");
+
+        Assert.False(ShellIntegration.TrySelectPathWithShellApi(path));
     }
 }
