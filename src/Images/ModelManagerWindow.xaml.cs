@@ -205,16 +205,13 @@ public partial class ModelManagerWindow : Window
     private void SetStatus(string message, ModelStatusTone tone)
     {
         StatusText.Text = message;
-        StatusDot.Fill = tone switch
+        StatusDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, tone switch
         {
-            ModelStatusTone.Warning => Brush("YellowBrush"),
-            ModelStatusTone.Error => Brush("RedBrush"),
-            _ => Brush("GreenBrush")
-        };
+            ModelStatusTone.Warning => "YellowBrush",
+            ModelStatusTone.Error => "RedBrush",
+            _ => "GreenBrush"
+        });
     }
-
-    private Brush Brush(string key)
-        => TryFindResource(key) as Brush ?? Brushes.Transparent;
 
     private enum ModelStatusTone
     {

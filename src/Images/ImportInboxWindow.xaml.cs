@@ -394,17 +394,14 @@ public partial class ImportInboxWindow : Window
     private void SetStatus(string message, ImportInboxStatus status)
     {
         StatusText.Text = message;
-        StatusDot.Fill = status switch
+        StatusDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, status switch
         {
-            ImportInboxStatus.Busy => Brush("AccentBrush"),
-            ImportInboxStatus.Warning => Brush("YellowBrush"),
-            ImportInboxStatus.Error => Brush("RedBrush"),
-            _ => Brush("GreenBrush")
-        };
+            ImportInboxStatus.Busy => "AccentBrush",
+            ImportInboxStatus.Warning => "YellowBrush",
+            ImportInboxStatus.Error => "RedBrush",
+            _ => "GreenBrush"
+        });
     }
-
-    private Brush Brush(string key)
-        => TryFindResource(key) as Brush ?? Brushes.Transparent;
 
     private static string? PickFolder(string title)
     {

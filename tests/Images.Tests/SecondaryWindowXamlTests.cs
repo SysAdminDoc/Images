@@ -1,10 +1,12 @@
 using System.Globalization;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using Images.Localization;
 
 namespace Images.Tests;
@@ -131,6 +133,72 @@ public sealed class SecondaryWindowXamlTests
 
         if (exception is not null)
             throw new InvalidOperationException("Filled button contrast smoke failed.", exception);
+    }
+
+    [Fact]
+    [Trait("Category", "SmokeGate")]
+    public void CodeBehindStatusBrushTracksLiveThemeResourceChanges()
+    {
+        Exception? exception = null;
+
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                var createdApplication = Application.Current is null;
+                var application = Application.Current ?? new Application
+                {
+                    ShutdownMode = ShutdownMode.OnExplicitShutdown
+                };
+
+                application.Resources.MergedDictionaries.Clear();
+                application.Resources.MergedDictionaries.Add(
+                    (ResourceDictionary)Application.LoadComponent(
+                        new Uri("/Images;component/Themes/DarkTheme.xaml", UriKind.Relative)));
+
+                var firstBrush = new SolidColorBrush(Color.FromRgb(1, 2, 3));
+                var secondBrush = new SolidColorBrush(Color.FromRgb(4, 5, 6));
+                application.Resources["AccentBrush"] = firstBrush;
+
+                var window = new ImportInboxWindow();
+                try
+                {
+                    var statusType = typeof(ImportInboxWindow).GetNestedType("ImportInboxStatus", BindingFlags.NonPublic);
+                    Assert.NotNull(statusType);
+                    var busyStatus = Enum.Parse(statusType!, "Busy");
+                    var setStatus = typeof(ImportInboxWindow).GetMethod(
+                            "SetStatus",
+                            BindingFlags.Instance | BindingFlags.NonPublic);
+                    Assert.NotNull(setStatus);
+
+                    setStatus!.Invoke(window, ["Indexing", busyStatus]);
+                    var statusDot = Assert.IsAssignableFrom<Shape>(window.FindName("StatusDot"));
+                    Assert.Same(firstBrush, statusDot.Fill);
+
+                    application.Resources["AccentBrush"] = secondBrush;
+                    Assert.Same(secondBrush, statusDot.Fill);
+                }
+                finally
+                {
+                    window.Close();
+                    application.Resources.Remove("AccentBrush");
+                }
+
+                if (createdApplication)
+                    application.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        if (exception is not null)
+            throw new InvalidOperationException("Code-behind status brush theme tracking smoke failed.", exception);
     }
 
     [Fact]

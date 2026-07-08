@@ -259,12 +259,12 @@ public partial class PerspectiveCorrectionWindow : Window
         var polygon = new Polygon
         {
             Points = new PointCollection(canvasPoints),
-            Stroke = Brush("TextBrush"),
             StrokeThickness = 2,
-            Fill = Brush("AccentSelectionBrush"),
             StrokeLineJoin = PenLineJoin.Round,
             IsHitTestVisible = false
         };
+        SetResource(polygon, Shape.StrokeProperty, "TextBrush");
+        SetResource(polygon, Shape.FillProperty, "AccentSelectionBrush");
         PreviewCanvas.Children.Add(polygon);
 
         var labels = new[]
@@ -294,12 +294,12 @@ public partial class PerspectiveCorrectionWindow : Window
         {
             Width = 16,
             Height = 16,
-            Fill = Brush("TextBrush"),
-            Stroke = Brush("AccentBrush"),
             StrokeThickness = 3,
             Cursor = Cursors.SizeAll,
             Tag = index
         };
+        SetResource(handle, Shape.FillProperty, "TextBrush");
+        SetResource(handle, Shape.StrokeProperty, "AccentBrush");
         Canvas.SetLeft(handle, point.X - 8);
         Canvas.SetTop(handle, point.Y - 8);
         PreviewCanvas.Children.Add(handle);
@@ -309,11 +309,11 @@ public partial class PerspectiveCorrectionWindow : Window
             Text = label,
             FontSize = 11,
             FontWeight = FontWeights.SemiBold,
-            Foreground = Brush("TextBrush"),
-            Background = Brush("FloatingChromeBrush"),
             Padding = new Thickness(4, 1, 4, 2),
             IsHitTestVisible = false
         };
+        SetResource(text, TextBlock.ForegroundProperty, "TextBrush");
+        SetResource(text, TextBlock.BackgroundProperty, "FloatingChromeBrush");
         Canvas.SetLeft(text, point.X + 8);
         Canvas.SetTop(text, point.Y + 8);
         PreviewCanvas.Children.Add(text);
@@ -383,5 +383,6 @@ public partial class PerspectiveCorrectionWindow : Window
         PreviewImage.Height = PreviewCanvas.ActualHeight;
     }
 
-    private Brush Brush(string key) => TryFindResource(key) as Brush ?? Brushes.Transparent;
+    private static void SetResource(FrameworkElement element, DependencyProperty property, string resourceKey)
+        => element.SetResourceReference(property, resourceKey);
 }

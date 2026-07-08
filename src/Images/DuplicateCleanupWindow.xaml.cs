@@ -428,17 +428,14 @@ public partial class DuplicateCleanupWindow : Window
     private void SetStatus(string message, CleanupStatus status)
     {
         StatusText.Text = message;
-        StatusDot.Fill = status switch
+        StatusDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, status switch
         {
-            CleanupStatus.Busy => Brush("AccentBrush"),
-            CleanupStatus.Warning => Brush("YellowBrush"),
-            CleanupStatus.Error => Brush("RedBrush"),
-            _ => Brush("GreenBrush")
-        };
+            CleanupStatus.Busy => "AccentBrush",
+            CleanupStatus.Warning => "YellowBrush",
+            CleanupStatus.Error => "RedBrush",
+            _ => "GreenBrush"
+        });
     }
-
-    private Brush Brush(string key)
-        => TryFindResource(key) as Brush ?? Brushes.Transparent;
 
     private static string? PickFolder(string title)
     {

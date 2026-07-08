@@ -559,17 +559,14 @@ public partial class BatchProcessorWindow : Window
     private void SetStatus(string message, BatchProcessorStatus status)
     {
         StatusText.Text = message;
-        StatusDot.Fill = status switch
+        StatusDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, status switch
         {
-            BatchProcessorStatus.Busy => Brush("AccentBrush"),
-            BatchProcessorStatus.Warning => Brush("YellowBrush"),
-            BatchProcessorStatus.Error => Brush("RedBrush"),
-            _ => Brush("GreenBrush")
-        };
+            BatchProcessorStatus.Busy => "AccentBrush",
+            BatchProcessorStatus.Warning => "YellowBrush",
+            BatchProcessorStatus.Error => "RedBrush",
+            _ => "GreenBrush"
+        });
     }
-
-    private Brush Brush(string key)
-        => TryFindResource(key) as Brush ?? Brushes.Transparent;
 
     private static int ParseInt(string value)
         => int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)

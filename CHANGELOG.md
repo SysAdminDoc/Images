@@ -69,6 +69,7 @@ All notable changes to **Images** are documented here.
 - **Main workspace shell feels more premium** — The viewer now has a persistent workflow rail, elevated top image command bar, warmer accent hierarchy, and a denser inspector surface aligned with the generated premium mockup.
 - **Filled-button contrast is theme-safe** — Primary and danger buttons now use a per-theme `OnAccentBrush`, Latte clears AA contrast, and high-contrast mode uses system highlight text.
 - **Latte native caption matches the window body** — The DWM caption color now uses Latte Base instead of Mantle, and the dead non-adaptive focus elevation token was removed.
+- **Open tool windows repaint on theme changes** — Status dots, status cards, reference-board cards, perspective handles, and the archive-password dialog now bind code-behind theme brushes through live resource references instead of stale brush snapshots.
 
 ## 0.2.17
 

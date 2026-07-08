@@ -315,17 +315,14 @@ public partial class SemanticSearchWindow : Window
     private void SetStatus(string message, SearchStatus status)
     {
         StatusText.Text = message;
-        StatusDot.Fill = status switch
+        StatusDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, status switch
         {
-            SearchStatus.Busy => Brush("AccentBrush"),
-            SearchStatus.Warning => Brush("YellowBrush"),
-            SearchStatus.Error => Brush("RedBrush"),
-            _ => Brush("GreenBrush")
-        };
+            SearchStatus.Busy => "AccentBrush",
+            SearchStatus.Warning => "YellowBrush",
+            SearchStatus.Error => "RedBrush",
+            _ => "GreenBrush"
+        });
     }
-
-    private Brush Brush(string key)
-        => TryFindResource(key) as Brush ?? Brushes.Transparent;
 
     private static string? PickFolder(string title)
     {

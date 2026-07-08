@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls;
 using Images.Localization;
 using Images.Services;
 
@@ -147,18 +148,27 @@ public partial class CrashDialog : Window
         {
             case "Success":
                 StatusIcon.Text = "\uE73E";
-                StatusIcon.Foreground = TryFindResource("GreenBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Green;
-                StatusCard.BorderBrush = TryFindResource("GreenBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Green;
-                StatusCard.Background = TryFindResource("SuccessPanelBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Transparent;
+                SetForegroundResource(StatusIcon, "GreenBrush");
+                SetBorderResource(StatusCard, "GreenBrush");
+                SetBackgroundResource(StatusCard, "SuccessPanelBrush");
                 break;
             default:
                 StatusIcon.Text = "\uE783";
-                StatusIcon.Foreground = TryFindResource("YellowBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Yellow;
-                StatusCard.BorderBrush = TryFindResource("YellowBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Yellow;
-                StatusCard.Background = TryFindResource("WarningPanelBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Transparent;
+                SetForegroundResource(StatusIcon, "YellowBrush");
+                SetBorderResource(StatusCard, "YellowBrush");
+                SetBackgroundResource(StatusCard, "WarningPanelBrush");
                 break;
         }
     }
+
+    private static void SetForegroundResource(TextBlock textBlock, string key)
+        => textBlock.SetResourceReference(TextBlock.ForegroundProperty, key);
+
+    private static void SetBackgroundResource(Border border, string key)
+        => border.SetResourceReference(Border.BackgroundProperty, key);
+
+    private static void SetBorderResource(Border border, string key)
+        => border.SetResourceReference(Border.BorderBrushProperty, key);
 
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
 }

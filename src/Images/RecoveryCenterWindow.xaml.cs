@@ -142,16 +142,13 @@ public partial class RecoveryCenterWindow : Window
     private void SetStatus(string message, RecoveryStatus status)
     {
         StatusText.Text = message;
-        StatusDot.Fill = status switch
+        StatusDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, status switch
         {
-            RecoveryStatus.Warning => Brush("YellowBrush"),
-            RecoveryStatus.Error => Brush("RedBrush"),
-            _ => Brush("GreenBrush")
-        };
+            RecoveryStatus.Warning => "YellowBrush",
+            RecoveryStatus.Error => "RedBrush",
+            _ => "GreenBrush"
+        });
     }
-
-    private Brush Brush(string key)
-        => TryFindResource(key) as Brush ?? Brushes.Transparent;
 
     private enum RecoveryStatus
     {

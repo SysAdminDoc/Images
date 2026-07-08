@@ -3,7 +3,6 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Media;
 using Images.Localization;
 using Images.Services;
 
@@ -311,9 +310,9 @@ public partial class AboutWindow : Window
         DocumentCapabilityDetailText.Text = summary.DocumentDetail;
 
         DocumentCapabilityIcon.Text = summary.DocumentReady ? "" : "";
-        DocumentCapabilityIcon.Foreground = ThemeBrush(summary.DocumentReady ? "GreenBrush" : "YellowBrush");
-        DocumentCapabilityCard.BorderBrush = ThemeBrush(summary.DocumentReady ? "GreenBrush" : "YellowBrush");
-        DocumentCapabilityCard.Background = ThemeBrush(summary.DocumentReady ? "SurfacePanelBrush" : "WarningPanelBrush");
+        SetForegroundResource(DocumentCapabilityIcon, summary.DocumentReady ? "GreenBrush" : "YellowBrush");
+        SetBorderResource(DocumentCapabilityCard, summary.DocumentReady ? "GreenBrush" : "YellowBrush");
+        SetBackgroundResource(DocumentCapabilityCard, summary.DocumentReady ? "SurfacePanelBrush" : "WarningPanelBrush");
     }
 
     private void PopulateDiagnostics()
@@ -388,32 +387,39 @@ public partial class AboutWindow : Window
         {
             case "Warning":
                 UpdateStatusIcon.Text = "";
-                UpdateStatusIcon.Foreground = ThemeBrush("YellowBrush");
-                UpdateStatusCard.BorderBrush = ThemeBrush("YellowBrush");
-                UpdateStatusCard.Background = ThemeBrush("WarningPanelBrush");
+                SetForegroundResource(UpdateStatusIcon, "YellowBrush");
+                SetBorderResource(UpdateStatusCard, "YellowBrush");
+                SetBackgroundResource(UpdateStatusCard, "WarningPanelBrush");
                 break;
             case "Success":
                 UpdateStatusIcon.Text = "";
-                UpdateStatusIcon.Foreground = ThemeBrush("GreenBrush");
-                UpdateStatusCard.BorderBrush = ThemeBrush("GreenBrush");
-                UpdateStatusCard.Background = ThemeBrush("SuccessPanelBrush");
+                SetForegroundResource(UpdateStatusIcon, "GreenBrush");
+                SetBorderResource(UpdateStatusCard, "GreenBrush");
+                SetBackgroundResource(UpdateStatusCard, "SuccessPanelBrush");
                 break;
             case "Update":
                 UpdateStatusIcon.Text = "";
-                UpdateStatusIcon.Foreground = ThemeBrush("AccentBrush");
-                UpdateStatusCard.BorderBrush = ThemeBrush("AccentBrush");
-                UpdateStatusCard.Background = ThemeBrush("AccentPanelBrush");
+                SetForegroundResource(UpdateStatusIcon, "AccentBrush");
+                SetBorderResource(UpdateStatusCard, "AccentBrush");
+                SetBackgroundResource(UpdateStatusCard, "AccentPanelBrush");
                 break;
             default:
                 UpdateStatusIcon.Text = "";
-                UpdateStatusIcon.Foreground = ThemeBrush("AccentBrush");
-                UpdateStatusCard.BorderBrush = ThemeBrush("HairlineBrush");
-                UpdateStatusCard.Background = ThemeBrush("SurfacePanelBrush");
+                SetForegroundResource(UpdateStatusIcon, "AccentBrush");
+                SetBorderResource(UpdateStatusCard, "HairlineBrush");
+                SetBackgroundResource(UpdateStatusCard, "SurfacePanelBrush");
                 break;
         }
     }
 
-    private Brush ThemeBrush(string key) => TryFindResource(key) as Brush ?? Brushes.Transparent;
+    private static void SetForegroundResource(TextBlock textBlock, string key)
+        => textBlock.SetResourceReference(TextBlock.ForegroundProperty, key);
+
+    private static void SetBackgroundResource(Border border, string key)
+        => border.SetResourceReference(Border.BackgroundProperty, key);
+
+    private static void SetBorderResource(Border border, string key)
+        => border.SetResourceReference(Border.BorderBrushProperty, key);
 
     private static string FormatBytes(long bytes)
     {

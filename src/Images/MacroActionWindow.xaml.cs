@@ -443,17 +443,14 @@ public partial class MacroActionWindow : Window
     private void SetStatus(string message, MacroActionStatus status)
     {
         StatusText.Text = message;
-        StatusDot.Fill = status switch
+        StatusDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, status switch
         {
-            MacroActionStatus.Busy => Brush("AccentBrush"),
-            MacroActionStatus.Warning => Brush("YellowBrush"),
-            MacroActionStatus.Error => Brush("RedBrush"),
-            _ => Brush("GreenBrush")
-        };
+            MacroActionStatus.Busy => "AccentBrush",
+            MacroActionStatus.Warning => "YellowBrush",
+            MacroActionStatus.Error => "RedBrush",
+            _ => "GreenBrush"
+        });
     }
-
-    private Brush Brush(string key)
-        => TryFindResource(key) as Brush ?? Brushes.Transparent;
 
     private static string? PickFolder(string title)
     {

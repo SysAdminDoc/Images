@@ -190,16 +190,13 @@ public partial class TagGraphWindow : Window
     private void SetStatus(string message, TagGraphStatus status)
     {
         StatusText.Text = message;
-        StatusDot.Fill = status switch
+        StatusDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, status switch
         {
-            TagGraphStatus.Warning => Brush("YellowBrush"),
-            TagGraphStatus.Error => Brush("RedBrush"),
-            _ => Brush("GreenBrush")
-        };
+            TagGraphStatus.Warning => "YellowBrush",
+            TagGraphStatus.Error => "RedBrush",
+            _ => "GreenBrush"
+        });
     }
-
-    private Brush Brush(string key)
-        => TryFindResource(key) as Brush ?? Brushes.Transparent;
 
     private static string Plural(int count) => count == 1 ? "" : "s";
 

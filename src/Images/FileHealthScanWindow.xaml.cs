@@ -278,17 +278,14 @@ public partial class FileHealthScanWindow : Window
     private void SetStatus(string message, FileHealthStatus status)
     {
         StatusText.Text = message;
-        StatusDot.Fill = status switch
+        StatusDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, status switch
         {
-            FileHealthStatus.Busy => Brush("AccentBrush"),
-            FileHealthStatus.Warning => Brush("YellowBrush"),
-            FileHealthStatus.Error => Brush("RedBrush"),
-            _ => Brush("GreenBrush")
-        };
+            FileHealthStatus.Busy => "AccentBrush",
+            FileHealthStatus.Warning => "YellowBrush",
+            FileHealthStatus.Error => "RedBrush",
+            _ => "GreenBrush"
+        });
     }
-
-    private Brush Brush(string key)
-        => TryFindResource(key) as Brush ?? Brushes.Transparent;
 
     private static string? PickFolder(string title)
     {

@@ -375,17 +375,14 @@ public partial class ExportPreviewWindow : Window
     private void SetStatus(string message, ExportPreviewStatus status)
     {
         StatusText.Text = message;
-        StatusDot.Fill = status switch
+        StatusDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, status switch
         {
-            ExportPreviewStatus.Busy => Brush("AccentBrush"),
-            ExportPreviewStatus.Warning => Brush("YellowBrush"),
-            ExportPreviewStatus.Error => Brush("RedBrush"),
-            _ => Brush("GreenBrush")
-        };
+            ExportPreviewStatus.Busy => "AccentBrush",
+            ExportPreviewStatus.Warning => "YellowBrush",
+            ExportPreviewStatus.Error => "RedBrush",
+            _ => "GreenBrush"
+        });
     }
-
-    private Brush Brush(string key)
-        => TryFindResource(key) as Brush ?? Brushes.Transparent;
 
     private static int ParseInt(string value)
         => int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)

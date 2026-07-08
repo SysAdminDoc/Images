@@ -568,9 +568,9 @@ public partial class MainWindow : Window
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
             ShowInTaskbar = false,
             ResizeMode = ResizeMode.NoResize,
-            Background = TryFindResource("BaseBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Black,
             Owner = this
         };
+        dialog.SetResourceReference(Window.BackgroundProperty, "BaseBrush");
 
         var hwnd = default(IntPtr);
         dialog.SourceInitialized += (_, _) =>
@@ -593,18 +593,18 @@ public partial class MainWindow : Window
             Content = Localization.Strings.Ok,
             IsDefault = true,
             MinWidth = 80,
-            Margin = new Thickness(8, 0, 0, 0),
-            Style = TryFindResource("ChromeButton") as Style
+            Margin = new Thickness(8, 0, 0, 0)
         };
+        okButton.SetResourceReference(FrameworkElement.StyleProperty, "ChromeButton");
         okButton.Click += (_, _) => { result = passwordBox.Password; dialog.DialogResult = true; };
 
         var cancelButton = new System.Windows.Controls.Button
         {
             Content = Localization.Strings.Cancel,
             IsCancel = true,
-            MinWidth = 80,
-            Style = TryFindResource("ChromeButton") as Style
+            MinWidth = 80
         };
+        cancelButton.SetResourceReference(FrameworkElement.StyleProperty, "ChromeButton");
 
         var buttonsPanel = new System.Windows.Controls.StackPanel
         {
@@ -622,10 +622,10 @@ public partial class MainWindow : Window
                 Localization.Strings.ArchivePasswordPrompt,
                 archiveName),
             TextWrapping = TextWrapping.Wrap,
-            Foreground = TryFindResource("TextBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.White,
             FontSize = 13,
             Margin = new Thickness(0, 0, 0, 12)
         };
+        labelText.SetResourceReference(System.Windows.Controls.TextBlock.ForegroundProperty, "TextBrush");
 
         var panel = new System.Windows.Controls.StackPanel { Margin = new Thickness(24) };
         panel.Children.Add(labelText);

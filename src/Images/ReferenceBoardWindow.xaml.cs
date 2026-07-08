@@ -244,19 +244,19 @@ public partial class ReferenceBoardWindow : Window
         {
             Text = fileName,
             FontWeight = FontWeights.SemiBold,
-            Foreground = Brush("TextBrush"),
             TextTrimming = TextTrimming.CharacterEllipsis,
             Margin = new Thickness(0, 10, 0, 0)
         };
+        SetResource(caption, TextBlock.ForegroundProperty, "TextBrush");
 
         var detail = new TextBlock
         {
             Text = $"{pixelWidth} x {pixelHeight} - {family}",
-            Foreground = Brush("SubtextBrush"),
             FontSize = 12,
             TextTrimming = TextTrimming.CharacterEllipsis,
             Margin = new Thickness(0, 2, 0, 0)
         };
+        SetResource(detail, TextBlock.ForegroundProperty, "SubtextBrush");
 
         var stack = new StackPanel();
         stack.Children.Add(image);
@@ -266,8 +266,8 @@ public partial class ReferenceBoardWindow : Window
         var card = CreateBoardBorder(
             width: Math.Max(220, size.Width + 24),
             height: size.Height + 76,
-            background: Brush("PanelBrush"),
-            borderBrush: Brush("HairlineBrush"),
+            backgroundResourceKey: "PanelBrush",
+            borderResourceKey: "HairlineBrush",
             content: stack);
 
         card.ToolTip = path;
@@ -320,8 +320,8 @@ public partial class ReferenceBoardWindow : Window
         var card = CreateBoardBorder(
             width: 300,
             height: 190,
-            background: Brush("Surface0Brush"),
-            borderBrush: Brush("HairlineBrush"),
+            backgroundResourceKey: "Surface0Brush",
+            borderResourceKey: "HairlineBrush",
             content: grid);
 
         AutomationProperties.SetName(card, Strings.ReferenceBoardNote);
@@ -337,12 +337,12 @@ public partial class ReferenceBoardWindow : Window
             FontWeight = FontWeights.SemiBold,
             Background = Brushes.Transparent,
             BorderThickness = new Thickness(0),
-            Foreground = Brush("TextBrush"),
             Margin = new Thickness(14, 42, 14, 0),
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
             MinWidth = 160
         };
+        SetResource(label, Control.ForegroundProperty, "TextBrush");
 
         var resizeGrip = new Thumb
         {
@@ -352,10 +352,10 @@ public partial class ReferenceBoardWindow : Window
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Bottom,
             Margin = new Thickness(0, 0, 8, 8),
-            Background = Brush("AccentBrush"),
-            BorderBrush = Brush("CrustBrush"),
             BorderThickness = new Thickness(1)
         };
+        SetResource(resizeGrip, Control.BackgroundProperty, "AccentBrush");
+        SetResource(resizeGrip, Control.BorderBrushProperty, "CrustBrush");
 
         resizeGrip.DragDelta += (_, e) =>
         {
@@ -381,8 +381,8 @@ public partial class ReferenceBoardWindow : Window
         var groupFrame = CreateBoardBorder(
             width: 540,
             height: 330,
-            background: Brush("AccentPanelBrush"),
-            borderBrush: Brush("AccentBrush"),
+            backgroundResourceKey: "AccentPanelBrush",
+            borderResourceKey: "AccentBrush",
             content: grid);
 
         groupFrame.BorderThickness = new Thickness(1.5);
@@ -391,22 +391,29 @@ public partial class ReferenceBoardWindow : Window
         AddBoardElement(groupFrame, draggableHandle: header, zIndex: 5);
     }
 
-    private Border CreateBoardBorder(double width, double height, Brush background, Brush borderBrush, UIElement content)
+    private Border CreateBoardBorder(
+        double width,
+        double height,
+        string backgroundResourceKey,
+        string borderResourceKey,
+        UIElement content)
     {
-        return new Border
+        var border = new Border
         {
             Width = width,
             Height = height,
             Padding = new Thickness(12),
             CornerRadius = new CornerRadius(10),
-            Background = background,
-            BorderBrush = borderBrush,
             BorderThickness = new Thickness(1),
             Effect = TryFindResource("Elevation.Low") as Effect,
             Child = content,
             SnapsToDevicePixels = true,
-            UseLayoutRounding = true
+            UseLayoutRounding = true,
+            Tag = borderResourceKey
         };
+        SetResource(border, Border.BackgroundProperty, backgroundResourceKey);
+        SetResource(border, Border.BorderBrushProperty, borderResourceKey);
+        return border;
     }
 
     private Border CreateCardHeader(string title, string automationName)
@@ -414,21 +421,22 @@ public partial class ReferenceBoardWindow : Window
         var header = new Border
         {
             Height = 30,
-            Background = Brush("SurfacePanelBrush"),
             CornerRadius = new CornerRadius(7),
             Cursor = Cursors.SizeAll,
             Padding = new Thickness(10, 0, 10, 0),
             VerticalAlignment = VerticalAlignment.Top
         };
+        SetResource(header, Border.BackgroundProperty, "SurfacePanelBrush");
 
-        header.Child = new TextBlock
+        var titleBlock = new TextBlock
         {
             Text = title,
-            Foreground = Brush("SubtextBrush"),
             FontSize = 12,
             FontWeight = FontWeights.SemiBold,
             VerticalAlignment = VerticalAlignment.Center
         };
+        SetResource(titleBlock, TextBlock.ForegroundProperty, "SubtextBrush");
+        header.Child = titleBlock;
 
         AutomationProperties.SetName(header, automationName);
         return header;
@@ -593,15 +601,14 @@ public partial class ReferenceBoardWindow : Window
     private void SelectBorder(Border? border)
     {
         if (_selectedBorder is not null)
-            _selectedBorder.BorderBrush = _selectedBorder.Tag as Brush ?? Brush("HairlineBrush");
+            SetResource(_selectedBorder, Border.BorderBrushProperty, _selectedBorder.Tag as string ?? "HairlineBrush");
 
         _selectedBorder = border;
 
         if (_selectedBorder is null)
             return;
 
-        _selectedBorder.Tag ??= _selectedBorder.BorderBrush;
-        _selectedBorder.BorderBrush = Brush("AccentBrush");
+        SetResource(_selectedBorder, Border.BorderBrushProperty, "AccentBrush");
         _selectedBorder.Focus();
     }
 
@@ -668,6 +675,9 @@ public partial class ReferenceBoardWindow : Window
     }
 
     private Brush Brush(string key) => TryFindResource(key) as Brush ?? Brushes.Transparent;
+
+    private static void SetResource(FrameworkElement element, DependencyProperty property, string resourceKey)
+        => element.SetResourceReference(property, resourceKey);
 
     private static Size FitWithin(double width, double height, double maxWidth, double maxHeight)
     {
