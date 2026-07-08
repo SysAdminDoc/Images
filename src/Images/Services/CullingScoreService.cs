@@ -64,6 +64,7 @@ public sealed class CullingScoreService
         var failures = 0;
         var normalized = NormalizePaths(paths, ref failures);
         var drafts = new List<CullingScoreDraft>(normalized.Count);
+        Span<double> hashLuminance = stackalloc double[HashSize * HashSize];
 
         foreach (var path in normalized)
         {
@@ -72,7 +73,7 @@ public sealed class CullingScoreService
             try
             {
                 var state = _reviewLabels.ReadState(path);
-                var signals = AnalyzeImage(path, cancellationToken);
+                var signals = AnalyzeImage(path, hashLuminance, cancellationToken);
                 var reasons = BuildInitialReasons(signals, state);
                 var score = BuildBaseScore(signals, state);
                 var info = new FileInfo(path);
@@ -176,7 +177,7 @@ public sealed class CullingScoreService
         return normalized;
     }
 
-    private static ImageSignals AnalyzeImage(string path, CancellationToken cancellationToken)
+    private static ImageSignals AnalyzeImage(string path, Span<double> hashLuminance, CancellationToken cancellationToken)
     {
         CodecRuntime.Configure();
         cancellationToken.ThrowIfCancellationRequested();
@@ -188,7 +189,7 @@ public sealed class CullingScoreService
 
         cancellationToken.ThrowIfCancellationRequested();
         using var hashImage = (MagickImage)image.Clone();
-        var hash = ComputeAverageHash(hashImage);
+        var hash = ComputeAverageHash(hashImage, hashLuminance);
 
         using var sample = (MagickImage)image.Clone();
         sample.Resize(new MagickGeometry(AnalysisMaxEdge, AnalysisMaxEdge)
@@ -241,7 +242,7 @@ public sealed class CullingScoreService
             hash);
     }
 
-    private static ulong? ComputeAverageHash(MagickImage image)
+    private static ulong? ComputeAverageHash(MagickImage image, Span<double> luminance)
     {
         image.Resize(new MagickGeometry(HashSize, HashSize)
         {
@@ -253,7 +254,7 @@ public sealed class CullingScoreService
         if (pixels is null || pixels.Length < HashSize * HashSize * 4)
             return null;
 
-        Span<double> luminance = stackalloc double[HashSize * HashSize];
+        luminance.Clear();
         var sum = 0.0;
         for (var i = 0; i < luminance.Length; i++)
         {

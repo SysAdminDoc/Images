@@ -147,9 +147,9 @@ public static class EmailShareService
             chunk.Clear();
         }
 
+        Span<byte> runeBytes = stackalloc byte[4];
         foreach (var rune in value.EnumerateRunes())
         {
-            Span<byte> runeBytes = stackalloc byte[4];
             var written = rune.EncodeToUtf8(runeBytes);
             // Keep the base64 payload (chunk*4/3) under ~63 chars so the whole
             // encoded word fits in 75; never split a UTF-8 rune across words.

@@ -122,6 +122,7 @@ public sealed class DuplicateCleanupService
         var references = NormalizeReferenceRoots(referenceRoots);
         var paths = CollectCandidateFiles(scanRoots, ref failures, cancellationToken);
         var candidates = new List<DuplicateCleanupCandidate>(paths.Count);
+        Span<double> hashLuminance = stackalloc double[HashSize * HashSize];
 
         foreach (var path in paths)
         {
@@ -137,7 +138,7 @@ public sealed class DuplicateCleanupService
                 }
 
                 var sha256 = ComputeSha256(path, cancellationToken);
-                var perceptualHash = TryComputeAverageHash(path, cancellationToken);
+                var perceptualHash = TryComputeAverageHash(path, hashLuminance, cancellationToken);
                 if (perceptualHash is null)
                     failures++;
 
@@ -412,7 +413,7 @@ public sealed class DuplicateCleanupService
         return Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant();
     }
 
-    private static ulong? TryComputeAverageHash(string path, CancellationToken cancellationToken)
+    private static ulong? TryComputeAverageHash(string path, Span<double> luminance, CancellationToken cancellationToken)
     {
         try
         {
@@ -431,7 +432,7 @@ public sealed class DuplicateCleanupService
             if (pixels is null || pixels.Length < HashSize * HashSize * 4)
                 return null;
 
-            Span<double> luminance = stackalloc double[HashSize * HashSize];
+            luminance.Clear();
             var sum = 0.0;
             for (var i = 0; i < luminance.Length; i++)
             {
