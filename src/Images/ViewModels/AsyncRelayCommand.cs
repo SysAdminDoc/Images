@@ -11,6 +11,7 @@ public sealed class AsyncRelayCommand : ICommand
 {
     private readonly Func<object?, Task> _execute;
     private readonly Predicate<object?>? _canExecute;
+    private int _isExecuting;
 
     public static event EventHandler<CommandFaultedEventArgs>? CommandFaulted;
 
@@ -25,11 +26,15 @@ public sealed class AsyncRelayCommand : ICommand
         _canExecute = canExecute;
     }
 
-    public bool CanExecute(object? parameter) => _canExecute?.Invoke(parameter) ?? true;
+    public bool CanExecute(object? parameter) =>
+        Volatile.Read(ref _isExecuting) == 0 && (_canExecute?.Invoke(parameter) ?? true);
 
     public void Execute(object? parameter)
     {
-        if (!CanExecute(parameter)) return;
+        if (_canExecute?.Invoke(parameter) == false) return;
+        if (Interlocked.CompareExchange(ref _isExecuting, 1, 0) != 0) return;
+
+        CommandManager.InvalidateRequerySuggested();
         ExecuteAsync(parameter);
     }
 
@@ -49,6 +54,11 @@ public sealed class AsyncRelayCommand : ICommand
                 handler(this, new CommandFaultedEventArgs(ex));
             else
                 throw;
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _isExecuting, 0);
+            CommandManager.InvalidateRequerySuggested();
         }
     }
 

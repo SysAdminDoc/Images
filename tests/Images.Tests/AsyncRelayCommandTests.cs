@@ -1,3 +1,4 @@
+using System.Threading;
 using Images.ViewModels;
 
 namespace Images.Tests;
@@ -66,5 +67,50 @@ public sealed class AsyncRelayCommandTests
         cmd.Execute(null);
         await Task.Delay(50);
         Assert.False(invoked);
+    }
+
+    [Fact]
+    public async Task Execute_WhenAlreadyRunning_IgnoresReentrantInvokeAndRestoresCanExecute()
+    {
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var finished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var calls = 0;
+
+        var cmd = new AsyncRelayCommand(async () =>
+        {
+            Interlocked.Increment(ref calls);
+            started.TrySetResult();
+            await release.Task;
+            finished.TrySetResult();
+        });
+
+        cmd.Execute(null);
+        await started.Task.WaitAsync(TimeSpan.FromSeconds(2));
+
+        Assert.False(cmd.CanExecute(null));
+
+        cmd.Execute(null);
+
+        Assert.Equal(1, Volatile.Read(ref calls));
+
+        release.SetResult();
+        await finished.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        await WaitUntilAsync(() => cmd.CanExecute(null));
+
+        Assert.True(cmd.CanExecute(null));
+        Assert.Equal(1, Volatile.Read(ref calls));
+    }
+
+    private static async Task WaitUntilAsync(Func<bool> condition)
+    {
+        var deadline = DateTimeOffset.UtcNow.AddSeconds(2);
+        while (!condition())
+        {
+            if (DateTimeOffset.UtcNow >= deadline)
+                throw new TimeoutException("Condition was not met before the timeout.");
+
+            await Task.Delay(10);
+        }
     }
 }

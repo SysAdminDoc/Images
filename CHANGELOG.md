@@ -49,6 +49,7 @@ All notable changes to **Images** are documented here.
 - **External edit reload hardening** — Reload debounce work is now tied to the watched path and the watcher listens for filename changes so atomic rename-over saves trigger reloads without stale-file false toasts.
 - **Slideshow state-machine hardening** — Empty or cleared image lists now stop slideshow state, single-image slideshows skip redundant reloads, and shuffle jumps within the current navigator list without folder re-enumeration.
 - **Inpaint state guard** — Latent inpaint mask state now resets on navigation, load failure, and clear, and apply is gated by the same current-image capability check as entering inpaint mode.
+- **Async command reentrancy guard** — Async commands now disable while their current execution is running, preventing duplicate motion-photo extraction or playback launches from racing to the same output.
 
 ## 0.2.17
 
