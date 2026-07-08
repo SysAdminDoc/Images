@@ -472,7 +472,7 @@ public partial class ReferenceBoardWindow : Window
 
         handle.MouseMove += (_, e) =>
         {
-            if (_dragElement is null || _dragHandle is null || e.LeftButton != MouseButtonState.Pressed)
+            if (_dragElement is null || !ReferenceEquals(_dragHandle, handle) || e.LeftButton != MouseButtonState.Pressed)
                 return;
 
             var current = e.GetPosition(BoardCanvas);
@@ -489,15 +489,36 @@ public partial class ReferenceBoardWindow : Window
             e.Handled = true;
         };
 
+        handle.LostMouseCapture += (_, _) =>
+        {
+            if (ShouldClearDragForLostCapture(_dragHandle, handle))
+                ClearDragState(releaseCapture: false);
+        };
+
         handle.MouseLeftButtonUp += (_, e) =>
         {
-            if (_dragHandle is not null && _dragHandle.IsMouseCaptured)
-                _dragHandle.ReleaseMouseCapture();
+            if (!ShouldHandleDragMouseUp(_dragElement, _dragHandle, handle))
+                return;
 
-            _dragElement = null;
-            _dragHandle = null;
+            ClearDragState(releaseCapture: true);
             e.Handled = true;
         };
+    }
+
+    internal static bool ShouldHandleDragMouseUp(FrameworkElement? dragElement, UIElement? activeHandle, UIElement eventHandle)
+        => dragElement is not null && ReferenceEquals(activeHandle, eventHandle);
+
+    internal static bool ShouldClearDragForLostCapture(UIElement? activeHandle, UIElement eventHandle)
+        => ReferenceEquals(activeHandle, eventHandle);
+
+    private void ClearDragState(bool releaseCapture)
+    {
+        var handle = _dragHandle;
+        _dragElement = null;
+        _dragHandle = null;
+
+        if (releaseCapture && handle is not null && handle.IsMouseCaptured)
+            handle.ReleaseMouseCapture();
     }
 
     private IEnumerable<ReferenceBoardItemBounds> GetBoardItemBounds()

@@ -62,6 +62,7 @@ All notable changes to **Images** are documented here.
 - **Annotation editing keeps text input and load errors intact** — Enter/Escape no longer apply or close the annotation window while text-entry controls have focus, and missing-file preview failures keep their error status instead of being overwritten by the empty-state message.
 - **Batch Processor reports unexpected item faults** — Non-cancellation item failures now become failed run rows, partial result slots are compacted before summary/reporting, and the window shows a failed status instead of crashing on unexpected run exceptions.
 - **Import Inbox destination changes wait for scans** — The destination chooser is now disabled during busy scans/import work, preventing overlapping reloads from re-enabling the window early.
+- **Reference Board drag state recovers after capture loss** — Drag handles now clear stale state when mouse capture is lost, and mouse-up events are only handled for an active drag.
 
 ## 0.2.17
 
