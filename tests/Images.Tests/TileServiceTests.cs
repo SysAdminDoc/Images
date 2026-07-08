@@ -110,6 +110,29 @@ public sealed class TileServiceTests
     }
 
     [Fact]
+    public void EvictIfOverCap_NeverEvictsAnyProtectedPyramid()
+    {
+        using var temp = TestDirectory.Create();
+        var cacheRoot = Directory.CreateDirectory(Path.Combine(temp.Path, "tiles")).FullName;
+        var firstActive = Directory.CreateDirectory(Path.Combine(cacheRoot, "first-active")).FullName;
+        var secondActive = Directory.CreateDirectory(Path.Combine(cacheRoot, "second-active")).FullName;
+        var stale = Directory.CreateDirectory(Path.Combine(cacheRoot, "stale")).FullName;
+
+        File.WriteAllBytes(Path.Combine(firstActive, "tile.bin"), new byte[4096]);
+        File.WriteAllBytes(Path.Combine(secondActive, "tile.bin"), new byte[4096]);
+        File.WriteAllBytes(Path.Combine(stale, "tile.bin"), new byte[4096]);
+        Directory.SetLastWriteTimeUtc(firstActive, DateTime.UtcNow.AddDays(-4));
+        Directory.SetLastWriteTimeUtc(secondActive, DateTime.UtcNow.AddDays(-3));
+        Directory.SetLastWriteTimeUtc(stale, DateTime.UtcNow.AddDays(-2));
+
+        TileService.EvictIfOverCap(cacheRoot, [firstActive, secondActive], capBytes: 1024);
+
+        Assert.True(Directory.Exists(firstActive));
+        Assert.True(Directory.Exists(secondActive));
+        Assert.False(Directory.Exists(stale));
+    }
+
+    [Fact]
     public void BuildPyramid_WhenDecodeFails_RemovesPartialCacheDirectory()
     {
         using var temp = TestDirectory.Create();

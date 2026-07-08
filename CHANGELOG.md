@@ -16,6 +16,7 @@ All notable changes to **Images** are documented here.
 - **Picasa face regions accept omitted leading zeros** — `rect64(...)` values with 1-15 hex digits are left-padded before parsing, so faces near the top or left edge are no longer dropped.
 - **GPS-strip import fails closed on unreadable files** — Metadata preview read failures are now surfaced separately from "no GPS fields," so Import Inbox rolls back unreadable non-rewritable files when GPS stripping was requested.
 - **Recursive scanners skip reparse-point directories** — Duplicate Cleanup, Import Inbox, and Catalog rebuild now avoid junction/symlink directories so cyclic folder links cannot trigger runaway traversal.
+- **Tile cache eviction protects every active pyramid** — Eviction now skips all tile cache directories in active use or mid-build, so secondary huge-image previews cannot evict the main viewer's displayed pyramid.
 
 ## 0.2.17
 

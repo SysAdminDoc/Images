@@ -41,11 +41,8 @@ public static class TileService
     private static readonly Microsoft.Extensions.Logging.ILogger _log =
         Log.Get("Images.TileService");
     private static readonly ConcurrentDictionary<string, object> BuildLocks = new(StringComparer.OrdinalIgnoreCase);
-
-    // The cache directory of the pyramid currently backing the display. Eviction
-    // must never delete it — a single pyramid larger than the cap would otherwise
-    // be pruned out from under the viewer.
-    private static volatile string? _activeCacheDir;
+    private static readonly ConcurrentDictionary<string, byte> ProtectedCacheDirs = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly ConcurrentDictionary<string, byte> BuildingCacheDirs = new(StringComparer.OrdinalIgnoreCase);
 
     public static bool ShouldUseTileEngine(string path)
     {
@@ -80,10 +77,8 @@ public static class TileService
         cacheRoot ??= GetDefaultCacheRoot();
         var sourceKey = ComputeSourceKey(sourcePath, pageIndex);
         var cacheDir = Path.Combine(cacheRoot, sourceKey);
-
-        // Mark active for all return paths (reuse and fresh build) so eviction
-        // skips the pyramid the viewer is about to display.
-        _activeCacheDir = Path.GetFullPath(cacheDir);
+        var fullCacheDir = Path.GetFullPath(cacheDir);
+        ProtectCacheDirectory(fullCacheDir);
 
         var infoPath = Path.Combine(cacheDir, "pyramid.json");
         if (TryReadReusablePyramidInfo(infoPath, sourcePath) is { } existing)
@@ -96,6 +91,7 @@ public static class TileService
                 return existingInsideLock;
 
             Directory.CreateDirectory(cacheDir);
+            BuildingCacheDirs[fullCacheDir] = 0;
 
             try
             {
@@ -176,8 +172,13 @@ public static class TileService
             }
             catch
             {
+                UnprotectCacheDirectory(fullCacheDir);
                 TryDeleteCacheDirectory(cacheDir);
                 throw;
+            }
+            finally
+            {
+                BuildingCacheDirs.TryRemove(fullCacheDir, out _);
             }
         }
     }
@@ -442,7 +443,10 @@ public static class TileService
         try
         {
             if (Directory.Exists(cacheDir))
+            {
                 Directory.Delete(cacheDir, recursive: true);
+                UnprotectCacheDirectory(cacheDir);
+            }
         }
         catch
         {
@@ -506,6 +510,7 @@ public static class TileService
                     Directory.Delete(dir, recursive: true);
                     deleted++;
                     deletedBytes += size;
+                    UnprotectCacheDirectory(dir);
                     BuildLocks.TryRemove(dir, out _);
                 }
                 catch (Exception ex) { _log.LogDebug(ex, "tile-cache: could not clear {Dir}", dir); }
@@ -519,9 +524,21 @@ public static class TileService
         return (deleted, deletedBytes);
     }
 
-    public static void EvictIfOverCap() => EvictIfOverCap(GetDefaultCacheRoot(), _activeCacheDir);
+    public static void EvictIfOverCap()
+    {
+        var root = GetDefaultCacheRoot();
+        EvictIfOverCap(root, SnapshotProtectedCacheDirs(root));
+    }
 
     internal static void EvictIfOverCap(string root, string? activeCacheDir, long capBytes = DefaultCapBytes)
+    {
+        EvictIfOverCap(
+            root,
+            string.IsNullOrWhiteSpace(activeCacheDir) ? [] : [Path.GetFullPath(activeCacheDir)],
+            capBytes);
+    }
+
+    internal static void EvictIfOverCap(string root, IEnumerable<string> protectedCacheDirs, long capBytes = DefaultCapBytes)
     {
         if (!Directory.Exists(root)) return;
 
@@ -536,17 +553,16 @@ public static class TileService
                 d.EnumerateFiles("*", SearchOption.AllDirectories).Sum(f => f.Length));
 
             var cutoffUtc = DateTime.UtcNow.AddDays(-MaxAgeDays);
-            var active = string.IsNullOrEmpty(activeCacheDir) ? null : Path.GetFullPath(activeCacheDir);
+            var protectedDirs = NormalizeProtectedCacheDirs(protectedCacheDirs);
 
             foreach (var dir in dirs)
             {
                 if (totalBytes <= capBytes && dir.LastWriteTimeUtc >= cutoffUtc)
                     break;
 
-                // Never evict the pyramid currently backing the display, even
-                // when it alone exceeds the cap.
-                if (active is not null &&
-                    string.Equals(dir.FullName, active, StringComparison.OrdinalIgnoreCase))
+                // Never evict pyramids currently backing a tile surface, even
+                // when one protected pyramid alone exceeds the cap.
+                if (protectedDirs.Contains(dir.FullName))
                     continue;
 
                 var size = dir.EnumerateFiles("*", SearchOption.AllDirectories)
@@ -555,6 +571,8 @@ public static class TileService
                 {
                     dir.Delete(recursive: true);
                     totalBytes -= size;
+                    UnprotectCacheDirectory(dir.FullName);
+                    BuildLocks.TryRemove(dir.FullName, out _);
                     _log.LogDebug("tile-cache: evicted {Dir} ({Size} bytes)", dir.Name, size);
                 }
                 catch (Exception ex) { _log.LogDebug(ex, "tile-cache: could not evict {Dir}", dir.Name); }
@@ -564,6 +582,78 @@ public static class TileService
         {
             _log.LogWarning(ex, "tile-cache: eviction error");
         }
+    }
+
+    private static void ProtectCacheDirectory(string cacheDir)
+        => ProtectedCacheDirs[Path.GetFullPath(cacheDir)] = 0;
+
+    private static void UnprotectCacheDirectory(string cacheDir)
+    {
+        var fullPath = Path.GetFullPath(cacheDir);
+        ProtectedCacheDirs.TryRemove(fullPath, out _);
+        BuildingCacheDirs.TryRemove(fullPath, out _);
+    }
+
+    private static HashSet<string> SnapshotProtectedCacheDirs(string root)
+    {
+        var protectedDirs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var cutoffUtc = DateTime.UtcNow.AddDays(-MaxAgeDays);
+        var fullRoot = Path.GetFullPath(root);
+
+        foreach (var cacheDir in ProtectedCacheDirs.Keys)
+        {
+            try
+            {
+                var fullPath = Path.GetFullPath(cacheDir);
+                if (!fullPath.StartsWith(fullRoot, StringComparison.OrdinalIgnoreCase) ||
+                    !Directory.Exists(fullPath) ||
+                    Directory.GetLastWriteTimeUtc(fullPath) < cutoffUtc)
+                {
+                    ProtectedCacheDirs.TryRemove(cacheDir, out _);
+                    continue;
+                }
+
+                protectedDirs.Add(fullPath);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException or System.Security.SecurityException)
+            {
+                ProtectedCacheDirs.TryRemove(cacheDir, out _);
+            }
+        }
+
+        foreach (var cacheDir in BuildingCacheDirs.Keys)
+        {
+            try
+            {
+                protectedDirs.Add(Path.GetFullPath(cacheDir));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException or System.Security.SecurityException)
+            {
+                BuildingCacheDirs.TryRemove(cacheDir, out _);
+            }
+        }
+
+        return protectedDirs;
+    }
+
+    private static HashSet<string> NormalizeProtectedCacheDirs(IEnumerable<string> protectedCacheDirs)
+    {
+        var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var dir in protectedCacheDirs)
+        {
+            if (string.IsNullOrWhiteSpace(dir))
+                continue;
+
+            try
+            {
+                set.Add(Path.GetFullPath(dir));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException or System.Security.SecurityException)
+            {
+            }
+        }
+
+        return set;
     }
 
     private static TilePyramidInfo? TryReadPyramidInfo(string path)
