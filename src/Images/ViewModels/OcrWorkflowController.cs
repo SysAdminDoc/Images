@@ -189,7 +189,8 @@ public sealed class OcrWorkflowController : ObservableObject, IDisposable
             if (ReferenceEquals(_ocrCts, cts))
                 _ocrCts = null;
 
-            IsOcrBusy = false;
+            if (generation == _ocrGeneration)
+                IsOcrBusy = false;
             cts.Dispose();
         }
     }

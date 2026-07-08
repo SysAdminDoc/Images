@@ -136,4 +136,50 @@ public sealed class OcrWorkflowControllerTests
         Assert.False(controller.IsOcrBusy);
         Assert.Equal(new[] { OcrWorkflowController.ExtractingMessage }, messages);
     }
+
+    [Fact]
+    public async Task ToggleAsync_WhenCanceledExtractionFinishesAfterRestart_KeepsBusyForCurrentExtraction()
+    {
+        var path = @"C:\photos\restart.png";
+        var calls = 0;
+        var firstStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var secondStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var releaseFirst = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var releaseSecond = new TaskCompletionSource<IReadOnlyList<OcrTextLine>?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var controller = new OcrWorkflowController(
+            currentPath: () => path,
+            hasImage: () => true,
+            notify: _ => { },
+            extractLinesAsync: async (_, token) =>
+            {
+                var call = Interlocked.Increment(ref calls);
+                if (call == 1)
+                {
+                    firstStarted.SetResult();
+                    await releaseFirst.Task;
+                    token.ThrowIfCancellationRequested();
+                    return Array.Empty<OcrTextLine>();
+                }
+
+                secondStarted.SetResult();
+                return await releaseSecond.Task;
+            });
+
+        var firstExtraction = controller.ToggleAsync();
+        await firstStarted.Task.WaitAsync(TimeSpan.FromSeconds(1));
+        controller.Clear(cancelExtraction: true);
+
+        var secondExtraction = controller.ToggleAsync();
+        await secondStarted.Task.WaitAsync(TimeSpan.FromSeconds(1));
+        Assert.True(controller.IsOcrBusy);
+
+        releaseFirst.SetResult();
+        await firstExtraction;
+
+        Assert.True(controller.IsOcrBusy);
+
+        releaseSecond.SetResult(Array.Empty<OcrTextLine>());
+        await secondExtraction;
+        Assert.False(controller.IsOcrBusy);
+    }
 }

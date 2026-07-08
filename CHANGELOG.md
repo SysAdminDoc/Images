@@ -45,6 +45,7 @@ All notable changes to **Images** are documented here.
 - **Tile cache build-lock hardening** — Cache clears and eviction no longer drop per-directory build locks, preserving mutual exclusion for rebuilds that overlap cache deletion.
 - **Collision-safe local JSON saves** — Smart collections and tag graph persistence now use GUID temp files with cleanup instead of fixed `.tmp` paths, avoiding cross-instance save collisions.
 - **Thumbnail eviction resilience** — Cache eviction now skips vanished or inaccessible files during sizing instead of aborting the whole sweep.
+- **OCR restart busy-state fix** — A stale canceled OCR extraction can no longer clear the busy panel while a newer extraction is still running.
 
 ## 0.2.17
 
