@@ -126,6 +126,48 @@ public sealed class ImportInboxServiceTests
     }
 
     [Fact]
+    public void Commit_TagExportFailureReportsFailureAndPreservesExistingDestinationSidecar()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Directory.CreateDirectory(Path.Combine(temp.Path, "source")).FullName;
+        var destination = Directory.CreateDirectory(Path.Combine(temp.Path, "library")).FullName;
+        var sourcePath = WriteFile(source, "photo.png", [1, 2, 3]);
+        var destinationPath = Path.Combine(destination, "photo.png");
+        var sidecarPath = destinationPath + ".xmp";
+        const string corruptSidecar = "<x:xmpmeta><rdf:RDF>";
+        File.WriteAllText(sidecarPath, corruptSidecar);
+
+        var result = new ImportInboxService().Commit(
+            [new ImportInboxCommitRequest(sourcePath, destination, "person:Alice", null, StripGps: false, MoveOriginal: false)]);
+
+        Assert.Empty(result.Imported);
+        var failure = Assert.Single(result.Failed);
+        Assert.Equal(sourcePath, failure.Path);
+        Assert.Contains("Sidecar", failure.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.True(File.Exists(sourcePath));
+        Assert.False(File.Exists(destinationPath));
+        Assert.Equal(corruptSidecar, File.ReadAllText(sidecarPath));
+    }
+
+    [Fact]
+    public void Commit_InPlaceFailureRollsBackWrittenTagSidecar()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Directory.CreateDirectory(Path.Combine(temp.Path, "source")).FullName;
+        var sourcePath = WriteFile(source, "photo.gif", [1, 2, 3]);
+
+        var result = new ImportInboxService().Commit(
+            [new ImportInboxCommitRequest(sourcePath, source, "person:Alice", null, StripGps: true, MoveOriginal: false)]);
+
+        Assert.Empty(result.Imported);
+        var failure = Assert.Single(result.Failed);
+        Assert.Equal(sourcePath, failure.Path);
+        Assert.Contains("GPS metadata", failure.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.True(File.Exists(sourcePath));
+        Assert.False(File.Exists(sourcePath + ".xmp"));
+    }
+
+    [Fact]
     public void Commit_CopyWithGpsStripFailureReportsFailureAndDeletesDestinationCopy()
     {
         using var temp = TestDirectory.Create();

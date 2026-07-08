@@ -28,6 +28,7 @@ All notable changes to **Images** are documented here.
 - **Archive password prompts are themed** — The implicit `PasswordBox` style now mirrors the app's TextBox chrome, including dark surfaces, accent focus, caret, and selection brushes.
 - **20 ms GIF frame delays stay fast** — Animated GIF playback now preserves valid 2-centisecond frame delays while still clamping shorter hostile delays.
 - **Catalog rescans notice sidecar-only edits** — Incremental catalog rebuilds now compare cached sidecar path and modified time, so XMP rating/tag creation, edits, or removal refresh stale rows even when the image file itself is unchanged.
+- **Import Inbox fails cleanly when tag sidecars cannot be written** — Tag export failures now fail the individual import, transfer rollbacks preserve any pre-existing destination sidecar, and in-place imports remove sidecars they created if a later post-import step fails.
 
 ## 0.2.17
 

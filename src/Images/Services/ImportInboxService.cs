@@ -190,7 +190,17 @@ public sealed class ImportInboxService
                 // source itself as a collision and duplicate/rename it.
                 if (SamePath(sourcePath, Path.Combine(destinationFolder, fileName)))
                 {
-                    ApplyPostImportEdits(sourcePath, request);
+                    var sidecarRollback = CaptureSidecarRollbackState(sourcePath);
+                    try
+                    {
+                        ApplyPostImportEdits(sourcePath, request);
+                    }
+                    catch
+                    {
+                        RestoreSidecar(sidecarRollback);
+                        throw;
+                    }
+
                     imported.Add(new ImportInboxCommitMove(sourcePath, sourcePath, MovedOriginal: false));
                     continue;
                 }
@@ -202,13 +212,14 @@ public sealed class ImportInboxService
                 else
                     File.Copy(sourcePath, destinationPath);
 
+                var destinationSidecarRollback = CaptureSidecarRollbackState(destinationPath);
                 try
                 {
                     ApplyPostImportEdits(destinationPath, request);
                 }
                 catch
                 {
-                    RollBackFailedTransfer(sourcePath, destinationPath, request.MoveOriginal);
+                    RollBackFailedTransfer(sourcePath, destinationPath, request.MoveOriginal, destinationSidecarRollback);
                     throw;
                 }
 
@@ -232,7 +243,11 @@ public sealed class ImportInboxService
     {
         var tags = TagGraphService.ParseTagInput(request.TagsText);
         if (tags.Count > 0)
-            _tagGraph.ExportSidecarTags(destinationPath, tags, includeParents: true);
+        {
+            var exportResult = _tagGraph.ExportSidecarTags(destinationPath, tags, includeParents: true);
+            if (!exportResult.Success)
+                throw new InvalidOperationException(exportResult.Message);
+        }
 
         if (request.Rating is not null)
             WriteRatingSidecar(destinationPath, Math.Clamp(request.Rating.Value, -1, 5));
@@ -276,16 +291,23 @@ public sealed class ImportInboxService
                extension.Equals(".webp", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static void RollBackFailedTransfer(string sourcePath, string destinationPath, bool movedOriginal)
+    private static SidecarRollbackState CaptureSidecarRollbackState(string imagePath)
+    {
+        var sidecarPath = imagePath + ".xmp";
+        return File.Exists(sidecarPath)
+            ? new SidecarRollbackState(sidecarPath, File.ReadAllBytes(sidecarPath))
+            : new SidecarRollbackState(sidecarPath, null);
+    }
+
+    private static void RollBackFailedTransfer(
+        string sourcePath,
+        string destinationPath,
+        bool movedOriginal,
+        SidecarRollbackState sidecarRollback)
     {
         try
         {
-            // The destination is always a fresh unique path, so any sidecar at
-            // destination + ".xmp" was written by this import's post-edits and
-            // must not survive the rollback as an orphan.
-            var sidecarPath = destinationPath + ".xmp";
-            if (File.Exists(sidecarPath))
-                File.Delete(sidecarPath);
+            RestoreSidecar(sidecarRollback);
 
             if (!File.Exists(destinationPath))
                 return;
@@ -302,6 +324,25 @@ public sealed class ImportInboxService
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
         {
             Log.LogWarning(ex, "Could not roll back failed import from {SourcePath} to {DestinationPath}", sourcePath, destinationPath);
+        }
+    }
+
+    private static void RestoreSidecar(SidecarRollbackState state)
+    {
+        try
+        {
+            if (state.Contents is null)
+            {
+                if (File.Exists(state.Path))
+                    File.Delete(state.Path);
+                return;
+            }
+
+            File.WriteAllBytes(state.Path, state.Contents);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
+        {
+            Log.LogWarning(ex, "Could not restore import sidecar rollback state for {Path}", state.Path);
         }
     }
 
@@ -555,4 +596,6 @@ public sealed class ImportInboxService
         long SizeBytes,
         DateTimeOffset ModifiedUtc,
         string Sha256);
+
+    private sealed record SidecarRollbackState(string Path, byte[]? Contents);
 }
