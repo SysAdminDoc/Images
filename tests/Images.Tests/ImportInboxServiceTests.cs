@@ -78,6 +78,36 @@ public sealed class ImportInboxServiceTests
     }
 
     [Fact]
+    public void Commit_CorruptExistingRatingSidecarFailsOneImportAndContinuesBatch()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Directory.CreateDirectory(Path.Combine(temp.Path, "source")).FullName;
+        var destination = Directory.CreateDirectory(Path.Combine(temp.Path, "library")).FullName;
+        var corruptSourcePath = WriteFile(source, "corrupt-sidecar.png", [1, 2, 3]);
+        var goodSourcePath = WriteFile(source, "good.png", [4, 5, 6]);
+        var corruptDestinationPath = Path.Combine(destination, "corrupt-sidecar.png");
+        File.WriteAllText(corruptDestinationPath + ".xmp", "<x:xmpmeta><rdf:RDF>");
+
+        var result = new ImportInboxService().Commit(
+        [
+            new ImportInboxCommitRequest(corruptSourcePath, destination, "", 5, StripGps: false, MoveOriginal: true),
+            new ImportInboxCommitRequest(goodSourcePath, destination, "", 4, StripGps: false, MoveOriginal: true)
+        ]);
+
+        var move = Assert.Single(result.Imported);
+        Assert.Equal(goodSourcePath, move.SourcePath);
+        Assert.True(move.MovedOriginal);
+        Assert.False(File.Exists(goodSourcePath));
+        Assert.True(File.Exists(move.DestinationPath));
+
+        var failure = Assert.Single(result.Failed);
+        Assert.Equal(corruptSourcePath, failure.Path);
+        Assert.Contains("undeclared prefix", failure.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.True(File.Exists(corruptSourcePath));
+        Assert.False(File.Exists(corruptDestinationPath));
+    }
+
+    [Fact]
     public void Commit_CopyWithGpsStripFailureReportsFailureAndDeletesDestinationCopy()
     {
         using var temp = TestDirectory.Create();

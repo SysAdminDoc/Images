@@ -2,6 +2,7 @@ using System.Globalization;
 using System.IO;
 using System.Security;
 using System.Security.Cryptography;
+using System.Xml;
 using System.Xml.Linq;
 using ImageMagick;
 using Microsoft.Extensions.Logging;
@@ -217,7 +218,7 @@ public sealed class ImportInboxService
             {
                 throw;
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException or InvalidOperationException)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException or InvalidOperationException or XmlException)
             {
                 failed.Add(new ImportInboxFailure(request.SourcePath, ex.Message));
                 Log.LogWarning(ex, "Import inbox commit failed for {Path}", request.SourcePath);
