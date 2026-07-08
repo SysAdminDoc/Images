@@ -4189,6 +4189,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             var draftPath = _createEmailDraft(CurrentPath);
             _openShellTarget(draftPath);
+            ShowSecondaryStatus(
+                Strings.MainToastEmailOpened,
+                Strings.MainSecondaryEmailRetentionDetail,
+                SecondaryStatusToneKind.Info,
+                "\uE715");
             Toast(Strings.MainToastEmailOpened);
         }
         catch (Exception ex)

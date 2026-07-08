@@ -10,6 +10,7 @@ public static class EmailShareService
 {
     private const int MaxBase64LineLength = 76;
     private const int BinaryReadChunkSize = 57 * 1024;
+    private static readonly TimeSpan DraftRetention = TimeSpan.FromDays(7);
 
     public static EmailDraftResult CreateDraftWithAttachment(string imagePath)
         => CreateDraftWithAttachmentCore(
@@ -17,6 +18,30 @@ public static class EmailShareService
             () => AppStorage.TryGetAppDirectory("email-drafts") ?? Path.Combine(Path.GetTempPath(), "Images", "email-drafts"),
             DateTimeOffset.Now,
             Guid.NewGuid);
+
+    public static void PruneOldDrafts()
+        => PruneOldDraftsCore(
+            () => AppStorage.TryGetAppDirectory("email-drafts") ?? Path.Combine(Path.GetTempPath(), "Images", "email-drafts"),
+            DateTimeOffset.Now);
+
+    internal static void PruneOldDraftsCore(
+        Func<string?> getDraftDirectory,
+        DateTimeOffset now)
+    {
+        try
+        {
+            var draftDirectory = getDraftDirectory();
+            if (string.IsNullOrWhiteSpace(draftDirectory))
+                return;
+
+            Directory.CreateDirectory(draftDirectory);
+            PruneOldDraftFiles(draftDirectory, now);
+        }
+        catch
+        {
+            // Draft cleanup is opportunistic; failure should not affect startup.
+        }
+    }
 
     internal static EmailDraftResult CreateDraftWithAttachmentCore(
         string imagePath,
@@ -35,7 +60,7 @@ public static class EmailShareService
             ?? throw new InvalidOperationException("Could not create an email draft folder.");
         Directory.CreateDirectory(draftDirectory);
 
-        PruneOldDrafts(draftDirectory, now);
+        PruneOldDraftFiles(draftDirectory, now);
 
         var fileName = Path.GetFileName(sourcePath);
         var draftName = $"images-email-{now:yyyyMMdd-HHmmss}-{newGuid():N}.eml";
@@ -89,11 +114,11 @@ public static class EmailShareService
         }
     }
 
-    private static void PruneOldDrafts(string draftDirectory, DateTimeOffset now)
+    private static void PruneOldDraftFiles(string draftDirectory, DateTimeOffset now)
     {
         try
         {
-            var cutoff = now - TimeSpan.FromDays(7);
+            var cutoff = now - DraftRetention;
             foreach (var file in Directory.EnumerateFiles(draftDirectory, "images-email-*.eml"))
             {
                 var info = new FileInfo(file);

@@ -144,6 +144,7 @@ public partial class App : Application
         window.Show();
         LaunchTiming.Log(_log, "main-window-shown");
 
+        _ = Task.Run(EmailShareService.PruneOldDrafts);
         _ = Task.Run(() => NetworkEgressService.LoadPersistedEntries());
 
         if (listenPort is not null)

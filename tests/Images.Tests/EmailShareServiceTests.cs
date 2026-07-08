@@ -64,4 +64,29 @@ public sealed class EmailShareServiceTests
             DateTimeOffset.Now,
             Guid.NewGuid));
     }
+
+    [Fact]
+    public void PruneOldDraftsCore_RemovesExpiredEmailDrafts()
+    {
+        using var temp = TestDirectory.Create();
+        var draftFolder = Path.Combine(temp.Path, "drafts");
+        Directory.CreateDirectory(draftFolder);
+        var oldDraft = Path.Combine(draftFolder, "images-email-20260501-120000-old.eml");
+        var currentDraft = Path.Combine(draftFolder, "images-email-20260513-120000-current.eml");
+        var otherFile = Path.Combine(draftFolder, "notes.eml");
+        File.WriteAllText(oldDraft, "old");
+        File.WriteAllText(currentDraft, "current");
+        File.WriteAllText(otherFile, "other");
+        File.SetLastWriteTimeUtc(oldDraft, new DateTime(2026, 5, 1, 12, 0, 0, DateTimeKind.Utc));
+        File.SetLastWriteTimeUtc(currentDraft, new DateTime(2026, 5, 13, 12, 0, 0, DateTimeKind.Utc));
+        File.SetLastWriteTimeUtc(otherFile, new DateTime(2026, 5, 1, 12, 0, 0, DateTimeKind.Utc));
+
+        EmailShareService.PruneOldDraftsCore(
+            () => draftFolder,
+            new DateTimeOffset(2026, 5, 14, 12, 0, 0, TimeSpan.Zero));
+
+        Assert.False(File.Exists(oldDraft));
+        Assert.True(File.Exists(currentDraft));
+        Assert.True(File.Exists(otherFile));
+    }
 }

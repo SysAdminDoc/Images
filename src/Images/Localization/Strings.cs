@@ -1153,6 +1153,7 @@ public static class Strings
     public static string MainSecondaryClipboardSaveFailed => Get(nameof(MainSecondaryClipboardSaveFailed));
     public static string MainSecondaryClipboardSaveFailedDetail => Get(nameof(MainSecondaryClipboardSaveFailedDetail));
     public static string MainSecondaryEmailFailed => Get(nameof(MainSecondaryEmailFailed));
+    public static string MainSecondaryEmailRetentionDetail => Get(nameof(MainSecondaryEmailRetentionDetail));
     public static string MainSecondaryCompareUnavailable => Get(nameof(MainSecondaryCompareUnavailable));
     public static string MainSecondaryTransferSourceDetail => Get(nameof(MainSecondaryTransferSourceDetail));
     public static string MainSecondaryTransferFolderGone => Get(nameof(MainSecondaryTransferFolderGone));

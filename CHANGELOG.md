@@ -39,6 +39,7 @@ All notable changes to **Images** are documented here.
 - **Network egress log rotation avoids per-entry full-file reads** — The JSONL writer now tracks persisted line count in memory and only reads/trims the log when the cached count exceeds the cap.
 - **Support bundles redact more profile path forms** — Redaction now catches Windows short-name profile paths and `file:///C:/Users/...` URI forms in logs and manifest text.
 - **Reveal in Explorer handles comma paths** — File selection now uses `SHParseDisplayName` plus `SHOpenFolderAndSelectItems` before falling back to Explorer's `/select,` command line.
+- **Email draft cleanup on startup** — Local `.eml` share drafts are now pruned on app startup as well as draft creation, and the share status explains the seven-day local attachment-copy retention.
 
 ## 0.2.17
 

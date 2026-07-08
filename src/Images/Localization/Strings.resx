@@ -3657,6 +3657,9 @@ Details written to:
   <data name="MainSecondaryEmailFailed" xml:space="preserve">
     <value>Email draft failed</value>
   </data>
+  <data name="MainSecondaryEmailRetentionDetail" xml:space="preserve">
+    <value>Draft attachment copies are stored locally and pruned after 7 days.</value>
+  </data>
   <data name="MainSecondaryCompareUnavailable" xml:space="preserve">
     <value>Compare image unavailable</value>
   </data>
