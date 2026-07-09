@@ -20,17 +20,17 @@
     <vm:DirectorySortModeMatchesConverter x:Key="SortModeMatches" />
 
     <!-- ============ Palette — Catppuccin Mocha ============ -->
-    <Color x:Key="BaseColor">#FF1E1E2E</Color>
-    <Color x:Key="MantleColor">#FF181825</Color>
-    <Color x:Key="CrustColor">#FF11111B</Color>
-    <Color x:Key="Surface0Color">#FF313244</Color>
-    <Color x:Key="Surface1Color">#FF45475A</Color>
-    <Color x:Key="Surface2Color">#FF585B70</Color>
-    <Color x:Key="OverlayColor">#FF6C7086</Color>
-    <Color x:Key="TextColor">#FFCDD6F4</Color>
-    <Color x:Key="SubtextColor">#FFA6ADC8</Color>
-    <Color x:Key="BlueColor">#FF89B4FA</Color>
-    <Color x:Key="LavenderColor">#FFB4BEFE</Color>
+    <Color x:Key="BaseColor">#FF15181D</Color>
+    <Color x:Key="MantleColor">#FF101217</Color>
+    <Color x:Key="CrustColor">#FF0B0D11</Color>
+    <Color x:Key="Surface0Color">#FF24282F</Color>
+    <Color x:Key="Surface1Color">#FF30353E</Color>
+    <Color x:Key="Surface2Color">#FF414852</Color>
+    <Color x:Key="OverlayColor">#FF737C89</Color>
+    <Color x:Key="TextColor">#FFF2F4F8</Color>
+    <Color x:Key="SubtextColor">#FFB8C0CC</Color>
+    <Color x:Key="BlueColor">#FFF6C177</Color>
+    <Color x:Key="LavenderColor">#FFFFD79A</Color>
     <Color x:Key="MauveColor">#FFCBA6F7</Color>
     <Color x:Key="RedColor">#FFF38BA8</Color>
     <Color x:Key="RedHoverColor">#FFFFA4BA</Color>
@@ -46,7 +46,7 @@
     <SolidColorBrush x:Key="OverlayBrush" Color="{StaticResource OverlayColor}" />
     <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
     <SolidColorBrush x:Key="SubtextBrush" Color="{StaticResource SubtextColor}" />
-    <SolidColorBrush x:Key="HintTextBrush" Color="#FF9399B2" />
+    <SolidColorBrush x:Key="HintTextBrush" Color="#FF9EA7B5" />
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource BlueColor}" />
     <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource LavenderColor}" />
     <SolidColorBrush x:Key="OnAccentBrush" Color="{StaticResource CrustColor}" />
@@ -61,16 +61,16 @@
     <SolidColorBrush x:Key="ViewportBrush" Color="#FF090B0F" />
     <SolidColorBrush x:Key="ViewerSurfaceBrush" Color="#FF090B0F" />
     <SolidColorBrush x:Key="PanelBrush" Color="#FA15181D" />
-    <SolidColorBrush x:Key="SurfacePanelBrush" Color="#70282C33" />
-    <SolidColorBrush x:Key="HairlineBrush" Color="#40545A66" />
-    <SolidColorBrush x:Key="DividerBrush" Color="#36545A66" />
+    <SolidColorBrush x:Key="SurfacePanelBrush" Color="#B31F232A" />
+    <SolidColorBrush x:Key="HairlineBrush" Color="#66555D6A" />
+    <SolidColorBrush x:Key="DividerBrush" Color="#4D555D6A" />
     <SolidColorBrush x:Key="FloatingChromeBrush" Color="#D30B0D14" />
     <SolidColorBrush x:Key="FloatingChromeBorderBrush" Color="#3345475A" />
     <SolidColorBrush x:Key="FloatingChromeTextBrush" Color="#FFE8ECF7" />
     <SolidColorBrush x:Key="ToastBrush" Color="#EB11111B" />
     <SolidColorBrush x:Key="WarningPanelBrush" Color="#1FF9E2AF" />
     <SolidColorBrush x:Key="DangerPanelBrush" Color="#1FF38BA8" />
-    <SolidColorBrush x:Key="FocusRingBrush" Color="#E6F6C177" />
+    <SolidColorBrush x:Key="FocusRingBrush" Color="#FFF6C177" />
     <SolidColorBrush x:Key="DropOverlayBrush" Color="#D911111B" />
     <SolidColorBrush x:Key="DropOverlayPanelBrush" Color="#F211111B" />
     <SolidColorBrush x:Key="OcrRegionBrush" Color="#4D89B4FA" />
@@ -78,9 +78,9 @@
     <SolidColorBrush x:Key="BrushTintYellowBrush" Color="#14F9E2AF" />
     <SolidColorBrush x:Key="BrushTintAccentBrush" Color="#1289B4FA" />
     <SolidColorBrush x:Key="BrushTintRedBrush" Color="#18FF4F64" />
-    <SolidColorBrush x:Key="AccentPanelBrush" Color="#1F89B4FA" />
-    <SolidColorBrush x:Key="AccentSelectionBrush" Color="#2689B4FA" />
-    <SolidColorBrush x:Key="StatusPanelBrush" Color="#66313244" />
+    <SolidColorBrush x:Key="AccentPanelBrush" Color="#26F6C177" />
+    <SolidColorBrush x:Key="AccentSelectionBrush" Color="#38F6C177" />
+    <SolidColorBrush x:Key="StatusPanelBrush" Color="#8A24282F" />
     <SolidColorBrush x:Key="SuccessPanelBrush" Color="#1FA6E3A1" />
     <SolidColorBrush x:Key="MauvePanelBrush" Color="#20CBA6F7" />
     <SolidColorBrush x:Key="OverlayGuideBrush" Color="#8CF5F5F8" />
@@ -292,7 +292,6 @@
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource FocusRingBrush}" />
-                            <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.42" />
@@ -425,7 +424,6 @@
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource TextBrush}" />
-                            <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.45" />
@@ -472,7 +470,6 @@
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource TextBrush}" />
-                            <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.45" />
@@ -528,7 +525,6 @@
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Bg" Property="BorderBrush" Value="{DynamicResource FocusRingBrush}" />
-                            <Setter TargetName="Bg" Property="BorderThickness" Value="2" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.3" />
@@ -978,7 +974,6 @@
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource FocusRingBrush}" />
-                            <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.5" />
@@ -1033,7 +1028,6 @@
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource FocusRingBrush}" />
-                            <Setter TargetName="Box" Property="BorderThickness" Value="2" />
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Box" Property="Background" Value="{DynamicResource AccentBrush}" />
@@ -1082,7 +1076,6 @@
                         </Trigger>
                         <Trigger Property="IsFocused" Value="True">
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
-                            <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
                         </Trigger>
                         <Trigger Property="IsReadOnly" Value="True">
                             <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SubtleSurfaceBrush}" />
@@ -1141,7 +1134,6 @@
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
-                            <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.5" />
@@ -1530,7 +1522,6 @@
                                             </Trigger>
                                             <Trigger Property="IsKeyboardFocused" Value="True">
                                                 <Setter TargetName="HeaderBorder" Property="BorderBrush" Value="{DynamicResource FocusRingBrush}" />
-                                                <Setter TargetName="HeaderBorder" Property="BorderThickness" Value="2" />
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -1669,7 +1660,6 @@
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource FocusRingBrush}" />
-                            <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
                         </Trigger>
                         <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
                             <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentWarmPanelBrush}" />

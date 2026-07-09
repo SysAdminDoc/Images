@@ -51,7 +51,9 @@
                 <TextBlock Style="{StaticResource Text.Subtitle}"
                            Text="{x:Static loc:Strings.SettingsSubtitle}"
                            Margin="0,5,0,0"
-                           MaxWidth="540" />
+                           MaxWidth="540"
+                           HorizontalAlignment="Left"
+                           TextAlignment="Left" />
             </StackPanel>
 
             <Border Grid.Column="1"
@@ -190,6 +192,30 @@
                     <StackPanel>
                         <Border Style="{StaticResource SettingsCard}">
                             <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsThemeTitle}"
+                                                   Style="{StaticResource Text.Body}"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsThemeDescription}"
+                                                   Style="{StaticResource Text.Hint}"
+                                                   Margin="0,3,0,0"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <ComboBox Grid.Column="1"
+                                              VerticalAlignment="Center"
+                                              MinWidth="170"
+                                              ItemsSource="{Binding AvailableThemes}"
+                                              SelectedItem="{Binding SelectedTheme}"
+                                              AutomationProperties.Name="{x:Static loc:Strings.SettingsThemeTitle}" />
+                                </Grid>
+
+                                <Border Style="{StaticResource SettingsDivider}" />
+
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />

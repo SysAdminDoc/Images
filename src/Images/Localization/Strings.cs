@@ -368,6 +368,12 @@ public static class Strings
     public static string SettingsRememberWindowTitle => Get(nameof(SettingsRememberWindowTitle));
     public static string SettingsRememberWindowDescription => Get(nameof(SettingsRememberWindowDescription));
     public static string SettingsSectionAppearance => Get(nameof(SettingsSectionAppearance));
+    public static string SettingsThemeTitle => Get(nameof(SettingsThemeTitle));
+    public static string SettingsThemeDescription => Get(nameof(SettingsThemeDescription));
+    public static string SettingsThemeDark => Get(nameof(SettingsThemeDark));
+    public static string SettingsThemeLight => Get(nameof(SettingsThemeLight));
+    public static string SettingsThemeSystem => Get(nameof(SettingsThemeSystem));
+    public static string SettingsThemeChangedStatusFormat => Get(nameof(SettingsThemeChangedStatusFormat));
     public static string SettingsFilmstripTitle => Get(nameof(SettingsFilmstripTitle));
     public static string SettingsFilmstripDescription => Get(nameof(SettingsFilmstripDescription));
     public static string SettingsMetadataHudTitle => Get(nameof(SettingsMetadataHudTitle));

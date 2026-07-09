@@ -66,6 +66,13 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         new LocaleOption("English", "en"),
     };
 
+    public IReadOnlyList<ThemeOption> AvailableThemes { get; } =
+    [
+        new ThemeOption(Strings.SettingsThemeDark, "dark"),
+        new ThemeOption(Strings.SettingsThemeLight, "latte"),
+        new ThemeOption(Strings.SettingsThemeSystem, "system"),
+    ];
+
     public LocaleOption SelectedLocale
     {
         get
@@ -91,6 +98,28 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
             Raise(nameof(SelectedLocale));
             SetStatus(Strings.SettingsLanguageRestartNotice, SettingsStatusToneKind.Warning);
+        }
+    }
+
+    public ThemeOption SelectedTheme
+    {
+        get
+        {
+            var persisted = _settings.GetString(Keys.ThemeMode, "dark") ?? "dark";
+            return AvailableThemes.FirstOrDefault(option =>
+                       string.Equals(option.Key, persisted, StringComparison.OrdinalIgnoreCase))
+                   ?? AvailableThemes[0];
+        }
+        set
+        {
+            if (value is null) return;
+
+            _settings.SetString(Keys.ThemeMode, value.Key);
+            ThemeService.ApplyFromSettings(_settings);
+            Raise(nameof(SelectedTheme));
+            SetStatus(
+                Strings.Format(nameof(Strings.SettingsThemeChangedStatusFormat), value.DisplayName),
+                SettingsStatusToneKind.Success);
         }
     }
 
@@ -607,6 +636,11 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 /// A display-name / IETF-tag pair for the language picker ComboBox.
 /// </summary>
 public sealed record LocaleOption(string DisplayName, string Tag)
+{
+    public override string ToString() => DisplayName;
+}
+
+public sealed record ThemeOption(string DisplayName, string Key)
 {
     public override string ToString() => DisplayName;
 }

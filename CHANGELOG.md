@@ -4,6 +4,13 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### Changed
+
+- **Theme selection is now available in Settings** - Appearance exposes Dark, Light, and Follow Windows choices that apply immediately, while the accessibility high-contrast override remains independent.
+- **Shared chrome uses one premium visual language** - Dark and light surfaces now use neutral charcoal/cool-gray layering with a warm accent across buttons, tabs, selection, focus, and tool windows instead of mixing the new workspace with legacy purple and blue controls.
+- **Keyboard focus no longer shifts layouts** - Shared buttons, tabs, checkboxes, text fields, expanders, and rail controls keep a stable one-pixel border while changing to the focus color, eliminating subtle size jitter during keyboard navigation.
+- **Accessibility descriptions match current behavior** - Reduce Motion and high-contrast settings now describe their app-wide effects instead of older partial or future-tense behavior.
+
 ## v0.2.25 - 2026-07-09
 
 ### Changed

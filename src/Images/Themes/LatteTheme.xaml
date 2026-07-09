@@ -12,17 +12,17 @@
     <sys:String x:Key="Images.Theme.Name">Latte</sys:String>
 
     <!-- ============ Palette — Catppuccin Latte ============ -->
-    <Color x:Key="BaseColor">#FFEFF1F5</Color>
-    <Color x:Key="MantleColor">#FFE6E9EF</Color>
-    <Color x:Key="CrustColor">#FFDCE0E8</Color>
-    <Color x:Key="Surface0Color">#FFCCD0DA</Color>
-    <Color x:Key="Surface1Color">#FFBCC0CC</Color>
-    <Color x:Key="Surface2Color">#FFACB0BE</Color>
-    <Color x:Key="OverlayColor">#FF7C7F93</Color>
-    <Color x:Key="TextColor">#FF4C4F69</Color>
-    <Color x:Key="SubtextColor">#FF6C6F85</Color>
-    <Color x:Key="BlueColor">#FF1E66F5</Color>
-    <Color x:Key="LavenderColor">#FF7287FD</Color>
+    <Color x:Key="BaseColor">#FFF4F5F7</Color>
+    <Color x:Key="MantleColor">#FFE9EBEF</Color>
+    <Color x:Key="CrustColor">#FFDDE1E7</Color>
+    <Color x:Key="Surface0Color">#FFE1E4E9</Color>
+    <Color x:Key="Surface1Color">#FFD0D5DD</Color>
+    <Color x:Key="Surface2Color">#FFB8C0CB</Color>
+    <Color x:Key="OverlayColor">#FF69717D</Color>
+    <Color x:Key="TextColor">#FF20242B</Color>
+    <Color x:Key="SubtextColor">#FF525A66</Color>
+    <Color x:Key="BlueColor">#FF9A6110</Color>
+    <Color x:Key="LavenderColor">#FFB7791F</Color>
     <Color x:Key="MauveColor">#FF8839EF</Color>
     <Color x:Key="RedColor">#FFD20F39</Color>
     <Color x:Key="RedHoverColor">#FFE64553</Color>
@@ -38,7 +38,7 @@
     <SolidColorBrush x:Key="OverlayBrush" Color="{StaticResource OverlayColor}" />
     <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
     <SolidColorBrush x:Key="SubtextBrush" Color="{StaticResource SubtextColor}" />
-    <SolidColorBrush x:Key="HintTextBrush" Color="#FF5C5F77" />
+    <SolidColorBrush x:Key="HintTextBrush" Color="#FF5E6673" />
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource BlueColor}" />
     <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource LavenderColor}" />
     <SolidColorBrush x:Key="OnAccentBrush" Color="#FFFFFFFF" />
@@ -49,25 +49,25 @@
     <SolidColorBrush x:Key="YellowBrush" Color="{StaticResource YellowColor}" />
 
     <!-- ============ Semantic surfaces + chrome ============ -->
-    <SolidColorBrush x:Key="ViewportBrush" Color="#FFF6F8FC" />
-    <SolidColorBrush x:Key="ViewerSurfaceBrush" Color="#FFF6F8FC" />
-    <SolidColorBrush x:Key="PanelBrush" Color="#FAEFF1F5" />
-    <SolidColorBrush x:Key="SurfacePanelBrush" Color="#CFE6E9EF" />
-    <SolidColorBrush x:Key="HairlineBrush" Color="#6CBCC0CC" />
-    <SolidColorBrush x:Key="DividerBrush" Color="#596C6F85" />
-    <SolidColorBrush x:Key="FloatingChromeBrush" Color="#F8EFF1F5" />
-    <SolidColorBrush x:Key="FloatingChromeBorderBrush" Color="#667C7F93" />
+    <SolidColorBrush x:Key="ViewportBrush" Color="#FFF8F9FB" />
+    <SolidColorBrush x:Key="ViewerSurfaceBrush" Color="#FFF8F9FB" />
+    <SolidColorBrush x:Key="PanelBrush" Color="#FCF4F5F7" />
+    <SolidColorBrush x:Key="SurfacePanelBrush" Color="#FFE9EBEF" />
+    <SolidColorBrush x:Key="HairlineBrush" Color="#997B8491" />
+    <SolidColorBrush x:Key="DividerBrush" Color="#667B8491" />
+    <SolidColorBrush x:Key="FloatingChromeBrush" Color="#FAF4F5F7" />
+    <SolidColorBrush x:Key="FloatingChromeBorderBrush" Color="#8069717D" />
     <SolidColorBrush x:Key="FloatingChromeTextBrush" Color="{StaticResource TextColor}" />
     <SolidColorBrush x:Key="ToastBrush" Color="#FBEFF1F5" />
     <SolidColorBrush x:Key="WarningPanelBrush" Color="#26DF8E1D" />
     <SolidColorBrush x:Key="DangerPanelBrush" Color="#22D20F39" />
-    <SolidColorBrush x:Key="FocusRingBrush" Color="#CC1E66F5" />
+    <SolidColorBrush x:Key="FocusRingBrush" Color="#FF9A6110" />
     <SolidColorBrush x:Key="DropOverlayBrush" Color="#DDEFF1F5" />
     <SolidColorBrush x:Key="DropOverlayPanelBrush" Color="#FBEFF1F5" />
     <SolidColorBrush x:Key="OcrRegionBrush" Color="#451E66F5" />
     <SolidColorBrush x:Key="OcrRegionFocusBrush" Color="#881E66F5" />
-    <SolidColorBrush x:Key="AccentPanelBrush" Color="#1F1E66F5" />
-    <SolidColorBrush x:Key="AccentSelectionBrush" Color="#2E1E66F5" />
+    <SolidColorBrush x:Key="AccentPanelBrush" Color="#269A6110" />
+    <SolidColorBrush x:Key="AccentSelectionBrush" Color="#389A6110" />
     <SolidColorBrush x:Key="StatusPanelBrush" Color="#DDE6E9EF" />
     <SolidColorBrush x:Key="SuccessPanelBrush" Color="#2640A02B" />
     <SolidColorBrush x:Key="MauvePanelBrush" Color="#228839EF" />
@@ -78,9 +78,9 @@
     <SolidColorBrush x:Key="BrushTintYellowBrush" Color="#24DF8E1D" />
     <SolidColorBrush x:Key="BrushTintAccentBrush" Color="#1F1E66F5" />
     <SolidColorBrush x:Key="BrushTintRedBrush" Color="#24D20F39" />
-    <SolidColorBrush x:Key="AccentWarmBrush" Color="#FFB7791F" />
-    <SolidColorBrush x:Key="AccentWarmPanelBrush" Color="#26B7791F" />
-    <SolidColorBrush x:Key="NavRailBrush" Color="#F4E3E7EF" />
+    <SolidColorBrush x:Key="AccentWarmBrush" Color="#FF9A6110" />
+    <SolidColorBrush x:Key="AccentWarmPanelBrush" Color="#269A6110" />
+    <SolidColorBrush x:Key="NavRailBrush" Color="#F4E5E8EC" />
     <SolidColorBrush x:Key="NavRailBorderBrush" Color="#66BCC0CC" />
     <SolidColorBrush x:Key="WorkspaceTopBarBrush" Color="#F8EFF1F5" />
     <SolidColorBrush x:Key="WorkspaceTopBarBorderBrush" Color="#8C7C7F93" />

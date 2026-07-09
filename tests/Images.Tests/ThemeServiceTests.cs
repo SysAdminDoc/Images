@@ -92,8 +92,12 @@ public sealed class ThemeServiceTests
         Assert.NotEqual(
             Assert.IsType<SolidColorBrush>(dark["PanelBrush"]).Color,
             Assert.IsType<SolidColorBrush>(latte["PanelBrush"]).Color);
-        Assert.Equal(Color.FromRgb(246, 248, 252), Assert.IsType<SolidColorBrush>(latte["ViewportBrush"]).Color);
-        Assert.Equal(Color.FromArgb(0xF8, 239, 241, 245), Assert.IsType<SolidColorBrush>(latte["FloatingChromeBrush"]).Color);
+        Assert.Equal(Color.FromRgb(248, 249, 251), Assert.IsType<SolidColorBrush>(latte["ViewportBrush"]).Color);
+        Assert.Equal(Color.FromArgb(0xFA, 244, 245, 247), Assert.IsType<SolidColorBrush>(latte["FloatingChromeBrush"]).Color);
+        Assert.Equal(Color.FromRgb(246, 193, 119), Assert.IsType<SolidColorBrush>(dark["AccentBrush"]).Color);
+        Assert.Equal(Color.FromRgb(154, 97, 16), Assert.IsType<SolidColorBrush>(latte["AccentBrush"]).Color);
+        Assert.Equal(Color.FromRgb(11, 13, 17), Assert.IsType<SolidColorBrush>(dark["OnAccentBrush"]).Color);
+        Assert.Equal(Colors.White, Assert.IsType<SolidColorBrush>(latte["OnAccentBrush"]).Color);
         Assert.True(latte.Contains("AccentPanelBrush"));
         Assert.True(latte.Contains("AccentSelectionBrush"));
         Assert.True(latte.Contains("SuccessPanelBrush"));

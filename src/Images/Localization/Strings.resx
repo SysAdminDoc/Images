@@ -1622,6 +1622,24 @@ Details written to:
   <data name="SettingsSectionAppearance" xml:space="preserve">
     <value>Appearance</value>
   </data>
+  <data name="SettingsThemeTitle" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="SettingsThemeDescription" xml:space="preserve">
+    <value>Choose a dark or light workspace, or follow your Windows preference. Changes apply immediately.</value>
+  </data>
+  <data name="SettingsThemeDark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="SettingsThemeLight" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="SettingsThemeSystem" xml:space="preserve">
+    <value>Follow Windows</value>
+  </data>
+  <data name="SettingsThemeChangedStatusFormat" xml:space="preserve">
+    <value>Theme preference saved: {0}.</value>
+  </data>
   <data name="SettingsFilmstripTitle" xml:space="preserve">
     <value>Show filmstrip at startup</value>
   </data>
@@ -1659,13 +1677,13 @@ Details written to:
     <value>Reduce viewer motion</value>
   </data>
   <data name="SettingsReduceMotionDescription" xml:space="preserve">
-    <value>Disables hover fade animation for the edge navigation buttons.</value>
+    <value>Reduces nonessential fades, pulses, and transform animations throughout the viewer.</value>
   </data>
   <data name="SettingsHighContrastTitle" xml:space="preserve">
     <value>Prefer high-contrast surfaces</value>
   </data>
   <data name="SettingsHighContrastDescription" xml:space="preserve">
-    <value>Stores a contrast preference for settings, diagnostics, and future contrast-aware views.</value>
+    <value>Uses stronger system-derived colors and borders throughout the app.</value>
   </data>
   <data name="SettingsSectionAdvanced" xml:space="preserve">
     <value>Advanced</value>

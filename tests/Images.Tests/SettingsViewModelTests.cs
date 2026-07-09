@@ -14,6 +14,7 @@ public sealed class SettingsViewModelTests
         var viewModel = new SettingsViewModel(settings);
 
         viewModel.RememberWindowPlacement = false;
+        viewModel.SelectedTheme = Assert.Single(viewModel.AvailableThemes, theme => theme.Key == "latte");
         viewModel.ReduceMotion = true;
         viewModel.HighContrastMode = true;
         viewModel.ArchiveRightToLeft = true;
@@ -21,6 +22,7 @@ public sealed class SettingsViewModelTests
         viewModel.ArchiveSpreadMode = true;
 
         Assert.False(settings.GetBool(Keys.RememberWindowPlacement, true));
+        Assert.Equal("latte", settings.GetString(Keys.ThemeMode, "dark"));
         Assert.True(settings.GetBool(Keys.AccessibilityReduceMotion, false));
         Assert.True(settings.GetBool(Keys.AccessibilityHighContrast, false));
         Assert.True(settings.GetBool(Keys.ArchiveRightToLeft, false));
