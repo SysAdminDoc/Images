@@ -245,7 +245,7 @@ public static class ImageAnnotationService
         new Drawables()
             .Font("Segoe UI")
             .FontPointSize(radius)
-            .FillColor(MagickColors.White)
+            .FillColor(ContrastingTextColor(color))
             .Text(item.X - radius * 0.35, item.Y + radius * 0.35, label)
             .Draw(image);
     }
@@ -324,6 +324,15 @@ public static class ImageAnnotationService
         {
             return MagickColors.Red;
         }
+    }
+
+    private static IMagickColor<ushort> ContrastingTextColor(IMagickColor<ushort> background)
+    {
+        var r = background.R / 257.0;
+        var g = background.G / 257.0;
+        var b = background.B / 257.0;
+        var luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+        return luminance > 186 ? MagickColors.Black : MagickColors.White;
     }
 
     private static double Distance(double x1, double y1, double x2, double y2)

@@ -4,10 +4,25 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+## 0.2.24
+
+### Fixed
+
+- **Motion photo state clears on load failure** - Load failures and empty-viewer transitions now clear motion-photo, companion-video, and motion-video-playback state so stale extract/play buttons from a previous file cannot appear on an error screen or empty viewer.
+- **Annotation number baking matches overlay contrast** - The Magick.NET annotation baking path now picks black or white number text from the marker fill luminance, matching the WPF overlay that already did this, so saved images with light-colored number markers are readable.
+- **Contact sheet colors are parameterized** - ContactSheetService no longer hardcodes Catppuccin Mocha hex values for text, placeholder, and watermark colors; callers can pass theme-appropriate colors via ContactSheetOptions.
+- **Macro rename carries sidecar files** - MacroActionService rename-pattern steps now call SidecarCompanionFiles.TryMoveAlongside after File.Move, matching the sidecar-carry pattern in RenameService, DuplicateCleanupService, and FileHealthScanService.
+- **Inpaint mode setter uses change guard** - IsInpaintMode and InpaintBrushRadius setters now use the standard Set(ref) change-detection pattern, eliminating redundant PropertyChanged notifications on same-value assignments.
+- **Background removal clone is exception-safe** - BackgroundRemovalService.RunInference now guards the clone-then-composite sequence with try/catch so the cloned MagickImage is disposed if Composite throws.
+
 ## 0.2.23
 
 ### Fixed
 
+- **Removed-file navigation updates immediately** - When the current image is deleted or removed from the navigator, the viewer now publishes the next path immediately while the async decode continues, so stale filenames do not linger in the shell.
+- **Theme overlays load reliably from tests and secondary entry points** - Latte and high-contrast overlays now use assembly-qualified pack URIs, preventing resource lookup failures outside the main app startup path.
+- **Catalog folder queries tolerate path normalization drift** - Folder queries now normalize both the requested folder and stored asset folders before comparison, so persisted relative or untrimmed paths still match.
+- **Dialog owner lookup is dispatcher-safe** - Delete confirmations and secondary tool windows no longer read `Application.Current.MainWindow` from the wrong dispatcher thread.
 - **Network egress entries survive dispatcher shutdown** - Network activity recorded after a WPF dispatcher is shutting down now falls back to direct insertion instead of disappearing behind a never-pumped dispatcher queue.
 - **Store codec launch failures are honest** - If Windows cannot open the Microsoft Store codec extension link, Images now shows a failure toast instead of claiming the Store page opened.
 - **Annotation marker labels stay readable** - Number annotations now choose black or white label text from the marker fill color, so white and yellow markers are no longer unreadable; annotation drags also recover cleanly from mouse-capture loss.

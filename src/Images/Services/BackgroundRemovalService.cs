@@ -93,9 +93,18 @@ public static class BackgroundRemovalService
         if (returnMaskOnly)
             return new BackgroundRemovalResult(true, null, null, maskImage);
 
-        var result = (MagickImage)sourceImage.Clone();
-        result.HasAlpha = true;
-        result.Composite(maskImage, CompositeOperator.CopyAlpha);
+        MagickImage? result = null;
+        try
+        {
+            result = (MagickImage)sourceImage.Clone();
+            result.HasAlpha = true;
+            result.Composite(maskImage, CompositeOperator.CopyAlpha);
+        }
+        catch
+        {
+            result?.Dispose();
+            throw;
+        }
 
         return new BackgroundRemovalResult(true, null, result, maskImage);
     }

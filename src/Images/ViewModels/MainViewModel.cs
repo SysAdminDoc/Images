@@ -353,14 +353,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (CurrentPath is not null && !HasImage)
         {
             // Current file was deleted externally — pick whatever slot the navigator landed on.
-            if (_nav.CurrentPath is not null)
-            {
-                ResetPageState();
-                _ = LoadCurrentWithOperationStatusAsync(
-                    Strings.MainOpLoadingNext,
-                    BuildDecodeOperationDetail(_nav.CurrentPath));
-            }
-            else ClearCurrentState();
+            LoadNavigatorCurrentAfterRemoval();
         }
         else
         {
@@ -4586,6 +4579,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClearRetouchState(showToast: false);
         ResetInpaintState();
         ResetPageState();
+        StopMotionVideo();
+        _motionPhoto = null;
+        CompanionVideoPath = null;
+        Raise(nameof(IsMotionPhoto));
+        Raise(nameof(CompanionVideoPath));
         SetLoadError(ex);
     }
 
@@ -4886,7 +4884,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _renameTimer.Stop();
 
         var toDelete = CurrentPath;
-        var result = RunWithOperationBusyGuard(() => _recycleBinDelete.Delete(toDelete, Application.Current?.MainWindow));
+        var result = RunWithOperationBusyGuard(() => _recycleBinDelete.Delete(toDelete, TryGetApplicationMainWindow()));
         switch (result.Status)
         {
             case RecycleBinDeleteStatus.Canceled:
@@ -4911,13 +4909,42 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         AdvanceAfterRemovedCurrent();
     }
 
+    private static Window? TryGetApplicationMainWindow()
+    {
+        var application = Application.Current;
+        if (application is null)
+            return null;
+
+        var dispatcher = application.Dispatcher;
+        if (dispatcher is null ||
+            dispatcher.HasShutdownStarted ||
+            dispatcher.HasShutdownFinished ||
+            !dispatcher.CheckAccess())
+        {
+            return null;
+        }
+
+        return application.MainWindow;
+    }
+
     private void AdvanceAfterRemovedCurrent()
     {
-        if (_nav.CurrentPath is null) { ClearCurrentState(); return; }
+        LoadNavigatorCurrentAfterRemoval();
+    }
+
+    private void LoadNavigatorCurrentAfterRemoval()
+    {
+        var nextPath = _nav.CurrentPath;
+        if (nextPath is null) { ClearCurrentState(); return; }
+
+        CurrentPath = nextPath;
         ResetPageState();
+        if (IsOperationBusy)
+            return;
+
         _ = LoadCurrentWithOperationStatusAsync(
             Strings.MainOpLoadingNext,
-            BuildDecodeOperationDetail(_nav.CurrentPath));
+            BuildDecodeOperationDetail(nextPath));
     }
 
     private void Rotate(double delta)
@@ -5908,7 +5935,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         var dialog = new Images.ResizeDialogWindow(PixelWidth, PixelHeight)
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         if (dialog.ShowDialog() != true || dialog.Result is not { } plan)
@@ -5945,7 +5972,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Toast(result.Success ? Strings.MainToastAdjustmentAdded : result.Message);
             })
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         window.Show();
@@ -5971,7 +5998,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Toast(result.Success ? Strings.MainToastEffectsAdded : result.Message);
             })
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         window.Show();
@@ -6011,7 +6038,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Toast(result.Success ? Strings.MainToastAnnotationsAdded : result.Message);
             })
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         window.Show();
@@ -6037,7 +6064,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Toast(result.Success ? Strings.MainToastPerspectiveAdded : result.Message);
             })
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         window.Show();
@@ -6268,13 +6295,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool IsInpaintMode
     {
         get => _isInpaintMode;
-        set { _isInpaintMode = value; Raise(); Raise(nameof(InpaintStatusText)); }
+        set { if (Set(ref _isInpaintMode, value)) Raise(nameof(InpaintStatusText)); }
     }
 
     public double InpaintBrushRadius
     {
         get => _inpaintBrushRadius;
-        set { _inpaintBrushRadius = Math.Clamp(value, LaMaInpaintService.MinBrushRadius, LaMaInpaintService.MaxBrushRadius); Raise(); }
+        set { var clamped = Math.Clamp(value, LaMaInpaintService.MinBrushRadius, LaMaInpaintService.MaxBrushRadius); Set(ref _inpaintBrushRadius, clamped); }
     }
 
     public System.Collections.ObjectModel.ObservableCollection<InpaintMaskRegion> InpaintMaskRegions => _inpaintMaskRegions;
@@ -7021,7 +7048,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var about = new Images.AboutWindow
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
         about.ShowDialog();
     }
@@ -7030,7 +7057,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var board = new Images.ReferenceBoardWindow
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         if (!string.IsNullOrWhiteSpace(CurrentPath) && File.Exists(CurrentPath))
@@ -7043,7 +7070,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var cleanup = new Images.DuplicateCleanupWindow(_recoveryCenter)
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
         cleanup.CompareRequested += (_, e) => StartCompareWithPair(e.PrimaryPath, e.SecondaryPath);
 
@@ -7057,7 +7084,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var scan = new Images.FileHealthScanWindow(_recoveryCenter)
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         if (!string.IsNullOrWhiteSpace(CurrentFolder) && Directory.Exists(CurrentFolder))
@@ -7070,7 +7097,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var recovery = new Images.RecoveryCenterWindow(_recoveryCenter)
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         recovery.Show();
@@ -7080,7 +7107,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var manager = new Images.ModelManagerWindow
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         manager.Show();
@@ -7090,7 +7117,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var semanticSearch = new Images.SemanticSearchWindow
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         if (Directory.Exists(CurrentFolder))
@@ -7104,7 +7131,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var tagGraph = new Images.TagGraphWindow
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         tagGraph.SetCurrentImage(CurrentPath);
@@ -7115,7 +7142,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var inbox = new Images.ImportInboxWindow
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         if (!string.IsNullOrWhiteSpace(CurrentPath) && File.Exists(CurrentPath))
@@ -7130,7 +7157,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var macros = new Images.MacroActionWindow
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         if (!string.IsNullOrWhiteSpace(CurrentPath) && File.Exists(CurrentPath))
@@ -7143,7 +7170,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var batch = new Images.BatchProcessorWindow
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         if (!string.IsNullOrWhiteSpace(CurrentPath) && File.Exists(CurrentPath))
@@ -7162,7 +7189,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             : ImageExportService.NormalizeExportExtension(Path.GetExtension(CurrentPath));
         var window = new Images.ExportPreviewWindow(bitmap, CurrentPath, extension)
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         window.Show();
@@ -7172,7 +7199,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var edits = new Images.EditStackWindow
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
 
         edits.SetCurrentImage(CurrentPath);
@@ -7185,7 +7212,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         var settings = new Images.SettingsWindow
         {
-            Owner = Application.Current?.MainWindow
+            Owner = TryGetApplicationMainWindow()
         };
         settings.ShowDialog();
         RefreshSettingsFromStore();
@@ -7473,6 +7500,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClearRetouchState(showToast: false);
         ResetInpaintState();
         ResetPageState();
+        StopMotionVideo();
+        _motionPhoto = null;
+        CompanionVideoPath = null;
+        Raise(nameof(IsMotionPhoto));
+        Raise(nameof(CompanionVideoPath));
         ClearPhotoMetadata();
         ClearColorAnalysis();
         ClearC2paInspection();

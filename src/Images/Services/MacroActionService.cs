@@ -329,6 +329,7 @@ public sealed class MacroActionService
         }
 
         File.Move(path, target);
+        SidecarCompanionFiles.TryMoveAlongside(path, target);
         messages.Add($"Renamed to {Path.GetFileName(target)}.");
         return target;
     }

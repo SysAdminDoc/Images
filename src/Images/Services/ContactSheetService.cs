@@ -15,9 +15,13 @@ public sealed record ContactSheetOptions(
     bool ShowRating = false,
     bool ShowDimensions = false,
     string? WatermarkText = null,
-    MagickColor? BackgroundColor = null)
+    MagickColor? BackgroundColor = null,
+    MagickColor? TextColor = null,
+    MagickColor? PlaceholderColor = null)
 {
     public MagickColor EffectiveBackground => BackgroundColor ?? new MagickColor("#1E1E2E");
+    public MagickColor EffectiveText => TextColor ?? new MagickColor("#CDD6F4");
+    public MagickColor EffectivePlaceholder => PlaceholderColor ?? new MagickColor("#45475A");
 }
 
 public sealed record ContactSheetPlan(
@@ -100,7 +104,7 @@ public sealed class ContactSheetService
                 (uint)plan.SheetHeightPx);
 
             var drawables = new Drawables();
-            drawables.FillColor(new MagickColor("#CDD6F4"));
+            drawables.FillColor(options.EffectiveText);
             drawables.Font("Segoe UI");
             drawables.FontPointSize(11);
 
@@ -127,9 +131,9 @@ public sealed class ContactSheetService
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     _log.LogWarning(ex, "Could not load thumbnail for contact sheet cell: {Path}", cell.SourcePath);
-                    drawables.FillColor(new MagickColor("#45475A"));
+                    drawables.FillColor(options.EffectivePlaceholder);
                     drawables.Rectangle(x, y, x + options.ThumbnailWidth, y + options.ThumbnailHeight);
-                    drawables.FillColor(new MagickColor("#CDD6F4"));
+                    drawables.FillColor(options.EffectiveText);
                 }
 
                 if (!string.IsNullOrWhiteSpace(cell.CaptionText))
@@ -141,7 +145,8 @@ public sealed class ContactSheetService
 
             if (!string.IsNullOrWhiteSpace(options.WatermarkText))
             {
-                drawables.FillColor(new MagickColor("#80CDD6F4"));
+                var watermarkColor = options.EffectiveText;
+                drawables.FillColor(new MagickColor(watermarkColor.R, watermarkColor.G, watermarkColor.B, (ushort)(watermarkColor.A / 2)));
                 drawables.FontPointSize(14);
                 drawables.Gravity(Gravity.Southeast);
                 drawables.Text(options.MarginPx, options.MarginPx, options.WatermarkText);
