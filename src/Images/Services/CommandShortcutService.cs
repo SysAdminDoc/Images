@@ -130,7 +130,6 @@ public sealed class CommandShortcutService
         var edit = Strings.CommandPalette_Category_Edit;
         var file = Strings.CommandPalette_Category_File;
         var tools = Strings.CommandPalette_Category_Tools;
-        var review = Strings.CommandPalette_Category_Review;
         var compare = Strings.CommandPalette_Category_Compare;
         var help = Strings.CommandPalette_Category_Help;
 
@@ -175,8 +174,6 @@ public sealed class CommandShortcutService
             new(CommandIds.MacroActions, Strings.CommandPalette_MacroActions, tools, "Ctrl+Shift+M"),
             new(CommandIds.BatchProcessor, Strings.CommandPalette_BatchProcessor, tools, "Ctrl+Shift+B"),
             new(CommandIds.EditStack, Strings.CommandPalette_EditStack, tools, "Ctrl+Shift+E"),
-
-            new(CommandIds.ReviewMode, Strings.CommandPalette_ReviewMode, review, "L"),
 
             new(CommandIds.Compare, Strings.CommandPalette_Compare, compare, "Ctrl+Alt+C"),
             new(CommandIds.CompareWith, Strings.CommandPalette_CompareWith, compare, "Ctrl+Alt+V"),
@@ -241,7 +238,6 @@ public static class CommandIds
     public const string MacroActions = "macro-actions";
     public const string BatchProcessor = "batch-processor";
     public const string EditStack = "edit-stack";
-    public const string ReviewMode = "review-mode";
     public const string Compare = "compare";
     public const string CompareWith = "compare-with";
     public const string Settings = "settings";

@@ -4,7 +4,7 @@
 
 # Images
 
-[![Version](https://img.shields.io/badge/version-0.2.19-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
+[![Version](https://img.shields.io/badge/version-0.2.20-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
 [![License](https://img.shields.io/badge/license-MIT-a6e3a1?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-cba6f7?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10.0-f38ba8?style=flat-square)](#)
@@ -37,7 +37,6 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Text extraction (OCR)** — press `E` to overlay selectable text boxes directly over detected text regions. Highlight any recognized text manually and copy it with Ctrl+C or the context menu. Uses Windows.Media.Ocr for local, offline processing with installed Windows OCR language packs. No cloud, no network, no bloat.
 - **Togglable folder filmstrip** — a compact, virtualized, cached thumbnail rail spans the current folder, keeps the current item centered, supports right-click Open/Reveal/Copy actions, and falls back to the side panel when hidden.
 - **Gallery workbench** — press `G` to open a multi-column thumbnail grid for the current folder with quick filtering, smart filter tokens for format/folder/rating/tag/palette/orientation/dimensions/date/duplicate status, sort shortcuts, context actions, selection, and Enter-to-load.
-- **Culling review mode** — press `L` while moving through a folder to enable keyboard review. In review mode, `1`-`5` writes a star rating, `0` clears the rating, `P` marks pick, `R` marks reject, and `U` restores the previous review label state. Labels are stored in local XMP sidecars and do not require a catalog rebuild.
 - **Private tag relationships** — press `Ctrl+Shift+T` to manage local-only tag namespaces such as `person:`, `place:`, and `project:`, resolve aliases/siblings, expand parent tags, and import/export the current image's XMP sidecar tags.
 - **Import inbox** — press `Ctrl+Shift+I` to stage new files before they join a library folder. The inbox detects exact duplicates in the staging set and destination, lets you tag/rate into XMP sidecars, imports Picasa `.picasa.ini` ratings/albums/faces into sidecars without modifying originals, strips GPS from imported JPEG/TIFF copies, recycles unwanted staged files, and copies or moves originals with collision-safe naming.
 - **Macro actions** — press `Ctrl+Shift+M` to build and run local JSON actions. Plans stay inspectable before execution, support dry runs, load/save as JSON, and currently cover GPS stripping, export/convert/resize copies with quality settings, and rename patterns with tokens.
@@ -52,12 +51,12 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Red-eye correction** — press `Ctrl+Alt+Y` to mark red pupils directly on the image. The side panel exposes radius, strength, and red-threshold controls; Enter adds the correction marks to edit history, and Save a copy renders them without changing the source file.
 - **Clone/heal retouch** — press `Ctrl+Alt+H`, Alt-click or first-click a clean source, then paint clone-stamp or healing-brush strokes over the target area. The side panel exposes mode, radius, and strength controls; Save a copy renders the retouch stack without changing the source file.
 - **Reference board mode** — press `Ctrl+B` to open a separate local board seeded from the current image. Drop supported files, arrange image cards, add notes and group frames, pin the board above other windows, zoom the canvas, and export the composed board as PNG.
-- **Duplicate cleanup center** — press `Ctrl+Shift+D` or use the side-panel Cleanup card to scan local folders for exact SHA-256 duplicates and perceptually similar images, prefer keep candidates from reference folders, review pairs side by side, mark false positives, and move extras to app-local quarantine or the Recycle Bin.
+- **Duplicate cleanup center** — press `Ctrl+Shift+D` or use the side-panel Cleanup card to scan local folders for exact SHA-256 duplicates and perceptually similar images, prefer keep candidates from reference folders, inspect pairs side by side, mark false positives, and move extras to app-local quarantine or the Recycle Bin.
 - **Compare mode** — press `Ctrl+Alt+C` to compare the current image with the next folder item, choose another local image from the side panel or context menu, or send the selected duplicate-cleanup pair into the viewer. 2-up and opacity-overlay layouts share pan, zoom, rotate, flip, A/B swap, and keyboard-accessible opacity controls.
 - **Rebuildable catalog foundation** — Images maintains an app-local SQLite catalog cache for future library-scale workflows. It records source path, SHA-256 fingerprint, dimensions, file dates, codec metadata, XMP sidecar rating/tags, and scan timestamps; sidecars and source files remain authoritative, so deleting `catalog.db` is a valid recovery step. Catalog migrations run forward only with integrity checks, WAL checkpointing, versioned backups, and a schema canary before the cache is reused.
 - **Semantic search foundation** — open Semantic search from the context menu or Automation card to explicitly index selected folders into app-local `semantic-index.db`, search with a deterministic offline metadata embedding provider, filter by folder, reveal results, open results in the viewer, cancel indexing, and delete derived search data. Approved ONNX CLIP/SigLIP inference remains future work.
 - **File health scan** — press `Ctrl+Shift+H` to find files with mismatched image extensions, corrupt supported images, zero-byte files, and temporary/partial-download artifacts, then rename detected extensions, mark reviewed, or move files to app-local quarantine.
-- **Recovery center** — open it from the context menu or Cleanup card to review recent move, rename, quarantine, writeback, and Recycle Bin actions. Moves, renames, and quarantines can be restored with collision-safe targets and matching XMP sidecars when the recovery source still exists; writebacks and Recycle Bin sends show explicit restore guidance.
+- **Recovery center** — open it from the context menu or Cleanup card to inspect recent move, rename, quarantine, writeback, and Recycle Bin actions. Moves, renames, and quarantines can be restored with collision-safe targets and matching XMP sidecars when the recovery source still exists; writebacks and Recycle Bin sends show explicit restore guidance.
 - **Pinned overlay mode** — pin the current image above other windows for tracing or design comparison, tune opacity in the side panel, and optionally enable click-through only when the `Ctrl+Alt+O` global exit hotkey is registered.
 - **Pixel inspector** — enable Inspector in the side panel to sample coordinates and HEX/RGB/HSV/alpha values, copy color values, Shift-drag pixel measurements, and switch to nearest-neighbor preview scaling for pixel art.
 - **Animation frame workbench** — animated GIF/APNG/WebP files get a side-panel timeline with a scrubber, frame stepping, playback-speed control, copy-current-frame, PNG frame export, and drag-out selected frames.
@@ -112,7 +111,7 @@ Development builds can still detect `IMAGES_GHOSTSCRIPT_DIR` and normal system i
 
 Release builders can use `scripts/Prepare-GhostscriptBundle.ps1`; see `docs/codec-bundling.md`.
 
-To build the installer locally, install [Inno Setup 6](https://jrsoftware.org/isdl.php), stage Ghostscript with `scripts\Prepare-GhostscriptBundle.ps1`, run `dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish`, then `iscc /DMyAppVersion=0.2.19 installer\Images.iss`. Output lands at `installer\output\Images-vX.Y.Z-setup-win-x64.exe`.
+To build the installer locally, install [Inno Setup 6](https://jrsoftware.org/isdl.php), stage Ghostscript with `scripts\Prepare-GhostscriptBundle.ps1`, run `dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish`, then `iscc /DMyAppVersion=0.2.20 installer\Images.iss`. Output lands at `installer\output\Images-vX.Y.Z-setup-win-x64.exe`.
 
 OCR depends on Microsoft Windows OCR optional capabilities. The installer installs the current Windows UI language OCR capability plus `en-US` fallback when needed; Images cannot legally bundle those Microsoft language packs inside the app folder.
 
@@ -141,9 +140,6 @@ OCR depends on Microsoft Windows OCR optional capabilities. The installer instal
 | **Ctrl+Shift+M** | Open macro actions |
 | **Ctrl+Shift+B** | Open batch processor |
 | **Ctrl+Shift+E** | Open edit history |
-| **L** | Toggle review mode |
-| **1-5 / 0** | In review mode, set star rating / clear rating |
-| **P / R / U** | In review mode, mark pick / reject / undo review label |
 | **Ctrl+Alt+W** | Open export workbench |
 | **Ctrl+Alt+C** | Compare current image with next folder item |
 | **Ctrl+Alt+V** | Compare current image with a chosen local file |
@@ -168,9 +164,9 @@ src/Images/
 ├── App.xaml                    # Entry point, theme merge
 ├── MainWindow.xaml             # Layout: image canvas + side rename panel + bottom toolbar
 ├── ReferenceBoardWindow.xaml   # Local reference-board canvas for images, notes, groups, and PNG export
-├── DuplicateCleanupWindow.xaml # Local duplicate/similar-image cleanup review surface
-├── FileHealthScanWindow.xaml   # Local bad-extension, broken-file, zero-byte, and temp-file review surface
-├── RecoveryCenterWindow.xaml   # Review, reveal, and restore recent destructive actions where possible
+├── DuplicateCleanupWindow.xaml # Local duplicate/similar-image cleanup surface
+├── FileHealthScanWindow.xaml   # Local bad-extension, broken-file, zero-byte, and temp-file inspection surface
+├── RecoveryCenterWindow.xaml   # Inspect, reveal, and restore recent destructive actions where possible
 ├── ModelManagerWindow.xaml     # Approved local ONNX model import, hash verification, and runtime status
 ├── SemanticSearchWindow.xaml   # Local semantic-index build/search/reveal surface
 ├── ViewModels/
@@ -194,7 +190,6 @@ src/Images/
 │   ├── ExportCapabilityWarningService.cs # Shared target-format loss warnings for export and batch
 │   ├── CatalogService.cs       # Rebuildable app-local catalog cache for metadata/search foundations
 │   ├── SemanticSearchService.cs # Local semantic index, embedding provider seam, and cosine search
-│   ├── ReviewLabelService.cs   # XMP-backed rating, pick/reject labels, and review undo state
 │   ├── NonDestructiveEditService.cs # XMP edit-stack persistence and export application
 │   ├── ImageAdjustmentService.cs # Levels, curve, and HSL adjustment planning/rendering
 │   ├── LocalExposureBrushService.cs # Soft dodge/burn brush strokes for non-destructive local exposure

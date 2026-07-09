@@ -6,7 +6,6 @@ namespace Images.Services;
 public enum WorkflowMode
 {
     Viewer,
-    Review,
     Organize,
     Edit,
     Book,
@@ -16,18 +15,16 @@ public enum WorkflowMode
 public sealed record WorkflowModePreset(
     bool FilmstripVisible,
     bool MetadataHudVisible,
-    bool GalleryOpen,
-    bool ReviewModeActive)
+    bool GalleryOpen)
 {
     public static WorkflowModePreset ForMode(WorkflowMode mode) => mode switch
     {
-        WorkflowMode.Viewer => new(FilmstripVisible: true, MetadataHudVisible: false, GalleryOpen: false, ReviewModeActive: false),
-        WorkflowMode.Review => new(FilmstripVisible: true, MetadataHudVisible: true, GalleryOpen: false, ReviewModeActive: true),
-        WorkflowMode.Organize => new(FilmstripVisible: false, MetadataHudVisible: true, GalleryOpen: true, ReviewModeActive: false),
-        WorkflowMode.Edit => new(FilmstripVisible: false, MetadataHudVisible: false, GalleryOpen: false, ReviewModeActive: false),
-        WorkflowMode.Book => new(FilmstripVisible: false, MetadataHudVisible: false, GalleryOpen: false, ReviewModeActive: false),
-        WorkflowMode.Diagnostics => new(FilmstripVisible: false, MetadataHudVisible: true, GalleryOpen: false, ReviewModeActive: false),
-        _ => new(FilmstripVisible: true, MetadataHudVisible: false, GalleryOpen: false, ReviewModeActive: false)
+        WorkflowMode.Viewer => new(FilmstripVisible: true, MetadataHudVisible: false, GalleryOpen: false),
+        WorkflowMode.Organize => new(FilmstripVisible: false, MetadataHudVisible: true, GalleryOpen: true),
+        WorkflowMode.Edit => new(FilmstripVisible: false, MetadataHudVisible: false, GalleryOpen: false),
+        WorkflowMode.Book => new(FilmstripVisible: false, MetadataHudVisible: false, GalleryOpen: false),
+        WorkflowMode.Diagnostics => new(FilmstripVisible: false, MetadataHudVisible: true, GalleryOpen: false),
+        _ => new(FilmstripVisible: true, MetadataHudVisible: false, GalleryOpen: false)
     };
 }
 
@@ -63,7 +60,6 @@ public sealed class WorkflowModeService
     public static string DisplayName(WorkflowMode mode) => mode switch
     {
         WorkflowMode.Viewer => "Viewer",
-        WorkflowMode.Review => "Review",
         WorkflowMode.Organize => "Organize",
         WorkflowMode.Edit => "Edit",
         WorkflowMode.Book => "Book",
@@ -74,7 +70,6 @@ public sealed class WorkflowModeService
     public static string Description(WorkflowMode mode) => mode switch
     {
         WorkflowMode.Viewer => "Minimal viewing with filmstrip, no metadata",
-        WorkflowMode.Review => "Culling with filmstrip, metadata HUD, and review labels",
         WorkflowMode.Organize => "Gallery with metadata for tagging and sorting",
         WorkflowMode.Edit => "Image-only for editing and crop workflows",
         WorkflowMode.Book => "Archive book reading mode",

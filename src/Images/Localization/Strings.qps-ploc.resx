@@ -3590,12 +3590,6 @@ Details written to:
   <data name="MainMetadataHudShow" xml:space="preserve">
     <value>[!!!!!! Show metadata HUD (I) !!!!!!]</value>
   </data>
-  <data name="MainReviewOn" xml:space="preserve">
-    <value>[!!! Review on !!!]</value>
-  </data>
-  <data name="MainReviewOff" xml:space="preserve">
-    <value>[!!! Review off !!!]</value>
-  </data>
   <data name="MainSecondaryThumbnailFailure" xml:space="preserve">
     <value>[!!!!!!!!! Some thumbnails could not be shown !!!!!!!!!]</value>
   </data>
@@ -3725,12 +3719,6 @@ Details written to:
   <data name="MainToastMetadataHudOff" xml:space="preserve">
     <value>[!!!! Metadata HUD off !!!!]</value>
   </data>
-  <data name="MainToastReviewModeOn" xml:space="preserve">
-    <value>[!!!! Review mode on !!!!]</value>
-  </data>
-  <data name="MainToastReviewModeOff" xml:space="preserve">
-    <value>[!!!! Review mode off !!!!]</value>
-  </data>
   <data name="MainToastFilmstripShown" xml:space="preserve">
     <value>[!!!! Filmstrip shown !!!!]</value>
   </data>
@@ -3745,9 +3733,6 @@ Details written to:
   </data>
   <data name="MainToastGalleryOpen" xml:space="preserve">
     <value>[!!! Gallery open !!!]</value>
-  </data>
-  <data name="MainToastReviewUndone" xml:space="preserve">
-    <value>[!!!!! Review change undone !!!!!]</value>
   </data>
   <data name="MainToastDeleteCanceled" xml:space="preserve">
     <value>[!!!! Delete canceled !!!!]</value>
@@ -4114,9 +4099,6 @@ Details written to:
   <data name="CommandPalette_Category_Tools" xml:space="preserve">
     <value>[!! Tools !!]</value>
   </data>
-  <data name="CommandPalette_Category_Review" xml:space="preserve">
-    <value>[!! Review !!]</value>
-  </data>
   <data name="CommandPalette_Category_Compare" xml:space="preserve">
     <value>[!! Compare !!]</value>
   </data>
@@ -4300,9 +4282,6 @@ Details written to:
   <data name="CommandPalette_EditStack" xml:space="preserve">
     <value>[!!! Edit history !!!]</value>
   </data>
-  <data name="CommandPalette_ReviewMode" xml:space="preserve">
-    <value>[!!!!! Toggle review mode !!!!!]</value>
-  </data>
   <data name="CommandPalette_Compare" xml:space="preserve">
     <value>[!!!!! Compare with next !!!!!]</value>
   </data>
@@ -4473,18 +4452,6 @@ Details written to:
   <data name="MainToastMetadataStripFailed" xml:space="preserve">
     <value>[!!!!!! Could not strip {0}: {1} !!!!!!]</value>
   </data>
-  <data name="CommandPalette_ImportXmpSidecars" xml:space="preserve">
-    <value>[!!!!!!!! Import XMP sidecars from folder !!!!!!!!]</value>
-  </data>
-  <data name="MainToastXmpImportResult" xml:space="preserve">
-    <value>[!!!!!!!!!!!! XMP import: {0} rating(s) applied, {1} without ratings, {2} unmatched image(s), {3} failed. !!!!!!!!!!!!]</value>
-  </data>
-  <data name="MainToastXmpImportFailed" xml:space="preserve">
-    <value>[!!!!!! XMP import failed: {0} !!!!!!]</value>
-  </data>
-  <data name="MainToastXmpNoSidecars" xml:space="preserve">
-    <value>[!!!!!!!!!!! No XMP sidecar files found in that folder !!!!!!!!!!!]</value>
-  </data>
   <data name="AutomationAboutWindowCodecCapabilityMatrix" xml:space="preserve">
     <value>[!!!!!! Codec capability matrix !!!!!!]</value>
   </data>
@@ -4544,9 +4511,6 @@ Details written to:
   </data>
   <data name="AutomationMainWindowLibrary" xml:space="preserve">
     <value>[!! Library !!]</value>
-  </data>
-  <data name="AutomationMainWindowReviewMode" xml:space="preserve">
-    <value>[!!! Review mode !!!]</value>
   </data>
   <data name="AutomationMainWindowSemanticSearch" xml:space="preserve">
     <value>[!!!! Semantic search !!!!]</value>
@@ -4784,57 +4748,6 @@ Details written to:
   </data>
   <data name="AutomationMainWindowUpdateCheckStatus" xml:space="preserve">
     <value>[!!!!! Update check status !!!!!]</value>
-  </data>
-  <data name="AutomationMainWindowReviewLabels" xml:space="preserve">
-    <value>[!!!! Review labels !!!!]</value>
-  </data>
-  <data name="AutomationMainWindowToggleReviewMode" xml:space="preserve">
-    <value>[!!!!! Toggle review mode !!!!!]</value>
-  </data>
-  <data name="AutomationMainWindowRateOneStar" xml:space="preserve">
-    <value>[!!!! Rate one star !!!!]</value>
-  </data>
-  <data name="AutomationMainWindowRateTwoStars" xml:space="preserve">
-    <value>[!!!! Rate two stars !!!!]</value>
-  </data>
-  <data name="AutomationMainWindowRateThreeStars" xml:space="preserve">
-    <value>[!!!! Rate three stars !!!!]</value>
-  </data>
-  <data name="AutomationMainWindowRateFourStars" xml:space="preserve">
-    <value>[!!!! Rate four stars !!!!]</value>
-  </data>
-  <data name="AutomationMainWindowRateFiveStars" xml:space="preserve">
-    <value>[!!!! Rate five stars !!!!]</value>
-  </data>
-  <data name="AutomationMainWindowClearRating" xml:space="preserve">
-    <value>[!!! Clear rating !!!]</value>
-  </data>
-  <data name="AutomationMainWindowMarkPick" xml:space="preserve">
-    <value>[!!! Mark pick !!!]</value>
-  </data>
-  <data name="AutomationMainWindowMarkReject" xml:space="preserve">
-    <value>[!!! Mark reject !!!]</value>
-  </data>
-  <data name="AutomationMainWindowClearReviewLabel" xml:space="preserve">
-    <value>[!!!!! Clear review label !!!!!]</value>
-  </data>
-  <data name="AutomationMainWindowUndoReviewLabel" xml:space="preserve">
-    <value>[!!!!! Undo review label !!!!!]</value>
-  </data>
-  <data name="AutomationMainWindowScoreFolderForAssistedCulling" xml:space="preserve">
-    <value>[!!!!!!!!! Score folder for assisted culling !!!!!!!!!]</value>
-  </data>
-  <data name="AutomationMainWindowAssistedCullingScores" xml:space="preserve">
-    <value>[!!!!!! Assisted culling scores !!!!!!]</value>
-  </data>
-  <data name="AutomationMainWindowOpenCullingCandidate" xml:space="preserve">
-    <value>[!!!!!! Open culling candidate !!!!!!]</value>
-  </data>
-  <data name="AutomationMainWindowKeepCullingCandidate" xml:space="preserve">
-    <value>[!!!!!! Keep culling candidate !!!!!!]</value>
-  </data>
-  <data name="AutomationMainWindowRejectCullingCandidate" xml:space="preserve">
-    <value>[!!!!!! Reject culling candidate !!!!!!]</value>
   </data>
   <data name="AutomationMainWindowFolderPreviewThumbnails" xml:space="preserve">
     <value>[!!!!!!! Folder preview thumbnails !!!!!!!]</value>

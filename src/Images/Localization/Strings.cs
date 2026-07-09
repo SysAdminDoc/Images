@@ -565,7 +565,6 @@ public static class Strings
     public static string CommandPalette_Category_Edit => Get(nameof(CommandPalette_Category_Edit));
     public static string CommandPalette_Category_File => Get(nameof(CommandPalette_Category_File));
     public static string CommandPalette_Category_Tools => Get(nameof(CommandPalette_Category_Tools));
-    public static string CommandPalette_Category_Review => Get(nameof(CommandPalette_Category_Review));
     public static string CommandPalette_Category_Compare => Get(nameof(CommandPalette_Category_Compare));
     public static string CommandPalette_Category_Help => Get(nameof(CommandPalette_Category_Help));
     public static string CommandPaletteCommandListAutomationName => Get(nameof(CommandPaletteCommandListAutomationName));
@@ -623,7 +622,6 @@ public static class Strings
     public static string CommandPalette_MacroActions => Get(nameof(CommandPalette_MacroActions));
     public static string CommandPalette_BatchProcessor => Get(nameof(CommandPalette_BatchProcessor));
     public static string CommandPalette_EditStack => Get(nameof(CommandPalette_EditStack));
-    public static string CommandPalette_ReviewMode => Get(nameof(CommandPalette_ReviewMode));
     public static string CommandPalette_Compare => Get(nameof(CommandPalette_Compare));
     public static string CommandPalette_CompareWith => Get(nameof(CommandPalette_CompareWith));
     public static string CommandPalette_Settings => Get(nameof(CommandPalette_Settings));
@@ -1131,8 +1129,6 @@ public static class Strings
     public static string MainFilmstripShowTooltip => Get(nameof(MainFilmstripShowTooltip));
     public static string MainMetadataHudHide => Get(nameof(MainMetadataHudHide));
     public static string MainMetadataHudShow => Get(nameof(MainMetadataHudShow));
-    public static string MainReviewOn => Get(nameof(MainReviewOn));
-    public static string MainReviewOff => Get(nameof(MainReviewOff));
     public static string MainSecondaryThumbnailFailure => Get(nameof(MainSecondaryThumbnailFailure));
     public static string MainSecondaryFileTypeNotSupported => Get(nameof(MainSecondaryFileTypeNotSupported));
     public static string MainSecondaryFileGone => Get(nameof(MainSecondaryFileGone));
@@ -1176,14 +1172,11 @@ public static class Strings
     public static string MainToastTwoPageOff => Get(nameof(MainToastTwoPageOff));
     public static string MainToastMetadataHudOn => Get(nameof(MainToastMetadataHudOn));
     public static string MainToastMetadataHudOff => Get(nameof(MainToastMetadataHudOff));
-    public static string MainToastReviewModeOn => Get(nameof(MainToastReviewModeOn));
-    public static string MainToastReviewModeOff => Get(nameof(MainToastReviewModeOff));
     public static string MainToastFilmstripShown => Get(nameof(MainToastFilmstripShown));
     public static string MainToastFilmstripHidden => Get(nameof(MainToastFilmstripHidden));
     public static string MainToastGalleryClosed => Get(nameof(MainToastGalleryClosed));
     public static string MainToastGalleryOpenFolder => Get(nameof(MainToastGalleryOpenFolder));
     public static string MainToastGalleryOpen => Get(nameof(MainToastGalleryOpen));
-    public static string MainToastReviewUndone => Get(nameof(MainToastReviewUndone));
     public static string MainToastDeleteCanceled => Get(nameof(MainToastDeleteCanceled));
     public static string MainToastRotationCanceled => Get(nameof(MainToastRotationCanceled));
     public static string MainToastCompareModeOn => Get(nameof(MainToastCompareModeOn));
@@ -1333,12 +1326,6 @@ public static class Strings
 
     // ---- Loading state ----
     public static string MainImageLoading => Get(nameof(MainImageLoading));
-
-    // ---- XMP migration import ----
-    public static string CommandPalette_ImportXmpSidecars => Get(nameof(CommandPalette_ImportXmpSidecars));
-    public static string MainToastXmpImportResult => Get(nameof(MainToastXmpImportResult));
-    public static string MainToastXmpImportFailed => Get(nameof(MainToastXmpImportFailed));
-    public static string MainToastXmpNoSidecars => Get(nameof(MainToastXmpNoSidecars));
 
     // ---- Motion Photo / Live Photo ----
     public static string MainToastMotionVideoExtracted => Get(nameof(MainToastMotionVideoExtracted));

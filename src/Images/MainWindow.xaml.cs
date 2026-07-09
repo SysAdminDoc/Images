@@ -1064,42 +1064,6 @@ public partial class MainWindow : Window
                 Vm.IncreaseCompareOpacityCommand.Execute(null);
                 e.Handled = true;
                 break;
-            case Key.P when Vm.IsReviewMode && Keyboard.Modifiers == ModifierKeys.None:
-                Vm.MarkReviewPickCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.R when Vm.IsReviewMode && Keyboard.Modifiers == ModifierKeys.None:
-                Vm.MarkReviewRejectCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.U when Vm.IsReviewMode && Keyboard.Modifiers == ModifierKeys.None:
-                Vm.UndoReviewLabelCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.D0 or Key.NumPad0 when Vm.IsReviewMode && Keyboard.Modifiers == ModifierKeys.None:
-                Vm.SetReviewRatingCommand.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.D1 or Key.NumPad1 when Vm.IsReviewMode && Keyboard.Modifiers == ModifierKeys.None:
-                Vm.SetReviewRatingCommand.Execute(1);
-                e.Handled = true;
-                break;
-            case Key.D2 or Key.NumPad2 when Vm.IsReviewMode && Keyboard.Modifiers == ModifierKeys.None:
-                Vm.SetReviewRatingCommand.Execute(2);
-                e.Handled = true;
-                break;
-            case Key.D3 or Key.NumPad3 when Vm.IsReviewMode && Keyboard.Modifiers == ModifierKeys.None:
-                Vm.SetReviewRatingCommand.Execute(3);
-                e.Handled = true;
-                break;
-            case Key.D4 or Key.NumPad4 when Vm.IsReviewMode && Keyboard.Modifiers == ModifierKeys.None:
-                Vm.SetReviewRatingCommand.Execute(4);
-                e.Handled = true;
-                break;
-            case Key.D5 or Key.NumPad5 when Vm.IsReviewMode && Keyboard.Modifiers == ModifierKeys.None:
-                Vm.SetReviewRatingCommand.Execute(5);
-                e.Handled = true;
-                break;
             case Key.C when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control
                 && Vm.CopySelectionCommand.CanExecute(null):
                 Vm.CopySelectionCommand.Execute(null);

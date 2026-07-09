@@ -4,6 +4,13 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+## 0.2.20
+
+### Removed
+
+- **Viewer Review workflow removed** — The Review rail button, side-panel rating/pick/reject card, assisted-culling scorer, Review workflow mode, Review command-palette entry, and Review hotkeys have been removed to keep the viewer lean.
+- **XMP rating folder import removed from the main viewer** — The command-palette action that wrote imported sidecar ratings through the old Review path is gone; tag-sidecar import/export remains under Tag relationships.
+
 ## 0.2.19
 
 ### Fixed

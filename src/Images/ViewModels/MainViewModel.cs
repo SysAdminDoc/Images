@@ -33,8 +33,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly NonDestructiveEditService _editStack = new();
     private readonly ImageFileTransferService _fileTransfer = new();
     private readonly RecoveryCenterService _recoveryCenter = new();
-    private readonly ReviewLabelService _reviewLabels = new();
-    private readonly CullingScoreService _cullingScores;
     private readonly Func<LosslessJpegTrimConfirmation, LosslessJpegTrimChoice> _confirmLosslessJpegTrim;
     private readonly Func<string, string?> _pickFolder;
     private readonly Func<string, WallpaperLayout, string> _setWallpaper;
@@ -103,7 +101,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _clipboardImport = clipboardImport ?? new ClipboardImportService();
         _nav = navigator ?? new DirectoryNavigator();
         _recycleBinDelete = recycleBinDelete ?? new RecycleBinDeleteService(_settings);
-        _cullingScores = new CullingScoreService(_reviewLabels);
         _folderPreview = folderPreview ?? new FolderPreviewController(_uiDispatcher, () => _isDisposed);
         _folderPreview.StateChanged += (_, _) => RaiseFolderPreviewState();
         _photoMetadata = photoMetadata ?? new PhotoMetadataController(_uiDispatcher, () => _isDisposed, () => CurrentPath);
@@ -282,7 +279,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenSemanticSearchCommand = new RelayCommand(OpenSemanticSearch);
         OpenTagGraphCommand = new RelayCommand(OpenTagGraph);
         OpenImportInboxCommand = new RelayCommand(OpenImportInbox);
-        ImportXmpSidecarsCommand = new RelayCommand(ImportXmpSidecars);
         OpenMacroActionsCommand = new RelayCommand(OpenMacroActions);
         OpenBatchProcessorCommand = new RelayCommand(OpenBatchProcessor);
         OpenEditStackCommand = new RelayCommand(OpenEditStack, () => HasImage);
@@ -300,16 +296,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenSelectedGalleryItemCommand = new RelayCommand(OpenSelectedGalleryItem, () => IsGalleryOpen && SelectedGalleryItem is not null);
         ApplyGallerySmartFilterCommand = new RelayCommand(ApplyGallerySmartFilter, p => p is string);
         ClearGalleryFilterCommand = new RelayCommand(() => GalleryFilterText = "", () => HasGalleryFilter);
-        ToggleReviewModeCommand = new RelayCommand(() => IsReviewMode = !IsReviewMode, () => CanUseReviewLabels || IsReviewMode);
-        SetReviewRatingCommand = new RelayCommand(SetReviewRating, _ => CanUseReviewLabels);
-        MarkReviewPickCommand = new RelayCommand(() => SetReviewLabel(ReviewLabelKind.Pick), () => CanUseReviewLabels);
-        MarkReviewRejectCommand = new RelayCommand(() => SetReviewLabel(ReviewLabelKind.Reject), () => CanUseReviewLabels);
-        ClearReviewLabelCommand = new RelayCommand(() => SetReviewLabel(ReviewLabelKind.None), () => CanUseReviewLabels);
-        UndoReviewLabelCommand = new RelayCommand(UndoReviewLabel, () => CanUndoReviewLabel);
-        RunCullingScoresCommand = new AsyncRelayCommand(RunCullingScoresAsync, () => CanRunCullingScores);
-        OpenCullingScoreCommand = new RelayCommand(OpenCullingScore, CanUseCullingScoreItem);
-        ApplyCullingPickCommand = new RelayCommand(p => ApplyCullingReviewLabel(p, ReviewLabelKind.Pick), CanUseCullingScoreItem);
-        ApplyCullingRejectCommand = new RelayCommand(p => ApplyCullingReviewLabel(p, ReviewLabelKind.Reject), CanUseCullingScoreItem);
         ToggleFilmstripCommand = new RelayCommand(ToggleFilmstrip, () => CanToggleFilmstrip);
         ToggleMetadataHudCommand = new RelayCommand(ToggleMetadataHud, () => CanToggleMetadataHud);
         PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard, () => !IsOperationBusy);
@@ -365,7 +351,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(PositionText));
         var currentAvailabilityChanged = RefreshCurrentPathExists();
         var compareAvailabilityChanged = RefreshComparePathExists();
-        RefreshCullingScoreAvailabilityFromNavigator();
 
         if (CurrentPath is not null && !HasImage)
         {
@@ -857,7 +842,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(CanUseRedEyeCorrection));
         Raise(nameof(CanUseRetouch));
         RaiseCompareState();
-        RefreshReviewState(CurrentPath);
         CommandManager.InvalidateRequerySuggested();
     }
 
@@ -903,7 +887,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseRetouch));
                 Raise(nameof(CanUseOverlayMode));
                 RaiseCompareState();
-                RaiseReviewState();
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -1238,9 +1221,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             case CommandIds.EditStack:
                 OpenEditStackCommand.Execute(null);
                 return true;
-            case CommandIds.ReviewMode:
-                ToggleReviewModeCommand.Execute(null);
-                return true;
             case CommandIds.Compare:
                 StartCompareCommand.Execute(null);
                 return true;
@@ -1347,13 +1327,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             new() { Name = Strings.CommandPalette_SemanticSearch, Category = tools, Command = OpenSemanticSearchCommand },
             PaletteCommand(CommandIds.TagGraph, OpenTagGraphCommand),
             PaletteCommand(CommandIds.ImportInbox, OpenImportInboxCommand),
-            new() { Name = Strings.CommandPalette_ImportXmpSidecars, Category = tools, Command = ImportXmpSidecarsCommand },
             PaletteCommand(CommandIds.MacroActions, OpenMacroActionsCommand),
             PaletteCommand(CommandIds.BatchProcessor, OpenBatchProcessorCommand),
             PaletteCommand(CommandIds.EditStack, OpenEditStackCommand),
-
-            // Review
-            PaletteCommand(CommandIds.ReviewMode, ToggleReviewModeCommand),
 
             // Compare
             PaletteCommand(CommandIds.Compare, StartCompareCommand),
@@ -1369,7 +1345,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
             // Workflow modes
             new() { Name = "Mode: Viewer", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Viewer)) },
-            new() { Name = "Mode: Review", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Review)) },
             new() { Name = "Mode: Organize", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Organize)) },
             new() { Name = "Mode: Edit", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Edit)) },
             new() { Name = "Mode: Book", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Book)) },
@@ -3012,7 +2987,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public ObservableCollection<FolderPreviewItem> FolderPreviewItems => _folderPreview.Items;
     public ObservableCollection<FolderPreviewItem> GalleryItems { get; } = [];
-    public ObservableCollection<CullingScoreItem> CullingScoreItems { get; } = [];
     private IReadOnlyList<AssetSmartFilterItem> _gallerySmartFilterIndex = [];
     private string _gallerySmartFilterSignature = "";
     private string? _gallerySmartFilterPendingSignature;
@@ -3034,8 +3008,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
     public double GalleryTileImageHeight => Math.Round(_galleryTileSize * 0.7);
-    private readonly Stack<ReviewLabelUndoEntry> _reviewUndo = new();
-    private ReviewLabelState _currentReviewState = new(null, ReviewLabelKind.None, "");
 
     private bool _isGalleryOpen;
     public bool IsGalleryOpen
@@ -3105,63 +3077,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
     public string GalleryFilterSummaryText => _galleryFilterSummaryText;
     public string GalleryFilterTooltip => Strings.MainGalleryFilterTooltip;
-
-    private bool _isReviewMode;
-    public bool IsReviewMode
-    {
-        get => _isReviewMode;
-        set
-        {
-            if (!Set(ref _isReviewMode, value)) return;
-            RaiseReviewState();
-            Toast(value ? Strings.MainToastReviewModeOn : Strings.MainToastReviewModeOff);
-        }
-    }
-
-    public bool CanUseReviewLabels => HasImage && !IsArchiveBook && !IsPeekMode && !IsOperationBusy;
-    public bool CanUndoReviewLabel => _reviewUndo.Count > 0;
-    public string ReviewModeText => IsReviewMode ? Strings.MainReviewOn : Strings.MainReviewOff;
-    public string ReviewRatingText => _currentReviewState.RatingText;
-    public string ReviewLabelText => _currentReviewState.LabelText;
-    public string ReviewStatusText => $"{ReviewRatingText} · {ReviewLabelText}";
-    public bool IsReviewPick => _currentReviewState.Label == ReviewLabelKind.Pick;
-    public bool IsReviewReject => _currentReviewState.Label == ReviewLabelKind.Reject;
-
-    private CullingScoreItem? _selectedCullingScore;
-    private readonly HashSet<string> _availableCullingScorePaths = new(StringComparer.OrdinalIgnoreCase);
-    public CullingScoreItem? SelectedCullingScore
-    {
-        get => _selectedCullingScore;
-        set
-        {
-            if (Set(ref _selectedCullingScore, value))
-                CommandManager.InvalidateRequerySuggested();
-        }
-    }
-
-    private bool _isCullingScoreBusy;
-    public bool IsCullingScoreBusy
-    {
-        get => _isCullingScoreBusy;
-        private set
-        {
-            if (!Set(ref _isCullingScoreBusy, value)) return;
-            Raise(nameof(CanRunCullingScores));
-            Raise(nameof(CullingScoreActionText));
-            CommandManager.InvalidateRequerySuggested();
-        }
-    }
-
-    private string _cullingScoreStatusText = "Score the current folder to rank likely keepers with local signals.";
-    public string CullingScoreStatusText
-    {
-        get => _cullingScoreStatusText;
-        private set => Set(ref _cullingScoreStatusText, value);
-    }
-
-    public bool HasCullingScores => CullingScoreItems.Count > 0;
-    public bool CanRunCullingScores => HasImage && !IsArchiveBook && !IsPeekMode && !IsOperationBusy && !IsCullingScoreBusy && _nav.Files.Count > 0;
-    public string CullingScoreActionText => IsCullingScoreBusy ? "Scoring" : "Score folder";
 
     private string _galleryFilterText = "";
     public string GalleryFilterText
@@ -3288,11 +3203,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         else if (!preset.GalleryOpen && IsGalleryOpen)
             IsGalleryOpen = false;
 
-        if (preset.ReviewModeActive && !IsReviewMode && CanUseReviewLabels)
-            IsReviewMode = true;
-        else if (!preset.ReviewModeActive && IsReviewMode)
-            IsReviewMode = false;
-
         Toast($"Switched to {WorkflowModeService.DisplayName(mode)} mode");
     }
 
@@ -3368,190 +3278,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         GalleryFilterText = string.Join(' ', parts);
     }
 
-    private void SetReviewRating(object? parameter)
-    {
-        if (!CanUseReviewLabels || CurrentPath is null)
-            return;
-
-        int? rating = null;
-        if (parameter is int numeric)
-            rating = Math.Clamp(numeric, 0, 5);
-        else if (parameter is string raw && int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
-            rating = Math.Clamp(parsed, 0, 5);
-
-        ApplyReviewMutation(CurrentPath, _reviewLabels.SetRating(CurrentPath, rating));
-    }
-
-    private void SetReviewLabel(ReviewLabelKind label)
-    {
-        if (!CanUseReviewLabels || CurrentPath is null)
-            return;
-
-        ApplyReviewMutation(CurrentPath, _reviewLabels.SetLabel(CurrentPath, label));
-    }
-
-    private async Task RunCullingScoresAsync()
-    {
-        if (!CanRunCullingScores)
-        {
-            Toast("Open a local image folder before scoring.");
-            return;
-        }
-
-        var files = _nav.Files
-            .Where(File.Exists)
-            .ToArray();
-        if (files.Length == 0)
-        {
-            CullingScoreStatusText = "No local files are available to score.";
-            Toast("No files to score.");
-            return;
-        }
-
-        IsCullingScoreBusy = true;
-        CullingScoreStatusText = $"Scoring {files.Length} local file{(files.Length == 1 ? "" : "s")}...";
-
-        try
-        {
-            var result = await Task.Run(() => _cullingScores.RankFiles(files));
-            CullingScoreItems.Clear();
-            _availableCullingScorePaths.Clear();
-            foreach (var item in result.Items)
-            {
-                CullingScoreItems.Add(item);
-                _availableCullingScorePaths.Add(item.Path);
-            }
-
-            SelectedCullingScore = result.Items.FirstOrDefault(item => AreSamePath(item.Path, CurrentPath))
-                                   ?? result.Items.FirstOrDefault();
-            CullingScoreStatusText = result.Summary;
-            Raise(nameof(HasCullingScores));
-            Toast(result.HasItems ? "Culling scores ready" : "No supported files scored");
-        }
-        catch (Exception ex) when (ex is IOException
-                                  or UnauthorizedAccessException
-                                  or ArgumentException
-                                  or NotSupportedException
-                                  or InvalidOperationException)
-        {
-            CullingScoreStatusText = $"Culling score failed: {ex.Message}";
-            Toast("Culling score failed.");
-        }
-        finally
-        {
-            IsCullingScoreBusy = false;
-        }
-    }
-
-    private void OpenCullingScore(object? parameter)
-    {
-        var item = ResolveCullingScoreItem(parameter);
-        if (item is null)
-            return;
-
-        SelectedCullingScore = item;
-        OpenFile(item.Path);
-    }
-
-    private void ApplyCullingReviewLabel(object? parameter, ReviewLabelKind label)
-    {
-        var item = ResolveCullingScoreItem(parameter);
-        if (item is null)
-            return;
-
-        SelectedCullingScore = item;
-        ApplyReviewMutation(item.Path, _reviewLabels.SetLabel(item.Path, label));
-    }
-
-    private bool CanUseCullingScoreItem(object? parameter)
-    {
-        if (IsOperationBusy || IsCullingScoreBusy)
-            return false;
-
-        var item = ResolveCullingScoreItem(parameter);
-        return item is not null && _availableCullingScorePaths.Contains(item.Path);
-    }
-
-    private CullingScoreItem? ResolveCullingScoreItem(object? parameter)
-        => parameter as CullingScoreItem ?? SelectedCullingScore;
-
-    private void RefreshCullingScoreAvailabilityFromNavigator()
-    {
-        if (_availableCullingScorePaths.Count == 0)
-            return;
-
-        var available = _nav.Files.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var removed = _availableCullingScorePaths.RemoveWhere(path => !available.Contains(path));
-        if (removed > 0)
-            CommandManager.InvalidateRequerySuggested();
-    }
-
-    private void ApplyReviewMutation(string path, ReviewLabelMutationResult result)
-    {
-        if (!result.Success)
-        {
-            Toast(result.Message);
-            return;
-        }
-
-        _reviewUndo.Push(new ReviewLabelUndoEntry(path, result.Previous));
-        if (AreSamePath(path, CurrentPath))
-            _currentReviewState = result.Current;
-        UpdateCullingScoreReviewState(path, result.Current);
-        RaiseReviewState();
-        InvalidateGallerySmartFilterIndex();
-        Toast(result.Message);
-    }
-
-    private void UndoReviewLabel()
-    {
-        if (_reviewUndo.Count == 0)
-            return;
-
-        var entry = _reviewUndo.Pop();
-        var result = _reviewLabels.Restore(entry.Path, entry.State);
-        if (!result.Success)
-        {
-            Toast(result.Message);
-            return;
-        }
-
-        if (AreSamePath(CurrentPath, entry.Path))
-            _currentReviewState = result.Current;
-        UpdateCullingScoreReviewState(entry.Path, result.Current);
-        RaiseReviewState();
-        InvalidateGallerySmartFilterIndex();
-        Toast(Strings.MainToastReviewUndone);
-    }
-
-    private void RefreshReviewState(string? path)
-    {
-        _currentReviewState = path is not null && _currentPathExists
-            ? _reviewLabels.ReadState(path)
-            : new ReviewLabelState(null, ReviewLabelKind.None, "");
-        RaiseReviewState();
-    }
-
-    private void UpdateCullingScoreReviewState(string path, ReviewLabelState state)
-    {
-        for (var i = 0; i < CullingScoreItems.Count; i++)
-        {
-            var item = CullingScoreItems[i];
-            if (!AreSamePath(item.Path, path))
-                continue;
-
-            var updated = item with
-            {
-                Rating = state.Rating,
-                Label = state.Label
-            };
-            CullingScoreItems[i] = updated;
-            if (SelectedCullingScore is not null && AreSamePath(SelectedCullingScore.Path, path))
-                SelectedCullingScore = updated;
-            break;
-        }
-    }
-
     private static bool AreSamePath(string? left, string? right)
     {
         if (string.IsNullOrWhiteSpace(left) || string.IsNullOrWhiteSpace(right))
@@ -3565,21 +3291,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             return string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
         }
-    }
-
-    private void RaiseReviewState()
-    {
-        Raise(nameof(IsReviewMode));
-        Raise(nameof(CanUseReviewLabels));
-        Raise(nameof(CanUndoReviewLabel));
-        Raise(nameof(ReviewModeText));
-        Raise(nameof(ReviewRatingText));
-        Raise(nameof(ReviewLabelText));
-        Raise(nameof(ReviewStatusText));
-        Raise(nameof(IsReviewPick));
-        Raise(nameof(IsReviewReject));
-        Raise(nameof(CanRunCullingScores));
-        CommandManager.InvalidateRequerySuggested();
     }
 
     private void InvalidateGallerySmartFilterIndex()
@@ -4032,7 +3743,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenSemanticSearchCommand { get; }
     public ICommand OpenTagGraphCommand { get; }
     public ICommand OpenImportInboxCommand { get; }
-    public ICommand ImportXmpSidecarsCommand { get; }
     public ICommand OpenMacroActionsCommand { get; }
     public ICommand OpenBatchProcessorCommand { get; }
     public ICommand OpenEditStackCommand { get; }
@@ -4048,16 +3758,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenSelectedGalleryItemCommand { get; }
     public ICommand ApplyGallerySmartFilterCommand { get; }
     public ICommand ClearGalleryFilterCommand { get; }
-    public ICommand ToggleReviewModeCommand { get; }
-    public ICommand SetReviewRatingCommand { get; }
-    public ICommand MarkReviewPickCommand { get; }
-    public ICommand MarkReviewRejectCommand { get; }
-    public ICommand ClearReviewLabelCommand { get; }
-    public ICommand UndoReviewLabelCommand { get; }
-    public ICommand RunCullingScoresCommand { get; }
-    public ICommand OpenCullingScoreCommand { get; }
-    public ICommand ApplyCullingPickCommand { get; }
-    public ICommand ApplyCullingRejectCommand { get; }
     public ICommand ToggleFilmstripCommand { get; }
     public ICommand ToggleMetadataHudCommand { get; }
     public ICommand PasteFromClipboardCommand { get; }
@@ -7446,46 +7146,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _ = inbox.ReloadAsync();
     }
 
-    private void ImportXmpSidecars()
-    {
-        var dialog = new Microsoft.Win32.OpenFolderDialog
-        {
-            Title = "Select folder containing XMP sidecars",
-        };
-
-        if (dialog.ShowDialog() != true || string.IsNullOrWhiteSpace(dialog.FolderName))
-            return;
-
-        try
-        {
-            var importer = new XmpSidecarImportService();
-            var result = importer.ScanFolder(dialog.FolderName);
-
-            if (result.TotalScanned == 0)
-            {
-                Toast(Strings.MainToastXmpNoSidecars);
-                return;
-            }
-
-            var summary = XmpSidecarImportService.ApplyFolderRatings(
-                result,
-                XmpSidecarImportService.FindImageForSidecar,
-                (imagePath, rating) => _reviewLabels.SetRating(imagePath, rating));
-
-            Toast(Strings.Format(
-                nameof(Strings.MainToastXmpImportResult),
-                summary.RatingsApplied,
-                summary.SkippedWithoutRating,
-                summary.UnmatchedImages,
-                summary.FailedSidecars));
-        }
-        catch (Exception ex)
-        {
-            Toast(string.Format(System.Globalization.CultureInfo.InvariantCulture,
-                Strings.MainToastXmpImportFailed, ex.Message));
-        }
-    }
-
     private void OpenMacroActions()
     {
         var macros = new Images.MacroActionWindow
@@ -7852,8 +7512,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         while (v >= 1024 && i < units.Length - 1) { v /= 1024; i++; }
         return $"{v:0.##} {units[i]}";
     }
-
-    private sealed record ReviewLabelUndoEntry(string Path, ReviewLabelState State);
 
     private static IReadOnlyList<RecoverySidecarMove> BuildRecoverySidecarMoves(ImageFileTransferResult result)
     {

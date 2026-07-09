@@ -79,16 +79,6 @@
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource NavRailButton}"
-                            Command="{Binding ToggleReviewModeCommand}"
-                            Tag="{Binding IsReviewMode}"
-                            ToolTip="{Binding ReviewModeText}"
-                            AutomationProperties.Name="{loc:Loc AutomationMainWindowReviewMode}">
-                        <StackPanel>
-                            <TextBlock Text="&#xE8EC;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                            <TextBlock Text="Review" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource NavRailButton}"
                             Command="{Binding OpenSemanticSearchCommand}"
                             ToolTip="Search this collection"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowSemanticSearch}">
@@ -171,15 +161,6 @@
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator />
-                        <MenuItem Header="{Binding ReviewModeText}"
-                                  Command="{Binding ToggleReviewModeCommand}"
-                                  InputGestureText="{Binding ShortcutTexts[review-mode]}"
-                                  IsCheckable="True"
-                                  IsChecked="{Binding IsReviewMode, Mode=OneWay}">
-                            <MenuItem.Icon>
-                                <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EC;" />
-                            </MenuItem.Icon>
-                        </MenuItem>
                         <MenuItem Header="Compare"
                                   AutomationProperties.AutomationId="ViewportContextMenuCompare">
                             <MenuItem.Icon>
@@ -2801,7 +2782,7 @@
                                 <TextBlock Text="  ·  "
                                            Foreground="{DynamicResource OverlayBrush}"
                                            VerticalAlignment="Center" />
-                                <TextBlock Text="Open or drop a supported file to start reviewing."
+                                <TextBlock Text="Open or drop a supported file to start viewing."
                                            Foreground="{DynamicResource SubtextBrush}"
                                            VerticalAlignment="Center" />
                             </StackPanel>
@@ -2948,7 +2929,7 @@
                             <TextBlock Style="{StaticResource Text.Display}"
                                        Text="Inspector" />
                             <TextBlock Style="{StaticResource Text.Subtitle}"
-                                       Text="Metadata, review state, workflow tools, and local automation."
+                                       Text="Metadata, workflow tools, and local automation."
                                        TextWrapping="Wrap"
                                        Margin="0,6,0,0" />
                         </StackPanel>
@@ -3244,218 +3225,6 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                        </StackPanel>
-                    </Border>
-
-                    <TextBlock Text="Review" Style="{StaticResource SectionLabel}" Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}" />
-                    <Border Style="{StaticResource Card}"
-                            Padding="12"
-                            Margin="0,0,0,20"
-                            Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}"
-                            AutomationProperties.Name="{loc:Loc AutomationMainWindowReviewLabels}">
-                        <StackPanel>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{Binding ReviewStatusText}"
-                                               Style="{StaticResource Text.Caption}"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource TextBrush}" />
-                                    <TextBlock Text="{Binding CurrentFileName}"
-                                               Style="{StaticResource Text.Hint}"
-                                               TextTrimming="CharacterEllipsis"
-                                               Margin="0,3,0,0" />
-                                </StackPanel>
-                                <Button Grid.Column="1"
-                                        Command="{Binding ToggleReviewModeCommand}"
-                                        Style="{StaticResource ChromeButton}"
-                                        Padding="10,4"
-                                        MinHeight="28"
-                                        Margin="10,0,0,0"
-                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowToggleReviewMode}">
-                                    <TextBlock Text="{Binding ReviewModeText}" />
-                                </Button>
-                            </Grid>
-
-                            <WrapPanel Margin="0,10,0,0" IsEnabled="{Binding CanUseReviewLabels}">
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="1" Margin="0,0,6,6" AutomationProperties.Name="{loc:Loc AutomationMainWindowRateOneStar}"><TextBlock Text="1" /></Button>
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="2" Margin="0,0,6,6" AutomationProperties.Name="{loc:Loc AutomationMainWindowRateTwoStars}"><TextBlock Text="2" /></Button>
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="3" Margin="0,0,6,6" AutomationProperties.Name="{loc:Loc AutomationMainWindowRateThreeStars}"><TextBlock Text="3" /></Button>
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="4" Margin="0,0,6,6" AutomationProperties.Name="{loc:Loc AutomationMainWindowRateFourStars}"><TextBlock Text="4" /></Button>
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" CommandParameter="5" Margin="0,0,6,6" AutomationProperties.Name="{loc:Loc AutomationMainWindowRateFiveStars}"><TextBlock Text="5" /></Button>
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding SetReviewRatingCommand}" Margin="0,0,6,6" AutomationProperties.Name="{loc:Loc AutomationMainWindowClearRating}"><TextBlock Text="0" /></Button>
-                            </WrapPanel>
-
-                            <WrapPanel Margin="0,4,0,0" IsEnabled="{Binding CanUseReviewLabels}">
-                                <Button Command="{Binding MarkReviewPickCommand}" Margin="0,0,8,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowMarkPick}">
-                                    <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsReviewPick}" Value="True">
-                                                    <Setter Property="Background" Value="{DynamicResource SuccessPanelBrush}" />
-                                                    <Setter Property="BorderBrush" Value="{DynamicResource GreenBrush}" />
-                                                    <Setter Property="Foreground" Value="{DynamicResource GreenBrush}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
-                                    <TextBlock Text="Pick" />
-                                </Button>
-                                <Button Command="{Binding MarkReviewRejectCommand}" Margin="0,0,8,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowMarkReject}">
-                                    <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsReviewReject}" Value="True">
-                                                    <Setter Property="Background" Value="{DynamicResource DangerPanelBrush}" />
-                                                    <Setter Property="BorderBrush" Value="{DynamicResource RedBrush}" />
-                                                    <Setter Property="Foreground" Value="{DynamicResource RedBrush}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
-                                    <TextBlock Text="Reject" />
-                                </Button>
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding ClearReviewLabelCommand}" Margin="0,0,8,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowClearReviewLabel}"><TextBlock Text="Clear" /></Button>
-                                <Button Style="{StaticResource ChromeButton}" Command="{Binding UndoReviewLabelCommand}" AutomationProperties.Name="{loc:Loc AutomationMainWindowUndoReviewLabel}"><TextBlock Text="Undo" /></Button>
-                            </WrapPanel>
-
-                            <Border Style="{StaticResource Divider}" Margin="0,12,0,10" />
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Assisted culling"
-                                               Style="{StaticResource Text.Caption}"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource TextBrush}" />
-                                    <TextBlock Text="{Binding CullingScoreStatusText}"
-                                               Style="{StaticResource Text.Hint}"
-                                               TextWrapping="Wrap"
-                                               Margin="0,2,0,0" />
-                                </StackPanel>
-                                <Button Grid.Column="1"
-                                        Command="{Binding RunCullingScoresCommand}"
-                                        Style="{StaticResource ChromeButton}"
-                                        Padding="10,4"
-                                        MinHeight="28"
-                                        Margin="10,0,0,0"
-                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowScoreFolderForAssistedCulling}">
-                                    <TextBlock Text="{Binding CullingScoreActionText}" />
-                                </Button>
-                            </Grid>
-
-                            <ListBox ItemsSource="{Binding CullingScoreItems}"
-                                     SelectedItem="{Binding SelectedCullingScore, Mode=TwoWay}"
-                                     Background="Transparent"
-                                     BorderThickness="0"
-                                     Margin="0,10,0,0"
-                                     MaxHeight="230"
-                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                     VirtualizingPanel.IsVirtualizing="True"
-                                     VirtualizingPanel.VirtualizationMode="Recycling"
-                                     Visibility="{Binding HasCullingScores, Converter={StaticResource BoolToVis}}"
-                                     AutomationProperties.Name="{loc:Loc AutomationMainWindowAssistedCullingScores}">
-                                <ListBox.ItemContainerStyle>
-                                    <Style TargetType="ListBoxItem">
-                                        <Setter Property="Padding" Value="0" />
-                                        <Setter Property="Margin" Value="0,0,0,8" />
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                    </Style>
-                                </ListBox.ItemContainerStyle>
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <Border Grid.Column="0"
-                                                    Width="42"
-                                                    Height="42"
-                                                    CornerRadius="{StaticResource Radius.Sm.CR}"
-                                                    BorderThickness="1"
-                                                    BorderBrush="{DynamicResource HairlineBrush}"
-                                                    Background="{DynamicResource AccentPanelBrush}"
-                                                    Margin="0,0,10,0"
-                                                    VerticalAlignment="Top">
-                                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding RankText}"
-                                                               FontSize="10"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{DynamicResource OverlayBrush}"
-                                                               HorizontalAlignment="Center" />
-                                                    <TextBlock Text="{Binding ScoreText}"
-                                                               FontSize="14"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{DynamicResource AccentBrush}"
-                                                               HorizontalAlignment="Center" />
-                                                </StackPanel>
-                                            </Border>
-
-                                            <StackPanel Grid.Column="1" MinWidth="0">
-                                                <TextBlock Text="{Binding FileName}"
-                                                           FontSize="12.5"
-                                                           FontWeight="SemiBold"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           Foreground="{DynamicResource TextBrush}" />
-                                                <TextBlock Text="{Binding PrimaryReason}"
-                                                           Style="{StaticResource Text.Hint}"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           ToolTip="{Binding ReasonsText}"
-                                                           Margin="0,2,0,0" />
-                                                <TextBlock Text="{Binding ReviewText}"
-                                                           FontSize="11"
-                                                           Foreground="{DynamicResource OverlayBrush}"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           Margin="0,2,0,0" />
-                                            </StackPanel>
-
-                                            <StackPanel Grid.Column="2"
-                                                        Margin="10,0,0,0"
-                                                        VerticalAlignment="Top">
-                                                <Button Command="{Binding DataContext.OpenCullingScoreCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                        CommandParameter="{Binding}"
-                                                        Style="{StaticResource ChromeButton}"
-                                                        Padding="8,4"
-                                                        MinWidth="58"
-                                                        MinHeight="26"
-                                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenCullingCandidate}">
-                                                    <TextBlock Text="Open" />
-                                                </Button>
-                                                <Button Command="{Binding DataContext.ApplyCullingPickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                        CommandParameter="{Binding}"
-                                                        Style="{StaticResource ChromeButton}"
-                                                        Padding="8,4"
-                                                        MinWidth="58"
-                                                        MinHeight="26"
-                                                        Margin="0,4,0,0"
-                                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowKeepCullingCandidate}">
-                                                    <TextBlock Text="Keep" />
-                                                </Button>
-                                                <Button Command="{Binding DataContext.ApplyCullingRejectCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                        CommandParameter="{Binding}"
-                                                        Style="{StaticResource ChromeButton}"
-                                                        Padding="8,4"
-                                                        MinWidth="58"
-                                                        MinHeight="26"
-                                                        Margin="0,4,0,0"
-                                                        AutomationProperties.Name="{loc:Loc AutomationMainWindowRejectCullingCandidate}">
-                                                    <TextBlock Text="Reject" />
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
                         </StackPanel>
                     </Border>
 

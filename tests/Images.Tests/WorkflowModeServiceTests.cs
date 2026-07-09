@@ -12,9 +12,9 @@ public sealed class WorkflowModeServiceTests
         var settings = new SettingsService(Path.Combine(temp.Path, "settings.db"));
         var service = new WorkflowModeService(settings);
 
-        service.SetMode(WorkflowMode.Review);
+        service.SetMode(WorkflowMode.Organize);
 
-        Assert.Equal(WorkflowMode.Review, service.CurrentMode);
+        Assert.Equal(WorkflowMode.Organize, service.CurrentMode);
     }
 
     [Fact]
@@ -27,11 +27,26 @@ public sealed class WorkflowModeServiceTests
         Assert.Equal(WorkflowMode.Viewer, service.CurrentMode);
     }
 
+    [Fact]
+    public void CurrentMode_IgnoresRemovedLegacyMode()
+    {
+        using var temp = TestDirectory.Create();
+        var settings = new SettingsService(Path.Combine(temp.Path, "settings.db"));
+        settings.SetString("viewer.workflow-mode", "Review");
+        var service = new WorkflowModeService(settings);
+
+        Assert.Equal(WorkflowMode.Viewer, service.CurrentMode);
+    }
+
     [Theory]
-    [InlineData(WorkflowMode.Viewer, false)]
-    [InlineData(WorkflowMode.Review, true)]
-    [InlineData(WorkflowMode.Organize, false)]
-    public void GetPreset_ReturnsCorrectReviewModeFlag(WorkflowMode mode, bool expectedReview)
+    [InlineData(WorkflowMode.Viewer, true, false, false)]
+    [InlineData(WorkflowMode.Organize, false, true, true)]
+    [InlineData(WorkflowMode.Edit, false, false, false)]
+    public void GetPreset_ReturnsExpectedSurfaceFlags(
+        WorkflowMode mode,
+        bool expectedFilmstrip,
+        bool expectedMetadataHud,
+        bool expectedGallery)
     {
         using var temp = TestDirectory.Create();
         var settings = new SettingsService(Path.Combine(temp.Path, "settings.db"));
@@ -39,12 +54,13 @@ public sealed class WorkflowModeServiceTests
 
         var preset = service.GetPreset(mode);
 
-        Assert.Equal(expectedReview, preset.ReviewModeActive);
+        Assert.Equal(expectedFilmstrip, preset.FilmstripVisible);
+        Assert.Equal(expectedMetadataHud, preset.MetadataHudVisible);
+        Assert.Equal(expectedGallery, preset.GalleryOpen);
     }
 
     [Theory]
     [InlineData(WorkflowMode.Viewer, "Viewer")]
-    [InlineData(WorkflowMode.Review, "Review")]
     [InlineData(WorkflowMode.Edit, "Edit")]
     [InlineData(WorkflowMode.Diagnostics, "Diagnostics")]
     public void DisplayName_ReturnsNonEmpty(WorkflowMode mode, string expected)
