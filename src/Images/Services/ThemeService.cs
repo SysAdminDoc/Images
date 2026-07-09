@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Threading;
 using Microsoft.Win32;
 
 namespace Images.Services;
@@ -73,11 +74,38 @@ public static class ThemeService
 
     private static void ReapplyCaptionsToOpenWindows(Application application)
     {
-        foreach (Window window in application.Windows)
+        RunOnDispatcher(application.Dispatcher, () =>
         {
-            var hwnd = new WindowInteropHelper(window).Handle;
-            if (hwnd != IntPtr.Zero)
-                WindowChrome.ApplyDarkCaption(hwnd);
+            foreach (Window window in application.Windows)
+            {
+                var hwnd = new WindowInteropHelper(window).Handle;
+                if (hwnd != IntPtr.Zero)
+                    WindowChrome.ApplyDarkCaption(hwnd);
+            }
+        });
+    }
+
+    internal static void RunOnDispatcher(Dispatcher dispatcher, Action action)
+    {
+        ArgumentNullException.ThrowIfNull(dispatcher);
+        ArgumentNullException.ThrowIfNull(action);
+
+        if (dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished)
+            return;
+
+        if (dispatcher.CheckAccess())
+        {
+            action();
+            return;
+        }
+
+        try
+        {
+            _ = dispatcher.BeginInvoke(action);
+        }
+        catch (InvalidOperationException) when (dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished)
+        {
+            // The owning window closed between the shutdown check and queueing.
         }
     }
 

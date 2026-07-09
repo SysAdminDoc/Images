@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Images.Services;
 using Images.ViewModels;
 
@@ -118,6 +119,50 @@ public sealed class ThemeServiceTests
 
         Assert.IsType<PathToFileNameConverter>(dictionary["PathToFileNameConverter"]);
         Assert.IsType<PathToParentConverter>(dictionary["PathToParentConverter"]);
+    }
+
+    [Fact]
+    public void RunOnDispatcherMarshalsWorkToTheOwningThread()
+    {
+        using var dispatcherReady = new ManualResetEventSlim();
+        using var workCompleted = new ManualResetEventSlim();
+        Dispatcher? dispatcher = null;
+        var ownerThreadId = 0;
+        var callbackThreadId = 0;
+
+        var ownerThread = new Thread(() =>
+        {
+            dispatcher = Dispatcher.CurrentDispatcher;
+            ownerThreadId = Environment.CurrentManagedThreadId;
+            dispatcherReady.Set();
+            Dispatcher.Run();
+        });
+        ownerThread.SetApartmentState(ApartmentState.STA);
+        ownerThread.Start();
+
+        try
+        {
+            Assert.True(dispatcherReady.Wait(TimeSpan.FromSeconds(5)));
+            var ownerDispatcher = dispatcher!;
+            ThemeService.RunOnDispatcher(ownerDispatcher, () =>
+            {
+                callbackThreadId = Environment.CurrentManagedThreadId;
+                workCompleted.Set();
+                ownerDispatcher.BeginInvokeShutdown(DispatcherPriority.Background);
+            });
+
+            Assert.True(workCompleted.Wait(TimeSpan.FromSeconds(5)));
+            Assert.True(ownerThread.Join(TimeSpan.FromSeconds(5)));
+            Assert.Equal(ownerThreadId, callbackThreadId);
+        }
+        finally
+        {
+            if (ownerThread.IsAlive && dispatcher is not null)
+            {
+                dispatcher.BeginInvokeShutdown(DispatcherPriority.Send);
+                ownerThread.Join(TimeSpan.FromSeconds(5));
+            }
+        }
     }
 
     private static ResourceDictionary CreateTestHighContrastDictionary()
