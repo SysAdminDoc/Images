@@ -4,6 +4,8 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+## 0.2.25
+
 ### Changed
 
 - **Viewer workspace reimagined around the image** - The main shell now uses a 52px navigation rail, neutral charcoal canvas, 300px contextual inspector, shorter filmstrip, warm focus/selection accents, and a compact navigation/fit/zoom command row with advanced actions removed from permanent chrome.
