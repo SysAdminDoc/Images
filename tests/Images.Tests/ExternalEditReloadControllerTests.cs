@@ -67,6 +67,35 @@ public sealed class ExternalEditReloadControllerTests
     }
 
     [Fact]
+    public void ScheduleReload_WhenReloadThrows_NotifiesFailureWithoutEscapingTimer()
+    {
+        RunOnSta(() =>
+        {
+            var reloadCount = 0;
+            var messages = new List<string>();
+
+            using var controller = new ExternalEditReloadController(
+                Dispatcher.CurrentDispatcher,
+                isDisposed: () => false,
+                reload: () =>
+                {
+                    reloadCount++;
+                    throw new IOException("edited file is locked");
+                },
+                notify: messages.Add,
+                debounceInterval: TimeSpan.FromMilliseconds(20));
+
+            controller.ScheduleReload();
+
+            PumpUntil(() => messages.Count == 1);
+            PumpFor(TimeSpan.FromMilliseconds(50));
+
+            Assert.Equal(1, reloadCount);
+            Assert.Equal($"{ExternalEditReloadController.ReloadFailedToastPrefix}: edited file is locked", messages[0]);
+        });
+    }
+
+    [Fact]
     public void Disarm_CancelsPendingReload()
     {
         RunOnSta(() =>

@@ -10,6 +10,7 @@ public sealed class ExternalEditReloadController : IDisposable
     private static readonly ILogger _log = Log.Get(nameof(ExternalEditReloadController));
 
     public const string ReloadedToastMessage = "Reloaded after external edit";
+    public const string ReloadFailedToastPrefix = "External edit reload failed";
 
     public static readonly TimeSpan DefaultDebounceInterval = TimeSpan.FromMilliseconds(800);
 
@@ -168,8 +169,16 @@ public sealed class ExternalEditReloadController : IDisposable
         if (pendingReloadPath is not null && !IsCurrentWatchedPath(pendingReloadPath))
             return;
 
-        if (await _reload())
-            _notify(ReloadedToastMessage);
+        try
+        {
+            if (await _reload())
+                _notify(ReloadedToastMessage);
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "External edit reload failed.");
+            _notify($"{ReloadFailedToastPrefix}: {ex.Message}");
+        }
     }
 
     private void RestartDebounce(string? changedPath, bool requirePathMatch)

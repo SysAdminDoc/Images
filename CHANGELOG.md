@@ -18,6 +18,7 @@ All notable changes to **Images** are documented here.
 
 - **Release readiness rejects placeholder package hashes** - The no-assets readiness path now validates committed package manifests for the current version, manifest generation rejects placeholder checksum entries, and SBOM generation works under Windows PowerShell 5.1.
 - **Semantic Search Reveal selects files in Explorer** - Reveal now uses the Explorer selection helper instead of launching the result file's associated app, and missing results stay in-window with a warning.
+- **External edit reload exceptions stay contained** - Exceptions thrown by the external-edit reload callback are now logged and surfaced through the existing toast path instead of escaping the dispatcher timer.
 - **Sidecar writes are collision-safe** - XMP sidecar saves now use unique temp files and serialize final swaps so parallel tag/import/Picasa writes cannot collide on a shared temp path or leave stale temp files behind.
 - **Import duplicate scans stay inside the destination tree** - Import Inbox destination hashing now skips reparse-point directories, matching the source scan guard so linked folders outside the library cannot be traversed for duplicate detection.
 - **Import sidecar rollback is bounded** - Existing XMP sidecars larger than the rollback snapshot cap now fail the import before metadata edits, with copied/moved files rolled back and the oversized sidecar left untouched.
