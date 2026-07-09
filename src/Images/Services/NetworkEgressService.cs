@@ -60,7 +60,7 @@ public static class NetworkEgressService
         lock (_lock)
         {
             var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher is not null && !dispatcher.CheckAccess())
+            if (dispatcher is not null && ShouldUseDispatcher(dispatcher))
             {
                 dispatcher.BeginInvoke(() => InsertEntry(entry));
             }
@@ -77,7 +77,7 @@ public static class NetworkEgressService
     public static void Clear()
     {
         var dispatcher = System.Windows.Application.Current?.Dispatcher;
-        if (dispatcher is not null && !dispatcher.CheckAccess())
+        if (dispatcher is not null && ShouldUseDispatcher(dispatcher))
         {
             dispatcher.BeginInvoke(() => _entries.Clear());
         }
@@ -159,7 +159,7 @@ public static class NetworkEgressService
             if (loaded.Count == 0) return;
 
             var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher is not null && !dispatcher.CheckAccess())
+            if (dispatcher is not null && ShouldUseDispatcher(dispatcher))
             {
                 dispatcher.BeginInvoke(() =>
                 {
@@ -181,6 +181,7 @@ public static class NetworkEgressService
 
     internal const int MaxLoadedEntries = 500;
     internal const int MaxPersistedEntries = 2000;
+    internal static bool DisableDispatcherMarshallingForTests { get; set; }
 
     internal static IReadOnlyList<NetworkEgressEntry> ReadPersistedEntriesForDisplay(
         IEnumerable<string> lines,
@@ -307,6 +308,13 @@ public static class NetworkEgressService
         var dir = AppStorage.TryGetAppDirectory();
         return dir is null ? null : Path.Combine(dir, "network-egress.jsonl");
     }
+
+    private static bool ShouldUseDispatcher(System.Windows.Threading.Dispatcher dispatcher)
+        => !DisableDispatcherMarshallingForTests &&
+           !dispatcher.CheckAccess() &&
+           dispatcher.Thread.IsAlive &&
+           !dispatcher.HasShutdownStarted &&
+           !dispatcher.HasShutdownFinished;
 }
 
 public sealed record NetworkEgressEntry(

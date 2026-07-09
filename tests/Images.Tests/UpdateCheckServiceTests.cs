@@ -54,6 +54,8 @@ public sealed class UpdateCheckServiceTests
               "html_url": "https://github.com/SysAdminDoc/Images/releases/tag/v99.0.0"
             }
             """;
+        var previousMarshalling = NetworkEgressService.DisableDispatcherMarshallingForTests;
+        NetworkEgressService.DisableDispatcherMarshallingForTests = true;
         NetworkEgressService.Clear();
         using var http = ClientReturning(new HttpResponseMessage(HttpStatusCode.OK)
         {
@@ -72,6 +74,7 @@ public sealed class UpdateCheckServiceTests
         finally
         {
             NetworkEgressService.Clear();
+            NetworkEgressService.DisableDispatcherMarshallingForTests = previousMarshalling;
         }
     }
 

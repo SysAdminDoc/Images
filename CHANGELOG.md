@@ -4,8 +4,11 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+## 0.2.23
+
 ### Fixed
 
+- **Network egress entries survive dispatcher shutdown** - Network activity recorded after a WPF dispatcher is shutting down now falls back to direct insertion instead of disappearing behind a never-pumped dispatcher queue.
 - **Store codec launch failures are honest** - If Windows cannot open the Microsoft Store codec extension link, Images now shows a failure toast instead of claiming the Store page opened.
 - **Annotation marker labels stay readable** - Number annotations now choose black or white label text from the marker fill color, so white and yellow markers are no longer unreadable; annotation drags also recover cleanly from mouse-capture loss.
 - **Canvas tools recover from mouse-capture loss** - Retouch, red-eye, exposure brush, crop, selection, and inspector drags now clear transient pointer state when WPF mouse capture is lost, preventing stale brush or drag state from leaking into the next pointer move.
