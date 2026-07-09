@@ -91,8 +91,8 @@ public sealed class ThemeServiceTests
         Assert.NotEqual(
             Assert.IsType<SolidColorBrush>(dark["PanelBrush"]).Color,
             Assert.IsType<SolidColorBrush>(latte["PanelBrush"]).Color);
-        Assert.Equal(Color.FromRgb(248, 250, 252), Assert.IsType<SolidColorBrush>(latte["ViewportBrush"]).Color);
-        Assert.Equal(Color.FromArgb(0xFB, 239, 241, 245), Assert.IsType<SolidColorBrush>(latte["FloatingChromeBrush"]).Color);
+        Assert.Equal(Color.FromRgb(246, 248, 252), Assert.IsType<SolidColorBrush>(latte["ViewportBrush"]).Color);
+        Assert.Equal(Color.FromArgb(0xF8, 239, 241, 245), Assert.IsType<SolidColorBrush>(latte["FloatingChromeBrush"]).Color);
         Assert.True(latte.Contains("AccentPanelBrush"));
         Assert.True(latte.Contains("AccentSelectionBrush"));
         Assert.True(latte.Contains("SuccessPanelBrush"));

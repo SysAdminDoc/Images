@@ -41,11 +41,12 @@ public sealed class CatalogQueryService
         bool redactPaths = false)
     {
         var all = _catalog.GetAllAssets(50_000);
-        var normalizedFolder = Path.GetFullPath(folder).TrimEnd(Path.DirectorySeparatorChar);
+        if (!TryNormalizeFolder(folder, out var normalizedFolder))
+            return new CatalogQueryResult([], 0, false);
 
         var matched = all
-            .Where(a => a.Folder.TrimEnd(Path.DirectorySeparatorChar)
-                .Equals(normalizedFolder, StringComparison.OrdinalIgnoreCase))
+            .Where(a => TryNormalizeFolder(a.Folder, out var assetFolder) &&
+                assetFolder.Equals(normalizedFolder, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         var truncated = matched.Count > limit;
@@ -119,5 +120,23 @@ public sealed class CatalogQueryService
             redacted[i] = "***";
         redacted[^1] = parts[^1];
         return string.Join(Path.DirectorySeparatorChar, redacted);
+    }
+
+    private static bool TryNormalizeFolder(string folder, out string normalized)
+    {
+        normalized = "";
+        if (string.IsNullOrWhiteSpace(folder))
+            return false;
+
+        try
+        {
+            normalized = Path.GetFullPath(folder)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            return !string.IsNullOrWhiteSpace(normalized);
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

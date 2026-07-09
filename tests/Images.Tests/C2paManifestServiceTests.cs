@@ -277,29 +277,39 @@ public sealed class C2paManifestServiceTests
         using var temp = TestDirectory.Create();
         var path = temp.WriteFile("plain.jpg", "fake image bytes");
         ProcessStartInfo? captured = null;
+        var previousMarshalling = NetworkEgressService.DisableDispatcherMarshallingForTests;
+        NetworkEgressService.DisableDispatcherMarshallingForTests = true;
         NetworkEgressService.Clear();
 
-        var result = C2paManifestService.Read(
-            path,
-            executableOverride: @"C:\Tools\c2patool.exe",
-            processRunner: psi =>
-            {
-                captured = psi;
-                return (0, "", "");
-            });
+        try
+        {
+            var result = C2paManifestService.Read(
+                path,
+                executableOverride: @"C:\Tools\c2patool.exe",
+                processRunner: psi =>
+                {
+                    captured = psi;
+                    return (0, "", "");
+                });
 
-        Assert.Equal(C2paStatus.NoManifest, result.Status);
-        Assert.NotNull(captured);
-        var args = captured.ArgumentList.ToArray();
-        var settingsIndex = Array.IndexOf(args, "--settings");
-        Assert.True(settingsIndex >= 0, "c2patool should receive a settings file.");
-        Assert.True(settingsIndex + 1 < args.Length, "settings file path should follow --settings.");
-        var settingsJson = File.ReadAllText(args[settingsIndex + 1]);
-        Assert.Contains("\"remote_manifest_fetch\": false", settingsJson, StringComparison.Ordinal);
-        Assert.Contains("\"ocsp_fetch\": false", settingsJson, StringComparison.Ordinal);
-        Assert.Contains(NetworkEgressService.Entries, entry =>
-            entry.Url == "process://c2patool/inspect" &&
-            entry.Purpose.Contains("remote manifest fetch disabled", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(C2paStatus.NoManifest, result.Status);
+            Assert.NotNull(captured);
+            var args = captured.ArgumentList.ToArray();
+            var settingsIndex = Array.IndexOf(args, "--settings");
+            Assert.True(settingsIndex >= 0, "c2patool should receive a settings file.");
+            Assert.True(settingsIndex + 1 < args.Length, "settings file path should follow --settings.");
+            var settingsJson = File.ReadAllText(args[settingsIndex + 1]);
+            Assert.Contains("\"remote_manifest_fetch\": false", settingsJson, StringComparison.Ordinal);
+            Assert.Contains("\"ocsp_fetch\": false", settingsJson, StringComparison.Ordinal);
+            Assert.Contains(NetworkEgressService.Entries, entry =>
+                entry.Url == "process://c2patool/inspect" &&
+                entry.Purpose.Contains("remote manifest fetch disabled", StringComparison.OrdinalIgnoreCase));
+        }
+        finally
+        {
+            NetworkEgressService.Clear();
+            NetworkEgressService.DisableDispatcherMarshallingForTests = previousMarshalling;
+        }
     }
 
     [Fact]

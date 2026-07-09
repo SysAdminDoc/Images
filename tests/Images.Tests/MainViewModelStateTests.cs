@@ -1044,8 +1044,11 @@ public sealed class MainViewModelStateTests
 
             File.Delete(image);
 
+            Assert.True(viewModel.HasImage);
+            viewModel.RefreshCommand.Execute(null);
+
             Assert.False(viewModel.HasImage);
-            Assert.True(viewModel.RefreshCommand.CanExecute(null));
+            Assert.False(viewModel.RefreshCommand.CanExecute(null));
             Assert.False(viewModel.ReloadCommand.CanExecute(null));
         });
     }

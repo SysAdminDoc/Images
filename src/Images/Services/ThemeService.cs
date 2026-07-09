@@ -18,8 +18,8 @@ public static class ThemeService
     internal const string HighContrastThemeName = "HighContrast";
     internal const string LatteName = "Latte";
 
-    private static readonly Uri HighContrastThemeUri = new("Themes/HighContrastTheme.xaml", UriKind.Relative);
-    private static readonly Uri LatteThemeUri = new("Themes/LatteTheme.xaml", UriKind.Relative);
+    private static readonly Uri HighContrastThemeUri = new("pack://application:,,,/Images;component/Themes/HighContrastTheme.xaml", UriKind.Absolute);
+    private static readonly Uri LatteThemeUri = new("pack://application:,,,/Images;component/Themes/LatteTheme.xaml", UriKind.Absolute);
     private static readonly object Gate = new();
 
     private static Application? _application;
