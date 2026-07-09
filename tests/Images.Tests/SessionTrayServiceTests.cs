@@ -68,6 +68,23 @@ public sealed class SessionTrayServiceTests
     }
 
     [Fact]
+    public void SaveToFile_DoesNotClobberSiblingTempFile()
+    {
+        using var temp = TestDirectory.Create();
+        var img = temp.WriteFile("one.jpg");
+        var listPath = Path.Combine(temp.Path, "session.txt");
+        var siblingTempPath = listPath + ".tmp";
+        File.WriteAllText(siblingTempPath, "user data");
+
+        var service = new SessionTrayService();
+        service.Add(img);
+        service.SaveToFile(listPath);
+
+        Assert.Equal("user data", File.ReadAllText(siblingTempPath));
+        Assert.Contains(img, File.ReadAllLines(listPath));
+    }
+
+    [Fact]
     public void LoadFromFile_ToleratesMissingFiles()
     {
         using var temp = TestDirectory.Create();
@@ -82,6 +99,23 @@ public sealed class SessionTrayServiceTests
         Assert.Equal(2, result.EntriesLoaded);
         Assert.Equal(1, result.MissingOnDisk);
         Assert.Equal(2, service.Count);
+    }
+
+    [Fact]
+    public void LoadFromFile_CountsOnlyNewEntries()
+    {
+        using var temp = TestDirectory.Create();
+        var existing = temp.WriteFile("exists.jpg");
+        var listPath = Path.Combine(temp.Path, "session.txt");
+        File.WriteAllLines(listPath, [existing, existing, existing.ToUpperInvariant()]);
+
+        var service = new SessionTrayService();
+        var result = service.LoadFromFile(listPath);
+
+        Assert.True(result.Success);
+        Assert.Equal(1, result.EntriesLoaded);
+        Assert.Equal(1, service.Count);
+        Assert.Equal("Loaded 1 entries (0 missing on disk).", result.Message);
     }
 
     [Fact]

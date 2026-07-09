@@ -13,16 +13,17 @@ public sealed class SessionTrayService
 
     public int Count => Entries.Count;
 
-    public void Add(string path)
+    public bool Add(string path)
     {
-        if (string.IsNullOrWhiteSpace(path)) return;
+        if (string.IsNullOrWhiteSpace(path)) return false;
 
         string normalized;
         try { normalized = Path.GetFullPath(path); }
-        catch { return; }
+        catch { return false; }
 
-        if (Entries.Contains(normalized, StringComparer.OrdinalIgnoreCase)) return;
+        if (Entries.Contains(normalized, StringComparer.OrdinalIgnoreCase)) return false;
         Entries.Add(normalized);
+        return true;
     }
 
     public void AddRange(IEnumerable<string> paths)
@@ -63,11 +64,15 @@ public sealed class SessionTrayService
         if (!string.IsNullOrWhiteSpace(dir))
             Directory.CreateDirectory(dir);
 
-        var tempPath = path + ".tmp";
+        var fileName = Path.GetFileName(path);
+        var tempPath = Path.Combine(dir ?? string.Empty, $".{fileName}.{Guid.NewGuid():N}.tmp");
         try
         {
             File.WriteAllLines(tempPath, Entries, Encoding.UTF8);
-            File.Move(tempPath, path, overwrite: true);
+            if (File.Exists(path))
+                File.Replace(tempPath, path, null);
+            else
+                File.Move(tempPath, path);
         }
         finally
         {
@@ -98,13 +103,13 @@ public sealed class SessionTrayService
 
                 if (File.Exists(fullPath))
                 {
-                    Add(fullPath);
-                    added++;
+                    if (Add(fullPath))
+                        added++;
                 }
                 else
                 {
-                    Add(fullPath);
-                    added++;
+                    if (Add(fullPath))
+                        added++;
                     missing++;
                 }
             }

@@ -4,6 +4,10 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### Fixed
+
+- **Session tray saves are collision-safe** - Saving a session tray now uses a unique sibling temp file instead of clobbering `*.tmp` files, and loading a session reports only entries that were actually added.
+
 ## 0.2.22
 
 ### Changed
