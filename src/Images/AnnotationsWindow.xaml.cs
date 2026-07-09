@@ -170,6 +170,14 @@ public partial class AnnotationsWindow : Window
         AddItem(item);
     }
 
+    private void PreviewCanvas_LostMouseCapture(object sender, MouseEventArgs e)
+    {
+        _isDragging = false;
+        _dragStart = null;
+        _freehandPoints.Clear();
+        Redraw();
+    }
+
     private void ApplyButton_Click(object sender, RoutedEventArgs e) => ApplyAndClose();
 
     private void UndoButton_Click(object sender, RoutedEventArgs e)
@@ -460,7 +468,7 @@ public partial class AnnotationsWindow : Window
         var label = new TextBlock
         {
             Text = item.Number.ToString(CultureInfo.InvariantCulture),
-            Foreground = Brushes.White,
+            Foreground = ContrastingTextBrushFor(item.Color),
             FontWeight = FontWeights.Bold,
             FontSize = radius,
             Width = radius * 2,
@@ -635,6 +643,30 @@ public partial class AnnotationsWindow : Window
         {
             return Brushes.Red;
         }
+    }
+
+    internal static Brush ContrastingTextBrushFor(string color)
+    {
+        try
+        {
+            var brush = (SolidColorBrush)new BrushConverter().ConvertFromString(color)!;
+            var value = (0.2126 * Linearize(brush.Color.R)) +
+                        (0.7152 * Linearize(brush.Color.G)) +
+                        (0.0722 * Linearize(brush.Color.B));
+            return value > 0.42 ? Brushes.Black : Brushes.White;
+        }
+        catch
+        {
+            return Brushes.White;
+        }
+    }
+
+    private static double Linearize(byte channel)
+    {
+        var value = channel / 255.0;
+        return value <= 0.03928
+            ? value / 12.92
+            : Math.Pow((value + 0.055) / 1.055, 2.4);
     }
 
     private static double Distance(double x1, double y1, double x2, double y2)

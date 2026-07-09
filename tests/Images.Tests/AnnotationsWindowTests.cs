@@ -1,9 +1,12 @@
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Images.Localization;
+using Images.Services;
 
 namespace Images.Tests;
 
@@ -45,6 +48,60 @@ public sealed class AnnotationsWindowTests
             Assert.True(AnnotationsWindow.ShouldHandleWindowKey(Key.Escape, null));
         });
     }
+
+    [Theory]
+    [InlineData("#FFFFFF", true)]
+    [InlineData("#F9E2AF", true)]
+    [InlineData("#000000", false)]
+    public void ContrastingTextBrushFor_SelectsReadableNumberLabelBrush(string fill, bool expectBlack)
+    {
+        var brush = AnnotationsWindow.ContrastingTextBrushFor(fill);
+
+        Assert.Same(expectBlack ? Brushes.Black : Brushes.White, brush);
+    }
+
+    [Fact]
+    public void LostMouseCapture_ClearsTransientDragState()
+    {
+        RunOnStaWithTheme(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var missing = Path.Combine(temp.Path, "missing.png");
+            var window = new AnnotationsWindow(missing, _ => throw new InvalidOperationException("Should not apply."));
+            try
+            {
+                SetField(window, "_isDragging", true);
+                SetField(window, "_dragStart", new Point(1, 1));
+                var points = Assert.IsType<List<ImageAnnotationPoint>>(GetField(window, "_freehandPoints"));
+                points.Add(new ImageAnnotationPoint(1, 1));
+
+                InvokePrivate(window, "PreviewCanvas_LostMouseCapture", window.FindName("PreviewCanvas"), null);
+
+                Assert.False(Assert.IsType<bool>(GetField(window, "_isDragging")));
+                Assert.Null(GetField(window, "_dragStart"));
+                Assert.Empty(points);
+            }
+            finally
+            {
+                window.Close();
+            }
+        });
+    }
+
+    private static void SetField(AnnotationsWindow window, string name, object? value)
+        => GetFieldInfo(name).SetValue(window, value);
+
+    private static object? GetField(AnnotationsWindow window, string name)
+        => GetFieldInfo(name).GetValue(window);
+
+    private static FieldInfo GetFieldInfo(string name)
+        => typeof(AnnotationsWindow).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)
+           ?? throw new InvalidOperationException($"Field not found: {name}");
+
+    private static void InvokePrivate(AnnotationsWindow window, string name, params object?[] args)
+        => (typeof(AnnotationsWindow).GetMethod(name, BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException($"Method not found: {name}"))
+            .Invoke(window, args);
 
     private static void RunOnStaWithTheme(Action action)
     {

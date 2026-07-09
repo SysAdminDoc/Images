@@ -146,6 +146,7 @@
                         SizeChanged="PreviewCanvas_SizeChanged"
                         MouseLeftButtonDown="PreviewCanvas_MouseLeftButtonDown"
                         MouseMove="PreviewCanvas_MouseMove"
+                        LostMouseCapture="PreviewCanvas_LostMouseCapture"
                         MouseLeftButtonUp="PreviewCanvas_MouseLeftButtonUp">
                     <Image x:Name="PreviewImage"
                            Stretch="Uniform"
