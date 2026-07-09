@@ -6,7 +6,7 @@
   "architecture": {
     "64bit": {
       "url": "https://github.com/SysAdminDoc/Images/releases/download/v0.2.25/Images-v0.2.25-win-x64.zip",
-      "hash": "A4DFC5CD2FEEE2447AD344B7F535F0BEDD28879132D6575379663070431629BB"
+      "hash": "9F79FBC701EB6D2DE46A2A8DE134E1DAB8E11452B787FA879E6267BA15513DEE"
     }
   },
   "bin": "Images.exe",
