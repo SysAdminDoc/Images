@@ -1343,13 +1343,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             new() { Name = Strings.CommandPalette_SlideshowFaster, Category = view, Command = IncreaseSlideshowIntervalCommand },
             new() { Name = Strings.CommandPalette_SlideshowSlower, Category = view, Command = DecreaseSlideshowIntervalCommand },
 
-            // Workflow modes
-            new() { Name = "Mode: Viewer", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Viewer)) },
-            new() { Name = "Mode: Organize", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Organize)) },
-            new() { Name = "Mode: Edit", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Edit)) },
-            new() { Name = "Mode: Book", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Book)) },
-            new() { Name = "Mode: Diagnostics", Category = view, Command = new RelayCommand(() => ApplyWorkflowMode(WorkflowMode.Diagnostics)) },
-
             // Sort
             new() { Name = Strings.CommandPalette_SortName, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.NaturalName)) },
             new() { Name = Strings.CommandPalette_SortNameDesc, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.NameDescending)) },

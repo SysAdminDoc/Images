@@ -58,14 +58,14 @@
 
     <!-- ============ Semantic surfaces + chrome ============ -->
     <!-- Viewport is deep near-black for image contrast; panels use Mantle; overlays use translucent Crust -->
-    <SolidColorBrush x:Key="ViewportBrush" Color="#FF0A0A10" />
-    <SolidColorBrush x:Key="ViewerSurfaceBrush" Color="#FF0A0A10" />
-    <SolidColorBrush x:Key="PanelBrush" Color="#F2181825" />
-    <SolidColorBrush x:Key="SurfacePanelBrush" Color="#8A313244" />
-    <SolidColorBrush x:Key="HairlineBrush" Color="#4045475A" />
+    <SolidColorBrush x:Key="ViewportBrush" Color="#FF070910" />
+    <SolidColorBrush x:Key="ViewerSurfaceBrush" Color="#FF070910" />
+    <SolidColorBrush x:Key="PanelBrush" Color="#F5161825" />
+    <SolidColorBrush x:Key="SurfacePanelBrush" Color="#70313244" />
+    <SolidColorBrush x:Key="HairlineBrush" Color="#3645475A" />
     <SolidColorBrush x:Key="DividerBrush" Color="#33CDD6F4" />
-    <SolidColorBrush x:Key="FloatingChromeBrush" Color="#BF11111B" />
-    <SolidColorBrush x:Key="FloatingChromeBorderBrush" Color="#3FCDD6F4" />
+    <SolidColorBrush x:Key="FloatingChromeBrush" Color="#D30B0D14" />
+    <SolidColorBrush x:Key="FloatingChromeBorderBrush" Color="#3345475A" />
     <SolidColorBrush x:Key="FloatingChromeTextBrush" Color="#FFE8ECF7" />
     <SolidColorBrush x:Key="ToastBrush" Color="#EB11111B" />
     <SolidColorBrush x:Key="WarningPanelBrush" Color="#1FF9E2AF" />
@@ -89,11 +89,11 @@
     <SolidColorBrush x:Key="SubtleSurfaceBrush" Color="#10313244" />
     <SolidColorBrush x:Key="AccentWarmBrush" Color="#FFF6C177" />
     <SolidColorBrush x:Key="AccentWarmPanelBrush" Color="#22F6C177" />
-    <SolidColorBrush x:Key="NavRailBrush" Color="#F411111B" />
-    <SolidColorBrush x:Key="NavRailBorderBrush" Color="#3345475A" />
+    <SolidColorBrush x:Key="NavRailBrush" Color="#F50F1118" />
+    <SolidColorBrush x:Key="NavRailBorderBrush" Color="#2945475A" />
     <SolidColorBrush x:Key="WorkspaceTopBarBrush" Color="#E8181825" />
     <SolidColorBrush x:Key="WorkspaceTopBarBorderBrush" Color="#4DCDD6F4" />
-    <SolidColorBrush x:Key="InspectorPanelBrush" Color="#F2181825" />
+    <SolidColorBrush x:Key="InspectorPanelBrush" Color="#F3171924" />
 
     <!-- ============ Radius scale ============ -->
     <!-- Restrained geometry keeps dense tool surfaces professional and compact. -->
@@ -487,7 +487,7 @@
     <!-- ============ Circular nav arrow (Win7-inspired edge chrome) ============ -->
     <!-- Starts subtle, grows on hover with a soft elevation + tint + scale cue -->
     <Style x:Key="NavArrowButton" TargetType="Button">
-        <Setter Property="Width" Value="58" />
+        <Setter Property="Width" Value="44" />
         <Setter Property="Height" Value="58" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Background" Value="{DynamicResource FloatingChromeBrush}" />
@@ -506,10 +506,11 @@
                             <ScaleTransform x:Name="Scale" ScaleX="1" ScaleY="1" />
                         </Grid.RenderTransform>
                         <Grid.RenderTransformOrigin>0.5,0.5</Grid.RenderTransformOrigin>
-                        <Ellipse x:Name="Bg"
-                                 Fill="{TemplateBinding Background}"
-                                 Stroke="{TemplateBinding BorderBrush}"
-                                 StrokeThickness="1.25" />
+                        <Border x:Name="Bg"
+                                CornerRadius="{StaticResource Radius.Md.CR}"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" />
                         <TextBlock Text="{TemplateBinding Content}"
                                    FontFamily="{StaticResource IconFontFamily}"
                                    FontSize="{TemplateBinding FontSize}"
@@ -519,15 +520,15 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bg" Property="Fill" Value="{DynamicResource DropOverlayBrush}" />
-                            <Setter TargetName="Bg" Property="Stroke" Value="{DynamicResource AccentBrush}" />
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource DropOverlayBrush}" />
+                            <Setter TargetName="Bg" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Bg" Property="Fill" Value="{DynamicResource DropOverlayPanelBrush}" />
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource DropOverlayPanelBrush}" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="Bg" Property="Stroke" Value="{DynamicResource FocusRingBrush}" />
-                            <Setter TargetName="Bg" Property="StrokeThickness" Value="2" />
+                            <Setter TargetName="Bg" Property="BorderBrush" Value="{DynamicResource FocusRingBrush}" />
+                            <Setter TargetName="Bg" Property="BorderThickness" Value="2" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.3" />
@@ -540,8 +541,8 @@
 
     <!-- ============ Toolbar icon button ============ -->
     <Style x:Key="ToolbarButton" TargetType="Button" BasedOn="{StaticResource ChromeButton}">
-        <Setter Property="Width" Value="40" />
-        <Setter Property="Height" Value="34" />
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="32" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
@@ -1411,7 +1412,7 @@
         <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{StaticResource Radius.Md.CR}" />
-        <Setter Property="Padding" Value="14,12" />
+        <Setter Property="Padding" Value="13,11" />
     </Style>
 
     <!-- Interactive card variant — hovering lifts the border toward the accent so the recent-rename
@@ -1460,7 +1461,86 @@
     <Style x:Key="Divider" TargetType="Border">
         <Setter Property="Height" Value="1" />
         <Setter Property="Background" Value="{DynamicResource HairlineBrush}" />
-        <Setter Property="Margin" Value="0,18,0,18" />
+        <Setter Property="Margin" Value="0,16,0,16" />
+    </Style>
+
+    <Style x:Key="InspectorExpander" TargetType="Expander">
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Margin" Value="0,0,0,12" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Expander">
+                    <Border Background="{TemplateBinding Background}">
+                        <StackPanel>
+                            <ToggleButton x:Name="HeaderSite"
+                                          IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          FocusVisualStyle="{StaticResource FocusVisual}"
+                                          Cursor="Hand"
+                                          Padding="11,9"
+                                          HorizontalContentAlignment="Stretch">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="HeaderBorder"
+                                                Background="{DynamicResource SurfacePanelBrush}"
+                                                BorderBrush="{DynamicResource HairlineBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource Radius.Md.CR}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <ContentPresenter Grid.Column="0"
+                                                                  HorizontalAlignment="Left"
+                                                                  VerticalAlignment="Center"
+                                                                  RecognizesAccessKey="True" />
+                                                <TextBlock x:Name="Chevron"
+                                                           Grid.Column="1"
+                                                           Text="&#xE76C;"
+                                                           FontFamily="{StaticResource IconFontFamily}"
+                                                           FontSize="10"
+                                                           Foreground="{DynamicResource SubtextBrush}"
+                                                           Margin="10,0,0,0"
+                                                           VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="HeaderBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="HeaderBorder" Property="Background" Value="{DynamicResource AccentPanelBrush}" />
+                                                <Setter TargetName="HeaderBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                                <Setter TargetName="Chevron" Property="Text" Value="&#xE70D;" />
+                                                <Setter TargetName="Chevron" Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                                            </Trigger>
+                                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                                <Setter TargetName="HeaderBorder" Property="BorderBrush" Value="{DynamicResource FocusRingBrush}" />
+                                                <Setter TargetName="HeaderBorder" Property="BorderThickness" Value="2" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                                <TextBlock Text="{TemplateBinding Header}"
+                                           Style="{StaticResource SectionLabel}"
+                                           Margin="0"
+                                           VerticalAlignment="Center" />
+                            </ToggleButton>
+                            <ContentPresenter x:Name="ExpandSite"
+                                              Margin="0,12,0,0"
+                                              Visibility="Collapsed" />
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Setter TargetName="ExpandSite" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- Floating chrome (position, transient status, HUD chrome) — elevated and translucent. -->
@@ -1539,10 +1619,10 @@
     </Style>
 
     <Style x:Key="NavRailButton" TargetType="Button">
-        <Setter Property="Width" Value="62" />
-        <Setter Property="MinHeight" Value="58" />
-        <Setter Property="Margin" Value="0,0,0,8" />
-        <Setter Property="Padding" Value="6,7" />
+        <Setter Property="Width" Value="42" />
+        <Setter Property="MinHeight" Value="42" />
+        <Setter Property="Margin" Value="0,0,0,10" />
+        <Setter Property="Padding" Value="0" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="1" />

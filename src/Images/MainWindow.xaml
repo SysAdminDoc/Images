@@ -37,21 +37,21 @@
 
         <Border x:Name="WorkflowRail"
                 Grid.Column="0"
-                Width="82"
+                Width="58"
                 Background="{DynamicResource NavRailBrush}"
                 BorderBrush="{DynamicResource NavRailBorderBrush}"
                 BorderThickness="0,0,1,0"
                 Visibility="{Binding IsFullscreen, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}"
                 AutomationProperties.Name="{loc:Loc AutomationMainWindowWorkflowNavigation}">
-            <Grid Margin="10,14,10,14">
+            <Grid Margin="8,14,8,14">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Border Width="42"
-                        Height="42"
+                <Border Width="34"
+                        Height="34"
                         CornerRadius="{StaticResource Radius.Md.CR}"
                         Background="{DynamicResource AccentPanelBrush}"
                         BorderBrush="{DynamicResource AccentBrush}"
@@ -73,37 +73,13 @@
                             Command="{Binding OpenCommand}"
                             ToolTip="Open an image or folder"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowLibrary}">
-                        <StackPanel>
-                            <TextBlock Text="&#xE8E5;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                            <TextBlock Text="Library" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                        </StackPanel>
+                        <TextBlock Text="&#xE8E5;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                     </Button>
                     <Button Style="{StaticResource NavRailButton}"
-                            Command="{Binding OpenSemanticSearchCommand}"
-                            ToolTip="Search this collection"
-                            AutomationProperties.Name="{loc:Loc AutomationMainWindowSemanticSearch}">
-                        <StackPanel>
-                            <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                            <TextBlock Text="Search" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource NavRailButton}"
-                            Command="{Binding OpenBatchProcessorCommand}"
-                            ToolTip="Batch processor"
-                            AutomationProperties.Name="{loc:Loc AutomationMainWindowBatchProcessor}">
-                        <StackPanel>
-                            <TextBlock Text="&#xE8EF;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                            <TextBlock Text="Batch" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource NavRailButton}"
-                            Command="{Binding OpenExportWorkbenchCommand}"
-                            ToolTip="Export workbench"
-                            AutomationProperties.Name="{loc:Loc AutomationMainWindowExportWorkbench}">
-                        <StackPanel>
-                            <TextBlock Text="&#xE74E;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                            <TextBlock Text="Export" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                        </StackPanel>
+                            Command="{Binding ToggleGalleryCommand}"
+                            ToolTip="Gallery"
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowGalleryWorkbench}">
+                        <TextBlock Text="&#xE8A9;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                     </Button>
                 </StackPanel>
 
@@ -112,10 +88,7 @@
                             Command="{Binding SettingsCommand}"
                             ToolTip="Settings"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowSettings}">
-                        <StackPanel>
-                            <TextBlock Text="&#xE713;" FontFamily="{StaticResource IconFontFamily}" FontSize="15" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                            <TextBlock Text="Settings" FontSize="10" FontWeight="SemiBold" TextAlignment="Center" Margin="0,4,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                        </StackPanel>
+                        <TextBlock Text="&#xE713;" FontFamily="{StaticResource IconFontFamily}" FontSize="15" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                     </Button>
                 </StackPanel>
             </Grid>
@@ -2833,24 +2806,6 @@
                                     </Style>
                                 </Button.Style>
                             </Button>
-                            <Button Command="{Binding StartCompareCommand}"
-                                    Content="&#xE8AB;"
-                                    ToolTip="{Binding CompareStatusText}"
-                                    Margin="4,0,0,0"
-                                    Visibility="{Binding CanUseCompareMode, Converter={StaticResource BoolToVis}}"
-                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareWithNextImage}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsCompareMode}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
-                                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
                             <Button Command="{Binding ExtractTextCommand}"
                                     Content="&#xE8EA;"
                                     ToolTip="{Binding OcrModeTooltip}"
@@ -2895,13 +2850,8 @@
                             <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding DeleteCommand}" Content="&#xE74D;" ToolTip="Delete (Recycle Bin)" AutomationProperties.Name="{loc:Loc AutomationMainWindowSendImageToRecycleBin}" />
                             <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding SaveAsCopyCommand}" Content="&#xE74E;" ToolTip="{Binding ShortcutTexts[save-copy], StringFormat=Save a copy ({0})}" AutomationProperties.Name="{loc:Loc AutomationMainWindowSaveACopy}" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenExportWorkbenchCommand}" Content="&#xE8EF;" ToolTip="{Binding ShortcutTexts[export-workbench], StringFormat=Export workbench ({0})}" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowExportWorkbench}" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrintCommand}" Content="&#xE749;" ToolTip="{Binding ShortcutTexts[print], StringFormat=Print ({0})}" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowPrintImage}" />
-                            <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}" Content="&#xE838;" ToolTip="Reveal in Explorer" AutomationProperties.Name="{loc:Loc AutomationMainWindowRevealImageInExplorer}" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="Copy path" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowCopyFilePath}" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding StripLocationCommand}" Content="&#xE707;" ToolTip="Strip GPS location from file" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowStripGPSLocation}" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding RefreshCommand}" Content="&#xE72C;" ToolTip="{Binding ShortcutTexts[refresh], StringFormat=Refresh folder ({0})}" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowRefreshFolder}" />
                         </WrapPanel>
                     </Grid>
@@ -2911,13 +2861,13 @@
 
         <!-- ============ RIGHT: Rename + Recent + Details panel ============ -->
         <Border x:Name="RightSidePanel" Grid.Column="2"
-                Width="350"
+                Width="336"
                 Visibility="{Binding IsFullscreen, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}"
                 Background="{DynamicResource InspectorPanelBrush}"
                 BorderBrush="{DynamicResource HairlineBrush}"
                 BorderThickness="1,0,0,0">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
-                <StackPanel Margin="18,22,18,28">
+                <StackPanel Margin="16,20,16,26">
 
                     <!-- Panel header -->
                     <Grid Margin="0,0,0,22">
@@ -2927,9 +2877,9 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Style="{StaticResource Text.Display}"
-                                       Text="Inspector" />
+                                       Text="Details" />
                             <TextBlock Style="{StaticResource Text.Subtitle}"
-                                       Text="Metadata, workflow tools, and local automation."
+                                       Text="Filename, metadata, and local status."
                                        TextWrapping="Wrap"
                                        Margin="0,6,0,0" />
                         </StackPanel>
@@ -3910,6 +3860,11 @@
                         </Border>
                     </Grid>
 
+                    <Expander Style="{StaticResource InspectorExpander}"
+                              Header="Tools"
+                              IsExpanded="False"
+                              Margin="0,4,0,0">
+                    <StackPanel>
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- ORGANIZATION section -->
@@ -5155,6 +5110,9 @@
                             </WrapPanel>
                         </StackPanel>
                     </Border>
+
+                    </StackPanel>
+                    </Expander>
 
                     <StackPanel Visibility="{Binding PhotoMetadataRows.Count, Converter={StaticResource BoolToVis}}">
                         <Border Style="{StaticResource Divider}" />

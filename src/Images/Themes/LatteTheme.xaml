@@ -49,14 +49,14 @@
     <SolidColorBrush x:Key="YellowBrush" Color="{StaticResource YellowColor}" />
 
     <!-- ============ Semantic surfaces + chrome ============ -->
-    <SolidColorBrush x:Key="ViewportBrush" Color="#FFF8FAFC" />
-    <SolidColorBrush x:Key="ViewerSurfaceBrush" Color="#FFF8FAFC" />
+    <SolidColorBrush x:Key="ViewportBrush" Color="#FFF6F8FC" />
+    <SolidColorBrush x:Key="ViewerSurfaceBrush" Color="#FFF6F8FC" />
     <SolidColorBrush x:Key="PanelBrush" Color="#FAEFF1F5" />
-    <SolidColorBrush x:Key="SurfacePanelBrush" Color="#DDE6E9EF" />
-    <SolidColorBrush x:Key="HairlineBrush" Color="#7CBCC0CC" />
+    <SolidColorBrush x:Key="SurfacePanelBrush" Color="#CFE6E9EF" />
+    <SolidColorBrush x:Key="HairlineBrush" Color="#6CBCC0CC" />
     <SolidColorBrush x:Key="DividerBrush" Color="#596C6F85" />
-    <SolidColorBrush x:Key="FloatingChromeBrush" Color="#FBEFF1F5" />
-    <SolidColorBrush x:Key="FloatingChromeBorderBrush" Color="#7C7C7F93" />
+    <SolidColorBrush x:Key="FloatingChromeBrush" Color="#F8EFF1F5" />
+    <SolidColorBrush x:Key="FloatingChromeBorderBrush" Color="#667C7F93" />
     <SolidColorBrush x:Key="FloatingChromeTextBrush" Color="{StaticResource TextColor}" />
     <SolidColorBrush x:Key="ToastBrush" Color="#FBEFF1F5" />
     <SolidColorBrush x:Key="WarningPanelBrush" Color="#26DF8E1D" />
@@ -80,10 +80,10 @@
     <SolidColorBrush x:Key="BrushTintRedBrush" Color="#24D20F39" />
     <SolidColorBrush x:Key="AccentWarmBrush" Color="#FFB7791F" />
     <SolidColorBrush x:Key="AccentWarmPanelBrush" Color="#26B7791F" />
-    <SolidColorBrush x:Key="NavRailBrush" Color="#F5DCE0E8" />
-    <SolidColorBrush x:Key="NavRailBorderBrush" Color="#7CBCC0CC" />
+    <SolidColorBrush x:Key="NavRailBrush" Color="#F4E3E7EF" />
+    <SolidColorBrush x:Key="NavRailBorderBrush" Color="#66BCC0CC" />
     <SolidColorBrush x:Key="WorkspaceTopBarBrush" Color="#F8EFF1F5" />
     <SolidColorBrush x:Key="WorkspaceTopBarBorderBrush" Color="#8C7C7F93" />
-    <SolidColorBrush x:Key="InspectorPanelBrush" Color="#FAE6E9EF" />
+    <SolidColorBrush x:Key="InspectorPanelBrush" Color="#F8E9ECF3" />
 
 </ResourceDictionary>

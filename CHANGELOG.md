@@ -4,6 +4,14 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+## 0.2.21
+
+### Changed
+
+- **Viewer shell debloated and premium-polished** - The default rail is now compact icon-only chrome, advanced Search/Batch/Export surfaces no longer occupy the primary rail, the right panel is renamed to Details, and advanced tool cards are removed from the default inspector surface.
+- **Default viewer controls are quieter** - Compare, Export, Print, Save-copy, and GPS-strip actions no longer sit in the bottom viewer toolbar; those power tools remain available through the context menu and command palette.
+- **Command palette mode noise reduced** - Legacy workflow-mode entries are no longer advertised in command search after the Review workflow removal.
+
 ## 0.2.20
 
 ### Removed
