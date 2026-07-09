@@ -169,6 +169,32 @@ public sealed class ImportInboxServiceTests
     }
 
     [Fact]
+    public void Commit_OversizedExistingSidecarFailsBeforeEditsAndRollsBackTransfer()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Directory.CreateDirectory(Path.Combine(temp.Path, "source")).FullName;
+        var destination = Directory.CreateDirectory(Path.Combine(temp.Path, "library")).FullName;
+        var sourcePath = WriteFile(source, "photo.png", [1, 2, 3]);
+        var destinationPath = Path.Combine(destination, "photo.png");
+        var sidecarPath = destinationPath + ".xmp";
+        var oversizedSidecar = new byte[(int)ImportInboxService.MaxSidecarRollbackBytes + 1];
+        oversizedSidecar[0] = 1;
+        oversizedSidecar[^1] = 2;
+        File.WriteAllBytes(sidecarPath, oversizedSidecar);
+
+        var result = new ImportInboxService().Commit(
+            [new ImportInboxCommitRequest(sourcePath, destination, "person:Alice", null, StripGps: false, MoveOriginal: false)]);
+
+        Assert.Empty(result.Imported);
+        var failure = Assert.Single(result.Failed);
+        Assert.Equal(sourcePath, failure.Path);
+        Assert.Contains("rollback snapshot limit", failure.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.True(File.Exists(sourcePath));
+        Assert.False(File.Exists(destinationPath));
+        Assert.Equal(oversizedSidecar.Length, new FileInfo(sidecarPath).Length);
+    }
+
+    [Fact]
     public void Commit_InPlaceFailureRollsBackWrittenTagSidecar()
     {
         using var temp = TestDirectory.Create();

@@ -58,6 +58,8 @@ public sealed record ImportInboxCommitResult(
 
 public sealed class ImportInboxService
 {
+    internal const long MaxSidecarRollbackBytes = 16L * 1024 * 1024;
+
     private static readonly ILogger Log = Images.Services.Log.Get(nameof(ImportInboxService));
     private readonly TagGraphService _tagGraph;
 
@@ -212,9 +214,10 @@ public sealed class ImportInboxService
                 else
                     File.Copy(sourcePath, destinationPath);
 
-                var destinationSidecarRollback = CaptureSidecarRollbackState(destinationPath);
+                SidecarRollbackState? destinationSidecarRollback = null;
                 try
                 {
+                    destinationSidecarRollback = CaptureSidecarRollbackState(destinationPath);
                     ApplyPostImportEdits(destinationPath, request);
                 }
                 catch
@@ -294,20 +297,27 @@ public sealed class ImportInboxService
     private static SidecarRollbackState CaptureSidecarRollbackState(string imagePath)
     {
         var sidecarPath = imagePath + ".xmp";
-        return File.Exists(sidecarPath)
-            ? new SidecarRollbackState(sidecarPath, File.ReadAllBytes(sidecarPath))
-            : new SidecarRollbackState(sidecarPath, null);
+        var sidecarInfo = new FileInfo(sidecarPath);
+        if (!sidecarInfo.Exists)
+            return new SidecarRollbackState(sidecarPath, null);
+
+        if (sidecarInfo.Length > MaxSidecarRollbackBytes)
+            throw new InvalidOperationException(
+                $"Existing sidecar is {FormatBytes(sidecarInfo.Length)}, which exceeds the {FormatBytes(MaxSidecarRollbackBytes)} rollback snapshot limit.");
+
+        return new SidecarRollbackState(sidecarPath, File.ReadAllBytes(sidecarPath));
     }
 
     private static void RollBackFailedTransfer(
         string sourcePath,
         string destinationPath,
         bool movedOriginal,
-        SidecarRollbackState sidecarRollback)
+        SidecarRollbackState? sidecarRollback)
     {
         try
         {
-            RestoreSidecar(sidecarRollback);
+            if (sidecarRollback is not null)
+                RestoreSidecar(sidecarRollback);
 
             if (!File.Exists(destinationPath))
                 return;
