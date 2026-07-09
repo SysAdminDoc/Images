@@ -54,6 +54,37 @@ public sealed class MainWindowInputTests
         });
     }
 
+    [Fact]
+    public void PremiumShell_UsesCompactImageFirstHierarchy()
+    {
+        RunOnSta(() =>
+        {
+            var window = new MainWindow();
+            try
+            {
+                Assert.Equal(52, Assert.IsType<Border>(window.FindName("WorkflowRail")).Width);
+                Assert.Equal(300, Assert.IsType<Border>(window.FindName("RightSidePanel")).Width);
+                Assert.Equal(94, Assert.IsType<ListBox>(window.FindName("FilmstripItems")).MaxHeight);
+
+                var fitButton = Assert.IsType<Button>(window.FindName("FitButton"));
+                Assert.Equal("Fit", fitButton.Content);
+                Assert.Equal(48, fitButton.Width);
+
+                Assert.Equal(Visibility.Collapsed, Assert.IsType<Grid>(window.FindName("EmptyCapabilityGrid")).Visibility);
+                Assert.Equal(Visibility.Collapsed, Assert.IsType<Grid>(window.FindName("CurrentFileInfoRow")).Visibility);
+                Assert.Equal(Visibility.Collapsed, Assert.IsType<Expander>(window.FindName("InspectorToolsExpander")).Visibility);
+                Assert.False(Assert.IsType<Expander>(window.FindName("MoreDetailsExpander")).IsExpanded);
+
+                var gallery = Assert.IsType<Border>(window.FindName("GalleryWorkbench"));
+                Assert.Equal(new Thickness(24, 20, 24, 20), gallery.Padding);
+            }
+            finally
+            {
+                window.Close();
+            }
+        });
+    }
+
     private static void SetField(MainWindow window, string name, object? value)
         => GetFieldInfo(name).SetValue(window, value);
 

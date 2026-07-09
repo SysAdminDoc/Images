@@ -607,7 +607,10 @@
                                    Margin="0,8,0,0"
                                    MaxWidth="400" />
 
-                        <Grid Margin="0,20,0,0" MaxWidth="456" Visibility="Collapsed">
+                        <Grid x:Name="EmptyCapabilityGrid"
+                              Margin="0,20,0,0"
+                              MaxWidth="456"
+                              Visibility="Collapsed">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
@@ -1012,7 +1015,8 @@
                     </Border>
                 </Border>
 
-                <Border Background="{DynamicResource ViewerSurfaceBrush}"
+                <Border x:Name="GalleryWorkbench"
+                        Background="{DynamicResource ViewerSurfaceBrush}"
                         Padding="24,20"
                         Visibility="{Binding ShowGallery, Converter={StaticResource BoolToVis}}"
                         Panel.ZIndex="18"
@@ -2554,7 +2558,8 @@
                         </Border>
 
                         <!-- Current file info gets its own row so command clusters never collide on narrow widths. -->
-                        <Grid Grid.Row="1"
+                        <Grid x:Name="CurrentFileInfoRow"
+                              Grid.Row="1"
                               MinHeight="20"
                               Margin="0"
                               Visibility="Collapsed">
@@ -2813,7 +2818,8 @@
                                    VerticalAlignment="Center">
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrevCommand}" Content="&#xE76B;" ToolTip="Previous (Left)" AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousImage}" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCcwCommand}" Content="&#xE7AD;" ToolTip="Rotate left" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowRotateLeft}" />
-                            <Button Style="{StaticResource ToolbarTextButton}"
+                            <Button x:Name="FitButton"
+                                    Style="{StaticResource ToolbarTextButton}"
                                     Content="Fit"
                                     Click="FitButton_Click"
                                     ToolTip="Fit image to viewport"
@@ -3926,7 +3932,8 @@
                         </Border>
                     </Grid>
 
-                    <Expander Style="{StaticResource InspectorExpander}"
+                    <Expander x:Name="InspectorToolsExpander"
+                              Style="{StaticResource InspectorExpander}"
                               Header="Tools"
                               IsExpanded="False"
                               Margin="0,4,0,0"
@@ -5206,7 +5213,8 @@
                         </ItemsControl>
                     </StackPanel>
 
-                    <Expander Style="{StaticResource InspectorExpander}"
+                    <Expander x:Name="MoreDetailsExpander"
+                              Style="{StaticResource InspectorExpander}"
                               Header="More details"
                               IsExpanded="False"
                               Margin="0,4,0,0"
