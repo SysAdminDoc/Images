@@ -188,6 +188,9 @@ if (-not $SkipPackageManifestValidation) {
         -Version $Version
 }
 
+$runtimeDocsScript = Join-Path $PSScriptRoot "Test-RuntimeProvenanceDocs.ps1"
+& $runtimeDocsScript -RepositoryRoot $RepositoryRoot
+
 $slnPath = Resolve-RepoPath "Images.sln"
 if (-not (Test-Path -LiteralPath $slnPath)) {
     throw "Images.sln not found at $slnPath."

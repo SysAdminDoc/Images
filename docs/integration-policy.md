@@ -86,9 +86,10 @@ Copy this block into a new design or decision document before adding the integra
 
 | Integration | Review status | Notes |
 | --- | --- | --- |
-| Magick.NET | Accepted | Existing NuGet dependency; release workflow vulnerable-package gate covers managed package advisories. |
-| Ghostscript | Conditionally accepted | Optional app-local/system runtime; bundling requires exact approved artifact and SHA-256 continuity. See `docs/codec-bundling.md`. |
-| SharpCompress 0.48.1 | Accepted | Managed MIT NuGet dependency for read-only RAR/CBR and 7z/CB7 archive books. Upgraded from 0.47.4 after GHSA-6c8g-7p36-r338 / CVE-2026-44788 flagged the extraction helper API that Images does not call. See `docs/archive-runtime-review.md`. |
+| Magick.NET 14.14.0 | Accepted | Existing NuGet dependency; release workflow vulnerable-package gate covers managed package advisories. |
+| Ghostscript 10.07.0 | Conditionally accepted | Optional app-local/system runtime; bundling requires exact approved artifact and SHA-256 continuity. See `docs/codec-bundling.md`. |
+| SharpCompress 0.49.1 | Accepted | Managed MIT NuGet dependency for read-only RAR/CBR and 7z/CB7 archive books. Upgraded from 0.47.4 after GHSA-6c8g-7p36-r338 / CVE-2026-44788 flagged the extraction helper API that Images does not call. See `docs/archive-runtime-review.md`. |
+| Microsoft.Data.Sqlite 10.0.9 + SQLitePCLRaw.bundle_e_sqlite3 3.0.3 | Accepted | App-local catalog, settings, and semantic index storage use managed ADO.NET over the bundled SQLitePCLRaw e_sqlite3 runtime; release readiness keeps package and vulnerability gates local. |
 | Windows.Media.Ocr | Accepted | In-box Windows API; no bundled runtime. |
 | 7-Zip/UnRAR native archive readers | Not reviewed | Native sidecars remain unapproved; ZIP/CBZ use .NET built-in APIs and RAR/7z use the reviewed managed SharpCompress path. |
 | jpegtran.exe | Accepted for release staging through reviewed libjpeg-turbo 3.1.4.1 artifact | Lossless JPEG crop/rotation planning, runtime diagnostics, exact MCU-aligned writeback, right-angle rotation writeback, confirmed-trim UI, exact artifact URL, license files, `jpegtran.exe` plus `jpeg62.dll` SHA-256 provenance, staging script, and release diagnostics smoke are documented in `docs/lossless-jpeg-transform-policy.md` and `src/Images/Codecs/JpegTran/PROVENANCE.md`. Runtime binaries remain ignored by git and are staged only for build/publish output. |

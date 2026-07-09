@@ -13,6 +13,7 @@ All notable changes to **Images** are documented here.
 - **Command palette mode noise reduced** - Legacy workflow-mode entries are no longer advertised in command search after the Review workflow removal.
 - **Workflow modes collapsed to the default viewer** - Organize/Edit/Book/Diagnostics mode state is no longer restored or advertised; legacy stored values normalize back to Viewer.
 - **Review documentation purged from live guidance** - Accessibility and product-planning docs no longer present the retired Review/rating workflow as current UI, and the manual screen-reader matrix now covers active viewer surfaces instead.
+- **Runtime provenance docs are gated** - Release readiness now fails when current runtime/package documentation drifts from Magick.NET, SharpCompress, Ghostscript, jpegtran, or SQLite package provenance, and archive docs now match SharpCompress 0.49.1.
 
 ### Fixed
 
