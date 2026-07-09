@@ -129,13 +129,12 @@ License: MIT
 LicenseUrl: https://github.com/SysAdminDoc/Images/blob/main/LICENSE
 ShortDescription: Local-first Windows image viewer with broad codec support and inline rename.
 Description: >-
-  A Windows 7-style classic image viewer reimagined in dark mode. Supports 100+
-  formats via WIC and Magick.NET, inline rename-while-viewing with conflict
-  resolution and undo, folder navigation with natural sort, animated GIF/WebP/APNG
-  playback, text extraction via Windows OCR, archive book previews, gallery and
-  review workflows, non-destructive editing, batch processing, and export with
-  visual diff preview. Local-first with no cloud, no telemetry, and transparent
-  network behavior.
+  A premium, local-first Windows image viewer with a compact image-first workspace.
+  Supports 100+ formats via WIC and Magick.NET, inline rename-while-viewing with
+  conflict resolution and undo, folder navigation with natural sort, animated
+  GIF/WebP/APNG playback, text extraction via Windows OCR, archive book previews,
+  gallery browsing, non-destructive editing, batch processing, and export with
+  visual diff preview. No cloud, no telemetry, and transparent network behavior.
 Tags:
   - image-viewer
   - photo-viewer
