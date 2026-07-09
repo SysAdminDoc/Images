@@ -12,6 +12,10 @@ All notable changes to **Images** are documented here.
 - **Default viewer controls are quieter** - Compare, Export, Print, Save-copy, and GPS-strip actions no longer sit in the bottom viewer toolbar; those power tools remain available through the context menu and command palette.
 - **Command palette mode noise reduced** - Legacy workflow-mode entries are no longer advertised in command search after the Review workflow removal.
 
+### Fixed
+
+- **Sidecar writes are collision-safe** - XMP sidecar saves now use unique temp files and serialize final swaps so parallel tag/import/Picasa writes cannot collide on a shared temp path or leave stale temp files behind.
+
 ## 0.2.20
 
 ### Removed

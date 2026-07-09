@@ -11,6 +11,8 @@ namespace Images.Services;
 /// </summary>
 internal static class SidecarWriter
 {
+    private static readonly object SwapGate = new();
+
     public static void SaveAtomically(XDocument document, string sidecarPath, SaveOptions options = SaveOptions.None)
     {
         ArgumentNullException.ThrowIfNull(document);
@@ -20,20 +22,35 @@ internal static class SidecarWriter
         if (!string.IsNullOrEmpty(directory))
             Directory.CreateDirectory(directory);
 
-        var tempPath = sidecarPath + ".images-tmp";
+        var tempPath = sidecarPath + $".{Guid.NewGuid():N}.images-tmp";
         try
         {
             document.Save(tempPath, options);
 
-            if (File.Exists(sidecarPath))
-                File.Replace(tempPath, sidecarPath, null);
-            else
-                File.Move(tempPath, sidecarPath);
+            lock (SwapGate)
+            {
+                if (File.Exists(sidecarPath))
+                    File.Replace(tempPath, sidecarPath, null);
+                else
+                    File.Move(tempPath, sidecarPath);
+            }
+        }
+        finally
+        {
+            TryDeleteFile(tempPath);
+        }
+    }
+
+    private static void TryDeleteFile(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+                File.Delete(path);
         }
         catch
         {
-            try { if (File.Exists(tempPath)) File.Delete(tempPath); } catch { }
-            throw;
+            // Best-effort cleanup only. The original sidecar remains intact.
         }
     }
 }
