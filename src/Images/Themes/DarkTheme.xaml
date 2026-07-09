@@ -58,19 +58,19 @@
 
     <!-- ============ Semantic surfaces + chrome ============ -->
     <!-- Viewport is deep near-black for image contrast; panels use Mantle; overlays use translucent Crust -->
-    <SolidColorBrush x:Key="ViewportBrush" Color="#FF070910" />
-    <SolidColorBrush x:Key="ViewerSurfaceBrush" Color="#FF070910" />
-    <SolidColorBrush x:Key="PanelBrush" Color="#F5161825" />
-    <SolidColorBrush x:Key="SurfacePanelBrush" Color="#70313244" />
-    <SolidColorBrush x:Key="HairlineBrush" Color="#3645475A" />
-    <SolidColorBrush x:Key="DividerBrush" Color="#33CDD6F4" />
+    <SolidColorBrush x:Key="ViewportBrush" Color="#FF090B0F" />
+    <SolidColorBrush x:Key="ViewerSurfaceBrush" Color="#FF090B0F" />
+    <SolidColorBrush x:Key="PanelBrush" Color="#FA15181D" />
+    <SolidColorBrush x:Key="SurfacePanelBrush" Color="#70282C33" />
+    <SolidColorBrush x:Key="HairlineBrush" Color="#40545A66" />
+    <SolidColorBrush x:Key="DividerBrush" Color="#36545A66" />
     <SolidColorBrush x:Key="FloatingChromeBrush" Color="#D30B0D14" />
     <SolidColorBrush x:Key="FloatingChromeBorderBrush" Color="#3345475A" />
     <SolidColorBrush x:Key="FloatingChromeTextBrush" Color="#FFE8ECF7" />
     <SolidColorBrush x:Key="ToastBrush" Color="#EB11111B" />
     <SolidColorBrush x:Key="WarningPanelBrush" Color="#1FF9E2AF" />
     <SolidColorBrush x:Key="DangerPanelBrush" Color="#1FF38BA8" />
-    <SolidColorBrush x:Key="FocusRingBrush" Color="#CC89B4FA" />
+    <SolidColorBrush x:Key="FocusRingBrush" Color="#E6F6C177" />
     <SolidColorBrush x:Key="DropOverlayBrush" Color="#D911111B" />
     <SolidColorBrush x:Key="DropOverlayPanelBrush" Color="#F211111B" />
     <SolidColorBrush x:Key="OcrRegionBrush" Color="#4D89B4FA" />
@@ -89,11 +89,11 @@
     <SolidColorBrush x:Key="SubtleSurfaceBrush" Color="#10313244" />
     <SolidColorBrush x:Key="AccentWarmBrush" Color="#FFF6C177" />
     <SolidColorBrush x:Key="AccentWarmPanelBrush" Color="#22F6C177" />
-    <SolidColorBrush x:Key="NavRailBrush" Color="#F50F1118" />
-    <SolidColorBrush x:Key="NavRailBorderBrush" Color="#2945475A" />
-    <SolidColorBrush x:Key="WorkspaceTopBarBrush" Color="#E8181825" />
-    <SolidColorBrush x:Key="WorkspaceTopBarBorderBrush" Color="#4DCDD6F4" />
-    <SolidColorBrush x:Key="InspectorPanelBrush" Color="#F3171924" />
+    <SolidColorBrush x:Key="NavRailBrush" Color="#FF101318" />
+    <SolidColorBrush x:Key="NavRailBorderBrush" Color="#40545A66" />
+    <SolidColorBrush x:Key="WorkspaceTopBarBrush" Color="#FC15181D" />
+    <SolidColorBrush x:Key="WorkspaceTopBarBorderBrush" Color="#40545A66" />
+    <SolidColorBrush x:Key="InspectorPanelBrush" Color="#FE15181D" />
 
     <!-- ============ Radius scale ============ -->
     <!-- Restrained geometry keeps dense tool surfaces professional and compact. -->
@@ -1095,6 +1095,18 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style x:Key="ToolbarTextButton" TargetType="Button" BasedOn="{StaticResource ChromeButton}">
+        <Setter Property="Width" Value="48" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="8,0" />
+        <Setter Property="Background" Value="{DynamicResource AccentWarmPanelBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentWarmBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentWarmBrush}" />
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
     <!-- ============ PasswordBox ============ -->

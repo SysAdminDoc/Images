@@ -4,6 +4,13 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### Changed
+
+- **Viewer workspace reimagined around the image** - The main shell now uses a 52px navigation rail, neutral charcoal canvas, 300px contextual inspector, shorter filmstrip, warm focus/selection accents, and a compact navigation/fit/zoom command row with advanced actions removed from permanent chrome.
+- **Inspector and empty states debloated** - Duplicate recent-folder/history sections, routine metadata warnings, advanced tool cards, marketing-style capability copy, and redundant settings/diagnostics actions no longer compete with the active image; deeper color analysis remains available under More details.
+- **Gallery and settings hierarchy tightened** - Gallery now shares the viewer canvas, keeps search plus common sort modes visible, and uses warm tile selection; Settings uses a smaller title hierarchy and concise automatic-save status instead of a decorative header tile and feature inventory.
+- **Premium viewer mockup captured** - The image-generated design target is preserved at `assets/mockups/premium-viewer-v0.2.25.png` for visual parity checks.
+
 ## 0.2.24
 
 ### Fixed

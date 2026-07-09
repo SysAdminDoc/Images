@@ -2833,6 +2833,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public string MetadataStatusText => _photoMetadata.StatusText;
 
+    public bool ShowMetadataStatus =>
+        !string.IsNullOrWhiteSpace(MetadataStatusText) &&
+        !string.Equals(MetadataStatusText, PhotoMetadataController.EmptyStatusText, StringComparison.Ordinal);
+
     public bool IsMetadataLoading => _photoMetadata.IsLoading;
 
     public bool CanToggleMetadataHud => HasDisplayImage && !IsPeekMode;
@@ -2879,6 +2883,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         Raise(nameof(IsMetadataLoading));
         Raise(nameof(MetadataStatusText));
+        Raise(nameof(ShowMetadataStatus));
     }
 
     public ObservableCollection<MetadataFact> ColorAnalysisRows => _colorAnalysis.Rows;

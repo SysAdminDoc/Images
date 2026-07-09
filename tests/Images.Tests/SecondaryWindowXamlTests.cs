@@ -50,6 +50,9 @@ public sealed class SecondaryWindowXamlTests
                 AssertCustomButtonTemplate(
                     "NavRailButton",
                     ["Bd"]);
+                AssertCustomButtonTemplate(
+                    "ToolbarTextButton",
+                    ["Bd"]);
                 AssertVerticalGridSplitterTemplate();
                 AssertThemedPasswordBoxTemplate();
 

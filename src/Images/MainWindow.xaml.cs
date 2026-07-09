@@ -418,6 +418,26 @@ public partial class MainWindow : Window
     private void ResetActiveCanvas() => ActiveImageCanvas().ResetView();
     private void OneToOneActiveCanvas() => ActiveImageCanvas().OneToOne();
 
+    private void FitButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!Vm.HasDisplayImage) return;
+
+        _zoomMode = ZoomPanImage.ZoomMode.Fit;
+        SetActiveZoomMode(_zoomMode);
+    }
+
+    private void ZoomOutButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (Vm.HasDisplayImage)
+            ZoomActiveCanvasBy(1 / 1.2);
+    }
+
+    private void ZoomInButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (Vm.HasDisplayImage)
+            ZoomActiveCanvasBy(1.2);
+    }
+
     // V20-02 + V20-27: restore saved window geometry with per-monitor awareness. When the app
     // was last on monitor X, we try to restore that monitor's saved geometry. Falls back to the
     // generic (legacy) keys, then to the primary work area clamp so nothing lands offscreen.

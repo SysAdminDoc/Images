@@ -1596,7 +1596,7 @@ Details written to:
     <value>Settings</value>
   </data>
   <data name="SettingsSubtitle" xml:space="preserve">
-    <value>Customize startup, appearance, accessibility, hotkeys, diagnostics, and privacy preferences.</value>
+    <value>Preferences save automatically.</value>
   </data>
   <data name="SettingsSectionGeneral" xml:space="preserve">
     <value>General</value>
