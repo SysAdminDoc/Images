@@ -159,7 +159,7 @@ $bom.metadata.component = @{
     type = "application"
     name = "Images"
     version = $version
-    description = "A Windows 7-style classic image viewer, reimagined in dark mode"
+    description = "A premium, local-first Windows image viewer with an image-first workspace"
     licenses = @(
         @{
             license = @{

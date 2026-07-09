@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.png" alt="Images — a Windows 7–style classic image viewer, reimagined in dark mode" width="100%" />
+<img src="assets/banner.png" alt="Images — a premium, local-first Windows image viewer" width="100%" />
 
 # Images
 
@@ -9,7 +9,7 @@
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-cba6f7?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10.0-f38ba8?style=flat-square)](#)
 
-A Windows 7–style classic image viewer, reimagined in dark mode, with inline rename-while-viewing.
+A premium, local-first Windows image viewer with an image-first workspace and inline rename-while-viewing.
 
 </div>
 
@@ -26,7 +26,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Multi-page navigation** for documents and layered/page-based image formats. PDF, TIFF, PSD/PSB, ICO, DICOM, FITS, DCX, and related formats surface page/frame controls only when the current file has more than one page.
 - **Archive book previews** for ZIP/CBZ, RAR/CBR, and 7z/CB7. Images opens supported image entries as read-only pages, promotes explicit cover/front images, ignores unsafe or nested archive entries, keeps archive navigation inside page controls plus book-specific side-panel and edge-turn controls, supports persisted right-to-left page turns and two-page spreads for manga-style books, adds a preview-only clean-scan filter, remembers the last read page locally, and lists recent books with progress in the side panel. ZIP/CBZ use built-in .NET ZIP support; RAR/CBR and 7z/CB7 use the managed SharpCompress reader without extracting entries to disk.
 - **Animated GIFs play inline** — multi-frame GIFs (and animated WebP / APNG when the Magick build supports them) decode via `MagickImageCollection.Coalesce()` and cycle through `ZoomPanImage` with the original per-frame delays + loop count intact. A green "N frames" chip in the bottom toolbar marks animated files.
-- **Classic Windows 7 Photo Viewer layout** — centered image, bottom toolbar, hover-reveal circular arrows on the left and right edges. But in **Catppuccin Mocha** dark.
+- **Image-first viewer layout** — dominant canvas, compact navigation rail, contextual Details inspector, short filmstrip, and hover-reveal arrows keep the active image in control of the workspace.
 - **Multi-path launch** — `Images.exe a.jpg b.png c.webp` opens an ad hoc session containing exactly those files in argument order, supporting next/previous/Home/End navigation. Single-path launch falls back to folder navigation as before.
 - **Peek mode** — `Images.exe --peek "C:\path\to\image.jpg"` opens a chromeless, topmost preview window that closes with Escape and leaves normal window settings alone.
 - **Listen mode** — `Images.exe --listen 9876` (or `-l 9876`) opens the viewer with a local TCP listener on port 9876 (loopback 127.0.0.1 only). Connect with `ncat 127.0.0.1 9876`, send the session token on the first line, then send UTF-8 file paths one per line and the viewer opens or refreshes the sent image live. The green toolbar chip shows the active port and exposes the token in its tooltip; the app log also records it for automation setup. All received paths are logged in the network activity panel.
