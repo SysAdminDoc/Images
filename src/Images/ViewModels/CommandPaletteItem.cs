@@ -6,6 +6,8 @@ public sealed class CommandPaletteItem
     public string Name { get; init; } = "";
     public string Shortcut { get; init; } = "";
     public string Category { get; init; } = "";
+    public string SearchText { get; init; } = "";
+    public int Priority { get; init; } = 50;
     public System.Windows.Input.ICommand? Command { get; init; }
 
     public override string ToString() => Name;

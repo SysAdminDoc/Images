@@ -1066,6 +1066,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             FilteredCommandPaletteItems = _commandPaletteRegistry
                 .Where(c => c.Command?.CanExecute(null) != false)
+                .OrderBy(c => c.Priority)
                 .ToList();
             return;
         }
@@ -1073,12 +1074,36 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var words = filter.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         FilteredCommandPaletteItems = _commandPaletteRegistry
             .Where(c => c.Command?.CanExecute(null) != false)
-            .Where(c => words.All(w =>
-                c.Name.Contains(w, StringComparison.OrdinalIgnoreCase) ||
-                c.Category.Contains(w, StringComparison.OrdinalIgnoreCase) ||
-                c.Shortcut.Contains(w, StringComparison.OrdinalIgnoreCase)))
+            .Where(c => words.All(w => PaletteMatches(c, w)))
+            .OrderBy(c => PaletteFilterRank(c, filter))
+            .ThenBy(c => c.Priority)
             .ToList();
     }
+
+    private static bool PaletteMatches(CommandPaletteItem item, string word)
+        => ContainsPaletteText(item.Name, word)
+           || ContainsPaletteText(item.Category, word)
+           || ContainsPaletteText(item.Shortcut, word)
+           || ContainsPaletteText(item.SearchText, word);
+
+    private static int PaletteFilterRank(CommandPaletteItem item, string filter)
+    {
+        if (item.Name.Equals(filter, StringComparison.OrdinalIgnoreCase))
+            return 0;
+        if (item.Name.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
+            return 10;
+        if (item.Category.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
+            return 20;
+        if (ContainsPaletteText(item.Name, filter))
+            return 30;
+        if (ContainsPaletteText(item.SearchText, filter))
+            return 40;
+        return 50;
+    }
+
+    private static bool ContainsPaletteText(string? haystack, string needle)
+        => !string.IsNullOrWhiteSpace(haystack)
+           && haystack.Contains(needle, StringComparison.OrdinalIgnoreCase);
 
     public void ExecuteSelectedPaletteCommand()
     {
@@ -1231,7 +1256,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private CommandPaletteItem PaletteCommand(string id, ICommand command)
+    private CommandPaletteItem PaletteCommand(
+        string id,
+        ICommand command,
+        int priority = 50,
+        string? category = null,
+        string searchText = "")
     {
         var definition = _commandShortcuts.GetDefinition(id);
         return new CommandPaletteItem
@@ -1239,7 +1269,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             CommandId = id,
             Name = definition.Name,
             Shortcut = _commandShortcuts.GetShortcutText(id),
-            Category = definition.Category,
+            Category = category ?? definition.Category,
+            SearchText = searchText,
+            Priority = priority,
             Command = command,
         };
     }
@@ -1249,41 +1281,41 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var view = Strings.CommandPalette_Category_View;
         var edit = Strings.CommandPalette_Category_Edit;
         var file = Strings.CommandPalette_Category_File;
-        var tools = Strings.CommandPalette_Category_Tools;
+        var advancedTools = Strings.CommandPalette_Category_AdvancedTools;
         var sort = Strings.CommandPalette_Category_Sort;
         var help = Strings.CommandPalette_Category_Help;
 
         var items = new List<CommandPaletteItem>
         {
             // Navigation
-            PaletteCommand(CommandIds.Open, OpenCommand),
-            PaletteCommand(CommandIds.BrowseFolder, BrowseFolderCommand),
-            PaletteCommand(CommandIds.Next, NextCommand),
-            PaletteCommand(CommandIds.Previous, PrevCommand),
-            PaletteCommand(CommandIds.First, FirstCommand),
-            PaletteCommand(CommandIds.Last, LastCommand),
-            PaletteCommand(CommandIds.Refresh, RefreshCommand),
+            PaletteCommand(CommandIds.Open, OpenCommand, priority: 0, searchText: "open image file"),
+            PaletteCommand(CommandIds.BrowseFolder, BrowseFolderCommand, priority: 1, searchText: "open folder directory library"),
+            PaletteCommand(CommandIds.Next, NextCommand, priority: 2, searchText: "forward navigate"),
+            PaletteCommand(CommandIds.Previous, PrevCommand, priority: 3, searchText: "back previous navigate"),
+            PaletteCommand(CommandIds.First, FirstCommand, priority: 4, searchText: "home start"),
+            PaletteCommand(CommandIds.Last, LastCommand, priority: 5, searchText: "end final"),
+            PaletteCommand(CommandIds.Refresh, RefreshCommand, priority: 6, searchText: "rescan reload folder"),
 
             // View
-            PaletteCommand(CommandIds.Filmstrip, ToggleFilmstripCommand),
-            PaletteCommand(CommandIds.MetadataHud, ToggleMetadataHudCommand),
-            PaletteCommand(CommandIds.Gallery, ToggleGalleryCommand),
-            new() { Name = Strings.CommandPalette_Inspector, Category = view, Command = ToggleInspectorCommand },
-            PaletteCommand(CommandIds.ExtractText, ExtractTextCommand),
-            new() { Name = Strings.CommandPalette_ChannelNormal, Category = view, Command = new RelayCommand(() => ChannelMode = ChannelMode.Normal) },
-            new() { Name = Strings.CommandPalette_ChannelRed, Category = view, Command = new RelayCommand(() => ChannelMode = ChannelMode.Red) },
-            new() { Name = Strings.CommandPalette_ChannelGreen, Category = view, Command = new RelayCommand(() => ChannelMode = ChannelMode.Green) },
-            new() { Name = Strings.CommandPalette_ChannelBlue, Category = view, Command = new RelayCommand(() => ChannelMode = ChannelMode.Blue) },
-            new() { Name = Strings.CommandPalette_ChannelAlpha, Category = view, Command = new RelayCommand(() => ChannelMode = ChannelMode.Alpha) },
+            PaletteCommand(CommandIds.Filmstrip, ToggleFilmstripCommand, priority: 10, searchText: "thumbnail rail folder strip"),
+            PaletteCommand(CommandIds.MetadataHud, ToggleMetadataHudCommand, priority: 11, searchText: "info exif details overlay"),
+            PaletteCommand(CommandIds.Gallery, ToggleGalleryCommand, priority: 12, searchText: "thumbnail grid browser"),
+            new() { Name = Strings.CommandPalette_Inspector, Category = view, Priority = 13, SearchText = "details panel sidebar", Command = ToggleInspectorCommand },
+            PaletteCommand(CommandIds.ExtractText, ExtractTextCommand, priority: 14, searchText: "ocr text copy"),
+            new() { Name = Strings.CommandPalette_ChannelNormal, Category = view, Priority = 35, SearchText = "channel rgb normal", Command = new RelayCommand(() => ChannelMode = ChannelMode.Normal) },
+            new() { Name = Strings.CommandPalette_ChannelRed, Category = view, Priority = 35, SearchText = "channel red", Command = new RelayCommand(() => ChannelMode = ChannelMode.Red) },
+            new() { Name = Strings.CommandPalette_ChannelGreen, Category = view, Priority = 35, SearchText = "channel green", Command = new RelayCommand(() => ChannelMode = ChannelMode.Green) },
+            new() { Name = Strings.CommandPalette_ChannelBlue, Category = view, Priority = 35, SearchText = "channel blue", Command = new RelayCommand(() => ChannelMode = ChannelMode.Blue) },
+            new() { Name = Strings.CommandPalette_ChannelAlpha, Category = view, Priority = 35, SearchText = "channel alpha transparency", Command = new RelayCommand(() => ChannelMode = ChannelMode.Alpha) },
 
             // Edit
-            new() { Name = Strings.CommandPalette_RotateCw, Category = edit, Command = RotateCwCommand },
-            new() { Name = Strings.CommandPalette_RotateCcw, Category = edit, Command = RotateCcwCommand },
-            new() { Name = Strings.CommandPalette_Rotate180, Category = edit, Command = Rotate180Command },
-            new() { Name = Strings.CommandPalette_FlipH, Category = edit, Command = FlipHorizontalCommand },
-            new() { Name = Strings.CommandPalette_FlipV, Category = edit, Command = FlipVerticalCommand },
-            PaletteCommand(CommandIds.CropMode, ToggleCropModeCommand),
-            PaletteCommand(CommandIds.SelectionMode, ToggleSelectionModeCommand),
+            new() { Name = Strings.CommandPalette_RotateCw, Category = edit, Priority = 20, SearchText = "turn clockwise", Command = RotateCwCommand },
+            new() { Name = Strings.CommandPalette_RotateCcw, Category = edit, Priority = 20, SearchText = "turn counterclockwise anticlockwise", Command = RotateCcwCommand },
+            new() { Name = Strings.CommandPalette_Rotate180, Category = edit, Priority = 20, SearchText = "turn upside down", Command = Rotate180Command },
+            new() { Name = Strings.CommandPalette_FlipH, Category = edit, Priority = 20, SearchText = "mirror horizontal", Command = FlipHorizontalCommand },
+            new() { Name = Strings.CommandPalette_FlipV, Category = edit, Priority = 20, SearchText = "mirror vertical", Command = FlipVerticalCommand },
+            PaletteCommand(CommandIds.CropMode, ToggleCropModeCommand, priority: 21, searchText: "trim crop selection"),
+            PaletteCommand(CommandIds.SelectionMode, ToggleSelectionModeCommand, priority: 22, searchText: "select region"),
             PaletteCommand(CommandIds.Resize, OpenResizeDialogCommand),
             PaletteCommand(CommandIds.Adjustments, OpenAdjustmentsCommand),
             PaletteCommand(CommandIds.Effects, OpenEffectsCommand),
@@ -1296,14 +1328,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             PaletteCommand(CommandIds.ExportWorkbench, OpenExportWorkbenchCommand),
 
             // File
-            PaletteCommand(CommandIds.Delete, DeleteCommand),
-            PaletteCommand(CommandIds.Reload, ReloadCommand),
-            PaletteCommand(CommandIds.Print, PrintCommand),
-            PaletteCommand(CommandIds.SaveCopy, SaveAsCopyCommand),
-            new() { Name = Strings.CommandPalette_CopyPath, Category = file, Command = CopyPathCommand },
-            new() { Name = Strings.CommandPalette_CopyImage, Category = file, Command = CopyImageCommand },
-            new() { Name = Strings.CommandPalette_Reveal, Category = file, Command = RevealCommand },
-            new() { Name = Strings.CommandPalette_OpenDefault, Category = file, Command = OpenInDefaultAppCommand },
+            PaletteCommand(CommandIds.Delete, DeleteCommand, priority: 15, searchText: "remove recycle bin"),
+            PaletteCommand(CommandIds.Reload, ReloadCommand, priority: 16, searchText: "refresh file"),
+            PaletteCommand(CommandIds.Print, PrintCommand, priority: 55, searchText: "printer paper"),
+            PaletteCommand(CommandIds.SaveCopy, SaveAsCopyCommand, priority: 30, searchText: "export duplicate save as"),
+            new() { Name = Strings.CommandPalette_CopyPath, Category = file, Priority = 17, SearchText = "clipboard filename", Command = CopyPathCommand },
+            new() { Name = Strings.CommandPalette_CopyImage, Category = file, Priority = 18, SearchText = "clipboard bitmap", Command = CopyImageCommand },
+            new() { Name = Strings.CommandPalette_Reveal, Category = file, Priority = 19, SearchText = "explorer show folder select", Command = RevealCommand },
+            new() { Name = Strings.CommandPalette_OpenDefault, Category = file, Priority = 31, SearchText = "open with default app", Command = OpenInDefaultAppCommand },
             new() { Name = Strings.CommandPalette_StripGps, Category = file, Command = StripLocationCommand },
             new() { Name = Strings.CommandPalette_StripDeviceInfo, Category = file, Command = StripDeviceInfoCommand },
             new() { Name = Strings.CommandPalette_StripTimestamps, Category = file, Command = StripTimestampsCommand },
@@ -1315,48 +1347,48 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             new() { Name = Strings.CommandPalette_MoveToFolder, Category = file, Command = MoveToFolderCommand },
 
             // Tools
-            PaletteCommand(CommandIds.ReferenceBoard, OpenReferenceBoardCommand),
-            PaletteCommand(CommandIds.DuplicateCleanup, OpenDuplicateCleanupCommand),
-            PaletteCommand(CommandIds.FileHealthScan, OpenFileHealthScanCommand),
-            new() { Name = Strings.CommandPalette_RecoveryCenter, Category = tools, Command = OpenRecoveryCenterCommand },
-            new() { Name = Strings.CommandPalette_ModelManager, Category = tools, Command = OpenModelManagerCommand },
-            new() { Name = Strings.CommandPalette_SemanticSearch, Category = tools, Command = OpenSemanticSearchCommand },
-            PaletteCommand(CommandIds.TagGraph, OpenTagGraphCommand),
-            PaletteCommand(CommandIds.ImportInbox, OpenImportInboxCommand),
-            PaletteCommand(CommandIds.MacroActions, OpenMacroActionsCommand),
-            PaletteCommand(CommandIds.BatchProcessor, OpenBatchProcessorCommand),
-            PaletteCommand(CommandIds.EditStack, OpenEditStackCommand),
+            PaletteCommand(CommandIds.ReferenceBoard, OpenReferenceBoardCommand, priority: 80, category: advancedTools, searchText: "advanced tool board canvas moodboard references"),
+            PaletteCommand(CommandIds.DuplicateCleanup, OpenDuplicateCleanupCommand, priority: 80, category: advancedTools, searchText: "advanced tool duplicates similar cleanup declutter"),
+            PaletteCommand(CommandIds.FileHealthScan, OpenFileHealthScanCommand, priority: 80, category: advancedTools, searchText: "advanced tool corrupt extension health audit"),
+            new() { Name = Strings.CommandPalette_RecoveryCenter, Category = advancedTools, Priority = 80, SearchText = "restore undo recycle quarantine writeback rollback", Command = OpenRecoveryCenterCommand },
+            new() { Name = Strings.CommandPalette_ModelManager, Category = advancedTools, Priority = 80, SearchText = "local model onnx inference ai", Command = OpenModelManagerCommand },
+            new() { Name = Strings.CommandPalette_SemanticSearch, Category = advancedTools, Priority = 80, SearchText = "search ai clip text embedding find", Command = OpenSemanticSearchCommand },
+            PaletteCommand(CommandIds.TagGraph, OpenTagGraphCommand, priority: 80, category: advancedTools, searchText: "advanced tool tags relationships taxonomy sidecar"),
+            PaletteCommand(CommandIds.ImportInbox, OpenImportInboxCommand, priority: 80, category: advancedTools, searchText: "advanced tool import ingest stage sidecar"),
+            PaletteCommand(CommandIds.MacroActions, OpenMacroActionsCommand, priority: 80, category: advancedTools, searchText: "advanced tool automation json actions"),
+            PaletteCommand(CommandIds.BatchProcessor, OpenBatchProcessorCommand, priority: 80, category: advancedTools, searchText: "advanced tool bulk export convert resize pipeline multiple files"),
+            PaletteCommand(CommandIds.EditStack, OpenEditStackCommand, priority: 80, category: advancedTools, searchText: "advanced tool history non destructive xmp"),
 
             // Compare
-            PaletteCommand(CommandIds.Compare, StartCompareCommand),
-            PaletteCommand(CommandIds.CompareWith, CompareWithCommand),
+            PaletteCommand(CommandIds.Compare, StartCompareCommand, priority: 45, searchText: "two up difference overlay"),
+            PaletteCommand(CommandIds.CompareWith, CompareWithCommand, priority: 45, searchText: "choose comparison image"),
 
             // Slideshow
-            new() { Name = Strings.CommandPalette_ToggleSlideshow, Category = view, Command = ToggleSlideshowCommand },
-            new() { Name = Strings.CommandPalette_PauseSlideshow, Category = view, Command = PauseSlideshowCommand },
-            new() { Name = Strings.CommandPalette_StopSlideshow, Category = view, Command = StopSlideshowCommand },
-            new() { Name = Strings.CommandPalette_SlideshowShuffle, Category = view, Command = ToggleSlideshowShuffleCommand },
-            new() { Name = Strings.CommandPalette_SlideshowFaster, Category = view, Command = IncreaseSlideshowIntervalCommand },
-            new() { Name = Strings.CommandPalette_SlideshowSlower, Category = view, Command = DecreaseSlideshowIntervalCommand },
+            new() { Name = Strings.CommandPalette_ToggleSlideshow, Category = view, Priority = 25, SearchText = "play presentation auto advance", Command = ToggleSlideshowCommand },
+            new() { Name = Strings.CommandPalette_PauseSlideshow, Category = view, Priority = 25, SearchText = "pause presentation", Command = PauseSlideshowCommand },
+            new() { Name = Strings.CommandPalette_StopSlideshow, Category = view, Priority = 25, SearchText = "stop presentation", Command = StopSlideshowCommand },
+            new() { Name = Strings.CommandPalette_SlideshowShuffle, Category = view, Priority = 26, SearchText = "random presentation", Command = ToggleSlideshowShuffleCommand },
+            new() { Name = Strings.CommandPalette_SlideshowFaster, Category = view, Priority = 26, SearchText = "speed presentation", Command = IncreaseSlideshowIntervalCommand },
+            new() { Name = Strings.CommandPalette_SlideshowSlower, Category = view, Priority = 26, SearchText = "speed presentation", Command = DecreaseSlideshowIntervalCommand },
 
             // Sort
-            new() { Name = Strings.CommandPalette_SortName, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.NaturalName)) },
-            new() { Name = Strings.CommandPalette_SortExplorerLike, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ExplorerLike)) },
-            new() { Name = Strings.CommandPalette_SortNameDesc, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.NameDescending)) },
-            new() { Name = Strings.CommandPalette_SortModifiedNewest, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ModifiedNewest)) },
-            new() { Name = Strings.CommandPalette_SortModifiedOldest, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ModifiedOldest)) },
-            new() { Name = Strings.CommandPalette_SortCreatedNewest, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.CreatedNewest)) },
-            new() { Name = Strings.CommandPalette_SortCreatedOldest, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.CreatedOldest)) },
-            new() { Name = Strings.CommandPalette_SortSizeLargest, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.SizeLargest)) },
-            new() { Name = Strings.CommandPalette_SortSizeSmallest, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.SizeSmallest)) },
-            new() { Name = Strings.CommandPalette_SortType, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ExtensionThenName)) },
+            new() { Name = Strings.CommandPalette_SortName, Category = sort, Priority = 40, SearchText = "folder order natural", Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.NaturalName)) },
+            new() { Name = Strings.CommandPalette_SortExplorerLike, Category = sort, Priority = 40, SearchText = "folder order shell explorer fallback", Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ExplorerLike)) },
+            new() { Name = Strings.CommandPalette_SortNameDesc, Category = sort, Priority = 40, SearchText = "folder order reverse z a", Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.NameDescending)) },
+            new() { Name = Strings.CommandPalette_SortModifiedNewest, Category = sort, Priority = 40, SearchText = "folder order date new", Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ModifiedNewest)) },
+            new() { Name = Strings.CommandPalette_SortModifiedOldest, Category = sort, Priority = 40, SearchText = "folder order date old", Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ModifiedOldest)) },
+            new() { Name = Strings.CommandPalette_SortCreatedNewest, Category = sort, Priority = 40, SearchText = "folder order created new", Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.CreatedNewest)) },
+            new() { Name = Strings.CommandPalette_SortCreatedOldest, Category = sort, Priority = 40, SearchText = "folder order created old", Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.CreatedOldest)) },
+            new() { Name = Strings.CommandPalette_SortSizeLargest, Category = sort, Priority = 40, SearchText = "folder order file size big large", Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.SizeLargest)) },
+            new() { Name = Strings.CommandPalette_SortSizeSmallest, Category = sort, Priority = 40, SearchText = "folder order file size small", Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.SizeSmallest)) },
+            new() { Name = Strings.CommandPalette_SortType, Category = sort, Priority = 40, SearchText = "folder order extension kind", Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ExtensionThenName)) },
 
             // Help
-            PaletteCommand(CommandIds.Settings, SettingsCommand),
-            PaletteCommand(CommandIds.CommandPalette, ToggleCommandPaletteCommand),
-            new() { Name = Strings.CommandPalette_About, Category = help, Command = AboutCommand },
-            new() { Name = Strings.CommandPalette_CheckUpdates, Category = help, Command = CheckForUpdatesCommand },
-            PaletteCommand(CommandIds.Paste, PasteFromClipboardCommand),
+            PaletteCommand(CommandIds.Settings, SettingsCommand, priority: 90, searchText: "preferences options"),
+            PaletteCommand(CommandIds.CommandPalette, ToggleCommandPaletteCommand, priority: 90, searchText: "commands search launcher"),
+            new() { Name = Strings.CommandPalette_About, Category = help, Priority = 91, SearchText = "version diagnostics system info", Command = AboutCommand },
+            new() { Name = Strings.CommandPalette_CheckUpdates, Category = help, Priority = 91, SearchText = "release update", Command = CheckForUpdatesCommand },
+            PaletteCommand(CommandIds.Paste, PasteFromClipboardCommand, priority: 32, searchText: "clipboard open image"),
         };
 
         // V20-27: append dynamic "Send to monitor N" entries for each connected display.

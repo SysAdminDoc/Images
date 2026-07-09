@@ -565,6 +565,7 @@ public static class Strings
     public static string CommandPalette_Category_Edit => Get(nameof(CommandPalette_Category_Edit));
     public static string CommandPalette_Category_File => Get(nameof(CommandPalette_Category_File));
     public static string CommandPalette_Category_Tools => Get(nameof(CommandPalette_Category_Tools));
+    public static string CommandPalette_Category_AdvancedTools => Get(nameof(CommandPalette_Category_AdvancedTools));
     public static string CommandPalette_Category_Compare => Get(nameof(CommandPalette_Category_Compare));
     public static string CommandPalette_Category_Help => Get(nameof(CommandPalette_Category_Help));
     public static string CommandPaletteCommandListAutomationName => Get(nameof(CommandPaletteCommandListAutomationName));

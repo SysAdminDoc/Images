@@ -135,6 +135,69 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void CommandPalette_DefaultOrderStartsWithCommonViewerCommands()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var first = WritePng(temp.Path, "a.png");
+            WritePng(temp.Path, "b.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+            viewModel.OpenFile(first);
+            viewModel.RefreshCommandPalette();
+
+            var leadingIds = viewModel.FilteredCommandPaletteItems
+                .Where(item => !string.IsNullOrEmpty(item.CommandId))
+                .Take(7)
+                .Select(item => item.CommandId)
+                .ToArray();
+
+            Assert.Equal(
+                [
+                    CommandIds.Open,
+                    CommandIds.BrowseFolder,
+                    CommandIds.Next,
+                    CommandIds.Previous,
+                    CommandIds.First,
+                    CommandIds.Last,
+                    CommandIds.Refresh
+                ],
+                leadingIds);
+        });
+    }
+
+    [Fact]
+    public void CommandPalette_GroupsAdvancedToolsAndMatchesSynonyms()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.CommandPaletteFilterText = "bulk export";
+
+            var item = Assert.Single(
+                viewModel.FilteredCommandPaletteItems,
+                item => item.CommandId == CommandIds.BatchProcessor);
+            Assert.Equal("Advanced tools", item.Category);
+        });
+    }
+
+    [Fact]
+    public void CommandPalette_ReviewQueryDoesNotReturnRetiredReviewCommands()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.CommandPaletteFilterText = "review";
+
+            Assert.Empty(viewModel.FilteredCommandPaletteItems);
+        });
+    }
+
+    [Fact]
     public void ToggleFilmstrip_PersistsPreferenceAndSwitchesPreviewSurface()
     {
         RunOnSta(() =>

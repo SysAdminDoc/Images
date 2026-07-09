@@ -4102,6 +4102,9 @@ Details written to:
   <data name="CommandPalette_Category_Tools" xml:space="preserve">
     <value>Tools</value>
   </data>
+  <data name="CommandPalette_Category_AdvancedTools" xml:space="preserve">
+    <value>Advanced tools</value>
+  </data>
   <data name="CommandPalette_Category_Compare" xml:space="preserve">
     <value>Compare</value>
   </data>

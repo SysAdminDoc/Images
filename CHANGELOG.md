@@ -8,6 +8,7 @@ All notable changes to **Images** are documented here.
 
 ### Changed
 
+- **Command palette taxonomy tightened** - Common viewer commands now rank first, heavyweight utilities appear under an Advanced tools category, task-oriented synonyms make advanced commands searchable, and Review-related queries no longer surface retired workflow entries.
 - **Explorer-like folder sort fallback added** - Folder sorting now includes an explicit Explorer-like name order that uses a deterministic Shell-style fallback when Images cannot read a live Explorer window's private sort/grouping state.
 - **Viewer shell debloated and premium-polished** - The default rail is now compact icon-only chrome, advanced Search/Batch/Export surfaces no longer occupy the primary rail, the right panel is renamed to Details, and advanced tool cards are removed from the default inspector surface.
 - **Default viewer controls are quieter** - Compare, Export, Print, Save-copy, and GPS-strip actions no longer sit in the bottom viewer toolbar; those power tools remain available through the context menu and command palette.
