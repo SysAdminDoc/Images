@@ -60,15 +60,44 @@ public static class UpdateCheckService
         {
             _log.LogInformation("update-check: GET {Url}", ReleasesApiUrl);
             using var resp = await http.GetAsync(ReleasesApiUrl, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
-            var bytes = resp.Content.Headers.ContentLength ?? -1;
-            var ms = (int)(utcNow() - startedAt).TotalMilliseconds;
-            _log.LogInformation("update-check: {Status} {Bytes} bytes in {Ms} ms", (int)resp.StatusCode, bytes, ms);
-            NetworkEgressService.Record(ReleasesApiUrl, "Update check (GitHub Releases API)", bytes >= 0 ? bytes : 0, ms);
+            var contentLength = resp.Content.Headers.ContentLength;
+            if (contentLength is > MaxReleaseResponseBytes)
+            {
+                var rejectedMs = (int)(utcNow() - startedAt).TotalMilliseconds;
+                _log.LogInformation(
+                    "update-check: {Status} {Bytes} bytes in {Ms} ms",
+                    (int)resp.StatusCode,
+                    contentLength,
+                    rejectedMs);
+                NetworkEgressService.Record(
+                    ReleasesApiUrl,
+                    "Update check (GitHub Releases API)",
+                    contentLength.Value,
+                    rejectedMs);
+                return CompletedCheck(false, null, null, "update response too large");
+            }
 
             if (!resp.IsSuccessStatusCode)
+            {
+                var failedMs = (int)(utcNow() - startedAt).TotalMilliseconds;
+                var failedBytes = contentLength ?? 0;
+                _log.LogInformation(
+                    "update-check: {Status} {Bytes} bytes in {Ms} ms",
+                    (int)resp.StatusCode,
+                    failedBytes,
+                    failedMs);
+                NetworkEgressService.Record(
+                    ReleasesApiUrl,
+                    "Update check (GitHub Releases API)",
+                    failedBytes,
+                    failedMs);
                 return CompletedCheck(false, null, null, $"HTTP {(int)resp.StatusCode}");
+            }
 
-            var release = await ReadReleaseJsonAsync(resp.Content, ct).ConfigureAwait(false);
+            var (release, bytesRead) = await ReadReleaseJsonAsync(resp.Content, ct).ConfigureAwait(false);
+            var ms = (int)(utcNow() - startedAt).TotalMilliseconds;
+            _log.LogInformation("update-check: {Status} {Bytes} bytes in {Ms} ms", (int)resp.StatusCode, bytesRead, ms);
+            NetworkEgressService.Record(ReleasesApiUrl, "Update check (GitHub Releases API)", bytesRead, ms);
             if (release?.TagName is null)
                 return CompletedCheck(false, null, null, "no tag in response");
 
@@ -117,7 +146,7 @@ public static class UpdateCheckService
             writeLastCheckedUtc(utcNow());
     }
 
-    private static async Task<GitHubRelease?> ReadReleaseJsonAsync(HttpContent content, CancellationToken ct)
+    private static async Task<(GitHubRelease? Release, long BytesRead)> ReadReleaseJsonAsync(HttpContent content, CancellationToken ct)
     {
         if (content.Headers.ContentLength is > MaxReleaseResponseBytes)
             throw new InvalidOperationException("update response too large");
@@ -142,7 +171,8 @@ public static class UpdateCheckService
         }
 
         bounded.Position = 0;
-        return await JsonSerializer.DeserializeAsync(bounded, ReleaseJsonContext.Default.GitHubRelease, ct).ConfigureAwait(false);
+        var release = await JsonSerializer.DeserializeAsync(bounded, ReleaseJsonContext.Default.GitHubRelease, ct).ConfigureAwait(false);
+        return (release, bounded.Length);
     }
 
     private static (int major, int minor, int patch)? ParseVersionTag(string tag)

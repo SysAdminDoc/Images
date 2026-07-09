@@ -6,6 +6,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixed
 
+- **Update-check network bytes are accurate** - Successful update checks now record the actual JSON bytes read when the server does not provide `Content-Length`, and oversized responses fail as a completed update-check error instead of an unexpected fault.
 - **Session tray saves are collision-safe** - Saving a session tray now uses a unique sibling temp file instead of clobbering `*.tmp` files, and loading a session reports only entries that were actually added.
 
 ## 0.2.22

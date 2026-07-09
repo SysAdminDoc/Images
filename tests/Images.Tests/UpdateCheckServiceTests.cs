@@ -46,6 +46,36 @@ public sealed class UpdateCheckServiceTests
     }
 
     [Fact]
+    public async Task CheckAsync_WhenContentLengthIsUnknown_RecordsActualBytesRead()
+    {
+        var json = """
+            {
+              "tag_name": "v99.0.0",
+              "html_url": "https://github.com/SysAdminDoc/Images/releases/tag/v99.0.0"
+            }
+            """;
+        NetworkEgressService.Clear();
+        using var http = ClientReturning(new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new UnknownLengthJsonContent(json)
+        });
+
+        try
+        {
+            var result = await UpdateCheckService.CheckAsync(http, FixedClock());
+
+            Assert.True(result.NewerAvailable);
+            var entry = Assert.Single(NetworkEgressService.Entries.Where(entry =>
+                entry.Purpose == "Update check (GitHub Releases API)"));
+            Assert.Equal(Encoding.UTF8.GetByteCount(json), entry.Bytes);
+        }
+        finally
+        {
+            NetworkEgressService.Clear();
+        }
+    }
+
+    [Fact]
     public async Task CheckAsync_WhenReleaseUrlIsUntrusted_FallsBackToLatestReleaseUrl()
     {
         using var http = ClientReturningJson("""
@@ -173,5 +203,24 @@ public sealed class UpdateCheckServiceTests
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             => _send(request, cancellationToken);
+    }
+
+    private sealed class UnknownLengthJsonContent : HttpContent
+    {
+        private readonly byte[] _payload;
+
+        public UnknownLengthJsonContent(string json)
+        {
+            _payload = Encoding.UTF8.GetBytes(json);
+        }
+
+        protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context)
+            => stream.WriteAsync(_payload, 0, _payload.Length);
+
+        protected override bool TryComputeLength(out long length)
+        {
+            length = -1;
+            return false;
+        }
     }
 }
