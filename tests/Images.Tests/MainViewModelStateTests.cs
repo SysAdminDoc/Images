@@ -607,7 +607,7 @@ public sealed class MainViewModelStateTests
             Assert.Equal("Clipboard file not supported", viewModel.SecondaryStatusTitle);
             Assert.Contains("none are formats Images can open", viewModel.SecondaryStatusDetail);
             Assert.Equal(MainViewModel.SecondaryStatusToneKind.Warning, viewModel.SecondaryStatusTone);
-            Assert.Equal("No supported image in the clipboard file list", viewModel.ToastMessage);
+            Assert.Equal("Clipboard file list does not contain a supported image", viewModel.ToastMessage);
         });
     }
 

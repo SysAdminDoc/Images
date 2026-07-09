@@ -108,7 +108,7 @@ public sealed class ClipboardImportService
             return new ClipboardImportResult(
                 ClipboardImportStatus.NoSupportedFile,
                 null,
-                "No supported image in the clipboard file list");
+                "Clipboard file list does not contain a supported image");
         }
 
         if (_clipboard.ContainsImage())
@@ -119,7 +119,7 @@ public sealed class ClipboardImportService
                 return new ClipboardImportResult(
                     ClipboardImportStatus.ImageUnavailable,
                     null,
-                    "Could not read clipboard image data");
+                    "Could not read the clipboard image");
             }
 
             var clipDir = _getClipboardDirectory();
@@ -128,13 +128,13 @@ public sealed class ClipboardImportService
                 return new ClipboardImportResult(
                     ClipboardImportStatus.StorageUnavailable,
                     null,
-                    "Paste failed: could not create temp folder");
+                    "Paste failed: could not create a temporary folder");
             }
+
+            QueuePruneSafely(clipDir);
 
             try
             {
-                _queuePrune(clipDir);
-
                 var tempPath = CreateClipboardImagePath(clipDir, _getUtcNow(), _newGuid());
                 SavePng(bitmap, tempPath);
 
@@ -156,7 +156,19 @@ public sealed class ClipboardImportService
         return new ClipboardImportResult(
             ClipboardImportStatus.NothingImageLike,
             null,
-            "Nothing image-like in the clipboard");
+            "Clipboard does not contain an image");
+    }
+
+    private void QueuePruneSafely(string clipDir)
+    {
+        try
+        {
+            _queuePrune(clipDir);
+        }
+        catch (Exception ex)
+        {
+            _log.LogDebug(ex, "Clipboard image pruning could not be queued for {Directory}", clipDir);
+        }
     }
 
     public static string CreateClipboardImagePath(string clipDir, DateTimeOffset utcNow, Guid guid)

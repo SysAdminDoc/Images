@@ -42,7 +42,7 @@ public sealed class ClipboardImportServiceTests
 
         Assert.Equal(ClipboardImportStatus.NoSupportedFile, result.Status);
         Assert.Null(result.Path);
-        Assert.Equal("No supported image in the clipboard file list", result.Message);
+        Assert.Equal("Clipboard file list does not contain a supported image", result.Message);
     }
 
     [Fact]
@@ -88,6 +88,26 @@ public sealed class ClipboardImportServiceTests
     }
 
     [Fact]
+    public void Import_ImageData_WhenPruneQueueFails_StillSavesImage()
+    {
+        using var temp = TestDirectory.Create();
+        var source = new FakeClipboardDataSource
+        {
+            Image = CreateBitmap()
+        };
+        var service = CreateService(
+            source,
+            temp.Path,
+            queuePrune: _ => throw new InvalidOperationException("queue unavailable"));
+
+        var result = service.Import();
+
+        Assert.Equal(ClipboardImportStatus.OpenSavedImage, result.Status);
+        Assert.NotNull(result.Path);
+        Assert.True(File.Exists(result.Path));
+    }
+
+    [Fact]
     public void Import_ImageDataWithoutStorage_ReturnsStorageMessage()
     {
         var source = new FakeClipboardDataSource
@@ -104,7 +124,7 @@ public sealed class ClipboardImportServiceTests
 
         Assert.Equal(ClipboardImportStatus.StorageUnavailable, result.Status);
         Assert.Null(result.Path);
-        Assert.Equal("Paste failed: could not create temp folder", result.Message);
+        Assert.Equal("Paste failed: could not create a temporary folder", result.Message);
     }
 
     [Fact]
@@ -117,7 +137,7 @@ public sealed class ClipboardImportServiceTests
 
         Assert.Equal(ClipboardImportStatus.NothingImageLike, result.Status);
         Assert.Null(result.Path);
-        Assert.Equal("Nothing image-like in the clipboard", result.Message);
+        Assert.Equal("Clipboard does not contain an image", result.Message);
     }
 
     [Fact]
@@ -148,13 +168,15 @@ public sealed class ClipboardImportServiceTests
         FakeClipboardDataSource source,
         string clipboardDirectory,
         Func<DateTimeOffset>? getUtcNow = null,
-        Func<Guid>? newGuid = null)
+        Func<Guid>? newGuid = null,
+        Action<string>? queuePrune = null)
     {
         return new ClipboardImportService(
             source,
             () => clipboardDirectory,
             getUtcNow ?? (() => DateTimeOffset.UnixEpoch),
-            newGuid ?? (() => Guid.Empty));
+            newGuid ?? (() => Guid.Empty),
+            queuePrune);
     }
 
     private static BitmapSource CreateBitmap()
