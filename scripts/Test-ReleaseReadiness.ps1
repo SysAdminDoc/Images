@@ -181,6 +181,13 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
     $Version = Get-ProjectVersion
 }
 
+if (-not $SkipPackageManifestValidation) {
+    $packageHashScript = Join-Path $PSScriptRoot "Test-PackageManifestHashes.ps1"
+    & $packageHashScript `
+        -RepositoryRoot $RepositoryRoot `
+        -Version $Version
+}
+
 $slnPath = Resolve-RepoPath "Images.sln"
 if (-not (Test-Path -LiteralPath $slnPath)) {
     throw "Images.sln not found at $slnPath."

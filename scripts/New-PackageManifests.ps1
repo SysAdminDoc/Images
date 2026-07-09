@@ -44,6 +44,13 @@ if (-not (Test-Path -LiteralPath $ChecksumFile)) {
     throw "Checksum file not found: $ChecksumFile"
 }
 
+$hashValidationScript = Join-Path $PSScriptRoot "Test-PackageManifestHashes.ps1"
+& $hashValidationScript `
+    -RepositoryRoot $RepositoryRoot `
+    -Version $Version `
+    -ChecksumFile $ChecksumFile `
+    -SkipCommittedManifests
+
 $checksumContent = Get-Content -LiteralPath $ChecksumFile -Encoding ascii
 $hashes = @{}
 foreach ($line in $checksumContent) {

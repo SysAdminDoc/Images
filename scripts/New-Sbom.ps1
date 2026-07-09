@@ -16,6 +16,17 @@ if ([string]::IsNullOrWhiteSpace($OutputDir)) {
 
 New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 
+function ConvertFrom-JsonCompat {
+    param([Parameter(Mandatory)][string]$Json)
+
+    $convertCommand = Get-Command ConvertFrom-Json
+    if ($convertCommand.Parameters.ContainsKey("Depth")) {
+        return $Json | ConvertFrom-Json -Depth 50
+    }
+
+    return $Json | ConvertFrom-Json
+}
+
 $projectPath = Join-Path $RepositoryRoot "src\Images\Images.csproj"
 if (-not (Test-Path -LiteralPath $projectPath)) {
     throw "Project file not found: $projectPath"
@@ -38,7 +49,7 @@ if (-not (Test-Path -LiteralPath $nugetBomPath)) {
     throw "CycloneDX output not found at expected path: $nugetBomPath"
 }
 
-$bom = Get-Content -Raw -LiteralPath $nugetBomPath | ConvertFrom-Json -Depth 50
+$bom = ConvertFrom-JsonCompat -Json (Get-Content -Raw -LiteralPath $nugetBomPath)
 
 $nativeComponents = @()
 
@@ -165,7 +176,7 @@ $bom | ConvertTo-Json -Depth 50 | Set-Content -LiteralPath $sbomPath -Encoding u
 $provenancePath = Join-Path $OutputDir "Images-v${version}-provenance.txt"
 $provenanceLines = @(
     "Images v$version - Release Provenance Summary"
-    "Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC' -AsUTC)"
+    "Generated: $([DateTime]::UtcNow.ToString('yyyy-MM-dd HH:mm:ss UTC', [Globalization.CultureInfo]::InvariantCulture))"
     ""
     "== NuGet Dependencies =="
 )
