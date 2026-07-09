@@ -15,6 +15,7 @@ All notable changes to **Images** are documented here.
 ### Fixed
 
 - **Sidecar writes are collision-safe** - XMP sidecar saves now use unique temp files and serialize final swaps so parallel tag/import/Picasa writes cannot collide on a shared temp path or leave stale temp files behind.
+- **Import duplicate scans stay inside the destination tree** - Import Inbox destination hashing now skips reparse-point directories, matching the source scan guard so linked folders outside the library cannot be traversed for duplicate detection.
 
 ## 0.2.20
 

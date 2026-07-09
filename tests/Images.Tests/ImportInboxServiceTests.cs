@@ -46,6 +46,25 @@ public sealed class ImportInboxServiceTests
     }
 
     [Fact]
+    public void BuildInbox_SkipsDestinationReparsePointDirectories()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Directory.CreateDirectory(Path.Combine(temp.Path, "source")).FullName;
+        var destination = Directory.CreateDirectory(Path.Combine(temp.Path, "library")).FullName;
+        var linkedTarget = Directory.CreateDirectory(Path.Combine(temp.Path, "linked-target")).FullName;
+        var imported = WriteFile(source, "incoming.png", [4, 5, 6]);
+        WriteFile(linkedTarget, "outside-duplicate.png", [4, 5, 6]);
+        ReparsePointTestHelper.CreateDirectoryLinkOrSkip(Path.Combine(destination, "linked"), linkedTarget);
+
+        var result = new ImportInboxService().BuildInbox([source], destination);
+
+        var item = Assert.Single(result.Items);
+        Assert.Equal(imported, item.Path);
+        Assert.False(item.IsDuplicateInDestination);
+        Assert.Equal(0, result.DestinationDuplicateCount);
+    }
+
+    [Fact]
     public void Commit_CopiesFileWritesExpandedTagsAndRatingSidecar()
     {
         using var temp = TestDirectory.Create();

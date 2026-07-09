@@ -449,19 +449,60 @@ public sealed class ImportInboxService
             if (!Directory.Exists(folder))
                 return hashes;
 
-            foreach (var file in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories))
+            var pending = new Stack<string>();
+            pending.Push(folder);
+
+            while (pending.Count > 0)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (!SupportedImageFormats.IsSupported(file))
-                    continue;
+                var directory = pending.Pop();
 
                 try
                 {
-                    hashes.Add(ComputeSha256(file, cancellationToken));
+                    foreach (var file in Directory.EnumerateFiles(directory))
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        if (!SupportedImageFormats.IsSupported(file))
+                            continue;
+
+                        try
+                        {
+                            hashes.Add(ComputeSha256(file, cancellationToken));
+                        }
+                        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
+                        {
+                            Log.LogDebug(ex, "Could not hash destination library file {Path}", file);
+                        }
+                    }
                 }
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
                 {
-                    Log.LogDebug(ex, "Could not hash destination library file {Path}", file);
+                    Log.LogDebug(ex, "Could not enumerate destination library files under {Path}", directory);
+                }
+
+                try
+                {
+                    foreach (var child in Directory.EnumerateDirectories(directory))
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        try
+                        {
+                            var attributes = File.GetAttributes(child);
+                            if ((attributes & FileAttributes.ReparsePoint) != 0)
+                                continue;
+                        }
+                        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
+                        {
+                            Log.LogDebug(ex, "Could not inspect destination library child directory {Path}", child);
+                            continue;
+                        }
+
+                        pending.Push(child);
+                    }
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
+                {
+                    Log.LogDebug(ex, "Could not enumerate destination library directories under {Path}", directory);
                 }
             }
         }
