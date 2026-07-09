@@ -12,6 +12,7 @@ All notable changes to **Images** are documented here.
 - **Default viewer controls are quieter** - Compare, Export, Print, Save-copy, and GPS-strip actions no longer sit in the bottom viewer toolbar; those power tools remain available through the context menu and command palette.
 - **Command palette mode noise reduced** - Legacy workflow-mode entries are no longer advertised in command search after the Review workflow removal.
 - **Workflow modes collapsed to the default viewer** - Organize/Edit/Book/Diagnostics mode state is no longer restored or advertised; legacy stored values normalize back to Viewer.
+- **Review documentation purged from live guidance** - Accessibility and product-planning docs no longer present the retired Review/rating workflow as current UI, and the manual screen-reader matrix now covers active viewer surfaces instead.
 
 ### Fixed
 

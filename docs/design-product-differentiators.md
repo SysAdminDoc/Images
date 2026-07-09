@@ -311,21 +311,18 @@ Inspect exact pixel data, transparency, channels, and HDR/technical images witho
 
 ### User Promise
 
-Cull, rate, tag, filter, and move images locally while keeping user intent portable and reversible.
+Tag, filter, and move images locally while keeping user intent portable and reversible. Dedicated culling/review surfaces are retired product direction after the v0.2.20 viewer debloat.
 
 ### MVP Scope
 
-- Add app-local pick/reject and 1-5 rating first.
-- Add keep/reject culling panel with move/copy target, undo, and clear per-folder review state.
-- Add metadata sort/filter in the folder preview: rating, pick/reject, capture date, modified date, extension.
+- Keep metadata filtering focused on facts the app already reads, such as tags, capture date, modified date, extension, dimensions, and sidecar presence.
 - Decide sidecar format before any portable writes. Preferred first sidecar: adjacent app-owned XMP or JSON sidecar; no embedded original writes by default.
 - Expose "clear local library data" and "open sidecar location" where applicable.
 
 ### Architecture Sketch
 
 - `LibraryCatalog`: app-local records keyed by asset identity.
-- `AssetMetadataRecord`: rating, pick state, labels, sidecar status, timestamps.
-- `CullingWorkflowController`: review queue, current decision, undo stack, move/copy execution.
+- `AssetMetadataRecord`: labels, tags, sidecar status, timestamps, and file facts.
 - `MetadataWriteService`: future sidecar writer behind an interface and explicit confirmation.
 
 ### Non-Goals
@@ -337,15 +334,14 @@ Cull, rate, tag, filter, and move images locally while keeping user intent porta
 
 ### Test Gates
 
-- Ratings and pick/reject state survive app restart.
 - Missing/offline files stay visible as recoverable records, not silent deletes.
 - Move/copy actions are atomic per file and report partial failures.
-- Undo restores file location and review state where possible.
+- Undo restores file location and app-owned metadata state where possible.
 - Sidecar writes, once added, are covered for malformed paths and concurrent file changes.
 
 ### Risks And Decisions
 
-- The app can become heavy if library mode leaks into the core viewer. Keep folder-local review as the first step and let full catalogs emerge only after users have reliable culling primitives.
+- The app can become heavy if library mode leaks into the core viewer. Keep metadata tools behind explicit user actions and do not reintroduce a permanent culling surface.
 
 ## Recommended Sequencing
 
@@ -353,8 +349,8 @@ Cull, rate, tag, filter, and move images locally while keeping user intent porta
 2. `RS-01` Compare/overlay mode: high user value and reuses existing decode/viewport infrastructure.
 3. `RS-06` Pixel tools: color picker and alpha background are compact, trust-building tools for broad-format users.
 4. `RS-07` Viewer-side adjustments: pairs naturally with save-copy export and operation-status work.
-5. `RS-04` Library/metadata culling: requires selection, sidecar/catalog decisions, and stronger undo semantics.
-6. Duplicate cleanup: should reuse compare mode and culling actions instead of inventing its own review UI.
+5. `RS-04` Library/metadata workflow: restrict to tag/filter/sidecar portability work unless a future product decision explicitly reverses the v0.2.20 debloat.
+6. Duplicate cleanup: should reuse compare mode and file actions instead of inventing another permanent rail.
 7. `RS-02` Archive/book navigation: useful but needs dependency/security review before code.
 8. Local semantic search: strongest long-term differentiator, but model/index/dependency choices make it the heaviest first implementation.
 

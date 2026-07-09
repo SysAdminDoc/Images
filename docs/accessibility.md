@@ -84,24 +84,6 @@ The rename section in the right panel:
 
 Rename status (Pending/Saved/Conflict/Error) is communicated visually via a colored dot; the `RenameStatusText` and `RenamePreview` text blocks next to it provide the same information as plain text for screen readers.
 
-## Rating and review
-
-The review section (`Name="Review labels"`) contains:
-
-**Star ratings** (1-5 buttons plus clear):
-- `"Rate one star"` through `"Rate five stars"`
-- `"Clear rating"` (the 0 button)
-
-**Pick/Reject labels:**
-- `"Mark pick"` -- highlighted green when active (`IsReviewPick`)
-- `"Mark reject"` -- highlighted red when active (`IsReviewReject`)
-- `"Clear review label"`
-- `"Undo review label"`
-
-The review mode toggle: `Name="Toggle review mode"`, with dynamic text from `ReviewModeText`.
-
-All review buttons are disabled (`IsEnabled=false`) when `CanUseReviewLabels` is false, which screen readers report as unavailable.
-
 ## Toolbar and side-panel actions
 
 Key toolbar buttons expose `AutomationProperties.Name`:
@@ -191,9 +173,6 @@ Audited 2026-06-19 against WCAG 2.2 success criteria 2.5.7 (Dragging Movements) 
 | `NavArrowButton` (style) | 58 x 58 | Pass |
 | Page nav buttons (page scrubber area) | 30 x 26 | Pass |
 | Folder sort button | Padding 9,4 + MinHeight 26 | Pass |
-| Toggle review mode button | MinHeight 28 | Pass |
-| Star rating buttons (1-5, 0) | ChromeButton (MinHeight 34) | Pass |
-| Pick / Reject / Clear / Undo buttons | ChromeButton (MinHeight 34) | Pass |
 | Crop overlay Apply button | MinWidth 78, MinHeight 32 | Pass |
 | Selection overlay Copy / Clear buttons | MinWidth 72, MinHeight 32 | Pass |
 | Channel isolation chip | Padding 8,2 + MinHeight 24 | Pass (fixed) |
