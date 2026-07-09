@@ -4333,6 +4333,9 @@ Details written to:
   <data name="CommandPalette_SortName" xml:space="preserve">
     <value>Sort by name (natural)</value>
   </data>
+  <data name="CommandPalette_SortExplorerLike" xml:space="preserve">
+    <value>Sort by Explorer-like name order</value>
+  </data>
   <data name="CommandPalette_SortNameDesc" xml:space="preserve">
     <value>Sort by name (Z to A)</value>
   </data>
@@ -4618,6 +4621,9 @@ Details written to:
   </data>
   <data name="AutomationMainWindowSortGalleryByName" xml:space="preserve">
     <value>Sort gallery by name</value>
+  </data>
+  <data name="AutomationMainWindowSortGalleryByExplorerLikeName" xml:space="preserve">
+    <value>Sort gallery by Explorer-like name order</value>
   </data>
   <data name="AutomationMainWindowSortGalleryByNewestModifiedDate" xml:space="preserve">
     <value>Sort gallery by newest modified date</value>

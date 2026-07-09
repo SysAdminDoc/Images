@@ -446,6 +446,7 @@ public sealed class DirectoryNavigator : IDisposable
     {
         return mode switch
         {
+            DirectorySortMode.ExplorerLike => CompareExplorerLikeName(a, b),
             DirectorySortMode.NameDescending => -CompareNaturalName(a, b),
             DirectorySortMode.ModifiedNewest => ThenByName(CompareDescending(GetLastWriteUtc(a), GetLastWriteUtc(b)), a, b),
             DirectorySortMode.ModifiedOldest => ThenByName(CompareAscending(GetLastWriteUtc(a), GetLastWriteUtc(b)), a, b),
@@ -599,11 +600,28 @@ public sealed class DirectoryNavigator : IDisposable
 
     private static int CompareNaturalName(string a, string b)
     {
-        var result = StrCmpLogicalW(Path.GetFileName(a), Path.GetFileName(b));
+        var result = CompareLogicalText(Path.GetFileName(a), Path.GetFileName(b));
         return result != 0
             ? result
             : StringComparer.OrdinalIgnoreCase.Compare(a, b);
     }
+
+    private static int CompareExplorerLikeName(string a, string b)
+    {
+        var name = CompareLogicalText(
+            Path.GetFileNameWithoutExtension(a),
+            Path.GetFileNameWithoutExtension(b));
+        if (name != 0)
+            return name;
+
+        var extension = StringComparer.OrdinalIgnoreCase.Compare(Path.GetExtension(a), Path.GetExtension(b));
+        return extension != 0
+            ? extension
+            : CompareNaturalName(a, b);
+    }
+
+    private static int CompareLogicalText(string? a, string? b)
+        => StrCmpLogicalW(a ?? string.Empty, b ?? string.Empty);
 
     public void Dispose()
     {

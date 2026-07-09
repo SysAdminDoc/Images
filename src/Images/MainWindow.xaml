@@ -1166,6 +1166,31 @@
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding SetFolderSortCommand}"
+                                    CommandParameter="ExplorerLike"
+                                    Padding="12,6"
+                                    MinHeight="30"
+                                    Margin="0,0,8,8"
+                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowSortGalleryByExplorerLikeName}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CurrentSortMode, Converter={StaticResource SortModeMatches}, ConverterParameter=ExplorerLike}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8B7;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="11"
+                                               Margin="0,0,7,0"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Text="Explorer" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding SetFolderSortCommand}"
                                     CommandParameter="ModifiedNewest"
                                     Padding="12,6"
                                     MinHeight="30"
@@ -2536,6 +2561,11 @@
                                                       CommandParameter="NaturalName"
                                                       IsCheckable="True"
                                                       IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=NaturalName, Mode=OneWay}" />
+                                            <MenuItem Header="Explorer-like name order"
+                                                      Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="ExplorerLike"
+                                                      IsCheckable="True"
+                                                      IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=ExplorerLike, Mode=OneWay}" />
                                             <MenuItem Header="Name (Z to A)"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="NameDescending"

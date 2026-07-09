@@ -6,6 +6,7 @@ public sealed class DirectorySortModeTests
 {
     [Theory]
     [InlineData("NaturalName", true, DirectorySortMode.NaturalName)]
+    [InlineData("ExplorerLike", true, DirectorySortMode.ExplorerLike)]
     [InlineData("ModifiedNewest", true, DirectorySortMode.ModifiedNewest)]
     [InlineData("extensionthenname", true, DirectorySortMode.ExtensionThenName)]
     [InlineData("invalid", false, DirectorySortMode.NaturalName)]
@@ -39,6 +40,7 @@ public sealed class DirectorySortModeTests
 
     [Theory]
     [InlineData(DirectorySortMode.NaturalName, "Name (natural)")]
+    [InlineData(DirectorySortMode.ExplorerLike, "Explorer-like name order")]
     [InlineData(DirectorySortMode.SizeLargest, "Size (largest first)")]
     [InlineData(DirectorySortMode.ExtensionThenName, "Type, then name")]
     public void DisplayName_ReturnsExpected(DirectorySortMode mode, string expected)
@@ -48,6 +50,7 @@ public sealed class DirectorySortModeTests
 
     [Theory]
     [InlineData(DirectorySortMode.NaturalName)]
+    [InlineData(DirectorySortMode.ExplorerLike)]
     [InlineData(DirectorySortMode.ModifiedNewest)]
     [InlineData(DirectorySortMode.SizeSmallest)]
     public void ShortLabel_IsNonEmpty(DirectorySortMode mode)

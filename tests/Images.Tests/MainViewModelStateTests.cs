@@ -90,13 +90,13 @@ public sealed class MainViewModelStateTests
             using (var vm1 = new MainViewModel(settings))
             {
                 vm1.OpenFile(image);
-                vm1.SetFolderSortCommand.Execute(DirectorySortMode.ModifiedNewest);
-                Assert.Equal(DirectorySortMode.ModifiedNewest, vm1.CurrentSortMode);
+                vm1.SetFolderSortCommand.Execute(DirectorySortMode.ExplorerLike);
+                Assert.Equal(DirectorySortMode.ExplorerLike, vm1.CurrentSortMode);
             }
 
             // A fresh ViewModel backed by the same DB should restore the persisted sort mode.
             using var vm2 = new MainViewModel(settings);
-            Assert.Equal(DirectorySortMode.ModifiedNewest, vm2.CurrentSortMode);
+            Assert.Equal(DirectorySortMode.ExplorerLike, vm2.CurrentSortMode);
         });
     }
 
@@ -115,6 +115,22 @@ public sealed class MainViewModelStateTests
             var item = Assert.Single(viewModel.FilteredCommandPaletteItems, i => i.CommandId == CommandIds.BatchProcessor);
             Assert.Equal("Ctrl+Alt+B", viewModel.ShortcutTexts[CommandIds.BatchProcessor]);
             Assert.Equal("Ctrl+Alt+B", item.Shortcut);
+        });
+    }
+
+    [Fact]
+    public void CommandPalette_ExposesExplorerLikeSortFallback()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.CommandPaletteFilterText = "explorer";
+
+            Assert.Contains(
+                viewModel.FilteredCommandPaletteItems,
+                item => item.Name == "Sort by Explorer-like name order");
         });
     }
 

@@ -1341,6 +1341,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
             // Sort
             new() { Name = Strings.CommandPalette_SortName, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.NaturalName)) },
+            new() { Name = Strings.CommandPalette_SortExplorerLike, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ExplorerLike)) },
             new() { Name = Strings.CommandPalette_SortNameDesc, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.NameDescending)) },
             new() { Name = Strings.CommandPalette_SortModifiedNewest, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ModifiedNewest)) },
             new() { Name = Strings.CommandPalette_SortModifiedOldest, Category = sort, Command = new RelayCommand(() => SetFolderSort(DirectorySortMode.ModifiedOldest)) },

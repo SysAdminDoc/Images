@@ -100,6 +100,25 @@ public sealed class DirectoryNavigatorTests
     }
 
     [Fact]
+    public void SetSortMode_ExplorerLike_UsesDeterministicNameFallbackAndPreservesCurrentFile()
+    {
+        using var temp = TestDirectory.Create();
+        var png = temp.WriteFile("scan2.png");
+        var current = temp.WriteFile("scan10.jpg");
+        var webp = temp.WriteFile("scan1.webp");
+        var jpg = temp.WriteFile("scan2.jpg");
+
+        using var nav = new DirectoryNavigator();
+        Assert.True(nav.Open(current));
+
+        Assert.True(nav.SetSortMode(DirectorySortMode.ExplorerLike));
+
+        Assert.Equal([webp, jpg, png, current], nav.Files);
+        Assert.Equal(current, nav.CurrentPath);
+        Assert.Equal(3, nav.CurrentIndex);
+    }
+
+    [Fact]
     public void FolderPreviewController_ShouldPreloadNearbyItemsOnlyInLargeFolders()
     {
         Assert.True(FolderPreviewController.ShouldPreloadThumbnail(count: 9, currentIndex: 4, index: 8));

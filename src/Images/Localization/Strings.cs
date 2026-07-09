@@ -638,6 +638,7 @@ public static class Strings
     public static string CommandPalette_SendToMonitorFormat => Get(nameof(CommandPalette_SendToMonitorFormat));
     public static string CommandPalette_Category_Sort => Get(nameof(CommandPalette_Category_Sort));
     public static string CommandPalette_SortName => Get(nameof(CommandPalette_SortName));
+    public static string CommandPalette_SortExplorerLike => Get(nameof(CommandPalette_SortExplorerLike));
     public static string CommandPalette_SortNameDesc => Get(nameof(CommandPalette_SortNameDesc));
     public static string CommandPalette_SortModifiedNewest => Get(nameof(CommandPalette_SortModifiedNewest));
     public static string CommandPalette_SortModifiedOldest => Get(nameof(CommandPalette_SortModifiedOldest));

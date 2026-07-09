@@ -3,6 +3,7 @@ namespace Images.Services;
 public enum DirectorySortMode
 {
     NaturalName,
+    ExplorerLike,
     NameDescending,
     ModifiedNewest,
     ModifiedOldest,
@@ -18,6 +19,7 @@ public static class DirectorySortModeInfo
     public static IReadOnlyList<DirectorySortMode> All { get; } =
     [
         DirectorySortMode.NaturalName,
+        DirectorySortMode.ExplorerLike,
         DirectorySortMode.NameDescending,
         DirectorySortMode.ModifiedNewest,
         DirectorySortMode.ModifiedOldest,
@@ -31,6 +33,7 @@ public static class DirectorySortModeInfo
     public static string DisplayName(DirectorySortMode mode) => mode switch
     {
         DirectorySortMode.NaturalName => "Name (natural)",
+        DirectorySortMode.ExplorerLike => "Explorer-like name order",
         DirectorySortMode.NameDescending => "Name (Z to A)",
         DirectorySortMode.ModifiedNewest => "Modified (newest first)",
         DirectorySortMode.ModifiedOldest => "Modified (oldest first)",
@@ -45,6 +48,7 @@ public static class DirectorySortModeInfo
     public static string ShortLabel(DirectorySortMode mode) => mode switch
     {
         DirectorySortMode.NaturalName => "Sort: Name",
+        DirectorySortMode.ExplorerLike => "Sort: Explorer",
         DirectorySortMode.NameDescending => "Sort: Z to A",
         DirectorySortMode.ModifiedNewest => "Sort: Newest",
         DirectorySortMode.ModifiedOldest => "Sort: Oldest",
