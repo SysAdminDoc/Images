@@ -1,15 +1,8 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
 namespace Images.Services;
 
 public enum WorkflowMode
 {
-    Viewer,
-    Organize,
-    Edit,
-    Book,
-    Diagnostics
+    Viewer
 }
 
 public sealed record WorkflowModePreset(
@@ -17,15 +10,8 @@ public sealed record WorkflowModePreset(
     bool MetadataHudVisible,
     bool GalleryOpen)
 {
-    public static WorkflowModePreset ForMode(WorkflowMode mode) => mode switch
-    {
-        WorkflowMode.Viewer => new(FilmstripVisible: true, MetadataHudVisible: false, GalleryOpen: false),
-        WorkflowMode.Organize => new(FilmstripVisible: false, MetadataHudVisible: true, GalleryOpen: true),
-        WorkflowMode.Edit => new(FilmstripVisible: false, MetadataHudVisible: false, GalleryOpen: false),
-        WorkflowMode.Book => new(FilmstripVisible: false, MetadataHudVisible: false, GalleryOpen: false),
-        WorkflowMode.Diagnostics => new(FilmstripVisible: false, MetadataHudVisible: true, GalleryOpen: false),
-        _ => new(FilmstripVisible: true, MetadataHudVisible: false, GalleryOpen: false)
-    };
+    public static WorkflowModePreset ForMode(WorkflowMode mode)
+        => new(FilmstripVisible: true, MetadataHudVisible: false, GalleryOpen: false);
 }
 
 public sealed class WorkflowModeService
@@ -42,38 +28,23 @@ public sealed class WorkflowModeService
     {
         get
         {
-            var stored = _settings.GetString(SettingsKey, "Viewer");
-            return Enum.TryParse<WorkflowMode>(stored, ignoreCase: true, out var mode)
-                ? mode
-                : WorkflowMode.Viewer;
+            var stored = _settings.GetString(SettingsKey, WorkflowMode.Viewer.ToString());
+            if (!string.Equals(stored, WorkflowMode.Viewer.ToString(), StringComparison.OrdinalIgnoreCase))
+                _settings.SetString(SettingsKey, WorkflowMode.Viewer.ToString());
+
+            return WorkflowMode.Viewer;
         }
     }
 
     public void SetMode(WorkflowMode mode)
     {
-        _settings.SetString(SettingsKey, mode.ToString());
+        _settings.SetString(SettingsKey, WorkflowMode.Viewer.ToString());
     }
 
     public WorkflowModePreset GetPreset(WorkflowMode mode)
         => WorkflowModePreset.ForMode(mode);
 
-    public static string DisplayName(WorkflowMode mode) => mode switch
-    {
-        WorkflowMode.Viewer => "Viewer",
-        WorkflowMode.Organize => "Organize",
-        WorkflowMode.Edit => "Edit",
-        WorkflowMode.Book => "Book",
-        WorkflowMode.Diagnostics => "Diagnostics",
-        _ => mode.ToString()
-    };
+    public static string DisplayName(WorkflowMode mode) => "Viewer";
 
-    public static string Description(WorkflowMode mode) => mode switch
-    {
-        WorkflowMode.Viewer => "Minimal viewing with filmstrip, no metadata",
-        WorkflowMode.Organize => "Gallery with metadata for tagging and sorting",
-        WorkflowMode.Edit => "Image-only for editing and crop workflows",
-        WorkflowMode.Book => "Archive book reading mode",
-        WorkflowMode.Diagnostics => "Metadata HUD with diagnostics focus",
-        _ => ""
-    };
+    public static string Description(WorkflowMode mode) => "Default image viewing surface";
 }

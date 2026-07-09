@@ -6,15 +6,16 @@ namespace Images.Tests;
 public sealed class WorkflowModeServiceTests
 {
     [Fact]
-    public void SetMode_PersistsAndRetrieves()
+    public void SetMode_PersistsViewerOnly()
     {
         using var temp = TestDirectory.Create();
         var settings = new SettingsService(Path.Combine(temp.Path, "settings.db"));
         var service = new WorkflowModeService(settings);
 
-        service.SetMode(WorkflowMode.Organize);
+        service.SetMode(WorkflowMode.Viewer);
 
-        Assert.Equal(WorkflowMode.Organize, service.CurrentMode);
+        Assert.Equal(WorkflowMode.Viewer, service.CurrentMode);
+        Assert.Equal("Viewer", settings.GetString("viewer.workflow-mode", ""));
     }
 
     [Fact]
@@ -27,44 +28,41 @@ public sealed class WorkflowModeServiceTests
         Assert.Equal(WorkflowMode.Viewer, service.CurrentMode);
     }
 
-    [Fact]
-    public void CurrentMode_IgnoresRemovedLegacyMode()
+    [Theory]
+    [InlineData("Review")]
+    [InlineData("Organize")]
+    [InlineData("Edit")]
+    [InlineData("Book")]
+    [InlineData("Diagnostics")]
+    [InlineData("unknown")]
+    public void CurrentMode_NormalizesRemovedLegacyModesToViewer(string storedMode)
     {
         using var temp = TestDirectory.Create();
         var settings = new SettingsService(Path.Combine(temp.Path, "settings.db"));
-        settings.SetString("viewer.workflow-mode", "Review");
+        settings.SetString("viewer.workflow-mode", storedMode);
         var service = new WorkflowModeService(settings);
 
         Assert.Equal(WorkflowMode.Viewer, service.CurrentMode);
+        Assert.Equal("Viewer", settings.GetString("viewer.workflow-mode", ""));
     }
 
-    [Theory]
-    [InlineData(WorkflowMode.Viewer, true, false, false)]
-    [InlineData(WorkflowMode.Organize, false, true, true)]
-    [InlineData(WorkflowMode.Edit, false, false, false)]
-    public void GetPreset_ReturnsExpectedSurfaceFlags(
-        WorkflowMode mode,
-        bool expectedFilmstrip,
-        bool expectedMetadataHud,
-        bool expectedGallery)
+    [Fact]
+    public void GetPreset_ReturnsViewerSurfaceFlags()
     {
         using var temp = TestDirectory.Create();
         var settings = new SettingsService(Path.Combine(temp.Path, "settings.db"));
         var service = new WorkflowModeService(settings);
 
-        var preset = service.GetPreset(mode);
+        var preset = service.GetPreset(WorkflowMode.Viewer);
 
-        Assert.Equal(expectedFilmstrip, preset.FilmstripVisible);
-        Assert.Equal(expectedMetadataHud, preset.MetadataHudVisible);
-        Assert.Equal(expectedGallery, preset.GalleryOpen);
+        Assert.True(preset.FilmstripVisible);
+        Assert.False(preset.MetadataHudVisible);
+        Assert.False(preset.GalleryOpen);
     }
 
-    [Theory]
-    [InlineData(WorkflowMode.Viewer, "Viewer")]
-    [InlineData(WorkflowMode.Edit, "Edit")]
-    [InlineData(WorkflowMode.Diagnostics, "Diagnostics")]
-    public void DisplayName_ReturnsNonEmpty(WorkflowMode mode, string expected)
+    [Fact]
+    public void DisplayName_ReturnsViewer()
     {
-        Assert.Equal(expected, WorkflowModeService.DisplayName(mode));
+        Assert.Equal("Viewer", WorkflowModeService.DisplayName(WorkflowMode.Viewer));
     }
 }
