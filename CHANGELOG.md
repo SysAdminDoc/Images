@@ -18,6 +18,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixed
 
+- **Recycle Bin dependency warning removed** - Delete-to-Recycle-Bin still uses the framework VisualBasic file-operation API, but the unnecessary `Microsoft.VisualBasic` NuGet package reference is gone and Release builds no longer emit `NU1510`.
 - **Release readiness rejects placeholder package hashes** - The no-assets readiness path now validates committed package manifests for the current version, manifest generation rejects placeholder checksum entries, and SBOM generation works under Windows PowerShell 5.1.
 - **Semantic Search Reveal selects files in Explorer** - Reveal now uses the Explorer selection helper instead of launching the result file's associated app, and missing results stay in-window with a warning.
 - **External edit reload exceptions stay contained** - Exceptions thrown by the external-edit reload callback are now logged and surfaced through the existing toast path instead of escaping the dispatcher timer.
