@@ -5748,6 +5748,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _retouchStrokeTargetAnchor = null;
     }
 
+    internal void CancelActiveRetouchStroke()
+    {
+        _retouchStrokeSourceAnchor = null;
+        _retouchStrokeTargetAnchor = null;
+    }
+
     private void AddRetouchStroke(PixelCoordinate target)
     {
         if (_retouchStrokeSourceAnchor is not { } sourceAnchor || _retouchStrokeTargetAnchor is not { } targetAnchor)

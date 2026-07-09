@@ -1285,6 +1285,35 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void Retouch_CancelActiveStrokeStopsStaleUpdatesWithoutClearingWork()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "photo.png");
+            using var viewModel = CreateViewModelWithFastPreview(temp);
+
+            viewModel.OpenFile(image);
+            viewModel.ToggleRetouchModeCommand.Execute(null);
+
+            Assert.True(viewModel.IsRetouchMode);
+
+            viewModel.BeginRetouchStroke(new PixelCoordinate(0, 0), pickSource: true);
+            viewModel.BeginRetouchStroke(new PixelCoordinate(1, 1), pickSource: false);
+
+            Assert.True(viewModel.HasRetouchSource);
+            Assert.Single(viewModel.RetouchStrokes);
+
+            viewModel.CancelActiveRetouchStroke();
+            viewModel.UpdateRetouchStroke(new PixelCoordinate(1, 0));
+            viewModel.EndRetouchStroke(new PixelCoordinate(0, 1));
+
+            Assert.True(viewModel.HasRetouchSource);
+            Assert.Single(viewModel.RetouchStrokes);
+        });
+    }
+
+    [Fact]
     public void ReloadCommand_ShowsOperationStatusAndDisablesMutatingCommands()
     {
         RunOnSta(() =>

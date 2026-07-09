@@ -354,6 +354,7 @@
                                    PreviewMouseRightButtonUp="Viewport_PreviewMouseRightButtonUp"
                                    MouseMove="Canvas_MouseMove"
                                    MouseLeave="Canvas_MouseLeave"
+                                   LostMouseCapture="Canvas_LostMouseCapture"
                                    MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
                                    MouseLeftButtonUp="Canvas_MouseLeftButtonUp" />
 

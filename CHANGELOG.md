@@ -6,6 +6,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixed
 
+- **Canvas tools recover from mouse-capture loss** - Retouch, red-eye, exposure brush, crop, selection, and inspector drags now clear transient pointer state when WPF mouse capture is lost, preventing stale brush or drag state from leaking into the next pointer move.
 - **Clipboard paste is not blocked by temp cleanup** - Clipboard image paste now continues if best-effort temp-image pruning cannot be queued, and paste feedback uses clearer status text.
 - **Update-check network bytes are accurate** - Successful update checks now record the actual JSON bytes read when the server does not provide `Content-Length`, and oversized responses fail as a completed update-check error instead of an unexpected fault.
 - **Session tray saves are collision-safe** - Saving a session tray now uses a unique sibling temp file instead of clobbering `*.tmp` files, and loading a session reports only entries that were actually added.

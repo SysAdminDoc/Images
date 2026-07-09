@@ -65,8 +65,8 @@ public sealed class UpdateCheckServiceTests
             var result = await UpdateCheckService.CheckAsync(http, FixedClock());
 
             Assert.True(result.NewerAvailable);
-            var entry = Assert.Single(NetworkEgressService.Entries.Where(entry =>
-                entry.Purpose == "Update check (GitHub Releases API)"));
+            var entry = Assert.Single(NetworkEgressService.Entries, entry =>
+                entry.Purpose == "Update check (GitHub Releases API)");
             Assert.Equal(Encoding.UTF8.GetByteCount(json), entry.Bytes);
         }
         finally

@@ -1296,6 +1296,22 @@ public partial class MainWindow : Window
             Vm.UpdateInspectorSample(null);
     }
 
+    private void Canvas_LostMouseCapture(object sender, MouseEventArgs e)
+        => ResetCanvasPointerStateAfterCaptureLoss();
+
+    internal void ResetCanvasPointerStateAfterCaptureLoss()
+    {
+        if (_retouchPainting)
+            Vm.CancelActiveRetouchStroke();
+
+        _retouchPainting = false;
+        _redEyeCorrectionPainting = false;
+        _exposureBrushPainting = false;
+        _canvasSelectionStart = null;
+        _cropSelectionStart = null;
+        _inspectorSelectionStart = null;
+    }
+
     private void HandleRetouchMouseDown(MouseButtonEventArgs e)
     {
         if (!TryMapCanvasPointToPixel(e.GetPosition(Canvas), out var coordinate))
