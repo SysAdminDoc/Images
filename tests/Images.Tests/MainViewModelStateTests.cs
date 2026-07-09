@@ -1779,6 +1779,7 @@ public sealed class MainViewModelStateTests
                 LatestHtmlUrl: null,
                 Error: null,
                 ShouldUpdateLastChecked: true));
+            PumpUntil(() => running.IsCompleted);
             running.GetAwaiter().GetResult();
 
             Assert.False(viewModel.IsCheckingForUpdates);
