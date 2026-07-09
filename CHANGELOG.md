@@ -4,7 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
-## 0.2.21
+## 0.2.22
 
 ### Changed
 
