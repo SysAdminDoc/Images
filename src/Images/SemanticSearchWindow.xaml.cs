@@ -26,6 +26,7 @@ public partial class SemanticSearchWindow : Window
 {
     private readonly SemanticSearchService _semanticSearch;
     private readonly bool _ownsSemanticSearch;
+    private readonly Action<string> _revealPathInExplorer;
     private readonly ObservableCollection<string> _roots = [];
     private readonly ObservableCollection<SemanticSearchResultRow> _results = [];
     private CancellationTokenSource? _indexCancellation;
@@ -39,10 +40,11 @@ public partial class SemanticSearchWindow : Window
     {
     }
 
-    internal SemanticSearchWindow(SemanticSearchService? semanticSearch)
+    internal SemanticSearchWindow(SemanticSearchService? semanticSearch, Action<string>? revealPathInExplorer = null)
     {
         _semanticSearch = semanticSearch ?? new SemanticSearchService();
         _ownsSemanticSearch = semanticSearch is null;
+        _revealPathInExplorer = revealPathInExplorer ?? ShellIntegration.RevealPathInExplorer;
         InitializeComponent();
 
         RootsList.ItemsSource = _roots;
@@ -214,16 +216,26 @@ public partial class SemanticSearchWindow : Window
 
     private void RevealResultButton_Click(object sender, RoutedEventArgs e)
     {
-        var result = SelectedResult;
+        RevealResult(SelectedResult);
+    }
+
+    internal void RevealResult(SemanticSearchResultRow? result)
+    {
         if (result is null)
         {
             SetStatus(Strings.SemanticSearchSelectBeforeRevealing, SearchStatus.Warning);
             return;
         }
 
+        if (!File.Exists(result.SourcePath))
+        {
+            SetStatus(Strings.SemanticSearchResultNoLongerExists, SearchStatus.Warning);
+            return;
+        }
+
         try
         {
-            ShellIntegration.OpenShellTarget(result.SourcePath);
+            _revealPathInExplorer(result.SourcePath);
             SetStatus(Strings.Format(nameof(Strings.SemanticSearchRevealedFormat), result.FileName), SearchStatus.Ready);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
