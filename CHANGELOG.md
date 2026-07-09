@@ -14,6 +14,7 @@ All notable changes to **Images** are documented here.
 - **Workflow modes collapsed to the default viewer** - Organize/Edit/Book/Diagnostics mode state is no longer restored or advertised; legacy stored values normalize back to Viewer.
 - **Review documentation purged from live guidance** - Accessibility and product-planning docs no longer present the retired Review/rating workflow as current UI, and the manual screen-reader matrix now covers active viewer surfaces instead.
 - **Runtime provenance docs are gated** - Release readiness now fails when current runtime/package documentation drifts from Magick.NET, SharpCompress, Ghostscript, jpegtran, or SQLite package provenance, and archive docs now match SharpCompress 0.49.1.
+- **Manual dependency sweep completed** - `Microsoft.NET.Test.Sdk` moved to 18.7.0; NuGet vulnerable/deprecated scans are clean. Remaining outdated entries are transitive packages held by current ONNX DirectML and SQLitePCLRaw package graphs.
 
 ### Fixed
 
