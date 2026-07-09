@@ -4699,8 +4699,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void OpenStoreExtensionPage()
     {
         if (_loadErrorStoreExtension is null) return;
-        _loadErrorStoreExtension.OpenStorePage();
-        Toast(string.Format(Strings.MainToastStoreExtensionOpened, _loadErrorStoreExtension.DisplayName));
+        var opened = _loadErrorStoreExtension.OpenStorePage();
+        Toast(string.Format(
+            opened ? Strings.MainToastStoreExtensionOpened : Strings.MainToastStoreExtensionOpenFailed,
+            _loadErrorStoreExtension.DisplayName));
     }
 
     private void ClearLoadError()

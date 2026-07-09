@@ -22,19 +22,24 @@ public static class StoreExtensionService
         /// <summary>
         /// Opens the Microsoft Store PDP page for this extension.
         /// </summary>
-        public void OpenStorePage()
+        public bool OpenStorePage()
+            => OpenStorePage(startInfo => Process.Start(startInfo));
+
+        internal bool OpenStorePage(Action<ProcessStartInfo> startProcess)
         {
             try
             {
-                Process.Start(new ProcessStartInfo
+                startProcess(new ProcessStartInfo
                 {
                     FileName = StoreUri,
                     UseShellExecute = true
                 });
+                return true;
             }
             catch
             {
-                // Swallow — the Store may not be available (Server SKUs, LTSC without Store).
+                // The Store may not be available on Server SKUs or LTSC images without Store.
+                return false;
             }
         }
     }

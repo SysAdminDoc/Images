@@ -1238,6 +1238,7 @@ public static class Strings
     public static string MainToastGhostscriptNeeded => Get(nameof(MainToastGhostscriptNeeded));
     public static string MainToastStoreExtensionNeeded => Get(nameof(MainToastStoreExtensionNeeded));
     public static string MainToastStoreExtensionOpened => Get(nameof(MainToastStoreExtensionOpened));
+    public static string MainToastStoreExtensionOpenFailed => Get(nameof(MainToastStoreExtensionOpenFailed));
     public static string MainToastJxlNeedsUpdate => Get(nameof(MainToastJxlNeedsUpdate));
     public static string MainToastFilenameInvalid => Get(nameof(MainToastFilenameInvalid));
     public static string MainToastTransferUnsupported => Get(nameof(MainToastTransferUnsupported));

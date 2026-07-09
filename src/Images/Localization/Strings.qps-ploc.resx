@@ -3911,6 +3911,9 @@ Details written to:
   <data name="MainToastStoreExtensionOpened" xml:space="preserve">
     <value>[!!!!!!!! Opening Microsoft Store for {0} !!!!!!!!]</value>
   </data>
+  <data name="MainToastStoreExtensionOpenFailed" xml:space="preserve">
+    <value>[!!!!!!!!!! Could not open Microsoft Store for {0} !!!!!!!!!!]</value>
+  </data>
   <data name="MainToastJxlNeedsUpdate" xml:space="preserve">
     <value>[!!!!!!!!!! JPEG XL needs Windows 11 24H2 or later !!!!!!!!!!]</value>
   </data>
