@@ -13,6 +13,22 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
   - **Blocked by**: human runtime validation requirement.
   - **Unblock when**: the manual smoke pass is scheduled or can be replaced by an accepted automated UI smoke.
 
+- [ ] **RD-02** *P2* — Display color management: honor embedded ICC + transform to the active monitor profile. Read the embedded profile, resolve the active monitor profile (`WcsGetDefaultColorProfile`), and bake a `TransformColorSpace(source, monitor)` into the display bitmap via Magick.NET's lcms2, with a managed/unmanaged status token; run lazily off the startup hot path. Distinct from the blocked OCIO/ACES pro pipeline (V80-26). Evidence: nomacs #459, ImageGlass #1433, PicView #201; RESEARCH.md. Touches: `src/Images/Services/ImageLoader.cs` (all decode branches: WIC, Magick fallback, paged, memory-mapped) or a new `ColorManagementService`.
+  - **Blocked by**: correctness is inherently visual and cross-cutting — it must be validated on a wide-gamut/P3 monitor, and an unvalidated always-on color transform risks regressing color for every user across all decode paths. Also a pending product decision (RESEARCH Open Question): bake via Magick/lcms2 now vs defer to the OCIO/ACES managed-renderer track.
+  - **Unblock when**: a wide-gamut monitor is available for visual validation and the bake-vs-managed-renderer decision is made; then ship opt-in first.
+
+- [ ] **RD-06** *P3* — Hold-to-loupe magnifier: a press-and-hold lens at 100%/Nx that tracks the cursor and samples source pixels without changing base zoom. Evidence: ImageGlass #1425; FastStone/NeeView; RESEARCH.md. Touches: `src/Images/Controls/ZoomPanImage.cs`.
+  - **Blocked by**: the deliverable is a live visual lens whose correctness (sampling, tracking, magnification feel) can only be judged in a running GUI session; no meaningful headless verification.
+  - **Unblock when**: an interactive Windows GUI session (or a background UIA/PrintWindow harness that can capture the lens) is available.
+
+- [ ] **RD-07** *P3* — Live cursor pixel readout (x/y + RGBA/hex). The coordinate/color sampling logic already exists (`MainWindow.TrySampleInspectorPixel` / `MainViewModel.UpdateInspectorSample`); the remaining work is where to surface a live-on-hover readout without cluttering the debloated viewer. Evidence: PicView #151, ImageGlass #913; RESEARCH.md.
+  - **Blocked by**: a product/placement decision plus live GUI validation — surfacing an always-on hover readout must be validated against the quiet-premium surface (does it fit the HUD, does it distract) which cannot be judged headless.
+  - **Unblock when**: the readout placement is decided and can be visually validated in a GUI session.
+
+- [ ] **RD-10 (residual)** *P3* — End-of-list "stop-with-nudge" mode. The other two modes already ship and are user-configurable: `DirectoryNavigator.SiblingFolderAutoSwitch` gives Wrap (off) and Next-sibling-folder (on). Only the third "stop at first/last with a subtle nudge" mode is unbuilt, which would rework the current bool setting into a tri-state selector. Evidence: JPEGView stop-with-alert; RESEARCH.md.
+  - **Blocked by**: low ROI vs. regression risk — the shipped Wrap/Sibling setting is tested and working; the residual mode's value is a *visual* nudge whose feel needs GUI validation, and it isn't worth reworking the tri-state setting + Settings UI + localization headless.
+  - **Unblock when**: a GUI session can validate the nudge feel, or a product decision prioritizes the third mode.
+
 ## Blocked On Package-Manager Credentials Or Account Setup
 
 - [ ] **D-02** *P0* — **`winget` publishing** via `WinGet Releaser` GitHub Action (`vedantmgoyal9/winget-releaser`). First submission manual via `wingetcreate new`; subsequent releases auto-fire on `release: [published]`. Requires classic PAT + forked `microsoft/winget-pkgs`. Effort: S. [WinGet Releaser action; Grafana k6 PR #5203]
