@@ -877,6 +877,14 @@ public partial class MainWindow : Window
     {
         var shortcutKey = GetShortcutKey(e);
 
+        // RD-08: Escape aborts an in-progress rubber-band zoom selection.
+        if (e.Key == Key.Escape && Canvas.IsZoomSelecting)
+        {
+            Canvas.CancelZoomSelection();
+            e.Handled = true;
+            return;
+        }
+
         // Don't steal keys from text entry controls.
         if (IsTextEntryElement(Keyboard.FocusedElement)) return;
 

@@ -58,6 +58,41 @@ public sealed class ZoomPanImageTests
         Assert.Equal(expected, ZoomPanImage.HasAlphaChannel(pixelFormat));
     }
 
+    [Fact]
+    public void ApplyZoomToViewportRect_CenteredBox_ScalesAndStaysCentered()
+    {
+        RunOnSta(() =>
+        {
+            var control = new ZoomPanImage { Source = MakeBitmap() };
+            Arrange(control, 400, 300);
+            control.SetViewState(new ZoomPanViewState(1, 0, 0));
+
+            // Centered 200x150 box in a 400x300 viewport -> 2x fill, still centered.
+            control.ApplyZoomToViewportRect(new Rect(100, 75, 200, 150));
+
+            var state = control.GetViewState();
+            Assert.Equal(2.0, state.Scale, 3);
+            Assert.Equal(0.0, state.TranslateX, 3);
+            Assert.Equal(0.0, state.TranslateY, 3);
+        });
+    }
+
+    [Fact]
+    public void ApplyZoomToViewportRect_IgnoresClickSizedBox()
+    {
+        RunOnSta(() =>
+        {
+            var control = new ZoomPanImage { Source = MakeBitmap() };
+            Arrange(control, 400, 300);
+            var before = new ZoomPanViewState(1.5, 10, -5);
+            control.SetViewState(before);
+
+            control.ApplyZoomToViewportRect(new Rect(50, 50, 3, 3));
+
+            Assert.Equal(before, control.GetViewState());
+        });
+    }
+
     private static BitmapSource MakeBitmap()
     {
         var bitmap = BitmapSource.Create(

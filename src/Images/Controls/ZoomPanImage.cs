@@ -33,6 +33,19 @@ public sealed class ZoomPanImage : ContentControl
         VerticalAlignment = VerticalAlignment.Center,
     };
     private DrawingBrush? _checkerBrush;
+    // RD-08: rubber-band zoom-to-selection. The marquee lives in _root (screen space), above the
+    // transformed _visual, so it is drawn in raw viewport coordinates.
+    private readonly Rectangle _zoomSelectionRect = new()
+    {
+        IsHitTestVisible = false,
+        Visibility = Visibility.Collapsed,
+        StrokeThickness = 1,
+        Stroke = new SolidColorBrush(Color.FromRgb(0xF5, 0xA9, 0x7F)),
+        Fill = new SolidColorBrush(Color.FromArgb(0x33, 0xF5, 0xA9, 0x7F)),
+        HorizontalAlignment = HorizontalAlignment.Left,
+        VerticalAlignment = VerticalAlignment.Top,
+    };
+    private Point? _zoomSelectStart;
     private readonly Grid _visual = new();
     private readonly Viewbox _tileViewbox = new() { Stretch = Stretch.Uniform, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
     private readonly Canvas _tileCanvas = new() { IsHitTestVisible = false };
@@ -230,6 +243,7 @@ public sealed class ZoomPanImage : ContentControl
         _visual.Children.Add(_image);
         _visual.Children.Add(_tileViewbox);
         _root.Children.Add(_visual);
+        _root.Children.Add(_zoomSelectionRect);
         Content = _root;
 
         _image.SizeChanged += (_, _) => UpdateTransparencyGrid();
@@ -239,6 +253,7 @@ public sealed class ZoomPanImage : ContentControl
         MouseMove += OnMove;
         MouseLeftButtonUp += OnUp;
         MouseDoubleClick += OnDouble;
+        LostMouseCapture += (_, _) => CancelZoomSelection();
 
         IsManipulationEnabled = true;
         ManipulationStarting += OnManipulationStarting;
@@ -538,9 +553,26 @@ public sealed class ZoomPanImage : ContentControl
         _scale.ScaleX = _scale.ScaleY = newScale;
     }
 
+    private const ModifierKeys ZoomSelectModifiers = ModifierKeys.Control | ModifierKeys.Shift;
+
     private void OnDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ClickCount >= 2) return;
+
+        // RD-08: Ctrl+Shift+drag draws a marquee that zooms to the boxed region. Checked before
+        // pan/inspector so it wins the gesture; needs a rendered image to have something to zoom.
+        if ((Keyboard.Modifiers & ZoomSelectModifiers) == ZoomSelectModifiers &&
+            TryGetRenderedPixelSize(out _, out _))
+        {
+            _zoomSelectStart = e.GetPosition(this);
+            UpdateZoomSelectionRect(_zoomSelectStart.Value, _zoomSelectStart.Value);
+            _zoomSelectionRect.Visibility = Visibility.Visible;
+            CaptureMouse();
+            Cursor = Cursors.Cross;
+            e.Handled = true;
+            return;
+        }
+
         if (InspectorMode)
         {
             Cursor = Cursors.Cross;
@@ -555,6 +587,12 @@ public sealed class ZoomPanImage : ContentControl
 
     private void OnMove(object sender, MouseEventArgs e)
     {
+        if (_zoomSelectStart is { } start)
+        {
+            UpdateZoomSelectionRect(start, e.GetPosition(this));
+            return;
+        }
+
         if (InspectorMode)
         {
             Cursor = Cursors.Cross;
@@ -571,9 +609,61 @@ public sealed class ZoomPanImage : ContentControl
 
     private void OnUp(object sender, MouseButtonEventArgs e)
     {
+        if (_zoomSelectStart is { } start)
+        {
+            var rect = MakeRect(start, e.GetPosition(this));
+            CancelZoomSelection();
+            ApplyZoomToViewportRect(rect);
+            return;
+        }
+
         _dragStart = null;
         ReleaseMouseCapture();
         Cursor = InspectorMode ? Cursors.Cross : Cursors.Arrow;
+    }
+
+    /// <summary>Abort an in-progress rubber-band zoom selection (e.g. on Escape or capture loss).</summary>
+    public void CancelZoomSelection()
+    {
+        if (_zoomSelectStart is null) return;
+        _zoomSelectStart = null;
+        _zoomSelectionRect.Visibility = Visibility.Collapsed;
+        ReleaseMouseCapture();
+        Cursor = InspectorMode ? Cursors.Cross : Cursors.Arrow;
+    }
+
+    public bool IsZoomSelecting => _zoomSelectStart is not null;
+
+    private void UpdateZoomSelectionRect(Point a, Point b)
+    {
+        var rect = MakeRect(a, b);
+        _zoomSelectionRect.Margin = new Thickness(rect.X, rect.Y, 0, 0);
+        _zoomSelectionRect.Width = rect.Width;
+        _zoomSelectionRect.Height = rect.Height;
+    }
+
+    private static Rect MakeRect(Point a, Point b)
+        => new(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y), Math.Abs(a.X - b.X), Math.Abs(a.Y - b.Y));
+
+    // RD-08: rescale so the boxed viewport region fills the viewport, then recenter it.
+    internal void ApplyZoomToViewportRect(Rect selection)
+    {
+        // Ignore accidental click-sized boxes — treat those as a no-op, not a huge zoom.
+        if (selection.Width < 6 || selection.Height < 6) return;
+        var w = ActualWidth;
+        var h = ActualHeight;
+        if (w <= 0 || h <= 0) return;
+
+        var factor = Math.Min(w / selection.Width, h / selection.Height);
+        var newScale = Math.Clamp(_scale.ScaleX * factor, 0.1, 20);
+        var center = new Point(selection.X + selection.Width / 2, selection.Y + selection.Height / 2);
+
+        ZoomAroundViewportPoint(center, newScale);
+        _translate.X += w / 2 - center.X;
+        _translate.Y += h / 2 - center.Y;
+
+        QueueTileRefresh();
+        RaiseViewChanged();
     }
 
     private void OnDouble(object sender, MouseButtonEventArgs e)

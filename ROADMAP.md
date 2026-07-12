@@ -40,13 +40,6 @@ Externally-grounded, net-new items from a competitor/format/security research pa
   Acceptance: moving the cursor over the image shows current pixel coordinate and color (hex + RGBA); hides when off-image; no navigation jank.
   Complexity: M
 
-- [ ] P3 RD-08 — Zoom-to-selection (rubber-band box zoom)
-  Why: No drag-rectangle zoom exists; JPEGView's Ctrl+Shift+drag zoom-to-region is a power-user favorite for inspecting detail precisely. Distinct from crop mode.
-  Evidence: https://github.com/sylikc/jpegview ; RESEARCH.md.
-  Touches: `src/Images/Controls/ZoomPanImage.cs` (modifier-drag rubber-band → compute scale/translate to fit the box), guard against clashing with crop/pan gestures.
-  Acceptance: modifier-dragging a rectangle zooms/pans so that region fills the viewport; Escape cancels the drag; does not trigger crop.
-  Complexity: M
-
 - [ ] P3 RD-10 — End-of-list behavior option: stop-with-nudge or advance to sibling folder (vs. always wrap)
   Why: Navigation always wraps at the ends; competitors offer a choice — stop with a subtle visual nudge (JPEGView) or auto-advance into the next sibling directory (ImageGlass 9.5). Wrap-only surprises users paging a large tree.
   Evidence: https://github.com/d2phap/ImageGlass/releases (9.5 sibling-folder) ; RESEARCH.md.
