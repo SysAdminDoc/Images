@@ -4,6 +4,10 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### Fixed
+
+- **Save a copy preserves image metadata** - Saving an unedited copy now reloads the source file through Magick.NET, so embedded EXIF, IPTC, XMP, and ICC color profiles survive the copy instead of being discarded by the in-memory pixel re-encode. Clipboard pastes and non-raster sources still use the pixel path.
+
 ### Security
 
 - **Magick.NET upgraded to 14.15.0** - Bundles ImageMagick 7.1.2-27 and libheif >=1.22.0, addressing CVE-2026-32740 (heap write decoding crafted HEIF/AVIF grid tiles) and the 2026 ImageMagick heap/OOB-write CVEs on the untrusted-file fallback decode path Images uses for HEIF/AVIF/RAW/etc. Runtime-provenance docs and the vulnerable-package gate stay in sync.

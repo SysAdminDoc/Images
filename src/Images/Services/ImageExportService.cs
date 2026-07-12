@@ -164,6 +164,43 @@ public static class ImageExportService
         return new ImageExportResult(savedPath, c2pa);
     }
 
+    /// <summary>
+    /// Saves an unedited copy of the current image. Prefers reloading the source file through
+    /// Magick.NET so embedded EXIF/IPTC/XMP/ICC metadata is preserved; the BitmapSource pixel
+    /// path (<paramref name="fallbackSource"/>) discards all of it and is used only when the
+    /// source is not a Magick-readable raster file (clipboard paste, vector/RAW/layered format).
+    /// </summary>
+    public static ImageExportResult SaveCopyWithC2paHandoff(
+        string? sourcePath,
+        BitmapSource fallbackSource,
+        string path,
+        Func<string?, string, C2paExportHandoff>? planC2paExport = null)
+    {
+        if (CanPreserveMetadataCopy(sourcePath))
+        {
+            try
+            {
+                return SaveWithC2paHandoff(sourcePath!, path, Array.Empty<EditOperation>(), planC2paExport);
+            }
+            catch (Exception ex) when (ex is MagickException or IOException or InvalidOperationException)
+            {
+                // Fall back to the pixel copy for anything Magick cannot reload from disk.
+            }
+        }
+
+        return SaveWithC2paHandoff(fallbackSource, sourcePath, path, 92, 0, 0, planC2paExport);
+    }
+
+    internal static bool CanPreserveMetadataCopy(string? sourcePath)
+    {
+        if (string.IsNullOrWhiteSpace(sourcePath))
+            return false;
+        if (!File.Exists(sourcePath))
+            return false;
+        var extension = Path.GetExtension(sourcePath).ToLowerInvariant();
+        return SupportedImageFormats.IsCropWritableRasterExtension(extension);
+    }
+
     public static string Overwrite(string sourcePath, IReadOnlyList<EditOperation> operations)
         => Overwrite(sourcePath, operations, jpegTranRuntime: null, jpegTranProcessRunner: null);
 

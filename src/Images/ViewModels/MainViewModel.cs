@@ -6989,7 +6989,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             }
             else
             {
-                var result = await Task.Run(() => ImageExportService.SaveWithC2paHandoff(bs, sourcePath, targetPath));
+                var result = await Task.Run(() => ImageExportService.SaveCopyWithC2paHandoff(sourcePath, bs, targetPath));
                 Toast($"Saved copy: {Path.GetFileName(result.OutputPath)}. {result.C2paHandoff.Summary}");
             }
         }

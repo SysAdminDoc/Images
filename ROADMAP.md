@@ -36,13 +36,6 @@ Externally-grounded, net-new items from a competitor/format/security research pa
   Acceptance: an image with an embedded non-sRGB profile displays visibly corrected on a wide-gamut monitor; a managed/unmanaged indicator reflects state; SDR sRGB path is unchanged; no measurable cold-start regression.
   Complexity: M
 
-- [ ] P2 RD-03 — Preserve EXIF/IPTC/XMP/ICC on Save-a-copy re-encode
-  Why: Save-a-copy (E6) re-encodes via WPF `BitmapEncoder`, which drops metadata unless explicitly threaded through — the ImageGlass #496 failure mode, a trust bug for a metadata-conscious viewer. Verify current behavior first (Open Question in RESEARCH); if it strips, carry frames' `Metadata`/`ColorContexts` (or route the re-encode through Magick.NET which preserves profiles).
-  Evidence: https://github.com/d2phap/ImageGlass/issues/496 ; CLAUDE.md v0.1.6 E6; RESEARCH.md.
-  Touches: `src/Images/Services/ImageExportService.cs` / Save-as-copy path in `MainViewModel`; regression test asserting EXIF+ICC survive a JPEG→JPEG copy.
-  Acceptance: saving a copy of a photo retains its EXIF (DateTimeOriginal, camera), ICC profile, and orientation; test proves round-trip.
-  Complexity: M
-
 - [ ] P2 RD-04 — Transparency backdrop: checkerboard / solid-color option for alpha images
   Why: No checkerboard or configurable backdrop exists anywhere in source; transparent PNG/WebP/SVG render on the flat canvas, hiding true alpha. Top-voted JPEGView request (#43); expected by design/screenshot users. Fits the quiet-premium surface as one toggle.
   Evidence: https://github.com/sylikc/jpegview/issues/43 ; RESEARCH.md.

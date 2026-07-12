@@ -269,6 +269,70 @@ public sealed class ImageExportServiceTests
         Assert.Contains("flat raster image files", ex.Message);
     }
 
+    [Fact]
+    public void SaveCopyWithC2paHandoff_PreservesEmbeddedExifMetadataForRasterSource()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Path.Combine(temp.Path, "photo.jpg");
+
+        var exif = new ImageMagick.ExifProfile();
+        exif.SetValue(ImageMagick.ExifTag.Make, "Images-Test");
+        using (var original = new ImageMagick.MagickImage(ImageMagick.MagickColors.Red, 8, 8))
+        {
+            original.Format = ImageMagick.MagickFormat.Jpeg;
+            original.SetProfile(exif);
+            original.Write(source);
+        }
+
+        var target = Path.Combine(temp.Path, "photo_copy.jpg");
+        // A throwaway 1x1 pixel source — the metadata-preserving path must ignore it for raster files.
+        var fallback = BitmapSource.Create(
+            1, 1, 96, 96, PixelFormats.Bgra32, null, new byte[] { 0x00, 0x00, 0x00, 0xFF }, 4);
+        fallback.Freeze();
+
+        var result = ImageExportService.SaveCopyWithC2paHandoff(
+            source,
+            fallback,
+            target,
+            planC2paExport: (_, _) => C2paExportHandoff.Omitted(
+                C2paExportReason.SourceHasNoManifest, "C2PA not written", "n/a"));
+
+        using var copy = new ImageMagick.MagickImage(result.OutputPath);
+        var copiedExif = copy.GetExifProfile();
+        Assert.NotNull(copiedExif);
+        Assert.Equal("Images-Test", copiedExif!.GetValue(ImageMagick.ExifTag.Make)?.Value);
+        // Original 8x8 pixels prove the file path was used, not the 1x1 fallback.
+        Assert.Equal(8u, copy.Width);
+        Assert.Equal(8u, copy.Height);
+    }
+
+    [Fact]
+    public void SaveCopyWithC2paHandoff_WhenNoSourceFile_FallsBackToPixelSource()
+    {
+        using var temp = TestDirectory.Create();
+        var target = Path.Combine(temp.Path, "clip.png");
+        var fallback = BitmapSource.Create(
+            2, 2, 96, 96, PixelFormats.Bgra32, null,
+            new byte[]
+            {
+                0xFF, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
+                0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+            },
+            8);
+        fallback.Freeze();
+
+        var result = ImageExportService.SaveCopyWithC2paHandoff(
+            sourcePath: null,
+            fallback,
+            target,
+            planC2paExport: (_, _) => C2paExportHandoff.Omitted(
+                C2paExportReason.SourceHasNoManifest, "C2PA not written", "n/a"));
+
+        Assert.True(File.Exists(result.OutputPath));
+        using var copy = new ImageMagick.MagickImage(result.OutputPath);
+        Assert.Equal(2u, copy.Width);
+    }
+
     private static (int Width, int Height) ReadImageSize(string path)
     {
         using var stream = File.OpenRead(path);
