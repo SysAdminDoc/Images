@@ -370,6 +370,8 @@ public static class Strings
     public static string SettingsRestoreSessionDescription => Get(nameof(SettingsRestoreSessionDescription));
     public static string SettingsColorManagementTitle => Get(nameof(SettingsColorManagementTitle));
     public static string SettingsColorManagementDescription => Get(nameof(SettingsColorManagementDescription));
+    public static string SettingsStopAtEndsTitle => Get(nameof(SettingsStopAtEndsTitle));
+    public static string SettingsStopAtEndsDescription => Get(nameof(SettingsStopAtEndsDescription));
     public static string SettingsRememberWindowDescription => Get(nameof(SettingsRememberWindowDescription));
     public static string SettingsSectionAppearance => Get(nameof(SettingsSectionAppearance));
     public static string SettingsThemeTitle => Get(nameof(SettingsThemeTitle));
@@ -432,6 +434,8 @@ public static class Strings
     public static string SettingsRestoreSessionOffStatus => Get(nameof(SettingsRestoreSessionOffStatus));
     public static string SettingsColorManagementOnStatus => Get(nameof(SettingsColorManagementOnStatus));
     public static string SettingsColorManagementOffStatus => Get(nameof(SettingsColorManagementOffStatus));
+    public static string SettingsStopAtEndsOnStatus => Get(nameof(SettingsStopAtEndsOnStatus));
+    public static string SettingsStopAtEndsOffStatus => Get(nameof(SettingsStopAtEndsOffStatus));
     public static string SettingsRememberWindowOffStatus => Get(nameof(SettingsRememberWindowOffStatus));
     public static string SettingsFilmstripOnStatus => Get(nameof(SettingsFilmstripOnStatus));
     public static string SettingsFilmstripOffStatus => Get(nameof(SettingsFilmstripOffStatus));
@@ -1190,6 +1194,7 @@ public static class Strings
     public static string MainToastTwoPageOff => Get(nameof(MainToastTwoPageOff));
     public static string MainToastMetadataHudOn => Get(nameof(MainToastMetadataHudOn));
     public static string MainToastMetadataHudOff => Get(nameof(MainToastMetadataHudOff));
+    public static string MainToastEndOfList => Get(nameof(MainToastEndOfList));
     public static string MainToastZoomLockOn => Get(nameof(MainToastZoomLockOn));
     public static string MainToastZoomLockOff => Get(nameof(MainToastZoomLockOff));
     public static string MainToastTransparencyGridOn => Get(nameof(MainToastTransparencyGridOn));

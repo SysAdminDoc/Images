@@ -1682,6 +1682,18 @@ Details written to:
   <data name="SettingsSiblingFolderOffStatus" xml:space="preserve">
     <value>[!!!!!!!!!!!! Sibling folder auto-switch disabled. Navigation wraps within the current folder. !!!!!!!!!!!!]</value>
   </data>
+  <data name="SettingsStopAtEndsTitle" xml:space="preserve">
+    <value>[!!!!!!! Stop at first and last image !!!!!!!]</value>
+  </data>
+  <data name="SettingsStopAtEndsDescription" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Prev/Next stop at the ends of the folder with a brief nudge instead of wrapping around. Takes precedence over sibling folder auto-switch. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="SettingsStopAtEndsOnStatus" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Navigation will stop at the first and last image. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="SettingsStopAtEndsOffStatus" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Navigation will wrap or switch folders at the ends. !!!!!!!!!!!!]</value>
+  </data>
   <data name="SettingsSectionAccessibility" xml:space="preserve">
     <value>[!!!! Accessibility !!!!]</value>
   </data>
@@ -3760,6 +3772,9 @@ Details written to:
   </data>
   <data name="MainToastMetadataHudOff" xml:space="preserve">
     <value>[!!!! Metadata HUD off !!!!]</value>
+  </data>
+  <data name="MainToastEndOfList" xml:space="preserve">
+    <value>[!!!! End of folder !!!!]</value>
   </data>
   <data name="MainToastZoomLockOn" xml:space="preserve">
     <value>[!!! Zoom lock on !!!]</value>

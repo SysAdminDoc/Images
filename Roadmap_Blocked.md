@@ -13,10 +13,6 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
   - **Blocked by**: human runtime validation requirement.
   - **Unblock when**: the manual smoke pass is scheduled or can be replaced by an accepted automated UI smoke.
 
-- [ ] **RD-10 (residual)** *P3* — End-of-list "stop-with-nudge" mode. The other two modes already ship and are user-configurable: `DirectoryNavigator.SiblingFolderAutoSwitch` gives Wrap (off) and Next-sibling-folder (on). Only the third "stop at first/last with a subtle nudge" mode is unbuilt, which would rework the current bool setting into a tri-state selector. Evidence: JPEGView stop-with-alert; RESEARCH.md.
-  - **Blocked by**: low ROI vs. regression risk — the shipped Wrap/Sibling setting is tested and working; the residual mode's value is a *visual* nudge whose feel needs GUI validation, and it isn't worth reworking the tri-state setting + Settings UI + localization headless.
-  - **Unblock when**: a GUI session can validate the nudge feel, or a product decision prioritizes the third mode.
-
 ## Blocked On Package-Manager Credentials Or Account Setup
 
 - [ ] **D-02** *P0* — **`winget` publishing** via `WinGet Releaser` GitHub Action (`vedantmgoyal9/winget-releaser`). First submission manual via `wingetcreate new`; subsequent releases auto-fire on `release: [published]`. Requires classic PAT + forked `microsoft/winget-pkgs`. Effort: S. [WinGet Releaser action; Grafana k6 PR #5203]

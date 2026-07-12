@@ -448,4 +448,48 @@ public sealed class DirectoryNavigatorTests
         Assert.Equal(elsewhere, nav.CurrentPath);
         Assert.Equal(folderB, nav.Folder);
     }
+
+    [Fact]
+    public void StopAtEnds_HaltsAtFirstAndLastWithoutWrapping()
+    {
+        using var temp = TestDirectory.Create();
+        var first = temp.WriteFile("image1.jpg");
+        temp.WriteFile("image2.jpg");
+        var last = temp.WriteFile("image3.jpg");
+
+        using var nav = new DirectoryNavigator { StopAtEnds = true };
+        Assert.True(nav.Open(first));
+
+        // At the first image, Previous stops (no wrap) and flags the stop.
+        Assert.False(nav.MovePrevious());
+        Assert.True(nav.LastMoveStoppedAtEnd);
+        Assert.Equal(first, nav.CurrentPath);
+
+        // Advancing forward works until the last image.
+        Assert.True(nav.MoveNext());
+        Assert.True(nav.MoveNext());
+        Assert.Equal(last, nav.CurrentPath);
+        Assert.False(nav.LastMoveStoppedAtEnd);
+
+        // At the last image, Next stops (no wrap) and flags the stop.
+        Assert.False(nav.MoveNext());
+        Assert.True(nav.LastMoveStoppedAtEnd);
+        Assert.Equal(last, nav.CurrentPath);
+    }
+
+    [Fact]
+    public void WithoutStopAtEnds_NextWrapsAround()
+    {
+        using var temp = TestDirectory.Create();
+        var first = temp.WriteFile("image1.jpg");
+        temp.WriteFile("image2.jpg");
+        var last = temp.WriteFile("image3.jpg");
+
+        using var nav = new DirectoryNavigator();
+        Assert.True(nav.Open(last));
+
+        Assert.True(nav.MoveNext());
+        Assert.False(nav.LastMoveStoppedAtEnd);
+        Assert.Equal(first, nav.CurrentPath);
+    }
 }

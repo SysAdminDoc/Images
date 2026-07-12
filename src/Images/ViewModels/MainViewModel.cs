@@ -177,6 +177,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _archiveSpreadModeEnabled = _settings.GetBool(Keys.ArchiveSpreadMode, false);
         RestorePersistedSortMode();
         _nav.SiblingFolderAutoSwitch = _settings.GetBool(Keys.SiblingFolderAutoSwitch, false);
+        _nav.StopAtEnds = _settings.GetBool(Keys.StopAtEnds, false);
         RestorePersistedGalleryTileSize();
 
         OpenCommand = new AsyncRelayCommand(OpenFileDialogAsync, () => !IsOperationBusy);
@@ -4257,7 +4258,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         FlushPendingRename();
         if (!move())
+        {
+            if (_nav.LastMoveStoppedAtEnd)
+                Toast(Strings.MainToastEndOfList);
             return;
+        }
 
         // V30-33: manual navigation during slideshow resets the timer countdown rather
         // than stopping playback, so the user can nudge forward and the show continues.
@@ -7347,6 +7352,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
 
         _nav.SiblingFolderAutoSwitch = _settings.GetBool(Keys.SiblingFolderAutoSwitch, false);
+        _nav.StopAtEnds = _settings.GetBool(Keys.StopAtEnds, false);
 
         Raise(nameof(FirstRunPrivacyText));
     }

@@ -220,6 +220,19 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
+    public bool StopAtEnds
+    {
+        get => _settings.GetBool(Keys.StopAtEnds, false);
+        set
+        {
+            _settings.SetBool(Keys.StopAtEnds, value);
+            Raise(nameof(StopAtEnds));
+            SetStatus(
+                value ? Strings.SettingsStopAtEndsOnStatus : Strings.SettingsStopAtEndsOffStatus,
+                SettingsStatusToneKind.Success);
+        }
+    }
+
     public bool ReduceMotion
     {
         get => _settings.GetBool(Keys.AccessibilityReduceMotion, false);

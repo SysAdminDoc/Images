@@ -6,6 +6,7 @@ All notable changes to **Images** are documented here.
 
 ### Added
 
+- **Stop at first/last image** - A new setting makes Prev/Next stop at the ends of the folder with a brief "End of folder" nudge instead of wrapping or switching folders; it takes precedence over sibling-folder auto-switch. Together with the existing wrap and sibling-folder options, all three end-of-list behaviors are now selectable.
 - **Live pixel readout** - When the metadata HUD is open, hovering over the image now shows the pixel under the cursor (coordinate, hex, and RGB) in the HUD; it clears when the pointer leaves the image.
 - **Loupe magnifier** - Hold the middle mouse button over the image to show a circular lens that magnifies the source pixels under the cursor (2x by default) without changing the base zoom; release or leave the image to dismiss it.
 - **Color-managed display (opt-in)** - A new Appearance setting (off by default) honors an image's embedded ICC profile and converts wide-gamut colors (Adobe RGB, Display P3) to sRGB on decode, so tagged photos no longer render over-saturated. Applies to newly opened raster images via Magick.NET; untagged and huge/tiled images are unaffected.

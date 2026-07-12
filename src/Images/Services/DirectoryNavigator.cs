@@ -33,6 +33,10 @@ public sealed class DirectoryNavigator : IDisposable
     public string? Folder => _folder;
     public DirectorySortMode SortMode { get; private set; } = DirectorySortMode.NaturalName;
     public bool SiblingFolderAutoSwitch { get; set; }
+    // RD-10: when set, prev/next stop at the first/last image instead of wrapping or switching
+    // folders; the last such stop is flagged so the view model can show a nudge.
+    public bool StopAtEnds { get; set; }
+    public bool LastMoveStoppedAtEnd { get; private set; }
     public bool CanGoBack => _backStack.Count > 0;
     public bool CanGoForward => _forwardStack.Count > 0;
 
@@ -195,13 +199,24 @@ public sealed class DirectoryNavigator : IDisposable
 
     public bool MoveNext()
     {
+        LastMoveStoppedAtEnd = false;
         if (_files.Count == 0) return false;
 
-        if (SiblingFolderAutoSwitch && CurrentIndex == _files.Count - 1)
+        if (CurrentIndex == _files.Count - 1)
         {
-            var next = FindSiblingFolder(forward: true);
-            if (next is not null)
-                return Open(next);
+            // Stop takes precedence over sibling-folder auto-switch and wrap.
+            if (StopAtEnds)
+            {
+                LastMoveStoppedAtEnd = true;
+                return false;
+            }
+
+            if (SiblingFolderAutoSwitch)
+            {
+                var next = FindSiblingFolder(forward: true);
+                if (next is not null)
+                    return Open(next);
+            }
         }
 
         CurrentIndex = (CurrentIndex + 1) % _files.Count;
@@ -210,16 +225,26 @@ public sealed class DirectoryNavigator : IDisposable
 
     public bool MovePrevious()
     {
+        LastMoveStoppedAtEnd = false;
         if (_files.Count == 0) return false;
 
-        if (SiblingFolderAutoSwitch && CurrentIndex == 0)
+        if (CurrentIndex == 0)
         {
-            var prev = FindSiblingFolder(forward: false);
-            if (prev is not null)
+            if (StopAtEnds)
             {
-                if (!Open(prev)) return false;
-                CurrentIndex = _files.Count - 1;
-                return true;
+                LastMoveStoppedAtEnd = true;
+                return false;
+            }
+
+            if (SiblingFolderAutoSwitch)
+            {
+                var prev = FindSiblingFolder(forward: false);
+                if (prev is not null)
+                {
+                    if (!Open(prev)) return false;
+                    CurrentIndex = _files.Count - 1;
+                    return true;
+                }
             }
         }
 
