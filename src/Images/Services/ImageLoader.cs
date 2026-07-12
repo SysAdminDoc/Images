@@ -58,6 +58,14 @@ public static class ImageLoader
     private const int StableReadRetryDelayMs = 80;
     private static readonly BitmapSource TilePlaceholder = CreateTilePlaceholder();
 
+    /// <summary>
+    /// RD-02: when true, normal raster loads are decoded through Magick.NET and any embedded ICC
+    /// profile is transformed to sRGB before display, so wide-gamut (AdobeRGB/DisplayP3) images no
+    /// longer render over-saturated on the common sRGB assumption. Opt-in (default off) because it
+    /// routes the fast WIC path through Magick; huge (memory-mapped) and tiled images are exempt.
+    /// </summary>
+    public static bool ColorManagedDisplay { get; set; }
+
     public static LoadResult Load(
         string path,
         int pageIndex = 0,
@@ -125,6 +133,14 @@ public static class ImageLoader
         {
             var animated = TryLoadAnimated(bytes);
             if (animated is not null) return animated;
+        }
+
+        // RD-02: color-managed decode (opt-in). Falls through to the normal WIC/Magick path if it
+        // fails so a decode error never costs the image.
+        if (ColorManagedDisplay)
+        {
+            var managed = TryLoadColorManaged(bytes, displayName);
+            if (managed is not null) return managed;
         }
 
         var evtSrc = ImageEventSource.Instance;
@@ -639,6 +655,51 @@ public static class ImageLoader
     /// <see cref="WriteableBitmap"/> in BGRA32. Shared by the static fallback path and the
     /// animated-frame decoder.
     /// </summary>
+    private static LoadResult? TryLoadColorManaged(byte[] bytes, string displayName)
+    {
+        var evtSrc = ImageEventSource.Instance;
+        evtSrc.RecordDecodeAttempt();
+        var sw = Stopwatch.StartNew();
+        evtSrc.DecodeStarted(displayName, "Magick.NET (color-managed)");
+        try
+        {
+            using var image = new MagickImage(bytes);
+            var managed = TransformToSrgbIfProfiled(image);
+            var wb = MagickToBitmap(image);
+
+            sw.Stop();
+            evtSrc.RecordMagickFallbackDecode();
+            evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
+            var decoder = managed ? "Magick.NET (color-managed)" : "Magick.NET";
+            evtSrc.DecodeCompleted(displayName, decoder, (long)sw.Elapsed.TotalMilliseconds);
+            return new LoadResult(wb, wb.PixelWidth, wb.PixelHeight, decoder);
+        }
+        catch (Exception ex) when (
+            ex is MagickException or
+                  NotSupportedException or
+                  InvalidOperationException or
+                  ArgumentException)
+        {
+            // Non-fatal: fall back to the normal decode path.
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Transforms the image's embedded ICC profile to sRGB in place. Returns true if the image
+    /// carried an embedded profile (was honored); false for untagged images (already assumed sRGB).
+    /// </summary>
+    internal static bool TransformToSrgbIfProfiled(IMagickImage<ushort> image)
+    {
+        if (image.GetColorProfile() is null)
+            return false;
+
+        // The first argument is only used when no profile is embedded (not our case here); the
+        // embedded profile is the real source, sRGB the target. Identity for sRGB-tagged images.
+        image.TransformColorSpace(ColorProfiles.SRGB, ColorProfiles.SRGB);
+        return true;
+    }
+
     private static WriteableBitmap MagickToBitmap(IMagickImage<ushort> image)
     {
         image.Format = MagickFormat.Bgra;

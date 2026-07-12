@@ -151,6 +151,21 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
+    public bool ColorManagedDisplay
+    {
+        get => _settings.GetBool(Keys.ColorManagement, false);
+        set
+        {
+            _settings.SetBool(Keys.ColorManagement, value);
+            // Static loader flag takes effect on the next image decode.
+            ImageLoader.ColorManagedDisplay = value;
+            Raise(nameof(ColorManagedDisplay));
+            SetStatus(
+                value ? Strings.SettingsColorManagementOnStatus : Strings.SettingsColorManagementOffStatus,
+                SettingsStatusToneKind.Success);
+        }
+    }
+
     public bool FilmstripVisibleOnStartup
     {
         get => _settings.GetBool(Keys.FilmstripVisible, true);

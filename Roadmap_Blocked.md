@@ -13,10 +13,6 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
   - **Blocked by**: human runtime validation requirement.
   - **Unblock when**: the manual smoke pass is scheduled or can be replaced by an accepted automated UI smoke.
 
-- [ ] **RD-02** *P2* — Display color management: honor embedded ICC + transform to the active monitor profile. Read the embedded profile, resolve the active monitor profile (`WcsGetDefaultColorProfile`), and bake a `TransformColorSpace(source, monitor)` into the display bitmap via Magick.NET's lcms2, with a managed/unmanaged status token; run lazily off the startup hot path. Distinct from the blocked OCIO/ACES pro pipeline (V80-26). Evidence: nomacs #459, ImageGlass #1433, PicView #201; RESEARCH.md. Touches: `src/Images/Services/ImageLoader.cs` (all decode branches: WIC, Magick fallback, paged, memory-mapped) or a new `ColorManagementService`.
-  - **Blocked by**: correctness is inherently visual and cross-cutting — it must be validated on a wide-gamut/P3 monitor, and an unvalidated always-on color transform risks regressing color for every user across all decode paths. Also a pending product decision (RESEARCH Open Question): bake via Magick/lcms2 now vs defer to the OCIO/ACES managed-renderer track.
-  - **Unblock when**: a wide-gamut monitor is available for visual validation and the bake-vs-managed-renderer decision is made; then ship opt-in first.
-
 - [ ] **RD-06** *P3* — Hold-to-loupe magnifier: a press-and-hold lens at 100%/Nx that tracks the cursor and samples source pixels without changing base zoom. Evidence: ImageGlass #1425; FastStone/NeeView; RESEARCH.md. Touches: `src/Images/Controls/ZoomPanImage.cs`.
   - **Blocked by**: the deliverable is a live visual lens whose correctness (sampling, tracking, magnification feel) can only be judged in a running GUI session; no meaningful headless verification.
   - **Unblock when**: an interactive Windows GUI session (or a background UIA/PrintWindow harness that can capture the lens) is available.

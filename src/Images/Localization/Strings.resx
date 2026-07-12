@@ -1625,6 +1625,12 @@ Details written to:
   <data name="SettingsRestoreSessionDescription" xml:space="preserve">
     <value>When Images starts with no file, reopens the last image you viewed. If that file is gone, opens to the empty state.</value>
   </data>
+  <data name="SettingsColorManagementTitle" xml:space="preserve">
+    <value>Color-managed display</value>
+  </data>
+  <data name="SettingsColorManagementDescription" xml:space="preserve">
+    <value>Honors an image's embedded ICC profile and converts wide-gamut colors (Adobe RGB, Display P3) to sRGB so they no longer look over-saturated. Applies to newly opened images; decodes through Magick.NET.</value>
+  </data>
   <data name="SettingsSectionAppearance" xml:space="preserve">
     <value>Appearance</value>
   </data>
@@ -1816,6 +1822,12 @@ Details written to:
   </data>
   <data name="SettingsRestoreSessionOffStatus" xml:space="preserve">
     <value>Images will start at the empty state when launched with no file.</value>
+  </data>
+  <data name="SettingsColorManagementOnStatus" xml:space="preserve">
+    <value>Embedded color profiles will be converted to sRGB on newly opened images.</value>
+  </data>
+  <data name="SettingsColorManagementOffStatus" xml:space="preserve">
+    <value>Images will display raw pixel values without ICC color conversion.</value>
   </data>
   <data name="SettingsFilmstripOnStatus" xml:space="preserve">
     <value>Filmstrip will be shown at startup.</value>

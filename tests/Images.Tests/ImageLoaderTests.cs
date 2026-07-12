@@ -74,4 +74,29 @@ public sealed class ImageLoaderTests
         };
         return frame;
     }
+
+    [Fact]
+    public void TransformToSrgbIfProfiled_UntaggedImage_ReturnsFalse()
+    {
+        using var image = new MagickImage(MagickColors.Red, 4, 4);
+
+        Assert.Null(image.GetColorProfile());
+        Assert.False(ImageLoader.TransformToSrgbIfProfiled(image));
+    }
+
+    [Fact]
+    public void TransformToSrgbIfProfiled_WideGamutProfile_ConvertsToSrgb()
+    {
+        using var image = new MagickImage(MagickColors.Red, 4, 4);
+        image.SetProfile(ColorProfiles.AdobeRGB1998);
+        var before = ColorProfiles.AdobeRGB1998.ToByteArray();
+
+        var managed = ImageLoader.TransformToSrgbIfProfiled(image);
+
+        Assert.True(managed);
+        var after = image.GetColorProfile();
+        Assert.NotNull(after);
+        // The embedded profile is now sRGB, not the original Adobe RGB.
+        Assert.False(after!.ToByteArray().AsSpan().SequenceEqual(before));
+    }
 }

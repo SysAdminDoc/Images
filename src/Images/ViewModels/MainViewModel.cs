@@ -171,6 +171,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _isMetadataHudVisible = _settings.GetBool(Keys.MetadataHudVisible, false);
         _isZoomLocked = _settings.GetBool(Keys.ZoomLock, false);
         _showTransparencyGrid = _settings.GetBool(Keys.TransparencyGrid, false);
+        ImageLoader.ColorManagedDisplay = _settings.GetBool(Keys.ColorManagement, false);
         _archiveRightToLeft = _settings.GetBool(Keys.ArchiveRightToLeft, false);
         _archiveOldScanFilterEnabled = _settings.GetBool(Keys.ArchiveOldScanFilter, false);
         _archiveSpreadModeEnabled = _settings.GetBool(Keys.ArchiveSpreadMode, false);
