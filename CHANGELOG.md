@@ -4,6 +4,10 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### Security
+
+- **Magick.NET upgraded to 14.15.0** - Bundles ImageMagick 7.1.2-27 and libheif >=1.22.0, addressing CVE-2026-32740 (heap write decoding crafted HEIF/AVIF grid tiles) and the 2026 ImageMagick heap/OOB-write CVEs on the untrusted-file fallback decode path Images uses for HEIF/AVIF/RAW/etc. Runtime-provenance docs and the vulnerable-package gate stay in sync.
+
 ### Changed
 
 - **Theme selection is now available in Settings** - Appearance exposes Dark, Light, and Follow Windows choices that apply immediately, while the accessibility high-contrast override remains independent.

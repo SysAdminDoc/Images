@@ -86,7 +86,7 @@ Copy this block into a new design or decision document before adding the integra
 
 | Integration | Review status | Notes |
 | --- | --- | --- |
-| Magick.NET 14.14.0 | Accepted | Existing NuGet dependency; release workflow vulnerable-package gate covers managed package advisories. |
+| Magick.NET 14.15.0 | Accepted | Existing NuGet dependency; release workflow vulnerable-package gate covers managed package advisories. Upgraded from 14.14.0 for ImageMagick 7.1.2-27 / libheif >=1.22.0, addressing CVE-2026-32740 and 2026 ImageMagick heap/OOB-write CVEs on the untrusted-file decode path. |
 | Ghostscript 10.07.0 | Conditionally accepted | Optional app-local/system runtime; bundling requires exact approved artifact and SHA-256 continuity. See `docs/codec-bundling.md`. |
 | SharpCompress 0.49.1 | Accepted | Managed MIT NuGet dependency for read-only RAR/CBR and 7z/CB7 archive books. Upgraded from 0.47.4 after GHSA-6c8g-7p36-r338 / CVE-2026-44788 flagged the extraction helper API that Images does not call. See `docs/archive-runtime-review.md`. |
 | Microsoft.Data.Sqlite 10.0.9 + SQLitePCLRaw.bundle_e_sqlite3 3.0.3 | Accepted | App-local catalog, settings, and semantic index storage use managed ADO.NET over the bundled SQLitePCLRaw e_sqlite3 runtime; release readiness keeps package and vulnerability gates local. |

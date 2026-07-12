@@ -27,15 +27,6 @@ Items found during the v0.2.24 deep audit that were NOT fixed in that session:
 
 Externally-grounded, net-new items from a competitor/format/security research pass. None duplicate the AUD deep-audit backlog above or the blocked items in `Roadmap_Blocked.md`. Each was verified against current source before landing here (Compare mode, trackpad manipulation/inertia, histogram, nearest-neighbor scaling, and lossless JPEG transforms already exist and are intentionally omitted).
 
-### P1 — security / data safety
-
-- [ ] P1 RD-01 — Upgrade Magick.NET 14.14.0 → 14.15.0 (untrusted-file decode CVEs)
-  Why: 14.15.0 (ImageMagick 7.1.2-27) bundles libheif ≥1.22.0 fixing CVE-2026-32740 (heap write decoding crafted HEIF/AVIF grid tiles, CVSS 8.8) plus 2026 ImageMagick heap/OOB-write CVEs (MAT/YUV/Sun/XBM/MIFF). These sit on the exact Magick.NET fallback path Images uses for untrusted HEIF/AVIF/etc., which is the *primary* path on the project's 22H2 floor (Store WIC extensions are 24H2-only). AnyCPU already dodges the 32-bit-only variants.
-  Evidence: https://github.com/dlemstra/Magick.NET/releases ; https://www.thehackerwire.com/libheif-heap-buffer-overflow-cve-2026-32740/ ; RESEARCH.md Security section.
-  Touches: `src/Images/Images.csproj` (both Magick.NET pins), `docs/integration-policy.md` + `docs/archive-runtime-review.md` runtime-provenance strings (release gate `scripts/Test-RuntimeProvenanceDocs.ps1` parses these), CHANGELOG.
-  Acceptance: csproj on 14.15.0, `dotnet list ... --vulnerable` clean, provenance-docs gate passes, full suite green.
-  Complexity: S
-
 ### P2 — trust / correctness / quiet-premium comfort
 
 - [ ] P2 RD-02 — Display color management: honor embedded ICC + transform to the active monitor profile
