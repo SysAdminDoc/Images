@@ -46,6 +46,22 @@ public sealed class ZoomPanImage : ContentControl
         VerticalAlignment = VerticalAlignment.Top,
     };
     private Point? _zoomSelectStart;
+    // RD-06: hold-the-middle-button loupe. A fixed-size circular lens that magnifies the source
+    // pixels under the cursor without changing the base zoom.
+    private const double LoupeSize = 180;
+    private readonly Ellipse _loupe = new()
+    {
+        Width = LoupeSize,
+        Height = LoupeSize,
+        IsHitTestVisible = false,
+        Visibility = Visibility.Collapsed,
+        StrokeThickness = 2,
+        Stroke = new SolidColorBrush(Color.FromRgb(0xF5, 0xA9, 0x7F)),
+        HorizontalAlignment = HorizontalAlignment.Left,
+        VerticalAlignment = VerticalAlignment.Top,
+    };
+    private readonly ImageBrush _loupeBrush = new() { Stretch = Stretch.Fill, ViewboxUnits = BrushMappingMode.RelativeToBoundingBox };
+    private bool _loupeActive;
     private readonly Grid _visual = new();
     private readonly Viewbox _tileViewbox = new() { Stretch = Stretch.Uniform, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
     private readonly Canvas _tileCanvas = new() { IsHitTestVisible = false };
@@ -222,6 +238,17 @@ public sealed class ZoomPanImage : ContentControl
         set => SetValue(TransparencyGridColorBProperty, value);
     }
 
+    // RD-06: loupe magnification relative to 1:1 (2.0 = 200% of source pixels).
+    public static readonly DependencyProperty LoupeFactorProperty = DependencyProperty.Register(
+        nameof(LoupeFactor), typeof(double), typeof(ZoomPanImage),
+        new PropertyMetadata(2.0));
+
+    public double LoupeFactor
+    {
+        get => (double)GetValue(LoupeFactorProperty);
+        set => SetValue(LoupeFactorProperty, value);
+    }
+
     public ZoomPanImage()
     {
         var group = new TransformGroup();
@@ -244,6 +271,8 @@ public sealed class ZoomPanImage : ContentControl
         _visual.Children.Add(_tileViewbox);
         _root.Children.Add(_visual);
         _root.Children.Add(_zoomSelectionRect);
+        _loupe.Fill = _loupeBrush;
+        _root.Children.Add(_loupe);
         Content = _root;
 
         _image.SizeChanged += (_, _) => UpdateTransparencyGrid();
@@ -253,6 +282,9 @@ public sealed class ZoomPanImage : ContentControl
         MouseMove += OnMove;
         MouseLeftButtonUp += OnUp;
         MouseDoubleClick += OnDouble;
+        MouseDown += OnAnyButtonDown;
+        MouseUp += OnAnyButtonUp;
+        MouseLeave += (_, _) => StopLoupe();
         LostMouseCapture += (_, _) => CancelZoomSelection();
 
         IsManipulationEnabled = true;
@@ -585,8 +617,79 @@ public sealed class ZoomPanImage : ContentControl
         Cursor = Cursors.SizeAll;
     }
 
+    // RD-06: middle-button hold shows the loupe; release hides it.
+    private void OnAnyButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton == MouseButton.Middle)
+            StartLoupe(e.GetPosition(this));
+    }
+
+    private void OnAnyButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton == MouseButton.Middle)
+            StopLoupe();
+    }
+
+    private void StartLoupe(Point position)
+    {
+        if (_image.Source is not ImageSource || !TryGetRenderedPixelSize(out _, out _))
+            return;
+        _loupeActive = true;
+        _loupe.Visibility = Visibility.Visible;
+        UpdateLoupe(position);
+    }
+
+    private void StopLoupe()
+    {
+        if (!_loupeActive) return;
+        _loupeActive = false;
+        _loupe.Visibility = Visibility.Collapsed;
+    }
+
+    public bool IsLoupeActive => _loupeActive;
+
+    private void UpdateLoupe(Point cursor)
+    {
+        if (!TryGetRenderedPixelSize(out var pixelWidth, out var pixelHeight))
+        {
+            StopLoupe();
+            return;
+        }
+
+        var matrix = GetImageToViewportMatrix();
+        if (!matrix.HasInverse)
+            return;
+        matrix.Invert();
+        var src = matrix.Transform(cursor);
+
+        // At the loupe factor, LoupeSize screen pixels show (LoupeSize / factor) source pixels.
+        var region = LoupeSize / Math.Max(0.1, LoupeFactor);
+        _loupeBrush.ImageSource = _image.Source;
+        _loupeBrush.Viewbox = ComputeLoupeViewbox(src.X, src.Y, pixelWidth, pixelHeight, region, region);
+        _loupe.Margin = new Thickness(cursor.X - LoupeSize / 2, cursor.Y - LoupeSize / 2, 0, 0);
+    }
+
+    /// <summary>Normalized, clamped source rectangle the loupe samples around (<paramref name="srcX"/>, <paramref name="srcY"/>).</summary>
+    internal static Rect ComputeLoupeViewbox(double srcX, double srcY, int pixelWidth, int pixelHeight, double regionWidth, double regionHeight)
+    {
+        if (pixelWidth <= 0 || pixelHeight <= 0)
+            return new Rect(0, 0, 1, 1);
+
+        var w = Math.Min(1.0, regionWidth / pixelWidth);
+        var h = Math.Min(1.0, regionHeight / pixelHeight);
+        var x = Math.Clamp((srcX - regionWidth / 2) / pixelWidth, 0, Math.Max(0, 1 - w));
+        var y = Math.Clamp((srcY - regionHeight / 2) / pixelHeight, 0, Math.Max(0, 1 - h));
+        return new Rect(x, y, w, h);
+    }
+
     private void OnMove(object sender, MouseEventArgs e)
     {
+        if (_loupeActive)
+        {
+            UpdateLoupe(e.GetPosition(this));
+            return;
+        }
+
         if (_zoomSelectStart is { } start)
         {
             UpdateZoomSelectionRect(start, e.GetPosition(this));

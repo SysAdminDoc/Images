@@ -13,10 +13,6 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
   - **Blocked by**: human runtime validation requirement.
   - **Unblock when**: the manual smoke pass is scheduled or can be replaced by an accepted automated UI smoke.
 
-- [ ] **RD-06** *P3* — Hold-to-loupe magnifier: a press-and-hold lens at 100%/Nx that tracks the cursor and samples source pixels without changing base zoom. Evidence: ImageGlass #1425; FastStone/NeeView; RESEARCH.md. Touches: `src/Images/Controls/ZoomPanImage.cs`.
-  - **Blocked by**: the deliverable is a live visual lens whose correctness (sampling, tracking, magnification feel) can only be judged in a running GUI session; no meaningful headless verification.
-  - **Unblock when**: an interactive Windows GUI session (or a background UIA/PrintWindow harness that can capture the lens) is available.
-
 - [ ] **RD-07** *P3* — Live cursor pixel readout (x/y + RGBA/hex). The coordinate/color sampling logic already exists (`MainWindow.TrySampleInspectorPixel` / `MainViewModel.UpdateInspectorSample`); the remaining work is where to surface a live-on-hover readout without cluttering the debloated viewer. Evidence: PicView #151, ImageGlass #913; RESEARCH.md.
   - **Blocked by**: a product/placement decision plus live GUI validation — surfacing an always-on hover readout must be validated against the quiet-premium surface (does it fit the HUD, does it distract) which cannot be judged headless.
   - **Unblock when**: the readout placement is decided and can be visually validated in a GUI session.

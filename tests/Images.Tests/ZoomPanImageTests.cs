@@ -93,6 +93,51 @@ public sealed class ZoomPanImageTests
         });
     }
 
+    [Fact]
+    public void ComputeLoupeViewbox_CenteredPoint_ReturnsCenteredRegion()
+    {
+        var box = ZoomPanImage.ComputeLoupeViewbox(50, 50, 100, 100, 20, 20);
+
+        Assert.Equal(0.40, box.X, 3);
+        Assert.Equal(0.40, box.Y, 3);
+        Assert.Equal(0.20, box.Width, 3);
+        Assert.Equal(0.20, box.Height, 3);
+    }
+
+    [Fact]
+    public void ComputeLoupeViewbox_NearEdge_ClampsInsideBounds()
+    {
+        var box = ZoomPanImage.ComputeLoupeViewbox(0, 0, 100, 100, 20, 20);
+
+        Assert.Equal(0.0, box.X, 3);
+        Assert.Equal(0.0, box.Y, 3);
+        Assert.True(box.X + box.Width <= 1.0 + 1e-9);
+        Assert.True(box.Y + box.Height <= 1.0 + 1e-9);
+    }
+
+    [Fact]
+    public void MiddleButton_TogglesLoupeActiveState()
+    {
+        RunOnSta(() =>
+        {
+            var control = new ZoomPanImage { Source = MakeBitmap() };
+            Arrange(control, 400, 300);
+
+            control.RaiseEvent(MiddleButtonEvent(control, System.Windows.Input.Mouse.MouseDownEvent));
+            Assert.True(control.IsLoupeActive);
+
+            control.RaiseEvent(MiddleButtonEvent(control, System.Windows.Input.Mouse.MouseUpEvent));
+            Assert.False(control.IsLoupeActive);
+        });
+    }
+
+    private static System.Windows.Input.MouseButtonEventArgs MiddleButtonEvent(ZoomPanImage control, RoutedEvent routed)
+        => new(System.Windows.Input.Mouse.PrimaryDevice, Environment.TickCount, System.Windows.Input.MouseButton.Middle)
+        {
+            RoutedEvent = routed,
+            Source = control,
+        };
+
     private static BitmapSource MakeBitmap()
     {
         var bitmap = BitmapSource.Create(
