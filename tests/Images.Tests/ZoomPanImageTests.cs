@@ -2,12 +2,76 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Images.Controls;
 
 namespace Images.Tests;
 
 public sealed class ZoomPanImageTests
 {
+    [Fact]
+    public void PreserveViewOnSourceChange_KeepsZoomAndCentersPanForNewImage()
+    {
+        RunOnSta(() =>
+        {
+            var control = new ZoomPanImage { PreserveViewOnSourceChange = true };
+            Arrange(control, 400, 300);
+            control.SetViewState(new ZoomPanViewState(3, 48, -32));
+
+            control.Source = MakeBitmap();
+
+            Assert.Equal(new ZoomPanViewState(3, 0, 0), control.GetViewState());
+        });
+    }
+
+    [Fact]
+    public void SourceChange_WithoutPreserve_ResetsView()
+    {
+        RunOnSta(() =>
+        {
+            var control = new ZoomPanImage();
+            Arrange(control, 400, 300);
+            control.SetViewState(new ZoomPanViewState(3, 48, -32));
+
+            control.Source = MakeBitmap();
+
+            Assert.Equal(new ZoomPanViewState(1, 0, 0), control.GetViewState());
+        });
+    }
+
+    [Theory]
+    [InlineData("Bgra32", true)]
+    [InlineData("Pbgra32", true)]
+    [InlineData("Bgr32", false)]
+    [InlineData("Bgr24", false)]
+    public void HasAlphaChannel_DetectsAlphaCarryingFormats(string format, bool expected)
+    {
+        var pixelFormat = format switch
+        {
+            "Bgra32" => PixelFormats.Bgra32,
+            "Pbgra32" => PixelFormats.Pbgra32,
+            "Bgr32" => PixelFormats.Bgr32,
+            _ => PixelFormats.Bgr24,
+        };
+
+        Assert.Equal(expected, ZoomPanImage.HasAlphaChannel(pixelFormat));
+    }
+
+    private static BitmapSource MakeBitmap()
+    {
+        var bitmap = BitmapSource.Create(
+            2, 2, 96, 96, PixelFormats.Bgra32, null,
+            new byte[]
+            {
+                0xFF, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x80,
+                0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00
+            },
+            8);
+        bitmap.Freeze();
+        return bitmap;
+    }
+
     [Fact]
     public void SizeChanged_PreservesUserModifiedViewState()
     {

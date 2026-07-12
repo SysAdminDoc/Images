@@ -586,6 +586,8 @@ public static class Strings
     public static string CommandPalette_Refresh => Get(nameof(CommandPalette_Refresh));
     public static string CommandPalette_Filmstrip => Get(nameof(CommandPalette_Filmstrip));
     public static string CommandPalette_MetadataHud => Get(nameof(CommandPalette_MetadataHud));
+    public static string CommandPalette_ZoomLock => Get(nameof(CommandPalette_ZoomLock));
+    public static string CommandPalette_TransparencyGrid => Get(nameof(CommandPalette_TransparencyGrid));
     public static string CommandPalette_Gallery => Get(nameof(CommandPalette_Gallery));
     public static string CommandPalette_Inspector => Get(nameof(CommandPalette_Inspector));
     public static string CommandPalette_ExtractText => Get(nameof(CommandPalette_ExtractText));
@@ -1180,6 +1182,10 @@ public static class Strings
     public static string MainToastTwoPageOff => Get(nameof(MainToastTwoPageOff));
     public static string MainToastMetadataHudOn => Get(nameof(MainToastMetadataHudOn));
     public static string MainToastMetadataHudOff => Get(nameof(MainToastMetadataHudOff));
+    public static string MainToastZoomLockOn => Get(nameof(MainToastZoomLockOn));
+    public static string MainToastZoomLockOff => Get(nameof(MainToastZoomLockOff));
+    public static string MainToastTransparencyGridOn => Get(nameof(MainToastTransparencyGridOn));
+    public static string MainToastTransparencyGridOff => Get(nameof(MainToastTransparencyGridOff));
     public static string MainToastFilmstripShown => Get(nameof(MainToastFilmstripShown));
     public static string MainToastFilmstripHidden => Get(nameof(MainToastFilmstripHidden));
     public static string MainToastGalleryClosed => Get(nameof(MainToastGalleryClosed));

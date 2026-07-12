@@ -36,20 +36,6 @@ Externally-grounded, net-new items from a competitor/format/security research pa
   Acceptance: an image with an embedded non-sRGB profile displays visibly corrected on a wide-gamut monitor; a managed/unmanaged indicator reflects state; SDR sRGB path is unchanged; no measurable cold-start regression.
   Complexity: M
 
-- [ ] P2 RD-04 — Transparency backdrop: checkerboard / solid-color option for alpha images
-  Why: No checkerboard or configurable backdrop exists anywhere in source; transparent PNG/WebP/SVG render on the flat canvas, hiding true alpha. Top-voted JPEGView request (#43); expected by design/screenshot users. Fits the quiet-premium surface as one toggle.
-  Evidence: https://github.com/sylikc/jpegview/issues/43 ; RESEARCH.md.
-  Touches: `src/Images/Controls/ZoomPanImage.cs` (draw a scaling checkerboard/solid behind images with alpha), a setting in `SettingsService` + Appearance UI, themed light/dark checker tokens.
-  Acceptance: an alpha PNG shows a checkerboard (or chosen color) behind transparent regions that scales with zoom; toggle persists; opaque images unaffected.
-  Complexity: S
-
-- [ ] P2 RD-05 — Zoom-lock across image navigation
-  Why: Navigating to the next image resets zoom/pan, so pixel-peeping a series at a fixed magnification is impossible. PicView 4.1 and nomacs both ship a keep-zoom option; cheap, high-value for cullers/reviewers.
-  Evidence: https://github.com/Ruben2776/PicView/releases (4.1 "Zoom level lock") ; RESEARCH.md.
-  Touches: `src/Images/Controls/ZoomPanImage.cs` + `MainViewModel` navigation (carry scale/translate across `LoadCurrent` when locked), a toggle command in the palette + setting. Interacts with AUD-58 (SizeChanged reset) — coordinate.
-  Acceptance: with zoom-lock on, Next/Prev preserves the current zoom factor and re-anchors pan to center; off by default; state persists.
-  Complexity: S
-
 ### P3 — comfort / polish
 
 - [ ] P3 RD-06 — Hold-to-loupe magnifier (1:1 or Nx lens under the cursor)

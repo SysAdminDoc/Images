@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using Images.Services;
 
 namespace Images.Controls;
@@ -21,6 +22,17 @@ public readonly record struct ZoomPanViewState(double Scale, double TranslateX, 
 public sealed class ZoomPanImage : ContentControl
 {
     private readonly Image _image = new() { Stretch = Stretch.Uniform };
+    // RD-04: checkerboard drawn behind the image so transparent pixels read as transparent.
+    // Lives inside _visual so it inherits the same flip/rotate/scale transform and stays aligned
+    // with (and scales alongside) the image content.
+    private readonly Rectangle _transparencyGrid = new()
+    {
+        IsHitTestVisible = false,
+        Visibility = Visibility.Collapsed,
+        HorizontalAlignment = HorizontalAlignment.Center,
+        VerticalAlignment = VerticalAlignment.Center,
+    };
+    private DrawingBrush? _checkerBrush;
     private readonly Grid _visual = new();
     private readonly Viewbox _tileViewbox = new() { Stretch = Stretch.Uniform, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
     private readonly Canvas _tileCanvas = new() { IsHitTestVisible = false };
@@ -154,6 +166,49 @@ public sealed class ZoomPanImage : ContentControl
         set => SetValue(UseNearestNeighborScalingProperty, value);
     }
 
+    // RD-05: keep the current zoom factor across image changes (pan re-anchors to center) so a
+    // series can be pixel-peeped at a fixed magnification.
+    public static readonly DependencyProperty PreserveViewOnSourceChangeProperty = DependencyProperty.Register(
+        nameof(PreserveViewOnSourceChange), typeof(bool), typeof(ZoomPanImage),
+        new PropertyMetadata(false));
+
+    public bool PreserveViewOnSourceChange
+    {
+        get => (bool)GetValue(PreserveViewOnSourceChangeProperty);
+        set => SetValue(PreserveViewOnSourceChangeProperty, value);
+    }
+
+    // RD-04: transparency checkerboard.
+    public static readonly DependencyProperty ShowTransparencyGridProperty = DependencyProperty.Register(
+        nameof(ShowTransparencyGrid), typeof(bool), typeof(ZoomPanImage),
+        new PropertyMetadata(false, (d, e) => ((ZoomPanImage)d).UpdateTransparencyGrid()));
+
+    public bool ShowTransparencyGrid
+    {
+        get => (bool)GetValue(ShowTransparencyGridProperty);
+        set => SetValue(ShowTransparencyGridProperty, value);
+    }
+
+    public static readonly DependencyProperty TransparencyGridColorAProperty = DependencyProperty.Register(
+        nameof(TransparencyGridColorA), typeof(Color), typeof(ZoomPanImage),
+        new PropertyMetadata(Color.FromRgb(0x2A, 0x2A, 0x2E), (d, e) => ((ZoomPanImage)d).InvalidateCheckerBrush()));
+
+    public Color TransparencyGridColorA
+    {
+        get => (Color)GetValue(TransparencyGridColorAProperty);
+        set => SetValue(TransparencyGridColorAProperty, value);
+    }
+
+    public static readonly DependencyProperty TransparencyGridColorBProperty = DependencyProperty.Register(
+        nameof(TransparencyGridColorB), typeof(Color), typeof(ZoomPanImage),
+        new PropertyMetadata(Color.FromRgb(0x3A, 0x3A, 0x40), (d, e) => ((ZoomPanImage)d).InvalidateCheckerBrush()));
+
+    public Color TransparencyGridColorB
+    {
+        get => (Color)GetValue(TransparencyGridColorBProperty);
+        set => SetValue(TransparencyGridColorBProperty, value);
+    }
+
     public ZoomPanImage()
     {
         var group = new TransformGroup();
@@ -171,10 +226,13 @@ public sealed class ZoomPanImage : ContentControl
 
         _root.ClipToBounds = true;
         _tileViewbox.Child = _tileCanvas;
+        _visual.Children.Add(_transparencyGrid);
         _visual.Children.Add(_image);
         _visual.Children.Add(_tileViewbox);
         _root.Children.Add(_visual);
         Content = _root;
+
+        _image.SizeChanged += (_, _) => UpdateTransparencyGrid();
 
         MouseWheel += OnWheel;
         MouseLeftButtonDown += OnDown;
@@ -210,10 +268,21 @@ public sealed class ZoomPanImage : ContentControl
         // new animation" rather than "new image, stale frames".
         _image.BeginAnimation(Image.SourceProperty, null);
         _image.Source = src;
-        ResetView();
+        if (PreserveViewOnSourceChange && src is not null)
+            RecenterPreservingZoom();
+        else
+            ResetView();
+        UpdateTransparencyGrid();
         QueueTileRefresh();
         RaiseViewChanged();
         Dispatcher.BeginInvoke(new Action(RaiseViewChanged), System.Windows.Threading.DispatcherPriority.Loaded);
+    }
+
+    // RD-05: keep the current zoom scale but re-anchor the pan to center for the incoming image.
+    private void RecenterPreservingZoom()
+    {
+        _translate.X = _translate.Y = 0;
+        QueueTileRefresh();
     }
 
     private void OnTilePyramidChanged(TilePyramidInfo? pyramid)
@@ -223,6 +292,7 @@ public sealed class ZoomPanImage : ContentControl
         _tileViewbox.Visibility = pyramid is null ? Visibility.Collapsed : Visibility.Visible;
         if (pyramid is not null)
             QueueTileRefresh();
+        UpdateTransparencyGrid();
         RaiseViewChanged();
     }
 
@@ -262,7 +332,75 @@ public sealed class ZoomPanImage : ContentControl
         else
             QueueTileRefresh();
 
+        UpdateTransparencyGrid();
         RaiseViewChanged();
+    }
+
+    private void InvalidateCheckerBrush()
+    {
+        _checkerBrush = null;
+        UpdateTransparencyGrid();
+    }
+
+    private DrawingBrush CheckerBrush =>
+        _checkerBrush ??= BuildCheckerBrush(TransparencyGridColorA, TransparencyGridColorB, 8);
+
+    // RD-04: size the checkerboard to the image's rendered box and show it only for images that
+    // actually carry an alpha channel. Tiled (huge) images and opaque images skip it.
+    private void UpdateTransparencyGrid()
+    {
+        if (!ShowTransparencyGrid || !SourceHasAlpha() ||
+            !TryGetRenderedPixelSize(out var pixelWidth, out var pixelHeight) ||
+            pixelWidth <= 0 || pixelHeight <= 0)
+        {
+            _transparencyGrid.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var availableWidth = _image.ActualWidth > 0 ? _image.ActualWidth : ActualWidth;
+        var availableHeight = _image.ActualHeight > 0 ? _image.ActualHeight : ActualHeight;
+        var fit = Math.Min(availableWidth / pixelWidth, availableHeight / pixelHeight);
+        if (!double.IsFinite(fit) || fit <= 0)
+        {
+            _transparencyGrid.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        _transparencyGrid.Width = pixelWidth * fit;
+        _transparencyGrid.Height = pixelHeight * fit;
+        _transparencyGrid.Fill = CheckerBrush;
+        _transparencyGrid.Visibility = Visibility.Visible;
+    }
+
+    private bool SourceHasAlpha()
+        => TilePyramid is null && _image.Source is BitmapSource bs && HasAlphaChannel(bs.Format);
+
+    internal static bool HasAlphaChannel(PixelFormat format)
+        => format == PixelFormats.Bgra32
+        || format == PixelFormats.Pbgra32
+        || format == PixelFormats.Rgba64
+        || format == PixelFormats.Prgba64
+        || format == PixelFormats.Rgba128Float
+        || format == PixelFormats.Prgba128Float;
+
+    private static DrawingBrush BuildCheckerBrush(Color colorA, Color colorB, double cell)
+    {
+        var group = new DrawingGroup();
+        group.Children.Add(new GeometryDrawing(
+            new SolidColorBrush(colorA), null, new RectangleGeometry(new Rect(0, 0, cell * 2, cell * 2))));
+        var contrast = new SolidColorBrush(colorB);
+        group.Children.Add(new GeometryDrawing(contrast, null, new RectangleGeometry(new Rect(0, 0, cell, cell))));
+        group.Children.Add(new GeometryDrawing(contrast, null, new RectangleGeometry(new Rect(cell, cell, cell, cell))));
+
+        var brush = new DrawingBrush(group)
+        {
+            TileMode = TileMode.Tile,
+            Viewport = new Rect(0, 0, cell * 2, cell * 2),
+            ViewportUnits = BrushMappingMode.Absolute,
+            Stretch = Stretch.None,
+        };
+        brush.Freeze();
+        return brush;
     }
 
     private bool IsUntouchedFitView =>

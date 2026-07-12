@@ -3738,6 +3738,18 @@ Details written to:
   <data name="MainToastMetadataHudOff" xml:space="preserve">
     <value>Metadata HUD off</value>
   </data>
+  <data name="MainToastZoomLockOn" xml:space="preserve">
+    <value>Zoom lock on</value>
+  </data>
+  <data name="MainToastZoomLockOff" xml:space="preserve">
+    <value>Zoom lock off</value>
+  </data>
+  <data name="MainToastTransparencyGridOn" xml:space="preserve">
+    <value>Transparency grid on</value>
+  </data>
+  <data name="MainToastTransparencyGridOff" xml:space="preserve">
+    <value>Transparency grid off</value>
+  </data>
   <data name="MainToastFilmstripShown" xml:space="preserve">
     <value>Filmstrip shown</value>
   </data>
@@ -4167,6 +4179,12 @@ Details written to:
   </data>
   <data name="CommandPalette_MetadataHud" xml:space="preserve">
     <value>Toggle metadata HUD</value>
+  </data>
+  <data name="CommandPalette_ZoomLock" xml:space="preserve">
+    <value>Toggle zoom lock</value>
+  </data>
+  <data name="CommandPalette_TransparencyGrid" xml:space="preserve">
+    <value>Toggle transparency grid</value>
   </data>
   <data name="CommandPalette_Gallery" xml:space="preserve">
     <value>Toggle gallery</value>

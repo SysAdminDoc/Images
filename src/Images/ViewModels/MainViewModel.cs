@@ -51,6 +51,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool _isDisposed;
     private bool _isFilmstripVisible;
     private bool _isMetadataHudVisible;
+    private bool _isZoomLocked;
+    private bool _showTransparencyGrid;
     private readonly DispatcherTimer _hintTimer;
 
     public MainViewModel()
@@ -167,6 +169,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         _isFilmstripVisible = _settings.GetBool(Keys.FilmstripVisible, true);
         _isMetadataHudVisible = _settings.GetBool(Keys.MetadataHudVisible, false);
+        _isZoomLocked = _settings.GetBool(Keys.ZoomLock, false);
+        _showTransparencyGrid = _settings.GetBool(Keys.TransparencyGrid, false);
         _archiveRightToLeft = _settings.GetBool(Keys.ArchiveRightToLeft, false);
         _archiveOldScanFilterEnabled = _settings.GetBool(Keys.ArchiveOldScanFilter, false);
         _archiveSpreadModeEnabled = _settings.GetBool(Keys.ArchiveSpreadMode, false);
@@ -297,6 +301,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ClearGalleryFilterCommand = new RelayCommand(() => GalleryFilterText = "", () => HasGalleryFilter);
         ToggleFilmstripCommand = new RelayCommand(ToggleFilmstrip, () => CanToggleFilmstrip);
         ToggleMetadataHudCommand = new RelayCommand(ToggleMetadataHud, () => CanToggleMetadataHud);
+        ToggleZoomLockCommand = new RelayCommand(ToggleZoomLock);
+        ToggleTransparencyGridCommand = new RelayCommand(ToggleTransparencyGrid);
         PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard, () => !IsOperationBusy);
         OpenInDefaultAppCommand = new RelayCommand(OpenInDefaultApp, () => HasImage);
         StripLocationCommand = new AsyncRelayCommand(StripLocationAsync, () => CanUseImageCommands);
@@ -1157,6 +1163,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             case CommandIds.MetadataHud:
                 ToggleMetadataHudCommand.Execute(null);
                 return true;
+            case CommandIds.ZoomLock:
+                ToggleZoomLockCommand.Execute(null);
+                return true;
+            case CommandIds.TransparencyGrid:
+                ToggleTransparencyGridCommand.Execute(null);
+                return true;
             case CommandIds.Gallery:
                 ToggleGalleryCommand.Execute(null);
                 return true;
@@ -1292,6 +1304,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             // View
             PaletteCommand(CommandIds.Filmstrip, ToggleFilmstripCommand, priority: 10, searchText: "thumbnail rail folder strip"),
             PaletteCommand(CommandIds.MetadataHud, ToggleMetadataHudCommand, priority: 11, searchText: "info exif details overlay"),
+            PaletteCommand(CommandIds.ZoomLock, ToggleZoomLockCommand, priority: 12, searchText: "keep zoom level lock magnification pixel peep"),
+            PaletteCommand(CommandIds.TransparencyGrid, ToggleTransparencyGridCommand, priority: 12, searchText: "checkerboard alpha transparent background backdrop"),
             PaletteCommand(CommandIds.Gallery, ToggleGalleryCommand, priority: 12, searchText: "thumbnail grid browser"),
             new() { Name = Strings.CommandPalette_Inspector, Category = view, Priority = 13, SearchText = "details panel sidebar", Command = ToggleInspectorCommand },
             PaletteCommand(CommandIds.ExtractText, ExtractTextCommand, priority: 14, searchText: "ocr text copy"),
@@ -2869,6 +2883,40 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Toast(IsMetadataHudVisible ? Strings.MainToastMetadataHudOn : Strings.MainToastMetadataHudOff);
     }
 
+    // RD-05: keep the current zoom factor across image navigation.
+    public bool IsZoomLocked
+    {
+        get => _isZoomLocked;
+        set
+        {
+            if (Set(ref _isZoomLocked, value))
+                _settings.SetBool(Keys.ZoomLock, value);
+        }
+    }
+
+    private void ToggleZoomLock()
+    {
+        IsZoomLocked = !IsZoomLocked;
+        Toast(IsZoomLocked ? Strings.MainToastZoomLockOn : Strings.MainToastZoomLockOff);
+    }
+
+    // RD-04: checkerboard behind transparent images.
+    public bool ShowTransparencyGrid
+    {
+        get => _showTransparencyGrid;
+        set
+        {
+            if (Set(ref _showTransparencyGrid, value))
+                _settings.SetBool(Keys.TransparencyGrid, value);
+        }
+    }
+
+    private void ToggleTransparencyGrid()
+    {
+        ShowTransparencyGrid = !ShowTransparencyGrid;
+        Toast(ShowTransparencyGrid ? Strings.MainToastTransparencyGridOn : Strings.MainToastTransparencyGridOff);
+    }
+
     private void RefreshPhotoMetadata(string path)
     {
         _photoMetadata.Refresh(path);
@@ -3730,6 +3778,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand ClearGalleryFilterCommand { get; }
     public ICommand ToggleFilmstripCommand { get; }
     public ICommand ToggleMetadataHudCommand { get; }
+    public ICommand ToggleZoomLockCommand { get; }
+    public ICommand ToggleTransparencyGridCommand { get; }
     public ICommand PasteFromClipboardCommand { get; }
     public ICommand OpenInDefaultAppCommand { get; }
     public ICommand StripLocationCommand { get; }

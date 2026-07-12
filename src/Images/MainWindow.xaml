@@ -350,6 +350,8 @@
                                    FlipVertical="{Binding FlipVertical}"
                                    InspectorMode="{Binding IsCanvasSelectionMode}"
                                    UseNearestNeighborScaling="{Binding InspectorNearestNeighborPreview}"
+                                   PreserveViewOnSourceChange="{Binding IsZoomLocked}"
+                                   ShowTransparencyGrid="{Binding ShowTransparencyGrid}"
                                    Visibility="{Binding ShowCompareMode, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}"
                                    PreviewMouseRightButtonUp="Viewport_PreviewMouseRightButtonUp"
                                    MouseMove="Canvas_MouseMove"

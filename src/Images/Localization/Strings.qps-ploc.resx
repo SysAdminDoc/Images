@@ -2418,10 +2418,10 @@ Details written to:
     <value>[!!!!!!!!!!!! Add at least one pipeline step before running. !!!!!!!!!!!!]</value>
   </data>
   <data name="MacroPreviewItemFormat" xml:space="preserve">
-    <value>[!!! {0} â†’ {1} !!!]</value>
+    <value>[!!! {0} → {1} !!!]</value>
   </data>
   <data name="MacroPreviewItemFailedFormat" xml:space="preserve">
-    <value>[!!!!! {0} â€” Error: {1} !!!!!]</value>
+    <value>[!!!! {0} — Error: {1} !!!!]</value>
   </data>
   <data name="ImportInboxWindowTitle" xml:space="preserve">
     <value>[!!!!!! Images - Import inbox !!!!!!]</value>
@@ -3737,6 +3737,18 @@ Details written to:
   <data name="MainToastMetadataHudOff" xml:space="preserve">
     <value>[!!!! Metadata HUD off !!!!]</value>
   </data>
+  <data name="MainToastZoomLockOn" xml:space="preserve">
+    <value>[!!! Zoom lock on !!!]</value>
+  </data>
+  <data name="MainToastZoomLockOff" xml:space="preserve">
+    <value>[!!!! Zoom lock off !!!!]</value>
+  </data>
+  <data name="MainToastTransparencyGridOn" xml:space="preserve">
+    <value>[!!!!! Transparency grid on !!!!!]</value>
+  </data>
+  <data name="MainToastTransparencyGridOff" xml:space="preserve">
+    <value>[!!!!!! Transparency grid off !!!!!!]</value>
+  </data>
   <data name="MainToastFilmstripShown" xml:space="preserve">
     <value>[!!!! Filmstrip shown !!!!]</value>
   </data>
@@ -4136,7 +4148,7 @@ Details written to:
     <value>[!!! Open file... !!!]</value>
   </data>
   <data name="CommandPalette_BrowseFolder" xml:space="preserve">
-    <value>[!!!! Browse folderâ€¦ !!!!]</value>
+    <value>[!!!! Browse folder… !!!!]</value>
   </data>
   <data name="MainDialogBrowseFolder" xml:space="preserve">
     <value>[!!!!!! Browse folder for images !!!!!!]</value>
@@ -4164,6 +4176,12 @@ Details written to:
   </data>
   <data name="CommandPalette_MetadataHud" xml:space="preserve">
     <value>[!!!!! Toggle metadata HUD !!!!!]</value>
+  </data>
+  <data name="CommandPalette_ZoomLock" xml:space="preserve">
+    <value>[!!!! Toggle zoom lock !!!!]</value>
+  </data>
+  <data name="CommandPalette_TransparencyGrid" xml:space="preserve">
+    <value>[!!!!!! Toggle transparency grid !!!!!!]</value>
   </data>
   <data name="CommandPalette_Gallery" xml:space="preserve">
     <value>[!!!! Toggle gallery !!!!]</value>
@@ -4444,7 +4462,7 @@ Details written to:
     <value>[!!!!!! Enter password for {0}: !!!!!!]</value>
   </data>
   <data name="MainFormatMismatch" xml:space="preserve">
-    <value>[!!!!!!!!!!!! File content is {0} but extension is {1} â€” expected {2} !!!!!!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! File content is {0} but extension is {1} — expected {2} !!!!!!!!!!!!]</value>
   </data>
   <data name="MainImageLoading" xml:space="preserve">
     <value>[!!! Loading... !!!]</value>
@@ -4465,7 +4483,7 @@ Details written to:
     <value>[!!!!! Extract motion video !!!!!]</value>
   </data>
   <data name="MainOpStrippingMetadata" xml:space="preserve">
-    <value>[!!!!!! Removing {0} metadataâ€¦ !!!!!!]</value>
+    <value>[!!!!!! Removing {0} metadata… !!!!!!]</value>
   </data>
   <data name="MainToastNoMetadataFound" xml:space="preserve">
     <value>[!!!!!! No {0} metadata found !!!!!!]</value>

@@ -4,6 +4,11 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### Added
+
+- **Zoom lock across image navigation** - A new toggle (command palette: "Toggle zoom lock") keeps the current zoom factor when moving to the next or previous image, re-anchoring the pan to center, so a series can be pixel-peeped at a fixed magnification. The choice persists.
+- **Transparency checkerboard** - A new toggle (command palette: "Toggle transparency grid") draws a checkerboard behind images that carry an alpha channel so transparent regions read as transparent; the pattern scales with zoom and the choice persists.
+
 ### Fixed
 
 - **Save a copy preserves image metadata** - Saving an unedited copy now reloads the source file through Magick.NET, so embedded EXIF, IPTC, XMP, and ICC color profiles survive the copy instead of being discarded by the in-memory pixel re-encode. Clipboard pastes and non-raster sources still use the pixel path.
