@@ -5657,6 +5657,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RaiseInspectorSampleState();
     }
 
+    // RD-07: live pixel readout surfaced in the (opt-in) metadata HUD while hovering the image.
+    private string? _hoverPixelText;
+    public string? HoverPixelText
+    {
+        get => _hoverPixelText;
+        private set => Set(ref _hoverPixelText, value);
+    }
+
+    public void UpdateHoverPixel(PixelSample? sample)
+        => HoverPixelText = sample is null
+            ? null
+            : $"{sample.CoordinateText}  ·  {sample.Hex}  ·  {sample.Rgb}";
+
     public void UpdateInspectorSelection(PixelSelection? selection)
     {
         _inspectorSelection = selection;

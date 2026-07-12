@@ -1859,6 +1859,30 @@ public sealed class MainViewModelStateTests
         });
     }
 
+    [Fact]
+    public void UpdateHoverPixel_SetsAndClearsReadoutText()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            using var viewModel = CreateViewModel(temp);
+
+            Assert.Null(viewModel.HoverPixelText);
+
+            var sample = new PixelSample(
+                new PixelCoordinate(12, 7), 255, 128, 0, 255,
+                "#FF8000", "rgb(255, 128, 0)", "hsv(30, 100%, 100%)", "255");
+            viewModel.UpdateHoverPixel(sample);
+
+            Assert.NotNull(viewModel.HoverPixelText);
+            Assert.Contains("x 12, y 7", viewModel.HoverPixelText!);
+            Assert.Contains("#FF8000", viewModel.HoverPixelText!);
+
+            viewModel.UpdateHoverPixel(null);
+            Assert.Null(viewModel.HoverPixelText);
+        });
+    }
+
     private static MainViewModel CreateViewModel(TestDirectory temp, ClipboardImportService? clipboardImport = null)
         => new(CreateSettings(temp), clipboardImport);
 

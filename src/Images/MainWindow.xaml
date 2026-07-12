@@ -1808,6 +1808,21 @@
                                            Foreground="{DynamicResource FloatingChromeTextBrush}"
                                            VerticalAlignment="Center" />
                             </StackPanel>
+
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0,8,0,0"
+                                        Visibility="{Binding HoverPixelText, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="&#xEF3C;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource AccentBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0" />
+                                <TextBlock Text="{Binding HoverPixelText}"
+                                           Style="{StaticResource Text.Hint}"
+                                           Foreground="{DynamicResource FloatingChromeTextBrush}"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
                         </StackPanel>
                     </Border>
 

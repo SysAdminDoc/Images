@@ -6,6 +6,7 @@ All notable changes to **Images** are documented here.
 
 ### Added
 
+- **Live pixel readout** - When the metadata HUD is open, hovering over the image now shows the pixel under the cursor (coordinate, hex, and RGB) in the HUD; it clears when the pointer leaves the image.
 - **Loupe magnifier** - Hold the middle mouse button over the image to show a circular lens that magnifies the source pixels under the cursor (2x by default) without changing the base zoom; release or leave the image to dismiss it.
 - **Color-managed display (opt-in)** - A new Appearance setting (off by default) honors an image's embedded ICC profile and converts wide-gamut colors (Adobe RGB, Display P3) to sRGB on decode, so tagged photos no longer render over-saturated. Applies to newly opened raster images via Magick.NET; untagged and huge/tiled images are unaffected.
 - **Zoom to selection** - Hold Ctrl+Shift and drag a box over the image to zoom directly to that region; the marquee fills the viewport and re-centers. Escape or losing focus cancels the drag; click-sized boxes are ignored.

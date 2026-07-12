@@ -13,10 +13,6 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
   - **Blocked by**: human runtime validation requirement.
   - **Unblock when**: the manual smoke pass is scheduled or can be replaced by an accepted automated UI smoke.
 
-- [ ] **RD-07** *P3* — Live cursor pixel readout (x/y + RGBA/hex). The coordinate/color sampling logic already exists (`MainWindow.TrySampleInspectorPixel` / `MainViewModel.UpdateInspectorSample`); the remaining work is where to surface a live-on-hover readout without cluttering the debloated viewer. Evidence: PicView #151, ImageGlass #913; RESEARCH.md.
-  - **Blocked by**: a product/placement decision plus live GUI validation — surfacing an always-on hover readout must be validated against the quiet-premium surface (does it fit the HUD, does it distract) which cannot be judged headless.
-  - **Unblock when**: the readout placement is decided and can be visually validated in a GUI session.
-
 - [ ] **RD-10 (residual)** *P3* — End-of-list "stop-with-nudge" mode. The other two modes already ship and are user-configurable: `DirectoryNavigator.SiblingFolderAutoSwitch` gives Wrap (off) and Next-sibling-folder (on). Only the third "stop at first/last with a subtle nudge" mode is unbuilt, which would rework the current bool setting into a tri-state selector. Evidence: JPEGView stop-with-alert; RESEARCH.md.
   - **Blocked by**: low ROI vs. regression risk — the shipped Wrap/Sibling setting is tested and working; the residual mode's value is a *visual* nudge whose feel needs GUI validation, and it isn't worth reworking the tri-state setting + Settings UI + localization headless.
   - **Unblock when**: a GUI session can validate the nudge feel, or a product decision prioritizes the third mode.

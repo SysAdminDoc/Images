@@ -1206,6 +1206,13 @@ public partial class MainWindow : Window
             return;
         }
 
+        // RD-07: live pixel readout in the metadata HUD, independent of inspector mode.
+        if (Vm.ShowMetadataHud)
+        {
+            Vm.UpdateHoverPixel(
+                TrySampleInspectorPixel(e.GetPosition(Canvas), out var hoverSample) ? hoverSample : null);
+        }
+
         if (!Vm.IsInspectorMode)
             return;
 
@@ -1322,6 +1329,7 @@ public partial class MainWindow : Window
     {
         if (Vm.IsInspectorMode && _inspectorSelectionStart is null)
             Vm.UpdateInspectorSample(null);
+        Vm.UpdateHoverPixel(null);
     }
 
     private void Canvas_LostMouseCapture(object sender, MouseEventArgs e)
