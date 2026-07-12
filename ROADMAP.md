@@ -47,13 +47,6 @@ Externally-grounded, net-new items from a competitor/format/security research pa
   Acceptance: modifier-dragging a rectangle zooms/pans so that region fills the viewport; Escape cancels the drag; does not trigger crop.
   Complexity: M
 
-- [ ] P3 RD-09 — Auto session restore: reopen last folder + image + position on launch (opt-in)
-  Why: Window geometry persists, but the app does not reopen the last-viewed image/position on relaunch (`SessionTrayService` is a manual basket, not auto-restore). Requested in JPEGView #216 and PicView #227; expected of a daily-driver viewer.
-  Evidence: https://github.com/sylikc/jpegview/issues/216 ; RESEARCH.md.
-  Touches: `SettingsService` (persist last path + index on close/navigation), `App.xaml.cs`/`MainViewModel` startup (reopen when no argv path and the file still exists), a Privacy/General toggle (default off to respect the quiet-open philosophy).
-  Acceptance: with the setting on and no file passed on launch, Images reopens the last image in its folder at the prior position; missing file falls back to empty state; off by default.
-  Complexity: S
-
 - [ ] P3 RD-10 — End-of-list behavior option: stop-with-nudge or advance to sibling folder (vs. always wrap)
   Why: Navigation always wraps at the ends; competitors offer a choice — stop with a subtle visual nudge (JPEGView) or auto-advance into the next sibling directory (ImageGlass 9.5). Wrap-only surprises users paging a large tree.
   Evidence: https://github.com/d2phap/ImageGlass/releases (9.5 sibling-folder) ; RESEARCH.md.

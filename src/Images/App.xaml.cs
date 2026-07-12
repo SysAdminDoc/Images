@@ -163,6 +163,21 @@ public partial class App : Application
             window.OpenPath(resolvedPaths[0]);
             LaunchTiming.Log(_log, "argv-open-complete", Path.GetFileName(resolvedPaths[0]));
         }
+        else if (listenPort is null)
+        {
+            // RD-09: opt-in session restore — with no file passed on launch, reopen the last
+            // image (its folder position follows). Missing file falls back to the empty state.
+            var settings = SettingsService.Instance;
+            if (settings.GetBool(Keys.RestoreLastSession, false))
+            {
+                var last = settings.GetString(Keys.LastImagePath, string.Empty);
+                if (!string.IsNullOrWhiteSpace(last) && File.Exists(last))
+                {
+                    window.OpenPath(last);
+                    LaunchTiming.Log(_log, "session-restore-open", Path.GetFileName(last));
+                }
+            }
+        }
     }
 
     /// <summary>

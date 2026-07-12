@@ -33,6 +33,22 @@ public sealed class SettingsViewModelTests
     }
 
     [Fact]
+    public void RestoreLastSession_DefaultsOffAndPersistsWhenEnabled()
+    {
+        using var temp = TestDirectory.Create();
+        var settings = new SettingsService(Path.Combine(temp.Path, "settings.db"));
+        var viewModel = new SettingsViewModel(settings);
+
+        Assert.False(viewModel.RestoreLastSession);
+        Assert.False(settings.GetBool(Keys.RestoreLastSession, false));
+
+        viewModel.RestoreLastSession = true;
+
+        Assert.True(settings.GetBool(Keys.RestoreLastSession, false));
+        Assert.Equal(SettingsViewModel.SettingsStatusToneKind.Success, viewModel.SettingsStatusTone);
+    }
+
+    [Fact]
     public void HotkeysAndDiagnosticsSummariesExposeExpectedSettingsSections()
     {
         using var temp = TestDirectory.Create();

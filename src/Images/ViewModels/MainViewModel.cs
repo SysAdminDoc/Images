@@ -777,6 +777,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
             _currentPath = value;
             RefreshCurrentPathExists();
+            // RD-09: remember the last real image so an opt-in session restore can reopen it.
+            if (_currentPathExists && value is not null)
+                _settings.SetString(Keys.LastImagePath, value);
             Raise(nameof(CurrentPath));
             RaiseCurrentPathState();
         }

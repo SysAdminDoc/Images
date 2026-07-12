@@ -507,6 +507,8 @@ public static class Keys
     public const string MetadataHudVisible = "viewer.metadata-hud.visible";
     public const string ZoomLock = "viewer.zoom-lock";
     public const string TransparencyGrid = "viewer.transparency-grid";
+    public const string RestoreLastSession = "general.restore-last-session";
+    public const string LastImagePath = "session.last-image-path";
     public const string ConfirmRecycleBinDelete = "viewer.delete.confirm-recycle";
     public const string AccessibilityReduceMotion = "accessibility.reduce-motion";
     public const string AccessibilityHighContrast = "accessibility.high-contrast";

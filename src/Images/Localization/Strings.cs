@@ -366,6 +366,8 @@ public static class Strings
     public static string SettingsLanguageSystemDefault => Get(nameof(SettingsLanguageSystemDefault));
     public static string SettingsLanguageRestartNotice => Get(nameof(SettingsLanguageRestartNotice));
     public static string SettingsRememberWindowTitle => Get(nameof(SettingsRememberWindowTitle));
+    public static string SettingsRestoreSessionTitle => Get(nameof(SettingsRestoreSessionTitle));
+    public static string SettingsRestoreSessionDescription => Get(nameof(SettingsRestoreSessionDescription));
     public static string SettingsRememberWindowDescription => Get(nameof(SettingsRememberWindowDescription));
     public static string SettingsSectionAppearance => Get(nameof(SettingsSectionAppearance));
     public static string SettingsThemeTitle => Get(nameof(SettingsThemeTitle));
@@ -424,6 +426,8 @@ public static class Strings
     public static string SettingsCloseButton => Get(nameof(SettingsCloseButton));
     public static string SettingsCloseAutomationName => Get(nameof(SettingsCloseAutomationName));
     public static string SettingsRememberWindowOnStatus => Get(nameof(SettingsRememberWindowOnStatus));
+    public static string SettingsRestoreSessionOnStatus => Get(nameof(SettingsRestoreSessionOnStatus));
+    public static string SettingsRestoreSessionOffStatus => Get(nameof(SettingsRestoreSessionOffStatus));
     public static string SettingsRememberWindowOffStatus => Get(nameof(SettingsRememberWindowOffStatus));
     public static string SettingsFilmstripOnStatus => Get(nameof(SettingsFilmstripOnStatus));
     public static string SettingsFilmstripOffStatus => Get(nameof(SettingsFilmstripOffStatus));

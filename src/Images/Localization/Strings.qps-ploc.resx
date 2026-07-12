@@ -1619,6 +1619,12 @@ Details written to:
   <data name="SettingsRememberWindowDescription" xml:space="preserve">
     <value>[!!!!!!!!!!!! Restores the last normal window bounds unless Images was launched in peek mode. !!!!!!!!!!!!]</value>
   </data>
+  <data name="SettingsRestoreSessionTitle" xml:space="preserve">
+    <value>[!!!!!!! Reopen last image on launch !!!!!!!]</value>
+  </data>
+  <data name="SettingsRestoreSessionDescription" xml:space="preserve">
+    <value>[!!!!!!!!!!!! When Images starts with no file, reopens the last image you viewed. If that file is gone, opens to the empty state. !!!!!!!!!!!!]</value>
+  </data>
   <data name="SettingsSectionAppearance" xml:space="preserve">
     <value>[!!! Appearance !!!]</value>
   </data>
@@ -1804,6 +1810,12 @@ Details written to:
   </data>
   <data name="SettingsRememberWindowOffStatus" xml:space="preserve">
     <value>[!!!!!!!!!!!! Images will use its default window placement at startup. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="SettingsRestoreSessionOnStatus" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Images will reopen the last image when launched with no file. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="SettingsRestoreSessionOffStatus" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Images will start at the empty state when launched with no file. !!!!!!!!!!!!]</value>
   </data>
   <data name="SettingsFilmstripOnStatus" xml:space="preserve">
     <value>[!!!!!!!!! Filmstrip will be shown at startup. !!!!!!!!!]</value>

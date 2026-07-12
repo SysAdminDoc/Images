@@ -138,6 +138,19 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
+    public bool RestoreLastSession
+    {
+        get => _settings.GetBool(Keys.RestoreLastSession, false);
+        set
+        {
+            _settings.SetBool(Keys.RestoreLastSession, value);
+            Raise(nameof(RestoreLastSession));
+            SetStatus(
+                value ? Strings.SettingsRestoreSessionOnStatus : Strings.SettingsRestoreSessionOffStatus,
+                SettingsStatusToneKind.Success);
+        }
+    }
+
     public bool FilmstripVisibleOnStartup
     {
         get => _settings.GetBool(Keys.FilmstripVisible, true);

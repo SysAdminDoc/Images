@@ -6,6 +6,7 @@ All notable changes to **Images** are documented here.
 
 ### Added
 
+- **Reopen last image on launch** - A new General setting (off by default) makes Images reopen the last image you viewed when it starts with no file passed on the command line; if that file is gone, it opens to the empty state.
 - **Zoom lock across image navigation** - A new toggle (command palette: "Toggle zoom lock") keeps the current zoom factor when moving to the next or previous image, re-anchoring the pan to center, so a series can be pixel-peeped at a fixed magnification. The choice persists.
 - **Transparency checkerboard** - A new toggle (command palette: "Toggle transparency grid") draws a checkerboard behind images that carry an alpha channel so transparent regions read as transparent; the pattern scales with zoom and the choice persists.
 
