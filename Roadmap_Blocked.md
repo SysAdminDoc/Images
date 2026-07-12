@@ -122,6 +122,10 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
 
 ## Blocked On Predecessor Features
 
+- [ ] *P3* — **Contact sheet caller should pass theme colors**. `ContactSheetOptions` accepts TextColor/PlaceholderColor/BackgroundColor but no caller passes theme-appropriate colors yet. Where: `src/Images/Services/ContactSheetService.cs`.
+  - **Blocked by**: no contact-sheet UI exists in the main app, so the service currently has no caller to wire theme colors through.
+  - **Unblock when**: a contact-sheet UI/command is added; wire Catppuccin palette colors through at that time.
+
 - [ ] **S-06** *P1* — **WIC JPEG re-encode gate**. On pre-patch `windowscodecs.dll` (< 10.0.26100.4946), thumbnails skip the 12-bit / 16-bit re-encode path that triggers CVE-2025-50165. Toast "Windows update recommended" once. Effort: M. [ESET CVE-2025-50165]
   - **Blocked by**: Windows version detection research — needs reliable `windowscodecs.dll` version probing.
   - **Unblock when**: version-detection approach validated and tested.
