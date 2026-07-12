@@ -150,10 +150,12 @@ public static class SuperResolutionService
                     {
                         // Derive the true integer scale from the model output.
                         actualScale = tw > 0 ? Math.Max(1, outTileW / tw) : scaleFactor;
+                        // Widen to long before multiplying so an extreme model scale factor
+                        // cannot overflow int and wrap to a bogus (or negative) dimension.
                         result = new MagickImage(
                             MagickColors.Black,
-                            (uint)(origWidth * actualScale),
-                            (uint)(origHeight * actualScale));
+                            (uint)Math.Min((long)origWidth * actualScale, uint.MaxValue),
+                            (uint)Math.Min((long)origHeight * actualScale, uint.MaxValue));
                     }
 
                     using var upscaledTile = TensorToImage(output, outTileW, outTileH);

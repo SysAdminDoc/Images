@@ -11,18 +11,6 @@ The feature set already rivals ImageGlass and nomacs. What's missing for a `1.0`
 
 Promote to `1.0.0` when unblocked **and** the P1 items in the audit backlog are drained.
 
-## Audit Additions (2026-07-09)
-
-Items found during the v0.2.24 deep audit that were NOT fixed in that session:
-
-- [ ] P3 — NetworkEgressService thread safety for test mode
-  Why: `DisableDispatcherMarshallingForTests` bypasses dispatcher serialization; concurrent background `Record()` and UI-thread `TotalBytes`/`BuildClipboardText` could race on `_entries`. Narrow window, only reachable in tests or during app startup/shutdown.
-  Where: `src/Images/Services/NetworkEgressService.cs`
-
-- [ ] P3 — SuperResolutionService integer overflow on extreme scale factors
-  Why: `origWidth * actualScale` computed as int*int could overflow for very large images with unexpected model scale factors. Latent risk, not currently triggered by approved models.
-  Where: `src/Images/Services/SuperResolutionService.cs:152`
-
 ## Research-Driven Additions (2026-07-12)
 
 Externally-grounded, net-new items from a competitor/format/security research pass. None duplicate the AUD deep-audit backlog above or the blocked items in `Roadmap_Blocked.md`. Each was verified against current source before landing here (Compare mode, trackpad manipulation/inertia, histogram, nearest-neighbor scaling, and lossless JPEG transforms already exist and are intentionally omitted).

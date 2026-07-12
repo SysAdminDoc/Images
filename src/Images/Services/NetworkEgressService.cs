@@ -114,8 +114,11 @@ public static class NetworkEgressService
         get
         {
             long sum = 0;
-            // Snapshot to avoid enumeration-changed exceptions.
-            var snapshot = _entries.ToArray();
+            // Snapshot under the mutation lock so a concurrent Record() (reachable in tests or
+            // during startup/shutdown when dispatcher marshalling is bypassed) cannot resize the
+            // backing store mid-enumeration.
+            NetworkEgressEntry[] snapshot;
+            lock (_lock) snapshot = _entries.ToArray();
             foreach (var e in snapshot) sum += e.Bytes;
             return sum;
         }
@@ -126,7 +129,8 @@ public static class NetworkEgressService
     /// </summary>
     public static string BuildClipboardText()
     {
-        var snapshot = _entries.ToArray();
+        NetworkEgressEntry[] snapshot;
+        lock (_lock) snapshot = _entries.ToArray();
         if (snapshot.Length == 0) return "No network activity recorded.";
 
         var sb = new System.Text.StringBuilder();

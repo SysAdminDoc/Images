@@ -11,6 +11,8 @@ All notable changes to **Images** are documented here.
 
 ### Fixed
 
+- **Network egress log reads are lock-synchronized** - `TotalBytes` and the clipboard summary now snapshot the entry list under the same lock that guards recording, closing a narrow race reachable when dispatcher marshalling is bypassed (tests, startup/shutdown).
+- **Super-resolution guards against dimension overflow** - The upscaled canvas size is now computed with 64-bit multiplication and clamped, so an extreme model scale factor cannot overflow and wrap to a bogus dimension.
 - **Save a copy preserves image metadata** - Saving an unedited copy now reloads the source file through Magick.NET, so embedded EXIF, IPTC, XMP, and ICC color profiles survive the copy instead of being discarded by the in-memory pixel re-encode. Clipboard pastes and non-raster sources still use the pixel path.
 
 ### Security
