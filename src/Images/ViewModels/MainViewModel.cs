@@ -7061,8 +7061,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             }
             else
             {
+                // Save-a-copy writes a single frame; tell the user if the source had more so an
+                // animated GIF or multi-page TIFF is not silently flattened without notice.
+                var multiFrameNotice = IsAnimated || PageCount > 1 ? " First frame only." : string.Empty;
                 var result = await Task.Run(() => ImageExportService.SaveCopyWithC2paHandoff(sourcePath, bs, targetPath));
-                Toast($"Saved copy: {Path.GetFileName(result.OutputPath)}. {result.C2paHandoff.Summary}");
+                Toast($"Saved copy: {Path.GetFileName(result.OutputPath)}.{multiFrameNotice} {result.C2paHandoff.Summary}");
             }
         }
         catch (Exception ex)

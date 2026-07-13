@@ -11,6 +11,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixed
 
+- **Save a copy tells you when it flattens frames** - Copying an animated GIF or multi-page source now notes "First frame only" in the confirmation so frame loss is not silent.
 - **Color management signals when it can't apply** - Very large (memory-mapped) and tile-backed images that bypass the ICC transform now note "color management not applied" in the decoder status when the setting is on, instead of silently rendering uncorrected.
 - **Color management applies immediately and safely** - Toggling color-managed display now re-decodes the current image and clears preloaded neighbors so the change is visible right away instead of only affecting the next opened file; the setting is also read safely across decode threads.
 - **Loupe no longer conflicts with panning or sticks open** - The magnifier now captures the pointer (so a release anywhere hides it), is suppressed while a pan or zoom-to-selection gesture is active, and no longer freezes an in-progress pan; capture loss dismisses it cleanly.

@@ -37,10 +37,3 @@ Net-new, evidence-grounded, code-ready items from the 2026-07-12 (pass 2) resear
   Touches: `CommandShortcutService.cs` + `MainViewModel` palette (a "Toggle loupe" command that follows the caret/viewport center), a Settings entry for `LoupeFactor`, localized strings.
   Acceptance: the loupe can be toggled and positioned without a mouse and its magnification is adjustable in Settings; localization parity passes.
   Complexity: M
-
-- [ ] P3 — Warn (or preserve frames) when Save-a-copy flattens an animated/multi-page source
-  Why: `SaveCopyWithC2paHandoff` reloads via `new MagickImage(sourcePath)` (single frame), so copying an animated GIF or multi-page TIFF silently produces a frame-0 flatten.
-  Evidence: `src/Images/Services/ImageExportService.cs:128-202`; RESEARCH.md.
-  Touches: `ImageExportService`/Save-a-copy path (detect multi-frame sources and either preserve via `MagickImageCollection` or surface a "saved first frame only" notice).
-  Acceptance: copying an animated GIF either preserves its frames or reports that only the first frame was saved; a test covers the multi-frame source.
-  Complexity: M
