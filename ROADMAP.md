@@ -35,13 +35,6 @@ Net-new, evidence-grounded, code-ready items from the 2026-07-12 (pass 2) resear
 
 ### P2 — hardening of today's shipped features (2026-07-12 pass 3 code audit)
 
-- [ ] P2 — Make `ImageLoader.ColorManagedDisplay` toggle-safe and preload-aware
-  Why: The flag is a process-global mutable static read on background decode threads with no memory barrier, and preloaded neighbors are cached by path with no record of the flag value used — so toggling color management does not re-color already-preloaded images and an in-flight decode can read a stale value.
-  Evidence: `src/Images/Services/ImageLoader.cs:67`; `src/Images/ViewModels/SettingsViewModel.cs` (setter); `src/Images/ViewModels/MainViewModel.cs` preload cache; RESEARCH.md.
-  Touches: mark the flag `volatile` at minimum; better, thread the bool through `Load(...)` and include it in the preload cache key (or invalidate/clear the preload cache when the setting flips); a test asserting a toggle re-decodes/re-colors.
-  Acceptance: toggling color management updates the current and preloaded neighbors on next navigation without stale-mode results; no torn read under concurrent load.
-  Complexity: M
-
 ### P3 — new-feature polish (2026-07-12 pass 3 code audit)
 
 - [ ] P3 — Give the loupe and zoom-to-selection discoverability and keyboard access

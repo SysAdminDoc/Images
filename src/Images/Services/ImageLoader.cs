@@ -58,13 +58,20 @@ public static class ImageLoader
     private const int StableReadRetryDelayMs = 80;
     private static readonly BitmapSource TilePlaceholder = CreateTilePlaceholder();
 
+    private static volatile bool _colorManagedDisplay;
+
     /// <summary>
     /// RD-02: when true, normal raster loads are decoded through Magick.NET and any embedded ICC
     /// profile is transformed to sRGB before display, so wide-gamut (AdobeRGB/DisplayP3) images no
     /// longer render over-saturated on the common sRGB assumption. Opt-in (default off) because it
     /// routes the fast WIC path through Magick; huge (memory-mapped) and tiled images are exempt.
+    /// Volatile so background decode threads observe UI-thread toggles without a torn/stale read.
     /// </summary>
-    public static bool ColorManagedDisplay { get; set; }
+    public static bool ColorManagedDisplay
+    {
+        get => _colorManagedDisplay;
+        set => _colorManagedDisplay = value;
+    }
 
     public static LoadResult Load(
         string path,

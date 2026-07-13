@@ -6,6 +6,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixed
 
+- **Color management applies immediately and safely** - Toggling color-managed display now re-decodes the current image and clears preloaded neighbors so the change is visible right away instead of only affecting the next opened file; the setting is also read safely across decode threads.
 - **Loupe no longer conflicts with panning or sticks open** - The magnifier now captures the pointer (so a release anywhere hides it), is suppressed while a pan or zoom-to-selection gesture is active, and no longer freezes an in-progress pan; capture loss dismisses it cleanly.
 - **Loupe and pixel readout skip gigapixel placeholders** - On very large tile-backed images the loupe no longer shows a solid block and the metadata HUD readout stays blank instead of reporting a placeholder pixel value for every position.
 - **One pixel sample per mouse move** - Hover readout and inspector mode now share a single per-move pixel sample instead of sampling the image twice.

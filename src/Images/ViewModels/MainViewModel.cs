@@ -7354,6 +7354,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _nav.SiblingFolderAutoSwitch = _settings.GetBool(Keys.SiblingFolderAutoSwitch, false);
         _nav.StopAtEnds = _settings.GetBool(Keys.StopAtEnds, false);
 
+        // Color management is a decode-time transform. When it changes, drop preloaded neighbors
+        // (decoded under the old mode) and re-decode the current image so the toggle applies now.
+        var colorManaged = _settings.GetBool(Keys.ColorManagement, false);
+        if (ImageLoader.ColorManagedDisplay != colorManaged)
+        {
+            ImageLoader.ColorManagedDisplay = colorManaged;
+            _preload.Reset();
+            if (HasDisplayImage && !IsOperationBusy && !IsTilePyramidActive)
+                ReloadCurrentPreservingViewState(resetPreload: true);
+        }
+
         Raise(nameof(FirstRunPrivacyText));
     }
 
