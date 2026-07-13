@@ -29,6 +29,8 @@
   <ItemGroup>
     <None Include="Fixtures\catalog.v1.db" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Fixtures\smoke-test.png" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Caps test parallelism so timing/async assertions are not starved on high-core machines. -->
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

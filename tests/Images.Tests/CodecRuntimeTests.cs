@@ -3,6 +3,13 @@ using Images.Services;
 
 namespace Images.Tests;
 
+// Tests here assert on child-process, HTTP-stream, cancellation, and concurrency-counter timing.
+// Under full parallel load on high-core machines these get CPU-starved and flake, so the whole
+// group is serialized (and does not race the parallel bucket) via this non-parallel collection.
+[CollectionDefinition("TimingSensitive", DisableParallelization = true)]
+public sealed class TimingSensitiveCollection { }
+
+[Collection("TimingSensitive")]
 public sealed class CodecRuntimeTests
 {
     [Fact]

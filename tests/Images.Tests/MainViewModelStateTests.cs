@@ -1189,7 +1189,10 @@ public sealed class MainViewModelStateTests
 
             viewModel.UpdateCropSelection(new PixelSelection(0, 0, 1, 1));
             viewModel.ApplyCropCommand.Execute(null);
-            Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.SystemIdle);
+            // Crop-bake completes asynchronously; wait for the terminal state instead of a single
+            // dispatcher pump, which races the async completion under load.
+            PumpUntil(() => !viewModel.IsOperationBusy
+                && string.Equals(viewModel.ToastMessage, "Crop applied to file", StringComparison.Ordinal));
 
             Assert.Equal("Crop applied to file", viewModel.ToastMessage);
             Assert.Equal(1, viewModel.PixelWidth);

@@ -5,6 +5,7 @@ using Microsoft.Data.Sqlite;
 
 namespace Images.Tests;
 
+[Collection("TimingSensitive")]
 public sealed class SemanticSearchServiceTests
 {
     [Fact]

@@ -6,6 +6,7 @@ using Images.Services;
 
 namespace Images.Tests;
 
+[Collection("TimingSensitive")]
 public sealed class UpdateCheckServiceTests
 {
     [Fact]
