@@ -1189,10 +1189,13 @@ public sealed class MainViewModelStateTests
 
             viewModel.UpdateCropSelection(new PixelSelection(0, 0, 1, 1));
             viewModel.ApplyCropCommand.Execute(null);
-            // Crop-bake completes asynchronously; wait for the terminal state instead of a single
-            // dispatcher pump, which races the async completion under load.
-            PumpUntil(() => !viewModel.IsOperationBusy
-                && string.Equals(viewModel.ToastMessage, "Crop applied to file", StringComparison.Ordinal));
+            // Crop-bake completes asynchronously (Magick decode + atomic file write); wait for the
+            // terminal state instead of a single dispatcher pump, with a generous deadline so a busy
+            // machine cannot starve the I/O-bound continuation into a false timeout.
+            PumpUntil(
+                () => !viewModel.IsOperationBusy
+                    && string.Equals(viewModel.ToastMessage, "Crop applied to file", StringComparison.Ordinal),
+                timeoutSeconds: 15);
 
             Assert.Equal("Crop applied to file", viewModel.ToastMessage);
             Assert.Equal(1, viewModel.PixelWidth);
@@ -2075,9 +2078,9 @@ public sealed class MainViewModelStateTests
                 changed.Add(e.PropertyName);
         };
 
-    private static void PumpUntil(Func<bool> condition)
+    private static void PumpUntil(Func<bool> condition, double timeoutSeconds = 3)
     {
-        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(3);
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(timeoutSeconds);
         while (!condition())
         {
             if (DateTime.UtcNow >= deadline)
