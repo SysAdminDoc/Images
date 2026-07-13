@@ -17,13 +17,6 @@ Net-new, evidence-grounded, code-ready items from the 2026-07-12 (pass 2) resear
 
 ### P2 — reliability / distribution
 
-- [ ] P2 — Serialize timing-sensitive tests to stop parallel-load flakes
-  Why: `CodecRuntimeTests.RunVersionProbe_DrainsStderrWhileWaiting` and `UpdateCheckServiceTests.CheckAsync_WhenContentLengthIsUnknown_RecordsActualBytesRead` intermittently fail only under full-suite CPU saturation (process-spawn stdout/stderr drain timing and HTTP stream byte-count timing); they pass isolated. A green build can flip red on unrelated PRs.
-  Evidence: first-hand test runs this session (2 failures on a full run, 0 on a clean re-run / isolated); xUnit docs (config-xunit-runner-json, running-tests-in-parallel); `tests/Images.Tests/CodecRuntimeTests.cs:44`, `tests/Images.Tests/UpdateCheckServiceTests.cs:49`.
-  Touches: new `[CollectionDefinition("Timing-Sensitive", DisableParallelization = true)]` + `[Collection("Timing-Sensitive")]` on the process-spawn/stream-timing classes (CodecRuntimeTests, UpdateCheckServiceTests, and any other child-process/stream-timing class); optionally add `tests/Images.Tests/xunit.runner.json` (`parallelAlgorithm: "conservative"`, a `maxParallelThreads` cap) with `CopyToOutputDirectory=PreserveNewest` in the csproj.
-  Acceptance: the full `dotnet test Images.sln -c Release` suite passes green across 10 consecutive runs with no intermittent timing failures.
-  Complexity: S
-
 - [ ] P2 — Cut the v0.2.26 release from the accumulated Unreleased CHANGELOG
   Why: ~29 lines of shipped user-facing features (opt-in color management, loupe, live pixel readout, zoom-lock, transparency checkerboard, zoom-to-selection, session restore, stop-at-ends, metadata-preserving Save-a-copy, Magick.NET 14.15 security bump) sit unreleased since v0.2.25 with no version cut. The unsigned ZIP/installer path is not gated on signing.
   Evidence: `CHANGELOG.md` `## Unreleased` section; `scripts/Test-ReleaseReadiness.ps1` / local release scripts; git log since `45494cb` (release Images 0.2.25).
@@ -42,20 +35,6 @@ Net-new, evidence-grounded, code-ready items from the 2026-07-12 (pass 2) resear
 
 ### P2 — hardening of today's shipped features (2026-07-12 pass 3 code audit)
 
-- [ ] P2 — Fix loupe/zoom-to-selection mouse-capture and gesture conflicts
-  Why: `StartLoupe` sets `_loupeActive` without `CaptureMouse()`, so releasing the middle button off-control leaves the loupe stuck; middle-down during an active left-drag pan (`_dragStart != null`) freezes the pan and strands `_dragStart`, so the next left-up jumps the image; the zoom-select `LostMouseCapture`→`CancelZoomSelection`→`ReleaseMouseCapture` path re-enters once.
-  Evidence: `src/Images/Controls/ZoomPanImage.cs` (`StartLoupe`, `StopLoupe`, `OnMove`, `OnAnyButtonDown`, `CancelZoomSelection`, `LostMouseCapture`); RESEARCH.md.
-  Touches: `ZoomPanImage.cs` — capture on `StartLoupe`/release on `StopLoupe`; ignore middle-down while `_dragStart`/`_zoomSelectStart` is active; make loupe and zoom-select mutually exclusive; avoid `ReleaseMouseCapture` re-entry from the `LostMouseCapture` handler.
-  Acceptance: loupe hides reliably on middle-up anywhere; a pan interrupted by middle-down resumes without jumping; no captured-mouse leak after either gesture; a control test covers the pan-then-loupe sequence.
-  Complexity: M
-
-- [ ] P2 — Loupe and live pixel readout must not sample the 1×1 tile placeholder on gigapixel images
-  Why: Tile-backed loads set `LoadResult.Image = TilePlaceholder` (1×1 BitmapSource); the loupe guard (`_image.Source is not ImageSource`) and HUD guard (`CurrentImage is BitmapSource`) both pass, so the loupe shows a solid block and the readout shows the placeholder's single pixel for every hover over a huge image.
-  Evidence: `src/Images/Services/ImageLoader.cs:445`; `ZoomPanImage.StartLoupe`/`UpdateLoupe`; `src/Images/MainWindow.xaml.cs:1210-1214`; RESEARCH.md.
-  Touches: `ZoomPanImage` (require `_image.Source is BitmapSource { PixelWidth: > 1 }` or `TilePyramid is null` before showing the loupe); `MainWindow.xaml.cs` (blank the HUD readout when tile-backed); tests.
-  Acceptance: with a tile-backed image loaded, the loupe does not appear (or samples real tiles) and the HUD pixel readout is blank rather than showing 1×1 placeholder values.
-  Complexity: M
-
 - [ ] P2 — Make `ImageLoader.ColorManagedDisplay` toggle-safe and preload-aware
   Why: The flag is a process-global mutable static read on background decode threads with no memory barrier, and preloaded neighbors are cached by path with no record of the flag value used — so toggling color management does not re-color already-preloaded images and an in-flight decode can read a stale value.
   Evidence: `src/Images/Services/ImageLoader.cs:67`; `src/Images/ViewModels/SettingsViewModel.cs` (setter); `src/Images/ViewModels/MainViewModel.cs` preload cache; RESEARCH.md.
@@ -71,13 +50,6 @@ Net-new, evidence-grounded, code-ready items from the 2026-07-12 (pass 2) resear
   Touches: `CommandShortcutService.cs` + `MainViewModel` palette (add "Toggle loupe" / "Zoom to selection" commands + localized strings), the `?` cheatsheet content, and a Settings entry for `LoupeFactor`; keyboard-invocable loupe following the last cursor.
   Acceptance: both features appear in the command palette and the `?` cheatsheet, are invocable without a mouse, and `LoupeFactor` is adjustable in Settings; localization parity gate passes with the new strings.
   Complexity: M
-
-- [ ] P3 — Sample the hover pixel once per mouse-move and throttle it
-  Why: `Canvas_MouseMove` calls `TrySampleInspectorPixel` twice for the same position when the HUD and Inspector are both on (once for the HUD readout, once for the inspector), unthrottled — a `CopyPixels` per WM_MOUSEMOVE, doubled.
-  Evidence: `src/Images/MainWindow.xaml.cs:1210-1219`; RESEARCH.md.
-  Touches: `MainWindow.xaml.cs` (sample once, reuse the result for HUD + inspector; add a lightweight per-frame/dispatcher throttle).
-  Acceptance: at most one pixel sample per mouse-move event feeds both the HUD and inspector; no measurable UI-thread cost increase on a fast drag over a large image.
-  Complexity: S
 
 - [ ] P3 — Signal when color management is unavailable for an image
   Why: Memory-mapped (>256 MB) and tile-backed decodes silently bypass `TransformToSrgbIfProfiled`, so the large wide-gamut RAW/PSD originals the feature exists for render uncorrected with color management "on" and no indication.

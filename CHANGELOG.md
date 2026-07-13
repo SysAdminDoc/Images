@@ -6,6 +6,9 @@ All notable changes to **Images** are documented here.
 
 ### Fixed
 
+- **Loupe no longer conflicts with panning or sticks open** - The magnifier now captures the pointer (so a release anywhere hides it), is suppressed while a pan or zoom-to-selection gesture is active, and no longer freezes an in-progress pan; capture loss dismisses it cleanly.
+- **Loupe and pixel readout skip gigapixel placeholders** - On very large tile-backed images the loupe no longer shows a solid block and the metadata HUD readout stays blank instead of reporting a placeholder pixel value for every position.
+- **One pixel sample per mouse move** - Hover readout and inspector mode now share a single per-move pixel sample instead of sampling the image twice.
 - **Session restore validates the persisted path** - Reopening the last image on launch now routes the stored path through the same guard as command-line arguments, rejecting device-namespace shapes and canonicalizing before opening, so a tampered settings value cannot reach the file-open path.
 - **End-of-folder nudge no longer lingers after a jump** - The "stopped at end" flag is now cleared on first/last/jump/open navigation, so the nudge only appears on an actual stopped Prev/Next.
 

@@ -1206,17 +1206,20 @@ public partial class MainWindow : Window
             return;
         }
 
-        // RD-07: live pixel readout in the metadata HUD, independent of inspector mode.
+        // RD-07 (HUD hover readout) and inspector mode share a single per-move pixel sample so a
+        // mouse-move never does the CopyPixels twice for the same position.
+        if (!Vm.ShowMetadataHud && !Vm.IsInspectorMode)
+            return;
+
+        var hasSample = TrySampleInspectorPixel(e.GetPosition(Canvas), out var sample);
+
         if (Vm.ShowMetadataHud)
-        {
-            Vm.UpdateHoverPixel(
-                TrySampleInspectorPixel(e.GetPosition(Canvas), out var hoverSample) ? hoverSample : null);
-        }
+            Vm.UpdateHoverPixel(hasSample ? sample : null);
 
         if (!Vm.IsInspectorMode)
             return;
 
-        if (!TrySampleInspectorPixel(e.GetPosition(Canvas), out var sample))
+        if (!hasSample)
         {
             if (_inspectorSelectionStart is null)
                 Vm.UpdateInspectorSample(null);
@@ -1550,7 +1553,10 @@ public partial class MainWindow : Window
     {
         sample = default!;
 
-        if (Vm.CurrentImage is not BitmapSource bitmap ||
+        // Tile-backed (gigapixel) images expose only a 1x1 placeholder as CurrentImage; sampling it
+        // would report the placeholder's single value for every position, so treat it as no sample.
+        if (Vm.IsTilePyramidActive ||
+            Vm.CurrentImage is not BitmapSource bitmap ||
             !TryMapCanvasPointToPixel(viewportPoint, out var coordinate))
             return false;
 

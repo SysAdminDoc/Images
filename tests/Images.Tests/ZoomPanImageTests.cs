@@ -131,6 +131,24 @@ public sealed class ZoomPanImageTests
         });
     }
 
+    [Fact]
+    public void MiddleButton_DoesNotActivateLoupeForOnePixelPlaceholderSource()
+    {
+        RunOnSta(() =>
+        {
+            // Tile-backed (gigapixel) images expose a 1x1 placeholder; the loupe must not engage.
+            var placeholder = BitmapSource.Create(
+                1, 1, 96, 96, PixelFormats.Bgra32, null, new byte[] { 0, 0, 0, 0xFF }, 4);
+            placeholder.Freeze();
+            var control = new ZoomPanImage { Source = placeholder };
+            Arrange(control, 400, 300);
+
+            control.RaiseEvent(MiddleButtonEvent(control, System.Windows.Input.Mouse.MouseDownEvent));
+
+            Assert.False(control.IsLoupeActive);
+        });
+    }
+
     private static System.Windows.Input.MouseButtonEventArgs MiddleButtonEvent(ZoomPanImage control, RoutedEvent routed)
         => new(System.Windows.Input.Mouse.PrimaryDevice, Environment.TickCount, System.Windows.Input.MouseButton.Middle)
         {

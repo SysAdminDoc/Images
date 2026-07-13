@@ -285,7 +285,7 @@ public sealed class ZoomPanImage : ContentControl
         MouseDown += OnAnyButtonDown;
         MouseUp += OnAnyButtonUp;
         MouseLeave += (_, _) => StopLoupe();
-        LostMouseCapture += (_, _) => CancelZoomSelection();
+        LostMouseCapture += (_, _) => OnCaptureLost();
 
         IsManipulationEnabled = true;
         ManipulationStarting += OnManipulationStarting;
@@ -590,6 +590,9 @@ public sealed class ZoomPanImage : ContentControl
     private void OnDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ClickCount >= 2) return;
+        // While the loupe is held (middle button), left-button gestures are suppressed so a
+        // pan/zoom-select cannot start underneath it.
+        if (_loupeActive) return;
 
         // RD-08: Ctrl+Shift+drag draws a marquee that zooms to the boxed region. Checked before
         // pan/inspector so it wins the gesture; needs a rendered image to have something to zoom.
@@ -620,7 +623,8 @@ public sealed class ZoomPanImage : ContentControl
     // RD-06: middle-button hold shows the loupe; release hides it.
     private void OnAnyButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.ChangedButton == MouseButton.Middle)
+        // Loupe is mutually exclusive with an in-progress pan or zoom-select gesture.
+        if (e.ChangedButton == MouseButton.Middle && _dragStart is null && _zoomSelectStart is null)
             StartLoupe(e.GetPosition(this));
     }
 
@@ -632,10 +636,14 @@ public sealed class ZoomPanImage : ContentControl
 
     private void StartLoupe(Point position)
     {
-        if (_image.Source is not ImageSource || !TryGetRenderedPixelSize(out _, out _))
+        // Needs a real raster source with usable pixels. Tile-backed (gigapixel) images expose
+        // only a 1x1 placeholder as _image.Source, which would magnify into a solid block.
+        if (_image.Source is not BitmapSource { PixelWidth: > 1 } || !TryGetRenderedPixelSize(out _, out _))
             return;
         _loupeActive = true;
         _loupe.Visibility = Visibility.Visible;
+        // Capture so a middle-release outside the control still hides the loupe.
+        CaptureMouse();
         UpdateLoupe(position);
     }
 
@@ -644,6 +652,7 @@ public sealed class ZoomPanImage : ContentControl
         if (!_loupeActive) return;
         _loupeActive = false;
         _loupe.Visibility = Visibility.Collapsed;
+        if (IsMouseCaptured) ReleaseMouseCapture();
     }
 
     public bool IsLoupeActive => _loupeActive;
@@ -731,8 +740,25 @@ public sealed class ZoomPanImage : ContentControl
         if (_zoomSelectStart is null) return;
         _zoomSelectStart = null;
         _zoomSelectionRect.Visibility = Visibility.Collapsed;
-        ReleaseMouseCapture();
+        if (IsMouseCaptured) ReleaseMouseCapture();
         Cursor = InspectorMode ? Cursors.Cross : Cursors.Arrow;
+    }
+
+    // Capture was stolen (system dialog, alt-tab, etc.): clear any active loupe/zoom-select
+    // state. Capture is already gone here, so do not call ReleaseMouseCapture (avoids re-entry).
+    private void OnCaptureLost()
+    {
+        if (_zoomSelectStart is not null)
+        {
+            _zoomSelectStart = null;
+            _zoomSelectionRect.Visibility = Visibility.Collapsed;
+            Cursor = InspectorMode ? Cursors.Cross : Cursors.Arrow;
+        }
+        if (_loupeActive)
+        {
+            _loupeActive = false;
+            _loupe.Visibility = Visibility.Collapsed;
+        }
     }
 
     public bool IsZoomSelecting => _zoomSelectStart is not null;
