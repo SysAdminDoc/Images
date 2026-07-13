@@ -110,6 +110,7 @@ public sealed class DirectoryNavigator : IDisposable
     /// </summary>
     public bool Open(string path)
     {
+        LastMoveStoppedAtEnd = false;
         if (string.IsNullOrWhiteSpace(path)) return false;
 
         string full;
@@ -254,6 +255,7 @@ public sealed class DirectoryNavigator : IDisposable
 
     public bool MoveFirst()
     {
+        LastMoveStoppedAtEnd = false;
         if (_files.Count == 0) return false;
         CurrentIndex = 0;
         return true;
@@ -261,6 +263,7 @@ public sealed class DirectoryNavigator : IDisposable
 
     public bool MoveLast()
     {
+        LastMoveStoppedAtEnd = false;
         if (_files.Count == 0) return false;
         CurrentIndex = _files.Count - 1;
         return true;
@@ -268,6 +271,7 @@ public sealed class DirectoryNavigator : IDisposable
 
     public bool MoveToIndex(int index)
     {
+        LastMoveStoppedAtEnd = false;
         if (index < 0 || index >= _files.Count) return false;
         CurrentIndex = index;
         return true;

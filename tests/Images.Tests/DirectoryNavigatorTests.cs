@@ -478,6 +478,32 @@ public sealed class DirectoryNavigatorTests
     }
 
     [Fact]
+    public void LastMoveStoppedAtEnd_IsClearedByJumpNavigation()
+    {
+        using var temp = TestDirectory.Create();
+        var first = temp.WriteFile("image1.jpg");
+        temp.WriteFile("image2.jpg");
+        temp.WriteFile("image3.jpg");
+
+        using var nav = new DirectoryNavigator { StopAtEnds = true };
+        Assert.True(nav.Open(first));
+
+        // Stop at the start, flagging the nudge.
+        Assert.False(nav.MovePrevious());
+        Assert.True(nav.LastMoveStoppedAtEnd);
+
+        // A jump to last must clear the stale flag.
+        Assert.True(nav.MoveLast());
+        Assert.False(nav.LastMoveStoppedAtEnd);
+
+        // Same for MoveFirst and Open.
+        Assert.False(nav.MoveNext());
+        Assert.True(nav.LastMoveStoppedAtEnd);
+        Assert.True(nav.MoveFirst());
+        Assert.False(nav.LastMoveStoppedAtEnd);
+    }
+
+    [Fact]
     public void WithoutStopAtEnds_NextWrapsAround()
     {
         using var temp = TestDirectory.Create();

@@ -171,10 +171,12 @@ public partial class App : Application
             if (settings.GetBool(Keys.RestoreLastSession, false))
             {
                 var last = settings.GetString(Keys.LastImagePath, string.Empty);
-                if (!string.IsNullOrWhiteSpace(last) && File.Exists(last))
+                // Route the persisted path through the same guard as argv (the settings DB is
+                // user-writable): rejects device-namespace shapes and canonicalizes before open.
+                if (!string.IsNullOrWhiteSpace(last) && TryResolveArgPath(last, out var safeLast))
                 {
-                    window.OpenPath(last);
-                    LaunchTiming.Log(_log, "session-restore-open", Path.GetFileName(last));
+                    window.OpenPath(safeLast);
+                    LaunchTiming.Log(_log, "session-restore-open", Path.GetFileName(safeLast));
                 }
             }
         }

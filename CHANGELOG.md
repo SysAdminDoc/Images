@@ -4,6 +4,11 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+### Fixed
+
+- **Session restore validates the persisted path** - Reopening the last image on launch now routes the stored path through the same guard as command-line arguments, rejecting device-namespace shapes and canonicalizing before opening, so a tampered settings value cannot reach the file-open path.
+- **End-of-folder nudge no longer lingers after a jump** - The "stopped at end" flag is now cleared on first/last/jump/open navigation, so the nudge only appears on an actual stopped Prev/Next.
+
 ### Added
 
 - **Stop at first/last image** - A new setting makes Prev/Next stop at the ends of the folder with a brief "End of folder" nudge instead of wrapping or switching folders; it takes precedence over sibling-folder auto-switch. Together with the existing wrap and sibling-folder options, all three end-of-list behaviors are now selectable.

@@ -42,13 +42,6 @@ Net-new, evidence-grounded, code-ready items from the 2026-07-12 (pass 2) resear
 
 ### P2 — hardening of today's shipped features (2026-07-12 pass 3 code audit)
 
-- [ ] P2 — Validate the session-restore path before opening
-  Why: Session restore reopens `Keys.LastImagePath` with only `File.Exists(last)` then `OpenPath(last)`, bypassing the `TryResolveArgPath` device-namespace (`\\?\`/`\\.\`) rejection + canonicalization the argv path uses; the settings DB is user-writable, and `File.Exists` on a device path can block.
-  Evidence: `src/Images/App.xaml.cs:167-180`; the argv guard at `TryResolveArgPath`; RESEARCH.md Security section.
-  Touches: `src/Images/App.xaml.cs` (route `last` through `TryResolveArgPath(last, out var safe)` and open only `safe`); regression test for a device-path/nonexistent persisted value.
-  Acceptance: a persisted `LastImagePath` containing a device/UNC/reparse or nonexistent shape is rejected (falls back to empty state), and only canonicalized real files are reopened.
-  Complexity: S
-
 - [ ] P2 — Fix loupe/zoom-to-selection mouse-capture and gesture conflicts
   Why: `StartLoupe` sets `_loupeActive` without `CaptureMouse()`, so releasing the middle button off-control leaves the loupe stuck; middle-down during an active left-drag pan (`_dragStart != null`) freezes the pan and strands `_dragStart`, so the next left-up jumps the image; the zoom-select `LostMouseCapture`→`CancelZoomSelection`→`ReleaseMouseCapture` path re-enters once.
   Evidence: `src/Images/Controls/ZoomPanImage.cs` (`StartLoupe`, `StopLoupe`, `OnMove`, `OnAnyButtonDown`, `CancelZoomSelection`, `LostMouseCapture`); RESEARCH.md.
@@ -84,13 +77,6 @@ Net-new, evidence-grounded, code-ready items from the 2026-07-12 (pass 2) resear
   Evidence: `src/Images/MainWindow.xaml.cs:1210-1219`; RESEARCH.md.
   Touches: `MainWindow.xaml.cs` (sample once, reuse the result for HUD + inspector; add a lightweight per-frame/dispatcher throttle).
   Acceptance: at most one pixel sample per mouse-move event feeds both the HUD and inspector; no measurable UI-thread cost increase on a fast drag over a large image.
-  Complexity: S
-
-- [ ] P3 — Reset `LastMoveStoppedAtEnd` on all navigation entry points
-  Why: The flag is cleared only in `MoveNext`/`MovePrevious`, so a stale "stopped at end" value persists after `MoveFirst`/`MoveLast`/`MoveToIndex`/`Open`/`Rescan` (latent now, but the flag is public and read by the nudge path).
-  Evidence: `src/Images/Services/DirectoryNavigator.cs` (`LastMoveStoppedAtEnd`); RESEARCH.md.
-  Touches: `DirectoryNavigator.cs` (reset the flag in `MoveFirst`, `MoveLast`, `MoveToIndex`, `Open`, `Rescan`); a navigator test asserting the flag is false after a jump.
-  Acceptance: `LastMoveStoppedAtEnd` is false after any first/last/jump/rescan; the end-of-folder nudge only fires on an actual stopped prev/next.
   Complexity: S
 
 - [ ] P3 — Signal when color management is unavailable for an image
