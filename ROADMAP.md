@@ -31,11 +31,11 @@ Net-new, evidence-grounded, code-ready items from the 2026-07-12 (pass 2) resear
 
 ### P3 — new-feature polish (2026-07-12 pass 3 code audit)
 
-- [ ] P3 — Give the loupe and zoom-to-selection discoverability and keyboard access
-  Why: Both were added as raw mouse gestures (middle-button hold; Ctrl+Shift+drag) with no command-palette entry, no `Strings.resx` hint, no `?` cheatsheet line, and no settings (`LoupeFactor` is an unexposed DP) — a regression against the app's established palette + cheatsheet + rebinding discoverability bar.
-  Evidence: no matches for loupe/zoom-select in `CommandShortcutService.cs`/palette/`Strings.resx`/cheatsheet; `ZoomPanImage.cs`; ImageGlass #1425 (surfaces the magnifier); RESEARCH.md.
-  Touches: `CommandShortcutService.cs` + `MainViewModel` palette (add "Toggle loupe" / "Zoom to selection" commands + localized strings), the `?` cheatsheet content, and a Settings entry for `LoupeFactor`; keyboard-invocable loupe following the last cursor.
-  Acceptance: both features appear in the command palette and the `?` cheatsheet, are invocable without a mouse, and `LoupeFactor` is adjustable in Settings; localization parity gate passes with the new strings.
+- [ ] P3 — Keyboard-invocable loupe + adjustable magnification
+  Why: The loupe and zoom-to-selection are now documented in the `?` cheatsheet, but remain pointer-only. A keyboard user cannot trigger a cursor-relative loupe, and `LoupeFactor` is an unexposed DP fixed at 2x. Needs a design decision on how a keyboard user positions/triggers a magnifier (e.g. a toggle mode centered on the viewport or last cursor) before implementation.
+  Evidence: `src/Images/Controls/ZoomPanImage.cs` (`LoupeFactor`, middle-button-only loupe); ImageGlass #1425; RESEARCH.md.
+  Touches: `CommandShortcutService.cs` + `MainViewModel` palette (a "Toggle loupe" command that follows the caret/viewport center), a Settings entry for `LoupeFactor`, localized strings.
+  Acceptance: the loupe can be toggled and positioned without a mouse and its magnification is adjustable in Settings; localization parity passes.
   Complexity: M
 
 - [ ] P3 — Warn (or preserve frames) when Save-a-copy flattens an animated/multi-page source

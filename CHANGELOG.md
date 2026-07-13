@@ -6,6 +6,7 @@ All notable changes to **Images** are documented here.
 
 ### Changed
 
+- **Loupe and zoom-to-selection are documented** - The `?` keyboard-shortcuts overlay now lists the middle-button loupe and Ctrl+Shift+drag zoom-to-selection gestures so they are discoverable.
 - **Serilog updated to 4.4.0** - Routine logging dependency refresh.
 
 ### Fixed

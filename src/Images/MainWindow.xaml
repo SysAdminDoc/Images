@@ -2004,7 +2004,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Wheel" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom about cursor" />
@@ -2038,6 +2038,10 @@
                                         <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Adjust compare overlay opacity" />
                                         <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[compare-with]}" />
                                         <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Compare with chosen image" />
+                                        <TextBlock Grid.Row="16" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Hold Middle" />
+                                        <TextBlock Grid.Row="16" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Loupe — magnify pixels under the cursor" />
+                                        <TextBlock Grid.Row="17" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+Drag" />
+                                        <TextBlock Grid.Row="17" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom to selection" />
                                     </Grid>
 
                                     <TextBlock Text="File" Style="{StaticResource SectionLabel}" />
