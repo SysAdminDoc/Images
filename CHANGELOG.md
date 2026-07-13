@@ -2,7 +2,7 @@
 
 All notable changes to **Images** are documented here.
 
-## Unreleased
+## v0.2.26 - 2026-07-12
 
 ### Changed
 
