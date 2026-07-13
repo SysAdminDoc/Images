@@ -1,12 +1,12 @@
 {
-  "version": "0.2.25",
+  "version": "0.2.26",
   "description": "Local-first Windows image viewer with broad codec support and inline rename.",
   "homepage": "https://github.com/SysAdminDoc/Images",
   "license": "MIT",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/SysAdminDoc/Images/releases/download/v0.2.25/Images-v0.2.25-win-x64.zip",
-      "hash": "9F79FBC701EB6D2DE46A2A8DE134E1DAB8E11452B787FA879E6267BA15513DEE"
+      "url": "https://github.com/SysAdminDoc/Images/releases/download/v0.2.26/Images-v0.2.26-win-x64.zip",
+      "hash": "71DF81AA2BB9F1AA655437753B5C31711F273B4026E671C5EE5B957700AE01B5"
     }
   },
   "bin": "Images.exe",
