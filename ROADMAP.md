@@ -26,12 +26,6 @@ Net-new, evidence-grounded, code-ready items from the 2026-07-12 (pass 2) resear
 
 ### P3 — dependency currency
 
-- [ ] P3 — Bump Serilog 4.3.1 → 4.4.0
-  Why: One routine minor behind (4.4.0 released 2026-07-10); keeps the logging dependency current. No security advisory — low priority, but a clean quick win alongside the release cut.
-  Evidence: https://www.nuget.org/packages/Serilog/ ; `src/Images/Images.csproj` pins `Serilog` 4.3.1.
-  Touches: `src/Images/Images.csproj` (Serilog PackageReference); verify build + `dotnet list --deprecated/--vulnerable` clean; Serilog.Extensions.Logging/Sinks.File stay on their current pins unless a resolution conflict appears.
-  Acceptance: Serilog resolves to 4.4.0, solution builds, full suite green, vulnerable/deprecated scans clean.
-  Complexity: S
 
 ### P2 — hardening of today's shipped features (2026-07-12 pass 3 code audit)
 
@@ -43,13 +37,6 @@ Net-new, evidence-grounded, code-ready items from the 2026-07-12 (pass 2) resear
   Touches: `CommandShortcutService.cs` + `MainViewModel` palette (add "Toggle loupe" / "Zoom to selection" commands + localized strings), the `?` cheatsheet content, and a Settings entry for `LoupeFactor`; keyboard-invocable loupe following the last cursor.
   Acceptance: both features appear in the command palette and the `?` cheatsheet, are invocable without a mouse, and `LoupeFactor` is adjustable in Settings; localization parity gate passes with the new strings.
   Complexity: M
-
-- [ ] P3 — Signal when color management is unavailable for an image
-  Why: Memory-mapped (>256 MB) and tile-backed decodes silently bypass `TransformToSrgbIfProfiled`, so the large wide-gamut RAW/PSD originals the feature exists for render uncorrected with color management "on" and no indication.
-  Evidence: `src/Images/Services/ImageLoader.cs:62-103,435-451`; RESEARCH.md Architecture section.
-  Touches: `ImageLoader` decoder/status string (report "color management unavailable for this image" on the MMF/tile paths when the flag is on); optionally apply the transform on those Magick paths (larger).
-  Acceptance: with color management on, loading a >256 MB or tile-backed image shows an explicit unavailable/uncorrected indication rather than silently rendering uncorrected.
-  Complexity: S
 
 - [ ] P3 — Warn (or preserve frames) when Save-a-copy flattens an animated/multi-page source
   Why: `SaveCopyWithC2paHandoff` reloads via `new MagickImage(sourcePath)` (single frame), so copying an animated GIF or multi-page TIFF silently produces a frame-0 flatten.

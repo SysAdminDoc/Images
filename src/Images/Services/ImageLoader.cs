@@ -95,7 +95,7 @@ public static class ImageLoader
             return WithMismatch(LoadDocumentPreview(path, pageIndex), mismatch);
 
         if (TileService.ShouldUseTileEngine(path))
-            return WithMismatch(LoadTilePyramid(path, pageIndex), mismatch);
+            return WithColorManagementNote(WithMismatch(LoadTilePyramid(path, pageIndex), mismatch));
 
         if (PagedRasterExtensions.Contains(Path.GetExtension(path)))
         {
@@ -107,7 +107,7 @@ public static class ImageLoader
         // too — a 256 MB+ GIF is a pathological edge case and multi-frame decode needs random
         // access to frame offsets that MMF serves fine from a single view.
         if (fi.Length >= MemoryMapThreshold)
-            return WithMotionPhoto(WithMismatch(LoadFromMemoryMapped(path), mismatch), path);
+            return WithColorManagementNote(WithMotionPhoto(WithMismatch(LoadFromMemoryMapped(path), mismatch), path));
 
         // Load the file into memory first so we never hold a lock on the original (rename/delete must work).
         var bytes = ReadStableFileBytes(path);
@@ -125,6 +125,13 @@ public static class ImageLoader
 
     private static LoadResult WithMismatch(LoadResult result, FormatMismatchInfo? mismatch)
         => mismatch is null ? result : result with { FormatMismatch = mismatch };
+
+    // The tile and memory-mapped paths cannot run the embedded-ICC->sRGB transform; when color
+    // management is on, note in the decoder string that it was not applied to this large image.
+    private static LoadResult WithColorManagementNote(LoadResult result)
+        => ColorManagedDisplay
+            ? result with { DecoderUsed = $"{result.DecoderUsed} · color management not applied" }
+            : result;
 
     private static LoadResult WithMotionPhoto(LoadResult result, string path)
     {
