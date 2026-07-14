@@ -637,8 +637,7 @@ public sealed class CatalogService
 
     private SqliteConnection Open()
     {
-        var conn = new SqliteConnection(_connectionString);
-        conn.Open();
+        var conn = SqliteConnectionPolicy.Open(_connectionString);
         ConfigureCatalogPragmas(conn);
         return conn;
     }

@@ -170,14 +170,7 @@ public sealed class SettingsService
     }
 
     private SqliteConnection Open()
-    {
-        var conn = new SqliteConnection(_connectionString);
-        conn.Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = "PRAGMA busy_timeout = 5000;";
-        cmd.ExecuteNonQuery();
-        return conn;
-    }
+        => SqliteConnectionPolicy.Open(_connectionString);
 
     // ---------------- Settings (generic string key/value) ----------------
 

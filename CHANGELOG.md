@@ -4,6 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Native SQLite is pinned to 3.53.3, every app-owned database disables and verifies trusted-schema execution on open, and release readiness rejects runtimes below the reviewed 3.53.2 security floor.
 - Macro and batch folder collection now shares one reparse-aware traversal that skips nested junctions/symbolic links, inaccessible paths, unsupported files, and duplicate sources instead of walking outside the selected tree.
 - User-selected macro and batch-preset JSON imports are now capped at 1 MiB and 128 operations, reject null action arrays cleanly, and read through replacement-friendly bounded streams. App-owned collection, tag, model-manifest, tile, and update-state JSON is likewise size-bounded so damaged local state cannot cause unbounded memory use.
 - Background thumbnail, metadata, catalog, and paged-image decoders now open source images with delete sharing, so navigation-time reads no longer intermittently block Recycle Bin deletes or atomic replacements.

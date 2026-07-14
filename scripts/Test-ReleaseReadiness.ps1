@@ -78,6 +78,48 @@ function Get-ProjectVersion {
     return $projectVersion
 }
 
+function Assert-NativeSqliteFloor {
+    $minimum = [Version]"3.53.2"
+    $projectPath = Resolve-RepoPath "src\Images\Images.csproj"
+    [xml]$project = Get-Content -Raw -LiteralPath $projectPath
+    $reference = @($project.Project.ItemGroup.PackageReference) |
+        Where-Object { $_.Include -eq "SourceGear.sqlite3" } |
+        Select-Object -First 1
+
+    if (-not $reference) {
+        throw "Images.csproj must directly pin SourceGear.sqlite3 at $minimum or newer."
+    }
+
+    try {
+        $projectVersion = [Version]([string]$reference.Version)
+    } catch {
+        throw "SourceGear.sqlite3 project pin '$([string]$reference.Version)' is not a valid version."
+    }
+    if ($projectVersion -lt $minimum) {
+        throw "SourceGear.sqlite3 project pin $projectVersion is below the reviewed SQLite floor $minimum."
+    }
+
+    $lockPath = Resolve-RepoPath "src\Images\packages.lock.json"
+    $lock = Get-Content -Raw -LiteralPath $lockPath | ConvertFrom-Json
+    $resolvedVersions = @(
+        foreach ($framework in $lock.dependencies.PSObject.Properties) {
+            $package = $framework.Value.PSObject.Properties["SourceGear.sqlite3"]
+            if ($package) { [string]$package.Value.resolved }
+        }
+    )
+
+    if ($resolvedVersions.Count -eq 0) {
+        throw "src\Images\packages.lock.json does not resolve SourceGear.sqlite3."
+    }
+
+    foreach ($resolved in $resolvedVersions) {
+        $resolvedVersion = [Version]$resolved
+        if ($resolvedVersion -lt $minimum) {
+            throw "SourceGear.sqlite3 lock resolution $resolvedVersion is below the reviewed SQLite floor $minimum."
+        }
+    }
+}
+
 function Read-ChecksumEntries {
     param([Parameter(Mandatory)][string]$Path)
 
@@ -192,6 +234,9 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
 if ([string]::IsNullOrWhiteSpace($Version)) {
     $Version = Get-ProjectVersion
 }
+
+Write-Host "Validating native SQLite security floor..."
+Assert-NativeSqliteFloor
 
 if (-not $SkipPackageManifestValidation) {
     $packageHashScript = Join-Path $PSScriptRoot "Test-PackageManifestHashes.ps1"

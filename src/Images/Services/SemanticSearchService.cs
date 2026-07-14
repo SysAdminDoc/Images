@@ -383,14 +383,7 @@ public sealed class SemanticSearchService : IDisposable
     }
 
     private SqliteConnection Open()
-    {
-        var conn = new SqliteConnection(_connectionString);
-        conn.Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = "PRAGMA busy_timeout = 5000;";
-        cmd.ExecuteNonQuery();
-        return conn;
-    }
+        => SqliteConnectionPolicy.Open(_connectionString);
 
     private static void ClearIndex(SqliteConnection conn, SqliteTransaction tx)
     {
