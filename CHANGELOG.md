@@ -4,6 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Archive pages now independently verify advertised ZIP/RAR/7z CRCs before returning decoded bytes; a corrupt-entry regression proves damaged page data fails as an archive error instead of silently reaching the image decoder.
 - Focus peaking and exposure-clipping overlays now provide bounded, cancellable RAW/photo culling analysis directly on the transformed image surface; both are localized, persisted, rebindable, command-palette discoverable, and use a text legend alongside green/red/blue markers.
 - Active-monitor DXGI diagnostics now report HDR/SDR color space and peak/full-frame luminance; when HDR-class content is tonemapped for the WPF SDR surface on an HDR desktop, the Details panel shows an explicit localized status badge.
 - Exif 3.1 learning-use preferences, development provenance, and correction/noise-reduction state now appear as localized read-only metadata; strict TIFF parsing preserves the new UTF-8 fields, labels reserved values explicitly, and rejects legacy Samsung/GE tag collisions without modifying the image.

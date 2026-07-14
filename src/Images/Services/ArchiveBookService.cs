@@ -35,6 +35,7 @@ public static class ArchiveBookService
         string Name,
         long DeclaredSize,
         bool IsEncrypted,
+        long? ExpectedCrc,
         Func<Stream> OpenStream);
 
     private interface IArchiveReader : IDisposable
@@ -155,6 +156,7 @@ public static class ArchiveBookService
         long declaredSize,
         bool isDirectory,
         bool isEncrypted,
+        long? expectedCrc,
         Func<Stream> openStream,
         out ArchiveEntrySource? page)
     {
@@ -172,7 +174,7 @@ public static class ArchiveBookService
         if (SupportedImageFormats.RequiresGhostscriptExtension(ext)) return false;
         if (!SupportedImageFormats.IsSupportedExtension(ext)) return false;
 
-        page = new ArchiveEntrySource(normalized, declaredSize, isEncrypted, openStream);
+        page = new ArchiveEntrySource(normalized, declaredSize, isEncrypted, expectedCrc, openStream);
         return true;
     }
 
@@ -212,6 +214,11 @@ public static class ArchiveBookService
         {
             using var entryStream = entry.OpenStream();
             var bytes = ReadBounded(entryStream, entry.DeclaredSize, entry.Name);
+            if (entry.ExpectedCrc is { } expectedCrc &&
+                Crc32Checksum.Compute(bytes) != unchecked((uint)expectedCrc))
+            {
+                throw new InvalidDataException($"Archive page '{entry.Name}' failed CRC validation.");
+            }
             return new ArchivePage(entry.Name, bytes, pageIndex, pageCount, IsCoverEntry(entry.Name));
         }
         catch (Exception ex) when (IsArchivePasswordException(ex))
@@ -351,6 +358,7 @@ public static class ArchiveBookService
                         entry.Size,
                         entry.IsDirectory,
                         entry.IsEncrypted,
+                        ExpectedCrc(entry),
                         entry.OpenEntryStream,
                         out var page) &&
                     page is not null)
@@ -363,6 +371,14 @@ public static class ArchiveBookService
             return pages;
         }
 
+        private long? ExpectedCrc(IArchiveEntry entry)
+        {
+            if (_archive.Type is not (ArchiveType.Zip or ArchiveType.Rar or ArchiveType.SevenZip))
+                return null;
+
+            return entry.Crc is >= 0 and <= uint.MaxValue ? entry.Crc : null;
+        }
+
         public void Dispose()
         {
             _archive.Dispose();
@@ -372,4 +388,31 @@ public static class ArchiveBookService
 
     [DllImport("shlwapi.dll", CharSet = CharSet.Unicode)]
     private static extern int StrCmpLogicalW(string a, string b);
+}
+
+internal static class Crc32Checksum
+{
+    private static readonly uint[] Table = BuildTable();
+
+    public static uint Compute(ReadOnlySpan<byte> data)
+    {
+        var crc = uint.MaxValue;
+        foreach (var value in data)
+            crc = Table[(byte)(crc ^ value)] ^ (crc >> 8);
+        return ~crc;
+    }
+
+    private static uint[] BuildTable()
+    {
+        const uint polynomial = 0xEDB88320;
+        var table = new uint[256];
+        for (uint i = 0; i < table.Length; i++)
+        {
+            var value = i;
+            for (var bit = 0; bit < 8; bit++)
+                value = (value & 1) != 0 ? polynomial ^ (value >> 1) : value >> 1;
+            table[i] = value;
+        }
+        return table;
+    }
 }

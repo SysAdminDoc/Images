@@ -1,5 +1,6 @@
 using System.IO;
 using System.IO.Compression;
+using System.Buffers.Binary;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Images.Services;
@@ -169,6 +170,24 @@ public sealed class ArchiveBookServiceTests
         var names = ArchiveBookService.ListPageNames(archivePath);
 
         Assert.Empty(names);
+    }
+
+    [Fact]
+    public void LoadPage_WhenZipEntryCrcDoesNotMatch_ReportsCorruption()
+    {
+        using var temp = TestDirectory.Create();
+        var archivePath = Path.Combine(temp.Path, "crc-mismatch.cbz");
+        using (var archive = ZipFile.Open(archivePath, ZipArchiveMode.Create))
+        {
+            var entry = archive.CreateEntry("page.png", CompressionLevel.NoCompression);
+            using var stream = entry.Open();
+            stream.Write(CreatePngBytes(0x20, 0x80, 0xE0));
+        }
+        CorruptFirstZipEntryPayload(archivePath);
+
+        var error = Assert.Throws<InvalidOperationException>(() => ArchiveBookService.LoadPage(archivePath, 0));
+
+        Assert.Contains("Could not read archive", error.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -342,15 +361,9 @@ public sealed class ArchiveBookServiceTests
 
     private static void WritePngEntry(ZipArchive archive, string name, byte red, byte green, byte blue)
     {
-        using var encoded = new MemoryStream();
-        var encoder = new PngBitmapEncoder();
-        encoder.Frames.Add(BitmapFrame.Create(CreateBitmap(red, green, blue)));
-        encoder.Save(encoded);
-        encoded.Position = 0;
-
         var entry = archive.CreateEntry(name, CompressionLevel.Fastest);
         using var stream = entry.Open();
-        encoded.CopyTo(stream);
+        stream.Write(CreatePngBytes(red, green, blue));
     }
 
     private static void WriteBytesEntry(ZipArchive archive, string name, byte[] bytes)
@@ -403,5 +416,28 @@ public sealed class ArchiveBookServiceTests
             stride);
         bitmap.Freeze();
         return bitmap;
+    }
+
+    private static byte[] CreatePngBytes(byte red, byte green, byte blue)
+    {
+        using var encoded = new MemoryStream();
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(CreateBitmap(red, green, blue)));
+        encoder.Save(encoded);
+        return encoded.ToArray();
+    }
+
+    private static void CorruptFirstZipEntryPayload(string path)
+    {
+        var bytes = File.ReadAllBytes(path);
+        Assert.True(bytes.Length >= 30);
+        Assert.Equal(0x04034B50u, BinaryPrimitives.ReadUInt32LittleEndian(bytes));
+
+        var nameLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(26, 2));
+        var extraLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(28, 2));
+        var payloadOffset = 30 + nameLength + extraLength;
+        Assert.InRange(payloadOffset, 0, bytes.Length - 1);
+        bytes[payloadOffset + 8] ^= 0x5A;
+        File.WriteAllBytes(path, bytes);
     }
 }
