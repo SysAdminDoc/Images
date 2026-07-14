@@ -314,7 +314,7 @@ public static class ImageAnnotationService
     private static ImageAnnotationPoint ArrowPoint(double x, double y, double angle, double length)
         => new(x + Math.Cos(angle) * length, y + Math.Sin(angle) * length);
 
-    private static IMagickColor<ushort> ParseColor(string color)
+    private static IMagickColor<float> ParseColor(string color)
     {
         try
         {
@@ -326,7 +326,7 @@ public static class ImageAnnotationService
         }
     }
 
-    private static IMagickColor<ushort> ContrastingTextColor(IMagickColor<ushort> background)
+    private static IMagickColor<float> ContrastingTextColor(IMagickColor<float> background)
     {
         var r = background.R / 257.0;
         var g = background.G / 257.0;

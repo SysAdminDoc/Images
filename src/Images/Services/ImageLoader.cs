@@ -59,6 +59,7 @@ public static class ImageLoader
     private static readonly BitmapSource TilePlaceholder = CreateTilePlaceholder();
 
     private static volatile bool _colorManagedDisplay;
+    private static volatile ToneMapOperator _toneMapOperator = ToneMapOperator.Reinhard;
 
     /// <summary>
     /// RD-02: when true, normal raster loads are decoded through Magick.NET and any embedded ICC
@@ -71,6 +72,12 @@ public static class ImageLoader
     {
         get => _colorManagedDisplay;
         set => _colorManagedDisplay = value;
+    }
+
+    public static ToneMapOperator HdrToneMapOperator
+    {
+        get => _toneMapOperator;
+        set => _toneMapOperator = value;
     }
 
     public static LoadResult Load(
@@ -164,6 +171,12 @@ public static class ImageLoader
             if (animated is not null) return animated;
         }
 
+        if (ToneMapService.ShouldProbe(bytes, extension))
+        {
+            var toneMapped = TryLoadToneMapped(bytes, displayName, extension);
+            if (toneMapped is not null) return toneMapped;
+        }
+
         // RD-02: color-managed decode (opt-in). Falls through to the normal WIC/Magick path if it
         // fails so a decode error never costs the image.
         if (ColorManagedDisplay)
@@ -214,13 +227,15 @@ public static class ImageLoader
         try
         {
             using var image = MagickSafeReader.Read(bytes, extension);
+            var toneMapped = ToneMapService.ApplyIfNeeded(image, extension, HdrToneMapOperator);
             var wb = MagickToBitmap(image);
 
             sw.Stop();
             evtSrc.RecordMagickFallbackDecode();
             evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
-            evtSrc.DecodeCompleted(displayName, "Magick.NET", (long)sw.Elapsed.TotalMilliseconds);
-            return new LoadResult(wb, wb.PixelWidth, wb.PixelHeight, "Magick.NET");
+            var decoder = WithToneMapStatus("Magick.NET", toneMapped);
+            evtSrc.DecodeCompleted(displayName, decoder, (long)sw.Elapsed.TotalMilliseconds);
+            return new LoadResult(wb, wb.PixelWidth, wb.PixelHeight, decoder);
         }
         catch (Exception ex)
         {
@@ -230,6 +245,38 @@ public static class ImageLoader
             throw new InvalidOperationException($"Could not decode '{displayName}': {ex.Message}", ex);
         }
     }
+
+    private static LoadResult? TryLoadToneMapped(byte[] bytes, string displayName, string extension)
+    {
+        var evtSrc = ImageEventSource.Instance;
+        evtSrc.RecordDecodeAttempt();
+        var sw = Stopwatch.StartNew();
+        evtSrc.DecodeStarted(displayName, "Magick.NET (HDRI)");
+        try
+        {
+            using var image = MagickSafeReader.Read(bytes, extension);
+            if (!ToneMapService.ApplyIfNeeded(image, extension, HdrToneMapOperator))
+                return null;
+
+            var managed = ColorManagedDisplay && TransformToSrgbIfProfiled(image);
+            var wb = MagickToBitmap(image);
+            sw.Stop();
+            evtSrc.RecordMagickFallbackDecode();
+            evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
+            var decoder = WithToneMapStatus(managed ? "Magick.NET (color-managed)" : "Magick.NET", true);
+            evtSrc.DecodeCompleted(displayName, decoder, (long)sw.Elapsed.TotalMilliseconds);
+            return new LoadResult(wb, wb.PixelWidth, wb.PixelHeight, decoder);
+        }
+        catch (Exception ex) when (ex is MagickException or NotSupportedException or InvalidOperationException or ArgumentException)
+        {
+            return null;
+        }
+    }
+
+    private static string WithToneMapStatus(string decoder, bool toneMapped)
+        => toneMapped
+            ? $"{decoder} · {HdrToneMapOperator} tonemapped to SDR"
+            : decoder;
 
     private static LoadResult LoadArchivePreview(
         string path,
@@ -449,13 +496,14 @@ public static class ImageLoader
             if (collection.Count == 0) return null;
 
             using var frame = collection[0].Clone();
+            var toneMapped = ToneMapService.ApplyIfNeeded(frame, Path.GetExtension(path), HdrToneMapOperator);
             var wb = MagickToBitmap(frame);
             var label = PageLabelFor(path);
             return new LoadResult(
                 wb,
                 wb.PixelWidth,
                 wb.PixelHeight,
-                $"Magick.NET ({SupportedImageFormats.FormatFamily(path)} {label.ToLowerInvariant()} {pageIndex + 1} of {pageCount})",
+                WithToneMapStatus($"Magick.NET ({SupportedImageFormats.FormatFamily(path)} {label.ToLowerInvariant()} {pageIndex + 1} of {pageCount})", toneMapped),
                 Pages: new PageSequence(pageIndex, pageCount, label));
         }
         catch (MagickException)
@@ -481,7 +529,7 @@ public static class ImageLoader
             TilePlaceholder,
             pyramid.SourceWidth,
             pyramid.SourceHeight,
-            $"Magick.NET tile pyramid (DZI/WebP, {pyramid.TotalTiles} tiles{pageSuffix})",
+            WithToneMapStatus($"Magick.NET tile pyramid (DZI/WebP, {pyramid.TotalTiles} tiles{pageSuffix})", pyramid.ToneMappedToSdr),
             Pages: pageCount > 1 ? new PageSequence(pageIndex, pageCount, PageLabelFor(path)) : null,
             TilePyramid: pyramid);
     }
@@ -564,32 +612,36 @@ public static class ImageLoader
 
         try
         {
-            // Primary: WIC via BitmapImage. EndInit fully reads the view stream under CacheOption.OnLoad.
-            try
+            // Primary: WIC via BitmapImage. HDR candidates skip WIC because its SDR surface can
+            // quantize extended samples before the HDRI tonemap sees them.
+            if (!ToneMapService.IsCandidateExtension(Path.GetExtension(path)))
             {
-                using var view = mmf.CreateViewStream(0, 0, MemoryMappedFileAccess.Read);
-                var bmp = new BitmapImage();
-                bmp.BeginInit();
-                bmp.CacheOption = BitmapCacheOption.OnLoad;
-                bmp.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
-                bmp.StreamSource = view;
-                bmp.EndInit();
-                bmp.Freeze();
+                try
+                {
+                    using var view = mmf.CreateViewStream(0, 0, MemoryMappedFileAccess.Read);
+                    var bmp = new BitmapImage();
+                    bmp.BeginInit();
+                    bmp.CacheOption = BitmapCacheOption.OnLoad;
+                    bmp.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+                    bmp.StreamSource = view;
+                    bmp.EndInit();
+                    bmp.Freeze();
 
-                sw.Stop();
-                evtSrc.RecordWicDecode();
-                evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
-                evtSrc.DecodeCompleted(displayName, "WIC (memory-mapped)", (long)sw.Elapsed.TotalMilliseconds);
-                return new LoadResult(bmp, bmp.PixelWidth, bmp.PixelHeight, "WIC (memory-mapped)");
-            }
-            catch (Exception ex) when (
-                ex is NotSupportedException or
-                      System.Runtime.InteropServices.COMException or
-                      FileFormatException or
-                      InvalidOperationException or
-                      ArgumentException)
-            {
-                // Fall through to Magick.NET.
+                    sw.Stop();
+                    evtSrc.RecordWicDecode();
+                    evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
+                    evtSrc.DecodeCompleted(displayName, "WIC (memory-mapped)", (long)sw.Elapsed.TotalMilliseconds);
+                    return new LoadResult(bmp, bmp.PixelWidth, bmp.PixelHeight, "WIC (memory-mapped)");
+                }
+                catch (Exception ex) when (
+                    ex is NotSupportedException or
+                          System.Runtime.InteropServices.COMException or
+                          FileFormatException or
+                          InvalidOperationException or
+                          ArgumentException)
+                {
+                    // Fall through to Magick.NET.
+                }
             }
 
             // Fallback: Magick.NET reads the mapping directly.
@@ -599,13 +651,15 @@ public static class ImageLoader
             {
                 using var view = mmf.CreateViewStream(0, 0, MemoryMappedFileAccess.Read);
                 using var image = MagickSafeReader.Read(view, Path.GetExtension(path));
+                var toneMapped = ToneMapService.ApplyIfNeeded(image, Path.GetExtension(path), HdrToneMapOperator);
                 var wb = MagickToBitmap(image);
 
                 sw.Stop();
                 evtSrc.RecordMagickFallbackDecode();
                 evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
-                evtSrc.DecodeCompleted(displayName, "Magick.NET (memory-mapped)", (long)sw.Elapsed.TotalMilliseconds);
-                return new LoadResult(wb, wb.PixelWidth, wb.PixelHeight, "Magick.NET (memory-mapped)");
+                var decoder = WithToneMapStatus("Magick.NET (memory-mapped)", toneMapped);
+                evtSrc.DecodeCompleted(displayName, decoder, (long)sw.Elapsed.TotalMilliseconds);
+                return new LoadResult(wb, wb.PixelWidth, wb.PixelHeight, decoder);
             }
             catch (Exception ex)
             {
@@ -703,13 +757,14 @@ public static class ImageLoader
         try
         {
             using var image = MagickSafeReader.Read(bytes, extension);
+            var toneMapped = ToneMapService.ApplyIfNeeded(image, extension, HdrToneMapOperator);
             var managed = TransformToSrgbIfProfiled(image);
             var wb = MagickToBitmap(image);
 
             sw.Stop();
             evtSrc.RecordMagickFallbackDecode();
             evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
-            var decoder = managed ? "Magick.NET (color-managed)" : "Magick.NET";
+            var decoder = WithToneMapStatus(managed ? "Magick.NET (color-managed)" : "Magick.NET", toneMapped);
             evtSrc.DecodeCompleted(displayName, decoder, (long)sw.Elapsed.TotalMilliseconds);
             return new LoadResult(wb, wb.PixelWidth, wb.PixelHeight, decoder);
         }
@@ -728,7 +783,7 @@ public static class ImageLoader
     /// Transforms the image's embedded ICC profile to sRGB in place. Returns true if the image
     /// carried an embedded profile (was honored); false for untagged images (already assumed sRGB).
     /// </summary>
-    internal static bool TransformToSrgbIfProfiled(IMagickImage<ushort> image)
+    internal static bool TransformToSrgbIfProfiled(IMagickImage<float> image)
     {
         if (image.GetColorProfile() is null)
             return false;
@@ -739,7 +794,7 @@ public static class ImageLoader
         return true;
     }
 
-    private static WriteableBitmap MagickToBitmap(IMagickImage<ushort> image)
+    private static WriteableBitmap MagickToBitmap(IMagickImage<float> image)
     {
         image.Format = MagickFormat.Bgra;
         image.Alpha(AlphaOption.Set);
@@ -822,13 +877,15 @@ public static class ImageLoader
         if (maxPixelDimension <= 0)
             throw new ArgumentOutOfRangeException(nameof(maxPixelDimension), "Preview dimension cap must be positive.");
 
-        if (TryLoadWicPreview(path, maxPixelDimension) is { } preview)
+        if (!ToneMapService.IsCandidateExtension(Path.GetExtension(path)) &&
+            TryLoadWicPreview(path, maxPixelDimension) is { } preview)
             return preview;
 
         CodecRuntime.Configure();
         using var image = MagickSafeReader.Read(path);
         image.AutoOrient();
         image.Resize(new MagickGeometry((uint)maxPixelDimension, (uint)maxPixelDimension) { Greater = true });
+        ToneMapService.ApplyIfNeeded(image, Path.GetExtension(path), HdrToneMapOperator);
         return MagickToBitmap(image);
     }
 

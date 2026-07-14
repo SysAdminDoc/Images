@@ -126,7 +126,7 @@ public sealed class DuplicateCleanupServiceTests
         Assert.Equal(4, DuplicateCleanupService.HammingDistance(0b1111UL, 0b0000UL));
     }
 
-    private static void WriteImage(string path, IMagickColor<ushort> color)
+    private static void WriteImage(string path, IMagickColor<float> color)
     {
         using var image = new MagickImage(color, 16, 16)
         {

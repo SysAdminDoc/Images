@@ -190,7 +190,7 @@ public sealed class ImageCodecCorpusTests
         collection.Write(path);
     }
 
-    private static MagickImage CreateMagickFrame(IMagickColor<ushort> color)
+    private static MagickImage CreateMagickFrame(IMagickColor<float> color)
         => new(color, 6, 4);
 
     private static BitmapSource CreateBitmap(

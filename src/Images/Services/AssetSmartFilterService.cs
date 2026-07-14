@@ -193,7 +193,7 @@ public static class AssetSmartFilterService
         }
     }
 
-    private static byte ToByte(ushort value)
+    private static byte ToByte(float value)
         => (byte)Math.Clamp((int)Math.Round(value / 257d), 0, 255);
 
     private static string ClassifyPalette(byte red, byte green, byte blue)

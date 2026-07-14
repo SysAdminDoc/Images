@@ -370,6 +370,11 @@ public static class Strings
     public static string SettingsRestoreSessionDescription => Get(nameof(SettingsRestoreSessionDescription));
     public static string SettingsColorManagementTitle => Get(nameof(SettingsColorManagementTitle));
     public static string SettingsColorManagementDescription => Get(nameof(SettingsColorManagementDescription));
+    public static string SettingsToneMapTitle => Get(nameof(SettingsToneMapTitle));
+    public static string SettingsToneMapDescription => Get(nameof(SettingsToneMapDescription));
+    public static string SettingsToneMapReinhard => Get(nameof(SettingsToneMapReinhard));
+    public static string SettingsToneMapHable => Get(nameof(SettingsToneMapHable));
+    public static string SettingsToneMapAces => Get(nameof(SettingsToneMapAces));
     public static string SettingsStopAtEndsTitle => Get(nameof(SettingsStopAtEndsTitle));
     public static string SettingsStopAtEndsDescription => Get(nameof(SettingsStopAtEndsDescription));
     public static string SettingsRememberWindowDescription => Get(nameof(SettingsRememberWindowDescription));
@@ -437,6 +442,7 @@ public static class Strings
     public static string SettingsRestoreSessionOffStatus => Get(nameof(SettingsRestoreSessionOffStatus));
     public static string SettingsColorManagementOnStatus => Get(nameof(SettingsColorManagementOnStatus));
     public static string SettingsColorManagementOffStatus => Get(nameof(SettingsColorManagementOffStatus));
+    public static string SettingsToneMapChangedStatusFormat => Get(nameof(SettingsToneMapChangedStatusFormat));
     public static string SettingsStopAtEndsOnStatus => Get(nameof(SettingsStopAtEndsOnStatus));
     public static string SettingsStopAtEndsOffStatus => Get(nameof(SettingsStopAtEndsOffStatus));
     public static string SettingsRememberWindowOffStatus => Get(nameof(SettingsRememberWindowOffStatus));

@@ -511,6 +511,7 @@ public static class Keys
     public const string RestoreLastSession = "general.restore-last-session";
     public const string LastImagePath = "session.last-image-path";
     public const string ColorManagement = "viewer.color-management";
+    public const string HdrToneMapOperator = "viewer.hdr-tonemap-operator";
     public const string StopAtEnds = "viewer.stop-at-ends";
     public const string ConfirmRecycleBinDelete = "viewer.delete.confirm-recycle";
     public const string AccessibilityReduceMotion = "accessibility.reduce-motion";

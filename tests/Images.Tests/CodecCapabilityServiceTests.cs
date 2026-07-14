@@ -25,7 +25,7 @@ public sealed class CodecCapabilityServiceTests
         Assert.Contains(rows, row =>
             row.Name.StartsWith("Magick.NET", StringComparison.Ordinal)
             && row.Kind == "NuGet"
-            && row.Source.Contains("nuget.org/packages/Magick.NET-Q16-AnyCPU", StringComparison.Ordinal)
+            && row.Source.Contains("nuget.org/packages/Magick.NET-Q16-HDRI-AnyCPU", StringComparison.Ordinal)
             && row.AdvisoryStatus.Contains("14.11.0", StringComparison.Ordinal));
 
         Assert.Contains(rows, row =>

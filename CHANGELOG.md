@@ -6,6 +6,7 @@ All notable changes to **Images** are documented here.
 
 ### Added
 
+- **HDRI decode-time tonemapping** - EXR, Radiance HDR, RAW, AVIF/HEIC/JXL, and high-bit-depth PNG/TIFF content now retains floating-point highlights until Reinhard, Hable, or ACES maps them into the SDR display range. Reinhard is the default, Settings exposes the operator, and decoder provenance identifies when tonemapping was applied.
 - **Authoritative local-data registry and privacy reset** - Settings, `--system-info`, and support bundles now share one inventory covering the real catalog and semantic-index files, caches, models, diagnostics, histories, drafts, backups, and temporary media. A confirmed reset clears registered rebuildable/diagnostic stores while preserving imported models and user-owned content.
 - **Adjustable loupe magnification** - Appearance settings now offer a loupe magnification choice (2×, 3×, 4×, 6×) so the middle-button magnifier can zoom in further than the previous fixed 2×.
 - **Keyboard-invocable loupe** - A new "Toggle loupe magnifier" command (default `L`, rebindable, in the command palette) shows a viewport-centered magnifier with no mouse needed; pan the image to move it beneath the lens. Holding the middle button still temporarily overrides the lens to follow the cursor.

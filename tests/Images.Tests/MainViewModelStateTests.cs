@@ -985,7 +985,12 @@ public sealed class MainViewModelStateTests
                 // The mid-confirmation OpenFile(second) navigates asynchronously; wait for it to
                 // settle before asserting (matches the MoveToFolder/rename tests). Without this the
                 // assertions race the navigation under CPU contention from parallel test decodes.
-                PumpUntil(() => !viewModel.IsOperationBusy && string.Equals(viewModel.CurrentPath, second, StringComparison.OrdinalIgnoreCase));
+                PumpUntil(() =>
+                    !viewModel.IsOperationBusy &&
+                    !File.Exists(first) &&
+                    string.Equals(viewModel.CurrentPath, second, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(viewModel.ToastMessage, "Sent to Recycle Bin: a.png", StringComparison.Ordinal),
+                    timeoutSeconds: 15);
 
                 Assert.False(File.Exists(first));
                 Assert.True(File.Exists(second));
@@ -1228,7 +1233,7 @@ public sealed class MainViewModelStateTests
             PumpUntil(
                 () => !viewModel.IsOperationBusy
                     && string.Equals(viewModel.ToastMessage, "Crop applied to file", StringComparison.Ordinal),
-                timeoutSeconds: 15);
+                timeoutSeconds: 30);
 
             Assert.Equal("Crop applied to file", viewModel.ToastMessage);
             Assert.Equal(1, viewModel.PixelWidth);

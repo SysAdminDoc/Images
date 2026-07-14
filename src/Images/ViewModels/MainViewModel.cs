@@ -173,6 +173,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _isZoomLocked = _settings.GetBool(Keys.ZoomLock, false);
         _showTransparencyGrid = _settings.GetBool(Keys.TransparencyGrid, false);
         ImageLoader.ColorManagedDisplay = _settings.GetBool(Keys.ColorManagement, false);
+        ImageLoader.HdrToneMapOperator = ToneMapService.ParseOperator(
+            _settings.GetString(Keys.HdrToneMapOperator, ToneMapOperator.Reinhard.ToString()));
         _archiveRightToLeft = _settings.GetBool(Keys.ArchiveRightToLeft, false);
         _archiveOldScanFilterEnabled = _settings.GetBool(Keys.ArchiveOldScanFilter, false);
         _archiveSpreadModeEnabled = _settings.GetBool(Keys.ArchiveSpreadMode, false);
@@ -7479,9 +7481,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         // Color management is a decode-time transform. When it changes, drop preloaded neighbors
         // (decoded under the old mode) and re-decode the current image so the toggle applies now.
         var colorManaged = _settings.GetBool(Keys.ColorManagement, false);
-        if (ImageLoader.ColorManagedDisplay != colorManaged)
+        var toneMapOperator = ToneMapService.ParseOperator(
+            _settings.GetString(Keys.HdrToneMapOperator, ToneMapOperator.Reinhard.ToString()));
+        if (ImageLoader.ColorManagedDisplay != colorManaged || ImageLoader.HdrToneMapOperator != toneMapOperator)
         {
             ImageLoader.ColorManagedDisplay = colorManaged;
+            ImageLoader.HdrToneMapOperator = toneMapOperator;
             _preload.Reset();
             if (HasDisplayImage && !IsOperationBusy && !IsTilePyramidActive)
                 ReloadCurrentPreservingViewState(resetPreload: true);

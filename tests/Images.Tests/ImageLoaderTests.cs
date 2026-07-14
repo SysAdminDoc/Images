@@ -65,6 +65,19 @@ public sealed class ImageLoaderTests
         Assert.Equal(320, Math.Max(preview.PixelWidth, preview.PixelHeight));
     }
 
+    [Fact]
+    public void Load_SixteenBitTiff_ReportsTonemappedDecode()
+    {
+        using var temp = TestDirectory.Create();
+        var path = Path.Combine(temp.Path, "sixteen-bit.tiff");
+        using (var image = new MagickImage(MagickColors.Gold, 4, 4) { Format = MagickFormat.Tiff, Depth = 16 })
+            image.Write(path);
+
+        var result = ImageLoader.Load(path);
+
+        Assert.Contains("tonemapped to SDR", result.DecoderUsed, StringComparison.Ordinal);
+    }
+
     private static void WriteAnimatedGif(string path, int centiseconds)
     {
         using var collection = new MagickImageCollection();
@@ -76,7 +89,7 @@ public sealed class ImageLoaderTests
         collection.Write(path);
     }
 
-    private static MagickImage CreateGifFrame(IMagickColor<ushort> color, int centiseconds)
+    private static MagickImage CreateGifFrame(IMagickColor<float> color, int centiseconds)
     {
         var frame = new MagickImage(color, 6, 4)
         {

@@ -122,13 +122,13 @@ public static class BackgroundRemovalService
             {
                 var pixel = pixels.GetPixel(x, y)!;
                 var channels = pixel.ToArray();
-                // Q16 build: quantum values are always 0-65535 (see LaMaInpaintService).
+                // HDRI can preserve samples above Quantum.Max; model tensors remain SDR-bounded.
                 var scale = (float)Quantum.Max;
                 var idx = y * size + x;
 
-                var r = channels.Length >= 1 ? channels[0] / scale : 0f;
-                var g = channels.Length >= 2 ? channels[1] / scale : r;
-                var b = channels.Length >= 3 ? channels[2] / scale : r;
+                var r = channels.Length >= 1 ? Math.Clamp(channels[0] / scale, 0f, 1f) : 0f;
+                var g = channels.Length >= 2 ? Math.Clamp(channels[1] / scale, 0f, 1f) : r;
+                var b = channels.Length >= 3 ? Math.Clamp(channels[2] / scale, 0f, 1f) : r;
 
                 tensor[0 * size * size + idx] = (r - mean[0]) / std[0];
                 tensor[1 * size * size + idx] = (g - mean[1]) / std[1];
@@ -153,7 +153,7 @@ public static class BackgroundRemovalService
             for (var x = 0; x < maskWidth; x++)
             {
                 var value = Math.Clamp(tensor[0, 0, y, x], 0, 1);
-                var gray = (ushort)(value * 65535);
+                var gray = value * Quantum.Max;
                 pixels.SetPixel(x, y, [gray]);
             }
         }

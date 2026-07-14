@@ -89,7 +89,7 @@ public sealed class AssetSmartFilterServiceTests
     private static string WriteImage(
         string folder,
         string fileName,
-        IMagickColor<ushort> color,
+        IMagickColor<float> color,
         uint width,
         uint height,
         DateTimeOffset modified)

@@ -139,6 +139,13 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         new LoupeMagnificationOption("6×", 6.0),
     ];
 
+    public IReadOnlyList<ToneMapOption> AvailableToneMapOperators { get; } =
+    [
+        new ToneMapOption(Strings.SettingsToneMapReinhard, ToneMapOperator.Reinhard),
+        new ToneMapOption(Strings.SettingsToneMapHable, ToneMapOperator.Hable),
+        new ToneMapOption(Strings.SettingsToneMapAces, ToneMapOperator.Aces),
+    ];
+
     public LoupeMagnificationOption SelectedLoupeMagnification
     {
         get
@@ -155,6 +162,26 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             Raise(nameof(SelectedLoupeMagnification));
             SetStatus(
                 Strings.Format(nameof(Strings.SettingsLoupeMagnificationChangedStatusFormat), value.DisplayName),
+                SettingsStatusToneKind.Success);
+        }
+    }
+
+    public ToneMapOption SelectedToneMapOperator
+    {
+        get
+        {
+            var persisted = ToneMapService.ParseOperator(
+                _settings.GetString(Keys.HdrToneMapOperator, ToneMapOperator.Reinhard.ToString()));
+            return AvailableToneMapOperators.First(option => option.Operator == persisted);
+        }
+        set
+        {
+            if (value is null) return;
+            _settings.SetString(Keys.HdrToneMapOperator, value.Operator.ToString());
+            ImageLoader.HdrToneMapOperator = value.Operator;
+            Raise(nameof(SelectedToneMapOperator));
+            SetStatus(
+                Strings.Format(nameof(Strings.SettingsToneMapChangedStatusFormat), value.DisplayName),
                 SettingsStatusToneKind.Success);
         }
     }
@@ -714,6 +741,11 @@ public sealed record ThemeOption(string DisplayName, string Key)
 
 /// <summary>A display label / magnification-factor pair for the loupe magnification picker.</summary>
 public sealed record LoupeMagnificationOption(string DisplayName, double Factor)
+{
+    public override string ToString() => DisplayName;
+}
+
+public sealed record ToneMapOption(string DisplayName, ToneMapOperator Operator)
 {
     public override string ToString() => DisplayName;
 }

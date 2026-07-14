@@ -452,10 +452,10 @@ public sealed class JpegTranTransformServiceTests
         return args[index + 1];
     }
 
-    private static string WriteJpeg(string folder, string name, uint width, uint height, IMagickColor<ushort> color)
+    private static string WriteJpeg(string folder, string name, uint width, uint height, IMagickColor<float> color)
         => WriteJpeg(Path.Combine(folder, name), width, height, color);
 
-    private static string WriteJpeg(string path, uint width, uint height, IMagickColor<ushort> color)
+    private static string WriteJpeg(string path, uint width, uint height, IMagickColor<float> color)
     {
         using var image = new MagickImage(color, width, height)
         {

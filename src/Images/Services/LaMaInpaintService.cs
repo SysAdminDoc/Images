@@ -143,15 +143,13 @@ public static class LaMaInpaintService
             {
                 var pixel = pixels.GetPixel(x, y)!;
                 var channels = pixel.ToArray();
-                // Q16 build: quantum values are always 0-65535. A per-pixel
-                // heuristic keyed on the first channel divides saturated
-                // blues/greens by 255 and blows normalization up ~257x.
+                // HDRI can preserve samples above Quantum.Max; model tensors remain SDR-bounded.
                 var scale = (float)Quantum.Max;
                 var idx = y * size + x;
 
-                tensor[0 * size * size + idx] = channels.Length >= 1 ? channels[0] / scale : 0;
-                tensor[1 * size * size + idx] = channels.Length >= 2 ? channels[1] / scale : channels[0] / scale;
-                tensor[2 * size * size + idx] = channels.Length >= 3 ? channels[2] / scale : channels[0] / scale;
+                tensor[0 * size * size + idx] = channels.Length >= 1 ? Math.Clamp(channels[0] / scale, 0f, 1f) : 0;
+                tensor[1 * size * size + idx] = channels.Length >= 2 ? Math.Clamp(channels[1] / scale, 0f, 1f) : Math.Clamp(channels[0] / scale, 0f, 1f);
+                tensor[2 * size * size + idx] = channels.Length >= 3 ? Math.Clamp(channels[2] / scale, 0f, 1f) : Math.Clamp(channels[0] / scale, 0f, 1f);
             }
         }
 
@@ -205,7 +203,7 @@ public static class LaMaInpaintService
                 var g = Math.Clamp(tensor[0, 1, y, x], 0, 1);
                 var b = Math.Clamp(tensor[0, 2, y, x], 0, 1);
 
-                var pixel = new[] { (ushort)(r * 65535), (ushort)(g * 65535), (ushort)(b * 65535) };
+                var pixel = new[] { r * Quantum.Max, g * Quantum.Max, b * Quantum.Max };
                 pixelCollection.SetPixel(x, y, pixel);
             }
         }

@@ -169,9 +169,9 @@ public static class CodecCapabilityService
                 Action: "Update the build image/runtime when Microsoft ships .NET 9 servicing releases."),
 
             new(
-                Name: "Magick.NET-Q16-AnyCPU / Magick.NET.Core",
+                Name: "Magick.NET-Q16-HDRI-AnyCPU / Magick.NET.Core",
                 Kind: "NuGet",
-                Source: "NuGet: https://www.nuget.org/packages/Magick.NET-Q16-AnyCPU; releases: https://github.com/dlemstra/Magick.NET/releases",
+                Source: "NuGet: https://www.nuget.org/packages/Magick.NET-Q16-HDRI-AnyCPU; releases: https://github.com/dlemstra/Magick.NET/releases",
                 Version: provenance.MagickVersion,
                 Path: provenance.MagickAssemblyPath,
                 Sha256: TrySha256(provenance.MagickAssemblyPath),

@@ -83,10 +83,10 @@ function Get-GhostscriptVersion {
     return $Matches[1]
 }
 
-$magickVersion = Get-PackageVersion "Magick.NET-Q16-AnyCPU"
+$magickVersion = Get-PackageVersion "Magick.NET-Q16-HDRI-AnyCPU"
 $magickCoreVersion = Get-PackageVersion "Magick.NET.Core"
 if ($magickCoreVersion -ne $magickVersion) {
-    throw "Magick.NET package versions must stay aligned. Q16=$magickVersion Core=$magickCoreVersion."
+    throw "Magick.NET package versions must stay aligned. Q16-HDRI=$magickVersion Core=$magickCoreVersion."
 }
 
 $sharpCompressVersion = Get-PackageVersion "SharpCompress"

@@ -32,7 +32,7 @@ public sealed class RuntimeProvenanceDocsScriptTests
             """
             <Project Sdk="Microsoft.NET.Sdk">
               <ItemGroup>
-                <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.14.0" />
+                <PackageReference Include="Magick.NET-Q16-HDRI-AnyCPU" Version="14.14.0" />
                 <PackageReference Include="Magick.NET.Core" Version="14.14.0" />
                 <PackageReference Include="SharpCompress" Version="0.49.1" />
                 <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.9" />

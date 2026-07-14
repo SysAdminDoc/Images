@@ -1631,6 +1631,21 @@ Details written to:
   <data name="SettingsColorManagementDescription" xml:space="preserve">
     <value>[!!!!!!!!!!!! Honors an image's embedded ICC profile and converts wide-gamut colors (Adobe RGB, Display P3) to sRGB so they no longer look over-saturated. Applies to the current and newly opened images; decodes through Magick.NET. !!!!!!!!!!!!]</value>
   </data>
+  <data name="SettingsToneMapTitle" xml:space="preserve">
+    <value>[!!!! HDR tonemapping !!!!]</value>
+  </data>
+  <data name="SettingsToneMapDescription" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Compresses extended highlights into the SDR display range before 8-bit conversion. Reinhard is the neutral default; Hable and ACES offer filmic contrast. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="SettingsToneMapReinhard" xml:space="preserve">
+    <value>[!!! Reinhard !!!]</value>
+  </data>
+  <data name="SettingsToneMapHable" xml:space="preserve">
+    <value>[!!! Hable !!!]</value>
+  </data>
+  <data name="SettingsToneMapAces" xml:space="preserve">
+    <value>[!!! ACES !!!]</value>
+  </data>
   <data name="SettingsSectionAppearance" xml:space="preserve">
     <value>[!!! Appearance !!!]</value>
   </data>
@@ -1849,6 +1864,9 @@ Details written to:
   </data>
   <data name="SettingsColorManagementOffStatus" xml:space="preserve">
     <value>[!!!!!!!!!!!! Images will display raw pixel values without ICC color conversion. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="SettingsToneMapChangedStatusFormat" xml:space="preserve">
+    <value>[!!!!!! HDR images will use {0} tonemapping. !!!!!!]</value>
   </data>
   <data name="SettingsFilmstripOnStatus" xml:space="preserve">
     <value>[!!!!!!!!! Filmstrip will be shown at startup. !!!!!!!!!]</value>

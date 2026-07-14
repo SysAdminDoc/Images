@@ -66,6 +66,32 @@ public sealed class SettingsViewModelTests
     }
 
     [Fact]
+    public void HdrToneMapOperator_DefaultsToReinhardAndPersistsSelection()
+    {
+        using var temp = TestDirectory.Create();
+        var settings = new SettingsService(Path.Combine(temp.Path, "settings.db"));
+        var viewModel = new SettingsViewModel(settings);
+        var previous = ImageLoader.HdrToneMapOperator;
+
+        try
+        {
+            Assert.Equal(ToneMapOperator.Reinhard, viewModel.SelectedToneMapOperator.Operator);
+
+            var hable = Assert.Single(viewModel.AvailableToneMapOperators, option => option.Operator == ToneMapOperator.Hable);
+            viewModel.SelectedToneMapOperator = hable;
+
+            Assert.Equal("Hable", settings.GetString(Keys.HdrToneMapOperator));
+            Assert.Equal(ToneMapOperator.Hable, new SettingsViewModel(settings).SelectedToneMapOperator.Operator);
+            Assert.Equal(ToneMapOperator.Hable, ImageLoader.HdrToneMapOperator);
+            Assert.Contains("Hable", viewModel.SettingsStatusText, StringComparison.Ordinal);
+        }
+        finally
+        {
+            ImageLoader.HdrToneMapOperator = previous;
+        }
+    }
+
+    [Fact]
     public void HotkeysAndDiagnosticsSummariesExposeExpectedSettingsSections()
     {
         using var temp = TestDirectory.Create();

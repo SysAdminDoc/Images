@@ -182,7 +182,7 @@ public sealed class ExportPreviewService
         return new EncodedPreview(bytes, copy.Width, copy.Height);
     }
 
-    private static void ApplyResize(IMagickImage<ushort> image, ExportPreviewRequest request)
+    private static void ApplyResize(IMagickImage<float> image, ExportPreviewRequest request)
     {
         if (request.MaxWidth <= 0 && request.MaxHeight <= 0)
             return;
@@ -197,7 +197,7 @@ public sealed class ExportPreviewService
         });
     }
 
-    private static void PrepareForPreview(IMagickImage<ushort> image, MagickFormat format, uint quality)
+    private static void PrepareForPreview(IMagickImage<float> image, MagickFormat format, uint quality)
     {
         image.Format = format;
         image.Quality = Math.Clamp(quality, 1, 100);

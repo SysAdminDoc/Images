@@ -69,20 +69,18 @@ public sealed class ClipImagePreprocessor
                 var pixel = pixels.GetPixel(x, y)!;
                 var channels = pixel.ToArray();
 
-                // Q16 build: quantum values are always 0-65535. A per-pixel
-                // heuristic keyed on the first channel divides saturated
-                // blues/greens by 255 and corrupts the embedding.
+                // HDRI can preserve samples above Quantum.Max; CLIP tensors remain SDR-bounded.
                 var scale = (float)Quantum.Max;
                 float r, g, b;
                 if (channels.Length >= 3)
                 {
-                    r = channels[0] / scale;
-                    g = channels[1] / scale;
-                    b = channels[2] / scale;
+                    r = Math.Clamp(channels[0] / scale, 0f, 1f);
+                    g = Math.Clamp(channels[1] / scale, 0f, 1f);
+                    b = Math.Clamp(channels[2] / scale, 0f, 1f);
                 }
                 else
                 {
-                    r = g = b = channels[0] / scale;
+                    r = g = b = Math.Clamp(channels[0] / scale, 0f, 1f);
                 }
 
                 var idx = y * ImageSize + x;

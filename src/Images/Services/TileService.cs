@@ -19,7 +19,8 @@ public sealed record TilePyramidInfo(
     int TileSize,
     int Overlap,
     int MaxLevel,
-    int TotalTiles);
+    int TotalTiles,
+    bool ToneMappedToSdr = false);
 
 public sealed record TileCacheHealth(
     bool Available,
@@ -158,6 +159,10 @@ public static class TileService
                 using var source = MagickSafeReader.Read(
                     sourcePath,
                     new MagickReadSettings { FrameIndex = (uint)Math.Max(0, pageIndex), FrameCount = 1 });
+                var toneMapped = ToneMapService.ApplyIfNeeded(
+                    source,
+                    Path.GetExtension(sourcePath),
+                    ImageLoader.HdrToneMapOperator);
 
                 var width = (int)source.Width;
                 var height = (int)source.Height;
@@ -223,7 +228,8 @@ public static class TileService
                     TileSize: tileSize,
                     Overlap: overlap,
                     MaxLevel: maxLevel,
-                    TotalTiles: totalTiles);
+                    TotalTiles: totalTiles,
+                    ToneMappedToSdr: toneMapped);
 
                 WritePyramidInfo(infoPath, info);
                 TouchCacheDirectory(cacheDir);
@@ -421,7 +427,7 @@ public static class TileService
         return tiles;
     }
 
-    private static BitmapSource MagickToBitmap(IMagickImage<ushort> image)
+    private static BitmapSource MagickToBitmap(IMagickImage<float> image)
     {
         image.Format = MagickFormat.Bgra;
         image.Alpha(AlphaOption.Set);
@@ -731,6 +737,8 @@ public static class TileService
 
         var existing = TryReadPyramidInfo(infoPath);
         if (existing is null || !string.Equals(existing.SourcePath, sourcePath, StringComparison.OrdinalIgnoreCase))
+            return null;
+        if (ToneMapService.IsCandidateExtension(Path.GetExtension(sourcePath)) && !existing.ToneMappedToSdr)
             return null;
 
         TouchCacheDirectory(existing.CacheDirectory);
