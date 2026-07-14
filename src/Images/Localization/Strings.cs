@@ -602,6 +602,7 @@ public static class Strings
     public static string CommandPalette_Filmstrip => Get(nameof(CommandPalette_Filmstrip));
     public static string CommandPalette_MetadataHud => Get(nameof(CommandPalette_MetadataHud));
     public static string CommandPalette_ZoomLock => Get(nameof(CommandPalette_ZoomLock));
+    public static string CommandPalette_Loupe => Get(nameof(CommandPalette_Loupe));
     public static string CommandPalette_TransparencyGrid => Get(nameof(CommandPalette_TransparencyGrid));
     public static string CommandPalette_Gallery => Get(nameof(CommandPalette_Gallery));
     public static string CommandPalette_Inspector => Get(nameof(CommandPalette_Inspector));

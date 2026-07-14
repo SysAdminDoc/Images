@@ -149,6 +149,58 @@ public sealed class ZoomPanImageTests
         });
     }
 
+    [Fact]
+    public void ToggleKeyboardLoupe_TurnsCenteredLoupeOnAndOff()
+    {
+        RunOnSta(() =>
+        {
+            var control = new ZoomPanImage { Source = MakeBitmap() };
+            Arrange(control, 400, 300);
+
+            Assert.True(control.ToggleKeyboardLoupe());
+            Assert.True(control.IsKeyboardLoupeActive);
+
+            Assert.False(control.ToggleKeyboardLoupe());
+            Assert.False(control.IsKeyboardLoupeActive);
+        });
+    }
+
+    [Fact]
+    public void ToggleKeyboardLoupe_IgnoresOnePixelPlaceholderSource()
+    {
+        RunOnSta(() =>
+        {
+            var placeholder = BitmapSource.Create(
+                1, 1, 96, 96, PixelFormats.Bgra32, null, new byte[] { 0, 0, 0, 0xFF }, 4);
+            placeholder.Freeze();
+            var control = new ZoomPanImage { Source = placeholder };
+            Arrange(control, 400, 300);
+
+            Assert.False(control.ToggleKeyboardLoupe());
+            Assert.False(control.IsKeyboardLoupeActive);
+        });
+    }
+
+    [Fact]
+    public void KeyboardLoupe_SurvivesMiddleButtonPointerLoupeRelease()
+    {
+        RunOnSta(() =>
+        {
+            var control = new ZoomPanImage { Source = MakeBitmap() };
+            Arrange(control, 400, 300);
+            Assert.True(control.ToggleKeyboardLoupe());
+
+            // A held middle-button loupe overrides position, then releasing reverts to the
+            // still-active centered keyboard loupe rather than hiding it.
+            control.RaiseEvent(MiddleButtonEvent(control, System.Windows.Input.Mouse.MouseDownEvent));
+            Assert.True(control.IsLoupeActive);
+            control.RaiseEvent(MiddleButtonEvent(control, System.Windows.Input.Mouse.MouseUpEvent));
+
+            Assert.False(control.IsLoupeActive);
+            Assert.True(control.IsKeyboardLoupeActive);
+        });
+    }
+
     private static System.Windows.Input.MouseButtonEventArgs MiddleButtonEvent(ZoomPanImage control, RoutedEvent routed)
         => new(System.Windows.Input.Mouse.PrimaryDevice, Environment.TickCount, System.Windows.Input.MouseButton.Middle)
         {

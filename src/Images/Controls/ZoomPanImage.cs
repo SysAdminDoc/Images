@@ -62,6 +62,10 @@ public sealed class ZoomPanImage : ContentControl
     };
     private readonly ImageBrush _loupeBrush = new() { Stretch = Stretch.Fill, ViewboxUnits = BrushMappingMode.RelativeToBoundingBox };
     private bool _loupeActive;
+    // Keyboard-invocable loupe (toggled from a command, no cursor to follow): the lens stays pinned
+    // to the viewport center and the user pans the image beneath it. A held middle-button pointer
+    // loupe temporarily overrides the position; releasing it reverts to center while this stays on.
+    private bool _keyboardLoupe;
     private readonly Grid _visual = new();
     private readonly Viewbox _tileViewbox = new() { Stretch = Stretch.Uniform, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
     private readonly Canvas _tileCanvas = new() { IsHitTestVisible = false };
@@ -651,17 +655,69 @@ public sealed class ZoomPanImage : ContentControl
     {
         if (!_loupeActive) return;
         _loupeActive = false;
-        _loupe.Visibility = Visibility.Collapsed;
         if (IsMouseCaptured) ReleaseMouseCapture();
+        // A keyboard loupe outlives the pointer gesture: revert the lens to viewport center
+        // instead of hiding it.
+        if (_keyboardLoupe)
+            UpdateLoupe(ViewportCenter);
+        else
+            _loupe.Visibility = Visibility.Collapsed;
     }
 
     public bool IsLoupeActive => _loupeActive;
+
+    public bool IsKeyboardLoupeActive => _keyboardLoupe;
+
+    private Point ViewportCenter => new(ActualWidth / 2, ActualHeight / 2);
+
+    /// <summary>
+    /// Toggles a viewport-centered magnifier that needs no pointer. Returns the resulting active
+    /// state. Requires a real raster source (tile-backed placeholders can't be magnified).
+    /// </summary>
+    public bool ToggleKeyboardLoupe()
+    {
+        if (_keyboardLoupe)
+        {
+            _keyboardLoupe = false;
+            if (!_loupeActive)
+                _loupe.Visibility = Visibility.Collapsed;
+            return false;
+        }
+
+        if (_image.Source is not BitmapSource { PixelWidth: > 1 } || !TryGetRenderedPixelSize(out _, out _))
+            return false;
+
+        _keyboardLoupe = true;
+        _loupe.Visibility = Visibility.Visible;
+        UpdateLoupe(ViewportCenter);
+        return true;
+    }
+
+    // Keep the centered lens sampling whatever the current pan/zoom puts under the viewport center.
+    // Drops itself if the incoming source is no longer a magnifiable raster (e.g. a tiled image).
+    private void RefreshKeyboardLoupe()
+    {
+        if (!_keyboardLoupe || _loupeActive) return;
+        if (_image.Source is not BitmapSource { PixelWidth: > 1 })
+        {
+            _keyboardLoupe = false;
+            _loupe.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        UpdateLoupe(ViewportCenter);
+    }
 
     private void UpdateLoupe(Point cursor)
     {
         if (!TryGetRenderedPixelSize(out var pixelWidth, out var pixelHeight))
         {
             StopLoupe();
+            if (_keyboardLoupe)
+            {
+                _keyboardLoupe = false;
+                _loupe.Visibility = Visibility.Collapsed;
+            }
             return;
         }
 
@@ -757,7 +813,10 @@ public sealed class ZoomPanImage : ContentControl
         if (_loupeActive)
         {
             _loupeActive = false;
-            _loupe.Visibility = Visibility.Collapsed;
+            if (_keyboardLoupe)
+                UpdateLoupe(ViewportCenter);
+            else
+                _loupe.Visibility = Visibility.Collapsed;
         }
     }
 
@@ -867,6 +926,7 @@ public sealed class ZoomPanImage : ContentControl
     private void RaiseViewChanged()
     {
         QueueTileRefresh();
+        RefreshKeyboardLoupe();
         ViewChanged?.Invoke(this, EventArgs.Empty);
     }
 

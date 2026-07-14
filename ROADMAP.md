@@ -13,4 +13,4 @@ Promote to `1.0.0` when those are unblocked.
 
 ## Actionable Work
 
-None open. All code-ready items are drained; the two remaining research items are decision-gated (keyboard-loupe interaction design, Ghostscript-source AGPL mechanism) and now live in `Roadmap_Blocked.md`. Refill via a research pass (`RESEARCH.md`) when ready.
+None open. All code-ready items are drained; the remaining research item is decision-gated (Ghostscript-source AGPL mechanism) and lives in `Roadmap_Blocked.md`. Refill via a research pass (`RESEARCH.md`) when ready.

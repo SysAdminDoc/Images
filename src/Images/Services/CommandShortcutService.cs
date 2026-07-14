@@ -146,6 +146,7 @@ public sealed class CommandShortcutService
             new(CommandIds.Filmstrip, Strings.CommandPalette_Filmstrip, view, "T"),
             new(CommandIds.MetadataHud, Strings.CommandPalette_MetadataHud, view, "I"),
             new(CommandIds.ZoomLock, Strings.CommandPalette_ZoomLock, view, ""),
+            new(CommandIds.Loupe, Strings.CommandPalette_Loupe, view, "L"),
             new(CommandIds.TransparencyGrid, Strings.CommandPalette_TransparencyGrid, view, ""),
             new(CommandIds.Gallery, Strings.CommandPalette_Gallery, view, "G"),
             new(CommandIds.ExtractText, Strings.CommandPalette_ExtractText, view, "E"),
@@ -215,6 +216,7 @@ public static class CommandIds
     public const string Filmstrip = "filmstrip";
     public const string MetadataHud = "metadata-hud";
     public const string ZoomLock = "zoom-lock";
+    public const string Loupe = "loupe";
     public const string TransparencyGrid = "transparency-grid";
     public const string Gallery = "gallery";
     public const string ExtractText = "extract-text";

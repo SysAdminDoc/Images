@@ -59,6 +59,7 @@ public partial class MainWindow : Window
         // "Send to monitor N" entries get a live delegate.
         Vm.RequestSendToMonitor = SendToMonitor;
         Vm.RequestArchivePassword = PromptArchivePassword;
+        Vm.RequestToggleLoupe = ToggleKeyboardLoupeActiveCanvas;
         Vm.RefreshCommandPalette();
         Closed += (_, _) =>
         {
@@ -417,6 +418,7 @@ public partial class MainWindow : Window
     private void ZoomActiveCanvasBy(double factor) => ActiveImageCanvas().ZoomBy(factor);
     private void ResetActiveCanvas() => ActiveImageCanvas().ResetView();
     private void OneToOneActiveCanvas() => ActiveImageCanvas().OneToOne();
+    private void ToggleKeyboardLoupeActiveCanvas() => ActiveImageCanvas().ToggleKeyboardLoupe();
 
     private void FitButton_Click(object sender, RoutedEventArgs e)
     {

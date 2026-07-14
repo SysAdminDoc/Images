@@ -304,6 +304,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ToggleFilmstripCommand = new RelayCommand(ToggleFilmstrip, () => CanToggleFilmstrip);
         ToggleMetadataHudCommand = new RelayCommand(ToggleMetadataHud, () => CanToggleMetadataHud);
         ToggleZoomLockCommand = new RelayCommand(ToggleZoomLock);
+        ToggleLoupeCommand = new RelayCommand(() => RequestToggleLoupe?.Invoke(), () => RequestToggleLoupe is not null);
         ToggleTransparencyGridCommand = new RelayCommand(ToggleTransparencyGrid);
         PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard, () => !IsOperationBusy);
         OpenInDefaultAppCommand = new RelayCommand(OpenInDefaultApp, () => HasImage);
@@ -1171,6 +1172,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             case CommandIds.ZoomLock:
                 ToggleZoomLockCommand.Execute(null);
                 return true;
+            case CommandIds.Loupe:
+                ToggleLoupeCommand.Execute(null);
+                return true;
             case CommandIds.TransparencyGrid:
                 ToggleTransparencyGridCommand.Execute(null);
                 return true;
@@ -1310,6 +1314,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             PaletteCommand(CommandIds.Filmstrip, ToggleFilmstripCommand, priority: 10, searchText: "thumbnail rail folder strip"),
             PaletteCommand(CommandIds.MetadataHud, ToggleMetadataHudCommand, priority: 11, searchText: "info exif details overlay"),
             PaletteCommand(CommandIds.ZoomLock, ToggleZoomLockCommand, priority: 12, searchText: "keep zoom level lock magnification pixel peep"),
+            PaletteCommand(CommandIds.Loupe, ToggleLoupeCommand, priority: 12, searchText: "loupe magnifier lens zoom pixel peep keyboard"),
             PaletteCommand(CommandIds.TransparencyGrid, ToggleTransparencyGridCommand, priority: 12, searchText: "checkerboard alpha transparent background backdrop"),
             PaletteCommand(CommandIds.Gallery, ToggleGalleryCommand, priority: 12, searchText: "thumbnail grid browser"),
             new() { Name = Strings.CommandPalette_Inspector, Category = view, Priority = 13, SearchText = "details panel sidebar", Command = ToggleInspectorCommand },
@@ -1433,6 +1438,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     // to a specific monitor index. Null until the window wires it up.
     public Action<int>? RequestSendToMonitor { get; set; }
     public Func<string, string?>? RequestArchivePassword { get; set; }
+
+    // Set by MainWindow: toggles the active canvas's viewport-centered keyboard loupe. The loupe is
+    // transient control state, so the view owns it and the VM only forwards the request.
+    public Action? RequestToggleLoupe { get; set; }
 
     /// <summary>
     /// V20-27: rebuilds the palette registry, e.g. after the window wires up the send-to-monitor
@@ -3787,6 +3796,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand ToggleFilmstripCommand { get; }
     public ICommand ToggleMetadataHudCommand { get; }
     public ICommand ToggleZoomLockCommand { get; }
+    public ICommand ToggleLoupeCommand { get; }
     public ICommand ToggleTransparencyGridCommand { get; }
     public ICommand PasteFromClipboardCommand { get; }
     public ICommand OpenInDefaultAppCommand { get; }

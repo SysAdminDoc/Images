@@ -4231,6 +4231,9 @@ Details written to:
   <data name="CommandPalette_ZoomLock" xml:space="preserve">
     <value>Toggle zoom lock</value>
   </data>
+  <data name="CommandPalette_Loupe" xml:space="preserve">
+    <value>Toggle loupe magnifier</value>
+  </data>
   <data name="CommandPalette_TransparencyGrid" xml:space="preserve">
     <value>Toggle transparency grid</value>
   </data>

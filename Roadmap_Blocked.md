@@ -64,10 +64,6 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
 
 ## Blocked On Research / Evaluation (Not Code-Ready)
 
-- [ ] *P3* — **Keyboard-invocable loupe**. The loupe magnification is now Settings-adjustable and the gesture is documented in the `?` cheatsheet, but the loupe remains pointer-only (middle-button hold). Where: `src/Images/Controls/ZoomPanImage.cs`, `CommandShortcutService.cs`.
-  - **Blocked by**: interaction-design decision — a keyboard-triggered magnifier has no natural cursor to follow, and arrow keys are already bound to navigation, so how a keyboard user positions/moves the lens must be decided before implementation.
-  - **Unblock when**: a keyboard-loupe interaction model is chosen (e.g. viewport-centered toggle with a dedicated positioning modifier) that does not collide with existing keybindings.
-
 - [ ] *P3* — **Reconcile the README's Ghostscript-source-archive claim with actual releases**. `README.md` states the AGPL Ghostscript "matching source archive is attached to the GitHub release", but releases v0.2.20–v0.2.26 attach only the ZIP, installer, and checksums. Where: `README.md`, release asset set, `scripts/Prepare-GhostscriptBundle.ps1`.
   - **Blocked by**: AGPL compliance (legal) decision — whether to satisfy the corresponding-source obligation by attaching the Ghostscript source archive to each release, by a written offer, or by documented upstream availability. The correct wording/mechanism is a licensing judgment, not a code change.
   - **Unblock when**: the compliant source-availability mechanism is chosen; then either attach the source archive or update the README to describe the actual offer.

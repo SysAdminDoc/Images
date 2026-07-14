@@ -7,6 +7,7 @@ All notable changes to **Images** are documented here.
 ### Added
 
 - **Adjustable loupe magnification** - Appearance settings now offer a loupe magnification choice (2×, 3×, 4×, 6×) so the middle-button magnifier can zoom in further than the previous fixed 2×.
+- **Keyboard-invocable loupe** - A new "Toggle loupe magnifier" command (default `L`, rebindable, in the command palette) shows a viewport-centered magnifier with no mouse needed; pan the image to move it beneath the lens. Holding the middle button still temporarily overrides the lens to follow the cursor.
 
 ## v0.2.26 - 2026-07-12
 
