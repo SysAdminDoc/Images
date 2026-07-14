@@ -354,13 +354,37 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     public bool ArchiveSpreadMode
     {
-        get => _settings.GetBool(Keys.ArchiveSpreadMode, false);
+        get => !_settings.GetBool(Keys.ArchiveContinuousMode, false)
+            && _settings.GetBool(Keys.ArchiveSpreadMode, false);
         set
         {
             _settings.SetBool(Keys.ArchiveSpreadMode, value);
+            if (value)
+            {
+                _settings.SetBool(Keys.ArchiveContinuousMode, false);
+                Raise(nameof(ArchiveContinuousMode));
+            }
             Raise(nameof(ArchiveSpreadMode));
             SetStatus(
                 value ? Strings.SettingsArchiveSpreadOnStatus : Strings.SettingsArchiveSpreadOffStatus,
+                SettingsStatusToneKind.Success);
+        }
+    }
+
+    public bool ArchiveContinuousMode
+    {
+        get => _settings.GetBool(Keys.ArchiveContinuousMode, false);
+        set
+        {
+            _settings.SetBool(Keys.ArchiveContinuousMode, value);
+            if (value)
+            {
+                _settings.SetBool(Keys.ArchiveSpreadMode, false);
+                Raise(nameof(ArchiveSpreadMode));
+            }
+            Raise(nameof(ArchiveContinuousMode));
+            SetStatus(
+                value ? Strings.SettingsArchiveContinuousOnStatus : Strings.SettingsArchiveContinuousOffStatus,
                 SettingsStatusToneKind.Success);
         }
     }
@@ -575,6 +599,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         Raise(nameof(ArchiveRightToLeft));
         Raise(nameof(ArchiveOldScanFilter));
         Raise(nameof(ArchiveSpreadMode));
+        Raise(nameof(ArchiveContinuousMode));
         RefreshShortcutRows();
     }
 

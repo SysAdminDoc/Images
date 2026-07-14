@@ -21,6 +21,7 @@ public sealed class SettingsViewModelTests
         viewModel.ArchiveRightToLeft = true;
         viewModel.ArchiveOldScanFilter = true;
         viewModel.ArchiveSpreadMode = true;
+        viewModel.ArchiveContinuousMode = true;
 
         Assert.False(settings.GetBool(Keys.RememberWindowPlacement, true));
         Assert.Equal("latte", settings.GetString(Keys.ThemeMode, "dark"));
@@ -28,9 +29,14 @@ public sealed class SettingsViewModelTests
         Assert.True(settings.GetBool(Keys.AccessibilityHighContrast, false));
         Assert.True(settings.GetBool(Keys.ArchiveRightToLeft, false));
         Assert.True(settings.GetBool(Keys.ArchiveOldScanFilter, false));
-        Assert.True(settings.GetBool(Keys.ArchiveSpreadMode, false));
+        Assert.False(settings.GetBool(Keys.ArchiveSpreadMode, true));
+        Assert.True(settings.GetBool(Keys.ArchiveContinuousMode, false));
         Assert.Equal(SettingsViewModel.SettingsStatusToneKind.Success, viewModel.SettingsStatusTone);
-        Assert.Contains("two-page spreads", viewModel.SettingsStatusText, StringComparison.Ordinal);
+        Assert.Contains("Continuous archive reading", viewModel.SettingsStatusText, StringComparison.Ordinal);
+
+        viewModel.ArchiveSpreadMode = true;
+        Assert.True(settings.GetBool(Keys.ArchiveSpreadMode, false));
+        Assert.False(settings.GetBool(Keys.ArchiveContinuousMode, true));
     }
 
     [Fact]

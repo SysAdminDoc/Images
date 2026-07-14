@@ -366,13 +366,114 @@
                                    PreserveViewOnSourceChange="{Binding IsZoomLocked}"
                                    ShowTransparencyGrid="{Binding ShowTransparencyGrid}"
                                    LoupeFactor="{Binding LoupeMagnification}"
-                                   Visibility="{Binding ShowCompareMode, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}"
+                                   Visibility="{Binding ShowPrimaryImageCanvas, Converter={StaticResource BoolToVis}}"
                                    PreviewMouseRightButtonUp="Viewport_PreviewMouseRightButtonUp"
                                    MouseMove="Canvas_MouseMove"
                                    MouseLeave="Canvas_MouseLeave"
                                    LostMouseCapture="Canvas_LostMouseCapture"
                                    MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
                                    MouseLeftButtonUp="Canvas_MouseLeftButtonUp" />
+
+                <Grid Visibility="{Binding ShowArchiveContinuousReader, Converter={StaticResource BoolToVis}}"
+                      Background="{DynamicResource BaseBrush}"
+                      AutomationProperties.Name="{loc:Loc AutomationMainWindowContinuousArchiveReader}">
+                    <ListBox x:Name="ContinuousArchiveReader"
+                             ItemsSource="{Binding ContinuousArchivePages}"
+                             SelectedIndex="{Binding PageIndex, Mode=OneWay}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Padding="12,12,12,24"
+                             HorizontalContentAlignment="Stretch"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             ScrollViewer.CanContentScroll="True"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling"
+                             VirtualizingPanel.ScrollUnit="Pixel"
+                             VirtualizingPanel.CacheLength="0.5,1"
+                             VirtualizingPanel.CacheLengthUnit="Page"
+                             ScrollViewer.ScrollChanged="ContinuousArchiveReader_ScrollChanged"
+                             VirtualizingStackPanel.CleanUpVirtualizedItem="ContinuousArchiveReader_CleanUpVirtualizedItem">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0,0,0,10" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:ArchiveContinuousPageItem}">
+                                <Border MinHeight="240"
+                                        MaxWidth="1600"
+                                        HorizontalAlignment="Center"
+                                        Background="{DynamicResource MantleBrush}"
+                                        BorderBrush="{DynamicResource HairlineBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource Radius.Sm.CR}"
+                                        Loaded="ContinuousArchivePage_Loaded"
+                                        Unloaded="ContinuousArchivePage_Unloaded"
+                                        AutomationProperties.Name="{Binding PageLabel}">
+                                    <Grid>
+                                        <Image Source="{Binding Image}"
+                                               Stretch="Uniform"
+                                               HorizontalAlignment="Stretch"
+                                               SnapsToDevicePixels="True"
+                                               AutomationProperties.Name="{Binding PageLabel}" />
+
+                                        <StackPanel HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                                            <TextBlock Text="{loc:Loc MainArchiveContinuousLoading}"
+                                                       Foreground="{DynamicResource OverlayBrush}"
+                                                       HorizontalAlignment="Center" />
+                                        </StackPanel>
+
+                                        <StackPanel HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    MaxWidth="360"
+                                                    Visibility="{Binding HasError, Converter={StaticResource BoolToVis}}">
+                                            <TextBlock Text="&#xE783;"
+                                                       FontFamily="{StaticResource IconFontFamily}"
+                                                       FontSize="22"
+                                                       Foreground="{DynamicResource AccentWarmBrush}"
+                                                       HorizontalAlignment="Center" />
+                                            <TextBlock Text="{Binding ErrorMessage}"
+                                                       Margin="0,10,0,0"
+                                                       TextAlignment="Center"
+                                                       TextWrapping="Wrap"
+                                                       Foreground="{DynamicResource TextBrush}" />
+                                            <Button Content="{loc:Loc MainArchiveContinuousRetry}"
+                                                    Command="{Binding RetryCommand}"
+                                                    Margin="0,12,0,0"
+                                                    HorizontalAlignment="Center" />
+                                        </StackPanel>
+
+                                        <Border VerticalAlignment="Bottom"
+                                                HorizontalAlignment="Center"
+                                                Margin="0,0,0,8"
+                                                Padding="8,3"
+                                                CornerRadius="{StaticResource Radius.Sm.CR}"
+                                                Background="{DynamicResource FloatingChromeBrush}"
+                                                BorderBrush="{DynamicResource FloatingChromeBorderBrush}"
+                                                BorderThickness="1">
+                                            <TextBlock Text="{Binding PageLabel}"
+                                                       FontSize="11"
+                                                       Foreground="{DynamicResource FloatingChromeTextBrush}" />
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
 
                 <Grid x:Name="MotionVideoOverlay"
                       Visibility="{Binding IsMotionVideoPlaying, Converter={StaticResource BoolToVis}}"
@@ -1626,7 +1727,7 @@
                             HorizontalAlignment="Left"
                             VerticalAlignment="Stretch"
                             Width="112"
-                            Visibility="{Binding IsArchiveBook, Converter={StaticResource BoolToVis}}"
+                            Visibility="{Binding ShowArchivePagedControls, Converter={StaticResource BoolToVis}}"
                             ToolTip="{Binding LeftBookPageTurnTooltip}"
                             AutomationProperties.Name="{Binding LeftBookPageTurnTooltip}">
                         <Border Width="38"
@@ -1653,7 +1754,7 @@
                             HorizontalAlignment="Right"
                             VerticalAlignment="Stretch"
                             Width="112"
-                            Visibility="{Binding IsArchiveBook, Converter={StaticResource BoolToVis}}"
+                            Visibility="{Binding ShowArchivePagedControls, Converter={StaticResource BoolToVis}}"
                             ToolTip="{Binding RightBookPageTurnTooltip}"
                             AutomationProperties.Name="{Binding RightBookPageTurnTooltip}">
                         <Border Width="38"
@@ -3755,6 +3856,16 @@
                                                   Margin="0,12,0,0"
                                                   AutomationProperties.Name="{loc:Loc AutomationMainWindowTwoPageArchiveSpreads}" />
                                         <TextBlock Text="{Binding ArchiveSpreadModeHint}"
+                                                   Margin="28,5,0,0"
+                                                   FontSize="11.5"
+                                                   Foreground="{DynamicResource OverlayBrush}"
+                                                   TextWrapping="Wrap" />
+                                        <CheckBox IsChecked="{Binding ArchiveContinuousModeEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  Content="{Binding ArchiveContinuousModeText}"
+                                                  ToolTip="{Binding ArchiveContinuousModeHint}"
+                                                  Margin="0,12,0,0"
+                                                  AutomationProperties.Name="{loc:Loc AutomationMainWindowContinuousArchiveReader}" />
+                                        <TextBlock Text="{Binding ArchiveContinuousModeHint}"
                                                    Margin="28,5,0,0"
                                                    FontSize="11.5"
                                                    Foreground="{DynamicResource OverlayBrush}"

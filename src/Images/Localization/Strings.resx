@@ -6243,4 +6243,46 @@ Details written to:
   <data name="MainPhotoCullingBothStatus" xml:space="preserve">
     <value>Focus — green edges · Clipping — red highlights, blue shadows</value>
   </data>
+  <data name="SettingsArchiveContinuousTitle" xml:space="preserve">
+    <value>Continuous archive reading</value>
+  </data>
+  <data name="SettingsArchiveContinuousDescription" xml:space="preserve">
+    <value>Stack comic and webtoon pages in one vertical, memory-conscious scrolling strip.</value>
+  </data>
+  <data name="SettingsArchiveContinuousOnStatus" xml:space="preserve">
+    <value>Continuous archive reading is on. Two-page spreads are off.</value>
+  </data>
+  <data name="SettingsArchiveContinuousOffStatus" xml:space="preserve">
+    <value>Continuous archive reading is off.</value>
+  </data>
+  <data name="MainArchiveContinuous" xml:space="preserve">
+    <value>Continuous reading</value>
+  </data>
+  <data name="MainArchiveContinuousOn" xml:space="preserve">
+    <value>Continuous reading on</value>
+  </data>
+  <data name="MainArchiveContinuousHint" xml:space="preserve">
+    <value>Stacks pages vertically and loads only the pages near the viewport. Turning this on disables two-page spreads.</value>
+  </data>
+  <data name="MainArchiveContinuousPageLabel" xml:space="preserve">
+    <value>Page {0} of {1}</value>
+  </data>
+  <data name="MainArchiveContinuousLoading" xml:space="preserve">
+    <value>Loading page…</value>
+  </data>
+  <data name="MainArchiveContinuousPageError" xml:space="preserve">
+    <value>This page could not be displayed. The archive was not changed.</value>
+  </data>
+  <data name="MainArchiveContinuousRetry" xml:space="preserve">
+    <value>Retry page</value>
+  </data>
+  <data name="MainToastContinuousReadingOn" xml:space="preserve">
+    <value>Continuous reading on</value>
+  </data>
+  <data name="MainToastContinuousReadingOff" xml:space="preserve">
+    <value>Continuous reading off</value>
+  </data>
+  <data name="AutomationMainWindowContinuousArchiveReader" xml:space="preserve">
+    <value>Continuous archive reader</value>
+  </data>
 </root>

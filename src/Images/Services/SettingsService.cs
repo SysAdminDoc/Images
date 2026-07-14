@@ -563,6 +563,7 @@ public static class Keys
     public const string ArchiveRightToLeft = "viewer.archive.right-to-left";
     public const string ArchiveOldScanFilter = "viewer.archive.old-scan-filter";
     public const string ArchiveSpreadMode = "viewer.archive.spread-mode";
+    public const string ArchiveContinuousMode = "viewer.archive.continuous-mode";
     public const string Locale = "locale";
     public const string ViewerSortMode = "viewer.sort-mode";
     public const string SiblingFolderAutoSwitch = "viewer.sibling-folder-auto-switch";

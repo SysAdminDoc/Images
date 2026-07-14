@@ -568,6 +568,28 @@
                                               IsChecked="{Binding ArchiveSpreadMode}"
                                               AutomationProperties.Name="{x:Static loc:Strings.SettingsArchiveSpreadTitle}" />
                                 </Grid>
+
+                                <Border Style="{StaticResource SettingsDivider}" />
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsArchiveContinuousTitle}"
+                                                   Style="{StaticResource Text.Body}"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsArchiveContinuousDescription}"
+                                                   Style="{StaticResource Text.Hint}"
+                                                   Margin="0,3,0,0"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1"
+                                              VerticalAlignment="Center"
+                                              IsChecked="{Binding ArchiveContinuousMode}"
+                                              AutomationProperties.Name="{x:Static loc:Strings.SettingsArchiveContinuousTitle}" />
+                                </Grid>
                             </StackPanel>
                         </Border>
 

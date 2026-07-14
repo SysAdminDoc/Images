@@ -43,6 +43,7 @@ public partial class MainWindow : Window
     private HwndSource? _hwndSource;
     private bool _overlayExitHotKeyRegistered;
     private bool _syncingCompareCanvases;
+    private bool _continuousArchiveScrollQueued;
     private string? _dragPathVerdictKey;
     private string? _dragPathVerdict;
 
@@ -69,6 +70,7 @@ public partial class MainWindow : Window
             Vm.Dispose();
         };
         Vm.FolderPreviewItems.CollectionChanged += (_, _) => QueueCenterCurrentPreviewItems();
+        Vm.ContinuousArchivePages.CollectionChanged += (_, _) => QueueContinuousArchivePosition();
         Vm.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName is nameof(MainViewModel.ShowFilmstrip) or nameof(MainViewModel.ShowSideFolderPreview))
@@ -94,6 +96,11 @@ public partial class MainWindow : Window
                     MotionVideoPlayer.Stop();
                     MotionVideoPlayer.Source = null;
                 }
+            }
+            if (e.PropertyName is nameof(MainViewModel.PageIndex)
+                or nameof(MainViewModel.ShowArchiveContinuousReader))
+            {
+                QueueContinuousArchivePosition();
             }
         };
 
@@ -212,6 +219,100 @@ public partial class MainWindow : Window
         }
 
         return null;
+    }
+
+    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent)
+        where T : DependencyObject
+    {
+        var childCount = VisualTreeHelper.GetChildrenCount(parent);
+        for (var i = 0; i < childCount; i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T match)
+                yield return match;
+
+            foreach (var descendant in FindVisualChildren<T>(child))
+                yield return descendant;
+        }
+    }
+
+    private void QueueContinuousArchivePosition()
+    {
+        if (_continuousArchiveScrollQueued || !Vm.ShowArchiveContinuousReader)
+            return;
+
+        _continuousArchiveScrollQueued = true;
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+            _continuousArchiveScrollQueued = false;
+            if (!Vm.ShowArchiveContinuousReader ||
+                Vm.PageIndex < 0 ||
+                Vm.PageIndex >= Vm.ContinuousArchivePages.Count)
+            {
+                return;
+            }
+
+            var page = Vm.ContinuousArchivePages[Vm.PageIndex];
+            ContinuousArchiveReader.SelectedItem = page;
+            ContinuousArchiveReader.ScrollIntoView(page);
+        }), System.Windows.Threading.DispatcherPriority.Loaded);
+    }
+
+    private void ContinuousArchivePage_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: ArchiveContinuousPageItem page })
+            _ = page.EnsureLoadedAsync();
+    }
+
+    private void ContinuousArchivePage_Unloaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: ArchiveContinuousPageItem page })
+            page.Release();
+    }
+
+    private void ContinuousArchiveReader_CleanUpVirtualizedItem(
+        object sender,
+        CleanUpVirtualizedItemEventArgs e)
+    {
+        if (e.Value is ArchiveContinuousPageItem page)
+            page.Release();
+    }
+
+    private void ContinuousArchiveReader_ScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+        if (!Vm.ShowArchiveContinuousReader || e.OriginalSource is not ScrollViewer)
+            return;
+
+        ArchiveContinuousPageItem? mostVisiblePage = null;
+        var greatestVisibleHeight = 0d;
+        foreach (var container in FindVisualChildren<ListBoxItem>(ContinuousArchiveReader))
+        {
+            if (container.DataContext is not ArchiveContinuousPageItem page || !container.IsVisible)
+                continue;
+
+            Rect bounds;
+            try
+            {
+                bounds = container.TransformToAncestor(ContinuousArchiveReader)
+                    .TransformBounds(new Rect(new Point(0, 0), container.RenderSize));
+            }
+            catch (InvalidOperationException)
+            {
+                continue;
+            }
+
+            var visibleTop = Math.Max(0, bounds.Top);
+            var visibleBottom = Math.Min(ContinuousArchiveReader.ActualHeight, bounds.Bottom);
+            var visibleHeight = Math.Max(0, visibleBottom - visibleTop);
+            if (visibleHeight > greatestVisibleHeight)
+            {
+                greatestVisibleHeight = visibleHeight;
+                mostVisiblePage = page;
+            }
+        }
+
+        if (mostVisiblePage is not null)
+            Vm.UpdateContinuousArchivePosition(mostVisiblePage.PageIndex);
     }
 
     private void PreviewThumbnail_Loaded(object sender, RoutedEventArgs e)

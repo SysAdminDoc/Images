@@ -11,6 +11,7 @@ public sealed class SettingsTransferServiceTests
         using var temp = TestDirectory.Create();
         var settings = CreateSettings(temp.Path);
         settings.SetString(Keys.ThemeMode, "latte");
+        settings.SetBool(Keys.ArchiveContinuousMode, true);
         settings.SetBool(Keys.UpdateCheckEnabled, true);
         settings.SetDouble(Keys.WindowLeft, 123.5);
         settings.SetString(Keys.LastImagePath, @"C:\Private\photo.jpg");
@@ -22,9 +23,10 @@ public sealed class SettingsTransferServiceTests
         var result = new SettingsTransferService(settings).Export(path);
         var json = File.ReadAllText(path);
 
-        Assert.Equal(1, result.SettingsCount);
+        Assert.Equal(2, result.SettingsCount);
         Assert.Equal(1, result.HotkeyCount);
         Assert.Contains(Keys.ThemeMode, json, StringComparison.Ordinal);
+        Assert.Contains(Keys.ArchiveContinuousMode, json, StringComparison.Ordinal);
         Assert.Contains(CommandIds.Open, json, StringComparison.Ordinal);
         Assert.DoesNotContain(Keys.UpdateCheckEnabled, json, StringComparison.Ordinal);
         Assert.DoesNotContain(Keys.WindowLeft, json, StringComparison.Ordinal);

@@ -1602,6 +1602,49 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void ArchiveContinuousMode_LazilyBuildsPagesPersistsPositionAndYieldsToSpreadMode()
+    {
+        RunOnSta(() =>
+        {
+            using var temp = TestDirectory.Create();
+            var archive = WriteCbz(temp.Path, "webtoon.cbz", "page1.png", "page2.png", "page3.png");
+            var settings = CreateSettings(temp);
+            settings.SetBool(Keys.ArchiveContinuousMode, true);
+            settings.SetBool(Keys.ArchiveSpreadMode, true);
+
+            using var viewModel = new MainViewModel(settings);
+            viewModel.OpenFile(archive);
+
+            Assert.True(viewModel.ArchiveContinuousModeEnabled);
+            Assert.False(viewModel.ArchiveSpreadModeEnabled);
+            Assert.False(settings.GetBool(Keys.ArchiveSpreadMode, true));
+            Assert.True(viewModel.ShowArchiveContinuousReader);
+            Assert.False(viewModel.ShowPrimaryImageCanvas);
+            Assert.False(viewModel.ShowArchivePagedControls);
+            Assert.Equal(3, viewModel.ContinuousArchivePages.Count);
+            Assert.True(viewModel.ContinuousArchivePages[0].HasImage);
+            Assert.False(viewModel.ContinuousArchivePages[1].HasImage);
+            Assert.False(viewModel.ContinuousArchivePages[2].HasImage);
+
+            viewModel.UpdateContinuousArchivePosition(2);
+
+            Assert.Equal(3, viewModel.PageNumber);
+            Assert.Equal(2, ArchiveReadPositionService.GetLastPageIndex(settings, archive));
+            Assert.False(viewModel.IsOperationBusy);
+
+            viewModel.ArchiveSpreadModeEnabled = true;
+            PumpUntil(() => !viewModel.IsOperationBusy);
+
+            Assert.True(viewModel.ArchiveSpreadModeEnabled);
+            Assert.False(viewModel.ArchiveContinuousModeEnabled);
+            Assert.Empty(viewModel.ContinuousArchivePages);
+            Assert.True(viewModel.ShowPrimaryImageCanvas);
+            Assert.True(viewModel.ShowArchivePagedControls);
+            Assert.False(settings.GetBool(Keys.ArchiveContinuousMode, true));
+        });
+    }
+
+    [Fact]
     public void FirstRunGuidance_ExposesCapabilityAndPrivacySummaries()
     {
         RunOnSta(() =>

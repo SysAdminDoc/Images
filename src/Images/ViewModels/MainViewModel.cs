@@ -56,6 +56,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool _isFocusPeakingEnabled;
     private bool _isExposureClippingEnabled;
     private CancellationTokenSource? _photoCullingOverlayCts;
+    private readonly SemaphoreSlim _continuousArchiveDecodeGate = new(2, 2);
     private readonly DispatcherTimer _hintTimer;
 
     public MainViewModel()
@@ -182,7 +183,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _settings.GetString(Keys.HdrToneMapOperator, ToneMapOperator.Reinhard.ToString()));
         _archiveRightToLeft = _settings.GetBool(Keys.ArchiveRightToLeft, false);
         _archiveOldScanFilterEnabled = _settings.GetBool(Keys.ArchiveOldScanFilter, false);
-        _archiveSpreadModeEnabled = _settings.GetBool(Keys.ArchiveSpreadMode, false);
+        _archiveContinuousModeEnabled = _settings.GetBool(Keys.ArchiveContinuousMode, false);
+        _archiveSpreadModeEnabled = !_archiveContinuousModeEnabled && _settings.GetBool(Keys.ArchiveSpreadMode, false);
+        if (_archiveContinuousModeEnabled && _settings.GetBool(Keys.ArchiveSpreadMode, false))
+            _settings.SetBool(Keys.ArchiveSpreadMode, false);
         RestorePersistedSortMode();
         _nav.SiblingFolderAutoSwitch = _settings.GetBool(Keys.SiblingFolderAutoSwitch, false);
         _nav.StopAtEnds = _settings.GetBool(Keys.StopAtEnds, false);
@@ -407,6 +411,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 RaiseCompareState();
                 Raise(nameof(CanToggleMetadataHud));
                 Raise(nameof(ShowMetadataHud));
+                Raise(nameof(ShowArchiveContinuousReader));
+                Raise(nameof(ShowPrimaryImageCanvas));
                 CommandManager.InvalidateRequerySuggested();
                 RefreshPhotoCullingOverlay();
             }
@@ -735,6 +741,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
     public bool IsArchiveBook => CurrentPath is not null && SupportedImageFormats.IsArchive(CurrentPath) && HasMultiplePages;
+    public bool ShowArchiveContinuousReader => ArchiveContinuousModeEnabled && IsArchiveBook && HasDisplayImage && !ShowCompareMode;
+    public bool ShowArchivePagedControls => IsArchiveBook && !ArchiveContinuousModeEnabled;
+    public bool ShowPrimaryImageCanvas => !ShowCompareMode && !ShowArchiveContinuousReader;
     public bool CanTurnLeftBookPage => IsArchiveBook && !IsOperationBusy && (ArchiveRightToLeft ? HasNextPage : HasPreviousPage);
     public bool CanTurnRightBookPage => IsArchiveBook && !IsOperationBusy && (ArchiveRightToLeft ? HasPreviousPage : HasNextPage);
     public string LeftBookPageTurnTooltip => ArchiveRightToLeft ? Strings.MainArchiveNextPage : Strings.MainArchivePrevPage;
@@ -749,6 +758,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public string ArchiveSpreadModeHint => ArchiveRightToLeft
         ? Strings.MainArchiveSpreadHintRtl
         : Strings.MainArchiveSpreadHintLtr;
+    public string ArchiveContinuousModeText => ArchiveContinuousModeEnabled
+        ? Strings.MainArchiveContinuousOn
+        : Strings.MainArchiveContinuous;
+    public string ArchiveContinuousModeHint => Strings.MainArchiveContinuousHint;
     public string CurrentArchiveProgressText => IsArchiveBook
         ? $"Reading {Path.GetFileName(CurrentPath)} · {PagePositionText}"
         : "";
@@ -773,6 +786,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(PageNumber));
         Raise(nameof(PageSpan));
         Raise(nameof(IsArchiveBook));
+        Raise(nameof(ShowArchiveContinuousReader));
+        Raise(nameof(ShowArchivePagedControls));
+        Raise(nameof(ShowPrimaryImageCanvas));
         Raise(nameof(CanUseCrop));
         Raise(nameof(CanApplyRotationToFile));
         Raise(nameof(CanUseExposureBrush));
@@ -855,6 +871,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(CanRefreshFolder));
         Raise(nameof(WindowTitle));
         Raise(nameof(IsArchiveBook));
+        Raise(nameof(ShowArchiveContinuousReader));
+        Raise(nameof(ShowArchivePagedControls));
+        Raise(nameof(ShowPrimaryImageCanvas));
         Raise(nameof(CanTurnLeftBookPage));
         Raise(nameof(CanTurnRightBookPage));
         Raise(nameof(CurrentArchiveProgressText));
@@ -2830,6 +2849,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     public ObservableCollection<ArchiveReadPositionService.ArchiveReadHistoryItem> RecentArchiveBooks { get; } = new();
+    public ObservableCollection<ArchiveContinuousPageItem> ContinuousArchivePages { get; } = new();
 
     private bool _archiveRightToLeft;
     public bool ArchiveRightToLeft
@@ -2883,6 +2903,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (!Set(ref _archiveSpreadModeEnabled, value)) return;
 
             _settings.SetBool(Keys.ArchiveSpreadMode, value);
+            if (value && _archiveContinuousModeEnabled)
+            {
+                _archiveContinuousModeEnabled = false;
+                _settings.SetBool(Keys.ArchiveContinuousMode, false);
+                ClearContinuousArchivePages();
+                RaiseContinuousArchiveModeState();
+            }
             Raise(nameof(ArchiveSpreadModeText));
             Raise(nameof(ArchiveSpreadModeHint));
 
@@ -2892,6 +2919,151 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Toast(value ? Strings.MainToastTwoPageOn : Strings.MainToastTwoPageOff);
             }
         }
+    }
+
+    private bool _archiveContinuousModeEnabled;
+    public bool ArchiveContinuousModeEnabled
+    {
+        get => _archiveContinuousModeEnabled;
+        set
+        {
+            if (!Set(ref _archiveContinuousModeEnabled, value)) return;
+
+            var wasSpread = _archiveSpreadModeEnabled;
+            _settings.SetBool(Keys.ArchiveContinuousMode, value);
+            if (value && wasSpread)
+            {
+                _archiveSpreadModeEnabled = false;
+                _settings.SetBool(Keys.ArchiveSpreadMode, false);
+                Raise(nameof(ArchiveSpreadModeEnabled));
+                Raise(nameof(ArchiveSpreadModeText));
+                Raise(nameof(ArchiveSpreadModeHint));
+            }
+
+            PageSpan = 1;
+            RaiseContinuousArchiveModeState();
+
+            if (IsArchiveBook && HasDisplayImage && !IsOperationBusy)
+            {
+                if (value && !wasSpread)
+                    RebuildContinuousArchivePages();
+                else
+                {
+                    ClearContinuousArchivePages();
+                    ReloadCurrentPreservingViewState(resetPreload: false);
+                }
+
+                Toast(value ? Strings.MainToastContinuousReadingOn : Strings.MainToastContinuousReadingOff);
+            }
+            else if (!value)
+            {
+                ClearContinuousArchivePages();
+            }
+        }
+    }
+
+    private void RaiseContinuousArchiveModeState()
+    {
+        Raise(nameof(ArchiveContinuousModeEnabled));
+        Raise(nameof(ArchiveContinuousModeText));
+        Raise(nameof(ArchiveContinuousModeHint));
+        Raise(nameof(ShowArchiveContinuousReader));
+        Raise(nameof(ShowArchivePagedControls));
+        Raise(nameof(ShowPrimaryImageCanvas));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    public void UpdateContinuousArchivePosition(int pageIndex)
+    {
+        if (!ArchiveContinuousModeEnabled || !IsArchiveBook || PageCount < 1)
+            return;
+
+        var target = Math.Clamp(pageIndex, 0, PageCount - 1);
+        PageSpan = 1;
+        if (target == PageIndex)
+            return;
+
+        PageIndex = target;
+        if (CurrentPath is { } path)
+        {
+            ArchiveReadPositionService.SaveLastPageIndex(_settings, path, PageIndex, PageCount);
+            RefreshArchiveReadHistory();
+        }
+    }
+
+    private void RebuildContinuousArchivePages()
+    {
+        ClearContinuousArchivePages();
+        if (!ArchiveContinuousModeEnabled || CurrentPath is not { } path || !IsArchiveBook)
+        {
+            Raise(nameof(ShowArchiveContinuousReader));
+            Raise(nameof(ShowPrimaryImageCanvas));
+            return;
+        }
+
+        var password = _currentArchivePassword;
+        var cleanOldScans = ArchiveOldScanFilterEnabled;
+        for (var index = 0; index < PageCount; index++)
+        {
+            var item = new ArchiveContinuousPageItem(
+                index,
+                PageCount,
+                (pageIndex, cancellationToken) => LoadContinuousArchivePageAsync(
+                    path,
+                    pageIndex,
+                    password,
+                    cleanOldScans,
+                    cancellationToken));
+
+            if (index == PageIndex && CurrentImage is BitmapSource currentPage)
+                item.Seed(currentPage);
+
+            ContinuousArchivePages.Add(item);
+        }
+
+        Raise(nameof(ShowArchiveContinuousReader));
+        Raise(nameof(ShowPrimaryImageCanvas));
+    }
+
+    private async Task<BitmapSource> LoadContinuousArchivePageAsync(
+        string path,
+        int pageIndex,
+        string? password,
+        bool cleanOldScans,
+        CancellationToken cancellationToken)
+    {
+        await _continuousArchiveDecodeGate.WaitAsync(cancellationToken);
+        try
+        {
+            var result = await Task.Run(
+                () => ImageLoader.Load(
+                    path,
+                    pageIndex,
+                    archiveSpreadMode: false,
+                    archiveRightToLeft: false,
+                    archivePassword: password),
+                cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            var bitmap = result.Image as BitmapSource
+                ?? throw new InvalidOperationException("The archive page did not decode to a bitmap.");
+            return cleanOldScans ? ScanFilterService.ApplyOldScanFilter(bitmap) : bitmap;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _log.LogError(ex, "Continuous archive page {PageNumber} failed to decode: {Message}", pageIndex + 1, ex.Message);
+            throw;
+        }
+        finally
+        {
+            _continuousArchiveDecodeGate.Release();
+        }
+    }
+
+    private void ClearContinuousArchivePages()
+    {
+        foreach (var page in ContinuousArchivePages)
+            page.Dispose();
+        ContinuousArchivePages.Clear();
     }
 
     private void RefreshArchiveReadHistory()
@@ -4529,6 +4701,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (targetPageIndex == PageIndex)
             return;
 
+        if (ArchiveContinuousModeEnabled && IsArchiveBook)
+        {
+            UpdateContinuousArchivePosition(targetPageIndex);
+            return;
+        }
+
         FlushPendingRename();
         PageIndex = targetPageIndex;
         await LoadCurrentWithOperationStatusAsync(title, $"{PageLabel} {PageIndex + 1} of {PageCount}.");
@@ -4786,6 +4964,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (isIntermediatePreview)
             return loaded;
 
+        if (loaded)
+            RebuildContinuousArchivePages();
+        else
+            ClearContinuousArchivePages();
+
         _externalEditReload.Arm(path);
         _fileSize = diskState.FileSize;
         Raise(nameof(FileSizeText));
@@ -5042,6 +5225,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void ResetPageState()
     {
+        ClearContinuousArchivePages();
         PageLabel = Strings.MainPageLabel;
         PageCount = 1;
         PageSpan = 1;
@@ -5592,6 +5776,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Raise(nameof(CanStartCompareWithNext));
         Raise(nameof(CanSwapComparePair));
         Raise(nameof(ShowCompareMode));
+        Raise(nameof(ShowArchiveContinuousReader));
+        Raise(nameof(ShowPrimaryImageCanvas));
         Raise(nameof(CompareModeText));
         Raise(nameof(CompareLayoutText));
         Raise(nameof(CompareLayoutToggleText));
@@ -7675,14 +7861,42 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
 
         var spreadMode = _settings.GetBool(Keys.ArchiveSpreadMode, false);
-        if (_archiveSpreadModeEnabled != spreadMode)
+        var continuousMode = _settings.GetBool(Keys.ArchiveContinuousMode, false);
+        if (continuousMode && spreadMode)
+        {
+            spreadMode = false;
+            _settings.SetBool(Keys.ArchiveSpreadMode, false);
+        }
+        var continuousModeChanged = _archiveContinuousModeEnabled != continuousMode;
+        if (continuousModeChanged)
+        {
+            _archiveContinuousModeEnabled = continuousMode;
+            RaiseContinuousArchiveModeState();
+        }
+        var spreadModeChanged = _archiveSpreadModeEnabled != spreadMode;
+        if (spreadModeChanged)
         {
             _archiveSpreadModeEnabled = spreadMode;
             Raise(nameof(ArchiveSpreadModeEnabled));
             Raise(nameof(ArchiveSpreadModeText));
             Raise(nameof(ArchiveSpreadModeHint));
-            if (IsArchiveBook && HasDisplayImage && !IsOperationBusy)
-                ReloadCurrentPreservingViewState(resetPreload: false);
+        }
+
+        if (IsArchiveBook && HasDisplayImage && !IsOperationBusy)
+        {
+            if (_archiveContinuousModeEnabled)
+            {
+                if (spreadModeChanged)
+                    ReloadCurrentPreservingViewState(resetPreload: false);
+                else
+                    RebuildContinuousArchivePages();
+            }
+            else
+            {
+                ClearContinuousArchivePages();
+                if (continuousModeChanged || spreadModeChanged)
+                    ReloadCurrentPreservingViewState(resetPreload: false);
+            }
         }
 
         _nav.SiblingFolderAutoSwitch = _settings.GetBool(Keys.SiblingFolderAutoSwitch, false);
@@ -7999,6 +8213,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _photoCullingOverlayCts?.Cancel();
         _photoCullingOverlayCts?.Dispose();
         _photoCullingOverlayCts = null;
+        ClearContinuousArchivePages();
         _slideshowTimer?.Stop();
         _slideshowTimer = null;
         _listenService?.Dispose();

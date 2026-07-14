@@ -38,6 +38,7 @@ public sealed class SettingsTransferService
                 [Keys.ArchiveRightToLeft] = IsBool,
                 [Keys.ArchiveOldScanFilter] = IsBool,
                 [Keys.ArchiveSpreadMode] = IsBool,
+                [Keys.ArchiveContinuousMode] = IsBool,
                 [Keys.Locale] = value => string.IsNullOrEmpty(value) || value.Equals("en", StringComparison.OrdinalIgnoreCase),
                 [Keys.ViewerSortMode] = value => Enum.TryParse<DirectorySortMode>(value, true, out _),
                 [Keys.SiblingFolderAutoSwitch] = IsBool,

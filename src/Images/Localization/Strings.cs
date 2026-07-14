@@ -1677,6 +1677,20 @@ public static class Strings
     public static string SettingsTransferPreviewFormat => Get(nameof(SettingsTransferPreviewFormat));
     public static string SettingsTransferPreviewTitle => Get(nameof(SettingsTransferPreviewTitle));
     public static string SettingsTransferTitle => Get(nameof(SettingsTransferTitle));
+    public static string SettingsArchiveContinuousTitle => Get(nameof(SettingsArchiveContinuousTitle));
+    public static string SettingsArchiveContinuousDescription => Get(nameof(SettingsArchiveContinuousDescription));
+    public static string SettingsArchiveContinuousOnStatus => Get(nameof(SettingsArchiveContinuousOnStatus));
+    public static string SettingsArchiveContinuousOffStatus => Get(nameof(SettingsArchiveContinuousOffStatus));
+    public static string MainArchiveContinuous => Get(nameof(MainArchiveContinuous));
+    public static string MainArchiveContinuousOn => Get(nameof(MainArchiveContinuousOn));
+    public static string MainArchiveContinuousHint => Get(nameof(MainArchiveContinuousHint));
+    public static string MainArchiveContinuousPageLabel => Get(nameof(MainArchiveContinuousPageLabel));
+    public static string MainArchiveContinuousLoading => Get(nameof(MainArchiveContinuousLoading));
+    public static string MainArchiveContinuousPageError => Get(nameof(MainArchiveContinuousPageError));
+    public static string MainArchiveContinuousRetry => Get(nameof(MainArchiveContinuousRetry));
+    public static string MainToastContinuousReadingOn => Get(nameof(MainToastContinuousReadingOn));
+    public static string MainToastContinuousReadingOff => Get(nameof(MainToastContinuousReadingOff));
+    public static string AutomationMainWindowContinuousArchiveReader => Get(nameof(AutomationMainWindowContinuousArchiveReader));
 
     public static string Get(string key)
     {
