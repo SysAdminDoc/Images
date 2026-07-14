@@ -146,8 +146,7 @@ public static class AssetSmartFilterService
                 BackgroundColor = MagickColors.White
             };
 
-            using var ping = new MagickImage();
-            ping.Ping(new FileInfo(path), readSettings);
+            using var ping = MagickSafeReader.Ping(path, readSettings);
 
             return new ImageSignals(
                 (int)Math.Min(ping.Width, int.MaxValue),
@@ -175,7 +174,7 @@ public static class AssetSmartFilterService
                 Width = 64,
                 Height = 64
             };
-            using var image = new MagickImage(new FileInfo(path), paletteSettings);
+            using var image = MagickSafeReader.Read(path, paletteSettings);
             image.Resize(new MagickGeometry(1, 1) { IgnoreAspectRatio = true });
             var color = image.Histogram()
                 .OrderByDescending(pair => pair.Value)

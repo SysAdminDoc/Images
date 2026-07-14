@@ -6,6 +6,21 @@ namespace Images.Tests;
 public sealed class ThumbnailCacheTests
 {
     [Fact]
+    public void SharedMagickRead_DoesNotBlockSourceDeletion()
+    {
+        using var temp = TestDirectory.Create();
+        var path = Path.Combine(temp.Path, "source.png");
+        File.WriteAllBytes(path, Convert.FromBase64String(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="));
+
+        using var stream = MagickSafeReader.OpenSharedRead(path);
+        File.Delete(path);
+
+        Assert.False(File.Exists(path));
+        Assert.True(stream.CanRead);
+    }
+
+    [Fact]
     public void GetHealth_WhenCacheContainsFiles_ReturnsDisposableCacheTotals()
     {
         using var temp = TestDirectory.Create();

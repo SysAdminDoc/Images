@@ -198,7 +198,7 @@ public sealed class ThumbnailCache
         if (SupportedImageFormats.RequiresGhostscript(sourcePath))
             settings.Density = new Density(72);
 
-        using var frames = new MagickImageCollection(new FileInfo(sourcePath), settings);
+        using var frames = MagickSafeReader.ReadCollection(sourcePath, settings);
         if (frames.Count == 0)
             throw new InvalidOperationException("No thumbnail frame was decoded.");
 

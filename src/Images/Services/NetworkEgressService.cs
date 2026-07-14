@@ -57,17 +57,19 @@ public static class NetworkEgressService
             "network-{Direction}: {Purpose} {Url} — {Bytes} bytes in {DurationMs} ms",
             entry.Direction, entry.Purpose, entry.Url, entry.Bytes, entry.DurationMs);
 
-        lock (_lock)
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher is not null && ShouldUseDispatcher(dispatcher))
         {
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher is not null && ShouldUseDispatcher(dispatcher))
+            dispatcher.BeginInvoke(() =>
             {
-                dispatcher.BeginInvoke(() => InsertEntry(entry));
-            }
-            else
-            {
+                lock (_lock)
+                    InsertEntry(entry);
+            });
+        }
+        else
+        {
+            lock (_lock)
                 InsertEntry(entry);
-            }
         }
 
         PersistEntry(entry);
@@ -79,11 +81,16 @@ public static class NetworkEgressService
         var dispatcher = System.Windows.Application.Current?.Dispatcher;
         if (dispatcher is not null && ShouldUseDispatcher(dispatcher))
         {
-            dispatcher.BeginInvoke(() => _entries.Clear());
+            dispatcher.BeginInvoke(() =>
+            {
+                lock (_lock)
+                    _entries.Clear();
+            });
         }
         else
         {
-            _entries.Clear();
+            lock (_lock)
+                _entries.Clear();
         }
     }
 
@@ -167,14 +174,20 @@ public static class NetworkEgressService
             {
                 dispatcher.BeginInvoke(() =>
                 {
-                    foreach (var entry in loaded)
-                        InsertEntry(entry);
+                    lock (_lock)
+                    {
+                        foreach (var entry in loaded)
+                            InsertEntry(entry);
+                    }
                 });
             }
             else
             {
-                foreach (var entry in loaded)
-                    InsertEntry(entry);
+                lock (_lock)
+                {
+                    foreach (var entry in loaded)
+                        InsertEntry(entry);
+                }
             }
         }
         catch (Exception ex)

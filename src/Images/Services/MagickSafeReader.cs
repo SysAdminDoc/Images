@@ -53,6 +53,9 @@ public static class MagickSafeReader
     }
 
     public static MagickImage Ping(string path)
+        => Ping(path, settings: null);
+
+    public static MagickImage Ping(string path, MagickReadSettings? settings)
     {
         CodecRuntime.Configure();
 
@@ -64,7 +67,11 @@ public static class MagickSafeReader
         var image = new MagickImage();
         try
         {
-            image.Ping(path);
+            using var stream = OpenSharedRead(path);
+            if (settings is null)
+                image.Ping(stream);
+            else
+                image.Ping(stream, settings);
             return image;
         }
         catch
@@ -74,27 +81,50 @@ public static class MagickSafeReader
         }
     }
 
+    public static MagickImageCollection ReadCollection(string path, MagickReadSettings? settings = null)
+    {
+        CodecRuntime.Configure();
+
+        if (IsSvg(path))
+        {
+            var collection = new MagickImageCollection();
+            try
+            {
+                collection.Add(Read(path, settings));
+                return collection;
+            }
+            catch
+            {
+                collection.Dispose();
+                throw;
+            }
+        }
+
+        using var stream = OpenSharedRead(path);
+        return settings is null
+            ? new MagickImageCollection(stream)
+            : new MagickImageCollection(stream, settings);
+    }
+
+    public static int CountFrames(string path, MagickReadSettings? settings = null)
+    {
+        CodecRuntime.Configure();
+        if (IsSvg(path)) return 1;
+
+        using var stream = OpenSharedRead(path);
+        var frames = settings is null
+            ? MagickImageInfo.ReadCollection(stream)
+            : MagickImageInfo.ReadCollection(stream, settings);
+        return Math.Max(1, frames.Count());
+    }
+
+    internal static FileStream OpenSharedRead(string path)
+        => new(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+
     private static void ReadPath(MagickImage image, string path, MagickReadSettings? settings)
     {
-        if (!IsSvg(path))
-        {
-            if (settings is null)
-                image.Read(path);
-            else
-                image.Read(path, settings);
-            return;
-        }
-
-        settings = WithMsvgFormat(settings);
-        if (!Path.GetExtension(path).Equals(".svgz", StringComparison.OrdinalIgnoreCase))
-        {
-            image.Read(path, settings);
-            return;
-        }
-
-        using var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-        using var gzip = new GZipStream(file, CompressionMode.Decompress, leaveOpen: false);
-        image.Read(gzip, settings);
+        using var file = OpenSharedRead(path);
+        ReadStream(image, file, Path.GetExtension(path), settings);
     }
 
     private static void ReadStream(

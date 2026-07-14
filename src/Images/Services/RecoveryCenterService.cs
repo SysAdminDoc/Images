@@ -103,6 +103,7 @@ public sealed class RecoveryCenterService
     private const string LogFileName = "recovery-log.jsonl";
     private const int CompactAfterLineCount = 512;
     private const int CompactExcessLineCount = 128;
+    private static readonly object PersistenceGate = new();
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.General)
     {
         WriteIndented = false,
@@ -376,9 +377,12 @@ public sealed class RecoveryCenterService
 
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-            File.AppendAllText(path, JsonSerializer.Serialize(record, JsonOptions) + Environment.NewLine);
-            CompactLogIfNeeded(path);
+            lock (PersistenceGate)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                File.AppendAllText(path, JsonSerializer.Serialize(record, JsonOptions) + Environment.NewLine);
+                CompactLogIfNeeded(path);
+            }
             return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
@@ -402,25 +406,28 @@ public sealed class RecoveryCenterService
 
     private static Dictionary<string, RecoveryActionRecord> LoadLatestRecords(string path)
     {
-        var records = new Dictionary<string, RecoveryActionRecord>(StringComparer.OrdinalIgnoreCase);
-        foreach (var line in ReadLines(path))
+        lock (PersistenceGate)
         {
-            if (string.IsNullOrWhiteSpace(line))
-                continue;
+            var records = new Dictionary<string, RecoveryActionRecord>(StringComparer.OrdinalIgnoreCase);
+            foreach (var line in ReadLines(path))
+            {
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
 
-            try
-            {
-                var record = JsonSerializer.Deserialize<RecoveryActionRecord>(line, JsonOptions);
-                if (record is not null && !string.IsNullOrWhiteSpace(record.Id))
-                    records[record.Id] = record;
+                try
+                {
+                    var record = JsonSerializer.Deserialize<RecoveryActionRecord>(line, JsonOptions);
+                    if (record is not null && !string.IsNullOrWhiteSpace(record.Id))
+                        records[record.Id] = record;
+                }
+                catch (JsonException)
+                {
+                    // Keep the recovery center usable if one record is corrupt.
+                }
             }
-            catch (JsonException)
-            {
-                // Keep the recovery center usable if one record is corrupt.
-            }
+
+            return records;
         }
-
-        return records;
     }
 
     private static void CompactLogIfNeeded(string path)

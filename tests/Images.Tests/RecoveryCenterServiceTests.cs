@@ -190,6 +190,31 @@ public sealed class RecoveryCenterServiceTests
         Assert.Equal(RecoveryRestoreStatus.MissingCurrentPath, afterCompaction.Status);
     }
 
+    [Fact]
+    public void ConcurrentServiceInstances_PersistEveryRecoveryRecord()
+    {
+        using var temp = TestDirectory.Create();
+        const int recordCount = 200;
+        var services = Enumerable.Range(0, 8)
+            .Select(_ => CreateService(temp.Path))
+            .ToArray();
+        var recordedIds = new System.Collections.Concurrent.ConcurrentBag<string>();
+
+        Parallel.For(0, recordCount, index =>
+        {
+            var record = services[index % services.Length].RecordWriteback(
+                Path.Combine(temp.Path, $"photo-{index}.png"),
+                "Concurrent writeback",
+                $"Writeback {index}.");
+            recordedIds.Add(record.Id);
+        });
+
+        var persisted = CreateService(temp.Path).ListRecent(recordCount);
+        Assert.Equal(recordCount, recordedIds.Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(recordCount, persisted.Count);
+        Assert.Empty(recordedIds.Except(persisted.Select(record => record.Id), StringComparer.OrdinalIgnoreCase));
+    }
+
     private static RecoveryCenterService CreateService(string root)
         => new(() => root, () => new DateTimeOffset(2026, 5, 17, 12, 0, 0, TimeSpan.Zero));
 }

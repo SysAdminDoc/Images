@@ -151,8 +151,7 @@ public static class ExportCapabilityWarningService
         {
             CodecRuntime.Configure();
 
-            using var image = new MagickImage();
-            image.Ping(new FileInfo(path), CreateSingleFrameReadSettings(path));
+            using var image = MagickSafeReader.Ping(path, CreateSingleFrameReadSettings(path));
             return InspectImage(image);
         }
         catch (Exception ex) when (ex is MagickException or IOException or UnauthorizedAccessException or InvalidOperationException or NotSupportedException)
@@ -187,10 +186,9 @@ public static class ExportCapabilityWarningService
         {
             CodecRuntime.Configure();
 
-            var info = SupportedImageFormats.RequiresGhostscript(path)
-                ? MagickImageInfo.ReadCollection(new FileInfo(path), CreateCollectionReadSettings(path))
-                : MagickImageInfo.ReadCollection(new FileInfo(path));
-            return Math.Max(1, info.Count());
+            return MagickSafeReader.CountFrames(
+                path,
+                SupportedImageFormats.RequiresGhostscript(path) ? CreateCollectionReadSettings(path) : null);
         }
         catch (Exception ex) when (ex is MagickException or IOException or UnauthorizedAccessException or InvalidOperationException or NotSupportedException)
         {

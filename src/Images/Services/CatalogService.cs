@@ -682,7 +682,7 @@ public sealed class CatalogService
         try
         {
             var settings = new MagickReadSettings { Width = 64, Height = 64 };
-            using var image = new MagickImage(new FileInfo(path), settings);
+            using var image = MagickSafeReader.Read(path, settings);
             image.Resize(new MagickGeometry(1, 1) { IgnoreAspectRatio = true });
             var color = image.Histogram()
                 .OrderByDescending(pair => pair.Value)

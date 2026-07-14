@@ -415,7 +415,7 @@ public static class ImageLoader
                 BackgroundColor = MagickColors.White
             };
 
-            using var collection = new MagickImageCollection(new FileInfo(path), settings);
+            using var collection = MagickSafeReader.ReadCollection(path, settings);
             if (collection.Count == 0)
                 throw new InvalidOperationException("The document did not produce a preview page.");
 
@@ -492,7 +492,7 @@ public static class ImageLoader
                 BackgroundColor = MagickColors.White
             };
 
-            using var collection = new MagickImageCollection(new FileInfo(path), settings);
+            using var collection = MagickSafeReader.ReadCollection(path, settings);
             if (collection.Count == 0) return null;
 
             using var frame = collection[0].Clone();
@@ -550,10 +550,7 @@ public static class ImageLoader
     {
         try
         {
-            var pages = settings is null
-                ? MagickImageInfo.ReadCollection(new FileInfo(path))
-                : MagickImageInfo.ReadCollection(new FileInfo(path), settings);
-            return Math.Max(1, pages.Count());
+            return MagickSafeReader.CountFrames(path, settings);
         }
         catch
         {

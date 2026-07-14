@@ -4,6 +4,8 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Background thumbnail, metadata, catalog, and paged-image decoders now open source images with delete sharing, so navigation-time reads no longer intermittently block Recycle Bin deletes or atomic replacements.
+
 ### Added
 
 - **Monitor-aware legacy ICC output** - The opt-in color-managed display path now resolves the active monitor profile with Windows ICM, verifies Advanced Color state, converts tagged images to a non-sRGB monitor profile only in legacy SDR mode, and safely falls back to sRGB otherwise. Moving the window between monitors invalidates preloads and re-decodes the current image; About diagnostics report the active destination and fallback reason.
@@ -16,6 +18,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixed
 
+- **Concurrent diagnostics and recovery logs are lossless** - Recovery Center instances now serialize append/compaction/read operations so overlapping destructive workflows cannot drop durable records, and deferred network-log collection mutations now honor the same lock used by snapshot readers.
 - **XMP/XML imports are resource-bounded** - Sidecar, catalog, tag, edit-stack, inbox, and Picasa XML readers now reject documents over 16 MiB, prohibit DTD/entity expansion, and use replacement-friendly file sharing before parsing user-controlled metadata.
 - **Atomic exports tolerate brief file locks** - Final temp-file swaps now retry a bounded number of times when an image reader, thumbnailer, or security scanner briefly locks the destination, preventing intermittent crop/writeback failures without hiding permanent permission errors.
 - **Optional tools cannot exhaust memory through process output** - ExifTool, c2patool, jpegtran, and Ghostscript now share a concurrent bounded process runner: version probes retain at most 256 KiB per stream, operations retain at most 4 MiB, and exceeding either limit terminates the child process tree with a distinct failure from timeout or nonzero exit.
