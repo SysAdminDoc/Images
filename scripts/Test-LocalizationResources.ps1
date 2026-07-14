@@ -200,11 +200,40 @@ if (Test-Path -LiteralPath $stringsCs) {
 # --- Scan XAML for obvious hard-coded UI strings ---
 $xamlFiles = @(Get-ChildItem -LiteralPath $SourceRoot -Filter '*.xaml' -Recurse -File |
     Where-Object { $_.Name -notmatch 'Theme|\.g\.' })
+$strictVisibleFiles = @('MainWindow.xaml', 'AboutWindow.xaml')
+$nonLocalizableVisibleLiterals = @(
+    'A', 'B', 'A/B', 'Ctrl+Alt+O', 'Ctrl+Shift+Drag', 'Enter', 'Esc', 'F11',
+    'Hex', 'Hold Middle', 'HSV / Alpha', 'Left arrow or Backspace',
+    'Mouse X1 / X2', 'O / X', 'RGB', 'Right arrow or Space',
+    'Shift + Wheel', 'Space / Bksp', 'Wheel'
+)
+
+function Test-IgnoredXamlLiteral {
+    param([AllowEmptyString()][string]$Value)
+
+    if ([string]::IsNullOrWhiteSpace($Value)) { return $true }
+    $decoded = [System.Net.WebUtility]::HtmlDecode($Value)
+    if ($decoded -notmatch '[A-Za-z]') { return $true }
+    if ($decoded -in $nonLocalizableVisibleLiterals) { return $true }
+    if ($decoded -match '^(Auto|Segoe|Consolas|Courier)$') { return $true }
+    if ($decoded -match '^pack://' -or $decoded -match '^[A-Z]:\\') { return $true }
+    return $false
+}
 
 $hardCodedCount = 0
 $hardCodedAutomationNameMatches = New-Object System.Collections.Generic.List[string]
+$hardCodedVisibleMatches = New-Object System.Collections.Generic.List[string]
+$missingXamlResourceMatches = New-Object System.Collections.Generic.List[string]
 foreach ($xamlFile in $xamlFiles) {
     $content = Get-Content -LiteralPath $xamlFile.FullName -Raw
+    $locMatches = [regex]::Matches($content, '\{loc:Loc\s+(?:Key\s*=\s*)?([A-Za-z_][A-Za-z0-9_.]*)')
+    foreach ($m in $locMatches) {
+        $key = $m.Groups[1].Value
+        if ($key -notin $baseKeys) {
+            $missingXamlResourceMatches.Add("$($xamlFile.Name): $key")
+        }
+    }
+
     $automationNameMatches = [regex]::Matches($content,
         'AutomationProperties\.Name\s*=\s*"([^"{][^"]*)"')
     foreach ($m in $automationNameMatches) {
@@ -223,6 +252,17 @@ foreach ($xamlFile in $xamlFiles) {
         }
         $hardCodedCount++
     }
+
+    if ($xamlFile.Name -in $strictVisibleFiles) {
+        $visibleMatches = [regex]::Matches($content,
+            '(?:Content|Text|Header|Title|ToolTip)\s*=\s*"([^"{][^"]*)"')
+        foreach ($m in $visibleMatches) {
+            $value = $m.Groups[1].Value
+            if (-not (Test-IgnoredXamlLiteral $value)) {
+                $hardCodedVisibleMatches.Add("$($xamlFile.Name): $value")
+            }
+        }
+    }
 }
 
 if ($hardCodedCount -gt 0) {
@@ -231,6 +271,16 @@ if ($hardCodedCount -gt 0) {
 
 if ($hardCodedAutomationNameMatches.Count -gt 0) {
     Write-Error "Hard-coded AutomationProperties.Name values must use localization resources: $($hardCodedAutomationNameMatches -join '; ')"
+    $failed = $true
+}
+
+if ($hardCodedVisibleMatches.Count -gt 0) {
+    Write-Error "MainWindow/AboutWindow visible Content, Text, Header, Title, and ToolTip values must use localization resources: $($hardCodedVisibleMatches -join '; ')"
+    $failed = $true
+}
+
+if ($missingXamlResourceMatches.Count -gt 0) {
+    Write-Error "XAML localization references have no base resource: $($missingXamlResourceMatches -join '; ')"
     $failed = $true
 }
 

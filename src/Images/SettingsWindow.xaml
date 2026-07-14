@@ -839,7 +839,7 @@
                                             Padding="12,6"
                                             MinHeight="32"
                                             Margin="0,0,8,8"
-                                            AutomationProperties.Name="Clear local derived data">
+                                            AutomationProperties.Name="{loc:Loc AutomationSettingsWindowClearLocalDerivedData}">
                                         <TextBlock Text="Clear derived data" VerticalAlignment="Center" />
                                     </Button>
 

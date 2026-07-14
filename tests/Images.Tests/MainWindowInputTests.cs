@@ -1,10 +1,12 @@
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Images.Controls;
+using Images.Localization;
 using Images.Services;
 
 namespace Images.Tests;
@@ -120,6 +122,64 @@ public sealed class MainWindowInputTests
                 window.Close();
             }
         });
+    }
+
+    [Fact]
+    public void PrimaryWindows_ResolveVisibleCopyFromPseudoLocale()
+    {
+        RunOnSta(() =>
+        {
+            var previousCulture = Strings.Culture;
+            var previousCurrentCulture = CultureInfo.CurrentCulture;
+            var previousUiCulture = CultureInfo.CurrentUICulture;
+            MainWindow? mainWindow = null;
+            try
+            {
+                var pseudoCulture = CultureInfo.GetCultureInfo("qps-ploc");
+                Strings.Culture = pseudoCulture;
+                CultureInfo.CurrentCulture = pseudoCulture;
+                CultureInfo.CurrentUICulture = pseudoCulture;
+
+                mainWindow = new MainWindow();
+
+                var viewport = Assert.IsType<Grid>(mainWindow.FindName("Viewport"));
+                var openItem = Assert.IsType<MenuItem>(viewport.ContextMenu!.Items[0]);
+                Assert.StartsWith("[!!", Assert.IsType<string>(openItem.Header), StringComparison.Ordinal);
+
+                var mainTexts = FindLogicalDescendants<TextBlock>(mainWindow)
+                    .Select(textBlock => textBlock.Text)
+                    .ToArray();
+                Assert.Contains(mainTexts, text =>
+                    text.StartsWith("[!!", StringComparison.Ordinal) &&
+                    text.Contains("Open an image to begin", StringComparison.Ordinal));
+
+                var aboutHeading = Strings.Get("AboutCodecCapabilityHeading");
+                Assert.StartsWith("[!!", aboutHeading, StringComparison.Ordinal);
+                Assert.Contains("Codec capability", aboutHeading, StringComparison.Ordinal);
+                Assert.DoesNotContain(
+                    mainTexts.Append(aboutHeading),
+                    text => text.StartsWith('!') && text.EndsWith('!'));
+            }
+            finally
+            {
+                mainWindow?.Close();
+                Strings.Culture = previousCulture;
+                CultureInfo.CurrentCulture = previousCurrentCulture;
+                CultureInfo.CurrentUICulture = previousUiCulture;
+            }
+        });
+    }
+
+    private static IEnumerable<T> FindLogicalDescendants<T>(DependencyObject root)
+        where T : DependencyObject
+    {
+        foreach (var child in LogicalTreeHelper.GetChildren(root))
+        {
+            if (child is not DependencyObject dependencyObject) continue;
+            if (dependencyObject is T match) yield return match;
+            foreach (var nested in FindLogicalDescendants<T>(dependencyObject))
+                yield return nested;
+        }
     }
 
     private static T? FindVisualDescendant<T>(DependencyObject root) where T : DependencyObject

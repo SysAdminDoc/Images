@@ -5157,4 +5157,577 @@ Details written to:
   <data name="AutomationSettingsWindowRefreshStorageSizes" xml:space="preserve">
     <value>[!!!!!! Refresh storage sizes !!!!!!]</value>
   </data>
+  <data name="MainUiAdjustments" xml:space="preserve">
+    <value>[!!! Adjustments… !!!]</value>
+  </data>
+  <data name="MainUiAllMetadata" xml:space="preserve">
+    <value>[!!! All metadata !!!]</value>
+  </data>
+  <data name="MainUiAnnotations" xml:space="preserve">
+    <value>[!!! Annotations… !!!]</value>
+  </data>
+  <data name="MainUiApplyRotationToFile" xml:space="preserve">
+    <value>[!!!!!! Apply rotation to file !!!!!!]</value>
+  </data>
+  <data name="MainUiCompareWith" xml:space="preserve">
+    <value>[!!!! Compare with… !!!!]</value>
+  </data>
+  <data name="MainUiCopyImage" xml:space="preserve">
+    <value>[!!! Copy image !!!]</value>
+  </data>
+  <data name="MainUiCopyImageAndPath" xml:space="preserve">
+    <value>[!!!!! Copy image and path !!!!!]</value>
+  </data>
+  <data name="MainUiCopyPath" xml:space="preserve">
+    <value>[!!! Copy path !!!]</value>
+  </data>
+  <data name="MainUiCopyToFolder" xml:space="preserve">
+    <value>[!!!! Copy to folder… !!!!]</value>
+  </data>
+  <data name="MainUiCopyToRecentFolder" xml:space="preserve">
+    <value>[!!!!!! Copy to recent folder !!!!!!]</value>
+  </data>
+  <data name="MainUiDeviceInfoMakeModelSerial" xml:space="preserve">
+    <value>[!!!!!!!!! Device info (make, model, serial) !!!!!!!!!]</value>
+  </data>
+  <data name="MainUiEffects" xml:space="preserve">
+    <value>[!! Effects… !!]</value>
+  </data>
+  <data name="MainUiExitCompare" xml:space="preserve">
+    <value>[!!! Exit compare !!!]</value>
+  </data>
+  <data name="MainUiExitOverlay" xml:space="preserve">
+    <value>[!!! Exit overlay !!!]</value>
+  </data>
+  <data name="MainUiExportWorkbench" xml:space="preserve">
+    <value>[!!!!! Export workbench… !!!!!]</value>
+  </data>
+  <data name="MainUiFileActions" xml:space="preserve">
+    <value>[!!! File actions !!!]</value>
+  </data>
+  <data name="MainUiGallery" xml:space="preserve">
+    <value>[!! Gallery !!]</value>
+  </data>
+  <data name="MainUiImagesWorkspace" xml:space="preserve">
+    <value>[!!!! Images workspace !!!!]</value>
+  </data>
+  <data name="MainUiLocalTools" xml:space="preserve">
+    <value>[!!! Local tools !!!]</value>
+  </data>
+  <data name="MainUiMove" xml:space="preserve">
+    <value>[!! Move !!]</value>
+  </data>
+  <data name="MainUiMoveToFolder" xml:space="preserve">
+    <value>[!!!! Move to folder… !!!!]</value>
+  </data>
+  <data name="MainUiMoveToRecentFolder" xml:space="preserve">
+    <value>[!!!!!! Move to recent folder !!!!!!]</value>
+  </data>
+  <data name="MainUiOpen" xml:space="preserve">
+    <value>[!! Open… !!]</value>
+  </data>
+  <data name="MainUiOpenAnImageOrFolder" xml:space="preserve">
+    <value>[!!!!!! Open an image or folder !!!!!!]</value>
+  </data>
+  <data name="MainUiOpenWithDefaultApp" xml:space="preserve">
+    <value>[!!!!!! Open with default app !!!!!!]</value>
+  </data>
+  <data name="MainUiOrganize" xml:space="preserve">
+    <value>[!! Organize !!]</value>
+  </data>
+  <data name="MainUiPerspective" xml:space="preserve">
+    <value>[!!! Perspective… !!!]</value>
+  </data>
+  <data name="MainUiPrint" xml:space="preserve">
+    <value>[!! Print… !!]</value>
+  </data>
+  <data name="MainUiResize" xml:space="preserve">
+    <value>[!! Resize… !!]</value>
+  </data>
+  <data name="MainUiRotate180" xml:space="preserve">
+    <value>[!!! Rotate 180° !!!]</value>
+  </data>
+  <data name="MainUiSaveACopy" xml:space="preserve">
+    <value>[!!! Save a copy… !!!]</value>
+  </data>
+  <data name="MainUiSoftwareAndComments" xml:space="preserve">
+    <value>[!!!!!! Software and comments !!!!!!]</value>
+  </data>
+  <data name="MainUiTimestamps" xml:space="preserve">
+    <value>[!!! Timestamps !!!]</value>
+  </data>
+  <data name="MainUiTransform" xml:space="preserve">
+    <value>[!!! Transform !!!]</value>
+  </data>
+  <data name="MainUiWorkflowTools" xml:space="preserve">
+    <value>[!!!! Workflow tools !!!!]</value>
+  </data>
+  <data name="MainUiPrintToDefaultPrinter" xml:space="preserve">
+    <value>[!!!!!! Print to default printer !!!!!!]</value>
+  </data>
+  <data name="MainUiSendToEmail" xml:space="preserve">
+    <value>[!!!! Send to email !!!!]</value>
+  </data>
+  <data name="MainUiSetAsDesktopWallpaper" xml:space="preserve">
+    <value>[!!!!!! Set as desktop wallpaper !!!!!!]</value>
+  </data>
+  <data name="MainUiFill" xml:space="preserve">
+    <value>[!! Fill !!]</value>
+  </data>
+  <data name="MainUiFit" xml:space="preserve">
+    <value>[!! Fit !!]</value>
+  </data>
+  <data name="MainUiSpan" xml:space="preserve">
+    <value>[!! Span !!]</value>
+  </data>
+  <data name="MainUiTile" xml:space="preserve">
+    <value>[!! Tile !!]</value>
+  </data>
+  <data name="MainUiMoveToRecycleBin" xml:space="preserve">
+    <value>[!!!!! Move to Recycle Bin… !!!!!]</value>
+  </data>
+  <data name="MainUiSettings" xml:space="preserve">
+    <value>[!!! Settings… !!!]</value>
+  </data>
+  <data name="MainUiStopVideo" xml:space="preserve">
+    <value>[!!! Stop video !!!]</value>
+  </data>
+  <data name="MainUiOverlayAB" xml:space="preserve">
+    <value>[!!! Overlay A/B !!!]</value>
+  </data>
+  <data name="MainUiOpenAnImageToBegin" xml:space="preserve">
+    <value>[!!!!!! Open an image to begin !!!!!!]</value>
+  </data>
+  <data name="MainUiDropAnImageHereChooseOneFromDiskOr" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Drop an image here, choose one from disk, or paste from the clipboard. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiLocalByDefault" xml:space="preserve">
+    <value>[!!!! Local by default !!!!]</value>
+  </data>
+  <data name="MainUiBroadFormatSupport" xml:space="preserve">
+    <value>[!!!!! Broad format support !!!!!]</value>
+  </data>
+  <data name="MainUiTextExtractionReadiness" xml:space="preserve">
+    <value>[!!!!!!! Text extraction readiness !!!!!!!]</value>
+  </data>
+  <data name="MainUiDocumentPreviews" xml:space="preserve">
+    <value>[!!!!! Document previews !!!!!]</value>
+  </data>
+  <data name="MainUiRecoveryLinks" xml:space="preserve">
+    <value>[!!!! Recovery links !!!!]</value>
+  </data>
+  <data name="MainUiOpenImage" xml:space="preserve">
+    <value>[!!! Open image… !!!]</value>
+  </data>
+  <data name="MainUiPaste" xml:space="preserve">
+    <value>[!! Paste !!]</value>
+  </data>
+  <data name="MainUiOpenDiagnosticsAndAppInformation" xml:space="preserve">
+    <value>[!!!!!!!!! Open diagnostics and app information !!!!!!!!!]</value>
+  </data>
+  <data name="MainUiRecentBooks" xml:space="preserve">
+    <value>[!!! Recent books !!!]</value>
+  </data>
+  <data name="MainUiTipArrowKeysBrowseTheFolderEnterCommitsA" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Tip: arrow keys browse the folder, Enter commits a rename. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiCodecDetails" xml:space="preserve">
+    <value>[!!!! Codec details !!!!]</value>
+  </data>
+  <data name="MainUiRevealFile" xml:space="preserve">
+    <value>[!!! Reveal file !!!]</value>
+  </data>
+  <data name="MainUiIndexingFilters" xml:space="preserve">
+    <value>[!!!!! Indexing filters... !!!!!]</value>
+  </data>
+  <data name="MainUiClearFilter" xml:space="preserve">
+    <value>[!!! Clear filter !!!]</value>
+  </data>
+  <data name="MainUiExplorer" xml:space="preserve">
+    <value>[!! Explorer !!]</value>
+  </data>
+  <data name="MainUiNewest" xml:space="preserve">
+    <value>[!! Newest !!]</value>
+  </data>
+  <data name="MainUiLandscape" xml:space="preserve">
+    <value>[!!! Landscape !!!]</value>
+  </data>
+  <data name="MainUiPortrait" xml:space="preserve">
+    <value>[!! Portrait !!]</value>
+  </data>
+  <data name="MainUiRecent" xml:space="preserve">
+    <value>[!! Recent !!]</value>
+  </data>
+  <data name="MainUiLarge" xml:space="preserve">
+    <value>[!! Large !!]</value>
+  </data>
+  <data name="MainUiDuplicates" xml:space="preserve">
+    <value>[!!! Duplicates !!!]</value>
+  </data>
+  <data name="MainUiNoMatchingImages" xml:space="preserve">
+    <value>[!!!!! No matching images !!!!!]</value>
+  </data>
+  <data name="MainUiDragToJumpToAnotherPageInTheCurrent" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Drag to jump to another page in the current document or archive. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiScrollToZoomDragToPanDoubleClickTo" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Scroll to zoom  ·  drag to pan  ·  double-click to fit !!!!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiPressAnyKeyToDismiss" xml:space="preserve">
+    <value>[!!!!!!! Press any key to dismiss. !!!!!!!]</value>
+  </data>
+  <data name="MainUiPreviousNextImageOrBookPage" xml:space="preserve">
+    <value>[!!!!!!!!! Previous / next image or book page !!!!!!!!!]</value>
+  </data>
+  <data name="MainUiFirstLastImageOrBookPage" xml:space="preserve">
+    <value>[!!!!!!!! First / last image or book page !!!!!!!!]</value>
+  </data>
+  <data name="MainUiNextPreviousImageOrBookPage" xml:space="preserve">
+    <value>[!!!!!!!!! Next / previous image or book page !!!!!!!!!]</value>
+  </data>
+  <data name="MainUiPreviousNextImage5ButtonMouse" xml:space="preserve">
+    <value>[!!!!!!!!!! Previous / next image (5-button mouse) !!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiRescanFolder" xml:space="preserve">
+    <value>[!!!! Rescan folder !!!!]</value>
+  </data>
+  <data name="MainUiZoomAboutCursor" xml:space="preserve">
+    <value>[!!!!! Zoom about cursor !!!!!]</value>
+  </data>
+  <data name="MainUiPanHorizontally" xml:space="preserve">
+    <value>[!!!! Pan horizontally !!!!]</value>
+  </data>
+  <data name="MainUiZoomInOut" xml:space="preserve">
+    <value>[!!!! Zoom in / out !!!!]</value>
+  </data>
+  <data name="MainUiFitToViewport11Pixel" xml:space="preserve">
+    <value>[!!!!!!! Fit to viewport / 1:1 pixel !!!!!!!]</value>
+  </data>
+  <data name="MainUiToggleFullscreen" xml:space="preserve">
+    <value>[!!!!! Toggle fullscreen !!!!!]</value>
+  </data>
+  <data name="MainUiTogglePixelSelection" xml:space="preserve">
+    <value>[!!!!!! Toggle pixel selection !!!!!!]</value>
+  </data>
+  <data name="MainUiToggleCompareOverlaySwapAB" xml:space="preserve">
+    <value>[!!!!!!!!! Toggle compare overlay / swap A-B !!!!!!!!!]</value>
+  </data>
+  <data name="MainUiAdjustCompareOverlayOpacity" xml:space="preserve">
+    <value>[!!!!!!!! Adjust compare overlay opacity !!!!!!!!]</value>
+  </data>
+  <data name="MainUiLoupeMagnifyPixelsUnderTheCursor" xml:space="preserve">
+    <value>[!!!!!!!!!! Loupe — magnify pixels under the cursor !!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiLoupeCenteredLensPanToMove" xml:space="preserve">
+    <value>[!!!!!!!!! Loupe — centered lens, pan to move !!!!!!!!!]</value>
+  </data>
+  <data name="MainUiZoomToSelection" xml:space="preserve">
+    <value>[!!!!! Zoom to selection !!!!!]</value>
+  </data>
+  <data name="MainUiPasteImageFromClipboard" xml:space="preserve">
+    <value>[!!!!!!! Paste image from clipboard !!!!!!!]</value>
+  </data>
+  <data name="MainUiPrintCurrentImage" xml:space="preserve">
+    <value>[!!!!! Print current image !!!!!]</value>
+  </data>
+  <data name="MainUiSendToRecycleBin" xml:space="preserve">
+    <value>[!!!!! Send to Recycle Bin !!!!!]</value>
+  </data>
+  <data name="MainUiOpenReferenceBoard" xml:space="preserve">
+    <value>[!!!!! Open reference board !!!!!]</value>
+  </data>
+  <data name="MainUiOpenEditHistory" xml:space="preserve">
+    <value>[!!!!! Open edit history !!!!!]</value>
+  </data>
+  <data name="MainUiApplyAutoEnhance" xml:space="preserve">
+    <value>[!!!!! Apply Auto Enhance !!!!!]</value>
+  </data>
+  <data name="MainUiApplyCropCommitRename" xml:space="preserve">
+    <value>[!!!!!!! Apply crop / commit rename !!!!!!!]</value>
+  </data>
+  <data name="MainUiRevertRenameDismissOverlayExitFullscreen" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Revert rename / dismiss overlay / exit fullscreen !!!!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiNameNatural" xml:space="preserve">
+    <value>[!!!! Name (natural) !!!!]</value>
+  </data>
+  <data name="MainUiExplorerLikeNameOrder" xml:space="preserve">
+    <value>[!!!!!! Explorer-like name order !!!!!!]</value>
+  </data>
+  <data name="MainUiNameZToA" xml:space="preserve">
+    <value>[!!!! Name (Z to A) !!!!]</value>
+  </data>
+  <data name="MainUiModifiedNewestFirst" xml:space="preserve">
+    <value>[!!!!!! Modified (newest first) !!!!!!]</value>
+  </data>
+  <data name="MainUiModifiedOldestFirst" xml:space="preserve">
+    <value>[!!!!!! Modified (oldest first) !!!!!!]</value>
+  </data>
+  <data name="MainUiCreatedNewestFirst" xml:space="preserve">
+    <value>[!!!!!! Created (newest first) !!!!!!]</value>
+  </data>
+  <data name="MainUiCreatedOldestFirst" xml:space="preserve">
+    <value>[!!!!!! Created (oldest first) !!!!!!]</value>
+  </data>
+  <data name="MainUiSizeLargestFirst" xml:space="preserve">
+    <value>[!!!!! Size (largest first) !!!!!]</value>
+  </data>
+  <data name="MainUiSizeSmallestFirst" xml:space="preserve">
+    <value>[!!!!!! Size (smallest first) !!!!!!]</value>
+  </data>
+  <data name="MainUiTypeThenName" xml:space="preserve">
+    <value>[!!!! Type, then name !!!!]</value>
+  </data>
+  <data name="MainUiClickToPauseResumeEscapeToStop" xml:space="preserve">
+    <value>[!!!!!!!!!! Click to pause/resume, Escape to stop !!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiReady" xml:space="preserve">
+    <value>[!! Ready !!]</value>
+  </data>
+  <data name="MainUiOpenOrDropASupportedFileToStartViewing" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Open or drop a supported file to start viewing. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiPreviousLeft" xml:space="preserve">
+    <value>[!!!! Previous (Left) !!!!]</value>
+  </data>
+  <data name="MainUiFitImageToViewport" xml:space="preserve">
+    <value>[!!!!!! Fit image to viewport !!!!!!]</value>
+  </data>
+  <data name="MainUiNextRight" xml:space="preserve">
+    <value>[!!! Next (Right) !!!]</value>
+  </data>
+  <data name="MainUiDeleteRecycleBin" xml:space="preserve">
+    <value>[!!!!! Delete (Recycle Bin) !!!!!]</value>
+  </data>
+  <data name="MainUiZoomOut" xml:space="preserve">
+    <value>[!! Zoom out !!]</value>
+  </data>
+  <data name="MainUiZoomIn" xml:space="preserve">
+    <value>[!! Zoom in !!]</value>
+  </data>
+  <data name="MainUiDetails" xml:space="preserve">
+    <value>[!! Details !!]</value>
+  </data>
+  <data name="MainUiFilenameMetadataAndLocalStatus" xml:space="preserve">
+    <value>[!!!!!!!!!! Filename, metadata, and local status. !!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiOpenTheReleasePageWhenYouAreReadyTo" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Open the release page when you are ready to install it. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiCheckingForUpdates" xml:space="preserve">
+    <value>[!!!!! Checking for updates !!!!!]</value>
+  </data>
+  <data name="MainUiActivity" xml:space="preserve">
+    <value>[!! Activity !!]</value>
+  </data>
+  <data name="MainUiFolderPreview" xml:space="preserve">
+    <value>[!!!! Folder preview !!!!]</value>
+  </data>
+  <data name="MainUiFilename" xml:space="preserve">
+    <value>[!! Filename !!]</value>
+  </data>
+  <data name="MainUiChangingTheExtensionOnlyRenamesTheFileUseA" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Changing the extension only renames the file. Use a supported Images format; this will not convert the image. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiChangesSaveAutomatically" xml:space="preserve">
+    <value>[!!!!!!! Changes save automatically. !!!!!!!]</value>
+  </data>
+  <data name="MainUiBookControls" xml:space="preserve">
+    <value>[!!!! Book controls !!!!]</value>
+  </data>
+  <data name="MainUiFirstPage" xml:space="preserve">
+    <value>[!!! First page !!!]</value>
+  </data>
+  <data name="MainUiLastPage" xml:space="preserve">
+    <value>[!!! Last page !!!]</value>
+  </data>
+  <data name="MainUiNoRenamesYet" xml:space="preserve">
+    <value>[!!!! No renames yet !!!!]</value>
+  </data>
+  <data name="MainUiYourUndoListWillAppearHere" xml:space="preserve">
+    <value>[!!!!!!!! Your undo list will appear here. !!!!!!!!]</value>
+  </data>
+  <data name="MainUiBookHistory" xml:space="preserve">
+    <value>[!!! Book history !!!]</value>
+  </data>
+  <data name="MainUiDecoder" xml:space="preserve">
+    <value>[!! Decoder !!]</value>
+  </data>
+  <data name="MainUiOrganization" xml:space="preserve">
+    <value>[!!! Organization !!!]</value>
+  </data>
+  <data name="MainUiManagePrivateLocalTagNamespacesAliasesParentsAndXMP" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Manage private local tag namespaces, aliases, parents, and XMP sidecar tag export. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiInbox" xml:space="preserve">
+    <value>[!! Inbox !!]</value>
+  </data>
+  <data name="MainUiAutomation" xml:space="preserve">
+    <value>[!!! Automation !!!]</value>
+  </data>
+  <data name="MainUiBuildInspectableJSONActionsManageLocalModelFilesAnd" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Build inspectable JSON actions, manage local model files, and search the current folder through the local semantic index. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiMacros" xml:space="preserve">
+    <value>[!! Macros !!]</value>
+  </data>
+  <data name="MainUiBatch" xml:space="preserve">
+    <value>[!! Batch !!]</value>
+  </data>
+  <data name="MainUiModels" xml:space="preserve">
+    <value>[!! Models !!]</value>
+  </data>
+  <data name="MainUiCleanup" xml:space="preserve">
+    <value>[!! Cleanup !!]</value>
+  </data>
+  <data name="MainUiCleanupTools" xml:space="preserve">
+    <value>[!!!! Cleanup tools !!!!]</value>
+  </data>
+  <data name="MainUiFindDuplicateImagesBadExtensionsBrokenFilesAndTemporary" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Find duplicate images, bad extensions, broken files, and temporary artifacts in local folders. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiFileHealth" xml:space="preserve">
+    <value>[!!! File health !!!]</value>
+  </data>
+  <data name="MainUiRecovery" xml:space="preserve">
+    <value>[!! Recovery !!]</value>
+  </data>
+  <data name="MainUiNext" xml:space="preserve">
+    <value>[!! Next !!]</value>
+  </data>
+  <data name="MainUiSwapAB" xml:space="preserve">
+    <value>[!! Swap A/B !!]</value>
+  </data>
+  <data name="MainUiExit" xml:space="preserve">
+    <value>[!! Exit !!]</value>
+  </data>
+  <data name="MainUiBOpacity" xml:space="preserve">
+    <value>[!!! B opacity !!!]</value>
+  </data>
+  <data name="MainUiOpacity" xml:space="preserve">
+    <value>[!! Opacity !!]</value>
+  </data>
+  <data name="MainUiAnimation" xml:space="preserve">
+    <value>[!!! Animation !!!]</value>
+  </data>
+  <data name="MainUiFirstFrame" xml:space="preserve">
+    <value>[!!! First frame !!!]</value>
+  </data>
+  <data name="MainUiFirst" xml:space="preserve">
+    <value>[!! First !!]</value>
+  </data>
+  <data name="MainUiPreviousFrame" xml:space="preserve">
+    <value>[!!!! Previous frame !!!!]</value>
+  </data>
+  <data name="MainUiPrev" xml:space="preserve">
+    <value>[!! Prev !!]</value>
+  </data>
+  <data name="MainUiNextFrame" xml:space="preserve">
+    <value>[!!! Next frame !!!]</value>
+  </data>
+  <data name="MainUiLastFrame" xml:space="preserve">
+    <value>[!!! Last frame !!!]</value>
+  </data>
+  <data name="MainUiLast" xml:space="preserve">
+    <value>[!! Last !!]</value>
+  </data>
+  <data name="MainUiSpeed" xml:space="preserve">
+    <value>[!! Speed !!]</value>
+  </data>
+  <data name="MainUiCopyFrame" xml:space="preserve">
+    <value>[!!! Copy frame !!!]</value>
+  </data>
+  <data name="MainUiExportFrame" xml:space="preserve">
+    <value>[!!! Export frame !!!]</value>
+  </data>
+  <data name="MainUiSelection" xml:space="preserve">
+    <value>[!!! Selection !!!]</value>
+  </data>
+  <data name="MainUiCrop" xml:space="preserve">
+    <value>[!! Crop !!]</value>
+  </data>
+  <data name="MainUiAspectRatio" xml:space="preserve">
+    <value>[!!! Aspect ratio !!!]</value>
+  </data>
+  <data name="MainUiFree" xml:space="preserve">
+    <value>[!! Free !!]</value>
+  </data>
+  <data name="MainUiLocalExposure" xml:space="preserve">
+    <value>[!!!! Local exposure !!!!]</value>
+  </data>
+  <data name="MainUiRadius" xml:space="preserve">
+    <value>[!! Radius !!]</value>
+  </data>
+  <data name="MainUiStrength" xml:space="preserve">
+    <value>[!! Strength !!]</value>
+  </data>
+  <data name="MainUiApplyBrush" xml:space="preserve">
+    <value>[!!! Apply brush !!!]</value>
+  </data>
+  <data name="MainUiRedEyeCorrection" xml:space="preserve">
+    <value>[!!!!! Red-eye correction !!!!!]</value>
+  </data>
+  <data name="MainUiRedThreshold" xml:space="preserve">
+    <value>[!!!! Red threshold !!!!]</value>
+  </data>
+  <data name="MainUiApplyRedEye" xml:space="preserve">
+    <value>[!!!! Apply red-eye !!!!]</value>
+  </data>
+  <data name="MainUiCloneHeal" xml:space="preserve">
+    <value>[!!! Clone / heal !!!]</value>
+  </data>
+  <data name="MainUiClone" xml:space="preserve">
+    <value>[!! Clone !!]</value>
+  </data>
+  <data name="MainUiHeal" xml:space="preserve">
+    <value>[!! Heal !!]</value>
+  </data>
+  <data name="MainUiApplyRetouch" xml:space="preserve">
+    <value>[!!!! Apply retouch !!!!]</value>
+  </data>
+  <data name="MainUiInspector" xml:space="preserve">
+    <value>[!!! Inspector !!!]</value>
+  </data>
+  <data name="MainUiNearestNeighborPreview" xml:space="preserve">
+    <value>[!!!!!! Nearest-neighbor preview !!!!!!]</value>
+  </data>
+  <data name="MainUiUseCrispScalingForPixelArtInspection" xml:space="preserve">
+    <value>[!!!!!!!!!!! Use crisp scaling for pixel-art inspection. !!!!!!!!!!!]</value>
+  </data>
+  <data name="MainUiCoordinate" xml:space="preserve">
+    <value>[!!! Coordinate !!!]</value>
+  </data>
+  <data name="MainUiCopyHEX" xml:space="preserve">
+    <value>[!! Copy HEX !!]</value>
+  </data>
+  <data name="MainUiCopyRGB" xml:space="preserve">
+    <value>[!! Copy RGB !!]</value>
+  </data>
+  <data name="MainUiCopyHSV" xml:space="preserve">
+    <value>[!! Copy HSV !!]</value>
+  </data>
+  <data name="MainUiClearMeasure" xml:space="preserve">
+    <value>[!!!! Clear measure !!!!]</value>
+  </data>
+  <data name="MainUiMoreDetails" xml:space="preserve">
+    <value>[!!! More details !!!]</value>
+  </data>
+  <data name="MainUiColorHistogram" xml:space="preserve">
+    <value>[!!!!! Color &amp; histogram !!!!!]</value>
+  </data>
+  <data name="MainUiContentCredentials" xml:space="preserve">
+    <value>[!!!!! content credentials !!!!!]</value>
+  </data>
+  <data name="MainUiCheckingContentCredentials" xml:space="preserve">
+    <value>[!!!!!!!! Checking content credentials... !!!!!!!!]</value>
+  </data>
+  <data name="AboutUiSavesAZIPWithSystemInfoCodecReportRecent" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Saves a ZIP with system info, codec report, recent logs, crash log, recovery records, and redacted settings. No image bytes or private paths. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="AboutUiExportSupportBundle" xml:space="preserve">
+    <value>[!!!!!! Export support bundle !!!!!!]</value>
+  </data>
+  <data name="AutomationSettingsWindowClearLocalDerivedData" xml:space="preserve">
+    <value>[!!!!!! Clear local derived data !!!!!!]</value>
+  </data>
 </root>

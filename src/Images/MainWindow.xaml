@@ -57,7 +57,7 @@
                         BorderBrush="{DynamicResource AccentWarmBrush}"
                         BorderThickness="1"
                         HorizontalAlignment="Center"
-                        ToolTip="Images workspace">
+                        ToolTip="{loc:Loc MainUiImagesWorkspace}">
                     <TextBlock Text="&#xEB9F;"
                                FontFamily="{StaticResource IconFontFamily}"
                                FontSize="18"
@@ -71,13 +71,13 @@
                             Margin="0,20,0,0">
                     <Button Style="{StaticResource NavRailButton}"
                             Command="{Binding OpenCommand}"
-                            ToolTip="Open an image or folder"
+                            ToolTip="{loc:Loc MainUiOpenAnImageOrFolder}"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowLibrary}">
                         <TextBlock Text="&#xE8E5;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                     </Button>
                     <Button Style="{StaticResource NavRailButton}"
                             Command="{Binding ToggleGalleryCommand}"
-                            ToolTip="Gallery"
+                            ToolTip="{loc:Loc MainUiGallery}"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowGalleryWorkbench}">
                         <TextBlock Text="&#xE8A9;" FontFamily="{StaticResource IconFontFamily}" FontSize="16" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                     </Button>
@@ -86,7 +86,7 @@
                 <StackPanel Grid.Row="2">
                     <Button Style="{StaticResource NavRailButton}"
                             Command="{Binding SettingsCommand}"
-                            ToolTip="Settings"
+                            ToolTip="{loc:Loc SettingsWindowTitle}"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowSettings}">
                         <TextBlock Text="&#xE713;" FontFamily="{StaticResource IconFontFamily}" FontSize="15" TextAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                     </Button>
@@ -113,62 +113,62 @@
                     <ContextMenu Style="{StaticResource ViewportContextMenu}"
                                  AutomationProperties.AutomationId="ViewportContextMenu"
                                  AutomationProperties.Name="{loc:Loc AutomationMainWindowViewportContextMenu}">
-                        <MenuItem Header="Open…" Command="{Binding OpenCommand}" InputGestureText="{Binding ShortcutTexts[open]}">
+                        <MenuItem Header="{loc:Loc MainUiOpen}" Command="{Binding OpenCommand}" InputGestureText="{Binding ShortcutTexts[open]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Browse folder…" Command="{Binding BrowseFolderCommand}" InputGestureText="{Binding ShortcutTexts[browse-folder]}">
+                        <MenuItem Header="{loc:Loc CommandPalette_BrowseFolder}" Command="{Binding BrowseFolderCommand}" InputGestureText="{Binding ShortcutTexts[browse-folder]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8B7;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Paste from clipboard" Command="{Binding PasteFromClipboardCommand}" InputGestureText="{Binding ShortcutTexts[paste]}">
+                        <MenuItem Header="{loc:Loc CommandPalette_Paste}" Command="{Binding PasteFromClipboardCommand}" InputGestureText="{Binding ShortcutTexts[paste]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE77F;" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Reload" Command="{Binding ReloadCommand}" InputGestureText="{Binding ShortcutTexts[reload]}">
+                        <MenuItem Header="{loc:Loc Reload}" Command="{Binding ReloadCommand}" InputGestureText="{Binding ShortcutTexts[reload]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE72C;" />
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator />
-                        <MenuItem Header="Compare"
+                        <MenuItem Header="{loc:Loc DuplicateCleanupCompareButton}"
                                   AutomationProperties.AutomationId="ViewportContextMenuCompare">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8AB;" />
                             </MenuItem.Icon>
                             <MenuItem Header="{Binding CompareModeText}" Command="{Binding StartCompareCommand}" InputGestureText="{Binding ShortcutTexts[compare]}" />
-                            <MenuItem Header="Compare with…" Command="{Binding CompareWithCommand}" InputGestureText="{Binding ShortcutTexts[compare-with]}" AutomationProperties.AutomationId="ViewportContextMenuCompareWith" />
-                            <MenuItem Header="Exit compare" Command="{Binding ExitCompareCommand}" InputGestureText="Esc" />
+                            <MenuItem Header="{loc:Loc MainUiCompareWith}" Command="{Binding CompareWithCommand}" InputGestureText="{Binding ShortcutTexts[compare-with]}" AutomationProperties.AutomationId="ViewportContextMenuCompareWith" />
+                            <MenuItem Header="{loc:Loc MainUiExitCompare}" Command="{Binding ExitCompareCommand}" InputGestureText="Esc" />
                         </MenuItem>
-                        <MenuItem Header="View">
+                        <MenuItem Header="{loc:Loc AboutViewUpdate}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE890;" />
                             </MenuItem.Icon>
-                            <MenuItem Header="Previous page" Command="{Binding PrevPageCommand}" />
-                            <MenuItem Header="Next page" Command="{Binding NextPageCommand}" />
+                            <MenuItem Header="{loc:Loc AutomationMainWindowPreviousPage}" Command="{Binding PrevPageCommand}" />
+                            <MenuItem Header="{loc:Loc AutomationMainWindowNextPage}" Command="{Binding NextPageCommand}" />
                             <Separator />
-                            <MenuItem Header="Metadata HUD"
+                            <MenuItem Header="{loc:Loc AutomationMainWindowMetadataHUD}"
                                       Command="{Binding ToggleMetadataHudCommand}"
                                       InputGestureText="{Binding ShortcutTexts[metadata-hud]}"
                                       IsCheckable="True"
                                       IsChecked="{Binding IsMetadataHudVisible, Mode=OneWay}" />
                         </MenuItem>
                         <Separator />
-                        <MenuItem Header="Edit">
+                        <MenuItem Header="{loc:Loc CommandPalette_Category_Edit}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE70F;" />
                             </MenuItem.Icon>
-                            <MenuItem Header="Edit history" Command="{Binding OpenEditStackCommand}" InputGestureText="{Binding ShortcutTexts[edit-stack]}" />
+                            <MenuItem Header="{loc:Loc EditHistoryHeading}" Command="{Binding OpenEditStackCommand}" InputGestureText="{Binding ShortcutTexts[edit-stack]}" />
                             <Separator />
-                            <MenuItem Header="Adjustments…" Command="{Binding OpenAdjustmentsCommand}" InputGestureText="{Binding ShortcutTexts[adjustments]}" />
-                            <MenuItem Header="Effects…" Command="{Binding OpenEffectsCommand}" InputGestureText="{Binding ShortcutTexts[effects]}" />
-                            <MenuItem Header="Auto enhance" Command="{Binding AutoEnhanceCommand}" InputGestureText="{Binding ShortcutTexts[auto-enhance]}" />
-                            <MenuItem Header="Annotations…" Command="{Binding OpenAnnotationsCommand}" />
+                            <MenuItem Header="{loc:Loc MainUiAdjustments}" Command="{Binding OpenAdjustmentsCommand}" InputGestureText="{Binding ShortcutTexts[adjustments]}" />
+                            <MenuItem Header="{loc:Loc MainUiEffects}" Command="{Binding OpenEffectsCommand}" InputGestureText="{Binding ShortcutTexts[effects]}" />
+                            <MenuItem Header="{loc:Loc CommandPalette_AutoEnhance}" Command="{Binding AutoEnhanceCommand}" InputGestureText="{Binding ShortcutTexts[auto-enhance]}" />
+                            <MenuItem Header="{loc:Loc MainUiAnnotations}" Command="{Binding OpenAnnotationsCommand}" />
                             <Separator />
-                            <MenuItem Header="Local tools">
+                            <MenuItem Header="{loc:Loc MainUiLocalTools}">
                                 <MenuItem Header="{Binding ExposureBrushModeText}"
                                           Command="{Binding ToggleExposureBrushModeCommand}"
                                           InputGestureText="{Binding ShortcutTexts[exposure-brush]}"
@@ -190,72 +190,72 @@
                                           IsCheckable="True"
                                           IsChecked="{Binding IsSelectionMode, Mode=OneWay}" />
                             </MenuItem>
-                            <MenuItem Header="Overlay">
+                            <MenuItem Header="{loc:Loc MainCompareOverlay}">
                                 <MenuItem Header="{Binding OverlayModeText}"
                                           Command="{Binding ToggleOverlayModeCommand}"
                                           IsCheckable="True"
                                           IsChecked="{Binding IsPinnedOverlayMode, Mode=OneWay}" />
-                                <MenuItem Header="Exit overlay"
+                                <MenuItem Header="{loc:Loc MainUiExitOverlay}"
                                           Command="{Binding ExitOverlayModeCommand}"
                                           InputGestureText="Ctrl+Alt+O" />
                             </MenuItem>
                         </MenuItem>
-                        <MenuItem Header="Transform">
+                        <MenuItem Header="{loc:Loc MainUiTransform}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE7AD;" />
                             </MenuItem.Icon>
-                            <MenuItem Header="Resize…" Command="{Binding OpenResizeDialogCommand}" InputGestureText="{Binding ShortcutTexts[resize]}" />
-                            <MenuItem Header="Perspective…" Command="{Binding OpenPerspectiveCommand}" InputGestureText="{Binding ShortcutTexts[perspective]}" />
+                            <MenuItem Header="{loc:Loc MainUiResize}" Command="{Binding OpenResizeDialogCommand}" InputGestureText="{Binding ShortcutTexts[resize]}" />
+                            <MenuItem Header="{loc:Loc MainUiPerspective}" Command="{Binding OpenPerspectiveCommand}" InputGestureText="{Binding ShortcutTexts[perspective]}" />
                             <MenuItem Header="{Binding CropModeText}"
                                       Command="{Binding ToggleCropModeCommand}"
                                       InputGestureText="{Binding ShortcutTexts[crop-mode]}"
                                       IsCheckable="True"
                                       IsChecked="{Binding IsCropMode, Mode=OneWay}" />
                             <Separator />
-                            <MenuItem Header="Rotate left" Command="{Binding RotateCcwCommand}" />
-                            <MenuItem Header="Rotate right" Command="{Binding RotateCwCommand}" />
-                            <MenuItem Header="Rotate 180°" Command="{Binding Rotate180Command}" />
-                            <MenuItem Header="Apply rotation to file" Command="{Binding ApplyRotationToFileCommand}" />
+                            <MenuItem Header="{loc:Loc AutomationMainWindowRotateLeft}" Command="{Binding RotateCcwCommand}" />
+                            <MenuItem Header="{loc:Loc AutomationMainWindowRotateRight}" Command="{Binding RotateCwCommand}" />
+                            <MenuItem Header="{loc:Loc MainUiRotate180}" Command="{Binding Rotate180Command}" />
+                            <MenuItem Header="{loc:Loc MainUiApplyRotationToFile}" Command="{Binding ApplyRotationToFileCommand}" />
                             <Separator />
-                            <MenuItem Header="Flip horizontal" Command="{Binding FlipHorizontalCommand}" />
-                            <MenuItem Header="Flip vertical" Command="{Binding FlipVerticalCommand}" />
+                            <MenuItem Header="{loc:Loc CommandPalette_FlipH}" Command="{Binding FlipHorizontalCommand}" />
+                            <MenuItem Header="{loc:Loc CommandPalette_FlipV}" Command="{Binding FlipVerticalCommand}" />
                         </MenuItem>
-                        <MenuItem Header="Organize">
+                        <MenuItem Header="{loc:Loc MainUiOrganize}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8EC;" />
                             </MenuItem.Icon>
-                            <MenuItem Header="Reference board" Command="{Binding OpenReferenceBoardCommand}" InputGestureText="{Binding ShortcutTexts[reference-board]}" />
-                            <MenuItem Header="Duplicate cleanup" Command="{Binding OpenDuplicateCleanupCommand}" InputGestureText="{Binding ShortcutTexts[duplicate-cleanup]}" />
-                            <MenuItem Header="Semantic search" Command="{Binding OpenSemanticSearchCommand}" />
-                            <MenuItem Header="Tag relationships" Command="{Binding OpenTagGraphCommand}" InputGestureText="{Binding ShortcutTexts[tag-graph]}" />
-                            <MenuItem Header="Import inbox" Command="{Binding OpenImportInboxCommand}" InputGestureText="{Binding ShortcutTexts[import-inbox]}" />
+                            <MenuItem Header="{loc:Loc ReferenceBoardHeading}" Command="{Binding OpenReferenceBoardCommand}" InputGestureText="{Binding ShortcutTexts[reference-board]}" />
+                            <MenuItem Header="{loc:Loc DuplicateCleanupHeading}" Command="{Binding OpenDuplicateCleanupCommand}" InputGestureText="{Binding ShortcutTexts[duplicate-cleanup]}" />
+                            <MenuItem Header="{loc:Loc SemanticSearchHeading}" Command="{Binding OpenSemanticSearchCommand}" />
+                            <MenuItem Header="{loc:Loc TagGraphHeading}" Command="{Binding OpenTagGraphCommand}" InputGestureText="{Binding ShortcutTexts[tag-graph]}" />
+                            <MenuItem Header="{loc:Loc ImportInboxHeading}" Command="{Binding OpenImportInboxCommand}" InputGestureText="{Binding ShortcutTexts[import-inbox]}" />
                         </MenuItem>
-                        <MenuItem Header="Workflow tools">
+                        <MenuItem Header="{loc:Loc MainUiWorkflowTools}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE945;" />
                             </MenuItem.Icon>
-                            <MenuItem Header="Macro actions" Command="{Binding OpenMacroActionsCommand}" InputGestureText="{Binding ShortcutTexts[macro-actions]}" />
-                            <MenuItem Header="Batch processor" Command="{Binding OpenBatchProcessorCommand}" InputGestureText="{Binding ShortcutTexts[batch-processor]}" />
+                            <MenuItem Header="{loc:Loc MacroHeading}" Command="{Binding OpenMacroActionsCommand}" InputGestureText="{Binding ShortcutTexts[macro-actions]}" />
+                            <MenuItem Header="{loc:Loc BatchHeading}" Command="{Binding OpenBatchProcessorCommand}" InputGestureText="{Binding ShortcutTexts[batch-processor]}" />
                             <Separator />
-                            <MenuItem Header="File health scan" Command="{Binding OpenFileHealthScanCommand}" InputGestureText="{Binding ShortcutTexts[file-health-scan]}" />
-                            <MenuItem Header="Recovery center" Command="{Binding OpenRecoveryCenterCommand}" />
-                            <MenuItem Header="Model manager" Command="{Binding OpenModelManagerCommand}" />
+                            <MenuItem Header="{loc:Loc FileHealthScanHeading}" Command="{Binding OpenFileHealthScanCommand}" InputGestureText="{Binding ShortcutTexts[file-health-scan]}" />
+                            <MenuItem Header="{loc:Loc RecoveryCenterHeading}" Command="{Binding OpenRecoveryCenterCommand}" />
+                            <MenuItem Header="{loc:Loc ModelManagerHeading}" Command="{Binding OpenModelManagerCommand}" />
                         </MenuItem>
                         <Separator />
-                        <MenuItem Header="File actions">
+                        <MenuItem Header="{loc:Loc MainUiFileActions}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
                             </MenuItem.Icon>
-                            <MenuItem Header="Reveal in Explorer" Command="{Binding RevealCommand}" />
-                            <MenuItem Header="Open with default app" Command="{Binding OpenInDefaultAppCommand}" />
+                            <MenuItem Header="{loc:Loc CommandPalette_Reveal}" Command="{Binding RevealCommand}" />
+                            <MenuItem Header="{loc:Loc MainUiOpenWithDefaultApp}" Command="{Binding OpenInDefaultAppCommand}" />
                             <Separator />
-                            <MenuItem Header="Copy">
-                                <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}" />
-                                <MenuItem Header="Copy image" Command="{Binding CopyImageCommand}" />
-                                <MenuItem Header="Copy image and path" Command="{Binding CopyImageAndPathCommand}" />
+                            <MenuItem Header="{loc:Loc Copy}">
+                                <MenuItem Header="{loc:Loc MainUiCopyPath}" Command="{Binding CopyPathCommand}" />
+                                <MenuItem Header="{loc:Loc MainUiCopyImage}" Command="{Binding CopyImageCommand}" />
+                                <MenuItem Header="{loc:Loc MainUiCopyImageAndPath}" Command="{Binding CopyImageAndPathCommand}" />
                                 <Separator />
-                                <MenuItem Header="Copy to folder…" Command="{Binding CopyToFolderCommand}" />
-                                <MenuItem Header="Copy to recent folder"
+                                <MenuItem Header="{loc:Loc MainUiCopyToFolder}" Command="{Binding CopyToFolderCommand}" />
+                                <MenuItem Header="{loc:Loc MainUiCopyToRecentFolder}"
                                           Tag="{Binding}"
                                           ItemsSource="{Binding RecentTransferFolders}"
                                           Visibility="{Binding RecentTransferFolders.Count, Converter={StaticResource BoolToVis}}">
@@ -269,9 +269,9 @@
                                     </MenuItem.ItemContainerStyle>
                                 </MenuItem>
                             </MenuItem>
-                            <MenuItem Header="Move">
-                                <MenuItem Header="Move to folder…" Command="{Binding MoveToFolderCommand}" />
-                                <MenuItem Header="Move to recent folder"
+                            <MenuItem Header="{loc:Loc MainUiMove}">
+                                <MenuItem Header="{loc:Loc MainUiMoveToFolder}" Command="{Binding MoveToFolderCommand}" />
+                                <MenuItem Header="{loc:Loc MainUiMoveToRecentFolder}"
                                           Tag="{Binding}"
                                           ItemsSource="{Binding RecentTransferFolders}"
                                           Visibility="{Binding RecentTransferFolders.Count, Converter={StaticResource BoolToVis}}">
@@ -286,52 +286,52 @@
                                 </MenuItem>
                             </MenuItem>
                             <Separator />
-                            <MenuItem Header="Strip GPS location" Command="{Binding StripLocationCommand}" />
-                            <MenuItem Header="Strip metadata">
-                                <MenuItem Header="Device info (make, model, serial)" Command="{Binding StripDeviceInfoCommand}" />
-                                <MenuItem Header="Timestamps" Command="{Binding StripTimestampsCommand}" />
-                                <MenuItem Header="Software and comments" Command="{Binding StripSoftwareCommand}" />
+                            <MenuItem Header="{loc:Loc CommandPalette_StripGps}" Command="{Binding StripLocationCommand}" />
+                            <MenuItem Header="{loc:Loc MacroStripMetadata}">
+                                <MenuItem Header="{loc:Loc MainUiDeviceInfoMakeModelSerial}" Command="{Binding StripDeviceInfoCommand}" />
+                                <MenuItem Header="{loc:Loc MainUiTimestamps}" Command="{Binding StripTimestampsCommand}" />
+                                <MenuItem Header="{loc:Loc MainUiSoftwareAndComments}" Command="{Binding StripSoftwareCommand}" />
                                 <Separator />
-                                <MenuItem Header="All metadata" Command="{Binding StripAllMetadataCommand}" />
+                                <MenuItem Header="{loc:Loc MainUiAllMetadata}" Command="{Binding StripAllMetadataCommand}" />
                             </MenuItem>
-                            <MenuItem Header="Extract motion video"
+                            <MenuItem Header="{loc:Loc CommandPalette_ExtractMotionVideo}"
                                       Command="{Binding ExtractMotionVideoCommand}"
                                       Visibility="{Binding IsMotionPhoto, Converter={StaticResource BoolToVis}}" />
                         </MenuItem>
-                        <MenuItem Header="Output">
+                        <MenuItem Header="{loc:Loc BatchOutputHeading}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE74E;" />
                             </MenuItem.Icon>
-                            <MenuItem Header="Save a copy…" Command="{Binding SaveAsCopyCommand}" InputGestureText="{Binding ShortcutTexts[save-copy]}" />
-                            <MenuItem Header="Export workbench…" Command="{Binding OpenExportWorkbenchCommand}" InputGestureText="{Binding ShortcutTexts[export-workbench]}" />
+                            <MenuItem Header="{loc:Loc MainUiSaveACopy}" Command="{Binding SaveAsCopyCommand}" InputGestureText="{Binding ShortcutTexts[save-copy]}" />
+                            <MenuItem Header="{loc:Loc MainUiExportWorkbench}" Command="{Binding OpenExportWorkbenchCommand}" InputGestureText="{Binding ShortcutTexts[export-workbench]}" />
                             <Separator />
-                            <MenuItem Header="Print…" Command="{Binding PrintCommand}" InputGestureText="{Binding ShortcutTexts[print]}" />
-                            <MenuItem Header="Print to default printer" Command="{Binding PrintDefaultCommand}" />
-                            <MenuItem Header="Send to email" Command="{Binding SendToEmailCommand}" />
+                            <MenuItem Header="{loc:Loc MainUiPrint}" Command="{Binding PrintCommand}" InputGestureText="{Binding ShortcutTexts[print]}" />
+                            <MenuItem Header="{loc:Loc MainUiPrintToDefaultPrinter}" Command="{Binding PrintDefaultCommand}" />
+                            <MenuItem Header="{loc:Loc MainUiSendToEmail}" Command="{Binding SendToEmailCommand}" />
                             <Separator />
-                            <MenuItem Header="Set as desktop wallpaper">
-                                <MenuItem Header="Fill"
+                            <MenuItem Header="{loc:Loc MainUiSetAsDesktopWallpaper}">
+                                <MenuItem Header="{loc:Loc MainUiFill}"
                                           Command="{Binding SetAsWallpaperCommand}"
                                           CommandParameter="Fill" />
-                                <MenuItem Header="Fit"
+                                <MenuItem Header="{loc:Loc MainUiFit}"
                                           Command="{Binding SetAsWallpaperCommand}"
                                           CommandParameter="Fit" />
-                                <MenuItem Header="Span"
+                                <MenuItem Header="{loc:Loc MainUiSpan}"
                                           Command="{Binding SetAsWallpaperCommand}"
                                           CommandParameter="Span" />
-                                <MenuItem Header="Tile"
+                                <MenuItem Header="{loc:Loc MainUiTile}"
                                           Command="{Binding SetAsWallpaperCommand}"
                                           CommandParameter="Tile" />
                             </MenuItem>
                         </MenuItem>
                         <Separator />
-                        <MenuItem Header="Move to Recycle Bin…" Command="{Binding DeleteCommand}" InputGestureText="{Binding ShortcutTexts[delete]}">
+                        <MenuItem Header="{loc:Loc MainUiMoveToRecycleBin}" Command="{Binding DeleteCommand}" InputGestureText="{Binding ShortcutTexts[delete]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE74D;" />
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator />
-                        <MenuItem Header="Settings…" Command="{Binding SettingsCommand}" InputGestureText="{Binding ShortcutTexts[settings]}">
+                        <MenuItem Header="{loc:Loc MainUiSettings}" Command="{Binding SettingsCommand}" InputGestureText="{Binding ShortcutTexts[settings]}">
                             <MenuItem.Icon>
                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE713;" />
                             </MenuItem.Icon>
@@ -379,7 +379,7 @@
                             Style="{DynamicResource ChromeButton}"
                             Command="{Binding StopMotionVideoCommand}"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowStopMotionVideo}"
-                            ToolTip="Stop video" />
+                            ToolTip="{loc:Loc MainUiStopVideo}" />
                 </Grid>
 
                 <Grid Visibility="{Binding ShowCompareMode, Converter={StaticResource BoolToVis}}"
@@ -485,7 +485,7 @@
                                 BorderBrush="{DynamicResource HairlineBrush}"
                                 BorderThickness="1">
                             <StackPanel>
-                                <TextBlock Text="Overlay A/B"
+                                <TextBlock Text="{loc:Loc MainUiOverlayAB}"
                                            FontSize="11"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource AccentBrush}" />
@@ -600,11 +600,11 @@
                                RenderOptions.BitmapScalingMode="HighQuality"
                                Opacity="0.94" />
                         <TextBlock Style="{StaticResource Text.Title}"
-                                   Text="Open an image to begin"
+                                   Text="{loc:Loc MainUiOpenAnImageToBegin}"
                                    HorizontalAlignment="Center"
                                    Margin="0,16,0,0" />
                         <TextBlock Style="{StaticResource Text.Body}"
-                                   Text="Drop an image here, choose one from disk, or paste from the clipboard."
+                                   Text="{loc:Loc MainUiDropAnImageHereChooseOneFromDiskOr}"
                                    HorizontalAlignment="Center"
                                    TextAlignment="Center"
                                    Margin="0,8,0,0"
@@ -637,7 +637,7 @@
                                            VerticalAlignment="Top"
                                            Margin="0,2,0,0" />
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Style="{StaticResource Text.Body}" Text="Local by default" />
+                                    <TextBlock Style="{StaticResource Text.Body}" Text="{loc:Loc MainUiLocalByDefault}" />
                                     <TextBlock Style="{StaticResource Text.Caption}"
                                                Text="{Binding FirstRunPrivacyText}"
                                                TextWrapping="Wrap" />
@@ -657,7 +657,7 @@
                                            VerticalAlignment="Top"
                                            Margin="0,2,0,0" />
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Style="{StaticResource Text.Body}" Text="Broad format support" />
+                                    <TextBlock Style="{StaticResource Text.Body}" Text="{loc:Loc MainUiBroadFormatSupport}" />
                                     <TextBlock Style="{StaticResource Text.Caption}"
                                                Text="{Binding FirstRunFormatStatusText}"
                                                TextWrapping="Wrap" />
@@ -677,7 +677,7 @@
                                            VerticalAlignment="Top"
                                            Margin="0,2,0,0" />
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Style="{StaticResource Text.Body}" Text="Text extraction readiness" />
+                                    <TextBlock Style="{StaticResource Text.Body}" Text="{loc:Loc MainUiTextExtractionReadiness}" />
                                     <TextBlock Style="{StaticResource Text.Caption}"
                                                Text="{Binding FirstRunOcrStatusText}"
                                                TextWrapping="Wrap" />
@@ -697,7 +697,7 @@
                                            VerticalAlignment="Top"
                                            Margin="0,2,0,0" />
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Style="{StaticResource Text.Body}" Text="Document previews" />
+                                    <TextBlock Style="{StaticResource Text.Body}" Text="{loc:Loc MainUiDocumentPreviews}" />
                                     <TextBlock Style="{StaticResource Text.Caption}"
                                                Text="{Binding FirstRunDocumentStatusText}"
                                                TextWrapping="Wrap" />
@@ -717,7 +717,7 @@
                                            VerticalAlignment="Top"
                                            Margin="0,2,0,0" />
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Style="{StaticResource Text.Body}" Text="Recovery links" />
+                                    <TextBlock Style="{StaticResource Text.Body}" Text="{loc:Loc MainUiRecoveryLinks}" />
                                     <TextBlock Style="{StaticResource Text.Caption}"
                                                Text="{Binding FirstRunRecoveryText}"
                                                TextWrapping="Wrap" />
@@ -739,7 +739,7 @@
                                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                Margin="0,0,9,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Open image…"
+                                    <TextBlock Text="{loc:Loc MainUiOpenImage}"
                                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                VerticalAlignment="Center" />
                                 </StackPanel>
@@ -756,7 +756,7 @@
                                                FontSize="12"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Paste" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc MainUiPaste}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding SettingsCommand}"
@@ -771,14 +771,14 @@
                                                FontSize="12"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Settings" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc SettingsWindowTitle}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding AboutCommand}"
                                     Style="{StaticResource ChromeButton}"
                                     Visibility="Collapsed"
                                     Margin="0,0,0,8"
-                                    ToolTip="Open diagnostics and app information"
+                                    ToolTip="{loc:Loc MainUiOpenDiagnosticsAndAppInformation}"
                                     AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenDiagnostics}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE946;"
@@ -786,7 +786,7 @@
                                                FontSize="12"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Diagnostics" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc SettingsSectionDiagnostics}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                         </WrapPanel>
@@ -802,7 +802,7 @@
                                                FontSize="12"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Import inbox" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc ImportInboxHeading}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                         </WrapPanel>
@@ -810,7 +810,7 @@
                         <StackPanel Margin="0,14,0,0"
                                     Visibility="{Binding RecentFolders.Count, Converter={StaticResource BoolToVis}}">
                             <TextBlock Style="{StaticResource Text.Hint}"
-                                       Text="Recent folders"
+                                       Text="{loc:Loc AutomationMainWindowRecentFolders}"
                                        FontWeight="SemiBold"
                                        Margin="0,0,0,6" />
                             <ItemsControl ItemsSource="{Binding RecentFolders}" MaxHeight="120">
@@ -838,7 +838,7 @@
                                     Visibility="Collapsed"
                                     >
                             <TextBlock Style="{StaticResource Text.Hint}"
-                                       Text="Recent books"
+                                       Text="{loc:Loc MainUiRecentBooks}"
                                        FontWeight="SemiBold"
                                        Margin="0,0,0,6" />
                             <ItemsControl ItemsSource="{Binding RecentArchiveBooks}" MaxHeight="90">
@@ -868,7 +868,7 @@
                         </StackPanel>
 
                         <TextBlock Style="{StaticResource Text.Hint}"
-                                   Text="Tip: arrow keys browse the folder, Enter commits a rename."
+                                   Text="{loc:Loc MainUiTipArrowKeysBrowseTheFolderEnterCommitsA}"
                                    Visibility="Collapsed"
                                    HorizontalAlignment="Center"
                                    TextAlignment="Center"
@@ -915,7 +915,7 @@
                                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Try another image"
+                                    <TextBlock Text="{loc:Loc AutomationMainWindowTryAnotherImage}"
                                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                VerticalAlignment="Center" />
                                 </StackPanel>
@@ -931,7 +931,7 @@
                                                FontSize="12"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Codec details" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc MainUiCodecDetails}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding InstallStoreExtensionCommand}"
@@ -961,7 +961,7 @@
                                                FontSize="12"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Reveal file" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc MainUiRevealFile}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                         </WrapPanel>
@@ -1056,7 +1056,7 @@
                             <StackPanel Grid.Column="1"
                                         Margin="12,0,16,0"
                                         VerticalAlignment="Center">
-                                <TextBlock Text="Gallery"
+                                <TextBlock Text="{loc:Loc MainUiGallery}"
                                            Style="{StaticResource Text.Title}"
                                            FontSize="18" />
                                 <TextBlock Text="{Binding GalleryStatusText}"
@@ -1077,7 +1077,7 @@
                                                    FontSize="10"
                                                    Margin="0,0,6,0"
                                                    VerticalAlignment="Center" />
-                                        <TextBlock Text="Indexing filters..."
+                                        <TextBlock Text="{loc:Loc MainUiIndexingFilters}"
                                                    Style="{StaticResource Text.Hint}"
                                                    VerticalAlignment="Center" />
                                     </StackPanel>
@@ -1089,7 +1089,7 @@
                                     Width="34"
                                     Height="34"
                                     Padding="0"
-                                    ToolTip="Close gallery"
+                                    ToolTip="{loc:Loc AutomationMainWindowCloseGallery}"
                                     AutomationProperties.Name="{loc:Loc AutomationMainWindowCloseGallery}">
                                 <TextBlock Text="&#xE8BB;"
                                            FontFamily="{StaticResource IconFontFamily}"
@@ -1139,7 +1139,7 @@
                                             Padding="0"
                                             Margin="6,0,0,0"
                                             Visibility="{Binding HasGalleryFilter, Converter={StaticResource BoolToVis}}"
-                                            ToolTip="Clear filter"
+                                            ToolTip="{loc:Loc MainUiClearFilter}"
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowClearGalleryFilter}">
                                         <Button.Style>
                                             <Style TargetType="Button" BasedOn="{StaticResource ChromeButton}">
@@ -1177,7 +1177,7 @@
                                                FontSize="11"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Name" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc BatchPresetName}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding SetFolderSortCommand}"
@@ -1203,7 +1203,7 @@
                                                FontSize="11"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Explorer" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc MainUiExplorer}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding SetFolderSortCommand}"
@@ -1228,7 +1228,7 @@
                                                FontSize="11"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Newest" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc MainUiNewest}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding SetFolderSortCommand}"
@@ -1253,7 +1253,7 @@
                                                FontSize="11"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Type" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc RecoveryCenterMetaType}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding SetFolderSortCommand}"
@@ -1279,7 +1279,7 @@
                                                FontSize="11"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Size" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc ExportPreviewSize}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding ApplyGallerySmartFilterCommand}"
@@ -1297,7 +1297,7 @@
                                                FontSize="11"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Landscape" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc MainUiLandscape}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding ApplyGallerySmartFilterCommand}"
@@ -1315,7 +1315,7 @@
                                                FontSize="11"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Portrait" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc MainUiPortrait}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding ApplyGallerySmartFilterCommand}"
@@ -1333,7 +1333,7 @@
                                                FontSize="11"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Recent" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc MainUiRecent}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding ApplyGallerySmartFilterCommand}"
@@ -1351,7 +1351,7 @@
                                                FontSize="11"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Large" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc MainUiLarge}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding ApplyGallerySmartFilterCommand}"
@@ -1369,7 +1369,7 @@
                                                FontSize="11"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Duplicates" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc MainUiDuplicates}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <TextBlock Text="{Binding GalleryFilterSummaryText}"
@@ -1400,7 +1400,7 @@
                                         SmallChange="10"
                                         LargeChange="40"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowThumbnailSize}"
-                                        ToolTip="Thumbnail size" />
+                                        ToolTip="{loc:Loc AutomationMainWindowThumbnailSize}" />
                                 <TextBlock Text="&#xE8A3;"
                                            FontFamily="{StaticResource IconFontFamily}"
                                            FontSize="16"
@@ -1468,21 +1468,21 @@
                                             AutomationProperties.ItemStatus="{Binding PositionText}">
                                         <Button.ContextMenu>
                                             <ContextMenu Style="{StaticResource ViewportContextMenu}">
-                                                <MenuItem Header="Open"
+                                                <MenuItem Header="{loc:Loc SemanticSearchOpen}"
                                                           Command="{Binding PlacementTarget.Tag.OpenPreviewItemCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                           CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                     <MenuItem.Icon>
                                                         <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
                                                     </MenuItem.Icon>
                                                 </MenuItem>
-                                                <MenuItem Header="Reveal in Explorer"
+                                                <MenuItem Header="{loc:Loc CommandPalette_Reveal}"
                                                           Command="{Binding PlacementTarget.Tag.RevealPreviewItemCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                           CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                     <MenuItem.Icon>
                                                         <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE838;" />
                                                     </MenuItem.Icon>
                                                 </MenuItem>
-                                                <MenuItem Header="Copy path"
+                                                <MenuItem Header="{loc:Loc MainUiCopyPath}"
                                                           Command="{Binding PlacementTarget.Tag.CopyPreviewPathCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                           CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                     <MenuItem.Icon>
@@ -1570,7 +1570,7 @@
                                            FontSize="28"
                                            Foreground="{DynamicResource OverlayBrush}"
                                            HorizontalAlignment="Center" />
-                                <TextBlock Text="No matching images"
+                                <TextBlock Text="{loc:Loc MainUiNoMatchingImages}"
                                            Style="{StaticResource Text.Title}"
                                            FontSize="16"
                                            TextAlignment="Center"
@@ -1692,7 +1692,7 @@
                                     FontSize="11"
                                     Content="&#xE76B;"
                                     Command="{Binding PrevPageCommand}"
-                                    ToolTip="Previous page"
+                                    ToolTip="{loc:Loc AutomationMainWindowPreviousPage}"
                                     AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousPage}" />
                             <Slider Width="152"
                                     Minimum="1"
@@ -1707,7 +1707,7 @@
                                     Margin="8,0,0,0"
                                     ToolTip="{Binding PagePositionText}"
                                     AutomationProperties.Name="{loc:Loc AutomationMainWindowPageScrubber}"
-                                    AutomationProperties.HelpText="Drag to jump to another page in the current document or archive." />
+                                    AutomationProperties.HelpText="{loc:Loc MainUiDragToJumpToAnotherPageInTheCurrent}" />
                             <TextBlock Text="{Binding PagePositionText}"
                                        Foreground="{DynamicResource FloatingChromeTextBrush}"
                                        FontSize="12"
@@ -1720,7 +1720,7 @@
                                     FontSize="11"
                                     Content="&#xE76C;"
                                     Command="{Binding NextPageCommand}"
-                                    ToolTip="Next page"
+                                    ToolTip="{loc:Loc AutomationMainWindowNextPage}"
                                     AutomationProperties.Name="{loc:Loc AutomationMainWindowNextPage}" />
                         </StackPanel>
                     </Border>
@@ -1745,7 +1745,7 @@
                                                Foreground="{DynamicResource AccentBrush}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,8,0" />
-                                    <TextBlock Text="Photo metadata"
+                                    <TextBlock Text="{loc:Loc AutomationMainWindowPhotoMetadata}"
                                                Foreground="{DynamicResource FloatingChromeTextBrush}"
                                                FontSize="12"
                                                FontWeight="SemiBold"
@@ -1753,7 +1753,7 @@
                                 </StackPanel>
                                 <Button Command="{Binding ToggleMetadataHudCommand}"
                                         Content="&#xE711;"
-                                        ToolTip="Hide metadata HUD"
+                                        ToolTip="{loc:Loc AutomationMainWindowHideMetadataHUD}"
                                         DockPanel.Dock="Right"
                                         Margin="16,-3,-7,-3"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowHideMetadataHUD}">
@@ -1951,7 +1951,7 @@
                                        Foreground="{DynamicResource AccentBrush}"
                                        VerticalAlignment="Center"
                                        Margin="0,0,10,0" />
-                            <TextBlock Text="Scroll to zoom  ·  drag to pan  ·  double-click to fit"
+                            <TextBlock Text="{loc:Loc MainUiScrollToZoomDragToPanDoubleClickTo}"
                                        Foreground="{DynamicResource FloatingChromeTextBrush}"
                                        FontSize="12"
                                        VerticalAlignment="Center" />
@@ -1975,14 +1975,14 @@
                                           Focusable="False">
                                 <StackPanel>
                                     <TextBlock Style="{StaticResource Text.Title}"
-                                               Text="Keyboard shortcuts"
+                                               Text="{loc:Loc SettingsHotkeysFixed}"
                                                HorizontalAlignment="Center" />
                                     <TextBlock Style="{StaticResource Text.Subtitle}"
-                                               Text="Press any key to dismiss."
+                                               Text="{loc:Loc MainUiPressAnyKeyToDismiss}"
                                                HorizontalAlignment="Center"
                                                Margin="0,6,0,22" />
 
-                                    <TextBlock Text="Navigate" Style="{StaticResource SectionLabel}" />
+                                    <TextBlock Text="{loc:Loc CommandPalette_Category_Navigation}" Style="{StaticResource SectionLabel}" />
                                     <Grid Margin="0,0,0,14">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
@@ -1992,18 +1992,18 @@
                                             <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding PreviousNextShortcutText}" />
-                                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Previous / next image or book page" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiPreviousNextImageOrBookPage}" />
                                         <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding FirstLastShortcutText}" />
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="First / last image or book page" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiFirstLastImageOrBookPage}" />
                                         <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Space / Bksp" />
-                                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Next / previous image or book page" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiNextPreviousImageOrBookPage}" />
                                         <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Mouse X1 / X2" />
-                                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Previous / next image (5-button mouse)" />
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiPreviousNextImage5ButtonMouse}" />
                                         <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[refresh]}" />
-                                        <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Rescan folder" />
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiRescanFolder}" />
                                     </Grid>
 
-                                    <TextBlock Text="View" Style="{StaticResource SectionLabel}" />
+                                    <TextBlock Text="{loc:Loc AboutViewUpdate}" Style="{StaticResource SectionLabel}" />
                                     <Grid Margin="0,0,0,14">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
@@ -2013,46 +2013,46 @@
                                             <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Wheel" />
-                                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom about cursor" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiZoomAboutCursor}" />
                                         <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Shift + Wheel" />
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Pan horizontally" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiPanHorizontally}" />
                                         <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="+ / −" />
-                                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom in / out" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiZoomInOut}" />
                                         <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="0 / 1" />
-                                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Fit to viewport / 1:1 pixel" />
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiFitToViewport11Pixel}" />
                                         <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="F11" />
-                                        <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle fullscreen" />
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiToggleFullscreen}" />
                                         <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[filmstrip]}" />
-                                        <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle filmstrip" />
+                                        <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc CommandPalette_Filmstrip}" />
                                         <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[metadata-hud]}" />
-                                        <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle metadata HUD" />
+                                        <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc CommandPalette_MetadataHud}" />
                                         <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[crop-mode]}" />
-                                        <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle crop mode" />
+                                        <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc CommandPalette_CropMode}" />
                                         <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[selection-mode]}" />
-                                        <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle pixel selection" />
+                                        <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiTogglePixelSelection}" />
                                         <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[exposure-brush]}" />
-                                        <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle exposure brush" />
+                                        <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc CommandPalette_ExposureBrush}" />
                                         <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[red-eye]}" />
-                                        <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle red-eye correction" />
+                                        <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc CommandPalette_RedEye}" />
                                         <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[retouch]}" />
-                                        <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle clone/heal retouch" />
+                                        <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc CommandPalette_Retouch}" />
                                         <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[compare]}" />
-                                        <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Compare with next image" />
+                                        <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc AutomationMainWindowCompareWithNextImage}" />
                                         <TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="O / X" />
-                                        <TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Toggle compare overlay / swap A-B" />
+                                        <TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiToggleCompareOverlaySwapAB}" />
                                         <TextBlock Grid.Row="14" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="[ / ]" />
-                                        <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Adjust compare overlay opacity" />
+                                        <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiAdjustCompareOverlayOpacity}" />
                                         <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[compare-with]}" />
-                                        <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Compare with chosen image" />
+                                        <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc AutomationMainWindowCompareWithChosenImage}" />
                                         <TextBlock Grid.Row="16" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Hold Middle" />
-                                        <TextBlock Grid.Row="16" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Loupe — magnify pixels under the cursor" />
+                                        <TextBlock Grid.Row="16" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiLoupeMagnifyPixelsUnderTheCursor}" />
                                         <TextBlock Grid.Row="17" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[loupe]}" />
-                                        <TextBlock Grid.Row="17" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Loupe — centered lens, pan to move" />
+                                        <TextBlock Grid.Row="17" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiLoupeCenteredLensPanToMove}" />
                                         <TextBlock Grid.Row="18" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+Drag" />
-                                        <TextBlock Grid.Row="18" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Zoom to selection" />
+                                        <TextBlock Grid.Row="18" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiZoomToSelection}" />
                                     </Grid>
 
-                                    <TextBlock Text="File" Style="{StaticResource SectionLabel}" />
+                                    <TextBlock Text="{loc:Loc FileHealthScanMetaFile}" Style="{StaticResource SectionLabel}" />
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
@@ -2062,49 +2062,49 @@
                                             <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[open]}" />
-                                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open image" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc AutomationMainWindowOpenImage}" />
                                         <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[paste]}" />
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Paste image from clipboard" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiPasteImageFromClipboard}" />
                                         <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[save-copy]}" />
-                                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Save a copy" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainDialogSaveCopy}" />
                                         <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[print]}" />
-                                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Print current image" />
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiPrintCurrentImage}" />
                                         <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[delete]}" />
-                                        <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Send to Recycle Bin" />
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiSendToRecycleBin}" />
                                         <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[reload]}" />
-                                        <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Reload current image" />
+                                        <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc CommandPalette_Reload}" />
                                         <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[settings]}" />
-                                        <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Settings" />
+                                        <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc SettingsWindowTitle}" />
                                         <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[reference-board]}" />
-                                        <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open reference board" />
+                                        <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiOpenReferenceBoard}" />
                                         <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[duplicate-cleanup]}" />
-                                        <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open duplicate cleanup" />
+                                        <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc AutomationMainWindowOpenDuplicateCleanup}" />
                                         <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[file-health-scan]}" />
-                                        <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open file health scan" />
+                                        <TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc AutomationMainWindowOpenFileHealthScan}" />
                                         <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[tag-graph]}" />
-                                        <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open tag relationships" />
+                                        <TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc AutomationMainWindowOpenTagRelationships}" />
                                         <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[import-inbox]}" />
-                                        <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open import inbox" />
+                                        <TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc AutomationMainWindowOpenImportInbox}" />
                                         <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[macro-actions]}" />
-                                        <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open macro actions" />
+                                        <TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc AutomationMainWindowOpenMacroActions}" />
                                         <TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[batch-processor]}" />
-                                        <TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open batch processor" />
+                                        <TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc AutomationMainWindowOpenBatchProcessor}" />
                                         <TextBlock Grid.Row="14" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[edit-stack]}" />
-                                        <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open edit history" />
+                                        <TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiOpenEditHistory}" />
                                         <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[resize]}" />
-                                        <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open resize dialog" />
+                                        <TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc CommandPalette_Resize}" />
                                         <TextBlock Grid.Row="16" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[adjustments]}" />
-                                        <TextBlock Grid.Row="16" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open adjustments" />
+                                        <TextBlock Grid.Row="16" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc CommandPalette_Adjustments}" />
                                         <TextBlock Grid.Row="17" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[effects]}" />
-                                        <TextBlock Grid.Row="17" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open effects" />
+                                        <TextBlock Grid.Row="17" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc CommandPalette_Effects}" />
                                         <TextBlock Grid.Row="18" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[auto-enhance]}" />
-                                        <TextBlock Grid.Row="18" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Apply Auto Enhance" />
+                                        <TextBlock Grid.Row="18" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiApplyAutoEnhance}" />
                                         <TextBlock Grid.Row="19" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[perspective]}" />
-                                        <TextBlock Grid.Row="19" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Open perspective correction" />
+                                        <TextBlock Grid.Row="19" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc CommandPalette_Perspective}" />
                                         <TextBlock Grid.Row="20" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Enter" />
-                                        <TextBlock Grid.Row="20" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Apply crop / commit rename" />
+                                        <TextBlock Grid.Row="20" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiApplyCropCommitRename}" />
                                         <TextBlock Grid.Row="21" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Esc" />
-                                        <TextBlock Grid.Row="21" Grid.Column="1" Style="{StaticResource MetaValue}" Text="Revert rename / dismiss overlay / exit fullscreen" />
+                                        <TextBlock Grid.Row="21" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiRevertRenameDismissOverlayExitFullscreen}" />
                                     </Grid>
                                 </StackPanel>
                             </ScrollViewer>
@@ -2498,21 +2498,21 @@
                                                     AutomationProperties.ItemStatus="{Binding PositionText}">
                                                 <Button.ContextMenu>
                                                     <ContextMenu Style="{StaticResource ViewportContextMenu}">
-                                                        <MenuItem Header="Open"
+                                                        <MenuItem Header="{loc:Loc SemanticSearchOpen}"
                                                                   Command="{Binding PlacementTarget.Tag.OpenPreviewItemCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                                   CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                             <MenuItem.Icon>
                                                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
                                                             </MenuItem.Icon>
                                                         </MenuItem>
-                                                        <MenuItem Header="Reveal in Explorer"
+                                                        <MenuItem Header="{loc:Loc CommandPalette_Reveal}"
                                                                   Command="{Binding PlacementTarget.Tag.RevealPreviewItemCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                                   CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                             <MenuItem.Icon>
                                                                 <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE838;" />
                                                             </MenuItem.Icon>
                                                         </MenuItem>
-                                                        <MenuItem Header="Copy path"
+                                                        <MenuItem Header="{loc:Loc MainUiCopyPath}"
                                                                   Command="{Binding PlacementTarget.Tag.CopyPreviewPathCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                                   CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                             <MenuItem.Icon>
@@ -2606,54 +2606,54 @@
                                         AutomationProperties.HelpText="{Binding FolderSortTooltip}">
                                     <Button.ContextMenu>
                                         <ContextMenu Style="{StaticResource ViewportContextMenu}">
-                                            <MenuItem Header="Name (natural)"
+                                            <MenuItem Header="{loc:Loc MainUiNameNatural}"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="NaturalName"
                                                       IsCheckable="True"
                                                       IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=NaturalName, Mode=OneWay}" />
-                                            <MenuItem Header="Explorer-like name order"
+                                            <MenuItem Header="{loc:Loc MainUiExplorerLikeNameOrder}"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="ExplorerLike"
                                                       IsCheckable="True"
                                                       IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=ExplorerLike, Mode=OneWay}" />
-                                            <MenuItem Header="Name (Z to A)"
+                                            <MenuItem Header="{loc:Loc MainUiNameZToA}"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="NameDescending"
                                                       IsCheckable="True"
                                                       IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=NameDescending, Mode=OneWay}" />
                                             <Separator />
-                                            <MenuItem Header="Modified (newest first)"
+                                            <MenuItem Header="{loc:Loc MainUiModifiedNewestFirst}"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="ModifiedNewest"
                                                       IsCheckable="True"
                                                       IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=ModifiedNewest, Mode=OneWay}" />
-                                            <MenuItem Header="Modified (oldest first)"
+                                            <MenuItem Header="{loc:Loc MainUiModifiedOldestFirst}"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="ModifiedOldest"
                                                       IsCheckable="True"
                                                       IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=ModifiedOldest, Mode=OneWay}" />
-                                            <MenuItem Header="Created (newest first)"
+                                            <MenuItem Header="{loc:Loc MainUiCreatedNewestFirst}"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="CreatedNewest"
                                                       IsCheckable="True"
                                                       IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=CreatedNewest, Mode=OneWay}" />
-                                            <MenuItem Header="Created (oldest first)"
+                                            <MenuItem Header="{loc:Loc MainUiCreatedOldestFirst}"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="CreatedOldest"
                                                       IsCheckable="True"
                                                       IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=CreatedOldest, Mode=OneWay}" />
                                             <Separator />
-                                            <MenuItem Header="Size (largest first)"
+                                            <MenuItem Header="{loc:Loc MainUiSizeLargestFirst}"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="SizeLargest"
                                                       IsCheckable="True"
                                                       IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=SizeLargest, Mode=OneWay}" />
-                                            <MenuItem Header="Size (smallest first)"
+                                            <MenuItem Header="{loc:Loc MainUiSizeSmallestFirst}"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="SizeSmallest"
                                                       IsCheckable="True"
                                                       IsChecked="{Binding PlacementTarget.DataContext.CurrentSortMode, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource SortModeMatches}, ConverterParameter=SizeSmallest, Mode=OneWay}" />
-                                            <MenuItem Header="Type, then name"
+                                            <MenuItem Header="{loc:Loc MainUiTypeThenName}"
                                                       Command="{Binding PlacementTarget.DataContext.SetFolderSortCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="ExtensionThenName"
                                                       IsCheckable="True"
@@ -2801,7 +2801,7 @@
                                         BorderThickness="1"
                                         VerticalAlignment="Center"
                                         Visibility="{Binding IsSlideshowActive, Converter={StaticResource BoolToVis}}"
-                                        ToolTip="Click to pause/resume, Escape to stop"
+                                        ToolTip="{loc:Loc MainUiClickToPauseResumeEscapeToStop}"
                                         Cursor="Hand"
                                         MouseEnter="SlideshowChip_MouseEnter"
                                         MouseLeave="SlideshowChip_MouseLeave"
@@ -2827,7 +2827,7 @@
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
-                                <TextBlock Text="Ready"
+                                <TextBlock Text="{loc:Loc MainUiReady}"
                                            Foreground="{DynamicResource TextBrush}"
                                            FontWeight="SemiBold"
                                            FontSize="13"
@@ -2835,7 +2835,7 @@
                                 <TextBlock Text="  ·  "
                                            Foreground="{DynamicResource OverlayBrush}"
                                            VerticalAlignment="Center" />
-                                <TextBlock Text="Open or drop a supported file to start viewing."
+                                <TextBlock Text="{loc:Loc MainUiOpenOrDropASupportedFileToStartViewing}"
                                            Foreground="{DynamicResource SubtextBrush}"
                                            VerticalAlignment="Center" />
                             </StackPanel>
@@ -2845,18 +2845,18 @@
                         <WrapPanel Grid.Row="2"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center">
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrevCommand}" Content="&#xE76B;" ToolTip="Previous (Left)" AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousImage}" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCcwCommand}" Content="&#xE7AD;" ToolTip="Rotate left" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowRotateLeft}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrevCommand}" Content="&#xE76B;" ToolTip="{loc:Loc MainUiPreviousLeft}" AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousImage}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCcwCommand}" Content="&#xE7AD;" ToolTip="{loc:Loc AutomationMainWindowRotateLeft}" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowRotateLeft}" />
                             <Button x:Name="FitButton"
                                     Style="{StaticResource ToolbarTextButton}"
-                                    Content="Fit"
+                                    Content="{loc:Loc MainUiFit}"
                                     Click="FitButton_Click"
-                                    ToolTip="Fit image to viewport"
+                                    ToolTip="{loc:Loc MainUiFitImageToViewport}"
                                     Margin="8,0,0,0"
                                     AutomationProperties.Name="{Binding ToolTip, RelativeSource={RelativeSource Self}}" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenCommand}" Content="&#xE8E5;" ToolTip="Open…" Margin="4,0,0,0" Visibility="Collapsed" AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenImage}" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCwCommand}" Content="&#xE7AC;" ToolTip="Rotate right" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowRotateRight}" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding NextCommand}" Content="&#xE76C;" ToolTip="Next (Right)" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowNextImage}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenCommand}" Content="&#xE8E5;" ToolTip="{loc:Loc MainUiOpen}" Margin="4,0,0,0" Visibility="Collapsed" AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenImage}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCwCommand}" Content="&#xE7AC;" ToolTip="{loc:Loc AutomationMainWindowRotateRight}" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowRotateRight}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding NextCommand}" Content="&#xE76C;" ToolTip="{loc:Loc MainUiNextRight}" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowNextImage}" />
                             <Button Command="{Binding ToggleFilmstripCommand}"
                                     Content="&#xEB9F;"
                                     ToolTip="{Binding FilmstripToggleTooltip}"
@@ -2924,32 +2924,32 @@
                             <Button Style="{StaticResource ToolbarButton}"
                                     Command="{Binding PrevPageCommand}"
                                     Content="&#xE76B;"
-                                    ToolTip="Previous page"
+                                    ToolTip="{loc:Loc AutomationMainWindowPreviousPage}"
                                     AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousPage}"
                                     Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}" />
                             <Button Style="{StaticResource ToolbarButton}"
                                     Command="{Binding NextPageCommand}"
                                     Content="&#xE76C;"
-                                    ToolTip="Next page"
+                                    ToolTip="{loc:Loc AutomationMainWindowNextPage}"
                                     Margin="4,0,0,0"
                                     AutomationProperties.Name="{loc:Loc AutomationMainWindowNextPage}"
                                     Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}" />
                             <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding DeleteCommand}" Content="&#xE74D;" ToolTip="Delete (Recycle Bin)" AutomationProperties.Name="{loc:Loc AutomationMainWindowSendImageToRecycleBin}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding DeleteCommand}" Content="&#xE74D;" ToolTip="{loc:Loc MainUiDeleteRecycleBin}" AutomationProperties.Name="{loc:Loc AutomationMainWindowSendImageToRecycleBin}" />
                             <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}" Content="&#xE838;" ToolTip="Reveal in Explorer" AutomationProperties.Name="{loc:Loc AutomationMainWindowRevealImageInExplorer}" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="Copy path" Margin="4,0,0,0" Visibility="Collapsed" AutomationProperties.Name="{loc:Loc AutomationMainWindowCopyFilePath}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}" Content="&#xE838;" ToolTip="{loc:Loc CommandPalette_Reveal}" AutomationProperties.Name="{loc:Loc AutomationMainWindowRevealImageInExplorer}" />
+                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="{loc:Loc MainUiCopyPath}" Margin="4,0,0,0" Visibility="Collapsed" AutomationProperties.Name="{loc:Loc AutomationMainWindowCopyFilePath}" />
                             <Button Style="{StaticResource ToolbarButton}" Command="{Binding RefreshCommand}" Content="&#xE72C;" ToolTip="{Binding ShortcutTexts[refresh], StringFormat=Refresh folder ({0})}" Margin="4,0,0,0" Visibility="Collapsed" AutomationProperties.Name="{loc:Loc AutomationMainWindowRefreshFolder}" />
                             <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
                             <Button Style="{StaticResource ToolbarButton}"
                                     Content="&#xE949;"
                                     Click="ZoomOutButton_Click"
-                                    ToolTip="Zoom out"
+                                    ToolTip="{loc:Loc MainUiZoomOut}"
                                     AutomationProperties.Name="{Binding ToolTip, RelativeSource={RelativeSource Self}}" />
                             <Button Style="{StaticResource ToolbarButton}"
                                     Content="&#xE948;"
                                     Click="ZoomInButton_Click"
-                                    ToolTip="Zoom in"
+                                    ToolTip="{loc:Loc MainUiZoomIn}"
                                     Margin="4,0,0,0"
                                     AutomationProperties.Name="{Binding ToolTip, RelativeSource={RelativeSource Self}}" />
                         </WrapPanel>
@@ -2976,9 +2976,9 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Style="{StaticResource Text.Title}"
-                                       Text="Details" />
+                                       Text="{loc:Loc MainUiDetails}" />
                             <TextBlock Style="{StaticResource Text.Subtitle}"
-                                       Text="Filename, metadata, and local status."
+                                       Text="{loc:Loc MainUiFilenameMetadataAndLocalStatus}"
                                        TextWrapping="Wrap"
                                        Margin="0,6,0,0"
                                        Visibility="Collapsed" />
@@ -2994,7 +2994,7 @@
                             <Button Command="{Binding AboutCommand}"
                                     Style="{StaticResource ToolbarButton}"
                                     Content="&#xE946;"
-                                    ToolTip="About Images"
+                                    ToolTip="{loc:Loc AboutTitle}"
                                     AutomationProperties.Name="{loc:Loc AutomationMainWindowAboutImages}"
                                     Margin="4,0,0,0" />
                         </StackPanel>
@@ -3023,7 +3023,7 @@
                                            FontSize="12.5"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextBrush}" />
-                                <TextBlock Text="Open the release page when you are ready to install it."
+                                <TextBlock Text="{loc:Loc MainUiOpenTheReleasePageWhenYouAreReadyTo}"
                                            Style="{StaticResource Text.Hint}"
                                            Margin="0,3,0,0" />
                             </StackPanel>
@@ -3041,7 +3041,7 @@
                                                FontSize="11"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="View" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Loc AboutViewUpdate}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                         </Grid>
@@ -3076,7 +3076,7 @@
                             </Border>
 
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Checking for updates"
+                                <TextBlock Text="{loc:Loc MainUiCheckingForUpdates}"
                                            Style="{StaticResource Text.Caption}"
                                            FontSize="13"
                                            FontWeight="SemiBold"
@@ -3218,7 +3218,7 @@
                                     </TextBlock.Style>
                                 </TextBlock>
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="Activity"
+                                    <TextBlock Text="{loc:Loc MainUiActivity}"
                                                Style="{StaticResource Text.Caption}"
                                                FontSize="13"
                                                FontWeight="SemiBold"
@@ -3281,7 +3281,7 @@
                     <!-- FOLDER PREVIEW fallback — remains in the side panel when the bottom
                          filmstrip is hidden so thumbnail jumping is never lost. -->
                     <StackPanel Visibility="{Binding ShowSideFolderPreview, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="Folder preview" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{loc:Loc MainUiFolderPreview}" Style="{StaticResource SectionLabel}" />
                         <ListBox x:Name="SidePreviewItems"
                                  ItemsSource="{Binding FolderPreviewItems}"
                                  Background="Transparent"
@@ -3335,21 +3335,21 @@
                                                 AutomationProperties.ItemStatus="{Binding PositionText}">
                                             <Button.ContextMenu>
                                                 <ContextMenu Style="{StaticResource ViewportContextMenu}">
-                                                    <MenuItem Header="Open"
+                                                    <MenuItem Header="{loc:Loc SemanticSearchOpen}"
                                                               Command="{Binding PlacementTarget.Tag.OpenPreviewItemCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                         <MenuItem.Icon>
                                                             <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE8E5;" />
                                                         </MenuItem.Icon>
                                                     </MenuItem>
-                                                    <MenuItem Header="Reveal in Explorer"
+                                                    <MenuItem Header="{loc:Loc CommandPalette_Reveal}"
                                                               Command="{Binding PlacementTarget.Tag.RevealPreviewItemCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                         <MenuItem.Icon>
                                                             <TextBlock Style="{StaticResource MenuItemIcon}" Text="&#xE838;" />
                                                         </MenuItem.Icon>
                                                     </MenuItem>
-                                                    <MenuItem Header="Copy path"
+                                                    <MenuItem Header="{loc:Loc MainUiCopyPath}"
                                                               Command="{Binding PlacementTarget.Tag.CopyPreviewPathCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                         <MenuItem.Icon>
@@ -3424,7 +3424,7 @@
                     </StackPanel>
 
                     <!-- RENAME section -->
-                    <TextBlock Text="Filename" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc MainUiFilename}" Style="{StaticResource SectionLabel}" />
 
                     <!-- Stem editor + locked extension chip -->
                     <Grid>
@@ -3498,7 +3498,7 @@
                             CornerRadius="{StaticResource Radius.Sm.CR}"
                             Visibility="{Binding IsExtensionUnlocked, Converter={StaticResource BoolToVis}}">
                         <StackPanel>
-                            <TextBlock Text="Changing the extension only renames the file. Use a supported Images format; this will not convert the image."
+                            <TextBlock Text="{loc:Loc MainUiChangingTheExtensionOnlyRenamesTheFileUseA}"
                                        Foreground="{DynamicResource YellowBrush}"
                                        FontSize="12"
                                        LineHeight="17"
@@ -3581,12 +3581,12 @@
                     </Border>
 
                     <TextBlock Style="{StaticResource Text.Hint}"
-                               Text="Changes save automatically."
+                               Text="{loc:Loc MainUiChangesSaveAutomatically}"
                                Margin="1,8,0,0" />
 
                     <StackPanel Visibility="{Binding IsArchiveBook, Converter={StaticResource BoolToVis}}">
                         <Border Style="{StaticResource Divider}" />
-                        <TextBlock Text="Book controls" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{loc:Loc MainUiBookControls}" Style="{StaticResource SectionLabel}" />
 
                         <Border Style="{StaticResource Card}"
                                 AutomationProperties.Name="{loc:Loc AutomationMainWindowArchiveBookControls}"
@@ -3634,7 +3634,7 @@
                                             MinHeight="32"
                                             Margin="0,0,6,0"
                                             Command="{Binding FirstPageCommand}"
-                                            ToolTip="First page"
+                                            ToolTip="{loc:Loc MainUiFirstPage}"
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowFirstBookPage}">
                                         <TextBlock Text="&#xE892;"
                                                    FontFamily="{StaticResource IconFontFamily}"
@@ -3645,7 +3645,7 @@
                                             MinHeight="32"
                                             Margin="0,0,6,0"
                                             Command="{Binding PrevPageCommand}"
-                                            ToolTip="Previous page"
+                                            ToolTip="{loc:Loc AutomationMainWindowPreviousPage}"
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousBookPage}">
                                         <TextBlock Text="&#xE76B;"
                                                    FontFamily="{StaticResource IconFontFamily}"
@@ -3656,7 +3656,7 @@
                                             MinHeight="32"
                                             Margin="0,0,6,0"
                                             Command="{Binding NextPageCommand}"
-                                            ToolTip="Next page"
+                                            ToolTip="{loc:Loc AutomationMainWindowNextPage}"
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowNextBookPage}">
                                         <TextBlock Text="&#xE76C;"
                                                    FontFamily="{StaticResource IconFontFamily}"
@@ -3666,7 +3666,7 @@
                                     <Button Style="{StaticResource ChromeButton}"
                                             MinHeight="32"
                                             Command="{Binding LastPageCommand}"
-                                            ToolTip="Last page"
+                                            ToolTip="{loc:Loc MainUiLastPage}"
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowLastBookPage}">
                                         <TextBlock Text="&#xE893;"
                                                    FontFamily="{StaticResource IconFontFamily}"
@@ -3720,16 +3720,16 @@
                     <Border Style="{StaticResource Divider}" Visibility="Collapsed" />
 
                     <!-- RECENT RENAMES section -->
-                    <TextBlock Text="Recent renames" Style="{StaticResource SectionLabel}" Visibility="Collapsed" />
+                    <TextBlock Text="{loc:Loc AutomationMainWindowRecentRenames}" Style="{StaticResource SectionLabel}" Visibility="Collapsed" />
 
                     <Border Style="{StaticResource Card}"
                             Visibility="Collapsed">
                         <StackPanel>
-                            <TextBlock Text="No renames yet"
+                            <TextBlock Text="{loc:Loc MainUiNoRenamesYet}"
                                        Foreground="{DynamicResource TextBrush}"
                                        FontSize="12.5"
                                        FontWeight="SemiBold" />
-                            <TextBlock Text="Your undo list will appear here."
+                            <TextBlock Text="{loc:Loc MainUiYourUndoListWillAppearHere}"
                                        Foreground="{DynamicResource OverlayBrush}"
                                        FontSize="12"
                                        LineHeight="17"
@@ -3779,7 +3779,7 @@
                                                            FontSize="11"
                                                            Margin="0,0,7,0"
                                                            VerticalAlignment="Center" />
-                                                <TextBlock Text="Undo" VerticalAlignment="Center" />
+                                                <TextBlock Text="{loc:Loc Undo}" VerticalAlignment="Center" />
                                             </StackPanel>
                                         </Button>
                                     </Grid>
@@ -3793,7 +3793,7 @@
                          user doesn't see an orphan "Recent folders" header above nothing. -->
                     <StackPanel Visibility="Collapsed">
                         <Border Style="{StaticResource Divider}" />
-                        <TextBlock Text="Recent folders" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{loc:Loc AutomationMainWindowRecentFolders}" Style="{StaticResource SectionLabel}" />
                         <ItemsControl ItemsSource="{Binding RecentFolders}"
                                       KeyboardNavigation.DirectionalNavigation="Cycle"
                                       KeyboardNavigation.TabNavigation="Continue"
@@ -3841,7 +3841,7 @@
 
                     <StackPanel Visibility="Collapsed">
                         <Border Style="{StaticResource Divider}" />
-                        <TextBlock Text="Book history" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{loc:Loc MainUiBookHistory}" Style="{StaticResource SectionLabel}" />
                         <ItemsControl ItemsSource="{Binding RecentArchiveBooks}"
                                       KeyboardNavigation.DirectionalNavigation="Cycle"
                                       KeyboardNavigation.TabNavigation="Continue"
@@ -3914,7 +3914,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- DETAILS section -->
-                    <TextBlock Text="Details" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc MainUiDetails}" Style="{StaticResource SectionLabel}" />
 
                     <Grid Margin="1,0,0,0">
                         <Grid.ColumnDefinitions>
@@ -3929,13 +3929,13 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Folder"  Style="{StaticResource MetaLabel}" />
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc FileHealthScanMetaFolder}"  Style="{StaticResource MetaLabel}" />
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentFolder}"   Style="{StaticResource MetaValue}" ToolTip="{Binding CurrentFolder}" />
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Size"    Style="{StaticResource MetaLabel}" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc ExportPreviewSize}"    Style="{StaticResource MetaLabel}" />
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding FileSizeText}"    Style="{StaticResource MetaValue}" />
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Pixels"  Style="{StaticResource MetaLabel}" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc ExportPreviewPixels}"  Style="{StaticResource MetaLabel}" />
                         <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DimensionsText}"  Style="{StaticResource MetaValue}" />
 
                         <TextBlock Grid.Row="3"
@@ -3949,7 +3949,7 @@
                                    Style="{StaticResource MetaValue}"
                                    Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}" />
 
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Decoder" Style="{StaticResource MetaLabel}" />
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc MainUiDecoder}" Style="{StaticResource MetaLabel}" />
                         <Border Grid.Row="4" Grid.Column="1"
                                 Style="{StaticResource Badge}"
                                 Margin="0,0,0,10"
@@ -3963,7 +3963,7 @@
 
                     <Expander x:Name="InspectorToolsExpander"
                               Style="{StaticResource InspectorExpander}"
-                              Header="Tools"
+                              Header="{loc:Loc CommandPalette_Category_Tools}"
                               IsExpanded="False"
                               Margin="0,4,0,0"
                               Visibility="Collapsed">
@@ -3971,7 +3971,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- ORGANIZATION section -->
-                    <TextBlock Text="Organization" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc MainUiOrganization}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowOrganizationControls}">
@@ -3981,10 +3981,10 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <TextBlock Text="Tag relationships"
+                                <TextBlock Text="{loc:Loc TagGraphHeading}"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextBrush}" />
-                                <TextBlock Text="Manage private local tag namespaces, aliases, parents, and XMP sidecar tag export."
+                                <TextBlock Text="{loc:Loc MainUiManagePrivateLocalTagNamespacesAliasesParentsAndXMP}"
                                            Style="{StaticResource Text.Hint}"
                                            TextWrapping="Wrap"
                                            Margin="0,3,0,0" />
@@ -3996,7 +3996,7 @@
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenTagRelationships}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE8EC;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                        <TextBlock Text="Tags" VerticalAlignment="Center" />
+                                        <TextBlock Text="{loc:Loc ImportInboxTags}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                                 <Button Command="{Binding OpenImportInboxCommand}"
@@ -4005,7 +4005,7 @@
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenImportInbox}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE8B7;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                        <TextBlock Text="Inbox" VerticalAlignment="Center" />
+                                        <TextBlock Text="{loc:Loc MainUiInbox}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -4015,7 +4015,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- AUTOMATION section -->
-                    <TextBlock Text="Automation" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc MainUiAutomation}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowAutomationControls}">
@@ -4025,10 +4025,10 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <TextBlock Text="Macro actions"
+                                <TextBlock Text="{loc:Loc MacroHeading}"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextBrush}" />
-                                <TextBlock Text="Build inspectable JSON actions, manage local model files, and search the current folder through the local semantic index."
+                                <TextBlock Text="{loc:Loc MainUiBuildInspectableJSONActionsManageLocalModelFilesAnd}"
                                            Style="{StaticResource Text.Hint}"
                                            TextWrapping="Wrap"
                                            Margin="0,3,0,0" />
@@ -4040,7 +4040,7 @@
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenMacroActions}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE945;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                        <TextBlock Text="Macros" VerticalAlignment="Center" />
+                                        <TextBlock Text="{loc:Loc MainUiMacros}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                                 <Button Command="{Binding OpenBatchProcessorCommand}"
@@ -4049,7 +4049,7 @@
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenBatchProcessor}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE8EF;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                        <TextBlock Text="Batch" VerticalAlignment="Center" />
+                                        <TextBlock Text="{loc:Loc MainUiBatch}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                                 <Button Command="{Binding OpenModelManagerCommand}"
@@ -4058,7 +4058,7 @@
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenModelManager}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE950;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                        <TextBlock Text="Models" VerticalAlignment="Center" />
+                                        <TextBlock Text="{loc:Loc MainUiModels}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                                 <Button Command="{Binding OpenSemanticSearchCommand}"
@@ -4067,7 +4067,7 @@
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenSemanticSearch}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                        <TextBlock Text="Search" VerticalAlignment="Center" />
+                                        <TextBlock Text="{loc:Loc SemanticSearchSearch}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -4077,7 +4077,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- CLEANUP section -->
-                    <TextBlock Text="Cleanup" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc MainUiCleanup}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowCleanupControls}">
@@ -4087,10 +4087,10 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <TextBlock Text="Cleanup tools"
+                                <TextBlock Text="{loc:Loc MainUiCleanupTools}"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextBrush}" />
-                                <TextBlock Text="Find duplicate images, bad extensions, broken files, and temporary artifacts in local folders."
+                                <TextBlock Text="{loc:Loc MainUiFindDuplicateImagesBadExtensionsBrokenFilesAndTemporary}"
                                            Style="{StaticResource Text.Hint}"
                                            TextWrapping="Wrap"
                                            Margin="0,3,0,0" />
@@ -4102,7 +4102,7 @@
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenDuplicateCleanup}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE8C8;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                        <TextBlock Text="Duplicates" VerticalAlignment="Center" />
+                                        <TextBlock Text="{loc:Loc MainUiDuplicates}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                                 <Button Command="{Binding OpenFileHealthScanCommand}"
@@ -4111,7 +4111,7 @@
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenFileHealthScan}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                        <TextBlock Text="File health" VerticalAlignment="Center" />
+                                        <TextBlock Text="{loc:Loc MainUiFileHealth}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                                 <Button Command="{Binding OpenRecoveryCenterCommand}"
@@ -4120,7 +4120,7 @@
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenRecoveryCenter}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE777;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                        <TextBlock Text="Recovery" VerticalAlignment="Center" />
+                                        <TextBlock Text="{loc:Loc MainUiRecovery}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -4130,7 +4130,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- COMPARE section -->
-                    <TextBlock Text="Compare" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc DuplicateCleanupCompareButton}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareControls}">
@@ -4155,14 +4155,14 @@
                                             Style="{StaticResource ChromeButton}"
                                             MinWidth="92"
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareWithNextImage}">
-                                        <TextBlock Text="Next" />
+                                        <TextBlock Text="{loc:Loc MainUiNext}" />
                                     </Button>
                                     <Button Command="{Binding CompareWithCommand}"
                                             Style="{StaticResource ChromeButton}"
                                             MinWidth="92"
                                             Margin="0,8,0,0"
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareWithChosenImage}">
-                                        <TextBlock Text="Choose" />
+                                        <TextBlock Text="{loc:Loc ImportInboxChoose}" />
                                     </Button>
                                 </StackPanel>
                             </Grid>
@@ -4179,13 +4179,13 @@
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowSwapCompareAAndB}">
-                                    <TextBlock Text="Swap A/B" />
+                                    <TextBlock Text="{loc:Loc MainUiSwapAB}" />
                                 </Button>
                                 <Button Command="{Binding ExitCompareCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowExitCompareMode}">
-                                    <TextBlock Text="Exit" />
+                                    <TextBlock Text="{loc:Loc MainUiExit}" />
                                 </Button>
                             </WrapPanel>
 
@@ -4197,7 +4197,7 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0"
-                                           Text="B opacity"
+                                           Text="{loc:Loc MainUiBOpacity}"
                                            Style="{StaticResource Text.Hint}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,10,0" />
@@ -4221,7 +4221,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- OVERLAY section -->
-                    <TextBlock Text="Overlay" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc MainCompareOverlay}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowPinnedOverlayControls}">
@@ -4259,7 +4259,7 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0"
-                                           Text="Opacity"
+                                           Text="{loc:Loc MainUiOpacity}"
                                            Style="{StaticResource Text.Hint}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,10,0" />
@@ -4311,7 +4311,7 @@
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,0"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowExitPinnedOverlayMode}">
-                                    <TextBlock Text="Exit overlay" />
+                                    <TextBlock Text="{loc:Loc MainUiExitOverlay}" />
                                 </Button>
                             </WrapPanel>
                         </StackPanel>
@@ -4321,7 +4321,7 @@
                         <Border Style="{StaticResource Divider}" />
 
                         <!-- ANIMATION section -->
-                        <TextBlock Text="Animation" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{loc:Loc MainUiAnimation}" Style="{StaticResource SectionLabel}" />
                         <Border Style="{StaticResource Card}"
                                 Padding="13,12"
                                 AutomationProperties.Name="{loc:Loc AutomationMainWindowAnimationFrameWorkbench}">
@@ -4381,29 +4381,29 @@
                                     <Button Command="{Binding FirstAnimationFrameCommand}"
                                             Style="{StaticResource ChromeButton}"
                                             Margin="0,0,6,0"
-                                            ToolTip="First frame"
+                                            ToolTip="{loc:Loc MainUiFirstFrame}"
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowFirstAnimationFrame}">
-                                        <TextBlock Text="First" />
+                                        <TextBlock Text="{loc:Loc MainUiFirst}" />
                                     </Button>
                                     <Button Command="{Binding PreviousAnimationFrameCommand}"
                                             Style="{StaticResource ChromeButton}"
                                             Margin="0,0,6,0"
-                                            ToolTip="Previous frame"
+                                            ToolTip="{loc:Loc MainUiPreviousFrame}"
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousAnimationFrame}">
-                                        <TextBlock Text="Prev" />
+                                        <TextBlock Text="{loc:Loc MainUiPrev}" />
                                     </Button>
                                     <Button Command="{Binding NextAnimationFrameCommand}"
                                             Style="{StaticResource ChromeButton}"
                                             Margin="0,0,6,0"
-                                            ToolTip="Next frame"
+                                            ToolTip="{loc:Loc MainUiNextFrame}"
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowNextAnimationFrame}">
-                                        <TextBlock Text="Next" />
+                                        <TextBlock Text="{loc:Loc MainUiNext}" />
                                     </Button>
                                     <Button Command="{Binding LastAnimationFrameCommand}"
                                             Style="{StaticResource ChromeButton}"
-                                            ToolTip="Last frame"
+                                            ToolTip="{loc:Loc MainUiLastFrame}"
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowLastAnimationFrame}">
-                                        <TextBlock Text="Last" />
+                                        <TextBlock Text="{loc:Loc MainUiLast}" />
                                     </Button>
                                 </UniformGrid>
 
@@ -4414,7 +4414,7 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0"
-                                               Text="Speed"
+                                               Text="{loc:Loc MainUiSpeed}"
                                                Style="{StaticResource Text.Hint}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,10,0" />
@@ -4494,13 +4494,13 @@
                                             Style="{StaticResource ChromeButton}"
                                             Margin="0,0,8,8"
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowCopySelectedAnimationFrame}">
-                                        <TextBlock Text="Copy frame" />
+                                        <TextBlock Text="{loc:Loc MainUiCopyFrame}" />
                                     </Button>
                                     <Button Command="{Binding ExportAnimationFrameCommand}"
                                             Style="{StaticResource ChromeButton}"
                                             Margin="0,0,8,8"
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowExportSelectedAnimationFrame}">
-                                        <TextBlock Text="Export frame" />
+                                        <TextBlock Text="{loc:Loc MainUiExportFrame}" />
                                     </Button>
                                 </WrapPanel>
                             </StackPanel>
@@ -4510,7 +4510,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- SELECTION section -->
-                    <TextBlock Text="Selection" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc MainUiSelection}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
                             IsEnabled="{Binding CanUseSelection}">
@@ -4560,19 +4560,19 @@
                                         Style="{StaticResource AccentButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowCopySelectedPixels}">
-                                    <TextBlock Text="Copy selection" />
+                                    <TextBlock Text="{loc:Loc CopySelection}" />
                                 </Button>
                                 <Button Command="{Binding ClearSelectionCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowClearSelectedPixels}">
-                                    <TextBlock Text="Clear" />
+                                    <TextBlock Text="{loc:Loc Clear}" />
                                 </Button>
                                 <Button Command="{Binding CancelSelectionCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowCancelPixelSelectionMode}">
-                                    <TextBlock Text="Cancel" />
+                                    <TextBlock Text="{loc:Loc Cancel}" />
                                 </Button>
                             </WrapPanel>
                         </StackPanel>
@@ -4581,7 +4581,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- CROP section -->
-                    <TextBlock Text="Crop" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc MainUiCrop}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
                             IsEnabled="{Binding CanUseCrop}">
@@ -4626,7 +4626,7 @@
                                 </StackPanel>
                             </Border>
 
-                            <TextBlock Text="Aspect ratio"
+                            <TextBlock Text="{loc:Loc MainUiAspectRatio}"
                                        Style="{StaticResource Text.Caption}"
                                        Margin="0,12,0,6" />
                             <WrapPanel>
@@ -4635,7 +4635,7 @@
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowFreeCropAspect}">
-                                    <TextBlock Text="Free" />
+                                    <TextBlock Text="{loc:Loc MainUiFree}" />
                                 </Button>
                                 <Button Command="{Binding SetCropAspectPresetCommand}"
                                         CommandParameter="square"
@@ -4670,7 +4670,7 @@
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowCustomCropAspect}">
-                                    <TextBlock Text="Custom" />
+                                    <TextBlock Text="{loc:Loc SettingsHotkeyStateCustom}" />
                                 </Button>
                             </WrapPanel>
 
@@ -4704,13 +4704,13 @@
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowApplyCropToFile}">
-                                    <TextBlock Text="Apply crop" />
+                                    <TextBlock Text="{loc:Loc ApplyCrop}" />
                                 </Button>
                                 <Button Command="{Binding CancelCropCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowCancelCrop}">
-                                    <TextBlock Text="Cancel" />
+                                    <TextBlock Text="{loc:Loc Cancel}" />
                                 </Button>
                             </WrapPanel>
                         </StackPanel>
@@ -4719,7 +4719,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- LOCAL EXPOSURE section -->
-                    <TextBlock Text="Local exposure" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc MainUiLocalExposure}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
                             IsEnabled="{Binding CanUseExposureBrush}">
@@ -4764,7 +4764,7 @@
                                 </StackPanel>
                             </Border>
 
-                            <TextBlock Text="Mode"
+                            <TextBlock Text="{loc:Loc ResizeMode}"
                                        Style="{StaticResource Text.Caption}"
                                        Margin="0,12,0,6" />
                             <WrapPanel>
@@ -4773,14 +4773,14 @@
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowUseDodgeBrush}">
-                                    <TextBlock Text="Dodge" />
+                                    <TextBlock Text="{loc:Loc MainExposureDodgeText}" />
                                 </Button>
                                 <Button Command="{Binding SetExposureBrushModeCommand}"
                                         CommandParameter="burn"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowUseBurnBrush}">
-                                    <TextBlock Text="Burn" />
+                                    <TextBlock Text="{loc:Loc MainExposureBurnText}" />
                                 </Button>
                                 <TextBlock Text="{Binding ExposureBrushToneText}"
                                            Style="{StaticResource Text.Hint}"
@@ -4793,7 +4793,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Radius"
+                                <TextBlock Text="{loc:Loc MainUiRadius}"
                                            Style="{StaticResource Text.Caption}" />
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding ExposureBrushRadiusText}"
@@ -4811,7 +4811,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Strength"
+                                <TextBlock Text="{loc:Loc MainUiStrength}"
                                            Style="{StaticResource Text.Caption}" />
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding ExposureBrushStrengthText}"
@@ -4829,19 +4829,19 @@
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowApplyLocalExposureBrushToEditHistory}">
-                                    <TextBlock Text="Apply brush" />
+                                    <TextBlock Text="{loc:Loc MainUiApplyBrush}" />
                                 </Button>
                                 <Button Command="{Binding ClearExposureBrushCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowClearLocalExposureBrushStrokes}">
-                                    <TextBlock Text="Clear" />
+                                    <TextBlock Text="{loc:Loc Clear}" />
                                 </Button>
                                 <Button Command="{Binding CancelExposureBrushCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowCancelLocalExposureBrush}">
-                                    <TextBlock Text="Cancel" />
+                                    <TextBlock Text="{loc:Loc Cancel}" />
                                 </Button>
                             </WrapPanel>
                         </StackPanel>
@@ -4850,7 +4850,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- RED-EYE section -->
-                    <TextBlock Text="Red-eye correction" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc MainUiRedEyeCorrection}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
                             IsEnabled="{Binding CanUseRedEyeCorrection}">
@@ -4900,7 +4900,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Radius"
+                                <TextBlock Text="{loc:Loc MainUiRadius}"
                                            Style="{StaticResource Text.Caption}" />
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding RedEyeCorrectionRadiusText}"
@@ -4918,7 +4918,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Strength"
+                                <TextBlock Text="{loc:Loc MainUiStrength}"
                                            Style="{StaticResource Text.Caption}" />
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding RedEyeCorrectionStrengthText}"
@@ -4936,7 +4936,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Red threshold"
+                                <TextBlock Text="{loc:Loc MainUiRedThreshold}"
                                            Style="{StaticResource Text.Caption}" />
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding RedEyeCorrectionThresholdText}"
@@ -4954,19 +4954,19 @@
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowApplyRedEyeCorrectionToEditHistory}">
-                                    <TextBlock Text="Apply red-eye" />
+                                    <TextBlock Text="{loc:Loc MainUiApplyRedEye}" />
                                 </Button>
                                 <Button Command="{Binding ClearRedEyeCorrectionCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowClearRedEyeCorrectionMarks}">
-                                    <TextBlock Text="Clear" />
+                                    <TextBlock Text="{loc:Loc Clear}" />
                                 </Button>
                                 <Button Command="{Binding CancelRedEyeCorrectionCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowCancelRedEyeCorrection}">
-                                    <TextBlock Text="Cancel" />
+                                    <TextBlock Text="{loc:Loc Cancel}" />
                                 </Button>
                             </WrapPanel>
                         </StackPanel>
@@ -4975,7 +4975,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- RETOUCH section -->
-                    <TextBlock Text="Clone / heal" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc MainUiCloneHeal}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
                             IsEnabled="{Binding CanUseRetouch}">
@@ -5023,7 +5023,7 @@
                                 </StackPanel>
                             </Border>
 
-                            <TextBlock Text="Mode"
+                            <TextBlock Text="{loc:Loc ResizeMode}"
                                        Style="{StaticResource Text.Caption}"
                                        Margin="0,12,0,6" />
                             <WrapPanel>
@@ -5032,14 +5032,14 @@
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowUseCloneStamp}">
-                                    <TextBlock Text="Clone" />
+                                    <TextBlock Text="{loc:Loc MainUiClone}" />
                                 </Button>
                                 <Button Command="{Binding SetRetouchModeCommand}"
                                         CommandParameter="heal"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowUseHealingBrush}">
-                                    <TextBlock Text="Heal" />
+                                    <TextBlock Text="{loc:Loc MainUiHeal}" />
                                 </Button>
                                 <TextBlock Text="{Binding RetouchBrushModeText}"
                                            Style="{StaticResource Text.Hint}"
@@ -5052,7 +5052,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Radius"
+                                <TextBlock Text="{loc:Loc MainUiRadius}"
                                            Style="{StaticResource Text.Caption}" />
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding RetouchRadiusText}"
@@ -5070,7 +5070,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Strength"
+                                <TextBlock Text="{loc:Loc MainUiStrength}"
                                            Style="{StaticResource Text.Caption}" />
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding RetouchStrengthText}"
@@ -5088,25 +5088,25 @@
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowApplyRetouchToEditHistory}">
-                                    <TextBlock Text="Apply retouch" />
+                                    <TextBlock Text="{loc:Loc MainUiApplyRetouch}" />
                                 </Button>
                                 <Button Command="{Binding ClearRetouchCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowClearRetouchStrokes}">
-                                    <TextBlock Text="Clear" />
+                                    <TextBlock Text="{loc:Loc Clear}" />
                                 </Button>
                                 <Button Command="{Binding ClearRetouchSourceCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowClearRetouchSource}">
-                                    <TextBlock Text="Source" />
+                                    <TextBlock Text="{loc:Loc EditSource}" />
                                 </Button>
                                 <Button Command="{Binding CancelRetouchCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowCancelRetouch}">
-                                    <TextBlock Text="Cancel" />
+                                    <TextBlock Text="{loc:Loc Cancel}" />
                                 </Button>
                             </WrapPanel>
                         </StackPanel>
@@ -5115,7 +5115,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <!-- INSPECTOR section -->
-                    <TextBlock Text="Inspector" Style="{StaticResource SectionLabel}" />
+                    <TextBlock Text="{loc:Loc MainUiInspector}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
                             Padding="13,12"
                             IsEnabled="{Binding CanUseInspector}">
@@ -5145,9 +5145,9 @@
                             </Grid>
 
                             <CheckBox IsChecked="{Binding InspectorNearestNeighborPreview, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      Content="Nearest-neighbor preview"
+                                      Content="{loc:Loc MainUiNearestNeighborPreview}"
                                       Margin="0,12,0,0"
-                                      ToolTip="Use crisp scaling for pixel-art inspection."
+                                      ToolTip="{loc:Loc MainUiUseCrispScalingForPixelArtInspection}"
                                       AutomationProperties.Name="{loc:Loc AutomationMainWindowUseNearestNeighborPreviewScaling}" />
 
                             <Border Background="{DynamicResource PanelBrush}"
@@ -5162,7 +5162,7 @@
                                                TextWrapping="Wrap" />
                                     <UniformGrid Columns="2" Margin="0,10,0,0">
                                         <StackPanel Margin="0,0,10,8">
-                                            <TextBlock Text="Coordinate" Style="{StaticResource Text.Hint}" />
+                                            <TextBlock Text="{loc:Loc MainUiCoordinate}" Style="{StaticResource Text.Hint}" />
                                             <TextBlock Text="{Binding InspectorCoordinateText}" Style="{StaticResource Text.Body}" />
                                         </StackPanel>
                                         <StackPanel Margin="0,0,0,8">
@@ -5190,25 +5190,25 @@
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowCopyHEXColor}">
-                                    <TextBlock Text="Copy HEX" />
+                                    <TextBlock Text="{loc:Loc MainUiCopyHEX}" />
                                 </Button>
                                 <Button Command="{Binding CopyInspectorRgbCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowCopyRGBColor}">
-                                    <TextBlock Text="Copy RGB" />
+                                    <TextBlock Text="{loc:Loc MainUiCopyRGB}" />
                                 </Button>
                                 <Button Command="{Binding CopyInspectorHsvCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,8,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowCopyHSVColor}">
-                                    <TextBlock Text="Copy HSV" />
+                                    <TextBlock Text="{loc:Loc MainUiCopyHSV}" />
                                 </Button>
                                 <Button Command="{Binding ClearInspectorSelectionCommand}"
                                         Style="{StaticResource ChromeButton}"
                                         Margin="0,0,0,8"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowClearInspectorMeasurement}">
-                                    <TextBlock Text="Clear measure" />
+                                    <TextBlock Text="{loc:Loc MainUiClearMeasure}" />
                                 </Button>
                             </WrapPanel>
                         </StackPanel>
@@ -5219,7 +5219,7 @@
 
                     <StackPanel Visibility="{Binding PhotoMetadataRows.Count, Converter={StaticResource BoolToVis}}">
                         <Border Style="{StaticResource Divider}" />
-                        <TextBlock Text="Photo metadata" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{loc:Loc AutomationMainWindowPhotoMetadata}" Style="{StaticResource SectionLabel}" />
                         <ItemsControl ItemsSource="{Binding PhotoMetadataRows}"
                                       AutomationProperties.Name="{loc:Loc AutomationMainWindowPhotoMetadata}">
                             <ItemsControl.ItemTemplate>
@@ -5244,13 +5244,13 @@
 
                     <Expander x:Name="MoreDetailsExpander"
                               Style="{StaticResource InspectorExpander}"
-                              Header="More details"
+                              Header="{loc:Loc MainUiMoreDetails}"
                               IsExpanded="False"
                               Margin="0,4,0,0"
                               Visibility="{Binding ShowColorAnalysisPanel, Converter={StaticResource BoolToVis}}">
                         <StackPanel>
                         <Border Style="{StaticResource Divider}" />
-                        <TextBlock Text="Color &amp; histogram" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{loc:Loc MainUiColorHistogram}" Style="{StaticResource SectionLabel}" />
 
                         <ItemsControl ItemsSource="{Binding ColorAnalysisRows}"
                                       Visibility="{Binding ColorAnalysisRows.Count, Converter={StaticResource BoolToVis}}"
@@ -5312,7 +5312,7 @@
 
                     <StackPanel Visibility="{Binding ShowC2paPanel, Converter={StaticResource BoolToVis}}">
                         <Border Style="{StaticResource Divider}" />
-                        <TextBlock Text="content credentials" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{loc:Loc MainUiContentCredentials}" Style="{StaticResource SectionLabel}" />
 
                         <Border Style="{StaticResource Card}" Margin="0,4,0,0"
                                 ToolTip="{Binding C2paTrustBadgeTooltip}"
@@ -5359,7 +5359,7 @@
                         <Border Style="{StaticResource Card}"
                                 Margin="0,4,0,0"
                                 Visibility="{Binding IsC2paLoading, Converter={StaticResource BoolToVis}}">
-                            <TextBlock Text="Checking content credentials..."
+                            <TextBlock Text="{loc:Loc MainUiCheckingContentCredentials}"
                                        Style="{StaticResource Text.Hint}"
                                        VerticalAlignment="Center" />
                         </Border>

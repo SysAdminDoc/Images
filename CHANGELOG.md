@@ -26,6 +26,7 @@ All notable changes to **Images** are documented here.
 
 ### Changed
 
+- **Primary windows are fully localization-backed** - MainWindow menus, tooltips, empty/error states, gallery, inspector, controls, shortcuts help, and AboutWindow visible copy now resolve from resources. The localization gate rejects new literal visible text in either window and missing XAML resource keys; the pseudo-locale covers every addition.
 - **Consistent microcopy** - "Auto enhance" menu casing, and the duplicate-cleanup buttons read "Quarantine extras"/"Recycle extras" instead of the awkward "extra(s)".
 
 ### Performance
