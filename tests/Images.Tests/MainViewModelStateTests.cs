@@ -985,12 +985,7 @@ public sealed class MainViewModelStateTests
                 // The mid-confirmation OpenFile(second) navigates asynchronously; wait for it to
                 // settle before asserting (matches the MoveToFolder/rename tests). Without this the
                 // assertions race the navigation under CPU contention from parallel test decodes.
-                PumpUntil(() =>
-                    !viewModel.IsOperationBusy &&
-                    !File.Exists(first) &&
-                    string.Equals(viewModel.CurrentPath, second, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(viewModel.ToastMessage, "Sent to Recycle Bin: a.png", StringComparison.Ordinal),
-                    timeoutSeconds: 15);
+                PumpUntil(() => !viewModel.IsOperationBusy, timeoutSeconds: 15);
 
                 Assert.False(File.Exists(first));
                 Assert.True(File.Exists(second));
@@ -1157,7 +1152,7 @@ public sealed class MainViewModelStateTests
             Assert.True(viewModel.ApplyCropCommand.CanExecute(null));
 
             viewModel.ApplyCropCommand.Execute(null);
-            Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.SystemIdle);
+            PumpUntil(() => !viewModel.IsOperationBusy, timeoutSeconds: 30);
 
             Assert.False(viewModel.IsCropMode);
             Assert.False(viewModel.HasCropSelection);
@@ -1230,10 +1225,7 @@ public sealed class MainViewModelStateTests
             // Crop-bake completes asynchronously (Magick decode + atomic file write); wait for the
             // terminal state instead of a single dispatcher pump, with a generous deadline so a busy
             // machine cannot starve the I/O-bound continuation into a false timeout.
-            PumpUntil(
-                () => !viewModel.IsOperationBusy
-                    && string.Equals(viewModel.ToastMessage, "Crop applied to file", StringComparison.Ordinal),
-                timeoutSeconds: 30);
+            PumpUntil(() => !viewModel.IsOperationBusy, timeoutSeconds: 30);
 
             Assert.Equal("Crop applied to file", viewModel.ToastMessage);
             Assert.Equal(1, viewModel.PixelWidth);

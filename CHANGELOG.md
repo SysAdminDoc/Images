@@ -16,6 +16,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixed
 
+- **Atomic exports tolerate brief file locks** - Final temp-file swaps now retry a bounded number of times when an image reader, thumbnailer, or security scanner briefly locks the destination, preventing intermittent crop/writeback failures without hiding permanent permission errors.
 - **Optional tools cannot exhaust memory through process output** - ExifTool, c2patool, jpegtran, and Ghostscript now share a concurrent bounded process runner: version probes retain at most 256 KiB per stream, operations retain at most 4 MiB, and exceeding either limit terminates the child process tree with a distinct failure from timeout or nonzero exit.
 - **Secondary failures no longer expose exception internals** - Rename, delete, rotate, crop, copy, export, repair, wallpaper, Explorer, transfer, save, print, metadata, email, clipboard, and edit-stack failures now show stable localized recovery copy; full exception and service-result details remain in diagnostics logs.
 - **ImageMagick now denies unadvertised native decoders** - Startup injects a deny-all-then-permit coder policy, disables filters and `@` path indirection, and default-denies delegates except the four Ghostscript raster-preview paths when that approved runtime is present. SVG/SVGZ use the in-process MSVG pipeline; hazardous MNG, TIM, MSL, and direct MVG inputs are no longer advertised.
@@ -32,6 +33,7 @@ All notable changes to **Images** are documented here.
 
 ### Changed
 
+- **Deterministic image-runtime tests** - Test collection parallelism now has a fixed four-worker ceiling, WPF/settings tests that share process-wide theme and decoder state are serialized together, and async writeback assertions wait for operation completion before checking terminal state.
 - **Reproducible local and release builds** - `global.json` pins the .NET 10.0.3xx feature band with patch-only roll-forward, app/test NuGet graphs are committed as lock files, and release readiness restores in locked mode. CycloneDX 6.2.0 is a repo-local tool restored explicitly before SBOM generation, removing dependence on machine-global tools.
 - **Primary windows are fully localization-backed** - MainWindow menus, tooltips, empty/error states, gallery, inspector, controls, shortcuts help, and AboutWindow visible copy now resolve from resources. The localization gate rejects new literal visible text in either window and missing XAML resource keys; the pseudo-locale covers every addition.
 - **Consistent microcopy** - "Auto enhance" menu casing, and the duplicate-cleanup buttons read "Quarantine extras"/"Recycle extras" instead of the awkward "extra(s)".

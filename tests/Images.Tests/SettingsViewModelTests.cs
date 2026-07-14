@@ -4,6 +4,7 @@ using Images.ViewModels;
 
 namespace Images.Tests;
 
+[Collection("WpfSmoke")]
 public sealed class SettingsViewModelTests
 {
     [Fact]

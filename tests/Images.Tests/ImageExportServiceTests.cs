@@ -199,6 +199,32 @@ public sealed class ImageExportServiceTests
     }
 
     [Fact]
+    public void MoveIntoPlaceWithRetry_WhenTargetIsTemporarilyLocked_RetriesAtomicSwap()
+    {
+        using var temp = TestDirectory.Create();
+        var target = Path.Combine(temp.Path, "target.txt");
+        var replacement = Path.Combine(temp.Path, "replacement.tmp");
+        File.WriteAllText(target, "old");
+        File.WriteAllText(replacement, "new");
+
+        using var targetLock = new FileStream(target, FileMode.Open, FileAccess.Read, FileShare.Read);
+        var retryCount = 0;
+
+        ImageExportService.MoveIntoPlaceWithRetry(
+            replacement,
+            target,
+            retryDelay: _ =>
+            {
+                retryCount++;
+                targetLock.Dispose();
+            });
+
+        Assert.Equal(1, retryCount);
+        Assert.Equal("new", File.ReadAllText(target));
+        Assert.False(File.Exists(replacement));
+    }
+
+    [Fact]
     public void Overwrite_WithRotateOperation_ReplacesSourcePixelsAndTouchesFile()
     {
         using var temp = TestDirectory.Create();

@@ -10,6 +10,8 @@ public sealed record ImageExportResult(string OutputPath, C2paExportHandoff C2pa
 
 public static class ImageExportService
 {
+    private const int AtomicMoveAttempts = 5;
+    private static readonly TimeSpan AtomicMoveRetryDelay = TimeSpan.FromMilliseconds(60);
     public static readonly string[] ExportExtensions =
     [
         ".jpg", ".jpeg", ".jpe", ".jfif", ".jif", ".png", ".webp", ".avif", ".jxl",
@@ -474,11 +476,42 @@ public static class ImageExportService
         try
         {
             image.Write(tempPath);
-            File.Move(tempPath, targetPath, overwrite: true);
+            MoveIntoPlaceWithRetry(tempPath, targetPath);
         }
         finally
         {
             TryDeleteFile(tempPath);
+        }
+    }
+
+    /// <summary>
+    /// Completes an atomic export after tolerating brief Windows sharing locks from image readers,
+    /// thumbnailers, and security scanners. Permanent access failures still surface after a small,
+    /// bounded delay and the caller retains the original destination.
+    /// </summary>
+    internal static void MoveIntoPlaceWithRetry(
+        string tempPath,
+        string targetPath,
+        int maxAttempts = AtomicMoveAttempts,
+        Action<TimeSpan>? retryDelay = null)
+    {
+        if (maxAttempts <= 0)
+            throw new ArgumentOutOfRangeException(nameof(maxAttempts));
+
+        retryDelay ??= static delay => Thread.Sleep(delay);
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                File.Move(tempPath, targetPath, overwrite: true);
+                return;
+            }
+            catch (Exception ex) when (
+                attempt < maxAttempts &&
+                ex is IOException or UnauthorizedAccessException)
+            {
+                retryDelay(AtomicMoveRetryDelay);
+            }
         }
     }
 
