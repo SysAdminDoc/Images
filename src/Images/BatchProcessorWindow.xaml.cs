@@ -515,34 +515,10 @@ public partial class BatchProcessorWindow : Window
 
     private List<string> CollectSourceFiles()
     {
-        var files = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var row in _sourceRows)
-        {
-            try
-            {
-                if (File.Exists(row))
-                {
-                    if (SupportedImageFormats.IsSupported(row))
-                        files.Add(Path.GetFullPath(row));
-                    continue;
-                }
-
-                if (!Directory.Exists(row))
-                    continue;
-
-                foreach (var file in Directory.EnumerateFiles(row, "*", SearchOption.AllDirectories))
-                {
-                    if (SupportedImageFormats.IsSupported(file))
-                        files.Add(Path.GetFullPath(file));
-                }
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
-            {
-                _resultRows.Add(Strings.Format("BatchSkippedSourceFormat", row));
-            }
-        }
-
-        return files.OrderBy(path => path, StringComparer.OrdinalIgnoreCase).ToList();
+        var result = WorkflowSourceCollector.Collect(_sourceRows);
+        foreach (var source in result.SkippedSources)
+            _resultRows.Add(Strings.Format("BatchSkippedSourceFormat", source));
+        return result.Files.ToList();
     }
 
     private void SetBusy(bool busy)
