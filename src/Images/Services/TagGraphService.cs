@@ -472,9 +472,11 @@ public sealed class TagGraphService
 
         try
         {
-            var loaded = JsonSerializer.Deserialize<TagGraphDocument>(
-                File.ReadAllText(storePath, Encoding.UTF8),
-                JsonOptions);
+            var json = BoundedTextFileReader.ReadUtf8(
+                storePath,
+                BoundedTextFileReader.MaxServiceStateBytes,
+                "Tag-graph store");
+            var loaded = JsonSerializer.Deserialize<TagGraphDocument>(json, JsonOptions);
             if (loaded is null)
                 return document;
 
@@ -482,7 +484,7 @@ public sealed class TagGraphService
             NormalizeDocument(loaded);
             return loaded;
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or NotSupportedException)
+        catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException or JsonException or NotSupportedException)
         {
             Log.LogWarning(ex, "Could not load local tag graph {Path}", storePath);
             TryQuarantineCorruptStore(storePath);

@@ -126,6 +126,19 @@ public sealed class SmartCollectionServiceTests
     }
 
     [Fact]
+    public void Load_WhenStoreExceedsStateLimit_DegradesToEmptyCollection()
+    {
+        using var temp = TestDirectory.Create();
+        var path = Path.Combine(temp.Path, "collections.json");
+        using (var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None))
+            stream.SetLength(BoundedTextFileReader.MaxServiceStateBytes + 1L);
+
+        var service = new SmartCollectionService(path);
+
+        Assert.Empty(service.Collections);
+    }
+
+    [Fact]
     public void Add_UsesGuidTempFileAndLeavesFixedTempUntouched()
     {
         using var temp = TestDirectory.Create();

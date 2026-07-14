@@ -721,7 +721,10 @@ public static class TileService
     {
         try
         {
-            var json = File.ReadAllText(path, System.Text.Encoding.UTF8);
+            var json = BoundedTextFileReader.ReadUtf8(
+                path,
+                BoundedTextFileReader.MaxServiceMetadataBytes,
+                "Tile-pyramid metadata");
             return System.Text.Json.JsonSerializer.Deserialize<TilePyramidInfo>(json);
         }
         catch

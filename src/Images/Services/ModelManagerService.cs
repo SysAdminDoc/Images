@@ -577,7 +577,7 @@ public sealed class ModelManagerService
                 size,
                 imported);
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or JsonException)
+        catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException or SecurityException or JsonException)
         {
             return new LocalModelStatus(
                 definition,
@@ -640,7 +640,11 @@ public sealed class ModelManagerService
         if (!File.Exists(path))
             return null;
 
-        return JsonSerializer.Deserialize<LocalModelManifest>(File.ReadAllText(path), JsonOptions);
+        var json = BoundedTextFileReader.ReadUtf8(
+            path,
+            BoundedTextFileReader.MaxServiceMetadataBytes,
+            "Model manifest");
+        return JsonSerializer.Deserialize<LocalModelManifest>(json, JsonOptions);
     }
 
     private static bool IsAssemblyLoaded(string name)

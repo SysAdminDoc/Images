@@ -243,7 +243,8 @@ public static class UpdateCheckService
                 return null;
             }
 
-            var state = JsonSerializer.Deserialize(File.ReadAllText(path), UpdateStateJsonContext.Default.UpdateState);
+            var json = BoundedTextFileReader.ReadUtf8(path, MaxStateFileBytes, "Update-check state");
+            var state = JsonSerializer.Deserialize(json, UpdateStateJsonContext.Default.UpdateState);
             return state?.LastCheckedUtc;
         }
         catch (Exception ex)

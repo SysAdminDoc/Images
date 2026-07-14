@@ -180,7 +180,10 @@ public sealed class SmartCollectionService
 
         try
         {
-            var json = File.ReadAllText(_storagePath);
+            var json = BoundedTextFileReader.ReadUtf8(
+                _storagePath,
+                BoundedTextFileReader.MaxServiceStateBytes,
+                "Smart-collection store");
             var store = JsonSerializer.Deserialize<SmartCollectionStore>(json, JsonOptions);
             _collections = store?.Collections is not null
                 ? new List<SmartCollectionDefinition>(store.Collections)

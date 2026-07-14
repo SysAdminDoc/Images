@@ -11,6 +11,8 @@ namespace Images.Services;
 public static class BoundedTextFileReader
 {
     public const int MaxWorkflowImportBytes = 1024 * 1024;
+    public const int MaxServiceMetadataBytes = 1024 * 1024;
+    public const int MaxServiceStateBytes = 16 * 1024 * 1024;
 
     public static string ReadUtf8(string path, int maxBytes, string contentLabel)
     {

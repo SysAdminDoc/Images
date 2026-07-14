@@ -135,7 +135,10 @@ public sealed class KeywordSetService
 
         try
         {
-            var json = File.ReadAllText(_storagePath);
+            var json = BoundedTextFileReader.ReadUtf8(
+                _storagePath,
+                BoundedTextFileReader.MaxServiceStateBytes,
+                "Keyword-set store");
             var collection = JsonSerializer.Deserialize<KeywordSetCollection>(json, JsonOptions);
             _sets = collection?.Sets is not null
                 ? new List<KeywordSetDefinition>(collection.Sets)

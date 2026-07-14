@@ -85,6 +85,25 @@ public sealed class ModelManagerServiceTests
     }
 
     [Fact]
+    public void Snapshot_WhenManifestExceedsMetadataLimit_ReportsInvalidManifest()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Path.Combine(temp.Path, "source.onnx");
+        File.WriteAllText(source, "model-data");
+        var definition = TestDefinition(expectedSha256: Sha256(source));
+        var service = CreateService(temp.Path, definition);
+        service.ImportLocalModel(definition.Id, source);
+        var manifestPath = Path.Combine(temp.Path, "test", definition.Id, "model-manifest.json");
+        using (var stream = new FileStream(manifestPath, FileMode.Create, FileAccess.Write, FileShare.None))
+            stream.SetLength(BoundedTextFileReader.MaxServiceMetadataBytes + 1L);
+
+        var status = Assert.Single(service.GetSnapshot().Models);
+
+        Assert.Equal(LocalModelAvailability.ManifestInvalid, status.Availability);
+        Assert.False(status.IsReady);
+    }
+
+    [Fact]
     public void DeleteLocalModel_RemovesImportedModelDirectory()
     {
         using var temp = TestDirectory.Create();
