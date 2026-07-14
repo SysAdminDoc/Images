@@ -127,17 +127,15 @@ public static class JpegTranRuntime
             };
             psi.ArgumentList.Add("-version");
 
-            using var process = Process.Start(psi);
-            if (process is null) return null;
-            var stdoutTask = process.StandardOutput.ReadToEndAsync();
-            var stderrTask = process.StandardError.ReadToEndAsync();
-            if (!process.WaitForExit(VersionTimeoutMilliseconds))
-            {
-                try { process.Kill(entireProcessTree: true); } catch { }
+            var result = BoundedProcessRunner.Run(
+                psi,
+                VersionTimeoutMilliseconds,
+                BoundedProcessRunner.VersionProbeOutputLimitBytes,
+                BoundedProcessRunner.VersionProbeOutputLimitBytes);
+            if (result.Status != BoundedProcessStatus.Completed || result.ExitCode != 0)
                 return null;
-            }
 
-            var output = (stdoutTask.GetAwaiter().GetResult() + Environment.NewLine + stderrTask.GetAwaiter().GetResult()).Trim();
+            var output = (result.StandardOutput + Environment.NewLine + result.StandardError).Trim();
             if (string.IsNullOrWhiteSpace(output)) return null;
 
             var firstLine = output

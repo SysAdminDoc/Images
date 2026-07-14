@@ -243,33 +243,32 @@ public static class C2paManifestService
                 }
                 else
                 {
-                    using var process = Process.Start(psi);
-                    if (process is null)
+                    var result = BoundedProcessRunner.Run(
+                        psi,
+                        ReadTimeoutMilliseconds,
+                        BoundedProcessRunner.OperationOutputLimitBytes,
+                        BoundedProcessRunner.OperationOutputLimitBytes);
+                    stdout = result.StandardOutput;
+                    stderr = result.StandardError;
+                    if (result.Status == BoundedProcessStatus.StartFailed)
                     {
                         _log.LogWarning("Failed to start c2patool process for {Path}", path);
                         return C2paInspectionResult.Error("Failed to start c2patool process.");
                     }
 
-                    var stdoutTask = process.StandardOutput.ReadToEndAsync();
-                    var stderrTask = process.StandardError.ReadToEndAsync();
-                    if (!process.WaitForExit(ReadTimeoutMilliseconds))
+                    if (result.TimedOut)
                     {
                         _log.LogWarning("c2patool timed out reading {Path}", path);
-                        try
-                        {
-                            process.Kill(entireProcessTree: true);
-                        }
-                        catch (Exception ex)
-                        {
-                            _log.LogWarning(ex, "Could not kill timed-out c2patool process for {Path}", path);
-                        }
-
                         return C2paInspectionResult.Error("c2patool timed out reading this file.");
                     }
 
-                    exitCode = process.ExitCode;
-                    stdout = stdoutTask.GetAwaiter().GetResult();
-                    stderr = stderrTask.GetAwaiter().GetResult();
+                    if (result.OutputLimitExceeded)
+                    {
+                        _log.LogWarning("c2patool exceeded its output limit reading {Path}", path);
+                        return C2paInspectionResult.Error("c2patool output exceeded the 4 MiB safety limit.");
+                    }
+
+                    exitCode = result.ExitCode ?? -1;
                 }
             }
             finally

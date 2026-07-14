@@ -91,6 +91,29 @@ public sealed class ExifToolServiceTests
     }
 
     [Fact]
+    public void Run_ReportsOutputLimitSeparatelyFromTimeoutAndExitFailure()
+    {
+        using var temp = TestDirectory.Create();
+        var executable = temp.WriteFile("exiftool.exe", "stub");
+        var target = temp.WriteFile("photo.jpg", "image");
+
+        var result = ExifToolService.Run(
+            executable,
+            ["-XMP-dc:Subject+=portrait"],
+            [target],
+            temp.Path,
+            (_, _) => new ExifToolProcessResult(
+                -1,
+                "bounded output",
+                "",
+                OutputLimitExceeded: true));
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("ExifTool output exceeded the 4 MiB safety limit.", result.Message);
+        Assert.Equal("bounded output", result.StandardOutput);
+    }
+
+    [Fact]
     public void BuildStartInfo_NeverUsesShell()
     {
         var startInfo = ExifToolService.BuildStartInfo(@"C:\Tools\exiftool.exe", @"C:\Temp\args.txt");

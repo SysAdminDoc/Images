@@ -11,7 +11,8 @@ internal sealed record ExifToolProcessResult(
     int ExitCode,
     string StandardOutput,
     string StandardError,
-    bool TimedOut = false);
+    bool TimedOut = false,
+    bool OutputLimitExceeded = false);
 
 internal sealed record ExifToolRunResult(
     bool Succeeded,
@@ -79,6 +80,9 @@ internal static class ExifToolService
             if (result.TimedOut)
                 return Failed("ExifTool timed out.", result);
 
+            if (result.OutputLimitExceeded)
+                return Failed("ExifTool output exceeded the 4 MiB safety limit.", result);
+
             if (result.ExitCode != 0)
             {
                 var detail = FirstNonEmptyLine(result.StandardError, result.StandardOutput);
@@ -120,69 +124,17 @@ internal static class ExifToolService
 
     internal static ExifToolProcessResult RunProcess(ProcessStartInfo startInfo, int timeoutMilliseconds)
     {
-        using var process = Process.Start(startInfo);
-        if (process is null)
-            return new ExifToolProcessResult(-1, "", "Failed to start ExifTool.");
-
-        var stdoutTask = process.StandardOutput.ReadToEndAsync();
-        var stderrTask = process.StandardError.ReadToEndAsync();
-        var waitTask = process.WaitForExitAsync();
-        var timeoutTask = timeoutMilliseconds == Timeout.Infinite
-            ? Task.Delay(Timeout.InfiniteTimeSpan)
-            : Task.Delay(timeoutMilliseconds);
-
-        if (Task.WhenAny(waitTask, timeoutTask).GetAwaiter().GetResult() != waitTask)
-        {
-            TryKillProcess(process);
-            DrainKilledProcess(waitTask, stdoutTask, stderrTask);
-            return new ExifToolProcessResult(
-                -1,
-                GetCompletedOutput(stdoutTask),
-                GetCompletedOutput(stderrTask),
-                TimedOut: true);
-        }
-
-        waitTask.GetAwaiter().GetResult();
+        var result = BoundedProcessRunner.Run(
+            startInfo,
+            timeoutMilliseconds,
+            BoundedProcessRunner.OperationOutputLimitBytes,
+            BoundedProcessRunner.OperationOutputLimitBytes);
         return new ExifToolProcessResult(
-            process.ExitCode,
-            stdoutTask.GetAwaiter().GetResult(),
-            stderrTask.GetAwaiter().GetResult());
-    }
-
-    private static void TryKillProcess(Process process)
-    {
-        try
-        {
-            if (!process.HasExited)
-                process.Kill(entireProcessTree: true);
-        }
-        catch
-        {
-        }
-    }
-
-    private static void DrainKilledProcess(Task waitTask, Task<string> stdoutTask, Task<string> stderrTask)
-    {
-        try
-        {
-            var drainTask = Task.WhenAll(waitTask, stdoutTask, stderrTask);
-            Task.WhenAny(drainTask, Task.Delay(TimeSpan.FromSeconds(5))).GetAwaiter().GetResult();
-        }
-        catch
-        {
-        }
-    }
-
-    private static string GetCompletedOutput(Task<string> task)
-    {
-        try
-        {
-            return task.IsCompleted ? task.GetAwaiter().GetResult() : "";
-        }
-        catch
-        {
-            return "";
-        }
+            result.ExitCode ?? -1,
+            result.StandardOutput,
+            result.StandardError,
+            TimedOut: result.TimedOut,
+            OutputLimitExceeded: result.OutputLimitExceeded);
     }
 
     private static bool TryNormalizeExecutable(string path, out string normalizedPath, out string error)

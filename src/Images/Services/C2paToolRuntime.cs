@@ -118,32 +118,18 @@ public static class C2paToolRuntime
             };
             psi.ArgumentList.Add("--version");
 
-            using var process = Process.Start(psi);
-            if (process is null)
+            var result = BoundedProcessRunner.Run(
+                psi,
+                VersionTimeoutMilliseconds,
+                BoundedProcessRunner.VersionProbeOutputLimitBytes,
+                BoundedProcessRunner.VersionProbeOutputLimitBytes);
+            if (result.Status != BoundedProcessStatus.Completed || result.ExitCode != 0)
             {
-                _log.LogWarning("Could not start c2patool to read version: {Path}", executablePath);
+                _log.LogWarning("c2patool version probe failed with status {Status}: {Path}", result.Status, executablePath);
                 return null;
             }
 
-            var stdoutTask = process.StandardOutput.ReadToEndAsync();
-            var stderrTask = process.StandardError.ReadToEndAsync();
-            if (!process.WaitForExit(VersionTimeoutMilliseconds))
-            {
-                _log.LogWarning("c2patool version probe timed out: {Path}", executablePath);
-                try
-                {
-                    process.Kill(entireProcessTree: true);
-                }
-                catch (Exception ex)
-                {
-                    _log.LogWarning(ex, "Could not kill timed-out c2patool version probe: {Path}", executablePath);
-                }
-
-                return null;
-            }
-
-            var output = (stdoutTask.GetAwaiter().GetResult() + Environment.NewLine +
-                          stderrTask.GetAwaiter().GetResult()).Trim();
+            var output = (result.StandardOutput + Environment.NewLine + result.StandardError).Trim();
             if (string.IsNullOrWhiteSpace(output)) return null;
 
             var firstLine = output

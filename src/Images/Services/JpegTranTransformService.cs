@@ -14,7 +14,8 @@ internal sealed record JpegTranProcessResult(
     int ExitCode,
     string StandardOutput,
     string StandardError,
-    bool TimedOut = false);
+    bool TimedOut = false,
+    bool OutputLimitExceeded = false);
 
 internal sealed record JpegTranWriteResult(
     bool Attempted,
@@ -77,6 +78,9 @@ internal static class JpegTranTransformService
             var result = runner(runtime.ExecutablePath, arguments, TransformTimeoutMilliseconds);
             if (result.TimedOut)
                 return JpegTranWriteResult.Failed("JPEG crop failed: jpegtran timed out.");
+
+            if (result.OutputLimitExceeded)
+                return JpegTranWriteResult.Failed("JPEG crop failed: jpegtran output exceeded the 4 MiB safety limit.");
 
             if (result.ExitCode != 0)
             {
@@ -170,6 +174,9 @@ internal static class JpegTranTransformService
             if (result.TimedOut)
                 return JpegTranWriteResult.Failed("JPEG rotation failed: jpegtran timed out.");
 
+            if (result.OutputLimitExceeded)
+                return JpegTranWriteResult.Failed("JPEG rotation failed: jpegtran output exceeded the 4 MiB safety limit.");
+
             if (result.ExitCode != 0)
             {
                 var details = FirstNonEmptyLine(result.StandardError, result.StandardOutput);
@@ -243,26 +250,17 @@ internal static class JpegTranTransformService
         foreach (var argument in arguments)
             psi.ArgumentList.Add(argument);
 
-        using var process = Process.Start(psi);
-        if (process is null)
-            throw new InvalidOperationException("jpegtran did not start.");
-
-        var stdoutTask = process.StandardOutput.ReadToEndAsync();
-        var stderrTask = process.StandardError.ReadToEndAsync();
-        if (!process.WaitForExit(timeoutMilliseconds))
-        {
-            try { process.Kill(entireProcessTree: true); } catch { }
-            return new JpegTranProcessResult(
-                ExitCode: -1,
-                StandardOutput: ReadCompletedOutput(stdoutTask),
-                StandardError: ReadCompletedOutput(stderrTask),
-                TimedOut: true);
-        }
-
+        var result = BoundedProcessRunner.Run(
+            psi,
+            timeoutMilliseconds,
+            BoundedProcessRunner.OperationOutputLimitBytes,
+            BoundedProcessRunner.OperationOutputLimitBytes);
         return new JpegTranProcessResult(
-            process.ExitCode,
-            stdoutTask.GetAwaiter().GetResult(),
-            stderrTask.GetAwaiter().GetResult());
+            result.ExitCode ?? -1,
+            result.StandardOutput,
+            result.StandardError,
+            TimedOut: result.TimedOut,
+            OutputLimitExceeded: result.OutputLimitExceeded);
     }
 
     private static void ReplaceAtomically(string outputPath, string targetPath, string backupPath)
@@ -355,9 +353,6 @@ internal static class JpegTranTransformService
             .SelectMany(value => (value ?? "").Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
             .Select(line => line.Trim())
             .FirstOrDefault(line => line.Length > 0) ?? "";
-
-    private static string ReadCompletedOutput(Task<string> outputTask)
-        => outputTask.IsCompletedSuccessfully ? outputTask.Result : "";
 
     private static void TryRestoreBackup(string backupPath, string targetPath)
     {
