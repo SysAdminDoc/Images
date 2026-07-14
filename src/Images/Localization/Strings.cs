@@ -380,6 +380,9 @@ public static class Strings
     public static string SettingsThemeLight => Get(nameof(SettingsThemeLight));
     public static string SettingsThemeSystem => Get(nameof(SettingsThemeSystem));
     public static string SettingsThemeChangedStatusFormat => Get(nameof(SettingsThemeChangedStatusFormat));
+    public static string SettingsLoupeMagnificationTitle => Get(nameof(SettingsLoupeMagnificationTitle));
+    public static string SettingsLoupeMagnificationDescription => Get(nameof(SettingsLoupeMagnificationDescription));
+    public static string SettingsLoupeMagnificationChangedStatusFormat => Get(nameof(SettingsLoupeMagnificationChangedStatusFormat));
     public static string SettingsFilmstripTitle => Get(nameof(SettingsFilmstripTitle));
     public static string SettingsFilmstripDescription => Get(nameof(SettingsFilmstripDescription));
     public static string SettingsMetadataHudTitle => Get(nameof(SettingsMetadataHudTitle));

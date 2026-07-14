@@ -2899,6 +2899,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    // Loupe magnification (Settings-adjustable); bound to ZoomPanImage.LoupeFactor.
+    public double LoupeMagnification => _settings.GetDouble(Keys.LoupeFactor, 2.0);
+
     private void ToggleZoomLock()
     {
         IsZoomLocked = !IsZoomLocked;
@@ -7368,6 +7371,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 ReloadCurrentPreservingViewState(resetPreload: true);
         }
 
+        Raise(nameof(LoupeMagnification));
         Raise(nameof(FirstRunPrivacyText));
     }
 

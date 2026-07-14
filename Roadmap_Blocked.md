@@ -64,7 +64,7 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
 
 ## Blocked On Research / Evaluation (Not Code-Ready)
 
-- [ ] *P3* — **Keyboard-invocable loupe + adjustable magnification**. The loupe and zoom-to-selection are documented in the `?` cheatsheet but remain pointer-only; `LoupeFactor` is a fixed-2x unexposed DP. Where: `src/Images/Controls/ZoomPanImage.cs`, `CommandShortcutService.cs`, `SettingsWindow.xaml`.
+- [ ] *P3* — **Keyboard-invocable loupe**. The loupe magnification is now Settings-adjustable and the gesture is documented in the `?` cheatsheet, but the loupe remains pointer-only (middle-button hold). Where: `src/Images/Controls/ZoomPanImage.cs`, `CommandShortcutService.cs`.
   - **Blocked by**: interaction-design decision — a keyboard-triggered magnifier has no natural cursor to follow, and arrow keys are already bound to navigation, so how a keyboard user positions/moves the lens must be decided before implementation.
   - **Unblock when**: a keyboard-loupe interaction model is chosen (e.g. viewport-centered toggle with a dedicated positioning modifier) that does not collide with existing keybindings.
 

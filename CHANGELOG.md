@@ -2,6 +2,12 @@
 
 All notable changes to **Images** are documented here.
 
+## Unreleased
+
+### Added
+
+- **Adjustable loupe magnification** - Appearance settings now offer a loupe magnification choice (2×, 3×, 4×, 6×) so the middle-button magnifier can zoom in further than the previous fixed 2×.
+
 ## v0.2.26 - 2026-07-12
 
 ### Changed

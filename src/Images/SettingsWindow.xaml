@@ -288,6 +288,30 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsLoupeMagnificationTitle}"
+                                                   Style="{StaticResource Text.Body}"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Static loc:Strings.SettingsLoupeMagnificationDescription}"
+                                                   Style="{StaticResource Text.Hint}"
+                                                   Margin="0,3,0,0"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <ComboBox Grid.Column="1"
+                                              VerticalAlignment="Center"
+                                              MinWidth="170"
+                                              ItemsSource="{Binding AvailableLoupeMagnifications}"
+                                              SelectedItem="{Binding SelectedLoupeMagnification}"
+                                              AutomationProperties.Name="{x:Static loc:Strings.SettingsLoupeMagnificationTitle}" />
+                                </Grid>
+
+                                <Border Style="{StaticResource SettingsDivider}" />
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,18,0">
                                         <TextBlock Text="{x:Static loc:Strings.SettingsFilmstripTitle}"
                                                    Style="{StaticResource Text.Body}"
                                                    FontWeight="SemiBold" />

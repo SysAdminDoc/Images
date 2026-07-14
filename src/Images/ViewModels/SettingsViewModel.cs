@@ -123,6 +123,34 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
+    public IReadOnlyList<LoupeMagnificationOption> AvailableLoupeMagnifications { get; } =
+    [
+        new LoupeMagnificationOption("2×", 2.0),
+        new LoupeMagnificationOption("3×", 3.0),
+        new LoupeMagnificationOption("4×", 4.0),
+        new LoupeMagnificationOption("6×", 6.0),
+    ];
+
+    public LoupeMagnificationOption SelectedLoupeMagnification
+    {
+        get
+        {
+            var persisted = _settings.GetDouble(Keys.LoupeFactor, 2.0);
+            return AvailableLoupeMagnifications.FirstOrDefault(option =>
+                       Math.Abs(option.Factor - persisted) < 0.01)
+                   ?? AvailableLoupeMagnifications[0];
+        }
+        set
+        {
+            if (value is null) return;
+            _settings.SetDouble(Keys.LoupeFactor, value.Factor);
+            Raise(nameof(SelectedLoupeMagnification));
+            SetStatus(
+                Strings.Format(nameof(Strings.SettingsLoupeMagnificationChangedStatusFormat), value.DisplayName),
+                SettingsStatusToneKind.Success);
+        }
+    }
+
     // ---- Viewer ----
 
     public bool RememberWindowPlacement
@@ -682,6 +710,12 @@ public sealed record LocaleOption(string DisplayName, string Tag)
 }
 
 public sealed record ThemeOption(string DisplayName, string Key)
+{
+    public override string ToString() => DisplayName;
+}
+
+/// <summary>A display label / magnification-factor pair for the loupe magnification picker.</summary>
+public sealed record LoupeMagnificationOption(string DisplayName, double Factor)
 {
     public override string ToString() => DisplayName;
 }

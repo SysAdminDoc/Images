@@ -49,6 +49,23 @@ public sealed class SettingsViewModelTests
     }
 
     [Fact]
+    public void LoupeMagnification_DefaultsTo2xAndPersistsSelection()
+    {
+        using var temp = TestDirectory.Create();
+        var settings = new SettingsService(Path.Combine(temp.Path, "settings.db"));
+        var viewModel = new SettingsViewModel(settings);
+
+        Assert.Equal(2.0, viewModel.SelectedLoupeMagnification.Factor, 3);
+
+        var fourX = Assert.Single(viewModel.AvailableLoupeMagnifications, option => option.Factor == 4.0);
+        viewModel.SelectedLoupeMagnification = fourX;
+
+        Assert.Equal(4.0, settings.GetDouble(Keys.LoupeFactor, 2.0), 3);
+        Assert.Equal(4.0, new SettingsViewModel(settings).SelectedLoupeMagnification.Factor, 3);
+        Assert.Equal(SettingsViewModel.SettingsStatusToneKind.Success, viewModel.SettingsStatusTone);
+    }
+
+    [Fact]
     public void HotkeysAndDiagnosticsSummariesExposeExpectedSettingsSections()
     {
         using var temp = TestDirectory.Create();

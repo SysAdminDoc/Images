@@ -352,6 +352,7 @@
                                    UseNearestNeighborScaling="{Binding InspectorNearestNeighborPreview}"
                                    PreserveViewOnSourceChange="{Binding IsZoomLocked}"
                                    ShowTransparencyGrid="{Binding ShowTransparencyGrid}"
+                                   LoupeFactor="{Binding LoupeMagnification}"
                                    Visibility="{Binding ShowCompareMode, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}"
                                    PreviewMouseRightButtonUp="Viewport_PreviewMouseRightButtonUp"
                                    MouseMove="Canvas_MouseMove"

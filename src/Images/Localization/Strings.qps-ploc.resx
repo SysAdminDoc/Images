@@ -1652,6 +1652,15 @@ Details written to:
   <data name="SettingsThemeChangedStatusFormat" xml:space="preserve">
     <value>[!!!!!!! Theme preference saved: {0}. !!!!!!!]</value>
   </data>
+  <data name="SettingsLoupeMagnificationTitle" xml:space="preserve">
+    <value>[!!!!! Loupe magnification !!!!!]</value>
+  </data>
+  <data name="SettingsLoupeMagnificationDescription" xml:space="preserve">
+    <value>[!!!!!!!!!!!! How much the middle-button loupe magnifies the pixels under the cursor. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="SettingsLoupeMagnificationChangedStatusFormat" xml:space="preserve">
+    <value>[!!!!!!!! Loupe magnification set to {0}. !!!!!!!!]</value>
+  </data>
   <data name="SettingsFilmstripTitle" xml:space="preserve">
     <value>[!!!!!!! Show filmstrip at startup !!!!!!!]</value>
   </data>
