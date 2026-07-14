@@ -108,4 +108,32 @@ public sealed class SettingsViewModelTests
         Assert.Null(settings.GetHotkey(CommandIds.Open));
         Assert.Contains(viewModel.ShortcutRows, r => r.Id == CommandIds.Open && r.ShortcutText == "Ctrl+O");
     }
+
+    [Fact]
+    public void LocalStorageRegistryReportsRealStoresAndConfirmedResetPreservesModels()
+    {
+        using var temp = TestDirectory.Create();
+        var settings = new SettingsService(Path.Combine(temp.Path, "settings.db"));
+        File.WriteAllText(Path.Combine(temp.Path, "catalog.db"), "catalog");
+        File.WriteAllText(Path.Combine(temp.Path, "semantic-index.db"), "semantic");
+        var models = Directory.CreateDirectory(Path.Combine(temp.Path, "models"));
+        File.WriteAllText(Path.Combine(models.FullName, "model.onnx"), "model");
+        var prompts = new List<string>();
+        var viewModel = new SettingsViewModel(
+            settings,
+            new LocalDataStoreRegistry(() => temp.Path),
+            prompt => { prompts.Add(prompt); return true; });
+
+        Assert.Contains("Catalog:", viewModel.StorageDetail, StringComparison.Ordinal);
+        Assert.Contains("Semantic index:", viewModel.StorageDetail, StringComparison.Ordinal);
+        Assert.Contains("Local models:", viewModel.StorageDetail, StringComparison.Ordinal);
+
+        viewModel.ClearDerivedDataCommand.Execute(null);
+
+        Assert.Single(prompts);
+        Assert.False(File.Exists(Path.Combine(temp.Path, "catalog.db")));
+        Assert.False(File.Exists(Path.Combine(temp.Path, "semantic-index.db")));
+        Assert.True(File.Exists(Path.Combine(models.FullName, "model.onnx")));
+        Assert.Equal(SettingsViewModel.SettingsStatusToneKind.Success, viewModel.SettingsStatusTone);
+    }
 }

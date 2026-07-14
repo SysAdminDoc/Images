@@ -54,6 +54,8 @@ public static class SupportBundleService
             () => NetworkEgressService.BuildClipboardText());
 
         AddDiagnosticsStatus(archive, manifest);
+        AddText(archive, manifest, "local-data-stores.txt",
+            () => new LocalDataStoreRegistry().BuildReport(includePaths: true));
         AddCacheHealth(archive, manifest);
         AddRecoveryRecords(archive, manifest);
         AddRedactedSettings(archive, manifest);

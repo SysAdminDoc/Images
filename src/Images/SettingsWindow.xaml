@@ -835,6 +835,15 @@
                                     </Button>
 
                                     <Button Style="{StaticResource ChromeButton}"
+                                            Command="{Binding ClearDerivedDataCommand}"
+                                            Padding="12,6"
+                                            MinHeight="32"
+                                            Margin="0,0,8,8"
+                                            AutomationProperties.Name="Clear local derived data">
+                                        <TextBlock Text="Clear derived data" VerticalAlignment="Center" />
+                                    </Button>
+
+                                    <Button Style="{StaticResource ChromeButton}"
                                             Command="{Binding RefreshStorageDetailCommand}"
                                             Padding="12,6"
                                             MinHeight="32"

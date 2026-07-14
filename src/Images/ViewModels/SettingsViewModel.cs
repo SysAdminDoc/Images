@@ -20,6 +20,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     private readonly SettingsService _settings;
     private readonly CommandShortcutService _shortcutService;
+    private readonly LocalDataStoreRegistry _localDataStores;
+    private readonly Func<string, bool> _confirmPrivacyReset;
     private OcrCapabilityService.OcrCapabilityStatus _ocrStatus = OcrCapabilityService.GetStatus();
     private string? _settingsStatusText;
     private SettingsStatusToneKind _settingsStatusTone = SettingsStatusToneKind.Info;
@@ -29,10 +31,15 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     {
     }
 
-    internal SettingsViewModel(SettingsService settings)
+    internal SettingsViewModel(
+        SettingsService settings,
+        LocalDataStoreRegistry? localDataStores = null,
+        Func<string, bool>? confirmPrivacyReset = null)
     {
         _settings = settings;
         _shortcutService = new CommandShortcutService(settings);
+        _localDataStores = localDataStores ?? new LocalDataStoreRegistry();
+        _confirmPrivacyReset = confirmPrivacyReset ?? ConfirmPrivacyReset;
         RefreshOcrStatusCommand = new RelayCommand(RefreshOcrStatus);
         OpenOcrLanguageSettingsCommand = new RelayCommand(OpenOcrLanguageSettings);
         OpenAppDataCommand = new RelayCommand(OpenAppData);
@@ -42,6 +49,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         ClearLogsCommand = new RelayCommand(ClearLogs);
         ClearRecoveryLogCommand = new RelayCommand(ClearRecoveryLog);
         ClearNetworkLogCommand = new RelayCommand(ClearNetworkLog);
+        ClearDerivedDataCommand = new RelayCommand(ClearDerivedData);
         ApplyShortcutCommand = new RelayCommand(ApplyShortcut, p => p is ShortcutSettingRow);
         ResetShortcutCommand = new RelayCommand(ResetShortcut, p => p is ShortcutSettingRow);
         RefreshShortcutRows();
@@ -412,6 +420,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     public ICommand ClearNetworkLogCommand { get; }
 
+    public ICommand ClearDerivedDataCommand { get; }
+
     public string? SettingsStatusText
     {
         get => _settingsStatusText;
@@ -551,57 +561,13 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     {
         try
         {
-            var lines = new List<string>();
-            AddStoreSize(lines, "Thumbnail cache", "thumbs");
-            AddStoreSize(lines, "Logs", "Logs");
-            AddStoreSize(lines, "Recovery log", "recovery");
-            AddStoreSize(lines, "Semantic index", "semantic");
-            AddStoreSize(lines, "Models", "models");
-            AddStoreSize(lines, "Diagnostics", "diagnostics");
-            AddStoreSize(lines, "Wallpaper", "wallpaper");
-
-            var settingsDb = Path.Combine(AppStorage.TryGetAppDirectory() ?? "", "settings.db");
-            if (File.Exists(settingsDb))
-                lines.Add($"Settings DB: {FormatBytes(new FileInfo(settingsDb).Length)}");
-
-            var networkLog = Path.Combine(AppStorage.TryGetAppDirectory() ?? "", "network-egress.jsonl");
-            if (File.Exists(networkLog))
-                lines.Add($"Network log: {FormatBytes(new FileInfo(networkLog).Length)}");
-
-            StorageDetail = lines.Count > 0
-                ? string.Join("\n", lines)
-                : "No local data found.";
+            StorageDetail = _localDataStores.BuildReport(includePaths: false).TrimEnd();
         }
         catch
         {
             StorageDetail = "Could not read storage sizes.";
         }
     }
-
-    private static void AddStoreSize(List<string> lines, string label, string subdir)
-    {
-        var dir = AppStorage.TryGetAppDirectory(subdir);
-        if (dir is null || !Directory.Exists(dir)) return;
-
-        try
-        {
-            var size = Directory.EnumerateFiles(dir, "*", SearchOption.AllDirectories)
-                .Sum(f => { try { return new FileInfo(f).Length; } catch { return 0L; } });
-            if (size > 0)
-                lines.Add($"{label}: {FormatBytes(size)}");
-        }
-        catch
-        {
-        }
-    }
-
-    private static string FormatBytes(long bytes) => bytes switch
-    {
-        < 1024 => $"{bytes} B",
-        < 1024 * 1024 => $"{bytes / 1024.0:F1} KB",
-        < 1024 * 1024 * 1024 => $"{bytes / (1024.0 * 1024.0):F1} MB",
-        _ => $"{bytes / (1024.0 * 1024.0 * 1024.0):F2} GB"
-    };
 
     private void ClearThumbnailCache()
     {
@@ -667,6 +633,38 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             SetStatus($"Could not clear network log: {ex.Message}", SettingsStatusToneKind.Warning);
         }
     }
+
+    private void ClearDerivedData()
+    {
+        const string prompt = "Clear rebuildable caches, indexes, diagnostics, logs, recovery records, and temporary media? Settings, imported models, smart collections, keyword sets, wallpaper, drafts, backups, and quarantined originals will be preserved.";
+        if (!_confirmPrivacyReset(prompt))
+        {
+            SetStatus("Local data reset canceled.", SettingsStatusToneKind.Info);
+            return;
+        }
+
+        var result = _localDataStores.ClearPrivacyResetStores();
+        RefreshStorageDetail();
+        if (result.Succeeded)
+        {
+            SetStatus(
+                $"Cleared {result.ClearedStores} local data stores ({LocalDataStoreRegistry.FormatBytes(result.ClearedBytes)}). Imported models and user-owned recovery files were preserved.",
+                SettingsStatusToneKind.Success);
+            return;
+        }
+
+        SetStatus(
+            $"Cleared {result.ClearedStores} local data stores; {result.FailedStoreIds.Count} locked or unavailable stores could not be cleared.",
+            SettingsStatusToneKind.Warning);
+    }
+
+    private static bool ConfirmPrivacyReset(string prompt)
+        => System.Windows.MessageBox.Show(
+               prompt,
+               "Clear local derived data",
+               System.Windows.MessageBoxButton.YesNo,
+               System.Windows.MessageBoxImage.Warning,
+               System.Windows.MessageBoxResult.No) == System.Windows.MessageBoxResult.Yes;
 
     private void OpenAppData()
     {

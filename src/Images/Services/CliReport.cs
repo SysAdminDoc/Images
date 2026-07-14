@@ -154,13 +154,15 @@ public static class CliReport
         sb.AppendLine($"- Export extensions: {ImageExportService.ExportExtensions.Length}");
         sb.AppendLine();
 
-        sb.AppendLine("Writable storage paths");
+        sb.AppendLine("Local data stores");
         AppendPath(sb, "App data root", AppStorage.TryGetAppDirectory());
-        AppendPath(sb, "Logs",          AppStorage.TryGetAppDirectory("Logs"));
-        AppendPath(sb, "Thumbnails",    AppStorage.TryGetAppDirectory("thumbs"));
-        AppendPath(sb, "Wallpaper",     AppStorage.TryGetAppDirectory("wallpaper"));
-        AppendPath(sb, "Email drafts",  AppStorage.TryGetAppDirectory("email-drafts"));
-        AppendPath(sb, "Crash log",     CrashLog.LogPath);
+        foreach (var snapshot in new LocalDataStoreRegistry().GetSnapshots())
+        {
+            var detail = snapshot.FullPath is null
+                ? null
+                : $"{snapshot.FullPath} ({LocalDataStoreRegistry.FormatBytes(snapshot.SizeBytes)}, {snapshot.Definition.ClearAction})";
+            AppendPath(sb, snapshot.Definition.DisplayName, detail);
+        }
         sb.AppendLine();
 
         sb.AppendLine("More");
@@ -207,7 +209,7 @@ public static class CliReport
 
     private static void AppendPath(StringBuilder sb, string label, string? path)
     {
-        var padded = (label + ":").PadRight(20);
+        var padded = (label + ":").PadRight(30);
         sb.AppendLine($"- {padded}{path ?? "(unavailable)"}");
     }
 
