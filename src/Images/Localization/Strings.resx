@@ -6204,6 +6204,18 @@ Details written to:
   <data name="SettingsTransferTitle" xml:space="preserve">
     <value>Move settings between installations</value>
   </data>
+  <data name="DiagnosticsNativeDependencies" xml:space="preserve">
+    <value>Native dependencies</value>
+  </data>
+  <data name="DiagnosticsNativeVersionsReady" xml:space="preserve">
+    <value>Reviewed versions active</value>
+  </data>
+  <data name="DiagnosticsNativeVersionsAttention" xml:space="preserve">
+    <value>Native version needs attention</value>
+  </data>
+  <data name="DiagnosticsNativeVersionsFormat" xml:space="preserve">
+    <value>{0}; {1} (minimum ImageMagick {2}); SQLite {3} (minimum {4}).</value>
+  </data>
   <data name="CommandPalette_FocusPeaking" xml:space="preserve">
     <value>Focus peaking</value>
   </data>

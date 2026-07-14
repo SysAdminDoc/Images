@@ -1474,6 +1474,10 @@ public static class Strings
     public static string DiagnosticsLogs => Get(nameof(DiagnosticsLogs));
     public static string DiagnosticsLogsDetailFormat => Get(nameof(DiagnosticsLogsDetailFormat));
     public static string DiagnosticsMagickAvailable => Get(nameof(DiagnosticsMagickAvailable));
+    public static string DiagnosticsNativeDependencies => Get(nameof(DiagnosticsNativeDependencies));
+    public static string DiagnosticsNativeVersionsReady => Get(nameof(DiagnosticsNativeVersionsReady));
+    public static string DiagnosticsNativeVersionsAttention => Get(nameof(DiagnosticsNativeVersionsAttention));
+    public static string DiagnosticsNativeVersionsFormat => Get(nameof(DiagnosticsNativeVersionsFormat));
     public static string DiagnosticsMonitorIccActive => Get(nameof(DiagnosticsMonitorIccActive));
     public static string DiagnosticsMonitorIccDetailFormat => Get(nameof(DiagnosticsMonitorIccDetailFormat));
     public static string DiagnosticsNoBackgroundWork => Get(nameof(DiagnosticsNoBackgroundWork));

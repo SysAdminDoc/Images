@@ -4,6 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Diagnostics, About provenance, and startup logs now report the loaded `MagickNET.Version`, native ImageMagick version, and `SELECT sqlite_version()` result; versions below ImageMagick 7.1.2-2 or SQLite 3.53.2 raise an explicit warning instead of letting native payload drift stay invisible.
 - Archive pages now independently verify advertised ZIP/RAR/7z CRCs before returning decoded bytes; a corrupt-entry regression proves damaged page data fails as an archive error instead of silently reaching the image decoder.
 - Focus peaking and exposure-clipping overlays now provide bounded, cancellable RAW/photo culling analysis directly on the transformed image surface; both are localized, persisted, rebindable, command-palette discoverable, and use a text legend alongside green/red/blue markers.
 - Active-monitor DXGI diagnostics now report HDR/SDR color space and peak/full-frame luminance; when HDR-class content is tonemapped for the WPF SDR surface on an HDR desktop, the Details panel shows an explicit localized status badge.

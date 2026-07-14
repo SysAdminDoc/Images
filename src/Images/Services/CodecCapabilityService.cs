@@ -54,6 +54,9 @@ public static class CodecCapabilityService
         string ProcessArchitecture,
         string AppDirectory,
         string MagickVersion,
+        string MagickNetRuntimeVersion,
+        string ImageMagickVersion,
+        string SqliteRuntimeVersion,
         string? MagickAssemblyPath,
         MagickSecurityPolicyReport MagickPolicy,
         string SharpCompressVersion,
@@ -114,6 +117,7 @@ public static class CodecCapabilityService
         var status = CodecRuntime.Status;
         var jpegTran = JpegTranRuntime.Inspect();
         var c2paTool = C2paToolRuntime.Inspect();
+        var nativeVersions = NativeRuntimeVersionService.Current;
         return new RuntimeProvenance(
             AppVersion: $"Images {info.DisplayVersion} ({info.ProductVersion})",
             Runtime: info.RuntimeDescription,
@@ -121,6 +125,9 @@ public static class CodecCapabilityService
             ProcessArchitecture: System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString(),
             AppDirectory: AppContext.BaseDirectory,
             MagickVersion: CodecRuntime.GetMagickAssemblyVersion(),
+            MagickNetRuntimeVersion: nativeVersions.MagickNetVersion,
+            ImageMagickVersion: nativeVersions.ImageMagickVersion,
+            SqliteRuntimeVersion: nativeVersions.SqliteVersion,
             MagickAssemblyPath: CodecRuntime.GetMagickAssemblyPath(),
             MagickPolicy: MagickSecurityPolicy.Inspect(status.GhostscriptAvailable, status.GhostscriptSource),
             SharpCompressVersion: GetSharpCompressAssemblyVersion(),
@@ -189,6 +196,18 @@ public static class CodecCapabilityService
                 Sha256: null,
                 AdvisoryStatus: $"Resource limits: {provenance.MagickPolicy.ResourceLimitSummary}. Read policy: {provenance.MagickPolicy.ReadPolicySummary}. {provenance.MagickPolicy.DocumentDelegateStatus}",
                 Action: $"Blocked write targets: {provenance.MagickPolicy.BlockedWriteSummary}. Keep document/vector exports routed to PNG unless a separately reviewed sidecar is added."),
+
+            new(
+                Name: "Native ImageMagick / SQLite",
+                Kind: "Native runtime",
+                Source: "Loaded runtime APIs: MagickNET.ImageMagickVersion and SELECT sqlite_version()",
+                Version: $"{provenance.MagickNetRuntimeVersion}; {provenance.ImageMagickVersion}; SQLite {provenance.SqliteRuntimeVersion}",
+                Path: null,
+                Sha256: null,
+                AdvisoryStatus: NativeRuntimeVersionsAreSupported(provenance)
+                    ? $"OK: ImageMagick is at or above {NativeRuntimeVersionService.MinimumImageMagickVersion} and SQLite is at or above {SqliteConnectionPolicy.MinimumRuntimeVersion}."
+                    : $"Needs review: require ImageMagick {NativeRuntimeVersionService.MinimumImageMagickVersion}+ and SQLite {SqliteConnectionPolicy.MinimumRuntimeVersion}+.",
+                Action: "Keep native payloads aligned with their managed package pins and treat startup version warnings as release blockers."),
 
             new(
                 Name: "SharpCompress",
@@ -569,6 +588,10 @@ public static class CodecCapabilityService
         var required = new Version(major, minor, patch);
         return version >= required;
     }
+
+    private static bool NativeRuntimeVersionsAreSupported(RuntimeProvenance provenance)
+        => NativeRuntimeVersionService.IsImageMagickVersionSupported(provenance.ImageMagickVersion)
+           && SqliteConnectionPolicy.IsRuntimeVersionSupported(provenance.SqliteRuntimeVersion);
 
     private static string GetOnnxRuntimeVersion()
     {

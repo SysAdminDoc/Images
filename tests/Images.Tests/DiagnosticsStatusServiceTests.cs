@@ -34,6 +34,12 @@ public sealed class DiagnosticsStatusServiceTests
         Assert.Contains(items, item => item.Title == "Text extraction" && item.Tone == DiagnosticsStatusService.ReadyTone);
         Assert.Contains(items, item => item.Title == "Document previews" && item.Status == "Ghostscript ready");
         Assert.Contains(items, item => item.Title == "Image codecs" && item.Detail.Contains("14.13.0", StringComparison.Ordinal));
+        Assert.Contains(items, item =>
+            item.Title == "Native dependencies"
+            && item.Status == "Reviewed versions active"
+            && item.Tone == DiagnosticsStatusService.ReadyTone
+            && item.Detail.Contains("ImageMagick 7.1.2-27", StringComparison.Ordinal)
+            && item.Detail.Contains("SQLite 3.53.3", StringComparison.Ordinal));
         Assert.Contains(items, item => item.Title == "Content credentials" && item.Status == "c2patool ready" && item.Tone == DiagnosticsStatusService.ReadyTone);
         Assert.Contains(items, item => item.Title == "Logs" && item.Tone == DiagnosticsStatusService.ReadyTone);
         Assert.Contains(items, item => item.Title == "Storage" && item.Status == "Writable storage ready");
@@ -79,6 +85,33 @@ public sealed class DiagnosticsStatusServiceTests
         Assert.Contains(items, item => item.Title == "Content credentials" && item.Tone == DiagnosticsStatusService.WarningTone && item.Detail.Contains("degraded", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(items, item => item.Title == "Storage" && item.Tone == DiagnosticsStatusService.WarningTone);
         Assert.Contains(items, item => item.Title == "Update checks" && item.Tone == DiagnosticsStatusService.InfoTone);
+    }
+
+    [Fact]
+    public void BuildStatusItems_WhenNativeRuntimeIsBelowFloor_FlagsWarning()
+    {
+        var items = DiagnosticsStatusService.BuildStatusItems(
+            ReadyProvenance() with { ImageMagickVersion = "ImageMagick 7.1.2-1", SqliteRuntimeVersion = "3.49.0" },
+            new OcrCapabilityService.OcrCapabilityStatus(
+                IsAvailable: true,
+                LanguageCount: 1,
+                LanguageSummary: "English (United States) (en-US)",
+                StatusTitle: "Text extraction ready",
+                StatusDetail: "OCR runs locally.",
+                BadgeText: "Ready"),
+            updateChecksEnabled: false,
+            lastUpdateCheckUtc: null,
+            appDataRoot: @"C:\Users\test\AppData\Local\Images",
+            logsPath: AppContext.BaseDirectory,
+            thumbnailsPath: @"C:\Users\test\AppData\Local\Images\thumbs",
+            crashLogPath: @"C:\Users\test\AppData\Local\Images\crash.log");
+
+        Assert.Contains(items, item =>
+            item.Title == "Native dependencies"
+            && item.Status == "Native version needs attention"
+            && item.Tone == DiagnosticsStatusService.WarningTone
+            && item.Detail.Contains("minimum ImageMagick 7.1.2-2", StringComparison.Ordinal)
+            && item.Detail.Contains("minimum 3.53.2", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -200,6 +233,9 @@ public sealed class DiagnosticsStatusServiceTests
             ProcessArchitecture: "X64",
             AppDirectory: @"C:\Images",
             MagickVersion: "14.13.0",
+            MagickNetRuntimeVersion: "Magick.NET 14.13.0",
+            ImageMagickVersion: "ImageMagick 7.1.2-27",
+            SqliteRuntimeVersion: "3.53.3",
             MagickAssemblyPath: @"C:\Images\Magick.NET-Q16-HDRI-AnyCPU.dll",
             MagickPolicy: MagickSecurityPolicy.Configure(true, "installed Ghostscript"),
             SharpCompressVersion: "0.47.4.0",

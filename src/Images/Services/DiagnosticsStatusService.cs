@@ -70,6 +70,7 @@ public static class DiagnosticsStatusService
                 BuildMagickDetail(provenance),
                 ReadyTone,
                 "\uE8B9"),
+            BuildNativeRuntimeStatus(provenance),
             BuildDisplayColorStatus(displayColor ?? DisplayColorState.Unprobed, colorManagementEnabled),
             new(
                 Strings.DiagnosticsContentCredentials,
@@ -197,6 +198,26 @@ public static class DiagnosticsStatusService
         => string.IsNullOrWhiteSpace(provenance.MagickAssemblyPath)
             ? provenance.MagickVersion
             : Strings.Format(nameof(Strings.DiagnosticsVersionAtFormat), provenance.MagickVersion, provenance.MagickAssemblyPath);
+
+    private static DiagnosticStatusItem BuildNativeRuntimeStatus(
+        CodecCapabilityService.RuntimeProvenance provenance)
+    {
+        var imageMagickSupported = NativeRuntimeVersionService.IsImageMagickVersionSupported(provenance.ImageMagickVersion);
+        var sqliteSupported = SqliteConnectionPolicy.IsRuntimeVersionSupported(provenance.SqliteRuntimeVersion);
+        var supported = imageMagickSupported && sqliteSupported;
+        return new DiagnosticStatusItem(
+            Strings.DiagnosticsNativeDependencies,
+            supported ? Strings.DiagnosticsNativeVersionsReady : Strings.DiagnosticsNativeVersionsAttention,
+            Strings.Format(
+                nameof(Strings.DiagnosticsNativeVersionsFormat),
+                provenance.MagickNetRuntimeVersion,
+                provenance.ImageMagickVersion,
+                NativeRuntimeVersionService.MinimumImageMagickVersion,
+                provenance.SqliteRuntimeVersion,
+                SqliteConnectionPolicy.MinimumRuntimeVersion),
+            supported ? ReadyTone : WarningTone,
+            supported ? "\uE73E" : "\uE783");
+    }
 
     private static string BuildC2paToolDetail(CodecCapabilityService.RuntimeProvenance provenance)
     {

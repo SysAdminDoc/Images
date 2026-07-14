@@ -35,6 +35,13 @@ public sealed class CodecCapabilityServiceTests
             && row.Action.Contains(".pdf", StringComparison.Ordinal));
 
         Assert.Contains(rows, row =>
+            row.Name == "Native ImageMagick / SQLite"
+            && row.Kind == "Native runtime"
+            && row.Version.Contains("ImageMagick 7.1.2-27", StringComparison.Ordinal)
+            && row.Version.Contains("SQLite 3.53.3", StringComparison.Ordinal)
+            && row.AdvisoryStatus.StartsWith("OK:", StringComparison.Ordinal));
+
+        Assert.Contains(rows, row =>
             row.Name == "SharpCompress"
             && row.Kind == "NuGet"
             && row.AdvisoryStatus.Contains("GHSA-6c8g-7p36-r338", StringComparison.Ordinal)
@@ -74,6 +81,9 @@ public sealed class CodecCapabilityServiceTests
             ProcessArchitecture: "X64",
             AppDirectory: @"C:\Images",
             MagickVersion: "14.13.0",
+            MagickNetRuntimeVersion: "Magick.NET 14.13.0",
+            ImageMagickVersion: "ImageMagick 7.1.2-27",
+            SqliteRuntimeVersion: "3.53.3",
             MagickAssemblyPath: null,
             MagickPolicy: MagickSecurityPolicy.Configure(true, "test Ghostscript"),
             SharpCompressVersion: "0.48.1.0",

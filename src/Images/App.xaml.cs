@@ -40,6 +40,15 @@ public partial class App : Application
             codecStatus.DocumentStatus,
             codecStatus.GhostscriptDirectory ?? "(none)");
 
+        var nativeVersions = NativeRuntimeVersionService.Current;
+        _log.LogInformation(
+            "Native runtime versions: MagickNET={MagickNetVersion}; ImageMagick={ImageMagickVersion}; SQLite={SqliteVersion}",
+            nativeVersions.MagickNetVersion,
+            nativeVersions.ImageMagickVersion,
+            nativeVersions.SqliteVersion);
+        foreach (var warning in NativeRuntimeVersionService.BuildStartupWarnings(nativeVersions))
+            _log.LogWarning("Native runtime version warning: {Warning}", warning);
+
         var magickPolicy = MagickSecurityPolicy.Inspect(codecStatus.GhostscriptAvailable, codecStatus.GhostscriptSource);
         _log.LogInformation("Magick.NET security policy: {Policy}; ResourceLimits={ResourceLimits}; BlockedWriteTargets={BlockedWriteTargets}",
             magickPolicy.EnforcementText,
