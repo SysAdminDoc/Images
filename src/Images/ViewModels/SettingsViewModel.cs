@@ -20,6 +20,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     private readonly SettingsService _settings;
     private readonly CommandShortcutService _shortcutService;
+    private readonly SettingsTransferService _settingsTransfer;
     private readonly LocalDataStoreRegistry _localDataStores;
     private readonly Func<string, bool> _confirmPrivacyReset;
     private OcrCapabilityService.OcrCapabilityStatus _ocrStatus = OcrCapabilityService.GetStatus();
@@ -34,10 +35,12 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     internal SettingsViewModel(
         SettingsService settings,
         LocalDataStoreRegistry? localDataStores = null,
-        Func<string, bool>? confirmPrivacyReset = null)
+        Func<string, bool>? confirmPrivacyReset = null,
+        SettingsTransferService? settingsTransfer = null)
     {
         _settings = settings;
         _shortcutService = new CommandShortcutService(settings);
+        _settingsTransfer = settingsTransfer ?? new SettingsTransferService(settings);
         _localDataStores = localDataStores ?? new LocalDataStoreRegistry();
         _confirmPrivacyReset = confirmPrivacyReset ?? ConfirmPrivacyReset;
         RefreshOcrStatusCommand = new RelayCommand(RefreshOcrStatus);
@@ -483,6 +486,96 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     {
         SettingsStatusTone = tone;
         SettingsStatusText = message;
+    }
+
+    internal void ExportPortableSettings(string path)
+    {
+        try
+        {
+            var result = _settingsTransfer.Export(path);
+            SetStatus(
+                Strings.Format(
+                    nameof(Strings.SettingsTransferExportSuccessFormat),
+                    result.SettingsCount,
+                    result.HotkeyCount),
+                SettingsStatusToneKind.Success);
+        }
+        catch
+        {
+            SetStatus(Strings.SettingsTransferExportFailed, SettingsStatusToneKind.Warning);
+        }
+    }
+
+    internal SettingsTransferPreview? PreviewPortableSettingsImport(string path)
+    {
+        try
+        {
+            return _settingsTransfer.PreviewImport(path);
+        }
+        catch
+        {
+            SetStatus(Strings.SettingsTransferImportInvalid, SettingsStatusToneKind.Warning);
+            return null;
+        }
+    }
+
+    internal static string BuildPortableSettingsImportPreview(SettingsTransferPreview preview)
+    {
+        ArgumentNullException.ThrowIfNull(preview);
+        return Strings.Format(
+            nameof(Strings.SettingsTransferPreviewFormat),
+            preview.Settings.Count,
+            preview.Hotkeys.Count,
+            preview.IgnoredCount);
+    }
+
+    internal void ApplyPortableSettingsImport(SettingsTransferPreview preview)
+    {
+        try
+        {
+            _settingsTransfer.ApplyImport(preview);
+        }
+        catch
+        {
+            SetStatus(Strings.SettingsTransferImportFailed, SettingsStatusToneKind.Warning);
+            return;
+        }
+
+        RefreshAfterPortableSettingsImport();
+        SetStatus(
+            Strings.Format(
+                nameof(Strings.SettingsTransferImportSuccessFormat),
+                preview.Settings.Count,
+                preview.Hotkeys.Count),
+            SettingsStatusToneKind.Success);
+    }
+
+    private void RefreshAfterPortableSettingsImport()
+    {
+        var locale = _settings.GetString(Keys.Locale, string.Empty) ?? string.Empty;
+        Strings.Culture = string.IsNullOrEmpty(locale) ? null : CultureInfo.GetCultureInfo(locale);
+        ImageLoader.HdrToneMapOperator = ToneMapService.ParseOperator(
+            _settings.GetString(Keys.HdrToneMapOperator, ToneMapOperator.Reinhard.ToString()));
+        ThemeService.ApplyFromSettings(_settings);
+
+        Raise(nameof(SelectedLocale));
+        Raise(nameof(SelectedTheme));
+        Raise(nameof(SelectedLoupeMagnification));
+        Raise(nameof(SelectedToneMapOperator));
+        Raise(nameof(RememberWindowPlacement));
+        Raise(nameof(RestoreLastSession));
+        Raise(nameof(ColorManagedDisplay));
+        Raise(nameof(FilmstripVisibleOnStartup));
+        Raise(nameof(MetadataHudVisibleOnStartup));
+        Raise(nameof(ConfirmRecycleBinDeletes));
+        Raise(nameof(SiblingFolderAutoSwitch));
+        Raise(nameof(StopAtEnds));
+        Raise(nameof(ReduceMotion));
+        Raise(nameof(HighContrastMode));
+        Raise(nameof(ArchiveRightToLeft));
+        Raise(nameof(ArchiveOldScanFilter));
+        Raise(nameof(ArchiveSpreadMode));
+        RefreshShortcutRows();
     }
 
     private void RefreshShortcutRows()

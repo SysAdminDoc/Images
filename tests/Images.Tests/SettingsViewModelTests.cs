@@ -163,4 +163,40 @@ public sealed class SettingsViewModelTests
         Assert.True(File.Exists(Path.Combine(models.FullName, "model.onnx")));
         Assert.Equal(SettingsViewModel.SettingsStatusToneKind.Success, viewModel.SettingsStatusTone);
     }
+
+    [Fact]
+    public void SettingsTransfer_PreviewsAppliesAndRefreshesPortableState()
+    {
+        using var temp = TestDirectory.Create();
+        var source = new SettingsService(Path.Combine(temp.Path, "source.db"));
+        source.SetString(Keys.ThemeMode, "latte");
+        source.SetBool(Keys.AccessibilityReduceMotion, true);
+        source.SetHotkey(CommandIds.Open, "O", "Control, Shift");
+        var exportPath = Path.Combine(temp.Path, "images-settings.json");
+        var sourceViewModel = new SettingsViewModel(source);
+
+        sourceViewModel.ExportPortableSettings(exportPath);
+
+        Assert.True(File.Exists(exportPath));
+        Assert.Equal(SettingsViewModel.SettingsStatusToneKind.Success, sourceViewModel.SettingsStatusTone);
+
+        var destination = new SettingsService(Path.Combine(temp.Path, "destination.db"));
+        destination.SetBool(Keys.UpdateCheckEnabled, true);
+        destination.SetString(Keys.LastImagePath, @"C:\Private\unchanged.jpg");
+        var destinationViewModel = new SettingsViewModel(destination);
+        var preview = destinationViewModel.PreviewPortableSettingsImport(exportPath);
+
+        Assert.NotNull(preview);
+        Assert.Contains("2 portable settings", SettingsViewModel.BuildPortableSettingsImportPreview(preview), StringComparison.Ordinal);
+
+        destinationViewModel.ApplyPortableSettingsImport(preview);
+
+        Assert.Equal("latte", destinationViewModel.SelectedTheme.Key);
+        Assert.True(destinationViewModel.ReduceMotion);
+        Assert.Contains(destinationViewModel.ShortcutRows,
+            row => row.Id == CommandIds.Open && row.ShortcutText == "Ctrl+Shift+O");
+        Assert.True(destination.GetBool(Keys.UpdateCheckEnabled, false));
+        Assert.Equal(@"C:\Private\unchanged.jpg", destination.GetString(Keys.LastImagePath));
+        Assert.Equal(SettingsViewModel.SettingsStatusToneKind.Success, destinationViewModel.SettingsStatusTone);
+    }
 }

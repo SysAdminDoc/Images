@@ -242,6 +242,52 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0"
+                                        Style="{StaticResource SettingsIconTile}"
+                                        Margin="0,0,14,0">
+                                    <TextBlock Text="&#xE8B7;"
+                                               FontFamily="{StaticResource IconFontFamily}"
+                                               FontSize="14"
+                                               Foreground="{DynamicResource AccentBrush}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="{x:Static loc:Strings.SettingsTransferTitle}"
+                                               Style="{StaticResource Text.Body}"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Static loc:Strings.SettingsTransferDescription}"
+                                               Style="{StaticResource Text.Hint}"
+                                               Margin="0,4,0,0"
+                                               TextWrapping="Wrap" />
+                                    <WrapPanel Margin="0,12,0,0">
+                                        <Button Content="{x:Static loc:Strings.SettingsTransferExportButton}"
+                                                Style="{StaticResource ChromeButton}"
+                                                Padding="14,7"
+                                                MinHeight="36"
+                                                Margin="0,0,8,6"
+                                                Click="ExportSettings_Click"
+                                                AutomationProperties.Name="{x:Static loc:Strings.SettingsTransferExportAutomationName}" />
+                                        <Button Content="{x:Static loc:Strings.SettingsTransferImportButton}"
+                                                Style="{StaticResource ChromeButton}"
+                                                Padding="14,7"
+                                                MinHeight="36"
+                                                Margin="0,0,8,6"
+                                                Click="ImportSettings_Click"
+                                                AutomationProperties.Name="{x:Static loc:Strings.SettingsTransferImportAutomationName}" />
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 

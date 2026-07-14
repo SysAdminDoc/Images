@@ -111,6 +111,65 @@ public sealed class CommandShortcutService
 
     public void ResetShortcut(string id) => _settings.RemoveHotkey(id);
 
+    internal bool TryValidateOverrides(IReadOnlyList<HotkeyOverride> overrides, out string? error)
+    {
+        ArgumentNullException.ThrowIfNull(overrides);
+        error = null;
+
+        var definitionsById = _definitions.ToDictionary(item => item.Id, StringComparer.Ordinal);
+        var imported = new Dictionary<string, ShortcutGesture>(StringComparer.Ordinal);
+        foreach (var hotkey in overrides)
+        {
+            if (!definitionsById.ContainsKey(hotkey.Action))
+            {
+                error = $"Unknown command: {hotkey.Action}";
+                return false;
+            }
+
+            if (!ShortcutGesture.TryCreate(hotkey.Key, hotkey.Modifiers, out var gesture))
+            {
+                error = $"Invalid shortcut for {hotkey.Action}.";
+                return false;
+            }
+
+            if (!imported.TryAdd(hotkey.Action, gesture))
+            {
+                error = $"Duplicate shortcut entry: {hotkey.Action}";
+                return false;
+            }
+        }
+
+        var actionByGesture = new Dictionary<ShortcutGesture, string>();
+        foreach (var definition in _definitions)
+        {
+            if (!imported.TryGetValue(definition.Id, out var gesture) &&
+                !TryGetEffectiveGesture(definition.Id, out gesture))
+            {
+                continue;
+            }
+
+            if (actionByGesture.TryGetValue(gesture, out var conflict))
+            {
+                error = $"Shortcut conflict between {definition.Id} and {conflict}.";
+                return false;
+            }
+
+            actionByGesture.Add(gesture, definition.Id);
+        }
+
+        foreach (var reserved in _reservedDefinitions)
+        {
+            if (ShortcutGesture.TryParse(reserved.DefaultShortcut, out var reservedGesture) &&
+                actionByGesture.TryGetValue(reservedGesture, out var conflict))
+            {
+                error = $"Shortcut for {conflict} conflicts with reserved command {reserved.Id}.";
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private bool TryGetEffectiveGesture(string id, out ShortcutGesture gesture)
     {
         if (_settings.GetHotkey(id) is { } hotkey

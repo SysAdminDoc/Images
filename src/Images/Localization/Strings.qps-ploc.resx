@@ -6465,4 +6465,55 @@ Details written to:
   <data name="ModelRuntimeUnavailable" xml:space="preserve">
     <value>[!!! Unavailable !!!]</value>
   </data>
+  <data name="SettingsTransferAllFilesFilter" xml:space="preserve">
+    <value>[!!!! All files (*.*) !!!!]</value>
+  </data>
+  <data name="SettingsTransferDescription" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Export portable preferences and custom shortcuts. Private paths, window position, history, and update-check consent are never included. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="SettingsTransferExportAutomationName" xml:space="preserve">
+    <value>[!!!!!! Export portable settings !!!!!!]</value>
+  </data>
+  <data name="SettingsTransferExportButton" xml:space="preserve">
+    <value>[!!!! Export settings !!!!]</value>
+  </data>
+  <data name="SettingsTransferExportDialogTitle" xml:space="preserve">
+    <value>[!!!!!! Export portable settings !!!!!!]</value>
+  </data>
+  <data name="SettingsTransferExportFailed" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Settings could not be exported. Check the destination and try again. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="SettingsTransferExportSuccessFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Exported {0} portable settings and {1} custom shortcuts. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="SettingsTransferImportAutomationName" xml:space="preserve">
+    <value>[!!!!!! Import portable settings !!!!!!]</value>
+  </data>
+  <data name="SettingsTransferImportButton" xml:space="preserve">
+    <value>[!!!! Import settings !!!!]</value>
+  </data>
+  <data name="SettingsTransferImportDialogTitle" xml:space="preserve">
+    <value>[!!!!!! Import portable settings !!!!!!]</value>
+  </data>
+  <data name="SettingsTransferImportFailed" xml:space="preserve">
+    <value>[!!!!!!!!!!!! No settings were changed because the import could not be completed. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="SettingsTransferImportInvalid" xml:space="preserve">
+    <value>[!!!!!!!!!!!! This settings file is invalid, unsupported, or too large. No settings were changed. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="SettingsTransferImportSuccessFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Imported {0} portable settings and {1} custom shortcuts. Restart Images to apply every setting. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="SettingsTransferJsonFilter" xml:space="preserve">
+    <value>[!!!!!! Images settings (*.json) !!!!!!]</value>
+  </data>
+  <data name="SettingsTransferPreviewFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Import {0} portable settings and {1} custom shortcuts? {2} unknown entries will be ignored. Private paths, history, window position, and update-check consent will remain unchanged. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="SettingsTransferPreviewTitle" xml:space="preserve">
+    <value>[!!!!!! Review settings import !!!!!!]</value>
+  </data>
+  <data name="SettingsTransferTitle" xml:space="preserve">
+    <value>[!!!!!!!!! Move settings between installations !!!!!!!!!]</value>
+  </data>
 </root>

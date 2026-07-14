@@ -1612,6 +1612,23 @@ public static class Strings
     public static string PhotoMetadataEmpty => Get(nameof(PhotoMetadataEmpty));
     public static string PhotoMetadataLoading => Get(nameof(PhotoMetadataLoading));
     public static string PhotoMetadataTimeout => Get(nameof(PhotoMetadataTimeout));
+    public static string SettingsTransferAllFilesFilter => Get(nameof(SettingsTransferAllFilesFilter));
+    public static string SettingsTransferDescription => Get(nameof(SettingsTransferDescription));
+    public static string SettingsTransferExportAutomationName => Get(nameof(SettingsTransferExportAutomationName));
+    public static string SettingsTransferExportButton => Get(nameof(SettingsTransferExportButton));
+    public static string SettingsTransferExportDialogTitle => Get(nameof(SettingsTransferExportDialogTitle));
+    public static string SettingsTransferExportFailed => Get(nameof(SettingsTransferExportFailed));
+    public static string SettingsTransferExportSuccessFormat => Get(nameof(SettingsTransferExportSuccessFormat));
+    public static string SettingsTransferImportAutomationName => Get(nameof(SettingsTransferImportAutomationName));
+    public static string SettingsTransferImportButton => Get(nameof(SettingsTransferImportButton));
+    public static string SettingsTransferImportDialogTitle => Get(nameof(SettingsTransferImportDialogTitle));
+    public static string SettingsTransferImportFailed => Get(nameof(SettingsTransferImportFailed));
+    public static string SettingsTransferImportInvalid => Get(nameof(SettingsTransferImportInvalid));
+    public static string SettingsTransferImportSuccessFormat => Get(nameof(SettingsTransferImportSuccessFormat));
+    public static string SettingsTransferJsonFilter => Get(nameof(SettingsTransferJsonFilter));
+    public static string SettingsTransferPreviewFormat => Get(nameof(SettingsTransferPreviewFormat));
+    public static string SettingsTransferPreviewTitle => Get(nameof(SettingsTransferPreviewTitle));
+    public static string SettingsTransferTitle => Get(nameof(SettingsTransferTitle));
 
     public static string Get(string key)
     {

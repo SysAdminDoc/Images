@@ -4,6 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Settings can now export and transactionally import a bounded, versioned JSON allowlist of portable preferences and custom shortcuts; previews report applied/ignored counts, while private paths, window placement, history, and update-check consent never leave the local database.
 - Service-generated metadata, color analysis, diagnostics, OCR, content-credential, model-management, network-export, and asynchronous loading/error copy now follows the active UI culture; the pseudo-locale test covers real service outputs instead of XAML alone.
 - Native SQLite is pinned to 3.53.3, every app-owned database disables and verifies trusted-schema execution on open, and release readiness rejects runtimes below the reviewed 3.53.2 security floor.
 - Macro and batch folder collection now shares one reparse-aware traversal that skips nested junctions/symbolic links, inaccessible paths, unsupported files, and duplicate sources instead of walking outside the selected tree.

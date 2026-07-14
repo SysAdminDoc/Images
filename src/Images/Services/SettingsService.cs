@@ -333,6 +333,54 @@ public sealed class SettingsService
         }
     }
 
+    internal void ApplyPortableSettings(
+        IReadOnlyDictionary<string, string> settings,
+        IReadOnlyList<HotkeyOverride> hotkeys,
+        Action<int>? afterMutationForTests = null)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(hotkeys);
+        if (!_isAvailable)
+            throw new InvalidOperationException("Persistent settings storage is unavailable.");
+
+        using var conn = Open();
+        using var transaction = conn.BeginTransaction();
+        var mutations = 0;
+
+        foreach (var item in settings.OrderBy(item => item.Key, StringComparer.Ordinal))
+        {
+            using var command = conn.CreateCommand();
+            command.Transaction = transaction;
+            command.CommandText = """
+                INSERT INTO settings (key, value) VALUES ($key, $value)
+                ON CONFLICT(key) DO UPDATE SET value = excluded.value;
+                """;
+            command.Parameters.AddWithValue("$key", item.Key);
+            command.Parameters.AddWithValue("$value", item.Value);
+            command.ExecuteNonQuery();
+            afterMutationForTests?.Invoke(++mutations);
+        }
+
+        foreach (var hotkey in hotkeys.OrderBy(item => item.Action, StringComparer.Ordinal))
+        {
+            using var command = conn.CreateCommand();
+            command.Transaction = transaction;
+            command.CommandText = """
+                INSERT INTO hotkeys (action, key, modifiers) VALUES ($action, $key, $modifiers)
+                ON CONFLICT(action) DO UPDATE SET
+                    key = excluded.key,
+                    modifiers = excluded.modifiers;
+                """;
+            command.Parameters.AddWithValue("$action", hotkey.Action);
+            command.Parameters.AddWithValue("$key", hotkey.Key);
+            command.Parameters.AddWithValue("$modifiers", hotkey.Modifiers);
+            command.ExecuteNonQuery();
+            afterMutationForTests?.Invoke(++mutations);
+        }
+
+        transaction.Commit();
+    }
+
     // ---------------- Recent folders MRU ----------------
 
     public void TouchRecentFolder(string path)
