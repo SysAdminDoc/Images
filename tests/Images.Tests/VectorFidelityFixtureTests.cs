@@ -14,7 +14,7 @@ public sealed class VectorFidelityFixtureTests
         var path = WriteSvg(temp.Path, "simple.svg",
             """<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="red" width="100" height="100"/></svg>""");
 
-        using var img = new MagickImage(path);
+        using var img = MagickSafeReader.Read(path);
         Assert.True(img.Width > 0);
         Assert.True(img.Height > 0);
     }
@@ -26,7 +26,7 @@ public sealed class VectorFidelityFixtureTests
         var path = WriteSvg(temp.Path, "transparent.svg",
             """<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="16" fill="blue"/></svg>""");
 
-        using var img = new MagickImage(path);
+        using var img = MagickSafeReader.Read(path);
         Assert.True(img.HasAlpha);
     }
 
@@ -37,13 +37,9 @@ public sealed class VectorFidelityFixtureTests
         var path = WriteSvg(temp.Path, "scale.svg",
             """<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50"><rect fill="green" width="50" height="50"/></svg>""");
 
-        using var imgLow = new MagickImage();
-        imgLow.Density = new Density(72);
-        imgLow.Read(path);
+        using var imgLow = MagickSafeReader.Read(path, new MagickReadSettings { Density = new Density(72) });
 
-        using var imgHigh = new MagickImage();
-        imgHigh.Density = new Density(300);
-        imgHigh.Read(path);
+        using var imgHigh = MagickSafeReader.Read(path, new MagickReadSettings { Density = new Density(300) });
 
         Assert.Equal(imgLow.Width, imgHigh.Width);
     }
@@ -55,7 +51,7 @@ public sealed class VectorFidelityFixtureTests
         var path = WriteSvg(temp.Path, "embedded.svg",
             """<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" width="64" height="64"/></svg>""");
 
-        using var img = new MagickImage(path);
+        using var img = MagickSafeReader.Read(path);
         Assert.True(img.Width > 0);
     }
 
@@ -66,7 +62,7 @@ public sealed class VectorFidelityFixtureTests
         var path = WriteSvg(temp.Path, "text.svg",
             """<svg xmlns="http://www.w3.org/2000/svg" width="200" height="50"><text x="10" y="30" font-size="20" fill="white">Hello</text></svg>""");
 
-        using var img = new MagickImage(path);
+        using var img = MagickSafeReader.Read(path);
         Assert.True(img.Width > 0);
     }
 
@@ -84,7 +80,7 @@ public sealed class VectorFidelityFixtureTests
             writer.Write(svgContent);
         }
 
-        using var img = new MagickImage(path);
+        using var img = MagickSafeReader.Read(path);
         Assert.True(img.Width > 0);
     }
 
@@ -102,7 +98,7 @@ public sealed class VectorFidelityFixtureTests
         var path = WriteSvg(temp.Path, "animated.svg",
             """<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="red" width="100" height="100"><animate attributeName="fill" values="red;blue;red" dur="2s" repeatCount="indefinite"/></rect></svg>""");
 
-        using var img = new MagickImage(path);
+        using var img = MagickSafeReader.Read(path);
         Assert.True(img.Width > 0);
     }
 

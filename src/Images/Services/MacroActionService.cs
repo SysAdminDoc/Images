@@ -257,7 +257,7 @@ public sealed class MacroActionService
             return targetPath;
         }
 
-        using var image = new MagickImage(path);
+        using var image = MagickSafeReader.Read(path);
         ApplyResize(image, parameters);
         AppendExportWarnings(image, path, extension, format, messages);
 
@@ -282,7 +282,7 @@ public sealed class MacroActionService
     {
         try
         {
-            using var image = new MagickImage(path);
+            using var image = MagickSafeReader.Read(path);
             AppendExportWarnings(image, path, extension, format, messages);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or MagickException)

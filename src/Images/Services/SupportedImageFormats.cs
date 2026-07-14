@@ -22,20 +22,20 @@ public static class SupportedImageFormats
         ".pic", ".dpx", ".cin", ".sgi", ".rgb", ".rgba", ".bw", ".jp2", ".j2k",
         ".j2c", ".jpc", ".jpf", ".jpx", ".jpm", ".jpt", ".jps", ".pgx", ".xcf",
         ".ora", ".dcx", ".rle", ".otb", ".pcd", ".pcds", ".picon", ".pix", ".pwp",
-        ".sfw", ".tim", ".vicar", ".viff", ".vips", ".xv", ".six", ".sixel",
+        ".sfw", ".vicar", ".viff", ".vips", ".xv", ".six", ".sixel",
         ".farbfeld", ".ff"
     ];
 
     public static readonly string[] PortableAndScientificExtensions =
     [
         ".xpm", ".xbm", ".pbm", ".pgm", ".ppm", ".pnm", ".pam", ".pfm", ".miff",
-        ".mng", ".jng", ".dcm", ".dicom", ".fits", ".fit", ".fts", ".pict", ".pct",
+        ".jng", ".dcm", ".dicom", ".fits", ".fit", ".fts", ".pict", ".pct",
         ".ras", ".sun", ".xwd", ".fax", ".g3", ".g4"
     ];
 
     public static readonly string[] VectorExtensions =
     [
-        ".svg", ".svgz", ".emf", ".wmf", ".wpg", ".mvg", ".msvg"
+        ".svg", ".svgz", ".emf", ".wmf", ".wpg"
     ];
 
     public static readonly string[] DocumentPreviewExtensions =
@@ -66,7 +66,7 @@ public static class SupportedImageFormats
         ".jp2", ".j2k", ".j2c", ".jpc", ".jpf", ".jpx", ".jpm", ".jpt", ".jps",
         ".pgx", ".dcx", ".pcd", ".pcds", ".vicar", ".viff", ".vips", ".six",
         ".sixel", ".farbfeld", ".ff", ".xpm", ".xbm", ".pbm", ".pgm", ".ppm",
-        ".pnm", ".pam", ".pfm", ".miff", ".mng", ".jng", ".ras", ".sun",
+        ".pnm", ".pam", ".pfm", ".miff", ".jng", ".ras", ".sun",
         ".fax", ".g3", ".g4"
     ];
 

@@ -91,7 +91,7 @@ public sealed class ExportPreviewService
             throw new IOException("Source image does not exist.");
 
         request = NormalizeRequest(request);
-        using var image = new MagickImage(normalizedPath);
+        using var image = MagickSafeReader.Read(normalizedPath);
         var sourceBytes = TryGetSourceBytes(normalizedPath) ?? 0;
         var encoded = Encode(image, request, CancellationToken.None);
         return CreateSummary(image, encoded, sourceBytes, request, normalizedPath);

@@ -85,8 +85,9 @@ public static class CodecCapabilityService
     {
         var codec = CodecRuntime.Status;
         var writableExports = CountWritableExportFormats();
-        var ghostscriptDetail = codec.GhostscriptAvailable
-            ? $"PDF, EPS, PS, and AI previews are enabled through {CodecRuntime.GetGhostscriptVersion() ?? codec.GhostscriptSource}."
+        var documentReady = codec.GhostscriptAvailable && MagickSecurityPolicy.DocumentDelegatesEnabled;
+        var ghostscriptDetail = documentReady
+            ? $"PDF, EPS, PS, and AI previews are enabled through {CodecRuntime.GetGhostscriptVersion() ?? codec.GhostscriptSource}; all other external delegates are denied."
             : "PDF, EPS, PS, and AI previews need bundled Ghostscript, IMAGES_GHOSTSCRIPT_DIR, or an installed runtime.";
 
         return new CodecCapabilitySummary(
@@ -94,16 +95,16 @@ public static class CodecCapabilityService
             $"{SupportedImageFormats.Extensions.Count} extensions across common images, archive books, RAW, PSD/PSB, vector, scientific, and document preview formats.",
             "Format-aware export",
             $"{writableExports} verified writable targets are available through Save a copy.",
-            codec.GhostscriptAvailable ? "Document previews ready" : "Document previews need Ghostscript",
+            documentReady ? "Document previews ready" : "Document previews need Ghostscript",
             ghostscriptDetail,
-            codec.GhostscriptAvailable);
+            documentReady);
     }
 
     public static string BuildDocumentStatusText()
     {
         var codec = CodecRuntime.Status;
-        return codec.GhostscriptAvailable
-            ? $"Ghostscript enabled ({CodecRuntime.GetGhostscriptVersion() ?? codec.GhostscriptSource})"
+        return codec.GhostscriptAvailable && MagickSecurityPolicy.DocumentDelegatesEnabled
+            ? $"Ghostscript enabled ({CodecRuntime.GetGhostscriptVersion() ?? codec.GhostscriptSource}); other delegates disabled"
             : "Ghostscript not bundled or installed; PDF, EPS, PS, and AI previews are unavailable";
     }
 
@@ -186,7 +187,7 @@ public static class CodecCapabilityService
                 Version: provenance.MagickPolicy.EnforcementText,
                 Path: null,
                 Sha256: null,
-                AdvisoryStatus: $"Resource limits: {provenance.MagickPolicy.ResourceLimitSummary}. {provenance.MagickPolicy.DocumentDelegateStatus}",
+                AdvisoryStatus: $"Resource limits: {provenance.MagickPolicy.ResourceLimitSummary}. Read policy: {provenance.MagickPolicy.ReadPolicySummary}. {provenance.MagickPolicy.DocumentDelegateStatus}",
                 Action: $"Blocked write targets: {provenance.MagickPolicy.BlockedWriteSummary}. Keep document/vector exports routed to PNG unless a separately reviewed sidecar is added."),
 
             new(
@@ -400,6 +401,7 @@ public static class CodecCapabilityService
             sb.AppendLine($"- Magick.NET assembly: {provenance.MagickAssemblyPath}");
         sb.AppendLine($"- Magick security policy: {provenance.MagickPolicy.EnforcementText}");
         sb.AppendLine($"- Magick resource limits: {provenance.MagickPolicy.ResourceLimitSummary}");
+        sb.AppendLine($"- Magick read policy: {provenance.MagickPolicy.ReadPolicySummary}");
         sb.AppendLine($"- Magick blocked write targets: {provenance.MagickPolicy.BlockedWriteSummary}");
         sb.AppendLine($"- Magick document delegates: {provenance.MagickPolicy.DocumentDelegateStatus}");
         sb.AppendLine($"- SharpCompress: {provenance.SharpCompressVersion} — archive book reader active");

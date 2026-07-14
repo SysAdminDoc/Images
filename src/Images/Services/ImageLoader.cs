@@ -168,7 +168,7 @@ public static class ImageLoader
         // fails so a decode error never costs the image.
         if (ColorManagedDisplay)
         {
-            var managed = TryLoadColorManaged(bytes, displayName);
+            var managed = TryLoadColorManaged(bytes, displayName, extension);
             if (managed is not null) return managed;
         }
 
@@ -213,7 +213,7 @@ public static class ImageLoader
         evtSrc.DecodeStarted(displayName, "Magick.NET");
         try
         {
-            using var image = new MagickImage(bytes);
+            using var image = MagickSafeReader.Read(bytes, extension);
             var wb = MagickToBitmap(image);
 
             sw.Stop();
@@ -349,7 +349,7 @@ public static class ImageLoader
     {
         var runtime = CodecRuntime.Status;
         var ext = Path.GetExtension(path).ToUpperInvariant();
-        if (!runtime.GhostscriptAvailable)
+        if (!runtime.GhostscriptAvailable || !MagickSecurityPolicy.DocumentDelegatesEnabled)
         {
             throw new InvalidOperationException(
                 $"{ext} preview requires Ghostscript. This build can use a bundled copy in the app's " +
@@ -598,7 +598,7 @@ public static class ImageLoader
             try
             {
                 using var view = mmf.CreateViewStream(0, 0, MemoryMappedFileAccess.Read);
-                using var image = new MagickImage(view);
+                using var image = MagickSafeReader.Read(view, Path.GetExtension(path));
                 var wb = MagickToBitmap(image);
 
                 sw.Stop();
@@ -694,7 +694,7 @@ public static class ImageLoader
     /// <see cref="WriteableBitmap"/> in BGRA32. Shared by the static fallback path and the
     /// animated-frame decoder.
     /// </summary>
-    private static LoadResult? TryLoadColorManaged(byte[] bytes, string displayName)
+    private static LoadResult? TryLoadColorManaged(byte[] bytes, string displayName, string extension)
     {
         var evtSrc = ImageEventSource.Instance;
         evtSrc.RecordDecodeAttempt();
@@ -702,7 +702,7 @@ public static class ImageLoader
         evtSrc.DecodeStarted(displayName, "Magick.NET (color-managed)");
         try
         {
-            using var image = new MagickImage(bytes);
+            using var image = MagickSafeReader.Read(bytes, extension);
             var managed = TransformToSrgbIfProfiled(image);
             var wb = MagickToBitmap(image);
 
@@ -826,7 +826,7 @@ public static class ImageLoader
             return preview;
 
         CodecRuntime.Configure();
-        using var image = new MagickImage(path);
+        using var image = MagickSafeReader.Read(path);
         image.AutoOrient();
         image.Resize(new MagickGeometry((uint)maxPixelDimension, (uint)maxPixelDimension) { Greater = true });
         return MagickToBitmap(image);
@@ -886,8 +886,7 @@ public static class ImageLoader
 
         try
         {
-            using var image = new MagickImage();
-            image.Ping(path);
+            using var image = MagickSafeReader.Ping(path);
 
             var exifProfile = image.GetExifProfile();
             if (exifProfile is null || exifProfile.ThumbnailLength <= 0)

@@ -43,6 +43,7 @@ public static class DiagnosticsStatusService
     {
         ArgumentNullException.ThrowIfNull(provenance);
         ArgumentNullException.ThrowIfNull(ocrStatus);
+        var documentPreviewsReady = provenance.GhostscriptAvailable && provenance.MagickPolicy.DocumentDelegatesEnabled;
 
         return
         [
@@ -54,10 +55,10 @@ public static class DiagnosticsStatusService
                 "\uE8EA"),
             new(
                 "Document previews",
-                provenance.GhostscriptAvailable ? "Ghostscript ready" : "Ghostscript not available",
+                documentPreviewsReady ? "Ghostscript ready" : "Disabled by codec policy",
                 BuildGhostscriptDetail(provenance),
-                provenance.GhostscriptAvailable ? ReadyTone : WarningTone,
-                provenance.GhostscriptAvailable ? "\uE73E" : "\uE783"),
+                documentPreviewsReady ? ReadyTone : WarningTone,
+                documentPreviewsReady ? "\uE73E" : "\uE783"),
             new(
                 "Image codecs",
                 "Magick.NET available",
@@ -105,6 +106,11 @@ public static class DiagnosticsStatusService
 
     private static string BuildGhostscriptDetail(CodecCapabilityService.RuntimeProvenance provenance)
     {
+        if (!provenance.MagickPolicy.DocumentDelegatesEnabled)
+            return provenance.GhostscriptAvailable
+                ? "Ghostscript is installed, but PDF, EPS, PS, and AI previews stay off because Images disables external ImageMagick delegates."
+                : "PDF, EPS, PS, and AI previews stay off because Images disables external ImageMagick delegates.";
+
         if (!provenance.GhostscriptAvailable)
             return "PDF, EPS, PS, and AI previews need bundled Ghostscript, IMAGES_GHOSTSCRIPT_DIR, or an installed runtime.";
 

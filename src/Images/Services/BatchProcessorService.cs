@@ -240,7 +240,7 @@ public sealed class BatchProcessorService
         if (!info.Exists)
             throw new IOException("Source file no longer exists.");
 
-        using var image = new MagickImage(info.FullName);
+        using var image = MagickSafeReader.Read(info.FullName);
         var originalWidth = image.Width;
         var originalHeight = image.Height;
         var messages = new List<string>();
@@ -313,7 +313,7 @@ public sealed class BatchProcessorService
                 return new MacroRunItemResult(sourcePath, outputPath, messages, null);
             }
 
-            using var image = new MagickImage(sourcePath);
+            using var image = MagickSafeReader.Read(sourcePath);
             ApplyPipelineOperations(image, sourcePath, preset, messages, cancellationToken);
             var format = ImageExportService.TryResolveFormat(request.Extension) ?? MagickFormat.Png;
             ImageExportService.PrepareForExport(image, format, (uint)request.Quality);

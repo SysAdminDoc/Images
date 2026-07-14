@@ -117,7 +117,7 @@ public sealed class ContactSheetService
 
                 try
                 {
-                    using var thumb = new MagickImage(cell.SourcePath);
+                    using var thumb = MagickSafeReader.Read(cell.SourcePath);
                     thumb.Resize(new MagickGeometry((uint)options.ThumbnailWidth, (uint)options.ThumbnailHeight)
                     {
                         FillArea = false,
@@ -183,8 +183,7 @@ public sealed class ContactSheetService
         {
             try
             {
-                using var probe = new MagickImage();
-                probe.Ping(path);
+                using var probe = MagickSafeReader.Ping(path);
                 parts.Add($"{probe.Width}x{probe.Height}");
             }
             catch (Exception ex) when (ex is MagickException or IOException or UnauthorizedAccessException or InvalidOperationException or NotSupportedException)

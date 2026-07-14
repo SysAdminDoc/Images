@@ -61,7 +61,7 @@ public static class CodecRuntime
                 MagickStatus: $"Magick.NET {GetMagickAssemblyVersion()} configured; security policy {policy.EnforcementText}",
                 DocumentStatus: ghostscriptDirectory is null
                     ? "EPS/PDF/PS/AI previews need bundled or installed Ghostscript"
-                    : $"EPS/PDF/PS/AI previews enabled via {ghostscriptSource}");
+                    : $"EPS/PDF/PS/AI previews enabled via {ghostscriptSource}; all other external delegates are disabled");
 
             _configured = true;
             return _status;

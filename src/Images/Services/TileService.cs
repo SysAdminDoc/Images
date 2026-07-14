@@ -75,8 +75,7 @@ public static class TileService
             return Preflight(file.Length, () =>
             {
                 CodecRuntime.Configure();
-                using var image = new MagickImage();
-                image.Ping(path);
+                using var image = MagickSafeReader.Ping(path);
                 return (image.Width, image.Height);
             });
         }
@@ -156,8 +155,9 @@ public static class TileService
             try
             {
                 CodecRuntime.Configure();
-                using var source = new MagickImage();
-                source.Read(sourcePath, new MagickReadSettings { FrameIndex = (uint)Math.Max(0, pageIndex), FrameCount = 1 });
+                using var source = MagickSafeReader.Read(
+                    sourcePath,
+                    new MagickReadSettings { FrameIndex = (uint)Math.Max(0, pageIndex), FrameCount = 1 });
 
                 var width = (int)source.Width;
                 var height = (int)source.Height;
@@ -260,9 +260,7 @@ public static class TileService
 
         try
         {
-            var image = new MagickImage();
-            image.Read(path);
-            return image;
+            return MagickSafeReader.Read(path);
         }
         catch
         {

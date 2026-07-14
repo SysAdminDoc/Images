@@ -95,7 +95,7 @@ public static class MetadataEditService
         if (categories == MetadataStripCategory.None)
             return new MetadataStripResult(0, []);
 
-        using var image = new MagickImage(path);
+        using var image = MagickSafeReader.Read(path);
 
         var result = StripCore(image, categories);
         if (result.RemovedCount == 0)
@@ -141,7 +141,7 @@ public static class MetadataEditService
         try
         {
             // StripCore mutates only the in-memory image, which is discarded.
-            using var image = new MagickImage(path);
+            using var image = MagickSafeReader.Read(path);
             return StripCore(image, categories);
         }
         catch (Exception ex)

@@ -17,7 +17,7 @@ public static class ImageExportService
         ".psd", ".psb", ".tga", ".targa", ".dds",
         ".qoi", ".exr", ".hdr", ".jp2", ".j2k", ".j2c", ".jpc", ".jpm", ".jpt",
         ".jps", ".ppm", ".pgm", ".pbm", ".pnm", ".pam", ".pfm", ".xpm", ".xbm",
-        ".miff", ".mng", ".jng", ".wbmp", ".farbfeld", ".ff", ".dcx", ".pcx",
+        ".miff", ".jng", ".wbmp", ".farbfeld", ".ff", ".dcx", ".pcx",
         ".pcd", ".pcds", ".pgx", ".six", ".sixel", ".vicar", ".viff", ".vips"
     ];
 
@@ -39,7 +39,7 @@ public static class ImageExportService
         "Radiance HDR|*.hdr",
         "JPEG 2000|*.jp2;*.j2k;*.j2c;*.jpc;*.jpm;*.jpt;*.jps",
         "Portable bitmap|*.ppm;*.pgm;*.pbm;*.pnm;*.pam;*.pfm",
-        "X11 / Magick|*.xpm;*.xbm;*.miff;*.mng;*.jng;*.wbmp;*.farbfeld;*.ff",
+        "X11 / Magick|*.xpm;*.xbm;*.miff;*.jng;*.wbmp;*.farbfeld;*.ff",
         "Production and scientific|*.dcx;*.pcx;*.pcd;*.pcds;*.pgx;*.six;*.sixel;*.vicar;*.viff;*.vips",
         "All files|*.*"
     ]);
@@ -136,7 +136,7 @@ public static class ImageExportService
 
         var target = ResolveWritableTarget(path);
 
-        using var image = new MagickImage(normalizedSourcePath);
+        using var image = MagickSafeReader.Read(normalizedSourcePath);
         NonDestructiveEditService.ApplyOperations(image, operations);
         PrepareForWrite(image, target.Format, 92);
 
@@ -234,7 +234,7 @@ public static class ImageExportService
         if (!SupportedImageFormats.IsCropWritableRasterExtension(extension) || format is null || !CanWrite(format.Value))
             throw new InvalidOperationException("Source overwrite supports only flat raster image files such as JPEG, PNG, WebP, TIFF, GIF, BMP, HEIC/AVIF/JXL, and similar bitmap formats.");
 
-        using var image = new MagickImage(normalizedSourcePath);
+        using var image = MagickSafeReader.Read(normalizedSourcePath);
         var losslessJpegTransform = TryOverwriteLosslessJpegTransform(
             normalizedSourcePath,
             operations,
@@ -428,7 +428,7 @@ public static class ImageExportService
         orientation = "";
         try
         {
-            using var image = new MagickImage(sourcePath);
+            using var image = MagickSafeReader.Read(sourcePath);
             width = (int)image.Width;
             height = (int)image.Height;
             orientation = image.Orientation.ToString();
@@ -625,7 +625,6 @@ public static class ImageExportService
         ".xpm" => MagickFormat.Xpm,
         ".xbm" => MagickFormat.Xbm,
         ".miff" => MagickFormat.Miff,
-        ".mng" => MagickFormat.Mng,
         ".jng" => MagickFormat.Jng,
         ".wbmp" => MagickFormat.Wbmp,
         ".farbfeld" or ".ff" => MagickFormat.Farbfeld,

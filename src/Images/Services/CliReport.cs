@@ -123,6 +123,7 @@ public static class CliReport
             sb.AppendLine($"- Magick.NET path:   {provenance.MagickAssemblyPath}");
         sb.AppendLine($"- Magick policy:     {provenance.MagickPolicy.EnforcementText}");
         sb.AppendLine($"- Magick limits:     {provenance.MagickPolicy.ResourceLimitSummary}");
+        sb.AppendLine($"- Magick readers:    {provenance.MagickPolicy.ReadPolicySummary}");
         sb.AppendLine($"- Magick blocked:    {provenance.MagickPolicy.BlockedWriteSummary}");
         sb.AppendLine($"- Magick delegates:  {provenance.MagickPolicy.DocumentDelegateStatus}");
         sb.AppendLine($"- SharpCompress:     {provenance.SharpCompressVersion}");

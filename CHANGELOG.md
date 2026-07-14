@@ -12,6 +12,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixed
 
+- **ImageMagick now denies unadvertised native decoders** - Startup injects a deny-all-then-permit coder policy, disables filters and `@` path indirection, and default-denies delegates except the four Ghostscript raster-preview paths when that approved runtime is present. SVG/SVGZ use the in-process MSVG pipeline; hazardous MNG, TIM, MSL, and direct MVG inputs are no longer advertised.
 - **Inline rename is transactional and restart-recoverable** - Image and XMP moves now succeed as one unit or roll back together, successful renames persist their complete sidecar map in Recovery Center, and an incomplete rollback creates an explicit partial-state record instead of silently orphaning metadata.
 - **Support bundles remove all rooted paths** - Every textual ZIP entry now passes one sanitizer that replaces drive-rooted, UNC/device, file-URI, mixed-separator, quoted, and POSIX absolute paths with `%PATH%`, including exception text and bundle failure details.
 - **Archive books enforce aggregate safety budgets** - Archive enumeration now stops at 10,000 entries, 4 MiB of entry-name metadata, 4 GiB of declared image data, or a known compression ratio above 1000:1, before page names are materialized or image data is decoded.

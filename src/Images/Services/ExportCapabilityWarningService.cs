@@ -31,7 +31,7 @@ public static class ExportCapabilityWarningService
 
     private static readonly HashSet<string> AnimationExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".gif", ".webp", ".apng", ".png", ".mng"
+        ".gif", ".webp", ".apng", ".png"
     };
 
     public static IReadOnlyList<string> BuildWarnings(
@@ -234,7 +234,7 @@ public static class ExportCapabilityWarningService
         => !ImageExportService.FormatRequiresOpaqueBackground(format);
 
     private static bool SupportsAnimation(MagickFormat format)
-        => format is MagickFormat.Gif or MagickFormat.APng or MagickFormat.WebP or MagickFormat.Mng;
+        => format is MagickFormat.Gif or MagickFormat.APng or MagickFormat.WebP;
 
     private static bool SupportsMultiplePages(MagickFormat format)
         => format is MagickFormat.Tiff or MagickFormat.Pdf or MagickFormat.Pdfa or

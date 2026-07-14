@@ -420,7 +420,7 @@ public sealed class DuplicateCleanupService
             CodecRuntime.Configure();
             cancellationToken.ThrowIfCancellationRequested();
 
-            using var image = new MagickImage(path);
+            using var image = MagickSafeReader.Read(path);
             image.AutoOrient();
             image.BackgroundColor = MagickColors.White;
             image.Alpha(AlphaOption.Remove);
