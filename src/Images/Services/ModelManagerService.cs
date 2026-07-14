@@ -4,6 +4,7 @@ using System.Security;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Images.Localization;
 
 namespace Images.Services;
 
@@ -71,7 +72,7 @@ public sealed record LocalModelStatus(
 
     [JsonIgnore]
     public string ImportedText => ImportedUtc is null
-        ? "Not imported"
+        ? Strings.ModelManagerNotImported
         : ImportedUtc.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
 
     [JsonIgnore]
@@ -96,7 +97,7 @@ public sealed record LocalModelManagerSnapshot(
 {
     public int ReadyCount => Models.Count(model => model.IsReady);
     public int TotalCount => Models.Count;
-    public string RegistrySummary => $"{ReadyCount}/{TotalCount} approved model files ready";
+    public string RegistrySummary => Strings.Format(nameof(Strings.ModelRegistrySummaryFormat), ReadyCount, TotalCount);
 }
 
 public sealed record LocalModelImportResult(
@@ -143,86 +144,86 @@ public sealed class ModelManagerService
         _definitions = definitions ?? ApprovedModels;
     }
 
-    public static IReadOnlyList<LocalModelDefinition> ApprovedModels { get; } =
+    public static IReadOnlyList<LocalModelDefinition> ApprovedModels =>
     [
         new(
             Id: "opencv-inpainting-lama-2025jan",
             DisplayName: "OpenCV LaMa ONNX",
-            Purpose: "Content-aware repair",
+            Purpose: Strings.ModelOpenCvPurpose,
             StorageGroup: "inpaint",
             SourceUrl: "https://huggingface.co/opencv/inpainting_lama",
             DownloadUrl: "https://huggingface.co/opencv/inpainting_lama/resolve/main/inpainting_lama_2025jan.onnx",
-            License: "Apache-2.0 / Apache License per model card",
+            License: Strings.ModelOpenCvLicense,
             FileName: "inpainting_lama_2025jan.onnx",
             ExpectedSha256: "7df918ac3921d3daf0aae1d219776cf0dc4e4935f035af81841b40adcf74fdf2",
             ExpectedSizeBytes: 92_600_000,
-            RuntimeContract: "ONNX Runtime DirectML first; CPU fallback with visible slow-path status.",
-            Notes: "Primary LaMa candidate from docs/inpaint-runtime-decision.md. No automatic download; import the exact ONNX file and verify SHA-256."),
+            RuntimeContract: Strings.ModelOpenCvRuntime,
+            Notes: Strings.ModelOpenCvNotes),
         new(
             Id: "carve-lama-fp32",
             DisplayName: "Carve LaMa FP32 ONNX",
-            Purpose: "Content-aware repair fallback",
+            Purpose: Strings.ModelCarvePurpose,
             StorageGroup: "inpaint",
             SourceUrl: "https://huggingface.co/Carve/LaMa-ONNX",
             DownloadUrl: "https://huggingface.co/Carve/LaMa-ONNX/resolve/main/lama_fp32.onnx",
-            License: "Apache-2.0 per model card",
+            License: Strings.ModelCarveLicense,
             FileName: "lama_fp32.onnx",
             ExpectedSha256: "1faef5301d78db7dda502fe59966957ec4b79dd64e16f03ed96913c7a4eb68d6",
             ExpectedSizeBytes: 208_000_000,
-            RuntimeContract: "Fixed 512x512 input, opset 17; ONNX Runtime DirectML first, CPU fallback.",
-            Notes: "Fallback validation candidate. The alternate Carve lama.onnx export is intentionally not approved because the model card marks it slower/not recommended."),
+            RuntimeContract: Strings.ModelCarveRuntime,
+            Notes: Strings.ModelCarveNotes),
         new(
             Id: "qdrant-clip-vit-b32-text",
             DisplayName: "Qdrant CLIP ViT-B/32 Text ONNX",
-            Purpose: "Semantic search text embeddings",
+            Purpose: Strings.ModelClipTextPurpose,
             StorageGroup: "semantic",
             SourceUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-text",
             DownloadUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-text/resolve/main/model.onnx",
-            License: "MIT per model card",
+            License: Strings.ModelMitLicense,
             FileName: "clip-vit-b32-text.onnx",
             ExpectedSha256: "4dbe762b11e36488304471e439cde89da053ad7acaddbf9e096745d142ec8d8b",
             ExpectedSizeBytes: 254_102_519,
-            RuntimeContract: "Text encoder for CLIP-style semantic search; requires tokenizer validation before runtime use.",
-            Notes: "Approved file candidate only. The V7-31 provider must still validate tokenizer files, input names/shapes, normalization, and runtime output compatibility before enabling model-backed search."),
+            RuntimeContract: Strings.ModelClipTextRuntime,
+            Notes: Strings.ModelClipTextNotes),
         new(
             Id: "qdrant-clip-vit-b32-tokenizer",
             DisplayName: "Qdrant CLIP ViT-B/32 Tokenizer",
-            Purpose: "Semantic search text tokenization",
+            Purpose: Strings.ModelClipTokenizerPurpose,
             StorageGroup: "semantic",
             SourceUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-text",
             DownloadUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-text/resolve/main/tokenizer.json",
-            License: "MIT per model card",
+            License: Strings.ModelMitLicense,
             FileName: "clip-vit-b32-tokenizer.json",
             ExpectedSha256: "b68d571997a1f81bf521fb73806740ddb91e4ed6666cb6e996c066bb289cf55b",
             ExpectedSizeBytes: 2_224_147,
-            RuntimeContract: "Tokenizer metadata for the CLIP text encoder; required before model-backed text search can replace deterministic metadata embeddings.",
-            Notes: "Approved tokenizer candidate only. The V7-31 provider must still validate BPE behavior, context length, truncation, and special-token parity before runtime use."),
+            RuntimeContract: Strings.ModelClipTokenizerRuntime,
+            Notes: Strings.ModelClipTokenizerNotes),
         new(
             Id: "qdrant-clip-vit-b32-vision",
             DisplayName: "Qdrant CLIP ViT-B/32 Vision ONNX",
-            Purpose: "Semantic search image embeddings",
+            Purpose: Strings.ModelClipVisionPurpose,
             StorageGroup: "semantic",
             SourceUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-vision",
             DownloadUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-vision/resolve/main/model.onnx",
-            License: "MIT per model card",
+            License: Strings.ModelMitLicense,
             FileName: "clip-vit-b32-vision.onnx",
             ExpectedSha256: "c68d3d9a200ddd2a8c8a5510b576d4c94d1ae383bf8b36dd8c084f94e1fb4d63",
             ExpectedSizeBytes: 352_000_000,
-            RuntimeContract: "Vision encoder for CLIP-style semantic search; requires 224px CLIP preprocessing and runtime validation before use.",
-            Notes: "Approved file candidate only. The V7-31 provider must still validate preprocessing, model output shape, and similarity parity before replacing deterministic metadata embeddings."),
+            RuntimeContract: Strings.ModelClipVisionRuntime,
+            Notes: Strings.ModelClipVisionNotes),
         new(
             Id: "qdrant-clip-vit-b32-preprocessor",
             DisplayName: "Qdrant CLIP ViT-B/32 Vision Preprocessor",
-            Purpose: "Semantic search image preprocessing",
+            Purpose: Strings.ModelClipPreprocessorPurpose,
             StorageGroup: "semantic",
             SourceUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-vision",
             DownloadUrl: "https://huggingface.co/Qdrant/clip-ViT-B-32-vision/resolve/main/preprocessor_config.json",
-            License: "MIT per model card",
+            License: Strings.ModelMitLicense,
             FileName: "clip-vit-b32-preprocessor_config.json",
             ExpectedSha256: "ce945ef831c9972c135b5b198a03d8eeb70478cd69c0238f24caf1903a9965e6",
             ExpectedSizeBytes: 780,
-            RuntimeContract: "Preprocessor metadata for the CLIP vision encoder; required before image embeddings can be generated from local files.",
-            Notes: "Approved preprocessor candidate only. The V7-31 provider must still validate resize/crop, RGB normalization, tensor layout, and output parity before runtime use.")
+            RuntimeContract: Strings.ModelClipPreprocessorRuntime,
+            Notes: Strings.ModelClipPreprocessorNotes)
     ];
 
     public LocalModelManagerSnapshot GetSnapshot()
@@ -244,7 +245,7 @@ public sealed class ModelManagerService
             return new LocalModelImportResult(
                 LocalModelImportStatus.UnknownModel,
                 null,
-                "The selected model definition is not approved by Images.");
+                Strings.ModelDefinitionNotApproved);
         }
 
         if (string.IsNullOrWhiteSpace(sourcePath) || !File.Exists(sourcePath))
@@ -252,7 +253,7 @@ public sealed class ModelManagerService
             return new LocalModelImportResult(
                 LocalModelImportStatus.SourceMissing,
                 null,
-                "Choose an existing local ONNX model file.");
+                Strings.ModelChooseExistingFile);
         }
 
         var root = TryGetModelRoot();
@@ -261,7 +262,7 @@ public sealed class ModelManagerService
             return new LocalModelImportResult(
                 LocalModelImportStatus.StorageUnavailable,
                 null,
-                "Model storage is not available.");
+                Strings.ModelManagerStorageNotAvailable);
         }
 
         try
@@ -304,8 +305,8 @@ public sealed class ModelManagerService
                         : LocalModelImportStatus.HashMismatch,
                     status,
                     availability == LocalModelAvailability.Ready
-                        ? $"{definition.DisplayName} imported and verified."
-                        : $"{definition.DisplayName} was copied but its SHA-256 does not match the approved model.");
+                        ? Strings.Format(nameof(Strings.ModelImportedVerifiedFormat), definition.DisplayName)
+                        : Strings.Format(nameof(Strings.ModelImportedHashMismatchFormat), definition.DisplayName));
             }
             finally
             {
@@ -317,7 +318,7 @@ public sealed class ModelManagerService
             return new LocalModelImportResult(
                 LocalModelImportStatus.Failed,
                 InspectModel(root, definition),
-                "Model import failed: " + ex.Message);
+                Strings.Format(nameof(Strings.ModelImportFailedFormat), ex.Message));
         }
     }
 
@@ -326,14 +327,14 @@ public sealed class ModelManagerService
         var definition = _definitions.FirstOrDefault(item => item.Id.Equals(modelId, StringComparison.OrdinalIgnoreCase));
         if (definition is null)
         {
-            message = "The selected model definition is not approved by Images.";
+            message = Strings.ModelDefinitionNotApproved;
             return false;
         }
 
         var root = TryGetModelRoot();
         if (string.IsNullOrWhiteSpace(root))
         {
-            message = "Model storage is not available.";
+            message = Strings.ModelManagerStorageNotAvailable;
             return false;
         }
 
@@ -343,12 +344,12 @@ public sealed class ModelManagerService
             if (Directory.Exists(directory))
                 Directory.Delete(directory, recursive: true);
 
-            message = $"{definition.DisplayName} removed from local model storage.";
+            message = Strings.Format(nameof(Strings.ModelRemovedFormat), definition.DisplayName);
             return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
         {
-            message = "Model delete failed: " + ex.Message;
+            message = Strings.Format(nameof(Strings.ModelDeleteFailedFormat), ex.Message);
             return false;
         }
     }
@@ -366,28 +367,28 @@ public sealed class ModelManagerService
         var preprocessorDef = _definitions.FirstOrDefault(d => d.Id == "qdrant-clip-vit-b32-preprocessor");
 
         if (textDef is null || visionDef is null || tokenizerDef is null || preprocessorDef is null)
-            return new ModelValidationResult(false, "CLIP model definitions not found in approved registry.", steps);
+            return new ModelValidationResult(false, Strings.ModelClipDefinitionsMissing, steps);
 
         var textModel = InspectModel(root, textDef);
-        steps.Add(new("Text model file", textModel.IsReady,
-            textModel.IsReady ? "Ready" : $"Not available: {textModel.StatusText}"));
+        steps.Add(new(Strings.ModelValidationTextModel, textModel.IsReady,
+            textModel.IsReady ? Strings.ModelValidationReady : Strings.Format(nameof(Strings.ModelValidationNotAvailableFormat), textModel.StatusText)));
 
         var visionModel = InspectModel(root, visionDef);
-        steps.Add(new("Vision model file", visionModel.IsReady,
-            visionModel.IsReady ? "Ready" : $"Not available: {visionModel.StatusText}"));
+        steps.Add(new(Strings.ModelValidationVisionModel, visionModel.IsReady,
+            visionModel.IsReady ? Strings.ModelValidationReady : Strings.Format(nameof(Strings.ModelValidationNotAvailableFormat), visionModel.StatusText)));
 
         var tokenizer = InspectModel(root, tokenizerDef);
-        steps.Add(new("Tokenizer file", tokenizer.IsReady,
-            tokenizer.IsReady ? "Ready" : $"Not available: {tokenizer.StatusText}"));
+        steps.Add(new(Strings.ModelValidationTokenizer, tokenizer.IsReady,
+            tokenizer.IsReady ? Strings.ModelValidationReady : Strings.Format(nameof(Strings.ModelValidationNotAvailableFormat), tokenizer.StatusText)));
 
         var preprocessor = InspectModel(root, preprocessorDef);
-        steps.Add(new("Preprocessor config", preprocessor.IsReady,
-            preprocessor.IsReady ? "Ready" : $"Not available: {preprocessor.StatusText}"));
+        steps.Add(new(Strings.ModelValidationPreprocessor, preprocessor.IsReady,
+            preprocessor.IsReady ? Strings.ModelValidationReady : Strings.Format(nameof(Strings.ModelValidationNotAvailableFormat), preprocessor.StatusText)));
 
         if (steps.Any(s => !s.Passed))
         {
             return new ModelValidationResult(false,
-                $"Missing model files: {steps.Count(s => !s.Passed)} of 4 unavailable.",
+                Strings.Format(nameof(Strings.ModelValidationMissingFilesFormat), steps.Count(s => !s.Passed), 4),
                 steps);
         }
 
@@ -395,24 +396,26 @@ public sealed class ModelManagerService
         {
             var tokenizerObj = ClipTokenizer.Load(tokenizer.InstalledPath!);
             var tokens = tokenizerObj.Encode("test validation input");
-            steps.Add(new("Tokenizer load + encode", tokens.Length > 0,
-                tokens.Length > 0 ? $"Encoded to {tokens.Length} tokens" : "Tokenizer returned empty"));
+            steps.Add(new(Strings.ModelValidationTokenizerEncode, tokens.Length > 0,
+                tokens.Length > 0
+                    ? Strings.Format(nameof(Strings.ModelValidationEncodedTokensFormat), tokens.Length)
+                    : Strings.ModelValidationTokenizerEmpty));
         }
         catch (Exception ex)
         {
-            steps.Add(new("Tokenizer load + encode", false, $"Failed: {ex.Message}"));
-            return new ModelValidationResult(false, $"Tokenizer validation failed: {ex.Message}", steps);
+            steps.Add(new(Strings.ModelValidationTokenizerEncode, false, Strings.Format(nameof(Strings.ModelValidationFailedFormat), ex.Message)));
+            return new ModelValidationResult(false, Strings.Format(nameof(Strings.ModelValidationTokenizerFailedFormat), ex.Message), steps);
         }
 
         try
         {
             ClipImagePreprocessor.Load(preprocessor.InstalledPath!);
-            steps.Add(new("Preprocessor config load", true, "Config parsed"));
+            steps.Add(new(Strings.ModelValidationPreprocessorLoad, true, Strings.ModelValidationConfigParsed));
         }
         catch (Exception ex)
         {
-            steps.Add(new("Preprocessor config load", false, $"Failed: {ex.Message}"));
-            return new ModelValidationResult(false, $"Preprocessor config failed: {ex.Message}", steps);
+            steps.Add(new(Strings.ModelValidationPreprocessorLoad, false, Strings.Format(nameof(Strings.ModelValidationFailedFormat), ex.Message)));
+            return new ModelValidationResult(false, Strings.Format(nameof(Strings.ModelValidationPreprocessorFailedFormat), ex.Message), steps);
         }
 
         try
@@ -420,27 +423,29 @@ public sealed class ModelManagerService
             var provider = ClipEmbeddingProvider.TryCreate(this);
             if (provider is null)
             {
-                steps.Add(new("ONNX session creation", false, "Provider returned null — ONNX Runtime or model load failure"));
-                return new ModelValidationResult(false, "CLIP provider creation failed.", steps);
+                steps.Add(new(Strings.ModelValidationOnnxSession, false, Strings.ModelValidationProviderNull));
+                return new ModelValidationResult(false, Strings.ModelValidationProviderFailed, steps);
             }
 
-            steps.Add(new("ONNX session creation", true, "Sessions created"));
+            steps.Add(new(Strings.ModelValidationOnnxSession, true, Strings.ModelValidationSessionsCreated));
 
             var textEmbed = provider.EmbedText("test");
             var textOk = textEmbed.Count > 0 && textEmbed.Any(v => Math.Abs(v) > 0.000001f);
-            steps.Add(new("Text embedding smoke", textOk,
-                textOk ? $"{textEmbed.Count}-dim non-zero vector" : "Zero or empty embedding"));
+            steps.Add(new(Strings.ModelValidationTextEmbedding, textOk,
+                textOk
+                    ? Strings.Format(nameof(Strings.ModelValidationVectorFormat), textEmbed.Count)
+                    : Strings.ModelValidationEmptyEmbedding));
 
             provider.Dispose();
         }
         catch (Exception ex)
         {
-            steps.Add(new("ONNX inference smoke", false, $"Failed: {ex.Message}"));
-            return new ModelValidationResult(false, $"Inference failed: {ex.Message}", steps);
+            steps.Add(new(Strings.ModelValidationOnnxInference, false, Strings.Format(nameof(Strings.ModelValidationFailedFormat), ex.Message)));
+            return new ModelValidationResult(false, Strings.Format(nameof(Strings.ModelValidationInferenceFailedFormat), ex.Message), steps);
         }
 
         return new ModelValidationResult(true,
-            $"CLIP pipeline validated: all {steps.Count} checks passed.", steps);
+            Strings.Format(nameof(Strings.ModelValidationSuccessFormat), steps.Count), steps);
     }
 
     private LocalModelRuntimeStatus InspectRuntime()
@@ -452,28 +457,41 @@ public sealed class ModelManagerService
                                      IsAssemblyLoaded("Microsoft.ML.OnnxRuntime");
 
         var probedProvider = OnnxRuntimeService.Provider;
-        var providerLabel = OnnxRuntimeService.ProviderLabel;
+        var providerLabel = probedProvider switch
+        {
+            OnnxProvider.DirectML => Strings.ModelRuntimeOnnxDirectMl,
+            OnnxProvider.Cpu => Strings.ModelRuntimeOnnxCpu,
+            _ => Strings.ModelRuntimeUnavailable
+        };
 
         var preferred = windowsMlOsCandidate
-            ? "Windows ML candidate"
+            ? Strings.ModelRuntimeWindowsMlCandidate
             : probedProvider == OnnxProvider.DirectML
-                ? "ONNX Runtime DirectML"
+                ? Strings.ModelRuntimeOnnxDirectMl
                 : probedProvider == OnnxProvider.Cpu
-                    ? "ONNX Runtime CPU"
-                    : "ONNX Runtime DirectML fallback required";
+                    ? Strings.ModelRuntimeOnnxCpu
+                    : Strings.ModelRuntimeDirectMlFallback;
         var status = windowsMlReferenced
-            ? "Windows ML package/runtime is referenced by this build."
-            : $"Active provider: {providerLabel}. " + (windowsMlOsCandidate
-                ? "Windows 11 24H2+ detected; Windows ML is the preferred future runtime."
-                : "This OS uses the ONNX Runtime path for local model features.");
+            ? Strings.ModelRuntimeWindowsMlReferenced
+            : Strings.Format(
+                windowsMlOsCandidate
+                    ? nameof(Strings.ModelRuntimeActiveProviderWindowsMlFormat)
+                    : nameof(Strings.ModelRuntimeActiveProviderOnnxFormat),
+                providerLabel);
 
         var rows = new[]
         {
-            new MetadataFact("Active provider", providerLabel),
-            new MetadataFact("Preferred", preferred),
-            new MetadataFact("Windows ML OS", windowsMlOsCandidate ? "Windows 11 24H2+ candidate" : "Not a Windows ML 24H2+ candidate"),
-            new MetadataFact("Windows ML reference", windowsMlReferenced ? "Referenced" : "Not referenced"),
-            new MetadataFact("ONNX DirectML reference", onnxDirectMlReferenced ? "Referenced" : "Not referenced")
+            new MetadataFact(Strings.ModelRuntimeActiveProvider, providerLabel),
+            new MetadataFact(Strings.ModelRuntimePreferred, preferred),
+            new MetadataFact(
+                Strings.ModelRuntimeWindowsMlOs,
+                windowsMlOsCandidate ? Strings.ModelRuntimeWindowsMlOsCandidate : Strings.ModelRuntimeWindowsMlOsNotCandidate),
+            new MetadataFact(
+                Strings.ModelRuntimeWindowsMlReference,
+                windowsMlReferenced ? Strings.ModelRuntimeReferenced : Strings.ModelRuntimeNotReferenced),
+            new MetadataFact(
+                Strings.ModelRuntimeOnnxDirectMlReference,
+                onnxDirectMlReferenced ? Strings.ModelRuntimeReferenced : Strings.ModelRuntimeNotReferenced)
         };
 
         return new LocalModelRuntimeStatus(
@@ -492,8 +510,8 @@ public sealed class ModelManagerService
             return new LocalModelStatus(
                 definition,
                 LocalModelAvailability.StorageUnavailable,
-                "Model storage is unavailable.",
-                "Fix app-local storage before importing models.",
+                Strings.ModelStorageUnavailable,
+                Strings.ModelStorageFixAction,
                 null,
                 null,
                 null,
@@ -509,8 +527,8 @@ public sealed class ModelManagerService
             return new LocalModelStatus(
                 definition,
                 LocalModelAvailability.Missing,
-                "Not imported.",
-                "Download manually from the approved source, then import the local ONNX file.",
+                Strings.ModelNotImportedStatus,
+                Strings.ModelImportAction,
                 null,
                 null,
                 null,
@@ -567,11 +585,11 @@ public sealed class ModelManagerService
                 definition,
                 availability,
                 availability == LocalModelAvailability.Ready
-                    ? "Imported and SHA-256 verified."
-                    : "Imported file does not match the approved SHA-256.",
+                    ? Strings.ModelImportedVerifiedStatus
+                    : Strings.ModelImportedHashMismatchStatus,
                 availability == LocalModelAvailability.Ready
-                    ? "Ready for future model-backed tools once runtime code is enabled."
-                    : "Delete this file and import the exact approved ONNX artifact.",
+                    ? Strings.ModelReadyAction
+                    : Strings.ModelHashMismatchAction,
                 modelPath,
                 sha256,
                 size,
@@ -582,8 +600,8 @@ public sealed class ModelManagerService
             return new LocalModelStatus(
                 definition,
                 LocalModelAvailability.ManifestInvalid,
-                "Local model metadata could not be read.",
-                "Delete and re-import the model file.",
+                Strings.ModelMetadataUnreadable,
+                Strings.ModelReimportAction,
                 modelPath,
                 null,
                 null,

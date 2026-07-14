@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.IO;
+using Images.Localization;
 using ImageMagick;
 using Microsoft.Extensions.Logging;
 
@@ -26,7 +27,7 @@ public static class ImageColorAnalysisService
         if (SupportedImageFormats.IsArchive(path))
             return new ImageColorAnalysis(
                 [],
-                "Color analysis is unavailable for archive book entries.",
+                Strings.ColorAnalysisArchiveUnavailable,
                 "");
 
         try
@@ -38,21 +39,21 @@ public static class ImageColorAnalysisService
             var stats = BuildChannelStats(image);
             var rows = new List<MetadataFact>(8)
             {
-                new("Profile", FormatProfile(profile)),
-                new("Color space", image.ColorSpace.ToString()),
-                new("Luma", stats.LumaText),
-                new("Red", stats.RedText),
-                new("Green", stats.GreenText),
-                new("Blue", stats.BlueText),
-                new("Histogram", stats.HistogramText)
+                new(Strings.ColorAnalysisProfile, FormatProfile(profile)),
+                new(Strings.ColorAnalysisColorSpace, image.ColorSpace.ToString()),
+                new(Strings.ColorAnalysisLuma, stats.LumaText),
+                new(Strings.ColorAnalysisRed, stats.RedText),
+                new(Strings.ColorAnalysisGreen, stats.GreenText),
+                new(Strings.ColorAnalysisBlue, stats.BlueText),
+                new(Strings.ColorAnalysisHistogram, stats.HistogramText)
             };
 
             if (stats.HasAlpha)
-                rows.Add(new MetadataFact("Alpha", stats.AlphaText));
+                rows.Add(new MetadataFact(Strings.ColorAnalysisAlpha, stats.AlphaText));
 
             var warning = profile is null
-                ? "No embedded ICC profile was found; Images is reporting decoded pixels without applying a managed display transform."
-                : "Embedded ICC profile found. Images reports profile and histogram data only; it does not change pixels or soft-proof output yet.";
+                ? Strings.ColorAnalysisNoProfileWarning
+                : Strings.ColorAnalysisEmbeddedProfileWarning;
 
             return new ImageColorAnalysis(rows, "", warning);
         }
@@ -61,7 +62,7 @@ public static class ImageColorAnalysisService
             Log.LogDebug(ex, "Color analysis failed for {Path}", path);
             return new ImageColorAnalysis(
                 [],
-                "Color analysis is unavailable for this image.",
+                Strings.ColorAnalysisUnavailable,
                 "");
         }
     }
@@ -147,24 +148,31 @@ public static class ImageColorAnalysisService
             FormatMean("R", red),
             FormatMean("G", green),
             FormatMean("B", blue),
-            $"mean {FormatPercent(lumaSum / count / 255d)}",
-            $"shadows {FormatPercent(shadows / (double)count)} / mid {FormatPercent(midtones / (double)count)} / highlights {FormatPercent(highlights / (double)count)}",
+            Strings.Format(nameof(Strings.ColorAnalysisMeanFormat), FormatPercent(lumaSum / count / 255d)),
+            Strings.Format(
+                nameof(Strings.ColorAnalysisHistogramFormat),
+                FormatPercent(shadows / (double)count),
+                FormatPercent(midtones / (double)count),
+                FormatPercent(highlights / (double)count)),
             hasAlpha
-                ? $"mean {FormatPercent(alpha.Mean / 255d)}, transparent {FormatPercent(transparent / (double)count)}"
-                : "opaque",
+                ? Strings.Format(
+                    nameof(Strings.ColorAnalysisAlphaFormat),
+                    FormatPercent(alpha.Mean / 255d),
+                    FormatPercent(transparent / (double)count))
+                : Strings.ColorAnalysisOpaque,
             hasAlpha);
     }
 
     private static string FormatProfile(IColorProfile? profile)
     {
         if (profile is null)
-            return "No embedded ICC profile";
+            return Strings.ColorAnalysisNoEmbeddedProfile;
 
         var description = Clean(profile.Description);
         var colorSpace = profile.ColorSpace.ToString();
         return description is null
-            ? $"Embedded ICC ({colorSpace})"
-            : $"Embedded ICC: {description} ({colorSpace})";
+            ? Strings.Format(nameof(Strings.ColorAnalysisEmbeddedProfileFormat), colorSpace)
+            : Strings.Format(nameof(Strings.ColorAnalysisEmbeddedProfileDescriptionFormat), description, colorSpace);
     }
 
     private static string? Clean(string? value)
@@ -180,7 +188,12 @@ public static class ImageColorAnalysisService
     }
 
     private static string FormatMean(string label, ChannelAccumulator channel)
-        => string.Create(CultureInfo.InvariantCulture, $"{label} min {channel.Minimum}, mean {channel.Mean:0.#}, max {channel.Maximum}");
+        => Strings.Format(
+            nameof(Strings.ColorAnalysisChannelStatsFormat),
+            label,
+            channel.Minimum,
+            channel.Mean,
+            channel.Maximum);
 
     private static string FormatPercent(double value)
         => string.Create(CultureInfo.InvariantCulture, $"{Math.Clamp(value, 0d, 1d) * 100:0.#}%");

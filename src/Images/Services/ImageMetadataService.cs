@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.IO;
+using Images.Localization;
 using ImageMagick;
 using Microsoft.Extensions.Logging;
 
@@ -44,30 +45,30 @@ public static class ImageMetadataService
                 Clean(ReadString(exif, ExifTag.DateTimeOriginal)),
                 Clean(ReadString(exif, ExifTag.OffsetTimeOriginal)));
             if (captured.HasValue)
-                rows.Add(new MetadataFact("Captured", captured.ToDisplay(CultureInfo.CurrentCulture)));
+                rows.Add(new MetadataFact(Strings.MetadataCaptured, captured.ToDisplay(CultureInfo.CurrentCulture)));
 
             var camera = FormatCamera(
                 Clean(ReadString(exif, ExifTag.Make)),
                 Clean(ReadString(exif, ExifTag.Model)));
             if (camera is not null)
-                rows.Add(new MetadataFact("Camera", camera));
+                rows.Add(new MetadataFact(Strings.MetadataCamera, camera));
 
             var lens = Clean(ReadString(exif, ExifTag.LensModel));
             if (lens is not null)
-                rows.Add(new MetadataFact("Lens", lens));
+                rows.Add(new MetadataFact(Strings.MetadataLens, lens));
 
             var exposure = FormatExposure(
                 ReadRational(exif, ExifTag.ExposureTime),
                 ReadRational(exif, ExifTag.FNumber),
                 ReadIso(exif));
             if (exposure is not null)
-                rows.Add(new MetadataFact("Exposure", exposure));
+                rows.Add(new MetadataFact(Strings.MetadataExposure, exposure));
 
             var focal = FormatFocalLength(
                 ReadRational(exif, ExifTag.FocalLength),
                 ReadUInt16(exif, ExifTag.FocalLengthIn35mmFilm));
             if (focal is not null)
-                rows.Add(new MetadataFact("Focal", focal));
+                rows.Add(new MetadataFact(Strings.MetadataFocal, focal));
 
             var gps = FormatGps(
                 ReadRationalArray(exif, ExifTag.GPSLatitude),
@@ -75,7 +76,7 @@ public static class ImageMetadataService
                 ReadRationalArray(exif, ExifTag.GPSLongitude),
                 Clean(ReadString(exif, ExifTag.GPSLongitudeRef)));
             if (gps is not null)
-                rows.Add(new MetadataFact("GPS", gps));
+                rows.Add(new MetadataFact(Strings.MetadataGps, gps));
 
             return rows.Count == 0 ? PhotoMetadata.Empty : new PhotoMetadata(rows);
         }
@@ -153,10 +154,12 @@ public static class ImageMetadataService
             return null;
 
         if (seconds >= 1)
-            return $"{seconds:0.##} s";
+            return Strings.Format(nameof(Strings.MetadataShutterSecondsFormat), seconds);
 
         var denominator = (int)Math.Round(1 / seconds);
-        return denominator <= 0 ? null : $"1/{denominator} s";
+        return denominator <= 0
+            ? null
+            : Strings.Format(nameof(Strings.MetadataShutterFractionFormat), denominator);
     }
 
     private static string? FormatAperture(Rational? value)
@@ -172,21 +175,23 @@ public static class ImageMetadataService
     {
         var ratings = ReadUInt16Array(profile, ExifTag.ISOSpeedRatings);
         if (ratings is { Length: > 0 } && ratings[0] > 0)
-            return $"ISO {ratings[0]}";
+            return Strings.Format(nameof(Strings.MetadataIsoFormat), ratings[0]);
 
         var speed = ReadUInt32(profile, ExifTag.ISOSpeed);
-        return speed is > 0 ? $"ISO {speed.Value}" : null;
+        return speed is > 0 ? Strings.Format(nameof(Strings.MetadataIsoFormat), speed.Value) : null;
     }
 
     private static string? FormatFocalLength(Rational? focalLength, ushort? focalLength35mm)
     {
         var focal = focalLength?.ToDouble();
         if (focal is null || focal <= 0 || double.IsNaN(focal.Value) || double.IsInfinity(focal.Value))
-            return focalLength35mm is > 0 ? $"{focalLength35mm.Value} mm equiv." : null;
+            return focalLength35mm is > 0
+                ? Strings.Format(nameof(Strings.MetadataFocalEquivalentFormat), focalLength35mm.Value)
+                : null;
 
-        var text = $"{focal.Value:0.#} mm";
+        var text = Strings.Format(nameof(Strings.MetadataFocalMillimetersFormat), focal.Value);
         return focalLength35mm is > 0
-            ? $"{text} ({focalLength35mm.Value} mm equiv.)"
+            ? Strings.Format(nameof(Strings.MetadataFocalWithEquivalentFormat), text, focalLength35mm.Value)
             : text;
     }
 

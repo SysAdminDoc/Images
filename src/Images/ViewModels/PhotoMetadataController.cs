@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows.Threading;
+using Images.Localization;
 using Images.Services;
 using Microsoft.Extensions.Logging;
 
@@ -10,9 +11,9 @@ public sealed class PhotoMetadataController : IDisposable
 {
     private static readonly ILogger _log = Log.Get(nameof(PhotoMetadataController));
 
-    public const string LoadingStatusText = "Reading photo metadata...";
-    public const string EmptyStatusText = "No embedded camera metadata.";
-    public const string TimeoutStatusText = "Metadata read timed out.";
+    public static string LoadingStatusText => Strings.PhotoMetadataLoading;
+    public static string EmptyStatusText => Strings.PhotoMetadataEmpty;
+    public static string TimeoutStatusText => Strings.PhotoMetadataTimeout;
 
     private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(5);
 

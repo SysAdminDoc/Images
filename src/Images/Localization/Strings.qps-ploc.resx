@@ -1638,13 +1638,13 @@ Details written to:
     <value>[!!!!!!!!!!!! Compresses extended highlights into the SDR display range before 8-bit conversion. Reinhard is the neutral default; Hable and ACES offer filmic contrast. !!!!!!!!!!!!]</value>
   </data>
   <data name="SettingsToneMapReinhard" xml:space="preserve">
-    <value>[!!! Reinhard !!!]</value>
+    <value>[!! Reinhard !!]</value>
   </data>
   <data name="SettingsToneMapHable" xml:space="preserve">
-    <value>[!!! Hable !!!]</value>
+    <value>[!! Hable !!]</value>
   </data>
   <data name="SettingsToneMapAces" xml:space="preserve">
-    <value>[!!! ACES !!!]</value>
+    <value>[!! ACES !!]</value>
   </data>
   <data name="SettingsSectionAppearance" xml:space="preserve">
     <value>[!!! Appearance !!!]</value>
@@ -1866,7 +1866,7 @@ Details written to:
     <value>[!!!!!!!!!!!! Images will display raw pixel values without ICC color conversion. !!!!!!!!!!!!]</value>
   </data>
   <data name="SettingsToneMapChangedStatusFormat" xml:space="preserve">
-    <value>[!!!!!! HDR images will use {0} tonemapping. !!!!!!]</value>
+    <value>[!!!!!!!!! HDR images will use {0} tonemapping. !!!!!!!!!]</value>
   </data>
   <data name="SettingsFilmstripOnStatus" xml:space="preserve">
     <value>[!!!!!!!!! Filmstrip will be shown at startup. !!!!!!!!!]</value>
@@ -5807,5 +5807,662 @@ Details written to:
   </data>
   <data name="MainToastGpsStripFailed" xml:space="preserve">
     <value>[!!!!!!!!! Could not remove GPS location data !!!!!!!!!]</value>
+  </data>
+  <data name="C2paCheckingCredentials" xml:space="preserve">
+    <value>[!!!!!!!! Checking content credentials... !!!!!!!!]</value>
+  </data>
+  <data name="C2paInspectionFailed" xml:space="preserve">
+    <value>[!!!!!! C2PA inspection failed. !!!!!!]</value>
+  </data>
+  <data name="C2paInspectionTimeout" xml:space="preserve">
+    <value>[!!!!!!! C2PA inspection timed out. !!!!!!!]</value>
+  </data>
+  <data name="C2paTrustDefaultTooltip" xml:space="preserve">
+    <value>[!!!!!!!!!!!! C2PA content credentials indicate provenance, not authenticity. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="C2paTrustInvalid" xml:space="preserve">
+    <value>[!! Invalid !!]</value>
+  </data>
+  <data name="C2paTrustInvalidTooltip" xml:space="preserve">
+    <value>[!!!!!!!!!!!! This file has C2PA content credentials but the signature could not be validated. The manifest may have been tampered with or the signing certificate may be revoked. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="C2paTrustPresent" xml:space="preserve">
+    <value>[!! Present !!]</value>
+  </data>
+  <data name="C2paTrustSigned" xml:space="preserve">
+    <value>[!! Signed !!]</value>
+  </data>
+  <data name="C2paTrustSignedTooltip" xml:space="preserve">
+    <value>[!!!!!!!!!!!! This file has C2PA content credentials with a digital signature. Provenance shows who created or edited the file — it does not verify whether the content is truthful. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ColorAnalysisAlpha" xml:space="preserve">
+    <value>[!! Alpha !!]</value>
+  </data>
+  <data name="ColorAnalysisAlphaFormat" xml:space="preserve">
+    <value>[!!!!!!! mean {0}, transparent {1} !!!!!!!]</value>
+  </data>
+  <data name="ColorAnalysisArchiveUnavailable" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Color analysis is unavailable for archive book entries. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ColorAnalysisBlue" xml:space="preserve">
+    <value>[!! Blue !!]</value>
+  </data>
+  <data name="ColorAnalysisChannelStatsFormat" xml:space="preserve">
+    <value>[!!!!!!!!! {0} min {1}, mean {2:0.#}, max {3} !!!!!!!!!]</value>
+  </data>
+  <data name="ColorAnalysisColorSpace" xml:space="preserve">
+    <value>[!!! Color space !!!]</value>
+  </data>
+  <data name="ColorAnalysisEmbeddedProfileDescriptionFormat" xml:space="preserve">
+    <value>[!!!!!! Embedded ICC: {0} ({1}) !!!!!!]</value>
+  </data>
+  <data name="ColorAnalysisEmbeddedProfileFormat" xml:space="preserve">
+    <value>[!!!!! Embedded ICC ({0}) !!!!!]</value>
+  </data>
+  <data name="ColorAnalysisEmbeddedProfileWarning" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Embedded ICC profile found. Images reports profile and histogram data only; it does not change pixels or soft-proof output yet. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ColorAnalysisGreen" xml:space="preserve">
+    <value>[!! Green !!]</value>
+  </data>
+  <data name="ColorAnalysisHistogram" xml:space="preserve">
+    <value>[!!! Histogram !!!]</value>
+  </data>
+  <data name="ColorAnalysisHistogramFormat" xml:space="preserve">
+    <value>[!!!!!!!!!! shadows {0} / mid {1} / highlights {2} !!!!!!!!!!]</value>
+  </data>
+  <data name="ColorAnalysisLoading" xml:space="preserve">
+    <value>[!!!!!!!!!! Reading color profile and histogram... !!!!!!!!!!]</value>
+  </data>
+  <data name="ColorAnalysisLuma" xml:space="preserve">
+    <value>[!! Luma !!]</value>
+  </data>
+  <data name="ColorAnalysisMeanFormat" xml:space="preserve">
+    <value>[!! mean {0} !!]</value>
+  </data>
+  <data name="ColorAnalysisNoEmbeddedProfile" xml:space="preserve">
+    <value>[!!!!!! No embedded ICC profile !!!!!!]</value>
+  </data>
+  <data name="ColorAnalysisNoProfileWarning" xml:space="preserve">
+    <value>[!!!!!!!!!!!! No embedded ICC profile was found; Images is reporting decoded pixels without applying a managed display transform. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ColorAnalysisOpaque" xml:space="preserve">
+    <value>[!! opaque !!]</value>
+  </data>
+  <data name="ColorAnalysisProfile" xml:space="preserve">
+    <value>[!! Profile !!]</value>
+  </data>
+  <data name="ColorAnalysisRed" xml:space="preserve">
+    <value>[!! Red !!]</value>
+  </data>
+  <data name="ColorAnalysisTimeout" xml:space="preserve">
+    <value>[!!!!!!! Color analysis timed out. !!!!!!!]</value>
+  </data>
+  <data name="ColorAnalysisUnavailable" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Color analysis is unavailable for this image. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="MetadataCamera" xml:space="preserve">
+    <value>[!! Camera !!]</value>
+  </data>
+  <data name="MetadataCaptured" xml:space="preserve">
+    <value>[!! Captured !!]</value>
+  </data>
+  <data name="MetadataExposure" xml:space="preserve">
+    <value>[!! Exposure !!]</value>
+  </data>
+  <data name="MetadataFocal" xml:space="preserve">
+    <value>[!! Focal !!]</value>
+  </data>
+  <data name="MetadataFocalEquivalentFormat" xml:space="preserve">
+    <value>[!!!! {0} mm equiv. !!!!]</value>
+  </data>
+  <data name="MetadataFocalMillimetersFormat" xml:space="preserve">
+    <value>[!!! {0:0.#} mm !!!]</value>
+  </data>
+  <data name="MetadataFocalWithEquivalentFormat" xml:space="preserve">
+    <value>[!!!!! {0} ({1} mm equiv.) !!!!!]</value>
+  </data>
+  <data name="MetadataGps" xml:space="preserve">
+    <value>[!! GPS !!]</value>
+  </data>
+  <data name="MetadataIsoFormat" xml:space="preserve">
+    <value>[!! ISO {0} !!]</value>
+  </data>
+  <data name="MetadataLens" xml:space="preserve">
+    <value>[!! Lens !!]</value>
+  </data>
+  <data name="MetadataShutterFractionFormat" xml:space="preserve">
+    <value>[!! 1/{0} s !!]</value>
+  </data>
+  <data name="MetadataShutterSecondsFormat" xml:space="preserve">
+    <value>[!!! {0:0.##} s !!!]</value>
+  </data>
+  <data name="NetworkClipboardBytesFormat" xml:space="preserve">
+    <value>[!!!!   Bytes:    {0} !!!!]</value>
+  </data>
+  <data name="NetworkClipboardDurationFormat" xml:space="preserve">
+    <value>[!!!!!   Duration: {0} ms !!!!!]</value>
+  </data>
+  <data name="NetworkClipboardPurposeFormat" xml:space="preserve">
+    <value>[!!!!   Purpose:  {0} !!!!]</value>
+  </data>
+  <data name="NetworkClipboardTimestampFormat" xml:space="preserve">
+    <value>[!!!!!!!!! [{0:yyyy-MM-dd HH:mm:ss.fff zzz}] !!!!!!!!!]</value>
+  </data>
+  <data name="NetworkClipboardTitleFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!! Images — Network activity log ({0} entries) !!!!!!!!!!!]</value>
+  </data>
+  <data name="NetworkClipboardUrlFormat" xml:space="preserve">
+    <value>[!!!!   URL:      {0} !!!!]</value>
+  </data>
+  <data name="NetworkDurationFormat" xml:space="preserve">
+    <value>[!! {0} ms !!]</value>
+  </data>
+  <data name="NetworkNoActivity" xml:space="preserve">
+    <value>[!!!!!!!! No network activity recorded. !!!!!!!!]</value>
+  </data>
+  <data name="OcrCapabilityCheckFailedBadge" xml:space="preserve">
+    <value>[!!! Check failed !!!]</value>
+  </data>
+  <data name="OcrCapabilityCheckUnavailable" xml:space="preserve">
+    <value>[!!!!!!!!!! Windows OCR status could not be checked !!!!!!!!!!]</value>
+  </data>
+  <data name="OcrCapabilityMoreLanguagesFormat" xml:space="preserve">
+    <value>[!!!  + {0} more !!!]</value>
+  </data>
+  <data name="OcrCapabilityNoLanguages" xml:space="preserve">
+    <value>[!!!!!!!!! No Windows OCR languages installed !!!!!!!!!]</value>
+  </data>
+  <data name="OcrCapabilityOverviewReadyFormat" xml:space="preserve">
+    <value>[!!! Ready — {0} !!!]</value>
+  </data>
+  <data name="OcrCapabilityQueryFailedFormat" xml:space="preserve">
+    <value>[!!!!!!!!!! Windows OCR could not be queried: {0} !!!!!!!!!!]</value>
+  </data>
+  <data name="OcrCapabilityReadyBadge" xml:space="preserve">
+    <value>[!! Ready !!]</value>
+  </data>
+  <data name="OcrCapabilityReadyDetail" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Images uses the installed Windows OCR languages on this PC. No image data is sent to a cloud service. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="OcrCapabilityReadyTitle" xml:space="preserve">
+    <value>[!!!!!! Text extraction ready !!!!!!]</value>
+  </data>
+  <data name="OcrCapabilitySetupBadge" xml:space="preserve">
+    <value>[!!! Setup needed !!!]</value>
+  </data>
+  <data name="OcrCapabilitySetupDetail" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Install a Windows language pack with OCR support, then refresh this status. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="OcrCapabilitySetupTitle" xml:space="preserve">
+    <value>[!!!! OCR needs setup !!!!]</value>
+  </data>
+  <data name="OcrCapabilitySystemInfoAvailableFormat" xml:space="preserve">
+    <value>[!!!! available ({0}) !!!!]</value>
+  </data>
+  <data name="OcrCapabilityUnavailableTitle" xml:space="preserve">
+    <value>[!!!!!! OCR status unavailable !!!!!!]</value>
+  </data>
+  <data name="PhotoMetadataEmpty" xml:space="preserve">
+    <value>[!!!!!!! No embedded camera metadata. !!!!!!!]</value>
+  </data>
+  <data name="PhotoMetadataLoading" xml:space="preserve">
+    <value>[!!!!!!! Reading photo metadata... !!!!!!!]</value>
+  </data>
+  <data name="PhotoMetadataTimeout" xml:space="preserve">
+    <value>[!!!!!! Metadata read timed out. !!!!!!]</value>
+  </data>
+  <data name="DiagnosticsAdvancedColorActive" xml:space="preserve">
+    <value>[!!!!!!!! Windows Advanced Color active !!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsAdvancedColorDetailFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Images outputs sRGB and leaves display conversion to Windows on {0}. {1}. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsAppDataNoThumbnailsFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! App data root: {0}. Thumbnail cache is unavailable. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsAppDataThumbnailsFormat" xml:space="preserve">
+    <value>[!!!!!!!!! App data root: {0}. Thumbnails: {1} !!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsAppDataUnavailable" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Images could not create its app data root. It may fall back to temporary storage. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsAutomaticChecksEnabled" xml:space="preserve">
+    <value>[!!!!!! Automatic checks enabled !!!!!!]</value>
+  </data>
+  <data name="DiagnosticsAutomaticChecksOff" xml:space="preserve">
+    <value>[!!!!! Automatic checks off !!!!!]</value>
+  </data>
+  <data name="DiagnosticsBackgroundActive" xml:space="preserve">
+    <value>[!!!!!! Background work active !!!!!!]</value>
+  </data>
+  <data name="DiagnosticsBackgroundAttention" xml:space="preserve">
+    <value>[!!!!!!!! Background work needs attention !!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsBackgroundDetailFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! {0} running, {1} completed, {2} failed, {3} canceled this session. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsBackgroundIdle" xml:space="preserve">
+    <value>[!!!!! Background work idle !!!!!]</value>
+  </data>
+  <data name="DiagnosticsBackgroundWork" xml:space="preserve">
+    <value>[!!!! Background work !!!!]</value>
+  </data>
+  <data name="DiagnosticsC2paDegradedFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! {0} C2PA inspection is degraded until c2patool is installed app-local or configured with IMAGES_C2PATOOL_EXE. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsC2paReadyDetailFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Using {0} from {1}. C2PA shows provenance, not truthfulness. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsC2paToolReady" xml:space="preserve">
+    <value>[!!!! c2patool ready !!!!]</value>
+  </data>
+  <data name="DiagnosticsC2paToolUnavailable" xml:space="preserve">
+    <value>[!!!!! c2patool unavailable !!!!!]</value>
+  </data>
+  <data name="DiagnosticsCacheDetailFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!! {0} files, {1} of {2}, {3}. {4} Path: {5} !!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsCacheScanFailedFormat" xml:space="preserve">
+    <value>[!!!!!! Could not scan {0}: {1} !!!!!!]</value>
+  </data>
+  <data name="DiagnosticsCacheSizeUnavailableFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!! Cache path: {0}. Size could not be measured. !!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsContentCredentials" xml:space="preserve">
+    <value>[!!!!! Content credentials !!!!!]</value>
+  </data>
+  <data name="DiagnosticsCrashLogPathFormat" xml:space="preserve">
+    <value>[!!!!! Crash log path: {0} !!!!!]</value>
+  </data>
+  <data name="DiagnosticsCustomMonitorProfile" xml:space="preserve">
+    <value>[!!!!!! custom monitor profile !!!!!!]</value>
+  </data>
+  <data name="DiagnosticsDisabledByCodecPolicy" xml:space="preserve">
+    <value>[!!!!!! Disabled by codec policy !!!!!!]</value>
+  </data>
+  <data name="DiagnosticsDisplayColor" xml:space="preserve">
+    <value>[!!!! Display color !!!!]</value>
+  </data>
+  <data name="DiagnosticsDocumentPreviews" xml:space="preserve">
+    <value>[!!!!! Document previews !!!!!]</value>
+  </data>
+  <data name="DiagnosticsGhostscriptPolicyDisabled" xml:space="preserve">
+    <value>[!!!!!!!!!!!! PDF, EPS, PS, and AI previews stay off because Images disables external ImageMagick delegates. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsGhostscriptPolicyInstalled" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Ghostscript is installed, but PDF, EPS, PS, and AI previews stay off because Images disables external ImageMagick delegates. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsGhostscriptReady" xml:space="preserve">
+    <value>[!!!!! Ghostscript ready !!!!!]</value>
+  </data>
+  <data name="DiagnosticsGhostscriptRequired" xml:space="preserve">
+    <value>[!!!!!!!!!!!! PDF, EPS, PS, and AI previews need bundled Ghostscript, IMAGES_GHOSTSCRIPT_DIR, or an installed runtime. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsIccOutputOff" xml:space="preserve">
+    <value>[!!!! ICC output off !!!!]</value>
+  </data>
+  <data name="DiagnosticsIccOutputOffDetailFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Color-managed display is opt-in and currently off. {0}; {1}. {2} !!!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsImageCodecs" xml:space="preserve">
+    <value>[!!! Image codecs !!!]</value>
+  </data>
+  <data name="DiagnosticsLastEvictionSweepFormat" xml:space="preserve">
+    <value>[!!!!!!! Last eviction sweep: {0:g}. !!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsLastSuccessfulCheckFormat" xml:space="preserve">
+    <value>[!!!!!!! Last successful check: {0:g} !!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsLogFolderReady" xml:space="preserve">
+    <value>[!!!! Log folder ready !!!!]</value>
+  </data>
+  <data name="DiagnosticsLogFolderUnavailable" xml:space="preserve">
+    <value>[!!!!!! Log folder unavailable !!!!!!]</value>
+  </data>
+  <data name="DiagnosticsLogs" xml:space="preserve">
+    <value>[!! Logs !!]</value>
+  </data>
+  <data name="DiagnosticsLogsDetailFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Daily logs and crash dumps are stored in {0}. Crash log: {1} !!!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsMagickAvailable" xml:space="preserve">
+    <value>[!!!!! Magick.NET available !!!!!]</value>
+  </data>
+  <data name="DiagnosticsMonitorIccActive" xml:space="preserve">
+    <value>[!!!!! Monitor ICC active !!!!!]</value>
+  </data>
+  <data name="DiagnosticsMonitorIccDetailFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Embedded profiles target {0} on {1}. {2}. Windows Advanced Color is off. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsNoBackgroundWork" xml:space="preserve">
+    <value>[!!!!!!!!!!!! No tracked background work has run in this session. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsNoEvictionSweep" xml:space="preserve">
+    <value>[!!!!!!!! No eviction sweep has run yet. !!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsNoSuccessfulUpdateCheck" xml:space="preserve">
+    <value>[!!!!!!!!!!! No successful check has been recorded yet. !!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsNoTempFiles" xml:space="preserve">
+    <value>[!!!! no temp files !!!!]</value>
+  </data>
+  <data name="DiagnosticsOcrDetailFormat" xml:space="preserve">
+    <value>[!! {0}. {1} !!]</value>
+  </data>
+  <data name="DiagnosticsSignalFormat" xml:space="preserve">
+    <value>[!!!!!!! {0}, {1} bits per channel !!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsSignalUnavailable" xml:space="preserve">
+    <value>[!!!!!!! signal format unavailable !!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsSrgbFallbackActive" xml:space="preserve">
+    <value>[!!!!! sRGB fallback active !!!!!]</value>
+  </data>
+  <data name="DiagnosticsSrgbFallbackDetailFormat" xml:space="preserve">
+    <value>[!!!!!!!!! Images outputs sRGB on {0}; {1}. {2} !!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsSrgbSafetyFallback" xml:space="preserve">
+    <value>[!!!!! sRGB safety fallback !!!!!]</value>
+  </data>
+  <data name="DiagnosticsStorage" xml:space="preserve">
+    <value>[!! Storage !!]</value>
+  </data>
+  <data name="DiagnosticsStorageFallbackNeeded" xml:space="preserve">
+    <value>[!!!!!! Storage fallback needed !!!!!!]</value>
+  </data>
+  <data name="DiagnosticsTempFilesFormat" xml:space="preserve">
+    <value>[!!!! {0} temp files !!!!]</value>
+  </data>
+  <data name="DiagnosticsTextExtraction" xml:space="preserve">
+    <value>[!!!! Text extraction !!!!]</value>
+  </data>
+  <data name="DiagnosticsThumbnailCache" xml:space="preserve">
+    <value>[!!!! Thumbnail cache !!!!]</value>
+  </data>
+  <data name="DiagnosticsThumbnailCacheAttention" xml:space="preserve">
+    <value>[!!!!!!!! Thumbnail cache needs attention !!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsThumbnailCacheNearLimit" xml:space="preserve">
+    <value>[!!!!!!! Thumbnail cache near limit !!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsThumbnailCacheObject" xml:space="preserve">
+    <value>[!!!! thumbnail cache !!!!]</value>
+  </data>
+  <data name="DiagnosticsThumbnailCacheReady" xml:space="preserve">
+    <value>[!!!!!! Thumbnail cache ready !!!!!!]</value>
+  </data>
+  <data name="DiagnosticsThumbnailCacheUnavailable" xml:space="preserve">
+    <value>[!!!!!!! Thumbnail cache unavailable !!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsThumbnailStorageUnavailable" xml:space="preserve">
+    <value>[!!!!!!!!!!! Thumbnail cache storage is not available. !!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsUncapped" xml:space="preserve">
+    <value>[!! uncapped !!]</value>
+  </data>
+  <data name="DiagnosticsUpdateChecks" xml:space="preserve">
+    <value>[!!!! Update checks !!!!]</value>
+  </data>
+  <data name="DiagnosticsUpdateChecksOffDetail" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Off by default. Manual checks are still available from About. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsUsingVersionFromFormat" xml:space="preserve">
+    <value>[!!!!! Using {0} from {1}. !!!!!]</value>
+  </data>
+  <data name="DiagnosticsVersionAtFormat" xml:space="preserve">
+    <value>[!!! {0} at {1} !!!]</value>
+  </data>
+  <data name="DiagnosticsVersionUnavailable" xml:space="preserve">
+    <value>[!!!!! version unavailable !!!!!]</value>
+  </data>
+  <data name="DiagnosticsWritableStorageReady" xml:space="preserve">
+    <value>[!!!!!! Writable storage ready !!!!!!]</value>
+  </data>
+  <data name="ModelCarveLicense" xml:space="preserve">
+    <value>[!!!!!!! Apache-2.0 per model card !!!!!!!]</value>
+  </data>
+  <data name="ModelCarveNotes" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Fallback validation candidate. The alternate Carve lama.onnx export is intentionally not approved because the model card marks it slower/not recommended. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelCarvePurpose" xml:space="preserve">
+    <value>[!!!!!!!! Content-aware repair fallback !!!!!!!!]</value>
+  </data>
+  <data name="ModelCarveRuntime" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Fixed 512x512 input, opset 17; ONNX Runtime DirectML first, CPU fallback. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelChooseExistingFile" xml:space="preserve">
+    <value>[!!!!!!!!!!! Choose an existing local ONNX model file. !!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelClipDefinitionsMissing" xml:space="preserve">
+    <value>[!!!!!!!!!!!! CLIP model definitions not found in approved registry. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelClipPreprocessorNotes" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Approved preprocessor candidate only. The V7-31 provider must still validate resize/crop, RGB normalization, tensor layout, and output parity before runtime use. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelClipPreprocessorPurpose" xml:space="preserve">
+    <value>[!!!!!!!!! Semantic search image preprocessing !!!!!!!!!]</value>
+  </data>
+  <data name="ModelClipPreprocessorRuntime" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Preprocessor metadata for the CLIP vision encoder; required before image embeddings can be generated from local files. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelClipTextNotes" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Approved file candidate only. The V7-31 provider must still validate tokenizer files, input names/shapes, normalization, and runtime output compatibility before enabling model-backed search. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelClipTextPurpose" xml:space="preserve">
+    <value>[!!!!!!!! Semantic search text embeddings !!!!!!!!]</value>
+  </data>
+  <data name="ModelClipTextRuntime" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Text encoder for CLIP-style semantic search; requires tokenizer validation before runtime use. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelClipTokenizerNotes" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Approved tokenizer candidate only. The V7-31 provider must still validate BPE behavior, context length, truncation, and special-token parity before runtime use. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelClipTokenizerPurpose" xml:space="preserve">
+    <value>[!!!!!!!!! Semantic search text tokenization !!!!!!!!!]</value>
+  </data>
+  <data name="ModelClipTokenizerRuntime" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Tokenizer metadata for the CLIP text encoder; required before model-backed text search can replace deterministic metadata embeddings. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelClipVisionNotes" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Approved file candidate only. The V7-31 provider must still validate preprocessing, model output shape, and similarity parity before replacing deterministic metadata embeddings. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelClipVisionPurpose" xml:space="preserve">
+    <value>[!!!!!!!! Semantic search image embeddings !!!!!!!!]</value>
+  </data>
+  <data name="ModelClipVisionRuntime" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Vision encoder for CLIP-style semantic search; requires 224px CLIP preprocessing and runtime validation before use. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelDefinitionNotApproved" xml:space="preserve">
+    <value>[!!!!!!!!!!!! The selected model definition is not approved by Images. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelDeleteFailedFormat" xml:space="preserve">
+    <value>[!!!!!! Model delete failed: {0} !!!!!!]</value>
+  </data>
+  <data name="ModelHashMismatchAction" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Delete this file and import the exact approved ONNX artifact. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelImportAction" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Download manually from the approved source, then import the local ONNX file. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelImportedHashMismatchFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! {0} was copied but its SHA-256 does not match the approved model. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelImportedHashMismatchStatus" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Imported file does not match the approved SHA-256. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelImportedVerifiedFormat" xml:space="preserve">
+    <value>[!!!!!!! {0} imported and verified. !!!!!!!]</value>
+  </data>
+  <data name="ModelImportedVerifiedStatus" xml:space="preserve">
+    <value>[!!!!!!!! Imported and SHA-256 verified. !!!!!!!!]</value>
+  </data>
+  <data name="ModelImportFailedFormat" xml:space="preserve">
+    <value>[!!!!!! Model import failed: {0} !!!!!!]</value>
+  </data>
+  <data name="ModelMetadataUnreadable" xml:space="preserve">
+    <value>[!!!!!!!!!! Local model metadata could not be read. !!!!!!!!!!]</value>
+  </data>
+  <data name="ModelMitLicense" xml:space="preserve">
+    <value>[!!!!! MIT per model card !!!!!]</value>
+  </data>
+  <data name="ModelNotImportedStatus" xml:space="preserve">
+    <value>[!!!! Not imported. !!!!]</value>
+  </data>
+  <data name="ModelOpenCvLicense" xml:space="preserve">
+    <value>[!!!!!!!!!!! Apache-2.0 / Apache License per model card !!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelOpenCvNotes" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Primary LaMa candidate from docs/inpaint-runtime-decision.md. No automatic download; import the exact ONNX file and verify SHA-256. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelOpenCvPurpose" xml:space="preserve">
+    <value>[!!!!! Content-aware repair !!!!!]</value>
+  </data>
+  <data name="ModelOpenCvRuntime" xml:space="preserve">
+    <value>[!!!!!!!!!!!! ONNX Runtime DirectML first; CPU fallback with visible slow-path status. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelReadyAction" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Ready for future model-backed tools once runtime code is enabled. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelRegistrySummaryFormat" xml:space="preserve">
+    <value>[!!!!!!!!! {0}/{1} approved model files ready !!!!!!!!!]</value>
+  </data>
+  <data name="ModelReimportAction" xml:space="preserve">
+    <value>[!!!!!!!!! Delete and re-import the model file. !!!!!!!!!]</value>
+  </data>
+  <data name="ModelRemovedFormat" xml:space="preserve">
+    <value>[!!!!!!!!!! {0} removed from local model storage. !!!!!!!!!!]</value>
+  </data>
+  <data name="ModelRuntimeActiveProvider" xml:space="preserve">
+    <value>[!!!! Active provider !!!!]</value>
+  </data>
+  <data name="ModelRuntimeActiveProviderOnnxFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Active provider: {0}. This OS uses the ONNX Runtime path for local model features. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelRuntimeActiveProviderWindowsMlFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Active provider: {0}. Windows 11 24H2+ detected; Windows ML is the preferred future runtime. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelRuntimeDirectMlFallback" xml:space="preserve">
+    <value>[!!!!!!!!!! ONNX Runtime DirectML fallback required !!!!!!!!!!]</value>
+  </data>
+  <data name="ModelRuntimeNotReferenced" xml:space="preserve">
+    <value>[!!!! Not referenced !!!!]</value>
+  </data>
+  <data name="ModelRuntimeOnnxCpu" xml:space="preserve">
+    <value>[!!!! ONNX Runtime CPU !!!!]</value>
+  </data>
+  <data name="ModelRuntimeOnnxDirectMl" xml:space="preserve">
+    <value>[!!!!!! ONNX Runtime DirectML !!!!!!]</value>
+  </data>
+  <data name="ModelRuntimeOnnxDirectMlReference" xml:space="preserve">
+    <value>[!!!!!! ONNX DirectML reference !!!!!!]</value>
+  </data>
+  <data name="ModelRuntimePreferred" xml:space="preserve">
+    <value>[!!! Preferred !!!]</value>
+  </data>
+  <data name="ModelRuntimeReferenced" xml:space="preserve">
+    <value>[!!! Referenced !!!]</value>
+  </data>
+  <data name="ModelRuntimeWindowsMlCandidate" xml:space="preserve">
+    <value>[!!!!! Windows ML candidate !!!!!]</value>
+  </data>
+  <data name="ModelRuntimeWindowsMlOs" xml:space="preserve">
+    <value>[!!!! Windows ML OS !!!!]</value>
+  </data>
+  <data name="ModelRuntimeWindowsMlOsCandidate" xml:space="preserve">
+    <value>[!!!!!!! Windows 11 24H2+ candidate !!!!!!!]</value>
+  </data>
+  <data name="ModelRuntimeWindowsMlOsNotCandidate" xml:space="preserve">
+    <value>[!!!!!!!! Not a Windows ML 24H2+ candidate !!!!!!!!]</value>
+  </data>
+  <data name="ModelRuntimeWindowsMlReference" xml:space="preserve">
+    <value>[!!!!! Windows ML reference !!!!!]</value>
+  </data>
+  <data name="ModelRuntimeWindowsMlReferenced" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Windows ML package/runtime is referenced by this build. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelStorageFixAction" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Fix app-local storage before importing models. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelStorageUnavailable" xml:space="preserve">
+    <value>[!!!!!!!! Model storage is unavailable. !!!!!!!!]</value>
+  </data>
+  <data name="ModelValidationConfigParsed" xml:space="preserve">
+    <value>[!!!! Config parsed !!!!]</value>
+  </data>
+  <data name="ModelValidationEmptyEmbedding" xml:space="preserve">
+    <value>[!!!!!! Zero or empty embedding !!!!!!]</value>
+  </data>
+  <data name="ModelValidationEncodedTokensFormat" xml:space="preserve">
+    <value>[!!!!!! Encoded to {0} tokens !!!!!!]</value>
+  </data>
+  <data name="ModelValidationFailedFormat" xml:space="preserve">
+    <value>[!!! Failed: {0} !!!]</value>
+  </data>
+  <data name="ModelValidationInferenceFailedFormat" xml:space="preserve">
+    <value>[!!!!!! Inference failed: {0} !!!!!!]</value>
+  </data>
+  <data name="ModelValidationMissingFilesFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!! Missing model files: {0} of {1} unavailable. !!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelValidationNotAvailableFormat" xml:space="preserve">
+    <value>[!!!!! Not available: {0} !!!!!]</value>
+  </data>
+  <data name="ModelValidationOnnxInference" xml:space="preserve">
+    <value>[!!!!! ONNX inference smoke !!!!!]</value>
+  </data>
+  <data name="ModelValidationOnnxSession" xml:space="preserve">
+    <value>[!!!!!! ONNX session creation !!!!!!]</value>
+  </data>
+  <data name="ModelValidationPreprocessor" xml:space="preserve">
+    <value>[!!!!! Preprocessor config !!!!!]</value>
+  </data>
+  <data name="ModelValidationPreprocessorFailedFormat" xml:space="preserve">
+    <value>[!!!!!!!! Preprocessor config failed: {0} !!!!!!!!]</value>
+  </data>
+  <data name="ModelValidationPreprocessorLoad" xml:space="preserve">
+    <value>[!!!!!! Preprocessor config load !!!!!!]</value>
+  </data>
+  <data name="ModelValidationProviderFailed" xml:space="preserve">
+    <value>[!!!!!!!! CLIP provider creation failed. !!!!!!!!]</value>
+  </data>
+  <data name="ModelValidationProviderNull" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Provider returned null — ONNX Runtime or model load failure !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelValidationReady" xml:space="preserve">
+    <value>[!! Ready !!]</value>
+  </data>
+  <data name="ModelValidationSessionsCreated" xml:space="preserve">
+    <value>[!!!! Sessions created !!!!]</value>
+  </data>
+  <data name="ModelValidationSuccessFormat" xml:space="preserve">
+    <value>[!!!!!!!!!!!! CLIP pipeline validated: all {0} checks passed. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelValidationTextEmbedding" xml:space="preserve">
+    <value>[!!!!! Text embedding smoke !!!!!]</value>
+  </data>
+  <data name="ModelValidationTextModel" xml:space="preserve">
+    <value>[!!!! Text model file !!!!]</value>
+  </data>
+  <data name="ModelValidationTokenizer" xml:space="preserve">
+    <value>[!!!! Tokenizer file !!!!]</value>
+  </data>
+  <data name="ModelValidationTokenizerEmpty" xml:space="preserve">
+    <value>[!!!!!! Tokenizer returned empty !!!!!!]</value>
+  </data>
+  <data name="ModelValidationTokenizerEncode" xml:space="preserve">
+    <value>[!!!!!! Tokenizer load + encode !!!!!!]</value>
+  </data>
+  <data name="ModelValidationTokenizerFailedFormat" xml:space="preserve">
+    <value>[!!!!!!!! Tokenizer validation failed: {0} !!!!!!!!]</value>
+  </data>
+  <data name="ModelValidationVectorFormat" xml:space="preserve">
+    <value>[!!!!!! {0}-dim non-zero vector !!!!!!]</value>
+  </data>
+  <data name="ModelValidationVisionModel" xml:space="preserve">
+    <value>[!!!!! Vision model file !!!!!]</value>
+  </data>
+  <data name="ModelRuntimeUnavailable" xml:space="preserve">
+    <value>[!!! Unavailable !!!]</value>
   </data>
 </root>

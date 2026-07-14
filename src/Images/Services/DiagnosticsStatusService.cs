@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.IO;
+using Images.Localization;
 
 namespace Images.Services;
 
@@ -52,56 +53,56 @@ public static class DiagnosticsStatusService
         return
         [
             new(
-                "Text extraction",
+                Strings.DiagnosticsTextExtraction,
                 ocrStatus.StatusTitle,
-                $"{ocrStatus.LanguageSummary}. {ocrStatus.StatusDetail}",
+                Strings.Format(nameof(Strings.DiagnosticsOcrDetailFormat), ocrStatus.LanguageSummary, ocrStatus.StatusDetail),
                 ocrStatus.IsAvailable ? ReadyTone : WarningTone,
                 "\uE8EA"),
             new(
-                "Document previews",
-                documentPreviewsReady ? "Ghostscript ready" : "Disabled by codec policy",
+                Strings.DiagnosticsDocumentPreviews,
+                documentPreviewsReady ? Strings.DiagnosticsGhostscriptReady : Strings.DiagnosticsDisabledByCodecPolicy,
                 BuildGhostscriptDetail(provenance),
                 documentPreviewsReady ? ReadyTone : WarningTone,
                 documentPreviewsReady ? "\uE73E" : "\uE783"),
             new(
-                "Image codecs",
-                "Magick.NET available",
+                Strings.DiagnosticsImageCodecs,
+                Strings.DiagnosticsMagickAvailable,
                 BuildMagickDetail(provenance),
                 ReadyTone,
                 "\uE8B9"),
             BuildDisplayColorStatus(displayColor ?? DisplayColorState.Unprobed, colorManagementEnabled),
             new(
-                "Content credentials",
-                provenance.C2paToolAvailable ? "c2patool ready" : "c2patool unavailable",
+                Strings.DiagnosticsContentCredentials,
+                provenance.C2paToolAvailable ? Strings.DiagnosticsC2paToolReady : Strings.DiagnosticsC2paToolUnavailable,
                 BuildC2paToolDetail(provenance),
                 provenance.C2paToolAvailable ? ReadyTone : WarningTone,
                 provenance.C2paToolAvailable ? "\uE8D7" : "\uE783"),
             new(
-                "Logs",
-                Directory.Exists(logsPath) ? "Log folder ready" : "Log folder unavailable",
+                Strings.DiagnosticsLogs,
+                Directory.Exists(logsPath) ? Strings.DiagnosticsLogFolderReady : Strings.DiagnosticsLogFolderUnavailable,
                 BuildLogsDetail(logsPath, crashLogPath),
                 Directory.Exists(logsPath) ? ReadyTone : WarningTone,
                 "\uE838"),
             new(
-                "Storage",
-                appDataRoot is not null && thumbnailsPath is not null ? "Writable storage ready" : "Storage fallback needed",
+                Strings.DiagnosticsStorage,
+                appDataRoot is not null && thumbnailsPath is not null ? Strings.DiagnosticsWritableStorageReady : Strings.DiagnosticsStorageFallbackNeeded,
                 BuildStorageDetail(appDataRoot, thumbnailsPath),
                 appDataRoot is not null && thumbnailsPath is not null ? ReadyTone : WarningTone,
                 "\uE8DA"),
             new(
-                "Thumbnail cache",
+                Strings.DiagnosticsThumbnailCache,
                 BuildThumbnailCacheStatus(thumbnailCache),
                 BuildThumbnailCacheDetail(thumbnailCache, thumbnailsPath),
                 BuildThumbnailCacheTone(thumbnailCache),
                 "\uE81E"),
             new(
-                "Update checks",
-                updateChecksEnabled ? "Automatic checks enabled" : "Automatic checks off",
+                Strings.DiagnosticsUpdateChecks,
+                updateChecksEnabled ? Strings.DiagnosticsAutomaticChecksEnabled : Strings.DiagnosticsAutomaticChecksOff,
                 BuildUpdateCheckDetail(updateChecksEnabled, lastUpdateCheckUtc),
                 updateChecksEnabled ? ReadyTone : InfoTone,
                 "\uE72C"),
             new(
-                "Background work",
+                Strings.DiagnosticsBackgroundWork,
                 BuildBackgroundWorkStatus(backgroundTasks ?? default),
                 BuildBackgroundWorkDetail(backgroundTasks ?? default),
                 BuildBackgroundWorkTone(backgroundTasks ?? default),
@@ -115,26 +116,26 @@ public static class DiagnosticsStatusService
     {
         var device = display.DeviceName;
         var signal = display.AdvancedColorKnown
-            ? $"{display.ColorEncoding}, {display.BitsPerColorChannel} bits per channel"
-            : "signal format unavailable";
+            ? Strings.Format(nameof(Strings.DiagnosticsSignalFormat), display.ColorEncoding, display.BitsPerColorChannel)
+            : Strings.DiagnosticsSignalUnavailable;
 
         if (!colorManagementEnabled)
         {
             return new DiagnosticStatusItem(
-                "Display color",
-                "ICC output off",
-                $"Color-managed display is opt-in and currently off. {device}; {signal}. {display.ProbeDetail}",
+                Strings.DiagnosticsDisplayColor,
+                Strings.DiagnosticsIccOutputOff,
+                Strings.Format(nameof(Strings.DiagnosticsIccOutputOffDetailFormat), device, signal, display.ProbeDetail),
                 InfoTone,
                 "\uE790");
         }
 
         if (display.UseLegacyMonitorProfile)
         {
-            var profile = display.ProfileFileName ?? display.ProfileDescription ?? "custom monitor profile";
+            var profile = display.ProfileFileName ?? display.ProfileDescription ?? Strings.DiagnosticsCustomMonitorProfile;
             return new DiagnosticStatusItem(
-                "Display color",
-                "Monitor ICC active",
-                $"Embedded profiles target {profile} on {device}. {signal}. Windows Advanced Color is off.",
+                Strings.DiagnosticsDisplayColor,
+                Strings.DiagnosticsMonitorIccActive,
+                Strings.Format(nameof(Strings.DiagnosticsMonitorIccDetailFormat), profile, device, signal),
                 ReadyTone,
                 "\uE790");
         }
@@ -142,19 +143,19 @@ public static class DiagnosticsStatusService
         if (display.AdvancedColorKnown && display.AdvancedColorEnabled)
         {
             return new DiagnosticStatusItem(
-                "Display color",
-                "Windows Advanced Color active",
-                $"Images outputs sRGB and leaves display conversion to Windows on {device}. {signal}.",
+                Strings.DiagnosticsDisplayColor,
+                Strings.DiagnosticsAdvancedColorActive,
+                Strings.Format(nameof(Strings.DiagnosticsAdvancedColorDetailFormat), device, signal),
                 ReadyTone,
                 "\uE790");
         }
 
-        var status = display.AdvancedColorKnown ? "sRGB fallback active" : "sRGB safety fallback";
+        var status = display.AdvancedColorKnown ? Strings.DiagnosticsSrgbFallbackActive : Strings.DiagnosticsSrgbSafetyFallback;
         var tone = display.AdvancedColorKnown ? ReadyTone : WarningTone;
         return new DiagnosticStatusItem(
-            "Display color",
+            Strings.DiagnosticsDisplayColor,
             status,
-            $"Images outputs sRGB on {device}; {signal}. {display.ProbeDetail}",
+            Strings.Format(nameof(Strings.DiagnosticsSrgbFallbackDetailFormat), device, signal, display.ProbeDetail),
             tone,
             "\uE790");
     }
@@ -163,89 +164,103 @@ public static class DiagnosticsStatusService
     {
         if (!provenance.MagickPolicy.DocumentDelegatesEnabled)
             return provenance.GhostscriptAvailable
-                ? "Ghostscript is installed, but PDF, EPS, PS, and AI previews stay off because Images disables external ImageMagick delegates."
-                : "PDF, EPS, PS, and AI previews stay off because Images disables external ImageMagick delegates.";
+                ? Strings.DiagnosticsGhostscriptPolicyInstalled
+                : Strings.DiagnosticsGhostscriptPolicyDisabled;
 
         if (!provenance.GhostscriptAvailable)
-            return "PDF, EPS, PS, and AI previews need bundled Ghostscript, IMAGES_GHOSTSCRIPT_DIR, or an installed runtime.";
+            return Strings.DiagnosticsGhostscriptRequired;
 
         var version = string.IsNullOrWhiteSpace(provenance.GhostscriptVersion)
             ? provenance.GhostscriptSource
             : provenance.GhostscriptVersion;
         var location = provenance.GhostscriptDirectory ?? provenance.GhostscriptDllPath ?? provenance.GhostscriptSource;
-        return $"Using {version} from {location}.";
+        return Strings.Format(nameof(Strings.DiagnosticsUsingVersionFromFormat), version, location);
     }
 
     private static string BuildMagickDetail(CodecCapabilityService.RuntimeProvenance provenance)
         => string.IsNullOrWhiteSpace(provenance.MagickAssemblyPath)
             ? provenance.MagickVersion
-            : $"{provenance.MagickVersion} at {provenance.MagickAssemblyPath}";
+            : Strings.Format(nameof(Strings.DiagnosticsVersionAtFormat), provenance.MagickVersion, provenance.MagickAssemblyPath);
 
     private static string BuildC2paToolDetail(CodecCapabilityService.RuntimeProvenance provenance)
     {
         if (!provenance.C2paToolAvailable)
-            return $"{provenance.C2paToolStatus} C2PA inspection is degraded until c2patool is installed app-local or configured with IMAGES_C2PATOOL_EXE.";
+            return Strings.Format(nameof(Strings.DiagnosticsC2paDegradedFormat), provenance.C2paToolStatus);
 
         var version = string.IsNullOrWhiteSpace(provenance.C2paToolVersion)
-            ? "version unavailable"
+            ? Strings.DiagnosticsVersionUnavailable
             : provenance.C2paToolVersion;
         var location = provenance.C2paToolExecutablePath ?? provenance.C2paToolSource;
-        return $"Using {version} from {location}. C2PA shows provenance, not truthfulness.";
+        return Strings.Format(nameof(Strings.DiagnosticsC2paReadyDetailFormat), version, location);
     }
 
     private static string BuildLogsDetail(string? logsPath, string crashLogPath)
     {
         if (string.IsNullOrWhiteSpace(logsPath))
-            return $"Crash log path: {crashLogPath}";
+            return Strings.Format(nameof(Strings.DiagnosticsCrashLogPathFormat), crashLogPath);
 
-        return $"Daily logs and crash dumps are stored in {logsPath}. Crash log: {crashLogPath}";
+        return Strings.Format(nameof(Strings.DiagnosticsLogsDetailFormat), logsPath, crashLogPath);
     }
 
     private static string BuildStorageDetail(string? appDataRoot, string? thumbnailsPath)
     {
         if (appDataRoot is null)
-            return "Images could not create its app data root. It may fall back to temporary storage.";
+            return Strings.DiagnosticsAppDataUnavailable;
 
         return thumbnailsPath is null
-            ? $"App data root: {appDataRoot}. Thumbnail cache is unavailable."
-            : $"App data root: {appDataRoot}. Thumbnails: {thumbnailsPath}";
+            ? Strings.Format(nameof(Strings.DiagnosticsAppDataNoThumbnailsFormat), appDataRoot)
+            : Strings.Format(nameof(Strings.DiagnosticsAppDataThumbnailsFormat), appDataRoot, thumbnailsPath);
     }
 
     private static string BuildThumbnailCacheStatus(ThumbnailCacheHealth? health)
     {
         if (health is null || !health.IsAvailable)
-            return "Thumbnail cache unavailable";
+            return Strings.DiagnosticsThumbnailCacheUnavailable;
 
         if (!string.IsNullOrWhiteSpace(health.Error))
-            return "Thumbnail cache needs attention";
+            return Strings.DiagnosticsThumbnailCacheAttention;
 
         if (health.CapBytes > 0 && health.Bytes >= health.CapBytes * 0.9)
-            return "Thumbnail cache near limit";
+            return Strings.DiagnosticsThumbnailCacheNearLimit;
 
-        return "Thumbnail cache ready";
+        return Strings.DiagnosticsThumbnailCacheReady;
     }
 
     private static string BuildThumbnailCacheDetail(ThumbnailCacheHealth? health, string? thumbnailsPath)
     {
         if (health is null)
             return string.IsNullOrWhiteSpace(thumbnailsPath)
-                ? "Thumbnail cache storage is not available."
-                : $"Cache path: {thumbnailsPath}. Size could not be measured.";
+                ? Strings.DiagnosticsThumbnailStorageUnavailable
+                : Strings.Format(nameof(Strings.DiagnosticsCacheSizeUnavailableFormat), thumbnailsPath);
 
         if (!string.IsNullOrWhiteSpace(health.Error))
-            return $"Could not scan {health.Root ?? thumbnailsPath ?? "the thumbnail cache"}: {health.Error}";
+            return Strings.Format(
+                nameof(Strings.DiagnosticsCacheScanFailedFormat),
+                health.Root ?? thumbnailsPath ?? Strings.DiagnosticsThumbnailCacheObject,
+                health.Error);
 
         if (!health.IsAvailable)
-            return "Thumbnail cache storage is not available.";
+            return Strings.DiagnosticsThumbnailStorageUnavailable;
 
-        var root = health.Root ?? thumbnailsPath ?? "thumbnail cache";
-        var cap = health.CapBytes > 0 ? FormatBytes(health.CapBytes) : "uncapped";
-        var temp = health.TempFileCount == 0 ? "no temp files" : $"{health.TempFileCount} temp files";
+        var root = health.Root ?? thumbnailsPath ?? Strings.DiagnosticsThumbnailCacheObject;
+        var cap = health.CapBytes > 0 ? FormatBytes(health.CapBytes) : Strings.DiagnosticsUncapped;
+        var temp = health.TempFileCount == 0
+            ? Strings.DiagnosticsNoTempFiles
+            : Strings.Format(nameof(Strings.DiagnosticsTempFilesFormat), health.TempFileCount);
         var lastSweep = health.LastEvictionSweepUtc is null
-            ? "No eviction sweep has run yet."
-            : $"Last eviction sweep: {health.LastEvictionSweepUtc.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture)}.";
+            ? Strings.DiagnosticsNoEvictionSweep
+            : Strings.Format(
+                nameof(Strings.DiagnosticsLastEvictionSweepFormat),
+                health.LastEvictionSweepUtc.Value.ToLocalTime());
 
-        return $"{health.FileCount} files, {FormatBytes(health.Bytes)} of {cap}, {temp}. {lastSweep} Path: {root}";
+        return Strings.Format(
+            nameof(Strings.DiagnosticsCacheDetailFormat),
+            health.FileCount,
+            FormatBytes(health.Bytes),
+            cap,
+            temp,
+            lastSweep,
+            root);
     }
 
     private static string BuildThumbnailCacheTone(ThumbnailCacheHealth? health)
@@ -259,34 +274,39 @@ public static class DiagnosticsStatusService
     private static string BuildUpdateCheckDetail(bool updateChecksEnabled, DateTime? lastUpdateCheckUtc)
     {
         if (!updateChecksEnabled)
-            return "Off by default. Manual checks are still available from About.";
+            return Strings.DiagnosticsUpdateChecksOffDetail;
 
         if (lastUpdateCheckUtc is null)
-            return "No successful check has been recorded yet.";
+            return Strings.DiagnosticsNoSuccessfulUpdateCheck;
 
         var local = lastUpdateCheckUtc.Value.Kind == DateTimeKind.Local
             ? lastUpdateCheckUtc.Value
             : lastUpdateCheckUtc.Value.ToLocalTime();
-        return $"Last successful check: {local.ToString("g", CultureInfo.CurrentCulture)}";
+        return Strings.Format(nameof(Strings.DiagnosticsLastSuccessfulCheckFormat), local);
     }
 
     private static string BuildBackgroundWorkStatus(BackgroundTaskSnapshot snapshot)
     {
         if (snapshot.Running > 0)
-            return "Background work active";
+            return Strings.DiagnosticsBackgroundActive;
 
         if (snapshot.Faulted > 0)
-            return "Background work needs attention";
+            return Strings.DiagnosticsBackgroundAttention;
 
-        return "Background work idle";
+        return Strings.DiagnosticsBackgroundIdle;
     }
 
     private static string BuildBackgroundWorkDetail(BackgroundTaskSnapshot snapshot)
     {
         if (snapshot.Started == 0)
-            return "No tracked background work has run in this session.";
+            return Strings.DiagnosticsNoBackgroundWork;
 
-        return $"{snapshot.Running} running, {snapshot.Completed} completed, {snapshot.Faulted} failed, {snapshot.Canceled} canceled this session.";
+        return Strings.Format(
+            nameof(Strings.DiagnosticsBackgroundDetailFormat),
+            snapshot.Running,
+            snapshot.Completed,
+            snapshot.Faulted,
+            snapshot.Canceled);
     }
 
     private static string BuildBackgroundWorkTone(BackgroundTaskSnapshot snapshot)

@@ -1,5 +1,6 @@
 using System.IO;
 using System.Windows.Threading;
+using Images.Localization;
 using Images.Services;
 using Microsoft.Extensions.Logging;
 
@@ -7,7 +8,7 @@ namespace Images.ViewModels;
 
 public sealed class C2paInspectionController : IDisposable
 {
-    public const string LoadingStatusText = "Checking content credentials...";
+    public static string LoadingStatusText => Strings.C2paCheckingCredentials;
 
     private static readonly ILogger _log = Log.Get(nameof(C2paInspectionController));
     private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(15);
@@ -47,21 +48,17 @@ public sealed class C2paInspectionController : IDisposable
 
     public string TrustBadgeText => Result?.TrustLevel switch
     {
-        C2paTrustLevel.Signed => "Signed",
-        C2paTrustLevel.Invalid => "Invalid",
-        C2paTrustLevel.Present => Result.HasCredentials ? "Present" : "",
+        C2paTrustLevel.Signed => Strings.C2paTrustSigned,
+        C2paTrustLevel.Invalid => Strings.C2paTrustInvalid,
+        C2paTrustLevel.Present => Result.HasCredentials ? Strings.C2paTrustPresent : "",
         _ => "",
     };
 
     public string TrustBadgeTooltip => Result?.TrustLevel switch
     {
-        C2paTrustLevel.Signed =>
-            "This file has C2PA content credentials with a digital signature. " +
-            "Provenance shows who created or edited the file — it does not verify whether the content is truthful.",
-        C2paTrustLevel.Invalid =>
-            "This file has C2PA content credentials but the signature could not be validated. " +
-            "The manifest may have been tampered with or the signing certificate may be revoked.",
-        _ => "C2PA content credentials indicate provenance, not authenticity.",
+        C2paTrustLevel.Signed => Strings.C2paTrustSignedTooltip,
+        C2paTrustLevel.Invalid => Strings.C2paTrustInvalidTooltip,
+        _ => Strings.C2paTrustDefaultTooltip,
     };
 
     public event EventHandler? StateChanged;
@@ -132,12 +129,12 @@ public sealed class C2paInspectionController : IDisposable
         {
             _log.LogWarning("C2PA inspection timed out for {File}", Path.GetFileName(path));
             _ = ObserveCompletionAsync(readTask);
-            result = C2paInspectionResult.Error("C2PA inspection timed out.");
+            result = C2paInspectionResult.Error(Strings.C2paInspectionTimeout);
         }
         catch (Exception ex)
         {
             _log.LogWarning(ex, "C2PA inspection failed for {File}", Path.GetFileName(path));
-            result = C2paInspectionResult.Error("C2PA inspection failed.");
+            result = C2paInspectionResult.Error(Strings.C2paInspectionFailed);
         }
 
         try

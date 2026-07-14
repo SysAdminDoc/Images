@@ -1,10 +1,18 @@
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Resources;
+using ImageMagick;
 using Images.Localization;
+using Images.Services;
+using Images.ViewModels;
 
 namespace Images.Tests;
 
+[CollectionDefinition("LocalizationCulture", DisableParallelization = true)]
+public sealed class LocalizationCultureCollection;
+
+[Collection("LocalizationCulture")]
 public sealed class LocalizationTests
 {
     [Fact]
@@ -48,6 +56,84 @@ public sealed class LocalizationTests
         Assert.Equal(FormatPlaceholders(baseFormat!), FormatPlaceholders(pseudoFormat!));
     }
 
+    [Fact]
+    public void PseudoLocale_LocalizesServiceGeneratedStatesAndMetadata()
+    {
+        var previousCulture = Strings.Culture;
+        try
+        {
+            Strings.Culture = CultureInfo.GetCultureInfo("qps-ploc");
+
+            AssertPseudo(PhotoMetadataController.LoadingStatusText);
+            AssertPseudo(PhotoMetadataController.EmptyStatusText);
+            AssertPseudo(PhotoMetadataController.TimeoutStatusText);
+            AssertPseudo(ColorAnalysisController.LoadingStatusText);
+            AssertPseudo(Strings.ColorAnalysisUnavailable);
+            AssertPseudo(C2paInspectionController.LoadingStatusText);
+            AssertPseudo(Strings.C2paTrustSigned);
+            AssertPseudo(Strings.C2paInspectionFailed);
+            AssertPseudo(OcrCapabilityService.BuildOverviewText(new OcrCapabilityService.OcrCapabilityStatus(
+                IsAvailable: true,
+                LanguageCount: 1,
+                LanguageSummary: "English (en-US)",
+                StatusTitle: Strings.OcrCapabilityReadyTitle,
+                StatusDetail: Strings.OcrCapabilityReadyDetail,
+                BadgeText: Strings.OcrCapabilityReadyBadge)));
+
+            using var temp = TestDirectory.Create();
+            var metadataPath = Path.Combine(temp.Path, "localized-metadata.jpg");
+            using (var image = new MagickImage(MagickColors.Blue, 8, 8) { Format = MagickFormat.Jpeg })
+            {
+                var exif = new ExifProfile();
+                exif.SetValue(ExifTag.Make, "Test Camera");
+                image.SetProfile(exif);
+                image.Write(metadataPath);
+            }
+
+            var metadata = ImageMetadataService.Read(metadataPath);
+            Assert.NotEmpty(metadata.Rows);
+            Assert.All(metadata.Rows, row => AssertPseudo(row.Label));
+
+            var archivePath = Path.Combine(temp.Path, "localized.cbz");
+            File.WriteAllBytes(archivePath, []);
+            AssertPseudo(ImageColorAnalysisService.Read(archivePath).StatusText);
+
+            var diagnostics = DiagnosticsStatusService.BuildStatusItems(
+                ReadyProvenance(),
+                new OcrCapabilityService.OcrCapabilityStatus(
+                    IsAvailable: true,
+                    LanguageCount: 1,
+                    LanguageSummary: "English (en-US)",
+                    StatusTitle: Strings.OcrCapabilityReadyTitle,
+                    StatusDetail: Strings.OcrCapabilityReadyDetail,
+                    BadgeText: Strings.OcrCapabilityReadyBadge),
+                updateChecksEnabled: false,
+                lastUpdateCheckUtc: null,
+                appDataRoot: null,
+                logsPath: null,
+                thumbnailsPath: null,
+                crashLogPath: "crash.log");
+            Assert.NotEmpty(diagnostics);
+            Assert.All(diagnostics, item => AssertPseudo(item.Title));
+
+            var models = new ModelManagerService(getModelRoot: () => null).GetSnapshot();
+            AssertPseudo(models.RegistrySummary);
+            Assert.All(models.Models, model =>
+            {
+                AssertPseudo(model.Purpose);
+                AssertPseudo(model.StatusText);
+                AssertPseudo(model.ActionText);
+            });
+
+            NetworkEgressService.Clear();
+            AssertPseudo(NetworkEgressService.BuildClipboardText());
+        }
+        finally
+        {
+            Strings.Culture = previousCulture;
+        }
+    }
+
     private static ResourceManager GetResourceManager()
     {
         var field = typeof(Strings).GetField("ResourceManager", BindingFlags.NonPublic | BindingFlags.Static);
@@ -55,9 +141,43 @@ public sealed class LocalizationTests
         return Assert.IsType<ResourceManager>(field.GetValue(null));
     }
 
+    private static CodecCapabilityService.RuntimeProvenance ReadyProvenance()
+        => new(
+            AppVersion: "Images test",
+            Runtime: ".NET test",
+            OperatingSystem: "Windows",
+            ProcessArchitecture: "X64",
+            AppDirectory: @"C:\Images",
+            MagickVersion: "14.15.0",
+            MagickAssemblyPath: @"C:\Images\Magick.NET.dll",
+            MagickPolicy: MagickSecurityPolicy.Configure(true, "test"),
+            SharpCompressVersion: "0.49.1",
+            SharpCompressAssemblyPath: @"C:\Images\SharpCompress.dll",
+            GhostscriptAvailable: true,
+            GhostscriptDirectory: @"C:\Ghostscript",
+            GhostscriptSource: "test",
+            GhostscriptVersion: "10.06.0",
+            GhostscriptDllPath: @"C:\Ghostscript\gsdll64.dll",
+            GhostscriptDllSha256: "sha256:test",
+            JpegTranAvailable: true,
+            JpegTranExecutablePath: @"C:\Images\jpegtran.exe",
+            JpegTranSource: "test",
+            JpegTranVersion: "test",
+            JpegTranSha256: "sha256:test",
+            JpegTranStatus: "ready",
+            C2paToolAvailable: true,
+            C2paToolExecutablePath: @"C:\Images\c2patool.exe",
+            C2paToolSource: "test",
+            C2paToolVersion: "test",
+            C2paToolSha256: "sha256:test",
+            C2paToolStatus: "ready");
+
     private static IReadOnlyList<string> FormatPlaceholders(string value) =>
         System.Text.RegularExpressions.Regex
             .Matches(value, @"\{[0-9]+(?:[^{}]*)\}")
             .Select(match => match.Value)
             .ToArray();
+
+    private static void AssertPseudo(string value)
+        => Assert.StartsWith("[!!", value, StringComparison.Ordinal);
 }

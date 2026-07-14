@@ -11,6 +11,7 @@ using Images.Services;
 
 namespace Images.Tests;
 
+[Collection("LocalizationCulture")]
 public sealed class MainWindowInputTests
 {
     [Fact]

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows.Threading;
+using Images.Localization;
 using Images.Services;
 using Microsoft.Extensions.Logging;
 
@@ -10,7 +11,7 @@ public sealed class ColorAnalysisController : IDisposable
 {
     private static readonly ILogger _log = Log.Get(nameof(ColorAnalysisController));
 
-    public const string LoadingStatusText = "Reading color profile and histogram...";
+    public static string LoadingStatusText => Strings.ColorAnalysisLoading;
 
     private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(5);
 
@@ -106,12 +107,12 @@ public sealed class ColorAnalysisController : IDisposable
         {
             _ = ObserveCompletionAsync(readTask);
             analysis = ImageColorAnalysis.Empty;
-            statusOverride = "Color analysis timed out.";
+            statusOverride = Strings.ColorAnalysisTimeout;
         }
         catch (Exception ex)
         {
             _log.LogWarning(ex, "Color analysis failed for {File}", Path.GetFileName(path));
-            analysis = new ImageColorAnalysis([], "Color analysis is unavailable for this image.", "");
+            analysis = new ImageColorAnalysis([], Strings.ColorAnalysisUnavailable, "");
         }
 
         try

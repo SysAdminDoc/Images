@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Images.Localization;
 using Microsoft.Extensions.Logging;
 
 namespace Images.Services;
@@ -138,18 +139,18 @@ public static class NetworkEgressService
     {
         NetworkEgressEntry[] snapshot;
         lock (_lock) snapshot = _entries.ToArray();
-        if (snapshot.Length == 0) return "No network activity recorded.";
+        if (snapshot.Length == 0) return Strings.NetworkNoActivity;
 
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine($"Images — Network activity log ({snapshot.Length} entries)");
+        sb.AppendLine(Strings.Format(nameof(Strings.NetworkClipboardTitleFormat), snapshot.Length));
         sb.AppendLine(new string('-', 60));
         foreach (var e in snapshot)
         {
-            sb.AppendLine($"[{e.Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}]");
-            sb.AppendLine($"  URL:      {e.Url}");
-            sb.AppendLine($"  Purpose:  {e.Purpose}");
-            sb.AppendLine($"  Bytes:    {e.Bytes}");
-            sb.AppendLine($"  Duration: {e.DurationMs} ms");
+            sb.AppendLine(Strings.Format(nameof(Strings.NetworkClipboardTimestampFormat), e.Timestamp));
+            sb.AppendLine(Strings.Format(nameof(Strings.NetworkClipboardUrlFormat), e.Url));
+            sb.AppendLine(Strings.Format(nameof(Strings.NetworkClipboardPurposeFormat), e.Purpose));
+            sb.AppendLine(Strings.Format(nameof(Strings.NetworkClipboardBytesFormat), e.Bytes));
+            sb.AppendLine(Strings.Format(nameof(Strings.NetworkClipboardDurationFormat), e.DurationMs));
             sb.AppendLine();
         }
         return sb.ToString();
@@ -348,7 +349,7 @@ public sealed record NetworkEgressEntry(
 
     /// <summary>Duration with unit for display.</summary>
     [JsonIgnore]
-    public string DurationDisplay => $"{DurationMs} ms";
+    public string DurationDisplay => Strings.Format(nameof(Strings.NetworkDurationFormat), DurationMs);
 
     /// <summary>Short timestamp for display.</summary>
     [JsonIgnore]
