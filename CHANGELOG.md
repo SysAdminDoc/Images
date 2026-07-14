@@ -22,6 +22,10 @@ All notable changes to **Images** are documented here.
 
 - **Consistent microcopy** - "Auto enhance" menu casing, and the duplicate-cleanup buttons read "Quarantine extras"/"Recycle extras" instead of the awkward "extra(s)".
 
+### Performance
+
+- **Faster folder sort by date/size** - Sorting a large folder by modified/created/size now stats each file once instead of repeatedly inside the comparator, removing multi-second stalls on big or network folders.
+
 ## v0.2.26 - 2026-07-12
 
 ### Changed

@@ -82,6 +82,27 @@ public sealed class DirectoryNavigatorTests
     }
 
     [Fact]
+    public void SetSortMode_SizeLargest_OrdersByFileLengthDescending()
+    {
+        using var temp = TestDirectory.Create();
+        var small = temp.WriteFile("small.jpg");
+        var medium = temp.WriteFile("medium.jpg");
+        var large = temp.WriteFile("large.jpg");
+
+        File.WriteAllBytes(small, new byte[10]);
+        File.WriteAllBytes(medium, new byte[500]);
+        File.WriteAllBytes(large, new byte[5000]);
+
+        using var nav = new DirectoryNavigator();
+        Assert.True(nav.Open(medium));
+
+        Assert.True(nav.SetSortMode(DirectorySortMode.SizeLargest));
+
+        Assert.Equal([large, medium, small], nav.Files);
+        Assert.Equal(medium, nav.CurrentPath);
+    }
+
+    [Fact]
     public void SetSortMode_ExtensionThenName_GroupsByExtensionWithNaturalNames()
     {
         using var temp = TestDirectory.Create();

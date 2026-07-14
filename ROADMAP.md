@@ -29,10 +29,6 @@ Promote to `1.0.0` when those are unblocked.
   Why: ~92 `MenuItem Header=`, ~36 `ToolTip=`, the empty state, rail labels, cheatsheet, and load-error button labels are hardcoded English, plus AboutWindow labels. The localization gate only flags hardcoded `AutomationProperties.Name`, so `Text=`/`Header=`/`ToolTip=` drifted through — a non-English build shows a half-translated shell and screen readers read a localized name over an English label. Extend `Test-LocalizationResources.ps1` to flag these too, then route them through resx.
   Where: `src/Images/MainWindow.xaml`, `src/Images/AboutWindow.xaml`, `scripts/Test-LocalizationResources.ps1`
 
-- [ ] P3 — Directory sort re-stats each file O(n log n) times
-  Why: for date/size sort modes, `DirectoryNavigator.CompareByMode` calls `File.GetLastWriteTimeUtc`/`GetCreationTimeUtc`/`FileInfo.Length` inside the comparator, so each file is stat'd ~log n times instead of once. A 5000-file folder sorted by Size issues ~60k stats; on a network share the sort can stall for seconds. Pre-stat once into tuples, then sort.
-  Where: `src/Images/Services/DirectoryNavigator.cs` (CompareByMode ~474-525)
-
 - [ ] P3 — Raw exception text still injected into ~25 secondary toasts
   Why: many `MainViewModel` catch blocks build toasts as `"<action> failed: " + ex.Message`, surfacing decoder/HRESULT jargon. The main decode-error card was cleaned up; the secondary toasts (rotation, wallpaper, export, strip-metadata, etc.) should use `FirstLine(ex.Message)` or a calm localized message consistently.
   Where: `src/Images/ViewModels/MainViewModel.cs` (various catch blocks)

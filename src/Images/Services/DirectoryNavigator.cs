@@ -464,7 +464,60 @@ public sealed class DirectoryNavigator : IDisposable
         return null;
     }
 
-    private void SortFiles(List<string> files) => files.Sort(CompareByActiveMode);
+    private void SortFiles(List<string> files)
+    {
+        // Date/size modes read file metadata to compare. Doing that inside the comparator stats each
+        // file O(log n) times (~60k stats for a 5000-file folder, seconds of stall on a network
+        // share). Stat once up front (Schwartzian transform) and sort against the cached values.
+        if (IsMetadataSortMode(SortMode))
+        {
+            var stats = new Dictionary<string, FileStat>(files.Count, StringComparer.OrdinalIgnoreCase);
+            foreach (var file in files)
+                if (!stats.ContainsKey(file))
+                    stats[file] = ReadFileStat(file);
+            files.Sort((a, b) => CompareByMetadata(a, b, SortMode, stats));
+            return;
+        }
+
+        files.Sort(CompareByActiveMode);
+    }
+
+    private static bool IsMetadataSortMode(DirectorySortMode mode) => mode
+        is DirectorySortMode.ModifiedNewest or DirectorySortMode.ModifiedOldest
+        or DirectorySortMode.CreatedNewest or DirectorySortMode.CreatedOldest
+        or DirectorySortMode.SizeLargest or DirectorySortMode.SizeSmallest;
+
+    private readonly record struct FileStat(DateTime LastWriteUtc, DateTime CreationUtc, long Length);
+
+    private static FileStat ReadFileStat(string path)
+    {
+        try
+        {
+            var info = new FileInfo(path);
+            // FileInfo caches its fields after the first stat, so this touches disk once per file.
+            return new FileStat(info.LastWriteTimeUtc, info.CreationTimeUtc, info.Exists ? info.Length : -1);
+        }
+        catch
+        {
+            return new FileStat(DateTime.MinValue, DateTime.MinValue, -1);
+        }
+    }
+
+    private static int CompareByMetadata(string a, string b, DirectorySortMode mode, IReadOnlyDictionary<string, FileStat> stats)
+    {
+        var sa = stats[a];
+        var sb = stats[b];
+        return mode switch
+        {
+            DirectorySortMode.ModifiedNewest => ThenByName(CompareDescending(sa.LastWriteUtc, sb.LastWriteUtc), a, b),
+            DirectorySortMode.ModifiedOldest => ThenByName(CompareAscending(sa.LastWriteUtc, sb.LastWriteUtc), a, b),
+            DirectorySortMode.CreatedNewest => ThenByName(CompareDescending(sa.CreationUtc, sb.CreationUtc), a, b),
+            DirectorySortMode.CreatedOldest => ThenByName(CompareAscending(sa.CreationUtc, sb.CreationUtc), a, b),
+            DirectorySortMode.SizeLargest => ThenByName(CompareDescending(sa.Length, sb.Length), a, b),
+            DirectorySortMode.SizeSmallest => ThenByName(CompareAscending(sa.Length, sb.Length), a, b),
+            _ => CompareNaturalName(a, b)
+        };
+    }
 
     private static IEnumerable<string> DefaultEnumerateFiles(string folder)
         => Directory.EnumerateFiles(folder, "*.*", SearchOption.TopDirectoryOnly);
