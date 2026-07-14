@@ -1,7 +1,10 @@
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using Images.Controls;
 using Images.Services;
 
 namespace Images.Tests;
@@ -85,6 +88,52 @@ public sealed class MainWindowInputTests
         });
     }
 
+    [Fact]
+    public void Gallery_RealizesOnlyViewportRows()
+    {
+        RunOnSta(() =>
+        {
+            var window = new MainWindow();
+            try
+            {
+                var list = Assert.IsType<ListBox>(window.FindName("GalleryItems"));
+                list.ItemsSource = Enumerable.Range(0, 1000).ToArray();
+                list.Width = 650;
+                list.Height = 320;
+                list.ApplyTemplate();
+                list.Measure(new Size(650, 320));
+                list.Arrange(new Rect(0, 0, 650, 320));
+                list.UpdateLayout();
+
+                var panel = FindVisualDescendant<VirtualizingWrapPanel>(list);
+                Assert.NotNull(panel);
+                Assert.InRange(panel.RealizedItemCount, 1, 50);
+                Assert.True(panel.ExtentHeight > panel.ViewportHeight);
+
+                panel.SetVerticalOffset(panel.ExtentHeight / 2);
+                list.UpdateLayout();
+                Assert.True(panel.VerticalOffset > 0);
+                Assert.InRange(panel.RealizedItemCount, 1, 50);
+            }
+            finally
+            {
+                window.Close();
+            }
+        });
+    }
+
+    private static T? FindVisualDescendant<T>(DependencyObject root) where T : DependencyObject
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var child = VisualTreeHelper.GetChild(root, i);
+            if (child is T match) return match;
+            if (FindVisualDescendant<T>(child) is { } nested) return nested;
+        }
+
+        return null;
+    }
+
     private static void SetField(MainWindow window, string name, object? value)
         => GetFieldInfo(name).SetValue(window, value);
 
@@ -128,6 +177,6 @@ public sealed class MainWindowInputTests
         thread.Join();
 
         if (failure is not null)
-            throw failure;
+            ExceptionDispatchInfo.Capture(failure).Throw();
     }
 }

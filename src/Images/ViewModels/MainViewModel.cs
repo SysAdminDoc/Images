@@ -3092,11 +3092,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             if (Set(ref _galleryTileSize, Math.Clamp(value, 80, 320)))
             {
                 Raise(nameof(GalleryTileImageHeight));
+                Raise(nameof(GalleryTileStrideWidth));
+                Raise(nameof(GalleryTileStrideHeight));
                 _settings.SetString(Keys.GalleryTileSize, value.ToString("F0", System.Globalization.CultureInfo.InvariantCulture));
             }
         }
     }
     public double GalleryTileImageHeight => Math.Round(_galleryTileSize * 0.7);
+    public double GalleryTileStrideWidth => _galleryTileSize + 10;
+    public double GalleryTileStrideHeight => GalleryTileImageHeight + 62;
 
     private bool _isGalleryOpen;
     public bool IsGalleryOpen

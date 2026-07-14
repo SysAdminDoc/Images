@@ -30,6 +30,7 @@ All notable changes to **Images** are documented here.
 
 ### Performance
 
+- **Gallery workbench stays responsive on large folders** - Its wrapping tile grid now recycles only the visible rows plus a small scroll cache instead of constructing every thumbnail card and context menu at once.
 - **Faster folder sort by date/size** - Sorting a large folder by modified/created/size now stats each file once instead of repeatedly inside the comparator, removing multi-second stalls on big or network folders.
 
 ## v0.2.26 - 2026-07-12

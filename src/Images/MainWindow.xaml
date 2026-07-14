@@ -1419,8 +1419,11 @@
                                  Padding="0,0,0,10"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                 ScrollViewer.CanContentScroll="False"
-                                 VirtualizingPanel.IsVirtualizing="False"
+                                 ScrollViewer.CanContentScroll="True"
+                                 VirtualizingPanel.IsVirtualizing="True"
+                                 VirtualizingPanel.VirtualizationMode="Recycling"
+                                 VirtualizingPanel.CacheLength="1"
+                                 VirtualizingPanel.CacheLengthUnit="Page"
                                  KeyboardNavigation.DirectionalNavigation="Contained"
                                  MouseDoubleClick="GalleryItems_MouseDoubleClick"
                                  KeyboardNavigation.TabNavigation="Cycle"
@@ -1428,7 +1431,9 @@
                                  AutomationProperties.HelpText="{Binding GalleryStatusText}">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <WrapPanel />
+                                    <ctl:VirtualizingWrapPanel
+                                        ItemWidth="{Binding DataContext.GalleryTileStrideWidth, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        ItemHeight="{Binding DataContext.GalleryTileStrideHeight, RelativeSource={RelativeSource AncestorType=Window}}" />
                                 </ItemsPanelTemplate>
                             </ListBox.ItemsPanel>
                             <ListBox.ItemContainerStyle>
