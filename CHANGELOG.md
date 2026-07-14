@@ -16,6 +16,11 @@ All notable changes to **Images** are documented here.
 - **Animated WebP/APNG frame delays can't overflow** - Very large per-frame delay fields (32-bit for WebP/APNG) no longer overflow into a negative value and silently reset to 100 ms; delays are computed in 64-bit and capped at 60 s.
 - **Batch preview shows the real output names** - When several source files rename to the same stem, the batch preview now reports the distinct destinations the run will actually write instead of repeating one identical path.
 - **No crash if a command faults during shutdown** - An async command that faulted after its view model was disposed could rethrow on a background continuation and terminate the app; the fault is now logged instead.
+- **Calmer decode-failure message** - The "couldn't be displayed" card no longer appends raw decoder exception text; it shows a clear localized sentence and logs the technical detail for diagnostics.
+
+### Changed
+
+- **Consistent microcopy** - "Auto enhance" menu casing, and the duplicate-cleanup buttons read "Quarantine extras"/"Recycle extras" instead of the awkward "extra(s)".
 
 ## v0.2.26 - 2026-07-12
 

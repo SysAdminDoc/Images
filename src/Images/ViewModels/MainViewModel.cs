@@ -4767,10 +4767,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             : SupportedImageFormats.SuggestionForDecodeFailure(ext);
 
         LoadErrorTitle = Strings.MainLoadErrorDefault;
-        LoadErrorMessage = $"This file could not be decoded. {ex.Message}";
+        // Keep the card calm and localized; the raw decoder exception is developer jargon, so log it
+        // for diagnostics instead of showing it.
+        LoadErrorMessage = Strings.MainLoadErrorDecodeMessage;
         LoadErrorHelpText = decodeHint
             ?? Strings.MainLoadErrorDecodeHelp;
         LoadErrorShowsCodecDetails = false;
+        _log.LogWarning(ex, "Could not decode {Path}", path);
         Toast(Strings.MainToastCouldNotDecode);
     }
 
@@ -4785,7 +4788,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void ClearLoadError()
     {
-        LoadErrorTitle = "This image couldn't be displayed";
+        LoadErrorTitle = Strings.MainLoadErrorDefault;
         LoadErrorHelpText = "";
         LoadErrorShowsCodecDetails = false;
         _loadErrorStoreExtension = null;

@@ -165,7 +165,7 @@
                             <Separator />
                             <MenuItem Header="Adjustments…" Command="{Binding OpenAdjustmentsCommand}" InputGestureText="{Binding ShortcutTexts[adjustments]}" />
                             <MenuItem Header="Effects…" Command="{Binding OpenEffectsCommand}" InputGestureText="{Binding ShortcutTexts[effects]}" />
-                            <MenuItem Header="Auto Enhance" Command="{Binding AutoEnhanceCommand}" InputGestureText="{Binding ShortcutTexts[auto-enhance]}" />
+                            <MenuItem Header="Auto enhance" Command="{Binding AutoEnhanceCommand}" InputGestureText="{Binding ShortcutTexts[auto-enhance]}" />
                             <MenuItem Header="Annotations…" Command="{Binding OpenAnnotationsCommand}" />
                             <Separator />
                             <MenuItem Header="Local tools">

@@ -1470,13 +1470,13 @@ Details written to:
     <value>[!!!!!!!!! Mark selected finding not duplicate !!!!!!!!!]</value>
   </data>
   <data name="DuplicateCleanupQuarantineExtrasButton" xml:space="preserve">
-    <value>[!!!!! Quarantine extra(s) !!!!!]</value>
+    <value>[!!!!! Quarantine extras !!!!!]</value>
   </data>
   <data name="DuplicateCleanupQuarantineExtrasAutomationName" xml:space="preserve">
     <value>[!!!!!!!!!! Quarantine extra duplicate candidates !!!!!!!!!!]</value>
   </data>
   <data name="DuplicateCleanupRecycleExtrasButton" xml:space="preserve">
-    <value>[!!!! Recycle extra(s) !!!!]</value>
+    <value>[!!!! Recycle extras !!!!]</value>
   </data>
   <data name="DuplicateCleanupRecycleExtrasAutomationName" xml:space="preserve">
     <value>[!!!!!!!!!!!! Move extra duplicate candidates to Recycle Bin !!!!!!!!!!!!]</value>
@@ -3361,6 +3361,9 @@ Details written to:
   </data>
   <data name="MainLoadErrorDecodeHelp" xml:space="preserve">
     <value>[!!!!!!!!!!!! Try another file, reveal the file in Explorer, or reload after another app finishes writing it. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="MainLoadErrorDecodeMessage" xml:space="preserve">
+    <value>[!!!!!!!!!!!! This file could not be decoded. It may be corrupt or use a format feature Images doesn't support. !!!!!!!!!!!!]</value>
   </data>
   <data name="MainLoadErrorStoreExtensionTitle" xml:space="preserve">
     <value>[!!!!!! Codec extension needed !!!!!!]</value>

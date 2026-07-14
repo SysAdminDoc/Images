@@ -1058,6 +1058,7 @@ public static class Strings
     public static string MainLoadErrorOomMessage => Get(nameof(MainLoadErrorOomMessage));
     public static string MainLoadErrorOomHelp => Get(nameof(MainLoadErrorOomHelp));
     public static string MainLoadErrorDecodeHelp => Get(nameof(MainLoadErrorDecodeHelp));
+    public static string MainLoadErrorDecodeMessage => Get(nameof(MainLoadErrorDecodeMessage));
     public static string MainLoadErrorStoreExtensionTitle => Get(nameof(MainLoadErrorStoreExtensionTitle));
     public static string MainLoadErrorStoreExtensionMessage => Get(nameof(MainLoadErrorStoreExtensionMessage));
     public static string MainLoadErrorStoreExtensionHelp => Get(nameof(MainLoadErrorStoreExtensionHelp));
