@@ -34,6 +34,17 @@ public sealed class PreloadService : IDisposable
     private readonly object _ctsGate = new();
     private volatile bool _isDisposed;
     private readonly ILogger _log = Log.For<PreloadService>();
+    private readonly Func<string, PreloadProbeResult> _probeCandidate;
+
+    public PreloadService()
+        : this(ProbeCandidate)
+    {
+    }
+
+    internal PreloadService(Func<string, PreloadProbeResult> probeCandidate)
+    {
+        _probeCandidate = probeCandidate ?? throw new ArgumentNullException(nameof(probeCandidate));
+    }
 
     /// <summary>
     /// Queue a path for background decode. Returns immediately. No-op if the path is already in
@@ -58,33 +69,6 @@ public sealed class PreloadService : IDisposable
             _log.LogDebug("preload evicted faulted entry: {Path}", path);
         }
 
-        // Probe size first — if it's a monster RAW / panorama / layered production file, skip.
-        // The on-demand path will decode it only if the user actually navigates there.
-        // Skip paths must drop the _lastAccess entry set above: a phantom key with no
-        // matching _cache entry becomes the LRU victim on every eviction and lets the
-        // decoded-image cache grow past its slot cap.
-        try
-        {
-            var fi = new FileInfo(path);
-            if (!fi.Exists || fi.Length >= FileSizeSkipThreshold)
-            {
-                _log.LogDebug("preload skip: {Path} is {Bytes} bytes", path, fi.Exists ? fi.Length : 0);
-                _lastAccess.TryRemove(path, out _);
-                return;
-            }
-
-            var (w, h) = ImageLoader.QuickDimensions(path);
-            if ((long)w * h > MegapixelSkipThreshold)
-            {
-                _log.LogDebug("preload skip: {Path} is {W}x{H} (> 40 MP)", path, w, h);
-                _lastAccess.TryRemove(path, out _);
-                return;
-            }
-
-            _sourceStamp[path] = (fi.LastWriteTimeUtc, fi.Length);
-        }
-        catch { /* quick dims is best-effort */ }
-
         CancellationTokenSource entryCts;
         lock (_ctsGate)
         {
@@ -103,6 +87,26 @@ public sealed class PreloadService : IDisposable
         {
             try
             {
+                token.ThrowIfCancellationRequested();
+                try
+                {
+                    var probe = _probeCandidate(path);
+                    if (!probe.ShouldPreload)
+                    {
+                        _log.LogDebug("preload skip: {Path} ({Reason})", path, probe.SkipReason);
+                        return null;
+                    }
+
+                    if (probe.SourceStamp is { } stamp)
+                        _sourceStamp[path] = stamp;
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or NotSupportedException or ImageMagick.MagickException)
+                {
+                    // Candidate probes are advisory. Decode can still succeed when dimensions or
+                    // metadata are unavailable, and all probe I/O remains on this worker thread.
+                    _log.LogDebug(ex, "preload probe failed for {Path}; trying decode", path);
+                }
+
                 token.ThrowIfCancellationRequested();
                 var res = ImageLoader.Load(path);
                 token.ThrowIfCancellationRequested();
@@ -157,19 +161,53 @@ public sealed class PreloadService : IDisposable
     public Task<ImageLoader.LoadResult?>? TryGetInFlight(string path)
     {
         if (!_cache.TryGetValue(path, out var lazy)) return null;
-        if (IsStale(path))
+        _lastAccess[path] = DateTime.UtcNow;
+        return AwaitValidPreloadAsync(path, lazy);
+    }
+
+    private async Task<ImageLoader.LoadResult?> AwaitValidPreloadAsync(
+        string path,
+        Lazy<Task<ImageLoader.LoadResult?>> lazy)
+    {
+        var stale = await BackgroundTaskTracker.Run(
+            $"preload-stamp:{Path.GetFileName(path)}",
+            () => IsStale(path)).ConfigureAwait(false);
+        if (stale)
         {
             Evict(path);
             return null;
         }
-        _lastAccess[path] = DateTime.UtcNow;
+
         var task = lazy.Value;
         if (task.IsFaulted || task.IsCanceled)
         {
             Evict(path);
             return null;
         }
-        return task;
+
+        try
+        {
+            return await task.ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            return null;
+        }
+    }
+
+    private static PreloadProbeResult ProbeCandidate(string path)
+    {
+        var file = new FileInfo(path);
+        if (!file.Exists)
+            return PreloadProbeResult.Skip("file is missing");
+        if (file.Length >= FileSizeSkipThreshold)
+            return PreloadProbeResult.Skip($"{file.Length} bytes is at or above the preload limit");
+
+        var (width, height) = ImageLoader.QuickDimensions(path);
+        if ((long)width * height > MegapixelSkipThreshold)
+            return PreloadProbeResult.Skip($"{width}x{height} exceeds 40 MP");
+
+        return PreloadProbeResult.Allow((file.LastWriteTimeUtc, file.Length));
     }
 
     /// <summary>
@@ -276,4 +314,16 @@ public sealed class PreloadService : IDisposable
             source.Dispose();
         }
     }
+}
+
+internal readonly record struct PreloadProbeResult(
+    bool ShouldPreload,
+    (DateTime WriteTimeUtc, long Length)? SourceStamp,
+    string SkipReason)
+{
+    public static PreloadProbeResult Allow((DateTime WriteTimeUtc, long Length) sourceStamp)
+        => new(true, sourceStamp, "");
+
+    public static PreloadProbeResult Skip(string reason)
+        => new(false, null, reason);
 }

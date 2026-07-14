@@ -4368,6 +4368,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (!PrepareCurrentLoad(path))
             return false;
 
+        var diskStateTask = ReadCurrentLoadDiskStateAsync(path!);
+
         try
         {
             if (ImageLoader.IsRawExtension(path!))
@@ -4376,29 +4378,35 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 if (preview is not null &&
                     string.Equals(_nav.CurrentPath, path, StringComparison.OrdinalIgnoreCase))
                 {
-                    CompleteCurrentLoad(path!, preview, startCropMode: false);
-                    IsImageLoading = true;
+                    CompleteCurrentLoad(
+                        path!,
+                        preview,
+                        startCropMode: false,
+                        diskState: CurrentLoadDiskState.Empty,
+                        isIntermediatePreview: true);
                 }
             }
 
             var result = await DecodeCurrentPathAsync(path!);
+            var diskState = await diskStateTask;
             if (!string.Equals(_nav.CurrentPath, path, StringComparison.OrdinalIgnoreCase))
             {
                 IsImageLoading = false;
                 return false;
             }
 
-            return CompleteCurrentLoad(path!, result, startCropMode: startCropMode);
+            return CompleteCurrentLoad(path!, result, startCropMode: startCropMode, diskState: diskState);
         }
         catch (Exception ex)
         {
+            var diskState = await diskStateTask;
             if (!string.Equals(_nav.CurrentPath, path, StringComparison.OrdinalIgnoreCase))
             {
                 IsImageLoading = false;
                 return false;
             }
 
-            return CompleteCurrentLoad(path!, error: ex, startCropMode: startCropMode);
+            return CompleteCurrentLoad(path!, error: ex, startCropMode: startCropMode, diskState: diskState);
         }
     }
 
@@ -4455,9 +4463,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var usePreload = pageIndex == 0 && !(isArchiveBookPage && archiveSpreadMode);
         if (usePreload)
         {
-            if (_preload.TryGet(path) is { } finished)
-                return finished;
-
             if (_preload.TryGetInFlight(path) is { } inFlight)
             {
                 var preloaded = await inFlight;
@@ -4492,16 +4497,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         string path,
         ImageLoader.LoadResult? result = null,
         Exception? error = null,
-        bool startCropMode = true)
+        bool startCropMode = true,
+        CurrentLoadDiskState? diskState = null,
+        bool isIntermediatePreview = false)
     {
         _pendingAutoStartCropMode = false;
         var loaded = false;
+        var isArchiveBookPage = SupportedImageFormats.IsArchive(path);
+        diskState ??= ReadCurrentLoadDiskState(path, isArchiveBookPage);
 
         if (error is null && result is not null)
         {
             try
             {
-                var isArchiveBookPage = SupportedImageFormats.IsArchive(path);
                 var tilePyramid = result.TilePyramid;
                 ImageSource? image = tilePyramid is null
                     ? ApplyArchiveDisplayFilters(result.Image, isArchiveBookPage, ArchiveOldScanFilterEnabled)
@@ -4510,7 +4518,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 var decoderUsed = isArchiveBookPage && ArchiveOldScanFilterEnabled
                     ? $"{result.DecoderUsed} + clean scan filter"
                     : result.DecoderUsed;
-                var editOperations = GetEnabledDisplayEditOperations(path, isArchiveBookPage);
+                var editOperations = diskState.EditOperations;
                 if (tilePyramid is null && editOperations.Count > 0 && image is BitmapSource bitmap)
                 {
                     image = ImageExportService.RenderPreview(bitmap, editOperations);
@@ -4539,22 +4547,26 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 IsRetouchMode = false;
                 ClearRetouchState(showToast: false);
                 ResetInpaintState();
-                ApplyPageSequence(result.Pages);
-                ArchiveReadPositionService.SaveLastPageIndex(_settings, path, PageIndex, PageCount);
-                if (isArchiveBookPage)
-                    RefreshArchiveReadHistory();
                 Rotation = 0;
                 FlipHorizontal = false;
                 FlipVertical = false;
                 ClearLoadError();
-                _motionPhoto = result.MotionPhoto;
-                CompanionVideoPath = MotionPhotoService.FindCompanionVideo(path);
-                Raise(nameof(IsMotionPhoto));
-                Raise(nameof(CompanionVideoPath));
+
+                if (!isIntermediatePreview)
+                {
+                    ApplyPageSequence(result.Pages);
+                    ArchiveReadPositionService.SaveLastPageIndex(_settings, path, PageIndex, PageCount);
+                    if (isArchiveBookPage)
+                        RefreshArchiveReadHistory();
+                    _motionPhoto = result.MotionPhoto;
+                    CompanionVideoPath = MotionPhotoService.FindCompanionVideo(path);
+                    Raise(nameof(IsMotionPhoto));
+                    Raise(nameof(CompanionVideoPath));
+                }
 
                 loaded = true;
 
-                if (result.FormatMismatch is { } fm)
+                if (!isIntermediatePreview && result.FormatMismatch is { } fm)
                     Toast(string.Format(
                         System.Globalization.CultureInfo.InvariantCulture,
                         Strings.MainFormatMismatch,
@@ -4583,8 +4595,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             ApplyLoadFailure(error);
 
         CurrentPath = path;
+        if (isIntermediatePreview)
+            return loaded;
+
         _externalEditReload.Arm(path);
-        try { _fileSize = new FileInfo(path).Length; } catch { _fileSize = 0; }
+        _fileSize = diskState.FileSize;
         Raise(nameof(FileSizeText));
         RefreshFolderPreview();
         if (!HasDisplayImage)
@@ -4621,6 +4636,28 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         IsImageLoading = false;
         EnqueueNeighbours();
         return loaded;
+    }
+
+    private Task<CurrentLoadDiskState> ReadCurrentLoadDiskStateAsync(string path)
+    {
+        var isArchiveBookPage = SupportedImageFormats.IsArchive(path);
+        return BackgroundTaskTracker.Run(
+            $"navigation-file-probe:{Path.GetFileName(path)}",
+            () => ReadCurrentLoadDiskState(path, isArchiveBookPage));
+    }
+
+    private CurrentLoadDiskState ReadCurrentLoadDiskState(string path, bool isArchiveBookPage)
+    {
+        var editOperations = GetEnabledDisplayEditOperations(path, isArchiveBookPage);
+        long fileSize;
+        try { fileSize = new FileInfo(path).Length; }
+        catch { fileSize = 0; }
+        return new CurrentLoadDiskState(editOperations, fileSize);
+    }
+
+    private sealed record CurrentLoadDiskState(IReadOnlyList<EditOperation> EditOperations, long FileSize)
+    {
+        public static CurrentLoadDiskState Empty { get; } = new([], 0);
     }
 
     private IReadOnlyList<EditOperation> GetEnabledDisplayEditOperations(string path, bool isArchiveBookPage)
