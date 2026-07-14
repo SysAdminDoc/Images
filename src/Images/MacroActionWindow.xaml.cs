@@ -207,7 +207,10 @@ public partial class MacroActionWindow : Window
 
         try
         {
-            var json = File.ReadAllText(dialog.FileName);
+            var json = BoundedTextFileReader.ReadUtf8(
+                dialog.FileName,
+                BoundedTextFileReader.MaxWorkflowImportBytes,
+                "Macro file");
             if (!MacroActionService.TryParse(json, out var plan, out var error))
             {
                 SetStatus(error, MacroActionStatus.Error);

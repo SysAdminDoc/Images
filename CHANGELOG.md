@@ -4,6 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- User-selected macro and batch-preset JSON imports are now capped at 1 MiB and 128 operations, reject null action arrays cleanly, and read through replacement-friendly bounded streams, preventing malformed workflow files from causing unbounded memory or UI work.
 - Background thumbnail, metadata, catalog, and paged-image decoders now open source images with delete sharing, so navigation-time reads no longer intermittently block Recycle Bin deletes or atomic replacements.
 
 ### Added

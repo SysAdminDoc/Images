@@ -31,6 +31,37 @@ public sealed class MacroActionServiceTests
     }
 
     [Fact]
+    public void TryParse_WhenActionsAreNull_ReturnsActionableValidationError()
+    {
+        var parsed = MacroActionService.TryParse("{\"name\":\"Bad\",\"actions\":null}", out _, out var error);
+
+        Assert.False(parsed);
+        Assert.Contains("actions array", error, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Parse_WhenActionsContainNull_IgnoresMalformedEntry()
+    {
+        var plan = MacroActionService.Parse(
+            "{\"name\":\"Mixed\",\"actions\":[null,{\"kind\":\"strip-gps\",\"parameters\":null}]}");
+
+        var action = Assert.Single(plan.Actions);
+        Assert.Equal("strip-gps", action.Kind);
+        Assert.Empty(action.Parameters);
+    }
+
+    [Fact]
+    public void Parse_WhenActionCountExceedsLimit_RejectsPlan()
+    {
+        var actions = string.Join(',', Enumerable.Repeat("{\"kind\":\"strip-gps\",\"parameters\":{}}", MacroActionService.MaxImportedActions + 1));
+
+        var error = Assert.Throws<System.Text.Json.JsonException>(() =>
+            MacroActionService.Parse($"{{\"name\":\"Too many\",\"actions\":[{actions}]}}"));
+
+        Assert.Contains("action limit", error.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Run_ExportCopyResizeAndRenamePattern_ProducesCollisionSafeOutput()
     {
         using var temp = TestDirectory.Create();

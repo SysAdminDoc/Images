@@ -74,6 +74,7 @@ public sealed record BatchProgressUpdate(
 
 public sealed class BatchProcessorService
 {
+    public const int MaxImportedOperations = 128;
     private static readonly ILogger Log = Images.Services.Log.Get(nameof(BatchProcessorService));
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.General)
     {
@@ -86,9 +87,13 @@ public sealed class BatchProcessorService
         => JsonSerializer.Serialize(NormalizePreset(preset), JsonOptions);
 
     public static BatchProcessorPreset ParsePreset(string json)
-        => NormalizePreset(
-            JsonSerializer.Deserialize<BatchProcessorPreset>(json, JsonOptions)
-            ?? throw new JsonException("Preset JSON did not contain a batch preset."));
+    {
+        var preset = JsonSerializer.Deserialize<BatchProcessorPreset>(json, JsonOptions)
+            ?? throw new JsonException("Preset JSON did not contain a batch preset.");
+        if (preset.Operations?.Count > MaxImportedOperations)
+            throw new JsonException($"Batch preset exceeds the {MaxImportedOperations} operation limit.");
+        return NormalizePreset(preset);
+    }
 
     public static BatchProcessorPreset NormalizePreset(BatchProcessorPreset preset)
     {
@@ -418,6 +423,8 @@ public sealed class BatchProcessorService
         {
             foreach (var operation in operations)
             {
+                if (operation is null)
+                    continue;
                 var step = NormalizeOperation(operation);
                 if (step is not null)
                     normalized.Add(step);

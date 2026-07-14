@@ -269,7 +269,11 @@ public partial class BatchProcessorWindow : Window
 
         try
         {
-            ApplyPreset(BatchProcessorService.ParsePreset(File.ReadAllText(dialog.FileName)));
+            var json = BoundedTextFileReader.ReadUtf8(
+                dialog.FileName,
+                BoundedTextFileReader.MaxWorkflowImportBytes,
+                "Batch preset");
+            ApplyPreset(BatchProcessorService.ParsePreset(json));
             SetStatus(Strings.BatchPresetLoaded, BatchProcessorStatus.Ready);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException or System.Text.Json.JsonException)

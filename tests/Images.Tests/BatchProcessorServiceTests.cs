@@ -157,6 +157,17 @@ public sealed class BatchProcessorServiceTests
     }
 
     [Fact]
+    public void ParsePreset_WhenOperationCountExceedsLimit_RejectsPreset()
+    {
+        var operations = string.Join(',', Enumerable.Repeat("{\"kind\":\"rotate\",\"parameters\":{}}", BatchProcessorService.MaxImportedOperations + 1));
+        var json = $"{{\"name\":\"Too many\",\"extension\":\".png\",\"quality\":92,\"maxWidth\":0,\"maxHeight\":0,\"operations\":[{operations}]}}";
+
+        var error = Assert.Throws<System.Text.Json.JsonException>(() => BatchProcessorService.ParsePreset(json));
+
+        Assert.Contains("operation limit", error.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task RunAsync_ProcessesFilesInParallel()
     {
         using var temp = TestDirectory.Create();

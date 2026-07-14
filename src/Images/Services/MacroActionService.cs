@@ -51,6 +51,7 @@ public sealed record MacroRunResult(
 
 public sealed class MacroActionService
 {
+    public const int MaxImportedActions = 128;
     private static readonly ILogger Log = Images.Services.Log.Get(nameof(MacroActionService));
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.General)
     {
@@ -70,11 +71,17 @@ public sealed class MacroActionService
         var document = JsonSerializer.Deserialize<MacroActionDocument>(json, JsonOptions)
             ?? throw new JsonException("Macro JSON did not contain a plan.");
 
-        var actions = document.Actions
+        var actionDocuments = document.Actions
+            ?? throw new JsonException("Macro plan must contain an actions array.");
+        if (actionDocuments.Count > MaxImportedActions)
+            throw new JsonException($"Macro plan exceeds the {MaxImportedActions} action limit.");
+
+        var actions = actionDocuments
+            .OfType<MacroActionStepDocument>()
             .Where(action => !string.IsNullOrWhiteSpace(action.Kind))
             .Select(action => new MacroActionStep(
                 NormalizeKind(action.Kind),
-                new Dictionary<string, string>(action.Parameters, StringComparer.OrdinalIgnoreCase)))
+                new Dictionary<string, string>(action.Parameters ?? [], StringComparer.OrdinalIgnoreCase)))
             .ToList();
 
         if (actions.Count == 0)
@@ -473,12 +480,12 @@ public sealed class MacroActionService
     private sealed class MacroActionDocument
     {
         public string Name { get; set; } = "Images macro";
-        public List<MacroActionStepDocument> Actions { get; set; } = [];
+        public List<MacroActionStepDocument>? Actions { get; set; } = [];
     }
 
     private sealed class MacroActionStepDocument
     {
         public string Kind { get; set; } = "";
-        public Dictionary<string, string> Parameters { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, string>? Parameters { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     }
 }
