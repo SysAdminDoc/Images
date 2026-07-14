@@ -4,7 +4,7 @@
 
 # Images
 
-[![Version](https://img.shields.io/badge/version-0.2.26-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
+[![Version](https://img.shields.io/badge/version-0.2.27-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
 [![License](https://img.shields.io/badge/license-MIT-a6e3a1?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-cba6f7?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10.0-f38ba8?style=flat-square)](#)
@@ -118,7 +118,7 @@ Development builds can still detect `IMAGES_GHOSTSCRIPT_DIR` and normal system i
 
 Release builders can use `scripts/Prepare-GhostscriptBundle.ps1`; see `docs/codec-bundling.md`.
 
-To build the installer locally, install [Inno Setup 6](https://jrsoftware.org/isdl.php), stage Ghostscript with `scripts\Prepare-GhostscriptBundle.ps1`, run `dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish`, then `iscc /DMyAppVersion=0.2.26 installer\Images.iss`. Output lands at `installer\output\Images-vX.Y.Z-setup-win-x64.exe`.
+To build the installer locally, install [Inno Setup 6](https://jrsoftware.org/isdl.php), stage Ghostscript with `scripts\Prepare-GhostscriptBundle.ps1`, run `dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish`, then `iscc /DMyAppVersion=0.2.27 installer\Images.iss`. Output lands at `installer\output\Images-vX.Y.Z-setup-win-x64.exe`.
 
 OCR depends on Microsoft Windows OCR optional capabilities. The installer installs the current Windows UI language OCR capability plus `en-US` fallback when needed; Images cannot legally bundle those Microsoft language packs inside the app folder.
 

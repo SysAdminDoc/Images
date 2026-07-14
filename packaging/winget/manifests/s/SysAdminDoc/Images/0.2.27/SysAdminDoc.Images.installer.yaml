@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.9.0.schema.json
+PackageIdentifier: SysAdminDoc.Images
+PackageVersion: 0.2.27
+MinimumOSVersion: 10.0.17763.0
+InstallerType: inno
+Scope: machine
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+InstallerSwitches:
+  Silent: /VERYSILENT /NORESTART /SKIPOCR
+  SilentWithProgress: /SILENT /NORESTART /SKIPOCR
+  InstallLocation: /DIR="<INSTALLPATH>"
+UpgradeBehavior: install
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/SysAdminDoc/Images/releases/download/v0.2.27/Images-v0.2.27-setup-win-x64.exe
+    InstallerSha256: F416E17A935246B3FAF34B1643C0A143AD61DE3E1BDE7E2DB758005D616F8096
+ManifestType: installer
+ManifestVersion: 1.9.0
