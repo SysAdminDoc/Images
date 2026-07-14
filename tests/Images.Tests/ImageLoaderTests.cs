@@ -23,6 +23,18 @@ public sealed class ImageLoaderTests
         Assert.Equal(0, h);
     }
 
+    [Fact]
+    public void Load_MalformedRaster_FailsAtPreflightBeforeFullDecode()
+    {
+        using var temp = TestDirectory.Create();
+        var path = temp.WriteFile("broken.png", "not an image");
+
+        var error = Assert.Throws<InvalidOperationException>(() => ImageLoader.Load(path));
+
+        Assert.Contains("refused to decode", error.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("dimensions", error.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
     [Theory]
     [InlineData(2, 20)]
     [InlineData(1, 100)]

@@ -94,8 +94,23 @@ public static class ImageLoader
         if (SupportedImageFormats.RequiresGhostscript(path))
             return WithMismatch(LoadDocumentPreview(path, pageIndex), mismatch);
 
-        if (TileService.ShouldUseTileEngine(path))
-            return WithColorManagementNote(WithMismatch(LoadTilePyramid(path, pageIndex), mismatch));
+        var preflight = TileService.Preflight(path);
+        switch (preflight.Status)
+        {
+            case ImagePreflightStatus.Small:
+                break;
+            case ImagePreflightStatus.Large:
+                return WithColorManagementNote(WithMismatch(LoadTilePyramid(path, pageIndex), mismatch));
+            case ImagePreflightStatus.Rejected:
+                throw new InvalidOperationException(
+                    $"Images refused to decode '{Path.GetFileName(path)}' because its dimensions could not be read safely. The file may be corrupt or unsupported.");
+            case ImagePreflightStatus.Unknown:
+                throw new IOException(
+                    $"Images could not safely inspect '{Path.GetFileName(path)}' before decoding. The file was not opened.");
+            default:
+                throw new IOException(
+                    $"Images could not classify '{Path.GetFileName(path)}' safely before decoding. The file was not opened.");
+        }
 
         if (PagedRasterExtensions.Contains(Path.GetExtension(path)))
         {

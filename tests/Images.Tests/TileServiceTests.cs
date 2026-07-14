@@ -9,18 +9,83 @@ namespace Images.Tests;
 public sealed class TileServiceTests
 {
     [Fact]
-    public void ShouldUseTileEngine_SmallFile_ReturnsFalse()
+    public void Preflight_ValidSmallImage_ReturnsSmallWithDimensions()
     {
         using var temp = TestDirectory.Create();
-        var smallFile = temp.WriteFile("small.txt", "not an image");
+        var path = Path.Combine(temp.Path, "small.png");
+        using (var image = new MagickImage(MagickColors.Red, 64, 32))
+            image.Write(path);
 
-        Assert.False(TileService.ShouldUseTileEngine(smallFile));
+        var result = TileService.Preflight(path);
+
+        Assert.Equal(ImagePreflightStatus.Small, result.Status);
+        Assert.Equal((uint)64, result.PixelWidth);
+        Assert.Equal((uint)32, result.PixelHeight);
     }
 
     [Fact]
-    public void ShouldUseTileEngine_NonexistentFile_ReturnsFalse()
+    public void Preflight_MalformedImage_ReturnsRejected()
     {
-        Assert.False(TileService.ShouldUseTileEngine("/nonexistent/path.jpg"));
+        using var temp = TestDirectory.Create();
+        var path = temp.WriteFile("broken.png", "not an image");
+
+        var result = TileService.Preflight(path);
+
+        Assert.Equal(ImagePreflightStatus.Rejected, result.Status);
+    }
+
+    [Fact]
+    public void Preflight_NonexistentFile_ReturnsUnknown()
+    {
+        var result = TileService.Preflight("/nonexistent/path.jpg");
+
+        Assert.Equal(ImagePreflightStatus.Unknown, result.Status);
+    }
+
+    [Fact]
+    public void Preflight_AtFileSizeThreshold_ReturnsLargeWithoutDimensionProbe()
+    {
+        var probeCalled = false;
+
+        var result = TileService.Preflight(TileService.LargeImageThresholdBytes, () =>
+        {
+            probeCalled = true;
+            return (1, 1);
+        });
+
+        Assert.Equal(ImagePreflightStatus.Large, result.Status);
+        Assert.False(probeCalled);
+    }
+
+    [Theory]
+    [InlineData(5_000, 5_000, ImagePreflightStatus.Small)]
+    [InlineData(10_000, 5_000, ImagePreflightStatus.Large)]
+    public void Preflight_ClassifiesPixelThresholdBoundary(
+        uint width,
+        uint height,
+        ImagePreflightStatus expected)
+    {
+        var result = TileService.Preflight(1024, () => (width, height));
+
+        Assert.Equal(expected, result.Status);
+    }
+
+    [Fact]
+    public void Preflight_DeclaredDimensionBomb_ReturnsLargeWithoutOverflow()
+    {
+        var result = TileService.Preflight(1024, () => (uint.MaxValue, uint.MaxValue));
+
+        Assert.Equal(ImagePreflightStatus.Large, result.Status);
+    }
+
+    [Fact]
+    public void Preflight_IoFailure_ReturnsUnknown()
+    {
+        var result = TileService.Preflight(
+            1024,
+            () => throw new IOException("simulated short read"));
+
+        Assert.Equal(ImagePreflightStatus.Unknown, result.Status);
     }
 
     [Fact]

@@ -29,6 +29,20 @@ public sealed record TileCacheHealth(
     long CapBytes,
     DateTime? OldestPyramidUtc);
 
+public enum ImagePreflightStatus
+{
+    Small,
+    Large,
+    Rejected,
+    Unknown,
+}
+
+public sealed record ImagePreflightResult(
+    ImagePreflightStatus Status,
+    uint? PixelWidth = null,
+    uint? PixelHeight = null,
+    string? Detail = null);
+
 public static class TileService
 {
     public const int DefaultTileSize = 256;
@@ -44,22 +58,68 @@ public static class TileService
     private static readonly ConcurrentDictionary<string, byte> ProtectedCacheDirs = new(StringComparer.OrdinalIgnoreCase);
     private static readonly ConcurrentDictionary<string, byte> BuildingCacheDirs = new(StringComparer.OrdinalIgnoreCase);
 
-    public static bool ShouldUseTileEngine(string path)
+    /// <summary>
+    /// Classifies an untrusted raster before any full-frame decoder is allowed to read it.
+    /// Rejected and unknown inputs must fail closed at the caller instead of falling through to
+    /// the managed byte[]/WIC path, where a malformed dimension header could force an unbounded
+    /// allocation.
+    /// </summary>
+    public static ImagePreflightResult Preflight(string path)
     {
         try
         {
-            var fileSize = new FileInfo(path).Length;
-            if (fileSize > LargeImageThresholdBytes) return true;
+            var file = new FileInfo(path);
+            if (!file.Exists)
+                return new ImagePreflightResult(ImagePreflightStatus.Unknown, Detail: "The source file does not exist.");
 
-            CodecRuntime.Configure();
-            using var image = new MagickImage();
-            image.Ping(path);
-            var pixels = (long)image.Width * image.Height;
-            return pixels > LargeImageThresholdPixels;
+            return Preflight(file.Length, () =>
+            {
+                CodecRuntime.Configure();
+                using var image = new MagickImage();
+                image.Ping(path);
+                return (image.Width, image.Height);
+            });
         }
-        catch
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException)
         {
-            return false;
+            _log.LogWarning(ex, "image-preflight: could not inspect {Path}", path);
+            return new ImagePreflightResult(ImagePreflightStatus.Unknown, Detail: "The source could not be inspected safely.");
+        }
+    }
+
+    internal static ImagePreflightResult Preflight(
+        long fileSize,
+        Func<(uint Width, uint Height)> dimensionProbe)
+    {
+        if (fileSize <= 0)
+            return new ImagePreflightResult(ImagePreflightStatus.Rejected, Detail: "The source is empty.");
+
+        // Match ImageLoader's memory-map boundary: a file exactly at the threshold is already
+        // large enough that it must never enter the managed byte[] path.
+        if (fileSize >= LargeImageThresholdBytes)
+            return new ImagePreflightResult(ImagePreflightStatus.Large);
+
+        try
+        {
+            var (width, height) = dimensionProbe();
+            if (width == 0 || height == 0)
+                return new ImagePreflightResult(ImagePreflightStatus.Rejected, width, height, "The image reports invalid dimensions.");
+
+            var pixels = (ulong)width * height;
+            var status = pixels >= (ulong)LargeImageThresholdPixels
+                ? ImagePreflightStatus.Large
+                : ImagePreflightStatus.Small;
+            return new ImagePreflightResult(status, width, height);
+        }
+        catch (Exception ex) when (ex is MagickException or NotSupportedException or InvalidOperationException)
+        {
+            _log.LogDebug(ex, "image-preflight: decoder rejected the dimension header");
+            return new ImagePreflightResult(ImagePreflightStatus.Rejected, Detail: "The image dimensions could not be decoded.");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException)
+        {
+            _log.LogWarning(ex, "image-preflight: dimension probe did not complete");
+            return new ImagePreflightResult(ImagePreflightStatus.Unknown, Detail: "The dimension probe did not complete safely.");
         }
     }
 
