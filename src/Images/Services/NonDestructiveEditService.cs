@@ -416,7 +416,7 @@ public sealed class NonDestructiveEditService
     {
         var sidecarPath = PrimarySidecarPath(outputPath);
         var document = File.Exists(sidecarPath)
-            ? XDocument.Load(sidecarPath, LoadOptions.PreserveWhitespace)
+            ? BoundedXmlReader.Load(sidecarPath, LoadOptions.PreserveWhitespace)
             : CreateEmptySidecar();
 
         ReplaceJsonElement(document, "ExportProvenance", provenance);
@@ -476,7 +476,7 @@ public sealed class NonDestructiveEditService
 
             try
             {
-                var xmpDocument = XDocument.Load(sidecarPath, LoadOptions.PreserveWhitespace);
+                var xmpDocument = BoundedXmlReader.Load(sidecarPath, LoadOptions.PreserveWhitespace);
                 var stackJson = FindJsonElement(xmpDocument, "EditStack")?.Value;
                 if (string.IsNullOrWhiteSpace(stackJson))
                     return CreateEmptyDocument(imagePath);
@@ -508,7 +508,7 @@ public sealed class NonDestructiveEditService
         try
         {
             xmpDocument = File.Exists(sidecarPath)
-                ? XDocument.Load(sidecarPath, LoadOptions.PreserveWhitespace)
+                ? BoundedXmlReader.Load(sidecarPath, LoadOptions.PreserveWhitespace)
                 : CreateEmptySidecar();
         }
         catch (System.Xml.XmlException ex)

@@ -969,7 +969,7 @@ public sealed class CatalogService
             try
             {
                 var info = new FileInfo(sidecarPath);
-                var document = XDocument.Load(sidecarPath, LoadOptions.None);
+                var document = BoundedXmlReader.Load(sidecarPath, LoadOptions.None);
                 return new SidecarState(
                     sidecarPath,
                     ToOffset(info.LastWriteTimeUtc),

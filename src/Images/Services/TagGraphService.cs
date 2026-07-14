@@ -235,7 +235,7 @@ public sealed class TagGraphService
 
             try
             {
-                var document = XDocument.Load(sidecarPath, LoadOptions.None);
+                var document = BoundedXmlReader.Load(sidecarPath, LoadOptions.None);
                 var tags = ExtractTagElements(document)
                     .SelectMany(SplitTagValues)
                     .Select(NormalizeTagOrNull)
@@ -310,7 +310,7 @@ public sealed class TagGraphService
         try
         {
             var document = File.Exists(sidecarPath)
-                ? XDocument.Load(sidecarPath, LoadOptions.None)
+                ? BoundedXmlReader.Load(sidecarPath, LoadOptions.None)
                 : CreateEmptySidecar();
 
             ReplaceSubjectTags(document, expandedTags);

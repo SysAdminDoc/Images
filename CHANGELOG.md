@@ -16,6 +16,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixed
 
+- **XMP/XML imports are resource-bounded** - Sidecar, catalog, tag, edit-stack, inbox, and Picasa XML readers now reject documents over 16 MiB, prohibit DTD/entity expansion, and use replacement-friendly file sharing before parsing user-controlled metadata.
 - **Atomic exports tolerate brief file locks** - Final temp-file swaps now retry a bounded number of times when an image reader, thumbnailer, or security scanner briefly locks the destination, preventing intermittent crop/writeback failures without hiding permanent permission errors.
 - **Optional tools cannot exhaust memory through process output** - ExifTool, c2patool, jpegtran, and Ghostscript now share a concurrent bounded process runner: version probes retain at most 256 KiB per stream, operations retain at most 4 MiB, and exceeding either limit terminates the child process tree with a distinct failure from timeout or nonzero exit.
 - **Secondary failures no longer expose exception internals** - Rename, delete, rotate, crop, copy, export, repair, wallpaper, Explorer, transfer, save, print, metadata, email, clipboard, and edit-stack failures now show stable localized recovery copy; full exception and service-result details remain in diagnostics logs.

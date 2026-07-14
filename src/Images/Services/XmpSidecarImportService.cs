@@ -47,7 +47,7 @@ public sealed class XmpSidecarImportService
 
         try
         {
-            var document = XDocument.Load(normalizedPath, LoadOptions.None);
+            var document = BoundedXmlReader.Load(normalizedPath, LoadOptions.None);
             return ParseDocument(document, normalizedPath);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or System.Xml.XmlException)
@@ -105,7 +105,7 @@ public sealed class XmpSidecarImportService
 
             try
             {
-                var document = XDocument.Load(candidate, LoadOptions.None);
+                var document = BoundedXmlReader.Load(candidate, LoadOptions.None);
                 return ParseDocument(document, candidate);
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or System.Xml.XmlException)

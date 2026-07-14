@@ -300,7 +300,7 @@ public static class AssetSmartFilterService
 
             try
             {
-                var document = XDocument.Load(sidecar, LoadOptions.None);
+                var document = BoundedXmlReader.Load(sidecar, LoadOptions.None);
                 foreach (var attribute in document.Descendants().Attributes())
                 {
                     if (attribute.Name.LocalName.Equals("Rating", StringComparison.OrdinalIgnoreCase))

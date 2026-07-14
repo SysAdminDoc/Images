@@ -602,7 +602,7 @@ public sealed class ImportInboxService
         XDocument document;
         if (File.Exists(sidecarPath))
         {
-            document = XDocument.Load(sidecarPath, LoadOptions.None);
+            document = BoundedXmlReader.Load(sidecarPath, LoadOptions.None);
         }
         else
         {

@@ -257,7 +257,7 @@ public sealed class PicasaImportService
         if (string.IsNullOrWhiteSpace(contactsXmlPath) || !File.Exists(contactsXmlPath))
             return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-        var document = XDocument.Load(contactsXmlPath, LoadOptions.None);
+        var document = BoundedXmlReader.Load(contactsXmlPath, LoadOptions.None);
         var contacts = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var contact in document.Descendants().Where(element => element.Name.LocalName.Equals("contact", StringComparison.OrdinalIgnoreCase)))
         {
@@ -454,7 +454,7 @@ public sealed class PicasaImportService
     {
         var sidecarPath = imagePath + ".xmp";
         var document = File.Exists(sidecarPath)
-            ? XDocument.Load(sidecarPath, LoadOptions.None)
+            ? BoundedXmlReader.Load(sidecarPath, LoadOptions.None)
             : CreateEmptySidecar();
         var description = EnsureDescription(document);
         EnsureNamespaces(document);
