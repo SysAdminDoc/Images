@@ -1,4 +1,6 @@
 using System.Windows.Input;
+using Images.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Images.ViewModels;
 
@@ -53,7 +55,10 @@ public sealed class AsyncRelayCommand : ICommand
             if (handler is not null)
                 handler(this, new CommandFaultedEventArgs(ex));
             else
-                throw;
+                // No live fault handler (e.g. the view model was disposed during shutdown while a
+                // command was still in flight). Rethrowing here escapes an async-void continuation
+                // and hard-crashes the process; log and observe the fault instead.
+                Log.For<AsyncRelayCommand>().LogError(ex, "Async command faulted with no fault handler subscribed.");
         }
         finally
         {

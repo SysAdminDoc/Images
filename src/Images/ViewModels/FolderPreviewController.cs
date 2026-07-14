@@ -230,6 +230,20 @@ public sealed class FolderPreviewController : IDisposable
         }
     }
 
+    private static async Task DisposeGateLaterAsync(SemaphoreSlim gate)
+    {
+        try
+        {
+            // Let cancellation drain in-flight decoders before disposing the gate, so a thumbnail
+            // decode still holding it does not Release() a disposed semaphore.
+            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        }
+        finally
+        {
+            gate.Dispose();
+        }
+    }
+
     private void RaiseStateChanged() => StateChanged?.Invoke(this, EventArgs.Empty);
 
     public void Dispose()
@@ -237,6 +251,7 @@ public sealed class FolderPreviewController : IDisposable
         _generation++;
         _previewCts.Cancel();
         _ = DisposeSourceLaterAsync(_previewCts);
+        _ = DisposeGateLaterAsync(_thumbnailDecodeGate);
     }
 }
 
