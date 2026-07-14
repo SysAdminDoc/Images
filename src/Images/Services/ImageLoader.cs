@@ -297,7 +297,14 @@ public static class ImageLoader
                 ? page.PixelWidth
                 : (int)Math.Round(page.PixelWidth * (height / (double)Math.Max(1, page.PixelHeight))))
             .ToList();
-        var width = widths.Sum();
+        // Sum as long: a wide multi-page spread (high-DPI scans normalized to a tall page's height)
+        // can exceed int.MaxValue, and an unchecked int Sum() wraps to a negative width that
+        // RenderTargetBitmap rejects with an opaque error. Validate against the same dimension policy
+        // every other decode path uses, and fail with the shared "too large" message.
+        var widthLong = widths.Aggregate(0L, (acc, w) => acc + w);
+        if (!MagickSecurityPolicy.IsRenderableDimensions(widthLong, height))
+            throw new InvalidOperationException("Archive spread is too large to render.");
+        var width = (int)widthLong;
 
         var visual = new DrawingVisual();
         using (var drawing = visual.RenderOpen())
@@ -637,9 +644,12 @@ public static class ImageLoader
 
                 // GIF frame delays are stored in 1/100 s units. Browsers clamp anything under 20 ms
                 // up to 100 ms to stop "0-delay" GIFs from pinning a CPU core — we match that
-                // convention rather than shipping a faster-than-browser playback.
-                var ms = (int)frame.AnimationDelay * 10;
+                // convention rather than shipping a faster-than-browser playback. AnimationDelay is a
+                // uint (32-bit for WebP/APNG); compute in long so a large/malformed field cannot
+                // overflow int into a negative delay, and cap absurd values at 60 s.
+                var ms = (long)frame.AnimationDelay * 10;
                 if (ms < 20) ms = 100;
+                else if (ms > 60_000) ms = 60_000;
                 delays.Add(TimeSpan.FromMilliseconds(ms));
             }
 

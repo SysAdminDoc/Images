@@ -781,7 +781,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _currentPath = value;
             RefreshCurrentPathExists();
             // RD-09: remember the last real image so an opt-in session restore can reopen it.
-            if (_currentPathExists && value is not null)
+            // Only persist a file that actually decoded and is being viewed normally: a present-but-
+            // undecodable file (load failed) or a transient --peek target must not become the restore
+            // target, or the next no-arg launch reopens a known-bad file or promotes a peek to a session.
+            if (_currentPathExists && value is not null && HasDisplayImage && !IsPeekMode)
                 _settings.SetString(Keys.LastImagePath, value);
             Raise(nameof(CurrentPath));
             RaiseCurrentPathState();
