@@ -6204,4 +6204,31 @@ Details written to:
   <data name="SettingsTransferTitle" xml:space="preserve">
     <value>Move settings between installations</value>
   </data>
+  <data name="CommandPalette_FocusPeaking" xml:space="preserve">
+    <value>Focus peaking</value>
+  </data>
+  <data name="CommandPalette_ExposureClipping" xml:space="preserve">
+    <value>Highlight and shadow clipping</value>
+  </data>
+  <data name="MainToastFocusPeakingOn" xml:space="preserve">
+    <value>Focus peaking on</value>
+  </data>
+  <data name="MainToastFocusPeakingOff" xml:space="preserve">
+    <value>Focus peaking off</value>
+  </data>
+  <data name="MainToastExposureClippingOn" xml:space="preserve">
+    <value>Exposure clipping on</value>
+  </data>
+  <data name="MainToastExposureClippingOff" xml:space="preserve">
+    <value>Exposure clipping off</value>
+  </data>
+  <data name="MainFocusPeakingStatus" xml:space="preserve">
+    <value>Focus peaking — green edges</value>
+  </data>
+  <data name="MainExposureClippingStatus" xml:space="preserve">
+    <value>Exposure clipping — red highlights, blue shadows</value>
+  </data>
+  <data name="MainPhotoCullingBothStatus" xml:space="preserve">
+    <value>Focus — green edges · Clipping — red highlights, blue shadows</value>
+  </data>
 </root>

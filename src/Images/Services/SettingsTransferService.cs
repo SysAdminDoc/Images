@@ -25,6 +25,8 @@ public sealed class SettingsTransferService
                 [Keys.MetadataHudVisible] = IsBool,
                 [Keys.ZoomLock] = IsBool,
                 [Keys.TransparencyGrid] = IsBool,
+                [Keys.FocusPeaking] = IsBool,
+                [Keys.ExposureClipping] = IsBool,
                 [Keys.LoupeFactor] = IsLoupeFactor,
                 [Keys.RestoreLastSession] = IsBool,
                 [Keys.ColorManagement] = IsBool,

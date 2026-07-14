@@ -53,6 +53,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool _isMetadataHudVisible;
     private bool _isZoomLocked;
     private bool _showTransparencyGrid;
+    private bool _isFocusPeakingEnabled;
+    private bool _isExposureClippingEnabled;
+    private CancellationTokenSource? _photoCullingOverlayCts;
     private readonly DispatcherTimer _hintTimer;
 
     public MainViewModel()
@@ -172,6 +175,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _isMetadataHudVisible = _settings.GetBool(Keys.MetadataHudVisible, false);
         _isZoomLocked = _settings.GetBool(Keys.ZoomLock, false);
         _showTransparencyGrid = _settings.GetBool(Keys.TransparencyGrid, false);
+        _isFocusPeakingEnabled = _settings.GetBool(Keys.FocusPeaking, false);
+        _isExposureClippingEnabled = _settings.GetBool(Keys.ExposureClipping, false);
         ImageLoader.ColorManagedDisplay = _settings.GetBool(Keys.ColorManagement, false);
         ImageLoader.HdrToneMapOperator = ToneMapService.ParseOperator(
             _settings.GetString(Keys.HdrToneMapOperator, ToneMapOperator.Reinhard.ToString()));
@@ -309,6 +314,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ToggleZoomLockCommand = new RelayCommand(ToggleZoomLock);
         ToggleLoupeCommand = new RelayCommand(() => RequestToggleLoupe?.Invoke(), () => RequestToggleLoupe is not null);
         ToggleTransparencyGridCommand = new RelayCommand(ToggleTransparencyGrid);
+        ToggleFocusPeakingCommand = new RelayCommand(ToggleFocusPeaking, () => CanUsePhotoCullingOverlays);
+        ToggleExposureClippingCommand = new RelayCommand(ToggleExposureClipping, () => CanUsePhotoCullingOverlays);
         PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard, () => !IsOperationBusy);
         OpenInDefaultAppCommand = new RelayCommand(OpenInDefaultApp, () => HasImage);
         StripLocationCommand = new AsyncRelayCommand(StripLocationAsync, () => CanUseImageCommands);
@@ -396,10 +403,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseRetouch));
                 Raise(nameof(CanUseOverlayMode));
+                Raise(nameof(CanUsePhotoCullingOverlays));
                 RaiseCompareState();
                 Raise(nameof(CanToggleMetadataHud));
                 Raise(nameof(ShowMetadataHud));
                 CommandManager.InvalidateRequerySuggested();
+                RefreshPhotoCullingOverlay();
             }
         }
     }
@@ -497,10 +506,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(CanUseRedEyeCorrection));
                 Raise(nameof(CanUseRetouch));
                 Raise(nameof(CanUseOverlayMode));
+                Raise(nameof(CanUsePhotoCullingOverlays));
                 RaiseCompareState();
                 Raise(nameof(CanToggleMetadataHud));
                 Raise(nameof(ShowMetadataHud));
                 CommandManager.InvalidateRequerySuggested();
+                RefreshPhotoCullingOverlay();
             }
         }
     }
@@ -522,6 +533,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Raise(nameof(IsAnimated));
                 Raise(nameof(AnimationFrameCountText));
                 RaiseAnimationWorkbenchState();
+                Raise(nameof(CanUsePhotoCullingOverlays));
+                RefreshPhotoCullingOverlay();
             }
         }
     }
@@ -820,6 +833,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private bool CanUseImageCommands => HasImage && !IsOperationBusy;
     private bool CanUseDisplayImageCommands => CurrentImage is not null && !IsTilePyramidActive && !IsOperationBusy;
+    public bool CanUsePhotoCullingOverlays => CanUseDisplayImageCommands && !IsCompareMode && !IsAnimated;
 
     private bool RefreshCurrentPathExists()
     {
@@ -1185,6 +1199,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             case CommandIds.TransparencyGrid:
                 ToggleTransparencyGridCommand.Execute(null);
                 return true;
+            case CommandIds.FocusPeaking:
+                ToggleFocusPeakingCommand.Execute(null);
+                return true;
+            case CommandIds.ExposureClipping:
+                ToggleExposureClippingCommand.Execute(null);
+                return true;
             case CommandIds.Gallery:
                 ToggleGalleryCommand.Execute(null);
                 return true;
@@ -1323,6 +1343,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             PaletteCommand(CommandIds.ZoomLock, ToggleZoomLockCommand, priority: 12, searchText: "keep zoom level lock magnification pixel peep"),
             PaletteCommand(CommandIds.Loupe, ToggleLoupeCommand, priority: 12, searchText: "loupe magnifier lens zoom pixel peep keyboard"),
             PaletteCommand(CommandIds.TransparencyGrid, ToggleTransparencyGridCommand, priority: 12, searchText: "checkerboard alpha transparent background backdrop"),
+            PaletteCommand(CommandIds.FocusPeaking, ToggleFocusPeakingCommand, priority: 13, searchText: "sharp edge focus raw photo culling overlay"),
+            PaletteCommand(CommandIds.ExposureClipping, ToggleExposureClippingCommand, priority: 13, searchText: "blown highlight crushed shadow exposure clipping raw photo culling overlay"),
             PaletteCommand(CommandIds.Gallery, ToggleGalleryCommand, priority: 12, searchText: "thumbnail grid browser"),
             new() { Name = Strings.CommandPalette_Inspector, Category = view, Priority = 13, SearchText = "details panel sidebar", Command = ToggleInspectorCommand },
             PaletteCommand(CommandIds.ExtractText, ExtractTextCommand, priority: 14, searchText: "ocr text copy"),
@@ -1684,6 +1706,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 RaiseCompareState();
                 RaiseImageToolState();
+                Raise(nameof(CanUsePhotoCullingOverlays));
+                Raise(nameof(ShowPhotoCullingOverlayStatus));
+                RefreshPhotoCullingOverlay();
             }
         }
     }
@@ -2959,6 +2984,132 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Toast(ShowTransparencyGrid ? Strings.MainToastTransparencyGridOn : Strings.MainToastTransparencyGridOff);
     }
 
+    private BitmapSource? _photoCullingOverlay;
+    public BitmapSource? PhotoCullingOverlay
+    {
+        get => _photoCullingOverlay;
+        private set
+        {
+            if (Set(ref _photoCullingOverlay, value))
+                Raise(nameof(ShowPhotoCullingOverlayStatus));
+        }
+    }
+
+    public bool IsFocusPeakingEnabled
+    {
+        get => _isFocusPeakingEnabled;
+        private set
+        {
+            if (!Set(ref _isFocusPeakingEnabled, value))
+                return;
+
+            _settings.SetBool(Keys.FocusPeaking, value);
+            Raise(nameof(PhotoCullingOverlayStatusText));
+            Raise(nameof(ShowPhotoCullingOverlayStatus));
+            RefreshPhotoCullingOverlay();
+        }
+    }
+
+    public bool IsExposureClippingEnabled
+    {
+        get => _isExposureClippingEnabled;
+        private set
+        {
+            if (!Set(ref _isExposureClippingEnabled, value))
+                return;
+
+            _settings.SetBool(Keys.ExposureClipping, value);
+            Raise(nameof(PhotoCullingOverlayStatusText));
+            Raise(nameof(ShowPhotoCullingOverlayStatus));
+            RefreshPhotoCullingOverlay();
+        }
+    }
+
+    public bool ShowPhotoCullingOverlayStatus =>
+        !IsCompareMode && PhotoCullingOverlay is not null &&
+        (IsFocusPeakingEnabled || IsExposureClippingEnabled);
+
+    public string PhotoCullingOverlayStatusText => (IsFocusPeakingEnabled, IsExposureClippingEnabled) switch
+    {
+        (true, true) => Strings.MainPhotoCullingBothStatus,
+        (true, false) => Strings.MainFocusPeakingStatus,
+        (false, true) => Strings.MainExposureClippingStatus,
+        _ => string.Empty,
+    };
+
+    private void ToggleFocusPeaking()
+    {
+        if (!CanUsePhotoCullingOverlays)
+            return;
+
+        IsFocusPeakingEnabled = !IsFocusPeakingEnabled;
+        Toast(IsFocusPeakingEnabled ? Strings.MainToastFocusPeakingOn : Strings.MainToastFocusPeakingOff);
+    }
+
+    private void ToggleExposureClipping()
+    {
+        if (!CanUsePhotoCullingOverlays)
+            return;
+
+        IsExposureClippingEnabled = !IsExposureClippingEnabled;
+        Toast(IsExposureClippingEnabled ? Strings.MainToastExposureClippingOn : Strings.MainToastExposureClippingOff);
+    }
+
+    private async void RefreshPhotoCullingOverlay()
+    {
+        var previous = _photoCullingOverlayCts;
+        _photoCullingOverlayCts = null;
+        previous?.Cancel();
+        previous?.Dispose();
+
+        var mode = PhotoCullingOverlayMode.None;
+        if (IsFocusPeakingEnabled)
+            mode |= PhotoCullingOverlayMode.FocusPeaking;
+        if (IsExposureClippingEnabled)
+            mode |= PhotoCullingOverlayMode.ExposureClipping;
+
+        if (_isDisposed || mode == PhotoCullingOverlayMode.None ||
+            CurrentImage is not BitmapSource bitmap || IsTilePyramidActive || IsCompareMode || IsAnimated)
+        {
+            PhotoCullingOverlay = null;
+            return;
+        }
+
+        BitmapSource source = bitmap;
+        if (!source.IsFrozen)
+        {
+            source = source.Clone();
+            source.Freeze();
+        }
+
+        var cancellation = new CancellationTokenSource();
+        _photoCullingOverlayCts = cancellation;
+        try
+        {
+            var overlay = await Task.Run(
+                () => PhotoCullingOverlayService.CreateOverlay(source, mode, cancellation.Token),
+                cancellation.Token);
+            if (!_isDisposed && ReferenceEquals(_photoCullingOverlayCts, cancellation) && !cancellation.IsCancellationRequested)
+                PhotoCullingOverlay = overlay;
+        }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+        {
+            // Image navigation and rapid toggle changes supersede stale analysis work.
+        }
+        catch (Exception ex)
+        {
+            if (ReferenceEquals(_photoCullingOverlayCts, cancellation))
+                PhotoCullingOverlay = null;
+            _log.LogWarning(ex, "Photo-culling overlay generation failed");
+        }
+        finally
+        {
+            if (ReferenceEquals(_photoCullingOverlayCts, cancellation))
+                _photoCullingOverlayCts = null;
+            cancellation.Dispose();
+        }
+    }
+
     private void RefreshPhotoMetadata(string path)
     {
         _photoMetadata.Refresh(path);
@@ -3833,6 +3984,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand ToggleZoomLockCommand { get; }
     public ICommand ToggleLoupeCommand { get; }
     public ICommand ToggleTransparencyGridCommand { get; }
+    public ICommand ToggleFocusPeakingCommand { get; }
+    public ICommand ToggleExposureClippingCommand { get; }
     public ICommand PasteFromClipboardCommand { get; }
     public ICommand OpenInDefaultAppCommand { get; }
     public ICommand StripLocationCommand { get; }
@@ -7843,6 +7996,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _toastTimer.Stop();
         _animationTimer.Stop();
         _hintTimer.Stop();
+        _photoCullingOverlayCts?.Cancel();
+        _photoCullingOverlayCts?.Dispose();
+        _photoCullingOverlayCts = null;
         _slideshowTimer?.Stop();
         _slideshowTimer = null;
         _listenService?.Dispose();

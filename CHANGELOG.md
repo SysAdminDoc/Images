@@ -4,6 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Focus peaking and exposure-clipping overlays now provide bounded, cancellable RAW/photo culling analysis directly on the transformed image surface; both are localized, persisted, rebindable, command-palette discoverable, and use a text legend alongside green/red/blue markers.
 - Active-monitor DXGI diagnostics now report HDR/SDR color space and peak/full-frame luminance; when HDR-class content is tonemapped for the WPF SDR surface on an HDR desktop, the Details panel shows an explicit localized status badge.
 - Exif 3.1 learning-use preferences, development provenance, and correction/noise-reduction state now appear as localized read-only metadata; strict TIFF parsing preserves the new UTF-8 fields, labels reserved values explicitly, and rejects legacy Samsung/GE tag collisions without modifying the image.
 - Settings can now export and transactionally import a bounded, versioned JSON allowlist of portable preferences and custom shortcuts; previews report applied/ignored counts, while private paths, window placement, history, and update-check consent never leave the local database.

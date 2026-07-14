@@ -610,6 +610,8 @@ public static class Strings
     public static string CommandPalette_ZoomLock => Get(nameof(CommandPalette_ZoomLock));
     public static string CommandPalette_Loupe => Get(nameof(CommandPalette_Loupe));
     public static string CommandPalette_TransparencyGrid => Get(nameof(CommandPalette_TransparencyGrid));
+    public static string CommandPalette_FocusPeaking => Get(nameof(CommandPalette_FocusPeaking));
+    public static string CommandPalette_ExposureClipping => Get(nameof(CommandPalette_ExposureClipping));
     public static string CommandPalette_Gallery => Get(nameof(CommandPalette_Gallery));
     public static string CommandPalette_Inspector => Get(nameof(CommandPalette_Inspector));
     public static string CommandPalette_ExtractText => Get(nameof(CommandPalette_ExtractText));
@@ -1210,6 +1212,13 @@ public static class Strings
     public static string MainToastZoomLockOff => Get(nameof(MainToastZoomLockOff));
     public static string MainToastTransparencyGridOn => Get(nameof(MainToastTransparencyGridOn));
     public static string MainToastTransparencyGridOff => Get(nameof(MainToastTransparencyGridOff));
+    public static string MainToastFocusPeakingOn => Get(nameof(MainToastFocusPeakingOn));
+    public static string MainToastFocusPeakingOff => Get(nameof(MainToastFocusPeakingOff));
+    public static string MainToastExposureClippingOn => Get(nameof(MainToastExposureClippingOn));
+    public static string MainToastExposureClippingOff => Get(nameof(MainToastExposureClippingOff));
+    public static string MainFocusPeakingStatus => Get(nameof(MainFocusPeakingStatus));
+    public static string MainExposureClippingStatus => Get(nameof(MainExposureClippingStatus));
+    public static string MainPhotoCullingBothStatus => Get(nameof(MainPhotoCullingBothStatus));
     public static string MainToastFilmstripShown => Get(nameof(MainToastFilmstripShown));
     public static string MainToastFilmstripHidden => Get(nameof(MainToastFilmstripHidden));
     public static string MainToastGalleryClosed => Get(nameof(MainToastGalleryClosed));

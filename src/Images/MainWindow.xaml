@@ -156,6 +156,17 @@
                                       InputGestureText="{Binding ShortcutTexts[metadata-hud]}"
                                       IsCheckable="True"
                                       IsChecked="{Binding IsMetadataHudVisible, Mode=OneWay}" />
+                            <Separator />
+                            <MenuItem Header="{loc:Loc CommandPalette_FocusPeaking}"
+                                      Command="{Binding ToggleFocusPeakingCommand}"
+                                      InputGestureText="{Binding ShortcutTexts[focus-peaking]}"
+                                      IsCheckable="True"
+                                      IsChecked="{Binding IsFocusPeakingEnabled, Mode=OneWay}" />
+                            <MenuItem Header="{loc:Loc CommandPalette_ExposureClipping}"
+                                      Command="{Binding ToggleExposureClippingCommand}"
+                                      InputGestureText="{Binding ShortcutTexts[exposure-clipping]}"
+                                      IsCheckable="True"
+                                      IsChecked="{Binding IsExposureClippingEnabled, Mode=OneWay}" />
                         </MenuItem>
                         <Separator />
                         <MenuItem Header="{loc:Loc CommandPalette_Category_Edit}">
@@ -342,6 +353,7 @@
 
                 <ctl:ZoomPanImage x:Name="Canvas"
                                    Source="{Binding CurrentImage}"
+                                   AnalysisOverlaySource="{Binding PhotoCullingOverlay}"
                                    AutomationProperties.AutomationId="ImageCanvas"
                                    TilePyramid="{Binding CurrentTilePyramid}"
                                    Animation="{Binding CurrentAnimation}"
@@ -539,6 +551,24 @@
                                          Strokes="{Binding RetouchStrokes}"
                                          Opacity="0.92"
                                          AutomationProperties.Name="{loc:Loc AutomationMainWindowRetouchBrushOverlay}" />
+
+                <Border HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Margin="16"
+                        Padding="10,7"
+                        CornerRadius="{StaticResource Radius.Sm.CR}"
+                        Background="{DynamicResource ToastBrush}"
+                        BorderBrush="{DynamicResource AccentBrush}"
+                        BorderThickness="1"
+                        IsHitTestVisible="False"
+                        Visibility="{Binding ShowPhotoCullingOverlayStatus, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="{Binding PhotoCullingOverlayStatusText}"
+                               Style="{StaticResource Text.Caption}"
+                               FontWeight="SemiBold"
+                               AutomationProperties.LiveSetting="Polite"
+                               AutomationProperties.Name="{Binding PhotoCullingOverlayStatusText}"
+                               a11y:LiveRegionBehavior.AnnounceChanges="True" />
+                </Border>
 
                 <Border HorizontalAlignment="Center"
                         VerticalAlignment="Top"
@@ -2017,7 +2047,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                            <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Wheel" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiZoomAboutCursor}" />
@@ -2057,6 +2087,10 @@
                                         <TextBlock Grid.Row="17" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiLoupeCenteredLensPanToMove}" />
                                         <TextBlock Grid.Row="18" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="Ctrl+Shift+Drag" />
                                         <TextBlock Grid.Row="18" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc MainUiZoomToSelection}" />
+                                        <TextBlock Grid.Row="19" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[focus-peaking]}" />
+                                        <TextBlock Grid.Row="19" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc CommandPalette_FocusPeaking}" />
+                                        <TextBlock Grid.Row="20" Grid.Column="0" Style="{StaticResource MetaLabel}" FontFamily="Consolas" Text="{Binding ShortcutTexts[exposure-clipping]}" />
+                                        <TextBlock Grid.Row="20" Grid.Column="1" Style="{StaticResource MetaValue}" Text="{loc:Loc CommandPalette_ExposureClipping}" />
                                     </Grid>
 
                                     <TextBlock Text="{loc:Loc FileHealthScanMetaFile}" Style="{StaticResource SectionLabel}" />

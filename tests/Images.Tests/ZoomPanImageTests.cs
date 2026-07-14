@@ -40,6 +40,20 @@ public sealed class ZoomPanImageTests
         });
     }
 
+    [Fact]
+    public void AnalysisOverlaySource_IsExposedAsIndependentDisplayLayer()
+    {
+        RunOnSta(() =>
+        {
+            var source = MakeBitmap();
+            var overlay = MakeBitmap();
+            var control = new ZoomPanImage { Source = source, AnalysisOverlaySource = overlay };
+
+            Assert.Same(source, control.Source);
+            Assert.Same(overlay, control.AnalysisOverlaySource);
+        });
+    }
+
     [Theory]
     [InlineData("Bgra32", true)]
     [InlineData("Pbgra32", true)]

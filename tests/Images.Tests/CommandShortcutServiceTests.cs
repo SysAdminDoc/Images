@@ -49,4 +49,20 @@ public sealed class CommandShortcutServiceTests
         Assert.Null(settings.GetHotkey(CommandIds.BatchProcessor));
         Assert.Equal("Ctrl+Shift+B", shortcuts.GetShortcutText(CommandIds.BatchProcessor));
     }
+
+    [Fact]
+    public void PhotoCullingOverlays_AreDiscoverableAndHaveDistinctShortcuts()
+    {
+        using var temp = TestDirectory.Create();
+        var shortcuts = new CommandShortcutService(new SettingsService(Path.Combine(temp.Path, "settings.db")));
+
+        var focus = shortcuts.GetDefinition(CommandIds.FocusPeaking);
+        var clipping = shortcuts.GetDefinition(CommandIds.ExposureClipping);
+
+        Assert.Equal("F", focus.DefaultShortcut);
+        Assert.Equal("H", clipping.DefaultShortcut);
+        Assert.NotEqual(focus.Name, clipping.Name);
+        Assert.True(shortcuts.IsShortcut(CommandIds.FocusPeaking, Key.F, ModifierKeys.None));
+        Assert.True(shortcuts.IsShortcut(CommandIds.ExposureClipping, Key.H, ModifierKeys.None));
+    }
 }

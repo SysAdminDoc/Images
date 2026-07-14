@@ -22,6 +22,11 @@ public readonly record struct ZoomPanViewState(double Scale, double TranslateX, 
 public sealed class ZoomPanImage : ContentControl
 {
     private readonly Image _image = new() { Stretch = Stretch.Uniform };
+    private readonly Image _analysisOverlay = new()
+    {
+        Stretch = Stretch.Uniform,
+        IsHitTestVisible = false,
+    };
     // RD-04: checkerboard drawn behind the image so transparent pixels read as transparent.
     // Lives inside _visual so it inherits the same flip/rotate/scale transform and stays aligned
     // with (and scales alongside) the image content.
@@ -95,6 +100,19 @@ public sealed class ZoomPanImage : ContentControl
     {
         get => (ImageSource?)GetValue(SourceProperty);
         set => SetValue(SourceProperty, value);
+    }
+
+    public static readonly DependencyProperty AnalysisOverlaySourceProperty = DependencyProperty.Register(
+        nameof(AnalysisOverlaySource), typeof(ImageSource), typeof(ZoomPanImage),
+        new PropertyMetadata(null, (d, e) => ((ZoomPanImage)d)._analysisOverlay.Source = (ImageSource?)e.NewValue));
+
+    /// <summary>
+    /// Transparent pixel-analysis surface rendered in the same transform stack as the image.
+    /// </summary>
+    public ImageSource? AnalysisOverlaySource
+    {
+        get => (ImageSource?)GetValue(AnalysisOverlaySourceProperty);
+        set => SetValue(AnalysisOverlaySourceProperty, value);
     }
 
     public static readonly DependencyProperty RotationProperty = DependencyProperty.Register(
@@ -273,6 +291,7 @@ public sealed class ZoomPanImage : ContentControl
         _visual.Children.Add(_transparencyGrid);
         _visual.Children.Add(_image);
         _visual.Children.Add(_tileViewbox);
+        _visual.Children.Add(_analysisOverlay);
         _root.Children.Add(_visual);
         _root.Children.Add(_zoomSelectionRect);
         _loupe.Fill = _loupeBrush;
