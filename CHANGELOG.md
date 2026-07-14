@@ -12,6 +12,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixed
 
+- **Secondary failures no longer expose exception internals** - Rename, delete, rotate, crop, copy, export, repair, wallpaper, Explorer, transfer, save, print, metadata, email, clipboard, and edit-stack failures now show stable localized recovery copy; full exception and service-result details remain in diagnostics logs.
 - **ImageMagick now denies unadvertised native decoders** - Startup injects a deny-all-then-permit coder policy, disables filters and `@` path indirection, and default-denies delegates except the four Ghostscript raster-preview paths when that approved runtime is present. SVG/SVGZ use the in-process MSVG pipeline; hazardous MNG, TIM, MSL, and direct MVG inputs are no longer advertised.
 - **Inline rename is transactional and restart-recoverable** - Image and XMP moves now succeed as one unit or roll back together, successful renames persist their complete sidecar map in Recovery Center, and an incomplete rollback creates an explicit partial-state record instead of silently orphaning metadata.
 - **Support bundles remove all rooted paths** - Every textual ZIP entry now passes one sanitizer that replaces drive-rooted, UNC/device, file-URI, mixed-separator, quoted, and POSIX absolute paths with `%PATH%`, including exception text and bundle failure details.

@@ -3572,7 +3572,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Toast($"Undo failed: {ex.Message}");
+            ReportOperationFailure(ex, "Undo rename", Strings.MainToastUndoFailed);
         }
     }
 
@@ -3592,6 +3592,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ToastMessage = message;
         _toastTimer.Stop();
         _toastTimer.Start();
+    }
+
+    private void ReportOperationFailure(Exception exception, string operation, string userMessage)
+    {
+        _log.LogWarning(exception, "{Operation} failed", operation);
+        Toast(userMessage);
     }
 
     private static ToastToneKind InferToastTone(string message)
@@ -4094,8 +4100,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         else
             ShowClipboardImportStatus(result);
 
-        if (!string.IsNullOrWhiteSpace(result.Message))
+        if (result.Exception is { } exception)
+        {
+            _log.LogWarning(exception, "Clipboard import failed");
+            Toast(Strings.MainSecondaryClipboardSaveFailed);
+        }
+        else if (!string.IsNullOrWhiteSpace(result.Message))
+        {
             Toast(result.Message);
+        }
     }
 
     private void ShowClipboardImportStatus(ClipboardImportResult result)
@@ -4146,7 +4159,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Toast($"Could not open: {ex.Message}");
+            ReportOperationFailure(ex, "Open in default app", Strings.MainToastOpenDefaultFailed);
         }
     }
 
@@ -4167,12 +4180,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
+            _log.LogWarning(ex, "Email draft creation failed");
             ShowSecondaryStatus(
                 Strings.MainSecondaryEmailFailed,
-                FirstLine(ex.Message),
+                Strings.MainFailureSeeDiagnostics,
                 SecondaryStatusToneKind.Warning,
                 "\uE783");
-            Toast($"Email failed: {FirstLine(ex.Message)}");
+            Toast(Strings.MainSecondaryEmailFailed);
         }
     }
 
@@ -4961,7 +4975,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         catch (Exception ex)
         {
             RenameStatus = RenameStatusKind.Error;
-            Toast($"Rename failed: {FirstLine(ex.Message)}");
+            ReportOperationFailure(ex, "Rename image", Strings.MainToastRenameFailed);
         }
     }
 
@@ -4973,18 +4987,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         return image is BitmapSource bitmap
             ? ScanFilterService.ApplyOldScanFilter(bitmap)
             : image;
-    }
-
-    private static string FirstLine(string message)
-    {
-        var line = message
-            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
-            .FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(line))
-            return Strings.MainUnexpectedError;
-
-        var parameterSuffix = line.IndexOf(" (Parameter '", StringComparison.Ordinal);
-        return parameterSuffix > 0 ? line[..parameterSuffix] : line;
     }
 
     private void CancelRenameEdit()
@@ -5022,7 +5024,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 AdvanceAfterRemovedCurrent();
                 return;
             case RecycleBinDeleteStatus.Failed:
-                Toast($"Delete failed: {result.ErrorMessage}");
+                _log.LogWarning("Recycle Bin delete failed for {Path}: {Error}", toDelete, result.ErrorMessage);
+                Toast(Strings.MainToastDeleteFailed);
                 return;
         }
 
@@ -5147,7 +5150,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
         {
-            Toast("Rotation failed: " + ex.Message);
+            ReportOperationFailure(ex, "Apply rotation to file", Strings.MainToastRotationFailed);
         }
         finally
         {
@@ -5360,7 +5363,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
         {
-            message = $"Images could not decode {Path.GetFileName(normalizedPath)} for compare: {ex.Message}";
+            _log.LogWarning(ex, "Could not decode compare image {Path}", normalizedPath);
+            message = $"{Strings.MainToastCompareOpenFailed}. {Strings.MainFailureSeeDiagnostics}";
             return false;
         }
     }
@@ -5630,7 +5634,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Toast($"Copy failed: {ex.Message}");
+            ReportOperationFailure(ex, "Copy animation frame", Strings.MainSecondaryCopyFailed);
         }
     }
 
@@ -5660,7 +5664,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Toast($"Export failed: {ex.Message}");
+            ReportOperationFailure(ex, "Export animation frame", Strings.MainToastExportFailed);
         }
         finally
         {
@@ -5681,7 +5685,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Toast($"Frame drag failed: {ex.Message}");
+            ReportOperationFailure(ex, "Prepare animation frame drag", Strings.MainToastFrameDragFailed);
             return false;
         }
     }
@@ -6058,8 +6062,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or ImageMagick.MagickException)
         {
-            CropStatusText = "Crop failed: " + ex.Message;
-            Toast(Strings.MainToastCropFailed);
+            CropStatusText = Strings.MainToastCropFailed;
+            ReportOperationFailure(ex, "Apply crop to file", Strings.MainToastCropFailed);
         }
         finally
         {
@@ -6087,7 +6091,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         else
         {
-            Toast(result.Message);
+            _log.LogWarning("Resize edit-stack update failed: {Message}", result.Message);
+            Toast(Strings.MainToastResizeFailed);
         }
     }
 
@@ -6108,7 +6113,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 }
 
                 var result = _editStack.AppendOperation(imagePath, "adjust", plan.ToEditParameters(), plan.Label);
-                Toast(result.Success ? Strings.MainToastAdjustmentAdded : result.Message);
+                if (result.Success)
+                    Toast(Strings.MainToastAdjustmentAdded);
+                else
+                {
+                    _log.LogWarning("Adjustment edit-stack update failed: {Message}", result.Message);
+                    Toast(Strings.MainToastAdjustmentFailed);
+                }
             })
         {
             Owner = TryGetApplicationMainWindow()
@@ -6134,7 +6145,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 }
 
                 var result = _editStack.AppendOperation(imagePath, "effects", plan.ToEditParameters(), plan.Label);
-                Toast(result.Success ? Strings.MainToastEffectsAdded : result.Message);
+                if (result.Success)
+                    Toast(Strings.MainToastEffectsAdded);
+                else
+                {
+                    _log.LogWarning("Effects edit-stack update failed: {Message}", result.Message);
+                    Toast(Strings.MainToastEffectsFailed);
+                }
             })
         {
             Owner = TryGetApplicationMainWindow()
@@ -6154,7 +6171,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             ImageAutoEnhancePlan.Balanced.ToEditParameters(),
             ImageAutoEnhancePlan.Balanced.Label);
 
-        Toast(result.Success ? Strings.MainToastAutoEnhanceAdded : result.Message);
+        if (result.Success)
+            Toast(Strings.MainToastAutoEnhanceAdded);
+        else
+        {
+            _log.LogWarning("Auto-enhance edit-stack update failed: {Message}", result.Message);
+            Toast(Strings.MainToastAutoEnhanceFailed);
+        }
     }
 
     private void OpenAnnotations()
@@ -6174,7 +6197,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 }
 
                 var result = _editStack.AppendOperation(imagePath, "annotation", plan.ToEditParameters(), plan.Label);
-                Toast(result.Success ? Strings.MainToastAnnotationsAdded : result.Message);
+                if (result.Success)
+                    Toast(Strings.MainToastAnnotationsAdded);
+                else
+                {
+                    _log.LogWarning("Annotation edit-stack update failed: {Message}", result.Message);
+                    Toast(Strings.MainToastAnnotationsFailed);
+                }
             })
         {
             Owner = TryGetApplicationMainWindow()
@@ -6200,7 +6229,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 }
 
                 var result = _editStack.AppendOperation(imagePath, "perspective", plan.ToEditParameters(), plan.Label);
-                Toast(result.Success ? Strings.MainToastPerspectiveAdded : result.Message);
+                if (result.Success)
+                    Toast(Strings.MainToastPerspectiveAdded);
+                else
+                {
+                    _log.LogWarning("Perspective edit-stack update failed: {Message}", result.Message);
+                    Toast(Strings.MainToastPerspectiveFailed);
+                }
             })
         {
             Owner = TryGetApplicationMainWindow()
@@ -6250,7 +6285,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         else
         {
-            ExposureBrushStatusText = "Exposure brush failed: " + result.Message;
+            _log.LogWarning("Exposure brush edit-stack update failed: {Message}", result.Message);
+            ExposureBrushStatusText = Strings.MainToastExposureBrushFailed;
             Toast(Strings.MainToastExposureBrushFailed);
         }
     }
@@ -6301,7 +6337,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         else
         {
-            RedEyeCorrectionStatusText = "Red-eye correction failed: " + result.Message;
+            _log.LogWarning("Red-eye edit-stack update failed: {Message}", result.Message);
+            RedEyeCorrectionStatusText = Strings.MainToastRedEyeFailed;
             Toast(Strings.MainToastRedEyeFailed);
         }
     }
@@ -6373,7 +6410,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         else
         {
-            RetouchStatusText = "Retouch failed: " + result.Message;
+            _log.LogWarning("Retouch edit-stack update failed: {Message}", result.Message);
+            RetouchStatusText = Strings.MainToastRetouchFailed;
             Toast(Strings.MainToastRetouchFailed);
         }
     }
@@ -6510,13 +6548,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             }
             catch (Exception ex)
             {
-                Toast($"Repair failed: {ex.Message}");
+                ReportOperationFailure(ex, "Run AI repair", Strings.MainToastRepairFailed);
                 return;
             }
 
             if (!result.Success || result.RepairedImage is null)
             {
-                Toast(result.ErrorMessage ?? Strings.MainToastRepairFailed);
+                _log.LogWarning("AI repair failed: {Message}", result.ErrorMessage);
+                Toast(Strings.MainToastRepairFailed);
                 return;
             }
 
@@ -6537,7 +6576,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             }
             catch (Exception ex)
             {
-                Toast($"Failed to save repair: {ex.Message}");
+                ReportOperationFailure(ex, "Save AI repair", Strings.MainToastRepairFailed);
             }
         }
         finally
@@ -6592,8 +6631,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            SelectionStatusText = "Selection copy failed: " + ex.Message;
-            Toast(Strings.MainToastSelectionCopyFailed);
+            SelectionStatusText = Strings.MainToastSelectionCopyFailed;
+            ReportOperationFailure(ex, "Copy pixel selection", Strings.MainToastSelectionCopyFailed);
         }
     }
 
@@ -6609,7 +6648,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Toast($"Copy failed: {ex.Message}");
+            ReportOperationFailure(ex, "Copy inspector value", Strings.MainSecondaryCopyFailed);
         }
     }
 
@@ -6815,7 +6854,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Toast($"Wallpaper failed: {ex.Message}");
+            ReportOperationFailure(ex, "Set desktop wallpaper", Strings.MainToastWallpaperFailed);
         }
     }
 
@@ -6826,7 +6865,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (path is null) return;
         string full;
         try { full = System.IO.Path.GetFullPath(path); }
-        catch (Exception ex) { Toast($"Could not open Explorer: {ex.Message}"); return; }
+        catch (Exception ex)
+        {
+            ReportOperationFailure(ex, "Normalize Explorer reveal path", Strings.MainToastRevealFailed);
+            return;
+        }
 
         if (!File.Exists(full))
         {
@@ -6838,7 +6881,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             ShellIntegration.RevealPathInExplorer(full);
         }
-        catch (Exception ex) { Toast($"Could not open Explorer: {ex.Message}"); }
+        catch (Exception ex)
+        {
+            ReportOperationFailure(ex, "Reveal file in Explorer", Strings.MainToastRevealFailed);
+        }
     }
 
     private void CopyPath() => CopyPath(CurrentPath);
@@ -6847,7 +6893,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         if (path is null) return;
         try { ClipboardService.SetText(path); Toast(Strings.MainToastCopiedPath); }
-        catch (Exception ex) { Toast($"Copy failed: {ex.Message}"); }
+        catch (Exception ex) { ReportOperationFailure(ex, "Copy path", Strings.MainSecondaryCopyFailed); }
     }
 
     private void CopyCurrentImage()
@@ -6860,7 +6906,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Toast($"Copy failed: {ex.Message}");
+            ReportOperationFailure(ex, "Copy image", Strings.MainSecondaryCopyFailed);
         }
     }
 
@@ -6874,7 +6920,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Toast($"Copy failed: {ex.Message}");
+            ReportOperationFailure(ex, "Copy image and path", Strings.MainSecondaryCopyFailed);
         }
     }
 
@@ -6893,7 +6939,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             }
             catch (Exception ex)
             {
-                Toast($"Folder picker failed: {ex.Message}");
+                ReportOperationFailure(ex, "Choose transfer folder", Strings.MainToastFolderPickerFailed);
                 return;
             }
         }
@@ -6951,12 +6997,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Toast(Strings.MainToastTransferUnsupported);
                 break;
             default:
+                _log.LogWarning(
+                    "{Mode} transfer failed for {Source}: {Message}",
+                    result.Mode,
+                    result.SourcePath,
+                    result.Message);
+                var failureTitle = result.Mode == ImageFileTransferMode.Copy
+                    ? Strings.MainSecondaryCopyFailed
+                    : Strings.MainSecondaryMoveFailed;
                 ShowSecondaryStatus(
-                    result.Mode == ImageFileTransferMode.Copy ? Strings.MainSecondaryCopyFailed : Strings.MainSecondaryMoveFailed,
-                    FirstLine(result.Message),
+                    failureTitle,
+                    Strings.MainFailureSeeDiagnostics,
                     SecondaryStatusToneKind.Error,
                     "\uE783");
-                Toast($"{(result.Mode == ImageFileTransferMode.Copy ? "Copy" : "Move")} failed: {FirstLine(result.Message)}");
+                Toast(failureTitle);
                 break;
         }
     }
@@ -7105,7 +7159,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Toast($"Save failed: {ex.Message}");
+            ReportOperationFailure(ex, "Resolve Save a copy destination", Strings.MainToastSaveFailed);
             return;
         }
 
@@ -7119,7 +7173,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 if (result.Success)
                     Toast($"Saved edited copy: {Path.GetFileName(result.OutputPath)}. {result.C2paHandoff?.Summary ?? "C2PA not written"}");
                 else
-                    Toast($"Save failed: {result.Message}");
+                {
+                    _log.LogWarning("Edit-stack export failed for {Path}: {Message}", sourcePath, result.Message);
+                    Toast(Strings.MainToastSaveFailed);
+                }
             }
             else
             {
@@ -7132,7 +7189,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Toast($"Save failed: {ex.Message}");
+            ReportOperationFailure(ex, "Save a copy", Strings.MainToastSaveFailed);
         }
         finally
         {
@@ -7166,7 +7223,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Toast($"Print failed: {ex.Message}");
+            ReportOperationFailure(ex, "Print image", Strings.MainToastPrintFailed);
         }
     }
 
@@ -7180,7 +7237,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Toast($"Default print failed: {ex.Message}");
+            ReportOperationFailure(ex, "Print image to default printer", Strings.MainToastPrintFailed);
         }
     }
 
@@ -7464,7 +7521,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            Toast($"Could not strip GPS data: {ex.Message}");
+            ReportOperationFailure(ex, "Remove GPS metadata", Strings.MainToastGpsStripFailed);
         }
         finally
         {
@@ -7506,8 +7563,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
+            _log.LogWarning(ex, "Could not strip metadata category {Category} from {Path}", label, path);
             Toast(string.Format(System.Globalization.CultureInfo.InvariantCulture,
-                Strings.MainToastMetadataStripFailed, label, ex.Message));
+                Strings.MainToastMetadataStripFailed, label));
         }
         finally
         {

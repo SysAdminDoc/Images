@@ -780,6 +780,34 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
+    public void OperationFailureMessages_DoNotExposeExceptionDetails()
+    {
+        RunOnSta(() =>
+        {
+            const string sensitiveDetail = "HRESULT 0x80070005 at C:\\private\\photo.png";
+            using var temp = TestDirectory.Create();
+            var image = WritePng(temp.Path, "a.png");
+            using var viewModel = CreateViewModelWithFastPreview(
+                temp,
+                setWallpaper: (_, _) => throw new InvalidOperationException(sensitiveDetail),
+                createEmailDraft: _ => throw new IOException(sensitiveDetail));
+
+            viewModel.OpenFile(image);
+            viewModel.SetAsWallpaperCommand.Execute("Fill");
+
+            Assert.Equal("Wallpaper could not be changed", viewModel.ToastMessage);
+            Assert.DoesNotContain(sensitiveDetail, viewModel.ToastMessage, StringComparison.Ordinal);
+
+            viewModel.SendToEmailCommand.Execute(null);
+
+            Assert.Equal("Email draft failed", viewModel.ToastMessage);
+            Assert.Equal("Email draft failed", viewModel.SecondaryStatusTitle);
+            Assert.Equal("Open Diagnostics for technical details.", viewModel.SecondaryStatusDetail);
+            Assert.DoesNotContain(sensitiveDetail, viewModel.SecondaryStatusDetail, StringComparison.Ordinal);
+        });
+    }
+
+    [Fact]
     public void CopyImageCommands_UseClipboardSeams()
     {
         RunOnSta(() =>
@@ -987,7 +1015,7 @@ public sealed class MainViewModelStateTests
             Assert.True(File.Exists(source));
             Assert.False(File.Exists(unsupportedTarget));
             Assert.Equal(MainViewModel.RenameStatusKind.Error, viewModel.RenameStatus);
-            Assert.Equal("Rename failed: Extension '.txt' is not supported by Images.", viewModel.ToastMessage);
+            Assert.Equal("Rename failed", viewModel.ToastMessage);
             Assert.Equal("Choose a supported Images extension", viewModel.RenamePreview);
         });
     }

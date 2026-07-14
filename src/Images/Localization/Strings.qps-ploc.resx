@@ -4549,7 +4549,7 @@ Details written to:
     <value>[!!!!!! {0} removed ({1} {2}) !!!!!!]</value>
   </data>
   <data name="MainToastMetadataStripFailed" xml:space="preserve">
-    <value>[!!!!!! Could not strip {0}: {1} !!!!!!]</value>
+    <value>[!!!!!!!!!!!! Could not strip {0}. Open Diagnostics for technical details. !!!!!!!!!!!!]</value>
   </data>
   <data name="AutomationAboutWindowCodecCapabilityMatrix" xml:space="preserve">
     <value>[!!!!!! Codec capability matrix !!!!!!]</value>
@@ -5729,5 +5729,65 @@ Details written to:
   </data>
   <data name="AutomationSettingsWindowClearLocalDerivedData" xml:space="preserve">
     <value>[!!!!!! Clear local derived data !!!!!!]</value>
+  </data>
+  <data name="MainFailureSeeDiagnostics" xml:space="preserve">
+    <value>[!!!!!!!!!! Open Diagnostics for technical details. !!!!!!!!!!]</value>
+  </data>
+  <data name="MainToastUndoFailed" xml:space="preserve">
+    <value>[!!!!!!! Could not undo the rename !!!!!!!]</value>
+  </data>
+  <data name="MainToastOpenDefaultFailed" xml:space="preserve">
+    <value>[!!!!!!!!!!! Could not open this file in its default app !!!!!!!!!!!]</value>
+  </data>
+  <data name="MainToastRenameFailed" xml:space="preserve">
+    <value>[!!!! Rename failed !!!!]</value>
+  </data>
+  <data name="MainToastDeleteFailed" xml:space="preserve">
+    <value>[!!!!!!!!!!! Could not move this file to the Recycle Bin !!!!!!!!!!!]</value>
+  </data>
+  <data name="MainToastRotationFailed" xml:space="preserve">
+    <value>[!!!!!!!! Rotation could not be applied !!!!!!!!]</value>
+  </data>
+  <data name="MainToastExportFailed" xml:space="preserve">
+    <value>[!!!! Export failed !!!!]</value>
+  </data>
+  <data name="MainToastFrameDragFailed" xml:space="preserve">
+    <value>[!!!!!!!!!! Could not prepare the frame for dragging !!!!!!!!!!]</value>
+  </data>
+  <data name="MainToastResizeFailed" xml:space="preserve">
+    <value>[!!!!!!! Resize could not be added !!!!!!!]</value>
+  </data>
+  <data name="MainToastAdjustmentFailed" xml:space="preserve">
+    <value>[!!!!!!!! Adjustment could not be added !!!!!!!!]</value>
+  </data>
+  <data name="MainToastEffectsFailed" xml:space="preserve">
+    <value>[!!!!!!! Effects could not be added !!!!!!!]</value>
+  </data>
+  <data name="MainToastAutoEnhanceFailed" xml:space="preserve">
+    <value>[!!!!!!!! Auto enhance could not be added !!!!!!!!]</value>
+  </data>
+  <data name="MainToastAnnotationsFailed" xml:space="preserve">
+    <value>[!!!!!!!! Annotations could not be added !!!!!!!!]</value>
+  </data>
+  <data name="MainToastPerspectiveFailed" xml:space="preserve">
+    <value>[!!!!!!!!!!! Perspective correction could not be added !!!!!!!!!!!]</value>
+  </data>
+  <data name="MainToastWallpaperFailed" xml:space="preserve">
+    <value>[!!!!!!!! Wallpaper could not be changed !!!!!!!!]</value>
+  </data>
+  <data name="MainToastRevealFailed" xml:space="preserve">
+    <value>[!!!!!!!!!! Could not reveal this file in Explorer !!!!!!!!!!]</value>
+  </data>
+  <data name="MainToastFolderPickerFailed" xml:space="preserve">
+    <value>[!!!!!!!! Could not open the folder picker !!!!!!!!]</value>
+  </data>
+  <data name="MainToastSaveFailed" xml:space="preserve">
+    <value>[!!! Save failed !!!]</value>
+  </data>
+  <data name="MainToastPrintFailed" xml:space="preserve">
+    <value>[!!! Print failed !!!]</value>
+  </data>
+  <data name="MainToastGpsStripFailed" xml:space="preserve">
+    <value>[!!!!!!!!! Could not remove GPS location data !!!!!!!!!]</value>
   </data>
 </root>
