@@ -69,8 +69,16 @@ public sealed class MainWindowInputTests
             try
             {
                 Assert.Equal(52, Assert.IsType<Border>(window.FindName("WorkflowRail")).Width);
-                Assert.Equal(300, Assert.IsType<Border>(window.FindName("RightSidePanel")).Width);
-                Assert.Equal(94, Assert.IsType<ListBox>(window.FindName("FilmstripItems")).MaxHeight);
+                Assert.Equal(340, Assert.IsType<Border>(window.FindName("RightSidePanel")).Width);
+                Assert.Equal(78, Assert.IsType<ListBox>(window.FindName("FilmstripItems")).MaxHeight);
+
+                Assert.NotNull(window.FindName("ImageContextBar"));
+                Assert.NotNull(window.FindName("ImageStageFrame"));
+                Assert.NotNull(window.FindName("TransportDock"));
+                Assert.NotNull(window.FindName("ImageNavigationGroup"));
+                Assert.NotNull(window.FindName("ImageViewGroup"));
+                Assert.NotNull(window.FindName("ImageUtilityGroup"));
+                Assert.NotNull(window.FindName("InspectorOverview"));
 
                 var fitButton = Assert.IsType<Button>(window.FindName("FitButton"));
                 Assert.Equal("Fit", fitButton.Content);
@@ -79,6 +87,7 @@ public sealed class MainWindowInputTests
                 Assert.Equal(Visibility.Collapsed, Assert.IsType<Grid>(window.FindName("EmptyCapabilityGrid")).Visibility);
                 Assert.Equal(Visibility.Collapsed, Assert.IsType<Grid>(window.FindName("CurrentFileInfoRow")).Visibility);
                 Assert.Equal(Visibility.Collapsed, Assert.IsType<Expander>(window.FindName("InspectorToolsExpander")).Visibility);
+                Assert.False(Assert.IsType<Expander>(window.FindName("FileDetailsExpander")).IsExpanded);
                 Assert.False(Assert.IsType<Expander>(window.FindName("MoreDetailsExpander")).IsExpanded);
 
                 var gallery = Assert.IsType<Border>(window.FindName("GalleryWorkbench"));

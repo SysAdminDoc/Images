@@ -141,6 +141,15 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
+    private void ContextBarMore_Click(object sender, RoutedEventArgs e)
+    {
+        if (Viewport.ContextMenu is not { } menu) return;
+
+        menu.PlacementTarget = sender as UIElement ?? Viewport;
+        menu.IsOpen = true;
+        e.Handled = true;
+    }
+
     private bool _previewCenterQueued;
 
     private void QueueCenterCurrentPreviewItems()

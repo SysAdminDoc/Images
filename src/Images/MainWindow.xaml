@@ -98,12 +98,91 @@
         <!-- ============ LEFT: Viewport, floating chrome, bottom toolbar ============ -->
         <Grid Grid.Column="1" Background="{DynamicResource ViewportBrush}">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
+            <!-- Quiet file context: keeps location and the highest-frequency image actions
+                 visible without competing with the image. Hidden for immersive modes. -->
+            <Border x:Name="ImageContextBar"
+                    Grid.Row="0"
+                    AutomationProperties.Name="{Binding CurrentFileName}">
+                <Border.Style>
+                    <Style TargetType="Border" BasedOn="{StaticResource ImageContextBar}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasImage}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsPeekMode}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsFullscreen}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="&#xE8B7;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource OverlayBrush}"
+                                   Margin="0,0,9,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding CurrentFolder, Converter={x:Static vm:PathToFileNameConverter.Instance}}"
+                                   Foreground="{DynamicResource SubtextBrush}"
+                                   FontSize="12"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="220"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="&#xE76C;"
+                                   FontFamily="{StaticResource IconFontFamily}"
+                                   FontSize="9"
+                                   Foreground="{DynamicResource OverlayBrush}"
+                                   Margin="8,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding CurrentFileName}"
+                                   Foreground="{DynamicResource TextBrush}"
+                                   FontSize="12.5"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="360"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <Button Style="{StaticResource ContextActionButton}"
+                                Command="{Binding StartCompareCommand}"
+                                Content="&#xE7A8;"
+                                ToolTip="{loc:Loc AutomationMainWindowCompareWithNextImage}"
+                                AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareWithNextImage}" />
+                        <Button Style="{StaticResource ContextActionButton}"
+                                Command="{Binding RotateCwCommand}"
+                                Content="&#xE7AC;"
+                                Margin="4,0,0,0"
+                                ToolTip="{loc:Loc AutomationMainWindowRotateRight}"
+                                AutomationProperties.Name="{loc:Loc AutomationMainWindowRotateRight}" />
+                        <Button Style="{StaticResource ContextActionButton}"
+                                Content="&#xE712;"
+                                Margin="4,0,0,0"
+                                Click="ContextBarMore_Click"
+                                ToolTip="{loc:Loc AutomationMainWindowViewportContextMenu}"
+                                AutomationProperties.Name="{loc:Loc AutomationMainWindowViewportContextMenu}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
             <Grid x:Name="Viewport"
-                  Grid.Row="0"
+                  Grid.Row="1"
                   ClipToBounds="True"
                   Background="Transparent"
                   PreviewMouseRightButtonUp="Viewport_PreviewMouseRightButtonUp">
@@ -351,6 +430,29 @@
                     </ContextMenu>
                 </Grid.ContextMenu>
 
+                <Border x:Name="ImageStageFrame"
+                        Background="{DynamicResource MantleBrush}"
+                        BorderBrush="{DynamicResource HairlineBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource Radius.Md.CR}"
+                        Visibility="{Binding ShowPrimaryImageCanvas, Converter={StaticResource BoolToVis}}">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Margin" Value="18,16,18,18" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPeekMode}" Value="True">
+                                    <Setter Property="Margin" Value="0" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsFullscreen}" Value="True">
+                                    <Setter Property="Margin" Value="0" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+
                 <ctl:ZoomPanImage x:Name="Canvas"
                                    Source="{Binding CurrentImage}"
                                    AnalysisOverlaySource="{Binding PhotoCullingOverlay}"
@@ -372,7 +474,21 @@
                                    MouseLeave="Canvas_MouseLeave"
                                    LostMouseCapture="Canvas_LostMouseCapture"
                                    MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
-                                   MouseLeftButtonUp="Canvas_MouseLeftButtonUp" />
+                                   MouseLeftButtonUp="Canvas_MouseLeftButtonUp">
+                    <ctl:ZoomPanImage.Style>
+                        <Style TargetType="ctl:ZoomPanImage">
+                            <Setter Property="Margin" Value="19,17,19,19" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPeekMode}" Value="True">
+                                    <Setter Property="Margin" Value="0" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsFullscreen}" Value="True">
+                                    <Setter Property="Margin" Value="0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ctl:ZoomPanImage.Style>
+                </ctl:ZoomPanImage>
 
                 <Grid Visibility="{Binding ShowArchiveContinuousReader, Converter={StaticResource BoolToVis}}"
                       Background="{DynamicResource BaseBrush}"
@@ -2567,7 +2683,7 @@
                  V20-32: peek-mode hides the entire toolbar so the image fills the window with
                  zero chrome. The Width="Auto" outer column on the side panel + IsFullscreen=true
                  binding handles the right-side panel; this Visibility handles the toolbar row. -->
-            <Grid x:Name="BottomToolbarGrid" Grid.Row="1"
+            <Grid x:Name="BottomToolbarGrid" Grid.Row="2"
                   Visibility="{Binding IsPeekMode, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1" />
@@ -2595,7 +2711,7 @@
                                      Background="Transparent"
                                      BorderThickness="0"
                                      Padding="0,0,0,4"
-                                     MaxHeight="94"
+                                     MaxHeight="78"
                                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                      ScrollViewer.VerticalScrollBarVisibility="Disabled"
                                      ScrollViewer.CanContentScroll="True"
@@ -2630,10 +2746,10 @@
                                             <Button Command="{Binding DataContext.OpenPreviewItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                     CommandParameter="{Binding}"
                                                     Loaded="PreviewThumbnail_Loaded"
-                                                    Width="78"
-                                                    MinHeight="76"
-                                                    Margin="0,0,7,0"
-                                                    Padding="4"
+                                                    Width="108"
+                                                    MinHeight="68"
+                                                    Margin="0,0,8,0"
+                                                    Padding="3"
                                                     HorizontalContentAlignment="Stretch"
                                                     VerticalContentAlignment="Stretch"
                                                     ToolTip="{Binding Path}"
@@ -2682,8 +2798,7 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Button.Style>
-                                                <StackPanel>
-                                                    <Border Height="44"
+                                                <Border Height="62"
                                                             CornerRadius="{StaticResource Radius.Sm.CR}"
                                                             Background="{DynamicResource ViewportBrush}"
                                                             BorderBrush="{DynamicResource HairlineBrush}"
@@ -2713,18 +2828,7 @@
                                                                 </TextBlock.Style>
                                                             </TextBlock>
                                                         </Grid>
-                                                    </Border>
-                                                    <TextBlock Text="{Binding FileName}"
-                                                               Foreground="{DynamicResource TextBrush}"
-                                                               FontSize="10.5"
-                                                               FontWeight="SemiBold"
-                                                               TextTrimming="CharacterEllipsis"
-                                                               Margin="1,5,1,0" />
-                                                    <TextBlock Text="{Binding PositionText}"
-                                                               Foreground="{DynamicResource OverlayBrush}"
-                                                               FontSize="10"
-                                                               Margin="1,1,1,0" />
-                                                </StackPanel>
+                                                </Border>
                                             </Button>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
@@ -2986,117 +3090,59 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Wrapping command row preserves all actions instead of clipping at the minimum width. -->
-                        <WrapPanel Grid.Row="2"
+                        <!-- Unified transport dock. Each semantic group wraps as a unit at the
+                             minimum window width, preserving hierarchy and every visible action. -->
+                        <WrapPanel x:Name="TransportDock"
+                                   Grid.Row="2"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center">
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrevCommand}" Content="&#xE76B;" ToolTip="{loc:Loc MainUiPreviousLeft}" AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousImage}" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCcwCommand}" Content="&#xE7AD;" ToolTip="{loc:Loc AutomationMainWindowRotateLeft}" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowRotateLeft}" />
-                            <Button x:Name="FitButton"
-                                    Style="{StaticResource ToolbarTextButton}"
-                                    Content="{loc:Loc MainUiFit}"
-                                    Click="FitButton_Click"
-                                    ToolTip="{loc:Loc MainUiFitImageToViewport}"
-                                    Margin="8,0,0,0"
-                                    AutomationProperties.Name="{Binding ToolTip, RelativeSource={RelativeSource Self}}" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding OpenCommand}" Content="&#xE8E5;" ToolTip="{loc:Loc MainUiOpen}" Margin="4,0,0,0" Visibility="Collapsed" AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenImage}" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCwCommand}" Content="&#xE7AC;" ToolTip="{loc:Loc AutomationMainWindowRotateRight}" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowRotateRight}" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding NextCommand}" Content="&#xE76C;" ToolTip="{loc:Loc MainUiNextRight}" Margin="4,0,0,0" AutomationProperties.Name="{loc:Loc AutomationMainWindowNextImage}" />
-                            <Button Command="{Binding ToggleFilmstripCommand}"
-                                    Content="&#xEB9F;"
-                                    ToolTip="{Binding FilmstripToggleTooltip}"
-                                    Margin="4,0,0,0"
-                                    Visibility="{Binding CanToggleFilmstrip, Converter={StaticResource BoolToVis}}"
-                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowToggleFilmstrip}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsFilmstripVisible}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource AccentWarmPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentWarmBrush}" />
-                                                <Setter Property="Foreground" Value="{DynamicResource AccentWarmBrush}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                            <Button Command="{Binding ToggleMetadataHudCommand}"
-                                    Content="&#xE946;"
-                                    ToolTip="{Binding MetadataHudToggleTooltip}"
-                                    Margin="4,0,0,0"
-                                    Visibility="Collapsed"
-                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowToggleMetadataHUD}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsMetadataHudVisible}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
-                                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                            <Button Command="{Binding ExtractTextCommand}"
-                                    Content="&#xE8EA;"
-                                    ToolTip="{Binding OcrModeTooltip}"
-                                    Margin="4,0,0,0"
-                                    Visibility="Collapsed"
-                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowExtractText}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsOcrMode}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource AccentPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
-                                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsOcrBusy}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource WarningPanelBrush}" />
-                                                <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}" />
-                                                <Setter Property="Foreground" Value="{DynamicResource YellowBrush}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                            <Border Width="1"
-                                    Height="22"
-                                    Background="{DynamicResource HairlineBrush}"
-                                    Margin="12,6"
-                                    Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}" />
-                            <Button Style="{StaticResource ToolbarButton}"
-                                    Command="{Binding PrevPageCommand}"
-                                    Content="&#xE76B;"
-                                    ToolTip="{loc:Loc AutomationMainWindowPreviousPage}"
-                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousPage}"
-                                    Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}" />
-                            <Button Style="{StaticResource ToolbarButton}"
-                                    Command="{Binding NextPageCommand}"
-                                    Content="&#xE76C;"
-                                    ToolTip="{loc:Loc AutomationMainWindowNextPage}"
-                                    Margin="4,0,0,0"
-                                    AutomationProperties.Name="{loc:Loc AutomationMainWindowNextPage}"
-                                    Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}" />
-                            <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding DeleteCommand}" Content="&#xE74D;" ToolTip="{loc:Loc MainUiDeleteRecycleBin}" AutomationProperties.Name="{loc:Loc AutomationMainWindowSendImageToRecycleBin}" />
-                            <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}" Content="&#xE838;" ToolTip="{loc:Loc CommandPalette_Reveal}" AutomationProperties.Name="{loc:Loc AutomationMainWindowRevealImageInExplorer}" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding CopyPathCommand}" Content="&#xE8C8;" ToolTip="{loc:Loc MainUiCopyPath}" Margin="4,0,0,0" Visibility="Collapsed" AutomationProperties.Name="{loc:Loc AutomationMainWindowCopyFilePath}" />
-                            <Button Style="{StaticResource ToolbarButton}" Command="{Binding RefreshCommand}" Content="&#xE72C;" ToolTip="{Binding ShortcutTexts[refresh], StringFormat=Refresh folder ({0})}" Margin="4,0,0,0" Visibility="Collapsed" AutomationProperties.Name="{loc:Loc AutomationMainWindowRefreshFolder}" />
-                            <Border Width="1" Height="22" Background="{DynamicResource HairlineBrush}" Margin="12,6" />
-                            <Button Style="{StaticResource ToolbarButton}"
-                                    Content="&#xE949;"
-                                    Click="ZoomOutButton_Click"
-                                    ToolTip="{loc:Loc MainUiZoomOut}"
-                                    AutomationProperties.Name="{Binding ToolTip, RelativeSource={RelativeSource Self}}" />
-                            <Button Style="{StaticResource ToolbarButton}"
-                                    Content="&#xE948;"
-                                    Click="ZoomInButton_Click"
-                                    ToolTip="{loc:Loc MainUiZoomIn}"
-                                    Margin="4,0,0,0"
-                                    AutomationProperties.Name="{Binding ToolTip, RelativeSource={RelativeSource Self}}" />
+                            <Border x:Name="ImageNavigationGroup" Style="{StaticResource ToolbarGroup}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrevCommand}" Content="&#xE76B;" ToolTip="{loc:Loc MainUiPreviousLeft}" AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousImage}" />
+                                    <Button Style="{StaticResource ToolbarButton}" Command="{Binding NextCommand}" Content="&#xE76C;" ToolTip="{loc:Loc MainUiNextRight}" AutomationProperties.Name="{loc:Loc AutomationMainWindowNextImage}" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border x:Name="ImageViewGroup" Style="{StaticResource ToolbarGroup}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCcwCommand}" Content="&#xE7AD;" ToolTip="{loc:Loc AutomationMainWindowRotateLeft}" AutomationProperties.Name="{loc:Loc AutomationMainWindowRotateLeft}" />
+                                    <Button x:Name="FitButton"
+                                            Style="{StaticResource ToolbarTextButton}"
+                                            Content="{loc:Loc MainUiFit}"
+                                            Click="FitButton_Click"
+                                            ToolTip="{loc:Loc MainUiFitImageToViewport}"
+                                            AutomationProperties.Name="{Binding ToolTip, RelativeSource={RelativeSource Self}}" />
+                                    <Button Style="{StaticResource ToolbarButton}" Command="{Binding RotateCwCommand}" Content="&#xE7AC;" ToolTip="{loc:Loc AutomationMainWindowRotateRight}" AutomationProperties.Name="{loc:Loc AutomationMainWindowRotateRight}" />
+                                    <Button Style="{StaticResource ToolbarButton}" Content="&#xE949;" Click="ZoomOutButton_Click" ToolTip="{loc:Loc MainUiZoomOut}" AutomationProperties.Name="{Binding ToolTip, RelativeSource={RelativeSource Self}}" />
+                                    <Button Style="{StaticResource ToolbarButton}" Content="&#xE948;" Click="ZoomInButton_Click" ToolTip="{loc:Loc MainUiZoomIn}" AutomationProperties.Name="{Binding ToolTip, RelativeSource={RelativeSource Self}}" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border x:Name="ImageUtilityGroup" Style="{StaticResource ToolbarGroup}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Command="{Binding ToggleFilmstripCommand}"
+                                            Content="&#xEB9F;"
+                                            ToolTip="{Binding FilmstripToggleTooltip}"
+                                            Visibility="{Binding CanToggleFilmstrip, Converter={StaticResource BoolToVis}}"
+                                            AutomationProperties.Name="{loc:Loc AutomationMainWindowToggleFilmstrip}">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsFilmstripVisible}" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource AccentWarmPanelBrush}" />
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource AccentWarmBrush}" />
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentWarmBrush}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                    <Button Style="{StaticResource ToolbarButton}" Command="{Binding PrevPageCommand}" Content="&#xE76B;" ToolTip="{loc:Loc AutomationMainWindowPreviousPage}" AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousPage}" Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}" />
+                                    <Button Style="{StaticResource ToolbarButton}" Command="{Binding NextPageCommand}" Content="&#xE76C;" ToolTip="{loc:Loc AutomationMainWindowNextPage}" AutomationProperties.Name="{loc:Loc AutomationMainWindowNextPage}" Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}" />
+                                    <Button Style="{StaticResource ToolbarButton}" Command="{Binding RevealCommand}" Content="&#xE838;" ToolTip="{loc:Loc CommandPalette_Reveal}" AutomationProperties.Name="{loc:Loc AutomationMainWindowRevealImageInExplorer}" />
+                                    <Button Style="{StaticResource ToolbarButton}" Command="{Binding DeleteCommand}" Content="&#xE74D;" ToolTip="{loc:Loc MainUiDeleteRecycleBin}" AutomationProperties.Name="{loc:Loc AutomationMainWindowSendImageToRecycleBin}" />
+                                </StackPanel>
+                            </Border>
                         </WrapPanel>
                     </Grid>
                 </Border>
@@ -3105,13 +3151,13 @@
 
         <!-- ============ RIGHT: Contextual details panel ============ -->
         <Border x:Name="RightSidePanel" Grid.Column="2"
-                Width="300"
+                Width="340"
                 Visibility="{Binding IsFullscreen, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}"
                 Background="{DynamicResource InspectorPanelBrush}"
                 BorderBrush="{DynamicResource HairlineBrush}"
                 BorderThickness="1,0,0,0">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
-                <StackPanel Margin="16,18,16,24">
+                <StackPanel Margin="18,20,18,26">
 
                     <!-- Panel header -->
                     <Grid Margin="0,0,0,16">
@@ -3144,6 +3190,51 @@
                                     Margin="4,0,0,0" />
                         </StackPanel>
                     </Grid>
+
+                    <!-- Overview first: identity and the four facts users most often scan.
+                         Deeper metadata remains available in the collapsed sections below. -->
+                    <StackPanel x:Name="InspectorOverview"
+                                Margin="0,0,0,17"
+                                Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="{Binding CurrentFileName}"
+                                   Foreground="{DynamicResource TextBrush}"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding CurrentFileName}" />
+                        <TextBlock Text="{Binding CurrentFolder}"
+                                   Foreground="{DynamicResource OverlayBrush}"
+                                   FontSize="11.5"
+                                   Margin="0,4,0,9"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding CurrentFolder}" />
+                        <UniformGrid Columns="2" Rows="2" Margin="-3,0,-3,0">
+                            <Border Style="{StaticResource InspectorFactTile}">
+                                <StackPanel>
+                                    <TextBlock Text="{loc:Loc ExportPreviewSize}" Style="{StaticResource Text.Hint}" />
+                                    <TextBlock Text="{Binding FileSizeText}" Margin="0,4,0,0" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource InspectorFactTile}">
+                                <StackPanel>
+                                    <TextBlock Text="{loc:Loc ExportPreviewPixels}" Style="{StaticResource Text.Hint}" />
+                                    <TextBlock Text="{Binding DimensionsText}" Margin="0,4,0,0" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource InspectorFactTile}">
+                                <StackPanel>
+                                    <TextBlock Text="{loc:Loc MainUiDecoder}" Style="{StaticResource Text.Hint}" />
+                                    <TextBlock Text="{Binding DecoderUsed}" Margin="0,4,0,0" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis" ToolTip="{Binding DecoderUsed}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource InspectorFactTile}">
+                                <StackPanel>
+                                    <TextBlock Text="{loc:Loc FileHealthScanMetaFolder}" Style="{StaticResource Text.Hint}" />
+                                    <TextBlock Text="{Binding CurrentFolder, Converter={x:Static vm:PathToFileNameConverter.Instance}}" Margin="0,4,0,0" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis" ToolTip="{Binding CurrentFolder}" />
+                                </StackPanel>
+                            </Border>
+                        </UniformGrid>
+                    </StackPanel>
 
                     <Border Style="{StaticResource Card}"
                             Background="{DynamicResource AccentPanelBrush}"
@@ -4070,12 +4161,15 @@
                         </ItemsControl>
                     </StackPanel>
 
-                    <Border Style="{StaticResource Divider}" />
-
-                    <!-- DETAILS section -->
-                    <TextBlock Text="{loc:Loc MainUiDetails}" Style="{StaticResource SectionLabel}" />
-
-                    <Grid Margin="1,0,0,0">
+                    <!-- Detailed file metadata is progressive disclosure; the common facts are
+                         already visible in the overview tiles above. -->
+                    <Expander x:Name="FileDetailsExpander"
+                              Style="{StaticResource InspectorExpander}"
+                              Header="{loc:Loc MainUiMoreDetails}"
+                              IsExpanded="False"
+                              Margin="0,4,0,0"
+                              Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}">
+                    <Grid Margin="11,10,11,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
@@ -4134,6 +4228,7 @@
                             </Border>
                         </StackPanel>
                     </Grid>
+                    </Expander>
 
                     <Expander x:Name="InspectorToolsExpander"
                               Style="{StaticResource InspectorExpander}"
@@ -5418,7 +5513,7 @@
 
                     <Expander x:Name="MoreDetailsExpander"
                               Style="{StaticResource InspectorExpander}"
-                              Header="{loc:Loc MainUiMoreDetails}"
+                              Header="{loc:Loc MainUiColorHistogram}"
                               IsExpanded="False"
                               Margin="0,4,0,0"
                               Visibility="{Binding ShowColorAnalysisPanel, Converter={StaticResource BoolToVis}}">

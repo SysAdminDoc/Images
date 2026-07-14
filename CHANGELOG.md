@@ -19,6 +19,7 @@ All notable changes to **Images** are documented here.
 
 ### Added
 
+- **Refined viewer design target** - A new image-generated concept at `assets/mockups/premium-viewer-v0.3-concept.png` captures the intended hierarchy for the contextual file bar, inset image stage, progressive Details inspector, filmstrip, and transport dock.
 - **Monitor-aware legacy ICC output** - The opt-in color-managed display path now resolves the active monitor profile with Windows ICM, verifies Advanced Color state, converts tagged images to a non-sRGB monitor profile only in legacy SDR mode, and safely falls back to sRGB otherwise. Moving the window between monitors invalidates preloads and re-decodes the current image; About diagnostics report the active destination and fallback reason.
 - **Resource-bounded adversarial codec corpus** - A dedicated child-process probe now exercises corrupt/truncated PNG, JPEG, WebP, TIFF, GIF, and SVG inputs, declared-dimension bombs, and archive entry/compression floods under a 20-second wall timeout and 768 MiB Windows Job Object ceiling. Hash- and license-verified upstream fixtures prove AVIF, HEIC, JXL, DNG RAW, and PSD decoding without risking the xUnit host.
 - **Screen-reader announcements for asynchronous status changes** - Every dynamic status surface across all 20 WPF windows now raises coalesced `LiveRegionChanged` events with polite semantics, including scans, imports, exports, recovery, model work, background activity, and errors. Static contracts cover every named status surface, while the opt-in rendered matrix now constructs every secondary window under Dark, Latte, High Contrast, and the pseudo-locale.
@@ -48,6 +49,7 @@ All notable changes to **Images** are documented here.
 
 ### Changed
 
+- **Viewer workspace has a clearer visual hierarchy** - The active file now gets a quiet breadcrumb/action bar and inset stage, the Details panel leads with four scannable facts and collapses duplicate metadata, the filmstrip prioritizes larger image previews, and navigation/view/file actions sit in three coherent transport groups that wrap intact on narrow windows. Peek and fullscreen modes remain edge-to-edge.
 - **Deterministic image-runtime tests** - Test collection parallelism now has a fixed four-worker ceiling, WPF/settings tests that share process-wide theme and decoder state are serialized together, and async writeback assertions wait for operation completion before checking terminal state.
 - **Reproducible local and release builds** - `global.json` pins the .NET 10.0.3xx feature band with patch-only roll-forward, app/test NuGet graphs are committed as lock files, and release readiness restores in locked mode. CycloneDX 6.2.0 is a repo-local tool restored explicitly before SBOM generation, removing dependence on machine-global tools.
 - **Primary windows are fully localization-backed** - MainWindow menus, tooltips, empty/error states, gallery, inspector, controls, shortcuts help, and AboutWindow visible copy now resolve from resources. The localization gate rejects new literal visible text in either window and missing XAML resource keys; the pseudo-locale covers every addition.
