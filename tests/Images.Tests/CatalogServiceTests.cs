@@ -300,6 +300,54 @@ public sealed class CatalogServiceTests
     }
 
     [Fact]
+    public void Rebuild_TransientSidecarProbeDefersHashAndRetriesLater()
+    {
+        using var temp = TestDirectory.Create();
+        var image = WriteImage(temp.Path, "rated.png", 8, 8);
+        var sidecar = image + ".xmp";
+        WriteRatingSidecar(sidecar, 2);
+        var originalSidecarMtime = File.GetLastWriteTimeUtc(sidecar);
+        var probeFails = false;
+        var hashCalls = 0;
+        var service = new CatalogService(
+            Path.Combine(temp.Path, "catalog.db"),
+            _ =>
+            {
+                if (probeFails)
+                    throw new IOException("Simulated transient sidecar metadata failure.");
+
+                return new CatalogService.CatalogSidecarFileSummary(
+                    sidecar,
+                    new DateTimeOffset(File.GetLastWriteTimeUtc(sidecar)));
+            },
+            (_, _) => Interlocked.Increment(ref hashCalls).ToString("x64"));
+
+        var first = service.Rebuild([temp.Path]);
+        Assert.Equal(1, first.UpdatedCount);
+        Assert.Equal(2, Assert.Single(first.Assets).Rating);
+        Assert.Equal(1, hashCalls);
+
+        WriteRatingSidecar(sidecar, 5);
+        File.SetLastWriteTimeUtc(sidecar, originalSidecarMtime.AddSeconds(5));
+        probeFails = true;
+
+        var deferred = service.Rebuild([temp.Path]);
+        Assert.Equal(1, deferred.ReusedCount);
+        Assert.Equal(0, deferred.UpdatedCount);
+        Assert.Equal(0, deferred.FailedCount);
+        Assert.Equal(2, Assert.Single(deferred.Assets).Rating);
+        Assert.Equal(1, hashCalls);
+
+        probeFails = false;
+
+        var retried = service.Rebuild([temp.Path]);
+        Assert.Equal(0, retried.ReusedCount);
+        Assert.Equal(1, retried.UpdatedCount);
+        Assert.Equal(5, Assert.Single(retried.Assets).Rating);
+        Assert.Equal(2, hashCalls);
+    }
+
+    [Fact]
     public void Rebuild_IncrementalRemovesDeletedFiles()
     {
         using var temp = TestDirectory.Create();

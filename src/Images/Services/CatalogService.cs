@@ -52,6 +52,8 @@ public sealed class CatalogService
     private readonly string? _dbPath;
     private readonly string _connectionString;
     private readonly bool _isAvailable;
+    private readonly Func<string, CatalogSidecarFileSummary> _readSidecarFileSummary;
+    private readonly Func<string, CancellationToken, string> _computeSha256;
 
     public CatalogService()
         : this(CreateDefaultPath())
@@ -59,7 +61,18 @@ public sealed class CatalogService
     }
 
     public CatalogService(string? dbPath)
+        : this(dbPath, ReadSidecarFileSummary, ComputeSha256)
     {
+    }
+
+    internal CatalogService(
+        string? dbPath,
+        Func<string, CatalogSidecarFileSummary> readSidecarFileSummary,
+        Func<string, CancellationToken, string> computeSha256)
+    {
+        _readSidecarFileSummary = readSidecarFileSummary ?? throw new ArgumentNullException(nameof(readSidecarFileSummary));
+        _computeSha256 = computeSha256 ?? throw new ArgumentNullException(nameof(computeSha256));
+
         if (string.IsNullOrWhiteSpace(dbPath))
         {
             _dbPath = null;
@@ -111,7 +124,10 @@ public sealed class CatalogService
             var stats = rootStats[candidate.Root];
             currentPaths.Add(path);
 
-            if (existing.TryGetValue(path, out var cached) && IsUnchanged(path, cached))
+            var change = existing.TryGetValue(path, out var cached)
+                ? GetChangeState(path, cached)
+                : CatalogFileChangeState.Changed;
+            if (change is CatalogFileChangeState.Unchanged or CatalogFileChangeState.SidecarProbeDeferred)
             {
                 reused++;
                 stats.IndexedCount++;
@@ -164,41 +180,57 @@ public sealed class CatalogService
         };
     }
 
-    private static bool IsUnchanged(string path, CatalogFileSummary cached)
+    private CatalogFileChangeState GetChangeState(string path, CatalogFileSummary cached)
     {
         try
         {
             var info = new FileInfo(path);
-            if (!info.Exists || info.Length != cached.SizeBytes) return false;
+            if (!info.Exists || info.Length != cached.SizeBytes)
+                return CatalogFileChangeState.Changed;
             var diskMtimeSeconds = ToOffset(info.LastWriteTimeUtc).ToUnixTimeSeconds();
             var cachedMtimeSeconds = cached.ModifiedUtc.ToUnixTimeSeconds();
             if (diskMtimeSeconds != cachedMtimeSeconds)
-                return false;
-
-            var sidecar = ReadSidecarFileSummary(path);
-            if (!string.Equals(sidecar.Path, cached.SidecarPath, StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            return ToUnixOrNull(sidecar.ModifiedUtc) == ToUnixOrNull(cached.SidecarModifiedUtc);
+                return CatalogFileChangeState.Changed;
         }
-        catch
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
         {
-            return false;
+            Log.LogDebug(ex, "Could not inspect catalog source {Path}", path);
+            return CatalogFileChangeState.Changed;
+        }
+
+        try
+        {
+            var sidecar = _readSidecarFileSummary(path);
+            if (!string.Equals(sidecar.Path, cached.SidecarPath, StringComparison.OrdinalIgnoreCase))
+                return CatalogFileChangeState.Changed;
+
+            return ToUnixOrNull(sidecar.ModifiedUtc) == ToUnixOrNull(cached.SidecarModifiedUtc)
+                ? CatalogFileChangeState.Unchanged
+                : CatalogFileChangeState.Changed;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
+        {
+            // Keep the cached row and retry the sidecar probe on the next rebuild. Re-hashing
+            // the unchanged image cannot resolve a transient sidecar metadata failure.
+            Log.LogDebug(ex, "Deferred transient catalog sidecar probe for {Path}", path);
+            return CatalogFileChangeState.SidecarProbeDeferred;
         }
     }
 
-    private static CatalogSidecarFileSummary ReadSidecarFileSummary(string imagePath)
+    internal static CatalogSidecarFileSummary ReadSidecarFileSummary(string imagePath)
     {
         foreach (var sidecarPath in SidecarPaths(imagePath))
         {
-            if (!File.Exists(sidecarPath))
+            try
+            {
+                _ = File.GetAttributes(sidecarPath);
+                var info = new FileInfo(sidecarPath);
+                return new CatalogSidecarFileSummary(sidecarPath, ToOffset(info.LastWriteTimeUtc));
+            }
+            catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
+            {
                 continue;
-
-            var info = new FileInfo(sidecarPath);
-            if (!info.Exists)
-                continue;
-
-            return new CatalogSidecarFileSummary(sidecarPath, ToOffset(info.LastWriteTimeUtc));
+            }
         }
 
         return new CatalogSidecarFileSummary(null, null);
@@ -611,7 +643,7 @@ public sealed class CatalogService
         return conn;
     }
 
-    private static CatalogAssetRecord BuildAsset(
+    private CatalogAssetRecord BuildAsset(
         string path,
         DateTimeOffset scannedUtc,
         CancellationToken cancellationToken)
@@ -620,7 +652,7 @@ public sealed class CatalogService
         if (!info.Exists || info.Length <= 0)
             throw new IOException("Catalog source file does not exist or is empty.");
 
-        var fingerprint = ComputeSha256(info.FullName, cancellationToken);
+        var fingerprint = _computeSha256(info.FullName, cancellationToken);
         using var image = new MagickImage();
         image.Ping(info);
         var sidecar = ReadSidecarState(info.FullName);
@@ -1013,7 +1045,14 @@ public sealed class CatalogService
         string? SidecarPath,
         DateTimeOffset? SidecarModifiedUtc);
 
-    private sealed record CatalogSidecarFileSummary(string? Path, DateTimeOffset? ModifiedUtc);
+    internal readonly record struct CatalogSidecarFileSummary(string? Path, DateTimeOffset? ModifiedUtc);
+
+    private enum CatalogFileChangeState
+    {
+        Changed,
+        Unchanged,
+        SidecarProbeDeferred
+    }
 
     private sealed record CatalogCandidateFile(string Root, string Path);
 
