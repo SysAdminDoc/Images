@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "d63f11ed2543331843f275586f17283c057af092",
+  "license": "GPL-2.0-or-later",
+  "licenseFile": "GPL-2.0-or-later.txt",
+  "licenseSha256": "A7BA75CB966ACA374711E2AF49E5F3AEA6A4443A803440F5D93E73A5A1222F66",
+  "fixtures": [
+    {
+      "file": "avif.avif",
+      "format": "AVIF",
+      "sha256": "96BF0656417DCA608EA9DE0314B6E526FA8910D112ED01054D8842BE1947E91F",
+      "source": "https://raw.githubusercontent.com/Exiv2/exiv2/d63f11ed2543331843f275586f17283c057af092/test/data/avif.avif"
+    },
+    {
+      "file": "heic.heic",
+      "format": "HEIC",
+      "sha256": "C6A1E7CBA3FF88C6DDC41B4269081DEDB76AB6E82E5BB1FFAC98154AA1C6DA56",
+      "source": "https://raw.githubusercontent.com/Exiv2/exiv2/d63f11ed2543331843f275586f17283c057af092/test/data/heic.heic"
+    },
+    {
+      "file": "Reagan.jxl",
+      "format": "JXL",
+      "sha256": "CDF84058E782D4620B0ADA0AECF065DFDA37080807652E611E3D0D0A14E295DA",
+      "source": "https://raw.githubusercontent.com/Exiv2/exiv2/d63f11ed2543331843f275586f17283c057af092/test/data/Reagan.jxl"
+    },
+    {
+      "file": "IMG_1361.dng",
+      "format": "RAW/DNG",
+      "sha256": "79D2A91E5A6584D8F56BB7FF90FEE4114548019B8FC590DA661B5A77B2DFC535",
+      "source": "https://raw.githubusercontent.com/Exiv2/exiv2/d63f11ed2543331843f275586f17283c057af092/test/data/IMG_1361.dng"
+    },
+    {
+      "file": "20110626_213900.psd",
+      "format": "PSD",
+      "sha256": "C604C0207AE77DAAB9EEFA7FDA1931DD61C53029343D2F435D3FFE402099FB5A",
+      "source": "https://raw.githubusercontent.com/Exiv2/exiv2/d63f11ed2543331843f275586f17283c057af092/test/data/20110626_213900.psd"
+    }
+  ]
+}

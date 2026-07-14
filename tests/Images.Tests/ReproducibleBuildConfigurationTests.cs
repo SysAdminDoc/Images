@@ -24,6 +24,7 @@ public sealed class ReproducibleBuildConfigurationTests
             ignoreCase: true);
 
         AssertLockFile(Path.Combine(root, "src", "Images", "packages.lock.json"));
+        AssertLockFile(Path.Combine(root, "tests", "Images.CodecProbe", "packages.lock.json"));
         AssertLockFile(Path.Combine(root, "tests", "Images.Tests", "packages.lock.json"));
 
         using var toolManifest = JsonDocument.Parse(
