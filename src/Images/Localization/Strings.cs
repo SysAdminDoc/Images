@@ -1330,6 +1330,7 @@ public static class Strings
     public static string MainOpRemovingLocation => Get(nameof(MainOpRemovingLocation));
     public static string MainOpSavingCopy => Get(nameof(MainOpSavingCopy));
     public static string MainDecoderUnavailable => Get(nameof(MainDecoderUnavailable));
+    public static string MainHdrDisplayTonemappedStatus => Get(nameof(MainHdrDisplayTonemappedStatus));
     public static string MainUnexpectedError => Get(nameof(MainUnexpectedError));
     public static string MainCancelLeaveUnchanged => Get(nameof(MainCancelLeaveUnchanged));
     public static string MainMovedImage => Get(nameof(MainMovedImage));
@@ -1452,6 +1453,7 @@ public static class Strings
     public static string DiagnosticsGhostscriptPolicyDisabled => Get(nameof(DiagnosticsGhostscriptPolicyDisabled));
     public static string DiagnosticsGhostscriptPolicyInstalled => Get(nameof(DiagnosticsGhostscriptPolicyInstalled));
     public static string DiagnosticsGhostscriptReady => Get(nameof(DiagnosticsGhostscriptReady));
+    public static string DiagnosticsHdrSignalFormat => Get(nameof(DiagnosticsHdrSignalFormat));
     public static string DiagnosticsGhostscriptRequired => Get(nameof(DiagnosticsGhostscriptRequired));
     public static string DiagnosticsIccOutputOff => Get(nameof(DiagnosticsIccOutputOff));
     public static string DiagnosticsIccOutputOffDetailFormat => Get(nameof(DiagnosticsIccOutputOffDetailFormat));
@@ -1472,6 +1474,7 @@ public static class Strings
     public static string DiagnosticsOcrDetailFormat => Get(nameof(DiagnosticsOcrDetailFormat));
     public static string DiagnosticsSignalFormat => Get(nameof(DiagnosticsSignalFormat));
     public static string DiagnosticsSignalUnavailable => Get(nameof(DiagnosticsSignalUnavailable));
+    public static string DiagnosticsSdrSignalFormat => Get(nameof(DiagnosticsSdrSignalFormat));
     public static string DiagnosticsSrgbFallbackActive => Get(nameof(DiagnosticsSrgbFallbackActive));
     public static string DiagnosticsSrgbFallbackDetailFormat => Get(nameof(DiagnosticsSrgbFallbackDetailFormat));
     public static string DiagnosticsSrgbSafetyFallback => Get(nameof(DiagnosticsSrgbSafetyFallback));

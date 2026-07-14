@@ -4118,6 +4118,9 @@ Details written to:
   <data name="MainDecoderUnavailable" xml:space="preserve">
     <value>[!!! Unavailable !!!]</value>
   </data>
+  <data name="MainHdrDisplayTonemappedStatus" xml:space="preserve">
+    <value>[!!!!!!!! HDR display detected — this image is shown tonemapped to SDR !!!!!!!!]</value>
+  </data>
   <data name="MainUnexpectedError" xml:space="preserve">
     <value>[!!!! Unexpected error !!!!]</value>
   </data>
@@ -6192,6 +6195,9 @@ Details written to:
   <data name="DiagnosticsGhostscriptReady" xml:space="preserve">
     <value>[!!!!! Ghostscript ready !!!!!]</value>
   </data>
+  <data name="DiagnosticsHdrSignalFormat" xml:space="preserve">
+    <value>[!!!!!!!! {0}; HDR active ({1}), peak {2:0.#} nits, full-frame {3:0.#} nits !!!!!!!!]</value>
+  </data>
   <data name="DiagnosticsGhostscriptRequired" xml:space="preserve">
     <value>[!!!!!!!!!!!! PDF, EPS, PS, and AI previews need bundled Ghostscript, IMAGES_GHOSTSCRIPT_DIR, or an installed runtime. !!!!!!!!!!!!]</value>
   </data>
@@ -6251,6 +6257,9 @@ Details written to:
   </data>
   <data name="DiagnosticsSignalUnavailable" xml:space="preserve">
     <value>[!!!!!!! signal format unavailable !!!!!!!]</value>
+  </data>
+  <data name="DiagnosticsSdrSignalFormat" xml:space="preserve">
+    <value>[!!! {0}; SDR active ({1}) !!!]</value>
   </data>
   <data name="DiagnosticsSrgbFallbackActive" xml:space="preserve">
     <value>[!!!!! sRGB fallback active !!!!!]</value>

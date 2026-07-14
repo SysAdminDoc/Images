@@ -149,6 +149,49 @@ public sealed class DiagnosticsStatusServiceTests
             && item.Detail.Contains(@"\\.\DISPLAY2", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public void BuildStatusItems_WithHdrOutput_ReportsColorSpaceAndLuminance()
+    {
+        var display = DisplayColorService.CreateStateForTest(
+            @"\\.\DISPLAY1",
+            advancedColorKnown: true,
+            advancedColorEnabled: true,
+            profilePath: null,
+            profileData: null,
+            bitsPerColorChannel: 10,
+            hdrCapabilitiesKnown: true,
+            hdrActive: true,
+            hdrColorSpace: "RGB PQ (BT.2020)",
+            hdrBitsPerColor: 10,
+            hdrMinLuminance: 0.005f,
+            hdrMaxLuminance: 1000,
+            hdrMaxFullFrameLuminance: 600);
+
+        var items = DiagnosticsStatusService.BuildStatusItems(
+            ReadyProvenance(),
+            new OcrCapabilityService.OcrCapabilityStatus(
+                IsAvailable: true,
+                LanguageCount: 1,
+                LanguageSummary: "English (United States) (en-US)",
+                StatusTitle: "Text extraction ready",
+                StatusDetail: "OCR runs locally.",
+                BadgeText: "Ready"),
+            updateChecksEnabled: false,
+            lastUpdateCheckUtc: null,
+            appDataRoot: @"C:\Users\test\AppData\Local\Images",
+            logsPath: AppContext.BaseDirectory,
+            thumbnailsPath: @"C:\Users\test\AppData\Local\Images\thumbs",
+            crashLogPath: @"C:\Users\test\AppData\Local\Images\crash.log",
+            displayColor: display,
+            colorManagementEnabled: true);
+
+        Assert.Contains(items, item =>
+            item.Title == "Display color"
+            && item.Detail.Contains("RGB PQ (BT.2020)", StringComparison.Ordinal)
+            && item.Detail.Contains("peak 1000 nits", StringComparison.Ordinal)
+            && item.Detail.Contains("full-frame 600 nits", StringComparison.Ordinal));
+    }
+
     private static CodecCapabilityService.RuntimeProvenance ReadyProvenance()
         => new(
             AppVersion: "Images 0.2.9",

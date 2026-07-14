@@ -1,5 +1,6 @@
 using ImageMagick;
 using Images.Services;
+using Images.ViewModels;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -94,6 +95,97 @@ public sealed class DisplayColorServiceTests
         Assert.Equal(72, SizeOfNested(native!, "DisplayConfigModeInfo"));
         Assert.Equal(84, SizeOfNested(native!, "DisplayConfigSourceDeviceName"));
         Assert.Equal(32, SizeOfNested(native!, "DisplayConfigGetAdvancedColorInfo"));
+    }
+
+    [Fact]
+    public void NativeDxgiOutputDescriptionLayout_MatchesWindowsSdkAbi()
+    {
+        Assert.Equal(
+            IntPtr.Size == 8 ? 152 : 144,
+            Marshal.SizeOf<HdrDisplayCapabilityProbe.DxgiOutputDescription1>());
+    }
+
+    [Fact]
+    public void PqOutputDescription_ReportsHdrAndLuminanceEnvelope()
+    {
+        var capability = HdrDisplayCapabilityProbe.FromDescription(
+            new HdrDisplayCapabilityProbe.DxgiOutputDescription1
+            {
+                DeviceName = string.Empty,
+                BitsPerColor = 10,
+                ColorSpace = 12,
+                MinLuminance = 0.005f,
+                MaxLuminance = 1000f,
+                MaxFullFrameLuminance = 600f
+            });
+
+        Assert.True(capability.Known);
+        Assert.True(capability.Active);
+        Assert.Equal("RGB PQ (BT.2020)", capability.ColorSpace);
+        Assert.Equal(10u, capability.BitsPerColor);
+        Assert.Equal(1000f, capability.MaxLuminance);
+        Assert.Equal(600f, capability.MaxFullFrameLuminance);
+    }
+
+    [Theory]
+    [InlineData(0, false)]
+    [InlineData(12, true)]
+    [InlineData(18, true)]
+    [InlineData(17, false)]
+    public void ColorSpaceClassification_OnlyMarksPqAndHlgAsHdr(uint colorSpace, bool expected)
+        => Assert.Equal(expected, HdrDisplayCapabilityProbe.IsHdrColorSpace(colorSpace));
+
+    [Fact]
+    public void HdrTonemapBadge_RequiresBothHdrOutputAndTonemappedImage()
+    {
+        var hdr = DisplayColorService.CreateStateForTest(
+            @"\\.\DISPLAY1",
+            advancedColorKnown: true,
+            advancedColorEnabled: true,
+            profilePath: null,
+            profileData: null,
+            hdrCapabilitiesKnown: true,
+            hdrActive: true,
+            hdrColorSpace: "RGB PQ (BT.2020)",
+            hdrBitsPerColor: 10,
+            hdrMaxLuminance: 1000,
+            hdrMaxFullFrameLuminance: 600);
+        var sdr = DisplayColorService.CreateStateForTest(
+            @"\\.\DISPLAY1",
+            advancedColorKnown: true,
+            advancedColorEnabled: false,
+            profilePath: null,
+            profileData: null,
+            hdrCapabilitiesKnown: true,
+            hdrActive: false,
+            hdrColorSpace: "sRGB (BT.709)");
+
+        Assert.Equal(
+            "HDR display detected — this image is shown tonemapped to SDR",
+            MainViewModel.BuildHdrDisplayStatus("Magick.NET · Reinhard tonemapped to SDR", hdr));
+        Assert.Null(MainViewModel.BuildHdrDisplayStatus("Magick.NET", hdr));
+        Assert.Null(MainViewModel.BuildHdrDisplayStatus("Magick.NET · Reinhard tonemapped to SDR", sdr));
+    }
+
+    [Fact]
+    public void DxgiProbe_CurrentMonitor_FailsClosedWithoutThrowing()
+    {
+        var monitor = MonitorFromPoint(default, 2);
+
+        var capability = HdrDisplayCapabilityProbe.Probe(monitor);
+
+        Assert.NotNull(capability);
+        Assert.False(string.IsNullOrWhiteSpace(capability.Detail));
+    }
+
+    [DllImport("user32.dll")]
+    private static extern nint MonitorFromPoint(NativePoint point, uint flags);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private readonly struct NativePoint
+    {
+        internal readonly int X;
+        internal readonly int Y;
     }
 
     private static int SizeOfNested(Type parent, string name)

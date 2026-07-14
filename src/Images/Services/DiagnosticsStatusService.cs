@@ -115,9 +115,7 @@ public static class DiagnosticsStatusService
         bool colorManagementEnabled)
     {
         var device = display.DeviceName;
-        var signal = display.AdvancedColorKnown
-            ? Strings.Format(nameof(Strings.DiagnosticsSignalFormat), display.ColorEncoding, display.BitsPerColorChannel)
-            : Strings.DiagnosticsSignalUnavailable;
+        var signal = BuildDisplaySignal(display);
 
         if (!colorManagementEnabled)
         {
@@ -158,6 +156,24 @@ public static class DiagnosticsStatusService
             Strings.Format(nameof(Strings.DiagnosticsSrgbFallbackDetailFormat), device, signal, display.ProbeDetail),
             tone,
             "\uE790");
+    }
+
+    private static string BuildDisplaySignal(DisplayColorState display)
+    {
+        var signal = display.AdvancedColorKnown
+            ? Strings.Format(nameof(Strings.DiagnosticsSignalFormat), display.ColorEncoding, display.BitsPerColorChannel)
+            : Strings.DiagnosticsSignalUnavailable;
+        if (!display.HdrCapabilitiesKnown)
+            return signal;
+
+        return display.HdrActive
+            ? Strings.Format(
+                nameof(Strings.DiagnosticsHdrSignalFormat),
+                signal,
+                display.HdrColorSpace,
+                display.HdrMaxLuminance,
+                display.HdrMaxFullFrameLuminance)
+            : Strings.Format(nameof(Strings.DiagnosticsSdrSignalFormat), signal, display.HdrColorSpace);
     }
 
     private static string BuildGhostscriptDetail(CodecCapabilityService.RuntimeProvenance provenance)

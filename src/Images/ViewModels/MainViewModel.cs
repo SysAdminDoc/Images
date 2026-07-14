@@ -1869,7 +1869,25 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool FlipVertical { get => _flipVertical; private set => Set(ref _flipVertical, value); }
 
     private string? _decoderUsed;
-    public string? DecoderUsed { get => _decoderUsed; private set => Set(ref _decoderUsed, value); }
+    public string? DecoderUsed
+    {
+        get => _decoderUsed;
+        private set
+        {
+            if (Set(ref _decoderUsed, value))
+                Raise(nameof(HdrDisplayStatus));
+        }
+    }
+
+    public string? HdrDisplayStatus
+        => BuildHdrDisplayStatus(DecoderUsed, DisplayColorService.Current);
+
+    internal static string? BuildHdrDisplayStatus(string? decoderUsed, DisplayColorState display)
+        => display.HdrCapabilitiesKnown &&
+           display.HdrActive &&
+           decoderUsed?.Contains("tonemapped to SDR", StringComparison.OrdinalIgnoreCase) == true
+            ? Strings.MainHdrDisplayTonemappedStatus
+            : null;
 
     private bool _isInspectorMode;
     public bool IsInspectorMode
@@ -7150,6 +7168,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     /// </summary>
     internal void OnDisplayColorStateChanged()
     {
+        Raise(nameof(HdrDisplayStatus));
         if (!ImageLoader.ColorManagedDisplay)
             return;
 

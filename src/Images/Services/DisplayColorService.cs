@@ -61,7 +61,14 @@ internal static class DisplayColorService
         byte[]? profileData,
         uint colorEncoding = 0,
         uint bitsPerColorChannel = 8,
-        string? probeDetail = null)
+        string? probeDetail = null,
+        bool hdrCapabilitiesKnown = false,
+        bool hdrActive = false,
+        string hdrColorSpace = "Unknown",
+        uint hdrBitsPerColor = 0,
+        float hdrMinLuminance = 0,
+        float hdrMaxLuminance = 0,
+        float hdrMaxFullFrameLuminance = 0)
         => BuildState(
             deviceName,
             advancedColorKnown,
@@ -70,7 +77,16 @@ internal static class DisplayColorService
             profileData,
             colorEncoding,
             bitsPerColorChannel,
-            probeDetail ?? "Test display state.");
+            probeDetail ?? "Test display state.",
+            new HdrDisplayCapability(
+                hdrCapabilitiesKnown,
+                hdrActive,
+                hdrColorSpace,
+                hdrBitsPerColor,
+                hdrMinLuminance,
+                hdrMaxLuminance,
+                hdrMaxFullFrameLuminance,
+                hdrCapabilitiesKnown ? "Test DXGI display state." : "Test DXGI state unavailable."));
 
     private static bool Update(nint monitor, DisplayColorState next)
     {
@@ -103,6 +119,7 @@ internal static class DisplayColorService
 
             var profilePath = TryGetMonitorProfilePath(deviceName);
             var (profileData, profileReadDetail) = TryReadProfile(profilePath);
+            var hdrCapability = HdrDisplayCapabilityProbe.Probe(monitor);
             var advancedDetail = advancedKnown
                 ? advancedEnabled ? "Windows Advanced Color is active." : "Windows Advanced Color is off."
                 : "Windows Advanced Color state could not be verified.";
@@ -115,7 +132,8 @@ internal static class DisplayColorService
                 profileData,
                 colorEncoding,
                 bitsPerColorChannel,
-                $"{advancedDetail} {profileReadDetail}");
+                $"{advancedDetail} {profileReadDetail} {hdrCapability.Detail}",
+                hdrCapability);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
         {
@@ -131,7 +149,8 @@ internal static class DisplayColorService
         byte[]? profileData,
         uint colorEncoding,
         uint bitsPerColorChannel,
-        string probeDetail)
+        string probeDetail,
+        HdrDisplayCapability hdrCapability)
     {
         string? description = null;
         string? fingerprint = null;
@@ -169,6 +188,13 @@ internal static class DisplayColorService
             advancedColorEnabled,
             ColorEncodingName(colorEncoding),
             bitsPerColorChannel,
+            hdrCapability.Known,
+            hdrCapability.Active,
+            hdrCapability.ColorSpace,
+            hdrCapability.BitsPerColor,
+            hdrCapability.MinLuminance,
+            hdrCapability.MaxLuminance,
+            hdrCapability.MaxFullFrameLuminance,
             profilePath,
             fileName,
             description,
@@ -507,6 +533,13 @@ internal sealed record DisplayColorState(
     bool AdvancedColorEnabled,
     string ColorEncoding,
     uint BitsPerColorChannel,
+    bool HdrCapabilitiesKnown,
+    bool HdrActive,
+    string HdrColorSpace,
+    uint HdrBitsPerColor,
+    float HdrMinLuminance,
+    float HdrMaxLuminance,
+    float HdrMaxFullFrameLuminance,
     string? ProfilePath,
     string? ProfileFileName,
     string? ProfileDescription,
@@ -534,6 +567,13 @@ internal sealed record DisplayColorState(
            && AdvancedColorEnabled == other.AdvancedColorEnabled
            && ColorEncoding == other.ColorEncoding
            && BitsPerColorChannel == other.BitsPerColorChannel
+           && HdrCapabilitiesKnown == other.HdrCapabilitiesKnown
+           && HdrActive == other.HdrActive
+           && HdrColorSpace == other.HdrColorSpace
+           && HdrBitsPerColor == other.HdrBitsPerColor
+           && HdrMinLuminance.Equals(other.HdrMinLuminance)
+           && HdrMaxLuminance.Equals(other.HdrMaxLuminance)
+           && HdrMaxFullFrameLuminance.Equals(other.HdrMaxFullFrameLuminance)
            && string.Equals(ProfilePath, other.ProfilePath, StringComparison.OrdinalIgnoreCase)
            && string.Equals(ProfileFingerprint, other.ProfileFingerprint, StringComparison.Ordinal);
 
@@ -544,6 +584,13 @@ internal sealed record DisplayColorState(
             AdvancedColorEnabled: false,
             ColorEncoding: "Unknown",
             BitsPerColorChannel: 0,
+            HdrCapabilitiesKnown: false,
+            HdrActive: false,
+            HdrColorSpace: "Unknown",
+            HdrBitsPerColor: 0,
+            HdrMinLuminance: 0,
+            HdrMaxLuminance: 0,
+            HdrMaxFullFrameLuminance: 0,
             ProfilePath: null,
             ProfileFileName: null,
             ProfileDescription: null,
