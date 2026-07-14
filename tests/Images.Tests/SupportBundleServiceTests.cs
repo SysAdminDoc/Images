@@ -62,21 +62,51 @@ public sealed class SupportBundleServiceTests
     }
 
     [Fact]
-    public void RedactProfilePaths_RedactsShortAndUriUserProfileForms()
+    public void SanitizeText_RedactsRootedPathsWithoutRemovingDiagnosticCopy()
     {
         var text = """
             opened C:\Users\MATTHE~1\Pictures\a,b.jpg
             uri file:///C:/Users/Matthew%20Parker/Pictures/a.jpg
             slash C:/Users/Somebody/Pictures/a.jpg
+            status decoder=Magick.NET exit=7
             """;
 
-        var redacted = SupportBundleService.RedactProfilePaths(text);
+        var redacted = SupportBundleService.SanitizeText(text);
 
-        Assert.DoesNotContain(@"C:\Users\MATTHE~1", redacted, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("C:/Users/Matthew%20Parker", redacted, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("C:/Users/Somebody", redacted, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains(@"%USERPROFILE%\Pictures\a,b.jpg", redacted);
-        Assert.Contains("file:///%USERPROFILE%/Pictures/a.jpg", redacted);
-        Assert.Contains("%USERPROFILE%/Pictures/a.jpg", redacted);
+        Assert.DoesNotContain("MATTHE~1", redacted, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Matthew%20Parker", redacted, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Somebody", redacted, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("a,b.jpg", redacted, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(3, redacted.Split("%PATH%").Length - 1);
+        Assert.Contains("status decoder=Magick.NET exit=7", redacted, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void WriteSanitizedTextEntry_RedactsAdversarialPathFormsInResultingZip()
+    {
+        const string payload = """
+            drive D:\Photos\drive-secret.jpg
+            unc \\server\share\unc-secret.jpg
+            device \\?\E:\vault\device-secret.jpg
+            uri file:///F:/private/uri-secret.jpg
+            mixed G:\mixed/separators/mixed-secret.jpg
+            quoted "H:\My Photos\quoted-secret.jpg"
+            System.IO.FileNotFoundException: decoder failed at 'I:\Exceptions\exception-secret.jpg'
+            useful decoder=Magick.NET exit=7 elapsed=42ms
+            """;
+        using var bytes = new MemoryStream();
+        using (var archive = new ZipArchive(bytes, ZipArchiveMode.Create, leaveOpen: true))
+            SupportBundleService.WriteSanitizedTextEntry(archive, "adversarial.txt", payload);
+
+        bytes.Position = 0;
+        using var result = new ZipArchive(bytes, ZipArchiveMode.Read);
+        using var reader = new StreamReader(result.GetEntry("adversarial.txt")!.Open());
+        var sanitized = reader.ReadToEnd();
+
+        foreach (var secret in new[] { "drive-secret", "unc-secret", "device-secret", "uri-secret", "mixed-secret", "quoted-secret", "exception-secret" })
+            Assert.DoesNotContain(secret, sanitized, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(7, sanitized.Split("%PATH%").Length - 1);
+        Assert.Contains("System.IO.FileNotFoundException: decoder failed at", sanitized, StringComparison.Ordinal);
+        Assert.Contains("useful decoder=Magick.NET exit=7 elapsed=42ms", sanitized, StringComparison.Ordinal);
     }
 }

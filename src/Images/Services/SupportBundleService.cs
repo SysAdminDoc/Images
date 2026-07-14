@@ -11,12 +11,22 @@ namespace Images.Services;
 public static class SupportBundleService
 {
     private static readonly ILogger _log = Log.Get(nameof(SupportBundleService));
-    private static readonly Regex FileUriProfileRegex = new(
-        @"\bfile:///[A-Z]:/Users/[^/\s""'<>]+",
+    private const string RedactedPath = "%PATH%";
+    private static readonly Regex QuotedRootedPathRegex = new(
+        @"(?<quote>[""'])(?:(?:file:(?://+|\\+))|(?:[A-Z]:[\\/]+)|(?:\\\\)|(?:/(?!/)))[^""'<>]*\k<quote>",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    private static readonly Regex WindowsProfileRegex = new(
-        @"\b[A-Z]:[\\/]+Users[\\/]+[^\\/\s""'<>]+",
+    private static readonly Regex FileUriRegex = new(
+        @"(?<!\w)file:(?://+|\\+)[^\s""'<>]+",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    private static readonly Regex UncOrDevicePathRegex = new(
+        @"(?<![:\\/])(?:\\\\|//)[^\s""'<>]+",
+        RegexOptions.CultureInvariant);
+    private static readonly Regex DriveRootedPathRegex = new(
+        @"(?<![A-Z0-9])(?:[A-Z]:[\\/]+)[^\s""'<>]+",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    private static readonly Regex PosixRootedPathRegex = new(
+        @"(?<![\w:/])/(?!/)[^\s""'<>]+",
+        RegexOptions.CultureInvariant);
 
     public static string Build()
     {
@@ -51,11 +61,9 @@ public static class SupportBundleService
         AddCrashLog(archive, manifest);
 
         manifest.AppendLine();
-        manifest.AppendLine("No image bytes, no file contents. User-profile paths are redacted to %USERPROFILE% throughout, including log lines.");
+        manifest.AppendLine("No image bytes, no file contents. Absolute paths are redacted to %PATH% throughout, including log lines and failure details.");
 
-        var manifestEntry = archive.CreateEntry("bundle-info.txt", CompressionLevel.Optimal);
-        using (var writer = new StreamWriter(manifestEntry.Open(), Encoding.UTF8))
-            writer.Write(manifest.ToString());
+        WriteSanitizedTextEntry(archive, "bundle-info.txt", manifest.ToString());
 
         return zipPath;
     }
@@ -67,9 +75,7 @@ public static class SupportBundleService
             var text = builder();
             if (string.IsNullOrWhiteSpace(text)) return;
 
-            var entry = archive.CreateEntry(name, CompressionLevel.Optimal);
-            using var writer = new StreamWriter(entry.Open(), Encoding.UTF8);
-            writer.Write(text);
+            WriteSanitizedTextEntry(archive, name, text);
             manifest.AppendLine($"  {name} — {text.Length:N0} chars");
         }
         catch (Exception ex)
@@ -88,9 +94,7 @@ public static class SupportBundleService
             foreach (var item in items)
                 sb.AppendLine($"[{item.Tone}] {item.Title}: {item.Status} — {item.Detail}");
 
-            var entry = archive.CreateEntry("diagnostics-status.txt", CompressionLevel.Optimal);
-            using var writer = new StreamWriter(entry.Open(), Encoding.UTF8);
-            writer.Write(sb.ToString());
+            WriteSanitizedTextEntry(archive, "diagnostics-status.txt", sb.ToString());
             manifest.AppendLine($"  diagnostics-status.txt — {items.Count} items");
         }
         catch (Exception ex)
@@ -114,9 +118,7 @@ public static class SupportBundleService
             sb.AppendLine($"Cap: {health.CapBytes:N0}");
             sb.AppendLine($"Last eviction: {health.LastEvictionSweepUtc:O}");
 
-            var entry = archive.CreateEntry("cache-health.txt", CompressionLevel.Optimal);
-            using var writer = new StreamWriter(entry.Open(), Encoding.UTF8);
-            writer.Write(sb.ToString());
+            WriteSanitizedTextEntry(archive, "cache-health.txt", sb.ToString());
             manifest.AppendLine("  cache-health.txt");
         }
         catch (Exception ex)
@@ -148,9 +150,7 @@ public static class SupportBundleService
                 sb.AppendLine();
             }
 
-            var entry = archive.CreateEntry("recovery-log.txt", CompressionLevel.Optimal);
-            using var writer = new StreamWriter(entry.Open(), Encoding.UTF8);
-            writer.Write(sb.ToString());
+            WriteSanitizedTextEntry(archive, "recovery-log.txt", sb.ToString());
             manifest.AppendLine($"  recovery-log.txt — {records.Count} records");
         }
         catch (Exception ex)
@@ -185,9 +185,7 @@ public static class SupportBundleService
             sb.AppendLine($"recent_folders_count = {settings.GetRecentFolders().Count}");
             sb.AppendLine($"hotkey_overrides_count = {settings.GetHotkeys().Count}");
 
-            var entry = archive.CreateEntry("settings-redacted.txt", CompressionLevel.Optimal);
-            using var writer = new StreamWriter(entry.Open(), Encoding.UTF8);
-            writer.Write(sb.ToString());
+            WriteSanitizedTextEntry(archive, "settings-redacted.txt", sb.ToString());
             manifest.AppendLine("  settings-redacted.txt — keys only, no paths");
         }
         catch (Exception ex)
@@ -224,7 +222,7 @@ public static class SupportBundleService
                     using var source = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                     var entry = archive.CreateEntry(name, CompressionLevel.Optimal);
                     using var dest = entry.Open();
-                    CopyRedacted(source, dest);
+                    CopySanitizedText(source, dest);
                     count++;
                 }
                 catch (IOException)
@@ -255,7 +253,7 @@ public static class SupportBundleService
             using var source = new FileStream(crashPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             var entry = archive.CreateEntry("crash.log", CompressionLevel.Optimal);
             using var dest = entry.Open();
-            CopyRedacted(source, dest);
+            CopySanitizedText(source, dest);
 
             var size = new FileInfo(crashPath).Length;
             manifest.AppendLine($"  crash.log — {size:N0} bytes");
@@ -268,38 +266,41 @@ public static class SupportBundleService
     }
 
     /// <summary>
-    /// Streams a log file into the bundle with user-profile paths replaced by
-    /// %USERPROFILE%. Raw logs contain full image paths (loader, listen-mode,
-    /// egress lines), and the bundle manifest promises they are redacted.
+    /// Streams a text file into the bundle with every recognized absolute path replaced. Raw logs
+    /// contain image paths in loader, listen-mode, exception, and egress lines.
     /// </summary>
-    private static void CopyRedacted(Stream source, Stream destination)
+    private static void CopySanitizedText(Stream source, Stream destination)
     {
         using var reader = new StreamReader(source, Encoding.UTF8);
         using var writer = new StreamWriter(destination, Encoding.UTF8, leaveOpen: true);
         while (reader.ReadLine() is { } line)
         {
-            writer.WriteLine(RedactProfilePaths(line));
+            writer.WriteLine(SanitizeText(line));
         }
     }
 
     private static string? RedactPath(string? path)
     {
         if (string.IsNullOrWhiteSpace(path)) return path;
-        return RedactProfilePaths(path);
+        return SanitizeText(path);
     }
 
-    internal static string RedactProfilePaths(string value)
+    internal static void WriteSanitizedTextEntry(ZipArchive archive, string name, string text)
+    {
+        var entry = archive.CreateEntry(name, CompressionLevel.Optimal);
+        using var writer = new StreamWriter(entry.Open(), Encoding.UTF8);
+        writer.Write(SanitizeText(text));
+    }
+
+    internal static string SanitizeText(string value)
     {
         if (string.IsNullOrEmpty(value)) return value;
 
-        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        if (!string.IsNullOrEmpty(userProfile))
-        {
-            value = value.Replace(userProfile, "%USERPROFILE%", StringComparison.OrdinalIgnoreCase);
-            value = value.Replace(userProfile.Replace('\\', '/'), "%USERPROFILE%", StringComparison.OrdinalIgnoreCase);
-        }
-
-        value = FileUriProfileRegex.Replace(value, "file:///%USERPROFILE%");
-        return WindowsProfileRegex.Replace(value, "%USERPROFILE%");
+        value = QuotedRootedPathRegex.Replace(value, match =>
+            $"{match.Groups["quote"].Value}{RedactedPath}{match.Groups["quote"].Value}");
+        value = FileUriRegex.Replace(value, RedactedPath);
+        value = UncOrDevicePathRegex.Replace(value, RedactedPath);
+        value = DriveRootedPathRegex.Replace(value, RedactedPath);
+        return PosixRootedPathRegex.Replace(value, RedactedPath);
     }
 }
