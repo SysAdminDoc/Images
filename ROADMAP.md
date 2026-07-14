@@ -13,4 +13,8 @@ Promote to `1.0.0` when those are unblocked.
 
 ## Actionable Work
 
-None open. All code-ready items are drained; the remaining research item is decision-gated (Ghostscript-source AGPL mechanism) and lives in `Roadmap_Blocked.md`. Refill via a research pass (`RESEARCH.md`) when ready.
+- [ ] P3 — Incremental rescan re-hashes files whose sidecar check transiently fails
+  Why: `CatalogService.IsUnchanged` treats any exception (e.g. a sidecar momentarily locked by cloud-sync/AV) as "changed", forcing a full SHA-256 re-hash of that file on every rescan under contention. Safe (never misses a real change) but defeats the incremental optimization. Consider distinguishing transient IO errors from genuine change signals.
+  Where: `src/Images/Services/CatalogService.cs` (IsUnchanged / ReadSidecarFileSummary)
+
+The remaining research item is decision-gated (Ghostscript-source AGPL mechanism) and lives in `Roadmap_Blocked.md`. Refill via a research pass (`RESEARCH.md`) when ready.

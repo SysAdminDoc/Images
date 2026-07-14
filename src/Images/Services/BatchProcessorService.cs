@@ -123,13 +123,16 @@ public sealed class BatchProcessorService
         var failed = 0;
         var items = new List<BatchPreviewItem>();
         var paths = NormalizeSourcePaths(sourcePaths);
+        // Mirror the real run's destination reservation so the preview's output names match what
+        // Run() would actually write when several sources sanitize to the same stem.
+        var reservedNames = new ConcurrentDictionary<string, byte>(StringComparer.OrdinalIgnoreCase);
         for (var index = 0; index < paths.Count; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var path = paths[index];
             try
             {
-                var item = BuildPreviewItem(path, index + 1, preset, outputFolder, cancellationToken);
+                var item = BuildPreviewItem(path, index + 1, preset, outputFolder, cancellationToken, reservedNames);
                 items.Add(item);
             }
             catch (OperationCanceledException)
@@ -229,7 +232,9 @@ public sealed class BatchProcessorService
         int sourceIndex,
         BatchProcessorPreset preset,
         string? outputFolder,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        ConcurrentDictionary<string, byte>? reservedNames = null,
+        string? precomputedOutputPath = null)
     {
         var info = new FileInfo(sourcePath);
         if (!info.Exists)
@@ -249,9 +254,13 @@ public sealed class BatchProcessorService
         ImageExportService.PrepareForExport(encodedImage, format, (uint)request.Quality);
         var encodedBytes = encodedImage.ToByteArray(format);
 
-        var outputPath = ResolveUniqueDestination(
+        // Reuse the run/caller's already-reserved destination when given one; otherwise resolve
+        // against the shared reservation set so a preview never reports a name a sibling will take.
+        // Without this, two sources whose sanitized stems collide both preview the same OutputPath.
+        var outputPath = precomputedOutputPath ?? ResolveUniqueDestination(
             ResolveOutputFolder(info.FullName, outputFolder),
-            Path.ChangeExtension(outputName, extension));
+            Path.ChangeExtension(outputName, extension),
+            reservedNames);
         var warnings = ExportCapabilityWarningService.BuildWarnings(image, info.FullName, extension, format);
         var status = BuildStatusText(preset, messages);
 
@@ -296,7 +305,9 @@ public sealed class BatchProcessorService
 
             if (dryRun)
             {
-                var preview = BuildPreviewItem(sourcePath, sourceIndex, preset, outputFolder, cancellationToken);
+                // Reuse the destination already reserved above so the preview reports the exact path
+                // the real run would write — recomputing here would double-reserve and drift by one.
+                var preview = BuildPreviewItem(sourcePath, sourceIndex, preset, outputFolder, cancellationToken, precomputedOutputPath: outputPath);
                 messages.Add($"Would run {preset.Operations?.Count ?? 0} operation{Plural(preset.Operations?.Count ?? 0)} on {Path.GetFileName(sourcePath)}.");
                 messages.Add($"Would write {preview.OutputDimensions} {preview.Format} to {preview.OutputPath}.");
                 return new MacroRunItemResult(sourcePath, outputPath, messages, null);

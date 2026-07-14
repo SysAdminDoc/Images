@@ -954,6 +954,11 @@ public sealed class MainViewModelStateTests
 
                 viewModel.DeleteCommand.Execute(null);
 
+                // The mid-confirmation OpenFile(second) navigates asynchronously; wait for it to
+                // settle before asserting (matches the MoveToFolder/rename tests). Without this the
+                // assertions race the navigation under CPU contention from parallel test decodes.
+                PumpUntil(() => !viewModel.IsOperationBusy && string.Equals(viewModel.CurrentPath, second, StringComparison.OrdinalIgnoreCase));
+
                 Assert.False(File.Exists(first));
                 Assert.True(File.Exists(second));
                 Assert.Equal(second, viewModel.CurrentPath);

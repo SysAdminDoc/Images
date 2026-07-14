@@ -235,6 +235,37 @@ public sealed class BatchProcessorServiceTests
         Assert.Equal([success, failure], result);
     }
 
+    [Fact]
+    public void BuildPreview_CollidingOutputStems_ReportDistinctPaths()
+    {
+        // Two sources renamed to the same stem must preview distinct destinations — matching what a
+        // real run reserves — instead of both reporting the identical output path.
+        using var temp = TestDirectory.Create();
+        var a = WriteImage(temp.Path, "a.png", 4, 4);
+        var b = WriteImage(temp.Path, "b.png", 4, 4);
+        var output = Directory.CreateDirectory(Path.Combine(temp.Path, "out")).FullName;
+        var preset = new BatchProcessorPreset(
+            "Dup",
+            ".png",
+            92,
+            0,
+            0,
+            [
+                new BatchOperationStep(
+                    BatchOperationKinds.RenamePattern,
+                    new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { ["pattern"] = "shared" }),
+                new BatchOperationStep(
+                    BatchOperationKinds.ExportCopy,
+                    new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { ["extension"] = ".png", ["quality"] = "92" })
+            ]);
+
+        var result = new BatchProcessorService().BuildPreview([a, b], preset, output);
+
+        Assert.Equal(2, result.Items.Count);
+        var paths = result.Items.Select(i => i.OutputPath).ToList();
+        Assert.Equal(paths.Count, paths.Distinct(StringComparer.OrdinalIgnoreCase).Count());
+    }
+
     private static string WriteImage(string folder, string name, uint width, uint height)
     {
         var path = Path.Combine(folder, name);

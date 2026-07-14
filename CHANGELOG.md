@@ -9,6 +9,14 @@ All notable changes to **Images** are documented here.
 - **Adjustable loupe magnification** - Appearance settings now offer a loupe magnification choice (2×, 3×, 4×, 6×) so the middle-button magnifier can zoom in further than the previous fixed 2×.
 - **Keyboard-invocable loupe** - A new "Toggle loupe magnifier" command (default `L`, rebindable, in the command palette) shows a viewport-centered magnifier with no mouse needed; pan the image to move it beneath the lens. Holding the middle button still temporarily overrides the lens to follow the cursor.
 
+### Fixed
+
+- **Session restore no longer reopens a broken or peeked file** - A file that exists but fails to decode, or a transient `--peek` target, is no longer saved as the "last image", so opt-in session restore won't reopen a known-bad file or promote a peek into a full session.
+- **Large archive spreads fail cleanly** - A two-page spread whose combined width overflowed a 32-bit integer produced an opaque render error; it now reports the same "too large to render" message as other decode paths.
+- **Animated WebP/APNG frame delays can't overflow** - Very large per-frame delay fields (32-bit for WebP/APNG) no longer overflow into a negative value and silently reset to 100 ms; delays are computed in 64-bit and capped at 60 s.
+- **Batch preview shows the real output names** - When several source files rename to the same stem, the batch preview now reports the distinct destinations the run will actually write instead of repeating one identical path.
+- **No crash if a command faults during shutdown** - An async command that faulted after its view model was disposed could rethrow on a background continuation and terminate the app; the fault is now logged instead.
+
 ## v0.2.26 - 2026-07-12
 
 ### Changed
