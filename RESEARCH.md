@@ -1,57 +1,87 @@
-# Research - Images
-Date: 2026-07-12 (pass 3) - replaces all prior research.
+# Research — Images
+
+Date: 2026-07-14 (pass 4) — replaces all prior research.
 
 ## Executive Summary
-Verified: Images is a mature, Windows-only, local-first WPF/.NET 10 image viewer/workbench (v0.2.25, ~1007 tests). The competitor/format/CVE/dependency landscape was exhausted in this day's passes 1-2 and the high-value feature items were shipped (color management, loupe, live pixel readout, zoom-lock, transparency checkerboard, zoom-to-selection, session restore, stop-at-ends, metadata-preserving Save-a-copy, Magick.NET 14.15). This pass audits the ~10 feature commits shipped today (`0684ff6..7224130`), which are new and independently un-reviewed — that un-audited code is the only genuinely-unmined surface left. The audit found concrete correctness, reliability, security-adjacent, and accessibility defects in the new code (grounded in file:line, several re-verified against source). Highest-value direction: harden and finish the features just shipped before adding more. Top opportunities in priority order: (1) fix the loupe/zoom-to-selection mouse-capture and gesture-conflict bugs; (2) validate the session-restore path (bypasses the argv device-path guard); (3) stop the loupe and HUD pixel-readout from sampling the 1×1 tile placeholder on gigapixel images; (4) make the `ColorManagedDisplay` toggle honor already-preloaded neighbors; (5) give the loupe and zoom-to-selection command-palette/keyboard/cheatsheet discoverability to match the app's otherwise a11y-complete surface.
+Images is a mature, Windows-only, local-first WPF/.NET 10 image viewer + light DAM + ML editor (v0.2.26, ~1017 tests, 100+ services). It already **leads the OSS Windows-viewer field** on ML/editing (CLIP semantic search over ONNX DirectML — the README's "future work" note is stale, `ClipEmbeddingProvider` runs real ViT-B/32 inference and only falls back to deterministic embeddings when models are absent; LaMa inpaint, super-resolution, background removal, non-destructive levels/curves/HSL/retouch/dodge-burn, C2PA provenance) and matches incumbents on format breadth, archives, OCR, tags, duplicate cleanup, batch, compare, slideshow, and gigapixel tiling. The remaining opportunity is **not more features** — it is **display-pipeline fidelity and untrusted-input hardening**, the two axes where every serious color/photo viewer (FastStone, BandiView, nomacs) still beats it. Most of the marquee display items (true HDR output, full monitor color management, GPS map overlay, Explorer thumbnail handler) are already correctly parked in `Roadmap_Blocked.md`, gated on a SkiaSharp canvas rewrite (V20-01), code signing (D-05), or an ExifTool write wrapper. This pass surfaces the **unblocked, incremental** wins those blocked epics overlook.
+
+Top opportunities, priority order:
+1. **ImageMagick read-coder allowlist + delegate lockdown** — the one real, unblocked security gap (P1).
+2. **Better SDR tonemapping at decode** for HDR/EXR/Radiance/16-bit content — pure `ImageLoader` change, no renderer rewrite (P2).
+3. **Legacy-mode monitor-ICC display output** — wide-gamut accuracy achievable in the *current* WPF pipeline, ahead of the blocked SkiaSharp epic (P2).
+4. **Focus-peaking + highlight/shadow-clipping overlays** for RAW/photo culling (P2).
+5. **HDR-display detection + status badge** (IDXGIOutput6) — cheap, honest, sets up the future path (P2).
+6. **SharpCompress 0.50.0 bump** (CRC verification + truncated-stream tolerance for comic archives) (P3).
+7. **Native-dependency version assertions in diagnostics** (SQLite, ImageMagick) (P3).
 
 ## Product Map
-- Core workflows: open files/folders/sessions/archives/books; navigate (wrap / stop-at-ends / sibling-folder); rename; compare; inspect metadata/provenance + live pixel readout + loupe; export/Save-a-copy; recover destructive actions.
-- User personas: Windows power users replacing Photos/ImageGlass/FastStone; photographers/archivists in local folders; technical users valuing portable artifacts, checksums, provenance, and visible network behavior.
-- Platforms and distribution: Windows 10/11 x64 WPF, `net10.0-windows10.0.22621.0`, MIT; Inno installer + portable ZIP; scripted local release gates; GitHub Releases; framework-dependent.
-- Key integrations and data flows: WIC first, Magick.NET fallback (opt-in embedded-ICC→sRGB); SharpCompress read-only archives; SQLite settings/catalog/cache; XMP sidecars; optional Ghostscript/jpegtran/ExifTool/c2patool/OCR/ONNX-DirectML; opt-in GitHub release checks logged by `NetworkEgressService`.
+- **Core workflows:** open files/folders/sessions/archives/comic-books; navigate; inline rename-while-viewing; compare; inspect metadata/provenance/pixels/loupe; non-destructive edit + Save-a-copy; batch/macro pipelines; semantic/duplicate/health scans; recover destructive actions.
+- **Personas:** Windows power users replacing Photos/ImageGlass/FastStone; photographers/archivists working in local folders; comic/manga readers; technical users valuing portable artifacts, checksums, provenance, and visible network behavior.
+- **Platforms/distribution:** Windows 10/11 x64, `net10.0-windows10.0.22621.0`, MIT; Inno installer + portable ZIP; scripted local release gates; GitHub Releases; framework-dependent; **unsigned** (code signing is a standing blocker for shell-integration features).
+- **Integrations/data flows:** WIC first → Magick.NET-Q16 14.15.0 fallback (embedded-ICC → sRGB); SharpCompress read-only archives; SQLite settings/catalog/semantic-index; XMP sidecars; optional Ghostscript 10.07.0 / jpegtran 3.1.4.1 / ExifTool / c2patool / Windows OCR / ONNX-DirectML CLIP; opt-in GitHub release check logged by `NetworkEgressService`.
 
 ## Competitive Landscape
-Unchanged from passes 1-2 (same day); the OSS/commercial field was fully mined and the feature gaps are either shipped today or parked in `Roadmap_Blocked.md`. The only competitor-relevant note for this pass: ImageGlass, PicView, and JPEGView all surface their new gestures through visible hints/shortcut lists — Images' newly-shipped loupe (middle-button) and zoom-to-selection (Ctrl+Shift+drag) currently have neither, a regression against Images' own established discoverability bar (command palette, `?` cheatsheet, per-command rebinding). Learn: every new gesture must join the palette + cheatsheet. Avoid (unchanged): WebView2 dependency, cross-platform rewrite, cloud/multi-user.
+- **FastStone / BandiView / nomacs (color viewers):** all ship **display-ICC monitor-profile** color management; Images converts only to sRGB (`ImageLoader.cs`), so it over-saturates on wide-gamut (P3/AdobeRGB) monitors. Learn: convert embedded → *monitor* profile in legacy (Advanced-Color-off) mode; it's a WPF-native change. Avoid: their heavier, dated UIs. (nomacs #394; FastStone monitor-profile thread.)
+- **ImageGlass 10 / BandiView / MS HDRImageViewer:** do **HDR display** (scRGB/HDR10 swapchain) and SDR tonemapping. Images hard-clips HDR/EXR to sRGB. Learn: at minimum tonemap (ACES/Hable) at decode — every serious viewer looks better for it. Avoid full HDR-swapchain in pure WPF (airspace tax — see Architecture).
+- **FastRawViewer:** focus-peaking + exposure-clipping overlays for fast RAW culling — Images has curves/levels but no culling overlays. Learn: cheap edge/threshold overlays on the decoded buffer.
+- **Honeyview / BandiView (comic):** webtoon/continuous-vertical-scroll reading. Images has RTL + two-page spreads but only paged navigation. Learn: add a continuous-scroll archive mode.
+- **ImageGlass / Pictus:** Explorer **thumbnail provider** for HEIC/AVIF/JXL/RAW/CBZ. Genuinely valuable but already parked (V70-04, blocked on plugin boundary + MSIX + code signing). Avoid re-litigating until D-05 unblocks.
+- **Do NOT adopt (unchanged):** WebView2 dependency, cross-platform rewrite, cloud/multi-user/telemetry.
 
 ## Security, Privacy, and Reliability
-- Verified (source): session restore reopens `Keys.LastImagePath` with only `!IsNullOrWhiteSpace(last) && File.Exists(last)` then `window.OpenPath(last)` — it bypasses `TryResolveArgPath`, which the argv path uses to reject `\\?\`/`\\.\` device-namespace shapes and canonicalize. A persisted path (settings DB is user-writable) reaches `OpenPath` unfiltered, and `File.Exists` on a device path can block. `src/Images/App.xaml.cs:167-180`.
-- Verified (source): the loupe never captures the mouse and does not guard an in-progress pan. `StartLoupe` (`src/Images/Controls/ZoomPanImage.cs`) sets `_loupeActive=true` without `CaptureMouse()`; `OnMove` short-circuits into `UpdateLoupe` while a left-drag pan is active (`_dragStart != null`), freezing the pan and leaving a stale `_dragStart` so the next left-up jumps the image. Releasing the middle button outside the control leaves the loupe stuck (no capture → no `OnAnyButtonUp`).
-- Verified (source): tile-backed (gigapixel) loads set `LoadResult.Image = TilePlaceholder` (a 1×1 BitmapSource, `src/Images/Services/ImageLoader.cs:445`). The loupe guard (`_image.Source is not ImageSource`) and the HUD readout guard (`CurrentImage is BitmapSource`) both pass for the placeholder, so the loupe renders a solid 1×1-sampled block and the live pixel readout shows the placeholder's single value for every hover over a huge image. `ZoomPanImage.StartLoupe`/`UpdateLoupe`; `src/Images/MainWindow.xaml.cs:1210-1214`.
-- Verified (source): `ImageLoader.ColorManagedDisplay` is a process-global mutable static, set on the UI thread (`SettingsViewModel`) and read on background decode threads (`Task.Run`/preload) with no memory barrier; preloaded neighbors are cached by path with no knowledge of the flag value used, so toggling color management does not re-color already-preloaded images and a decode in flight can observe a stale value. `src/Images/Services/ImageLoader.cs:67`.
-- Verified (source): `Canvas_MouseMove` calls `TrySampleInspectorPixel` twice for the same position/event when both the metadata HUD and Inspector mode are on (once for the HUD readout, once for the inspector), unthrottled — a `CopyPixels` per WM_MOUSEMOVE, doubled. `src/Images/MainWindow.xaml.cs:1210-1219`.
-- Verified (source): `DirectoryNavigator.LastMoveStoppedAtEnd` is reset only in `MoveNext`/`MovePrevious`, not in `MoveFirst`/`MoveLast`/`MoveToIndex`/`Open`/`Rescan`, so a stale "stopped at end" flag persists after a jump. Low impact (current sole consumer reads it immediately after a failed move) but latent. `src/Images/Services/DirectoryNavigator.cs`.
-- Refuted (do not re-investigate): the claim that `TransformToSrgbIfProfiled`'s `TransformColorSpace(ColorProfiles.SRGB, ColorProfiles.SRGB)` is a no-op is false — the two-arg overload's first argument is the assumed source used only when no profile is embedded; with an embedded profile it converts embedded→target(sRGB). Proven by the passing test `ImageLoaderTests.TransformToSrgbIfProfiled_WideGamutProfile_ConvertsToSrgb`. Narrow real caveat: it returns `true` for CMYK/gray profiles without confirming a meaningful RGB result.
+- **[Verified — real gap] No ImageMagick read-coder allowlist.** `MagickSecurityPolicy.cs` sets thorough `ResourceLimits` (memory/disk/area/dimensions/time/threads/list) and a *write*-format blocklist, but no read-side coder allowlist and no `ConfigurationFiles.Policy`/delegate `rights="none"`. Crafted exotic-format inputs (MNG, TIM/PSX, SF3, MSL, Log-colorspace) can still reach the native decoder — precisely the 2025-2026 ImageMagick heap-overflow CVE class (CVE-2025-55004/55005/53014, CVE-2025-66628). Mitigation: inject a deny-all-then-permit-web-safe coder policy + delegate lockdown at init. Effort S-M. (imagemagick.org security-policy; GHSA advisories.)
+- **[Verified — mostly mitigated] Ghostscript.** Bundled **10.07.0** ≥ 10.06.0, so the 2025 GS RCEs (CVE-2025-59798-59801) are patched, and ImageMagick document delegates are gated behind explicit Ghostscript availability. Residual hardening (confirm `-dSAFER`, no network, scratch-dir path sandbox, low-priv token, magic-byte gate before dispatch) is worthwhile but lower urgency given the version floor. (Artifex hardening blog.)
+- **[Verified — not exposed] SharpCompress zip-slip CVE-2026-44788** affects only `WriteToDirectory()`; Images streams archive entries without extracting to disk, so it is safe by construction. Do not introduce `WriteToDirectory` on untrusted archives.
+- **[Likely — verify] Native dependency floors.** Confirm the ImageMagick core inside Magick.NET-Q16 14.15.0 is ≥ 7.1.2-2 (CVE-2025-57803 BMP-encoder, CVSS 9.8) and the SQLite inside `bundle_e_sqlite3 3.0.3` is ≥ 3.50.2 (CVE-2025-6965, CVSS 9.8; low exposure — DB SQL is app-authored). No startup version assertion exists; add one to diagnostics.
+- **Reliability:** several already-tracked hot-path items remain (gallery virtualization, per-nav UI-thread I/O, RAW double-tail) in the existing ROADMAP; not re-listed here.
 
 ## Architecture Assessment
-- Color-management completeness gap: memory-mapped (>256 MB) and tile-backed decodes silently bypass `TransformToSrgbIfProfiled` (documented in the comment at `ImageLoader.cs:62-67`), so the exact wide-gamut originals (large RAW/PSD) the feature targets render uncorrected with no status signal. Either apply the transform on the Magick MMF/tile source or surface "color management unavailable for this image" in the decoder/status string.
-- Save-a-copy fidelity: `SaveCopyWithC2paHandoff` reloads via `new MagickImage(sourcePath)` (single frame). Copying an animated GIF / multi-page TIFF flattens to frame 0 with no warning; a JPEG target of a PNG source strips alpha — inherent to a user-chosen format change, but the animated-flatten deserves a warning or `MagickImageCollection`. `src/Images/Services/ImageExportService.cs:128-202`.
-- Discoverability/a11y as an architectural invariant: the app has a command palette + `?` cheatsheet + per-command rebinding + custom UIA peers, but the loupe and zoom-to-selection were added as raw mouse gestures with no palette entry, no `Strings.resx` hint, no cheatsheet line, and no settings (`LoupeFactor` is an unexposed DP). New interactions should route through the existing command/cheatsheet infrastructure by construction.
-- Test gaps: the new gesture/geometry code (loupe viewbox on tile-backed, zoom-select capture lifecycle, checker alignment under rotation) has control-level math tests but no coverage for the tile-placeholder and capture-conflict paths found here; each fix below should land a focused regression.
+- **Display pipeline is the ceiling.** `ImageLoader.cs` decodes → `TransformColorSpace(SRGB, SRGB)` → 8-bit `WriteableBitmap` Bgra32. This forecloses HDR and monitor-gamut accuracy. Two increments land in this one file **without** the blocked SkiaSharp rewrite: (a) a tonemap operator before 8-bit quantization; (b) a monitor-ICC destination profile (read via `GetICMProfile`/`WcsGetDefaultColorProfile`) in legacy (Advanced-Color-off) mode. The full HDR/managed-display epic (V100-05/06) still needs the new canvas.
+- **HDR in WPF is an XL trap.** Every Windows app doing true HDR display uses a DXGI flip swapchain (UWP/WinUI/native/browser); WPF cannot host one in its compositor. An `HwndHost` swapchain works but incurs the **airspace** problem — Images' rich WPF overlay stack (`ZoomPanImage`, OCR/crop/selection/exposure/red-eye/retouch overlays) can't composite over an HDR child HWND without being ported into D3D. Confirms parking V100-06; the SDR-tonemap + detection increments deliver ~80% of the perceived benefit for ~5% of the effort.
+- **Test/observability gaps:** no runtime assertion of native decoder/SQLite versions; the new tonemap/peaking/coder-policy work should each ship focused tests mirroring `ImageAdjustmentServiceTests` / `MagickSecurityPolicy` patterns.
 
 ## Rejected Ideas
-- Color-transform "no-op" fix (auditor #5): refuted by a passing test (see above); source = code-auditor subagent, dropped.
-- Preserve 16-bit depth on the color-managed path (auditor #6): the display path produces a WPF `WriteableBitmap` Bgra32 (8-bit) either way, so the depth "loss" is moot for on-screen rendering; source = code-auditor subagent, rejected as no user-visible effect.
-- Transparency-checkerboard rotation mis-size (auditor #8): the checker rect lives inside `_visual` and shares the same flip/rotate/scale transform as the image, so they rotate together; could not confirm a real misalignment without a wide-gamut/rotated live capture; needs-live-validation only, not a firm item.
-- Re-anchor zoom-lock to preserve the same screen region (auditor #9): the current center-on-new-image behavior matches the shipped acceptance ("re-anchors pan to center"); changing it is a spec change, not a bug fix.
-- Broad competitor/format re-survey: completed same day in passes 1-2; re-mining returns no new signal.
+- **True HDR display via `HwndHost` swapchain (now):** XL, breaks WPF overlay compositing (airspace). Already parked as V100-06; do not pull forward. Source: dotnet/wpf #4569, MS Advanced-Color doc.
+- **Explorer thumbnail/preview handler (now):** valuable but blocked on plugin-boundary design + MSIX AppContainer + code signing (D-05). Already parked (V70-04, Scout). Do not duplicate. Source: MS Building Thumbnail Providers.
+- **GPS map overlay (now):** already parked (V20-23) behind ExifTool GPS write wrapper; also, online map tiles conflict with local-first unless offline-tiled or "open in browser." Source: blocked roadmap.
+- **Screen capture:** out of scope — the user maintains a separate tool (SwiftShot); duplicating it bloats the viewer. Source: internal.
+- **SkiaSharp canvas as a research item:** already the P0 linchpin (V20-01) in the blocked roadmap; not re-proposed. Source: blocked roadmap.
+- **Slideshow / MP4 export as net-new:** slideshow already exists (`ToggleSlideshow`/interval/shuffle in `MainViewModel`); only transition shaders + MP4 encode would be new, and MP4 encode needs an encoder dependency — low ROI. Source: code scan.
+- **SQLite FTS5 / SQLCipher encryption:** interesting but the catalog is a rebuildable cache, not a system of record; encryption adds a native-swap (`bundle_e_sqlcipher`) for little gain on local-only data. Source: MDS encryption docs.
 
 ## Sources
-Code findings (primary evidence, this pass):
-- src/Images/App.xaml.cs:167-180
-- src/Images/Controls/ZoomPanImage.cs (StartLoupe/UpdateLoupe/OnMove/OnDown/OnUp/UpdateTransparencyGrid)
-- src/Images/Services/ImageLoader.cs:62-103,445,666-701
-- src/Images/Services/ImageExportService.cs:128-202
-- src/Images/Services/DirectoryNavigator.cs (MoveNext/MovePrevious/LastMoveStoppedAtEnd)
-- src/Images/MainWindow.xaml.cs:1210-1219
-- tests/Images.Tests/ImageLoaderTests.cs (TransformToSrgbIfProfiled_WideGamutProfile_ConvertsToSrgb)
+Code (primary evidence):
+- src/Images/Services/MagickSecurityPolicy.cs (ResourceLimits + write blocklist; no read-coder allowlist)
+- src/Images/Services/ImageLoader.cs (TransformColorSpace→sRGB→Bgra32; no tonemap)
+- src/Images/Services/ClipEmbeddingProvider.cs (real ONNX ViT-B/32 inference)
+- src/Images/Services/ArchiveBookService.cs (streamed, no WriteToDirectory)
+- src/Images/Images.csproj (dep versions); README.md (GS 10.07.0)
 
-External (grounding for specific claims):
-- https://github.com/dlemstra/magick.net/blob/main/docs/ConvertImage.md
-- https://learn.microsoft.com/en-us/dotnet/api/system.windows.uielement.capturemouse
-- https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file
-- https://github.com/d2phap/ImageGlass/issues/1425
-- https://github.com/sylikc/jpegview
+Competitors:
+- https://github.com/d2phap/ImageGlass/releases
+- https://github.com/nomacs/nomacs/issues/394
+- https://www.faststone.org/FSViewerDetail.htm
+- https://www.bandisoft.com/bandiview/
+- https://www.fastrawviewer.com/usermanual17/focus-peaking-and-overlay-grid
+- https://github.com/13thsymphony/HDRImageViewer
+
+HDR / color / platform:
+- https://learn.microsoft.com/en-us/windows/win32/direct3darticles/high-dynamic-range
+- https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_6/nf-dxgi1_6-idxgioutput6-getdesc1
+- https://learn.microsoft.com/en-us/windows/win32/wcs/advanced-color-icc-profiles
+- https://learn.microsoft.com/en-us/windows/win32/wcs/windows-color-system
+- https://github.com/dotnet/wpf/issues/4569
+
+Security / deps:
+- https://imagemagick.org/script/security-policy.php
+- https://imagemagick.org/source/policy-secure.xml
+- https://github.com/advisories/GHSA-hm4x-r5hc-794f (CVE-2025-53014 ImageMagick)
+- https://security.snyk.io/vuln/SNYK-DEBIAN11-IMAGEMAGICK-12202814 (CVE-2025-57803)
+- https://github.com/advisories/GHSA-6c8g-7p36-r338 (CVE-2026-44788 SharpCompress — not exposed)
+- https://github.com/advisories/GHSA-2m69-gcr7-jv3q (CVE-2025-6965 SQLite)
+- https://ghostscript.com/releases/cve/index.html
+- https://github.com/adamhathcock/sharpcompress/releases/tag/0.50.0
 
 ## Open Questions
-- Loupe on tile-backed (gigapixel) images: disable it entirely, or sample from the highest-resolution loaded tile? The latter is more capable but needs a tile-lookup path in `ZoomPanImage` that does not exist yet — decides the complexity of the fix.
-- Should color management be applied to the memory-mapped/tile Magick paths (heavier, touches the large-image pipeline) or only signaled as unavailable? Decides whether the completeness fix is S or L.
+- Monitor-ICC in legacy mode: apply per-monitor on the current window's display (re-transform on monitor change) or a single primary-display profile? Decides whether the transform is cached per-image or re-run on `WM_DISPLAYCHANGE`/window move — the difference between an M and an L.
+- Tonemap default: ship Reinhard (safe, neutral) as always-on for HDR-class inputs, or expose an operator picker (Reinhard/Hable/ACES) and leave off by default? Decides whether this is a silent quality fix or a user-facing setting.
