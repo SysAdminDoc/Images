@@ -87,6 +87,7 @@ public sealed record RecoveryActionRecord(
         : "Expires " + ExpiresUtc.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
 
     public const string StatusOpen = "Open";
+    public const string StatusPartial = "Partial";
     public const string StatusRestored = "Restored";
     public const string StatusMissing = "Missing";
 }
@@ -153,6 +154,39 @@ public sealed class RecoveryCenterService
             isRestorable: true,
             restoreHint: "Renames can be restored while the renamed file still exists.",
             sidecars);
+
+    internal RecoveryActionRecord RecordRenameDurable(
+        string sourcePath,
+        string destinationPath,
+        string title,
+        string description,
+        IEnumerable<RecoverySidecarMove>? sidecars = null)
+        => AppendNew(
+            RecoveryOperationKind.Rename,
+            sourcePath,
+            destinationPath,
+            title,
+            description,
+            isRestorable: true,
+            restoreHint: "Renames can be restored while the renamed file still exists.",
+            sidecars,
+            requirePersistence: true);
+
+    public RecoveryActionRecord RecordPartialRename(
+        string sourcePath,
+        string currentPath,
+        string description,
+        IEnumerable<RecoverySidecarMove>? sidecars = null)
+        => AppendNew(
+            RecoveryOperationKind.Rename,
+            sourcePath,
+            currentPath,
+            "Rename needs attention",
+            description,
+            isRestorable: false,
+            restoreHint: "The rename could not be rolled back completely. Inspect the listed file and sidecars before moving them manually.",
+            sidecars,
+            status: RecoveryActionRecord.StatusPartial);
 
     public RecoveryActionRecord RecordQuarantine(
         string sourcePath,
@@ -311,7 +345,9 @@ public sealed class RecoveryCenterService
         string description,
         bool isRestorable,
         string restoreHint,
-        IEnumerable<RecoverySidecarMove>? sidecars)
+        IEnumerable<RecoverySidecarMove>? sidecars,
+        string status = RecoveryActionRecord.StatusOpen,
+        bool requirePersistence = false)
     {
         var created = _clock();
         var record = new RecoveryActionRecord(
@@ -326,26 +362,29 @@ public sealed class RecoveryCenterService
             ExpiresUtc: null,
             isRestorable,
             restoreHint,
-            RecoveryActionRecord.StatusOpen);
-        AppendRecord(record);
+            status);
+        if (!AppendRecord(record) && requirePersistence)
+            throw new IOException("A durable Recovery Center record could not be written.");
         return record;
     }
 
-    private void AppendRecord(RecoveryActionRecord record)
+    private bool AppendRecord(RecoveryActionRecord record)
     {
         var path = TryGetLogPath();
         if (path is null)
-            return;
+            return false;
 
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             File.AppendAllText(path, JsonSerializer.Serialize(record, JsonOptions) + Environment.NewLine);
             CompactLogIfNeeded(path);
+            return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
         {
             // Recovery logging should never block the destructive operation that already succeeded.
+            return false;
         }
     }
 

@@ -60,7 +60,7 @@ public static class SidecarCompanionFiles
         return false;
     }
 
-    private static IReadOnlyList<SidecarMovePlan> EnumerateMovePlans(string oldImagePath, string newImagePath)
+    internal static IReadOnlyList<SidecarMovePlan> EnumerateMovePlans(string oldImagePath, string newImagePath)
     {
         var plans = new List<SidecarMovePlan>();
         var seenSources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -119,5 +119,5 @@ public static class SidecarCompanionFiles
         }
     }
 
-    private sealed record SidecarMovePlan(string SourcePath, string DestinationPath);
+    internal sealed record SidecarMovePlan(string SourcePath, string DestinationPath);
 }

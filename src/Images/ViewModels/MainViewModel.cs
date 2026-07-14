@@ -16,7 +16,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 {
     private static readonly ILogger _log = Log.For<MainViewModel>();
     private readonly DirectoryNavigator _nav;
-    private readonly RenameService _rename = new();
+    private readonly RenameService _rename;
     private readonly PreloadService _preload = new();
     private readonly Dispatcher _uiDispatcher = Dispatcher.CurrentDispatcher;
     private readonly SettingsService _settings;
@@ -99,6 +99,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Func<string?>? pickCompareFile = null)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        _rename = new RenameService(_recoveryCenter);
         _commandShortcuts = new CommandShortcutService(_settings);
         _clipboardImport = clipboardImport ?? new ClipboardImportService();
         _nav = navigator ?? new DirectoryNavigator();
@@ -4884,7 +4885,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 return;
             }
 
-            var newPath = _rename.Commit(CurrentPath, EditableStem, Extension);
+            var commit = _rename.Commit(CurrentPath, EditableStem, Extension);
+            var newPath = commit.FinalPath;
             if (string.Equals(newPath, CurrentPath, StringComparison.Ordinal))
             {
                 RenameStatus = RenameStatusKind.Idle;

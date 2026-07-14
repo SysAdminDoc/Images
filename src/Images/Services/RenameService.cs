@@ -1,4 +1,5 @@
 using System.IO;
+using System.Security;
 using System.Text;
 
 namespace Images.Services;
@@ -11,9 +12,59 @@ public sealed class RenameService
 {
     public sealed record UndoEntry(string FromPath, string ToPath, DateTime At);
 
+    public enum MoveStatus
+    {
+        NoChange,
+        Moved,
+        SkippedMissing,
+        Failed,
+        RolledBack,
+        RollbackFailed,
+    }
+
+    public sealed record MoveOutcome(
+        string SourcePath,
+        string DestinationPath,
+        MoveStatus Status,
+        string? Error = null);
+
+    public sealed record CommitResult(
+        string OriginalPath,
+        string FinalPath,
+        bool Changed,
+        MoveOutcome Primary,
+        IReadOnlyList<MoveOutcome> Sidecars,
+        RecoveryActionRecord? RecoveryRecord);
+
+    public sealed class RenameTransactionException : IOException
+    {
+        public RenameTransactionException(string message, CommitResult result, bool isPartialState, Exception innerException)
+            : base(message, innerException)
+        {
+            Result = result;
+            IsPartialState = isPartialState;
+        }
+
+        public CommitResult Result { get; }
+        public bool IsPartialState { get; }
+    }
+
     private static readonly char[] _invalid = Path.GetInvalidFileNameChars();
     private readonly LinkedList<UndoEntry> _undo = new();
+    private readonly RecoveryCenterService _recoveryCenter;
+    private readonly IRenameFileSystem _fileSystem;
     private const int MaxUndo = 10;
+
+    public RenameService(RecoveryCenterService? recoveryCenter = null)
+        : this(recoveryCenter ?? new RecoveryCenterService(), SystemRenameFileSystem.Instance)
+    {
+    }
+
+    internal RenameService(RecoveryCenterService recoveryCenter, IRenameFileSystem fileSystem)
+    {
+        _recoveryCenter = recoveryCenter ?? throw new ArgumentNullException(nameof(recoveryCenter));
+        _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+    }
 
     public IReadOnlyCollection<UndoEntry> UndoHistory => _undo;
 
@@ -147,13 +198,14 @@ public sealed class RenameService
 
     /// <summary>
     /// Move the file from <paramref name="currentPath"/> to the resolved target.
-    /// Returns the final path (which may differ from <paramref name="desiredStem"/>+ext if a collision
-    /// forced a " (2)" suffix). Returns <paramref name="currentPath"/> unchanged on no-op.
+    /// Returns structured primary, sidecar, and durable recovery outcomes. The final path may differ
+    /// from <paramref name="desiredStem"/>+ext if a collision forced a " (2)" suffix.
     /// Throws for invalid filename input so the UI can surface a clear validation error.
     /// </summary>
-    public string Commit(string currentPath, string desiredStem, string extension)
+    public CommitResult Commit(string currentPath, string desiredStem, string extension)
     {
-        if (!File.Exists(currentPath)) return currentPath;
+        if (!_fileSystem.FileExists(currentPath))
+            return NoChange(currentPath);
 
         var clean = Sanitize(desiredStem);
         if (string.IsNullOrEmpty(clean))
@@ -161,36 +213,30 @@ public sealed class RenameService
 
         var folder = Path.GetDirectoryName(currentPath)!;
         string target = currentPath;
-        var moved = false;
-
         for (var attempt = 0; attempt < 100; attempt++)
         {
             target = ResolveTargetPath(folder, clean, extension, currentPath);
 
-            if (IsExactSame(target, currentPath)) return currentPath;
+            if (IsExactSame(target, currentPath)) return NoChange(currentPath);
 
             try
             {
-                File.Move(currentPath, target);
-                SidecarCompanionFiles.TryMoveAlongside(currentPath, target);
-                moved = true;
-                break;
+                var result = MoveTransaction(currentPath, target, "Renamed image");
+                var entry = new UndoEntry(currentPath, target, DateTime.Now);
+                _undo.AddFirst(entry);
+                while (_undo.Count > MaxUndo) _undo.RemoveLast();
+                Renamed?.Invoke(this, entry);
+                return result;
             }
-            catch (IOException) when (File.Exists(target) && !IsSame(target, currentPath))
+            catch (IOException ex) when (ex is not RenameTransactionException &&
+                                         _fileSystem.FileExists(target) &&
+                                         !IsSame(target, currentPath))
             {
                 clean = $"{Sanitize(desiredStem)} ({attempt + 2})";
             }
         }
 
-        if (!moved || !File.Exists(target))
-            throw new IOException("Rename did not produce the expected target file.");
-
-        var entry = new UndoEntry(currentPath, target, DateTime.Now);
-        _undo.AddFirst(entry);
-        while (_undo.Count > MaxUndo) _undo.RemoveLast();
-        Renamed?.Invoke(this, entry);
-
-        return target;
+        throw new IOException("Rename could not resolve an available target after 100 attempts.");
     }
 
     /// <summary>
@@ -212,8 +258,7 @@ public sealed class RenameService
             restoreTo = ResolveTargetPath(folder, originalStem, originalExt, entry.ToPath);
             try
             {
-                File.Move(entry.ToPath, restoreTo);
-                SidecarCompanionFiles.TryMoveAlongside(entry.ToPath, restoreTo);
+                MoveTransaction(entry.ToPath, restoreTo, "Reverted rename");
                 moved = true;
                 break;
             }
@@ -231,4 +276,155 @@ public sealed class RenameService
         Undone?.Invoke(this, reverted);
         return reverted;
     }
+
+    private CommitResult MoveTransaction(string sourcePath, string targetPath, string recoveryTitle)
+    {
+        var sidecarOutcomes = new List<MoveOutcome>();
+        var movedSidecars = new List<SidecarCompanionFiles.SidecarMovePlan>();
+        var primary = new MoveOutcome(sourcePath, targetPath, MoveStatus.Moved);
+        RecoveryActionRecord? recoveryRecord = null;
+
+        _fileSystem.Move(sourcePath, targetPath);
+
+        try
+        {
+            foreach (var plan in SidecarCompanionFiles.EnumerateMovePlans(sourcePath, targetPath))
+            {
+                if (!_fileSystem.FileExists(plan.SourcePath))
+                {
+                    sidecarOutcomes.Add(new MoveOutcome(
+                        plan.SourcePath,
+                        plan.DestinationPath,
+                        MoveStatus.SkippedMissing));
+                    continue;
+                }
+
+                try
+                {
+                    _fileSystem.Move(plan.SourcePath, plan.DestinationPath);
+                    movedSidecars.Add(plan);
+                    sidecarOutcomes.Add(new MoveOutcome(
+                        plan.SourcePath,
+                        plan.DestinationPath,
+                        MoveStatus.Moved));
+                }
+                catch (Exception ex) when (IsMoveFailure(ex))
+                {
+                    sidecarOutcomes.Add(new MoveOutcome(
+                        plan.SourcePath,
+                        plan.DestinationPath,
+                        MoveStatus.Failed,
+                        ex.Message));
+                    throw;
+                }
+            }
+
+            var recoverySidecars = movedSidecars
+                .Select(plan => new RecoverySidecarMove(plan.SourcePath, plan.DestinationPath))
+                .ToArray();
+            recoveryRecord = _recoveryCenter.RecordRenameDurable(
+                sourcePath,
+                targetPath,
+                recoveryTitle,
+                $"{recoveryTitle} from {Path.GetFileName(sourcePath)} to {Path.GetFileName(targetPath)}.",
+                recoverySidecars);
+        }
+        catch (Exception ex) when (IsMoveFailure(ex))
+        {
+            var rollbackFailed = false;
+            for (var i = movedSidecars.Count - 1; i >= 0; i--)
+            {
+                var plan = movedSidecars[i];
+                var outcomeIndex = sidecarOutcomes.FindIndex(outcome =>
+                    outcome.SourcePath.Equals(plan.SourcePath, StringComparison.OrdinalIgnoreCase) &&
+                    outcome.DestinationPath.Equals(plan.DestinationPath, StringComparison.OrdinalIgnoreCase));
+                try
+                {
+                    _fileSystem.Move(plan.DestinationPath, plan.SourcePath);
+                    sidecarOutcomes[outcomeIndex] = sidecarOutcomes[outcomeIndex] with { Status = MoveStatus.RolledBack };
+                }
+                catch (Exception rollbackEx) when (IsMoveFailure(rollbackEx))
+                {
+                    rollbackFailed = true;
+                    sidecarOutcomes[outcomeIndex] = sidecarOutcomes[outcomeIndex] with
+                    {
+                        Status = MoveStatus.RollbackFailed,
+                        Error = rollbackEx.Message,
+                    };
+                }
+            }
+
+            try
+            {
+                _fileSystem.Move(targetPath, sourcePath);
+                primary = primary with { Status = MoveStatus.RolledBack };
+            }
+            catch (Exception rollbackEx) when (IsMoveFailure(rollbackEx))
+            {
+                rollbackFailed = true;
+                primary = primary with { Status = MoveStatus.RollbackFailed, Error = rollbackEx.Message };
+            }
+
+            RecoveryActionRecord? partialRecord = null;
+            if (rollbackFailed)
+            {
+                var primaryCurrentPath = _fileSystem.FileExists(sourcePath) ? sourcePath : targetPath;
+                var remainingSidecars = movedSidecars
+                    .Where(plan => _fileSystem.FileExists(plan.DestinationPath))
+                    .Select(plan => new RecoverySidecarMove(plan.SourcePath, plan.DestinationPath))
+                    .ToArray();
+                partialRecord = _recoveryCenter.RecordPartialRename(
+                    sourcePath,
+                    primaryCurrentPath,
+                    "One or more image or XMP moves could not be rolled back; the recorded paths require manual inspection.",
+                    remainingSidecars);
+            }
+
+            var result = new CommitResult(
+                sourcePath,
+                _fileSystem.FileExists(sourcePath) ? sourcePath : targetPath,
+                Changed: rollbackFailed,
+                primary,
+                sidecarOutcomes,
+                partialRecord);
+            var message = rollbackFailed
+                ? "Rename left files in a partial state. Open Recovery Center before making further changes."
+                : "Rename transaction could not be completed; all image and XMP moves were restored.";
+            throw new RenameTransactionException(message, result, rollbackFailed, ex);
+        }
+
+        return new CommitResult(sourcePath, targetPath, Changed: true, primary, sidecarOutcomes, recoveryRecord);
+    }
+
+    private static CommitResult NoChange(string path)
+        => new(
+            path,
+            path,
+            Changed: false,
+            new MoveOutcome(path, path, MoveStatus.NoChange),
+            [],
+            RecoveryRecord: null);
+
+    private static bool IsMoveFailure(Exception ex)
+        => ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException;
+}
+
+internal interface IRenameFileSystem
+{
+    bool FileExists(string path);
+    void Move(string sourcePath, string destinationPath);
+}
+
+internal sealed class SystemRenameFileSystem : IRenameFileSystem
+{
+    public static SystemRenameFileSystem Instance { get; } = new();
+
+    private SystemRenameFileSystem()
+    {
+    }
+
+    public bool FileExists(string path) => File.Exists(path);
+
+    public void Move(string sourcePath, string destinationPath)
+        => File.Move(sourcePath, destinationPath, overwrite: false);
 }
