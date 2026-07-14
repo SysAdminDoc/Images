@@ -877,6 +877,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     private bool _isOperationBusy;
+    private bool _displayColorReloadPending;
     public bool IsOperationBusy
     {
         get => _isOperationBusy;
@@ -7110,7 +7111,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         finally
         {
             if (!wasBusy)
+            {
                 IsOperationBusy = false;
+                ApplyPendingDisplayColorReload();
+            }
         }
     }
 
@@ -7127,6 +7131,40 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _pendingAutoStartCropMode = false;
             StartFreehandCropModeForCurrentImage();
         }
+        ApplyPendingDisplayColorReload();
+    }
+
+    private void ApplyPendingDisplayColorReload()
+    {
+        if (!_displayColorReloadPending)
+            return;
+
+        _displayColorReloadPending = false;
+        if (ImageLoader.ColorManagedDisplay && HasDisplayImage && !IsTilePyramidActive)
+            ReloadCurrentPreservingViewState(resetPreload: true);
+    }
+
+    /// <summary>
+    /// Re-decodes monitor-profiled pixels after the window crosses displays or Windows changes
+    /// the display topology. Tile-backed images remain on their documented unmanaged path.
+    /// </summary>
+    internal void OnDisplayColorStateChanged()
+    {
+        if (!ImageLoader.ColorManagedDisplay)
+            return;
+
+        _preload.Reset();
+        if (!HasDisplayImage || IsTilePyramidActive)
+            return;
+
+        if (IsOperationBusy)
+        {
+            _displayColorReloadPending = true;
+            return;
+        }
+
+        _displayColorReloadPending = false;
+        ReloadCurrentPreservingViewState(resetPreload: false);
     }
 
     // E6/V100-01: save a copy of the decoded frame, applying persisted edit-stack operations

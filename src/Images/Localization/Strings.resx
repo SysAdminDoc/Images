@@ -1629,7 +1629,7 @@ Details written to:
     <value>Color-managed display</value>
   </data>
   <data name="SettingsColorManagementDescription" xml:space="preserve">
-    <value>Honors an image's embedded ICC profile and converts wide-gamut colors (Adobe RGB, Display P3) to sRGB so they no longer look over-saturated. Applies to the current and newly opened images; decodes through Magick.NET.</value>
+    <value>Honors embedded ICC profiles. With Windows Advanced Color off, wide-gamut images target the active monitor profile; with Advanced Color on or unavailable, Images safely outputs sRGB. Applies immediately and decodes through Magick.NET.</value>
   </data>
   <data name="SettingsToneMapTitle" xml:space="preserve">
     <value>HDR tonemapping</value>
@@ -1860,7 +1860,7 @@ Details written to:
     <value>Images will start at the empty state when launched with no file.</value>
   </data>
   <data name="SettingsColorManagementOnStatus" xml:space="preserve">
-    <value>Embedded color profiles will be converted to sRGB on newly opened images.</value>
+    <value>Embedded profiles will target the active legacy monitor profile, with an sRGB fallback for Windows Advanced Color.</value>
   </data>
   <data name="SettingsColorManagementOffStatus" xml:space="preserve">
     <value>Images will display raw pixel values without ICC color conversion.</value>

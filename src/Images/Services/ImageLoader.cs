@@ -63,9 +63,9 @@ public static class ImageLoader
 
     /// <summary>
     /// RD-02: when true, normal raster loads are decoded through Magick.NET and any embedded ICC
-    /// profile is transformed to sRGB before display, so wide-gamut (AdobeRGB/DisplayP3) images no
-    /// longer render over-saturated on the common sRGB assumption. Opt-in (default off) because it
-    /// routes the fast WIC path through Magick; huge (memory-mapped) and tiled images are exempt.
+    /// profile is transformed to the active legacy monitor profile, or to sRGB when Windows
+    /// Advanced Color is active/unavailable. Opt-in (default off) because it routes the fast WIC
+    /// path through Magick; huge (memory-mapped) and tiled images are exempt.
     /// Volatile so background decode threads observe UI-thread toggles without a torn/stale read.
     /// </summary>
     public static bool ColorManagedDisplay
@@ -258,12 +258,12 @@ public static class ImageLoader
             if (!ToneMapService.ApplyIfNeeded(image, extension, HdrToneMapOperator))
                 return null;
 
-            var managed = ColorManagedDisplay && TransformToSrgbIfProfiled(image);
+            var colorTarget = ColorManagedDisplay ? TransformForDisplayIfProfiled(image) : null;
             var wb = MagickToBitmap(image);
             sw.Stop();
             evtSrc.RecordMagickFallbackDecode();
             evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
-            var decoder = WithToneMapStatus(managed ? "Magick.NET (color-managed)" : "Magick.NET", true);
+            var decoder = WithToneMapStatus(WithColorManagementStatus("Magick.NET", colorTarget), true);
             evtSrc.DecodeCompleted(displayName, decoder, (long)sw.Elapsed.TotalMilliseconds);
             return new LoadResult(wb, wb.PixelWidth, wb.PixelHeight, decoder);
         }
@@ -497,13 +497,18 @@ public static class ImageLoader
 
             using var frame = collection[0].Clone();
             var toneMapped = ToneMapService.ApplyIfNeeded(frame, Path.GetExtension(path), HdrToneMapOperator);
+            var colorTarget = ColorManagedDisplay ? TransformForDisplayIfProfiled(frame) : null;
             var wb = MagickToBitmap(frame);
             var label = PageLabelFor(path);
             return new LoadResult(
                 wb,
                 wb.PixelWidth,
                 wb.PixelHeight,
-                WithToneMapStatus($"Magick.NET ({SupportedImageFormats.FormatFamily(path)} {label.ToLowerInvariant()} {pageIndex + 1} of {pageCount})", toneMapped),
+                WithToneMapStatus(
+                    WithColorManagementStatus(
+                        $"Magick.NET ({SupportedImageFormats.FormatFamily(path)} {label.ToLowerInvariant()} {pageIndex + 1} of {pageCount})",
+                        colorTarget),
+                    toneMapped),
                 Pages: new PageSequence(pageIndex, pageCount, label));
         }
         catch (MagickException)
@@ -699,8 +704,14 @@ public static class ImageLoader
             int iterations = 0;
             bool first = true;
 
+            string? colorTarget = null;
             foreach (var frame in collection)
             {
+                if (ColorManagedDisplay)
+                {
+                    var frameTarget = TransformForDisplayIfProfiled(frame);
+                    colorTarget ??= frameTarget;
+                }
                 var wb = MagickToBitmap(frame);
                 if (first)
                 {
@@ -729,7 +740,7 @@ public static class ImageLoader
                 frames[0],
                 firstWidth,
                 firstHeight,
-                $"Magick.NET (animated, {frames.Count} frames)",
+                WithColorManagementStatus($"Magick.NET (animated, {frames.Count} frames)", colorTarget),
                 seq);
         }
         // Missing codec / unknown format / corrupt header — fall back to the regular single-image path.
@@ -758,13 +769,13 @@ public static class ImageLoader
         {
             using var image = MagickSafeReader.Read(bytes, extension);
             var toneMapped = ToneMapService.ApplyIfNeeded(image, extension, HdrToneMapOperator);
-            var managed = TransformToSrgbIfProfiled(image);
+            var colorTarget = TransformForDisplayIfProfiled(image);
             var wb = MagickToBitmap(image);
 
             sw.Stop();
             evtSrc.RecordMagickFallbackDecode();
             evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
-            var decoder = WithToneMapStatus(managed ? "Magick.NET (color-managed)" : "Magick.NET", toneMapped);
+            var decoder = WithToneMapStatus(WithColorManagementStatus("Magick.NET", colorTarget), toneMapped);
             evtSrc.DecodeCompleted(displayName, decoder, (long)sw.Elapsed.TotalMilliseconds);
             return new LoadResult(wb, wb.PixelWidth, wb.PixelHeight, decoder);
         }
@@ -793,6 +804,34 @@ public static class ImageLoader
         image.TransformColorSpace(ColorProfiles.SRGB, ColorProfiles.SRGB);
         return true;
     }
+
+    /// <summary>
+    /// Transforms an embedded source profile to the effective display destination. Legacy SDR
+    /// monitors use their validated ICC profile; Advanced Color and uncertain display states use
+    /// sRGB so Windows can perform (or safely assume) the desktop conversion. Returns the target
+    /// label for decoder diagnostics, or null when the image was untagged.
+    /// </summary>
+    internal static string? TransformForDisplayIfProfiled(
+        IMagickImage<float> image,
+        DisplayColorState? display = null)
+    {
+        if (image.GetColorProfile() is null)
+            return null;
+
+        display ??= DisplayColorService.Current;
+        if (display.UseLegacyMonitorProfile && display.ProfileData is { Length: > 0 } profileData)
+        {
+            var destination = new ColorProfile(profileData);
+            image.TransformColorSpace(ColorProfiles.SRGB, destination);
+            return display.DestinationLabel;
+        }
+
+        image.TransformColorSpace(ColorProfiles.SRGB, ColorProfiles.SRGB);
+        return "sRGB";
+    }
+
+    private static string WithColorManagementStatus(string decoder, string? target)
+        => target is null ? decoder : $"{decoder} · color-managed → {target}";
 
     private static WriteableBitmap MagickToBitmap(IMagickImage<float> image)
     {

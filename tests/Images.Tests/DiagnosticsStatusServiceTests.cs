@@ -113,6 +113,42 @@ public sealed class DiagnosticsStatusServiceTests
             && item.Detail.Contains("2 failed", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public void BuildStatusItems_WithLegacyMonitorProfile_ReportsEffectiveDestination()
+    {
+        var display = DisplayColorService.CreateStateForTest(
+            @"\\.\DISPLAY2",
+            advancedColorKnown: true,
+            advancedColorEnabled: false,
+            profilePath: @"C:\Color\WideGamut.icc",
+            profileData: ImageMagick.ColorProfiles.AppleRGB.ToByteArray(),
+            bitsPerColorChannel: 8);
+
+        var items = DiagnosticsStatusService.BuildStatusItems(
+            ReadyProvenance(),
+            new OcrCapabilityService.OcrCapabilityStatus(
+                IsAvailable: true,
+                LanguageCount: 1,
+                LanguageSummary: "English (United States) (en-US)",
+                StatusTitle: "Text extraction ready",
+                StatusDetail: "OCR runs locally.",
+                BadgeText: "Ready"),
+            updateChecksEnabled: false,
+            lastUpdateCheckUtc: null,
+            appDataRoot: @"C:\Users\test\AppData\Local\Images",
+            logsPath: AppContext.BaseDirectory,
+            thumbnailsPath: @"C:\Users\test\AppData\Local\Images\thumbs",
+            crashLogPath: @"C:\Users\test\AppData\Local\Images\crash.log",
+            displayColor: display,
+            colorManagementEnabled: true);
+
+        Assert.Contains(items, item =>
+            item.Title == "Display color"
+            && item.Status == "Monitor ICC active"
+            && item.Detail.Contains("WideGamut.icc", StringComparison.Ordinal)
+            && item.Detail.Contains(@"\\.\DISPLAY2", StringComparison.Ordinal));
+    }
+
     private static CodecCapabilityService.RuntimeProvenance ReadyProvenance()
         => new(
             AppVersion: "Images 0.2.9",

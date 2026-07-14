@@ -27,7 +27,9 @@ public static class DiagnosticsStatusService
             AppStorage.TryGetAppDirectory("thumbs"),
             CrashLog.LogPath,
             ThumbnailCache.Instance.GetHealth(),
-            BackgroundTaskTracker.Snapshot);
+            BackgroundTaskTracker.Snapshot,
+            DisplayColorService.Current,
+            SettingsService.Instance.GetBool(Keys.ColorManagement, false));
 
     internal static IReadOnlyList<DiagnosticStatusItem> BuildStatusItems(
         CodecCapabilityService.RuntimeProvenance provenance,
@@ -39,7 +41,9 @@ public static class DiagnosticsStatusService
         string? thumbnailsPath,
         string crashLogPath,
         ThumbnailCacheHealth? thumbnailCache = null,
-        BackgroundTaskSnapshot? backgroundTasks = null)
+        BackgroundTaskSnapshot? backgroundTasks = null,
+        DisplayColorState? displayColor = null,
+        bool colorManagementEnabled = false)
     {
         ArgumentNullException.ThrowIfNull(provenance);
         ArgumentNullException.ThrowIfNull(ocrStatus);
@@ -65,6 +69,7 @@ public static class DiagnosticsStatusService
                 BuildMagickDetail(provenance),
                 ReadyTone,
                 "\uE8B9"),
+            BuildDisplayColorStatus(displayColor ?? DisplayColorState.Unprobed, colorManagementEnabled),
             new(
                 "Content credentials",
                 provenance.C2paToolAvailable ? "c2patool ready" : "c2patool unavailable",
@@ -102,6 +107,56 @@ public static class DiagnosticsStatusService
                 BuildBackgroundWorkTone(backgroundTasks ?? default),
                 "\uE9F5")
         ];
+    }
+
+    private static DiagnosticStatusItem BuildDisplayColorStatus(
+        DisplayColorState display,
+        bool colorManagementEnabled)
+    {
+        var device = display.DeviceName;
+        var signal = display.AdvancedColorKnown
+            ? $"{display.ColorEncoding}, {display.BitsPerColorChannel} bits per channel"
+            : "signal format unavailable";
+
+        if (!colorManagementEnabled)
+        {
+            return new DiagnosticStatusItem(
+                "Display color",
+                "ICC output off",
+                $"Color-managed display is opt-in and currently off. {device}; {signal}. {display.ProbeDetail}",
+                InfoTone,
+                "\uE790");
+        }
+
+        if (display.UseLegacyMonitorProfile)
+        {
+            var profile = display.ProfileFileName ?? display.ProfileDescription ?? "custom monitor profile";
+            return new DiagnosticStatusItem(
+                "Display color",
+                "Monitor ICC active",
+                $"Embedded profiles target {profile} on {device}. {signal}. Windows Advanced Color is off.",
+                ReadyTone,
+                "\uE790");
+        }
+
+        if (display.AdvancedColorKnown && display.AdvancedColorEnabled)
+        {
+            return new DiagnosticStatusItem(
+                "Display color",
+                "Windows Advanced Color active",
+                $"Images outputs sRGB and leaves display conversion to Windows on {device}. {signal}.",
+                ReadyTone,
+                "\uE790");
+        }
+
+        var status = display.AdvancedColorKnown ? "sRGB fallback active" : "sRGB safety fallback";
+        var tone = display.AdvancedColorKnown ? ReadyTone : WarningTone;
+        return new DiagnosticStatusItem(
+            "Display color",
+            status,
+            $"Images outputs sRGB on {device}; {signal}. {display.ProbeDetail}",
+            tone,
+            "\uE790");
     }
 
     private static string BuildGhostscriptDetail(CodecCapabilityService.RuntimeProvenance provenance)

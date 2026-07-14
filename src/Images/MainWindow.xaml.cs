@@ -16,6 +16,7 @@ namespace Images;
 public partial class MainWindow : Window
 {
     private const double WorkAreaMargin = 24;
+    private const int WmDisplayChange = 0x007E;
 
     internal enum DropOpenKind
     {
@@ -105,6 +106,7 @@ public partial class MainWindow : Window
         Viewport.MouseLeave += (_, _) => FadeArrows(0.0);
         _edgeHideTimer.Tick += EdgeHideTimer_Tick;
         MouseMove += (_, e) => FullscreenEdgeCheck(e.GetPosition(this));
+        LocationChanged += (_, _) => RefreshDisplayColorState(force: false);
         Loaded += (_, _) =>
         {
             Focus();
@@ -242,6 +244,7 @@ public partial class MainWindow : Window
         WindowChrome.ApplyDarkCaption(hwnd);
         _hwndSource = HwndSource.FromHwnd(hwnd);
         _hwndSource?.AddHook(WndProc);
+        RefreshDisplayColorState(force: true);
         ApplyOverlayWindowState();
     }
 
@@ -252,8 +255,26 @@ public partial class MainWindow : Window
             Vm.ExitOverlayModeCommand.Execute(null);
             handled = true;
         }
+        else if (msg == WmDisplayChange)
+        {
+            RefreshDisplayColorState(force: true);
+        }
 
         return IntPtr.Zero;
+    }
+
+    private void RefreshDisplayColorState(bool force)
+    {
+        var hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd != IntPtr.Zero && DisplayColorService.RefreshForWindow(hwnd, force))
+        {
+            // Never decode inside WM_DISPLAYCHANGE or the native move/size loop. Deferring to
+            // background dispatcher priority keeps monitor transitions responsive and coalesces
+            // naturally behind higher-priority input/layout work.
+            Dispatcher.BeginInvoke(
+                new Action(Vm.OnDisplayColorStateChanged),
+                System.Windows.Threading.DispatcherPriority.Background);
+        }
     }
 
     private void ApplyOverlayWindowState()

@@ -124,4 +124,45 @@ public sealed class ImageLoaderTests
         // The embedded profile is now sRGB, not the original Adobe RGB.
         Assert.False(after!.ToByteArray().AsSpan().SequenceEqual(before));
     }
+
+    [Fact]
+    public void TransformForDisplayIfProfiled_LegacySdr_EmbedsMonitorDestination()
+    {
+        using var image = new MagickImage(MagickColors.Red, 4, 4);
+        image.SetProfile(ColorProfiles.AdobeRGB1998);
+        var destinationBytes = ColorProfiles.AppleRGB.ToByteArray();
+        var display = DisplayColorService.CreateStateForTest(
+            @"\\.\DISPLAY2",
+            advancedColorKnown: true,
+            advancedColorEnabled: false,
+            profilePath: @"C:\Color\WideGamut.icc",
+            profileData: destinationBytes);
+
+        var target = ImageLoader.TransformForDisplayIfProfiled(image, display);
+
+        Assert.Contains("monitor ICC", target, StringComparison.Ordinal);
+        var embedded = Assert.IsAssignableFrom<IColorProfile>(image.GetColorProfile());
+        Assert.True(embedded.ToByteArray().AsSpan().SequenceEqual(destinationBytes));
+    }
+
+    [Fact]
+    public void TransformForDisplayIfProfiled_AdvancedColor_EmbedsSrgbDestination()
+    {
+        using var image = new MagickImage(MagickColors.Red, 4, 4);
+        image.SetProfile(ColorProfiles.AdobeRGB1998);
+        var sourceBytes = ColorProfiles.AdobeRGB1998.ToByteArray();
+        var display = DisplayColorService.CreateStateForTest(
+            @"\\.\DISPLAY1",
+            advancedColorKnown: true,
+            advancedColorEnabled: true,
+            profilePath: @"C:\Color\WideGamut.icc",
+            profileData: ColorProfiles.AppleRGB.ToByteArray(),
+            bitsPerColorChannel: 10);
+
+        var target = ImageLoader.TransformForDisplayIfProfiled(image, display);
+
+        Assert.Equal("sRGB", target);
+        var embedded = Assert.IsAssignableFrom<IColorProfile>(image.GetColorProfile());
+        Assert.False(embedded.ToByteArray().AsSpan().SequenceEqual(sourceBytes));
+    }
 }
