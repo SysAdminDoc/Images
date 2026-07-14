@@ -4,6 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Exif 3.1 learning-use preferences, development provenance, and correction/noise-reduction state now appear as localized read-only metadata; strict TIFF parsing preserves the new UTF-8 fields, labels reserved values explicitly, and rejects legacy Samsung/GE tag collisions without modifying the image.
 - Settings can now export and transactionally import a bounded, versioned JSON allowlist of portable preferences and custom shortcuts; previews report applied/ignored counts, while private paths, window placement, history, and update-check consent never leave the local database.
 - Service-generated metadata, color analysis, diagnostics, OCR, content-credential, model-management, network-export, and asynchronous loading/error copy now follows the active UI culture; the pseudo-locale test covers real service outputs instead of XAML alone.
 - Native SQLite is pinned to 3.53.3, every app-owned database disables and verifies trusted-schema execution on open, and release readiness rejects runtimes below the reviewed 3.53.2 security floor.

@@ -94,6 +94,27 @@ public sealed class LocalizationTests
             Assert.NotEmpty(metadata.Rows);
             Assert.All(metadata.Rows, row => AssertPseudo(row.Label));
 
+            var exif31Path = Path.Combine(temp.Path, "localized-exif31.jpg");
+            Exif31TestFixture.WriteJpeg(
+                exif31Path,
+                littleEndian: true,
+                "0300",
+                "Test Camera",
+                Exif31TestFixture.Undefined(0x9287, littleEndian: true, 1, 0, 2),
+                Exif31TestFixture.Short(0xa40d, littleEndian: true, 0x0101),
+                Exif31TestFixture.Utf8(0xa40e, "Localized development"),
+                Exif31TestFixture.Short(0xa40f, littleEndian: true, 1),
+                Exif31TestFixture.Short(0xa412, littleEndian: true, 2));
+            var exif31Metadata = ImageMetadataService.Read(exif31Path);
+            Assert.True(exif31Metadata.Rows.Count >= 5);
+            Assert.All(exif31Metadata.Rows, row =>
+            {
+                AssertPseudo(row.Label);
+                if (row.Label != Strings.MetadataDevelopmentDescription &&
+                    row.Label != Strings.MetadataCamera)
+                    AssertPseudo(row.Value);
+            });
+
             var archivePath = Path.Combine(temp.Path, "localized.cbz");
             File.WriteAllBytes(archivePath, []);
             AssertPseudo(ImageColorAnalysisService.Read(archivePath).StatusText);

@@ -39,7 +39,7 @@ public static class ImageMetadataService
             if (exif is null)
                 return PhotoMetadata.Empty;
 
-            var rows = new List<MetadataFact>(6);
+            var rows = new List<MetadataFact>(14);
 
             var captured = MetadataDate.TryFromExif(
                 Clean(ReadString(exif, ExifTag.DateTimeOriginal)),
@@ -69,6 +69,8 @@ public static class ImageMetadataService
                 ReadUInt16(exif, ExifTag.FocalLengthIn35mmFilm));
             if (focal is not null)
                 rows.Add(new MetadataFact(Strings.MetadataFocal, focal));
+
+            AppendExif31Rows(rows, Exif31MetadataReader.Read(stream, exif.ToByteArray()));
 
             var gps = FormatGps(
                 ReadRationalArray(exif, ExifTag.GPSLatitude),
@@ -207,6 +209,122 @@ public static class ImageMetadataService
             ? $"{lat.Value:0.000000}, {lon.Value:0.000000}"
             : null;
     }
+
+    private static void AppendExif31Rows(List<MetadataFact> rows, Exif31Metadata? metadata)
+    {
+        if (metadata is null)
+            return;
+
+        if (metadata.LearningUses.Count > 0)
+        {
+            var values = metadata.LearningUses
+                .Take(8)
+                .Select(item => Strings.Format(
+                    nameof(Strings.MetadataLearningUseEntryFormat),
+                    FormatLearningUsage(item.Usage),
+                    FormatLearningIntention(item.Intention)))
+                .ToList();
+            if (metadata.LearningUses.Count > values.Count)
+            {
+                values.Add(Strings.Format(
+                    nameof(Strings.MetadataMoreItemsFormat),
+                    metadata.LearningUses.Count - values.Count));
+            }
+
+            rows.Add(new MetadataFact(Strings.MetadataLearningUse, string.Join("; ", values)));
+        }
+        else if (metadata.LearningUseInvalid)
+        {
+            rows.Add(new MetadataFact(Strings.MetadataLearningUse, Strings.MetadataInvalidValue));
+        }
+
+        if (metadata.Development is { } development)
+        {
+            rows.Add(new MetadataFact(
+                Strings.MetadataDevelopment,
+                Strings.Format(
+                    nameof(Strings.MetadataDevelopmentFormat),
+                    FormatDevelopmentCharacteristic(development.Characteristic),
+                    FormatFactoryDifference(development.FactoryDifference))));
+        }
+
+        if (metadata.DevelopmentDescription is not null)
+        {
+            rows.Add(new MetadataFact(
+                Strings.MetadataDevelopmentDescription,
+                metadata.DevelopmentDescription));
+        }
+
+        AppendCorrectionRow(rows, Strings.MetadataDistortionCorrection, metadata.DistortionCorrection);
+        AppendCorrectionRow(rows, Strings.MetadataChromaticAberrationCorrection, metadata.ChromaticAberrationCorrection);
+        AppendCorrectionRow(rows, Strings.MetadataShadingCorrection, metadata.ShadingCorrection);
+
+        if (metadata.NoiseReduction.HasValue)
+        {
+            rows.Add(new MetadataFact(
+                Strings.MetadataNoiseReduction,
+                metadata.NoiseReduction.Value switch
+                {
+                    0 => Strings.MetadataCorrectionNotApplied,
+                    1 => Strings.MetadataNoiseReductionLow,
+                    2 => Strings.MetadataNoiseReductionNormal,
+                    3 => Strings.MetadataNoiseReductionHigh,
+                    var value => FormatUnknown(value)
+                }));
+        }
+    }
+
+    private static void AppendCorrectionRow(List<MetadataFact> rows, string label, ushort? value)
+    {
+        if (!value.HasValue)
+            return;
+
+        rows.Add(new MetadataFact(
+            label,
+            value.Value switch
+            {
+                0 => Strings.MetadataCorrectionNotApplied,
+                1 => Strings.MetadataCorrectionApplied,
+                var unknown => FormatUnknown(unknown)
+            }));
+    }
+
+    private static string FormatLearningUsage(ushort value) => value switch
+    {
+        0 => Strings.MetadataLearningUseOther,
+        1 => Strings.MetadataLearningUseNonGenerative,
+        2 => Strings.MetadataLearningUseGenerative,
+        3 => Strings.MetadataLearningUseDataMining,
+        4 => Strings.MetadataLearningUseFoundationModel,
+        _ => Strings.Format(nameof(Strings.MetadataUnknownUseFormat), value)
+    };
+
+    private static string FormatLearningIntention(ushort value) => value switch
+    {
+        0 => Strings.MetadataLearningIntentOptOut,
+        1 => Strings.MetadataLearningIntentOptIn,
+        2 => Strings.MetadataLearningIntentUnspecified,
+        _ => FormatUnknown(value)
+    };
+
+    private static string FormatDevelopmentCharacteristic(byte value) => value switch
+    {
+        1 => Strings.MetadataDevelopmentAccurate,
+        2 => Strings.MetadataDevelopmentSmallDifferences,
+        4 => Strings.MetadataDevelopmentExtremeDifferences,
+        _ => FormatUnknown(value)
+    };
+
+    private static string FormatFactoryDifference(byte value) => value switch
+    {
+        1 => Strings.MetadataDevelopmentFactoryDefaults,
+        2 => Strings.MetadataDevelopmentNotFactoryDefaults,
+        4 => Strings.MetadataDevelopmentFactoryUnknown,
+        _ => FormatUnknown(value)
+    };
+
+    private static string FormatUnknown(ushort value)
+        => Strings.Format(nameof(Strings.MetadataUnknownValueFormat), value);
 
     private static double? ToDecimalDegrees(Rational[]? dms, string? reference)
     {

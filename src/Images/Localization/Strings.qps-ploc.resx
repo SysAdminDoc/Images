@@ -5907,6 +5907,45 @@ Details written to:
   <data name="MetadataCaptured" xml:space="preserve">
     <value>[!! Captured !!]</value>
   </data>
+  <data name="MetadataChromaticAberrationCorrection" xml:space="preserve">
+    <value>[!!!! Chromatic correction !!!!]</value>
+  </data>
+  <data name="MetadataCorrectionApplied" xml:space="preserve">
+    <value>[!! Applied !!]</value>
+  </data>
+  <data name="MetadataCorrectionNotApplied" xml:space="preserve">
+    <value>[!!! Not applied !!!]</value>
+  </data>
+  <data name="MetadataDevelopment" xml:space="preserve">
+    <value>[!!! Development !!!]</value>
+  </data>
+  <data name="MetadataDevelopmentAccurate" xml:space="preserve">
+    <value>[!!!! Accurate reproduction !!!!]</value>
+  </data>
+  <data name="MetadataDevelopmentDescription" xml:space="preserve">
+    <value>[!!!! Development details !!!!]</value>
+  </data>
+  <data name="MetadataDevelopmentExtremeDifferences" xml:space="preserve">
+    <value>[!!!! Extreme differences !!!!]</value>
+  </data>
+  <data name="MetadataDevelopmentFactoryDefaults" xml:space="preserve">
+    <value>[!!! Factory defaults !!!]</value>
+  </data>
+  <data name="MetadataDevelopmentFactoryUnknown" xml:space="preserve">
+    <value>[!!!! Factory setting unknown !!!!]</value>
+  </data>
+  <data name="MetadataDevelopmentFormat" xml:space="preserve">
+    <value>[!! {0}; {1} !!]</value>
+  </data>
+  <data name="MetadataDevelopmentNotFactoryDefaults" xml:space="preserve">
+    <value>[!!!! Not factory defaults !!!!]</value>
+  </data>
+  <data name="MetadataDevelopmentSmallDifferences" xml:space="preserve">
+    <value>[!!! Small differences !!!]</value>
+  </data>
+  <data name="MetadataDistortionCorrection" xml:space="preserve">
+    <value>[!!!! Distortion correction !!!!]</value>
+  </data>
   <data name="MetadataExposure" xml:space="preserve">
     <value>[!! Exposure !!]</value>
   </data>
@@ -5928,14 +5967,71 @@ Details written to:
   <data name="MetadataIsoFormat" xml:space="preserve">
     <value>[!! ISO {0} !!]</value>
   </data>
+  <data name="MetadataInvalidValue" xml:space="preserve">
+    <value>[!!! Invalid metadata !!!]</value>
+  </data>
+  <data name="MetadataLearningIntentOptIn" xml:space="preserve">
+    <value>[!! Opt-in !!]</value>
+  </data>
+  <data name="MetadataLearningIntentOptOut" xml:space="preserve">
+    <value>[!! Opt-out !!]</value>
+  </data>
+  <data name="MetadataLearningIntentUnspecified" xml:space="preserve">
+    <value>[!!! Unspecified !!!]</value>
+  </data>
+  <data name="MetadataLearningUse" xml:space="preserve">
+    <value>[!! AI/ML use !!]</value>
+  </data>
+  <data name="MetadataLearningUseDataMining" xml:space="preserve">
+    <value>[!! Data mining !!]</value>
+  </data>
+  <data name="MetadataLearningUseEntryFormat" xml:space="preserve">
+    <value>[!! {0}: {1} !!]</value>
+  </data>
+  <data name="MetadataLearningUseFoundationModel" xml:space="preserve">
+    <value>[!!!! Foundation-model input !!!!]</value>
+  </data>
+  <data name="MetadataLearningUseGenerative" xml:space="preserve">
+    <value>[!!!! Generative AI/ML training !!!!]</value>
+  </data>
+  <data name="MetadataLearningUseNonGenerative" xml:space="preserve">
+    <value>[!!!!! Non-generative AI/ML training !!!!!]</value>
+  </data>
+  <data name="MetadataLearningUseOther" xml:space="preserve">
+    <value>[!!!! Other or unspecified uses !!!!]</value>
+  </data>
   <data name="MetadataLens" xml:space="preserve">
     <value>[!! Lens !!]</value>
+  </data>
+  <data name="MetadataMoreItemsFormat" xml:space="preserve">
+    <value>[!!! …and {0} more !!!]</value>
+  </data>
+  <data name="MetadataNoiseReduction" xml:space="preserve">
+    <value>[!!! Noise reduction !!!]</value>
+  </data>
+  <data name="MetadataNoiseReductionHigh" xml:space="preserve">
+    <value>[!!! High strength !!!]</value>
+  </data>
+  <data name="MetadataNoiseReductionLow" xml:space="preserve">
+    <value>[!! Low strength !!]</value>
+  </data>
+  <data name="MetadataNoiseReductionNormal" xml:space="preserve">
+    <value>[!!! Normal strength !!!]</value>
+  </data>
+  <data name="MetadataShadingCorrection" xml:space="preserve">
+    <value>[!!! Shading correction !!!]</value>
   </data>
   <data name="MetadataShutterFractionFormat" xml:space="preserve">
     <value>[!! 1/{0} s !!]</value>
   </data>
   <data name="MetadataShutterSecondsFormat" xml:space="preserve">
     <value>[!!! {0:0.##} s !!!]</value>
+  </data>
+  <data name="MetadataUnknownUseFormat" xml:space="preserve">
+    <value>[!!! Unknown use ({0}) !!!]</value>
+  </data>
+  <data name="MetadataUnknownValueFormat" xml:space="preserve">
+    <value>[!! Unknown ({0}) !!]</value>
   </data>
   <data name="NetworkClipboardBytesFormat" xml:space="preserve">
     <value>[!!!!   Bytes:    {0} !!!!]</value>
