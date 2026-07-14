@@ -172,6 +172,63 @@ public sealed class ArchiveBookServiceTests
     }
 
     [Fact]
+    public async Task ListPageNames_WhenArchiveExceedsEntryBudget_FailsWithinTimeout()
+    {
+        using var temp = TestDirectory.Create();
+        var archivePath = Path.Combine(temp.Path, "entry-flood.zip");
+        using (var archive = ZipFile.Open(archivePath, ZipArchiveMode.Create))
+        {
+            for (var i = 0; i <= ArchiveBudgetPolicy.MaxEntryCount; i++)
+                archive.CreateEntry($"notes/{i:D5}.txt");
+        }
+
+        var operation = Task.Run(() => Record.Exception(() => ArchiveBookService.ListPageNames(archivePath)));
+        var error = await operation.WaitAsync(TimeSpan.FromSeconds(10));
+
+        var exceeded = Assert.IsType<ArchiveBudgetExceededException>(error);
+        Assert.Equal(ArchiveBudgetKind.EntryCount, exceeded.Budget);
+        Assert.DoesNotContain("notes/", exceeded.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ListPageNames_WhenPageExceedsCompressionRatio_FailsWithinTimeout()
+    {
+        using var temp = TestDirectory.Create();
+        var archivePath = Path.Combine(temp.Path, "ratio-bomb.zip");
+        using (var archive = ZipFile.Open(archivePath, ZipArchiveMode.Create))
+        {
+            var entry = archive.CreateEntry("secret-page.png", CompressionLevel.Optimal);
+            using var stream = entry.Open();
+            stream.Write(new byte[8 * 1024 * 1024]);
+        }
+
+        var operation = Task.Run(() => Record.Exception(() => ArchiveBookService.ListPageNames(archivePath)));
+        var error = await operation.WaitAsync(TimeSpan.FromSeconds(10));
+
+        var exceeded = Assert.IsType<ArchiveBudgetExceededException>(error);
+        Assert.Equal(ArchiveBudgetKind.CompressionRatio, exceeded.Budget);
+        Assert.DoesNotContain("secret-page", exceeded.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ArchiveBudgetPolicy_EnforcesNameAndAggregatePageBudgets()
+    {
+        var names = new ArchiveBudgetPolicy();
+        var nameError = Assert.Throws<ArchiveBudgetExceededException>(() =>
+            names.AccountEntry(new string('a', checked((int)ArchiveBudgetPolicy.MaxEntryNameBytes + 1))));
+
+        var pages = new ArchiveBudgetPolicy();
+        var pageError = Assert.Throws<ArchiveBudgetExceededException>(() =>
+        {
+            pages.AccountPage(ArchiveBudgetPolicy.MaxAggregatePageBytes, compressedSize: 0);
+            pages.AccountPage(1, compressedSize: 0);
+        });
+
+        Assert.Equal(ArchiveBudgetKind.EntryNameBytes, nameError.Budget);
+        Assert.Equal(ArchiveBudgetKind.AggregatePageBytes, pageError.Budget);
+    }
+
+    [Fact]
     public void LoadPage_WhenArchiveHasNoSupportedPages_ThrowsActionableError()
     {
         using var temp = TestDirectory.Create();

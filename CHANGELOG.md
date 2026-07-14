@@ -11,6 +11,7 @@ All notable changes to **Images** are documented here.
 
 ### Fixed
 
+- **Archive books enforce aggregate safety budgets** - Archive enumeration now stops at 10,000 entries, 4 MiB of entry-name metadata, 4 GiB of declared image data, or a known compression ratio above 1000:1, before page names are materialized or image data is decoded.
 - **Malformed image dimensions now fail closed** - Raster loads classify dimension preflight as small, large, rejected, or unknown; rejected and inconclusive probes are refused before WPF or managed full-frame decode can allocate from untrusted headers.
 - **Session restore no longer reopens a broken or peeked file** - A file that exists but fails to decode, or a transient `--peek` target, is no longer saved as the "last image", so opt-in session restore won't reopen a known-bad file or promote a peek into a full session.
 - **Large archive spreads fail cleanly** - A two-page spread whose combined width overflowed a 32-bit integer produced an opaque render error; it now reports the same "too large to render" message as other decode paths.

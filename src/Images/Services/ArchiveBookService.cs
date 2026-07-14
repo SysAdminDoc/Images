@@ -8,8 +8,8 @@ namespace Images.Services;
 
 /// <summary>
 /// Read-only page discovery for archive/book mode. The service never extracts entry names
-/// to the filesystem, skips recursive archives, rejects unsafe paths, and enforces a
-/// per-entry size cap before buffering a page for the decoder.
+/// to the filesystem, skips recursive archives, rejects unsafe paths, and enforces metadata,
+/// aggregate-decompression, compression-ratio, and per-entry limits before decoding.
 /// </summary>
 public static class ArchiveBookService
 {
@@ -161,7 +161,7 @@ public static class ArchiveBookService
         page = null;
         var normalized = NormalizeEntryName(entryName);
         if (isDirectory) return false;
-        if (declaredSize == 0) return false;
+        if (declaredSize <= 0) return false;
         if (!IsSafeEntryName(normalized)) return false;
 
         var fileName = GetEntryFileName(normalized);
@@ -341,9 +341,11 @@ public static class ArchiveBookService
         public IReadOnlyList<ArchiveEntrySource> ListPageEntries()
         {
             var pages = new List<ArchiveEntrySource>();
+            var budget = new ArchiveBudgetPolicy();
             foreach (var entry in _archive.Entries)
             {
                 var entryName = entry.Key ?? string.Empty;
+                budget.AccountEntry(entryName);
                 if (TryCreatePageEntry(
                         entryName,
                         entry.Size,
@@ -353,6 +355,7 @@ public static class ArchiveBookService
                         out var page) &&
                     page is not null)
                 {
+                    budget.AccountPage(entry.Size, entry.CompressedSize);
                     pages.Add(page);
                 }
             }
