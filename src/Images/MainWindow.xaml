@@ -4,6 +4,7 @@
         xmlns:vm="clr-namespace:Images.ViewModels"
         xmlns:ctl="clr-namespace:Images.Controls"
         xmlns:loc="clr-namespace:Images.Localization"
+        xmlns:a11y="clr-namespace:Images.Services"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         Title="{Binding WindowTitle}"
         Width="1280" Height="840"
@@ -1023,8 +1024,7 @@
                         Padding="24,20"
                         Visibility="{Binding ShowGallery, Converter={StaticResource BoolToVis}}"
                         Panel.ZIndex="18"
-                        AutomationProperties.Name="{loc:Loc AutomationMainWindowGalleryWorkbench}"
-                        AutomationProperties.LiveSetting="Polite">
+                        AutomationProperties.Name="{loc:Loc AutomationMainWindowGalleryWorkbench}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -1061,7 +1061,9 @@
                                            FontSize="18" />
                                 <TextBlock Text="{Binding GalleryStatusText}"
                                            Style="{StaticResource Text.Hint}"
-                                           Margin="0,3,0,0" />
+                                           Margin="0,3,0,0"
+                                           AutomationProperties.LiveSetting="Polite"
+                                           a11y:LiveRegionBehavior.AnnounceChanges="True" />
                                 <Border Margin="0,6,0,0"
                                         Padding="8,2"
                                         HorizontalAlignment="Left"
@@ -1670,12 +1672,13 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Top"
                             Margin="0,18,0,0"
-                            AutomationProperties.LiveSetting="Polite"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowFolderPosition}">
                         <TextBlock Text="{Binding PositionText}"
                                    Foreground="{DynamicResource FloatingChromeTextBrush}"
                                    FontSize="12"
-                                   FontWeight="SemiBold" />
+                                   FontWeight="SemiBold"
+                                   AutomationProperties.LiveSetting="Polite"
+                                   a11y:LiveRegionBehavior.AnnounceChanges="True" />
                     </Border>
 
                     <Border Style="{StaticResource FloatingChrome}"
@@ -1683,7 +1686,6 @@
                             VerticalAlignment="Top"
                             Margin="0,60,0,0"
                             Visibility="{Binding HasMultiplePages, Converter={StaticResource BoolToVis}}"
-                            AutomationProperties.LiveSetting="Polite"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowPagePosition}">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Button Style="{StaticResource ToolbarButton}"
@@ -1713,7 +1715,9 @@
                                        FontSize="12"
                                        FontWeight="SemiBold"
                                        Margin="8,0"
-                                       VerticalAlignment="Center" />
+                                       VerticalAlignment="Center"
+                                       AutomationProperties.LiveSetting="Polite"
+                                       a11y:LiveRegionBehavior.AnnounceChanges="True" />
                             <Button Style="{StaticResource ToolbarButton}"
                                     Width="30"
                                     Height="26"
@@ -1732,8 +1736,7 @@
                             Margin="22,20,0,0"
                             MaxWidth="560"
                             Visibility="{Binding ShowMetadataHud, Converter={StaticResource BoolToVis}}"
-                            AutomationProperties.Name="{loc:Loc AutomationMainWindowMetadataHUD}"
-                            AutomationProperties.LiveSetting="Polite">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowMetadataHUD}">
                         <StackPanel>
                             <DockPanel LastChildFill="False">
                                 <StackPanel Orientation="Horizontal"
@@ -1749,7 +1752,9 @@
                                                Foreground="{DynamicResource FloatingChromeTextBrush}"
                                                FontSize="12"
                                                FontWeight="SemiBold"
-                                               VerticalAlignment="Center" />
+                                               VerticalAlignment="Center"
+                                               AutomationProperties.LiveSetting="Polite"
+                                               a11y:LiveRegionBehavior.AnnounceChanges="True" />
                                 </StackPanel>
                                 <Button Command="{Binding ToggleMetadataHudCommand}"
                                         Content="&#xE711;"
@@ -1838,8 +1843,7 @@
                             Margin="28,24,0,0"
                             MaxWidth="360"
                             Visibility="{Binding ShowOcrStatusPanel, Converter={StaticResource BoolToVis}}"
-                            AutomationProperties.Name="{loc:Loc AutomationMainWindowTextExtractionStatus}"
-                            AutomationProperties.LiveSetting="Polite">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowTextExtractionStatus}">
                         <Border.Style>
                             <Style TargetType="Border" BasedOn="{StaticResource FloatingChrome}">
                                 <Style.Triggers>
@@ -1897,7 +1901,9 @@
                                 <TextBlock Text="{Binding OcrStatusTitle}"
                                            Foreground="{DynamicResource FloatingChromeTextBrush}"
                                            FontSize="12.5"
-                                           FontWeight="SemiBold" />
+                                           FontWeight="SemiBold"
+                                           AutomationProperties.LiveSetting="Polite"
+                                           a11y:LiveRegionBehavior.AnnounceChanges="True" />
                                 <TextBlock Text="{Binding OcrStatusDetail}"
                                            Foreground="{DynamicResource SubtextBrush}"
                                            FontSize="11.5"
@@ -1922,8 +1928,7 @@
                             VerticalAlignment="Bottom"
                             Margin="0,0,0,144"
                             Visibility="{Binding ShowGestureHint, Converter={StaticResource BoolToVis}}"
-                            IsHitTestVisible="False"
-                            AutomationProperties.LiveSetting="Polite">
+                            IsHitTestVisible="False">
                         <Border.Style>
                             <Style TargetType="Border" BasedOn="{StaticResource FloatingChrome}">
                                 <Setter Property="Opacity" Value="0" />
@@ -1954,7 +1959,9 @@
                             <TextBlock Text="{loc:Loc MainUiScrollToZoomDragToPanDoubleClickTo}"
                                        Foreground="{DynamicResource FloatingChromeTextBrush}"
                                        FontSize="12"
-                                       VerticalAlignment="Center" />
+                                       VerticalAlignment="Center"
+                                       AutomationProperties.LiveSetting="Polite"
+                                       a11y:LiveRegionBehavior.AnnounceChanges="True" />
                         </StackPanel>
                     </Border>
 
@@ -2241,8 +2248,7 @@
                             VerticalAlignment="Center"
                             Visibility="{Binding IsImageLoading, Converter={StaticResource BoolToVis}}"
                             IsHitTestVisible="False"
-                            AutomationProperties.Name="{x:Static loc:Strings.MainImageLoading}"
-                            AutomationProperties.LiveSetting="Polite">
+                            AutomationProperties.Name="{x:Static loc:Strings.MainImageLoading}">
                         <Border Style="{StaticResource FloatingChrome}" Padding="14,8">
                             <StackPanel Orientation="Horizontal">
                                 <Ellipse Width="6" Height="6"
@@ -2273,7 +2279,9 @@
                                 <TextBlock Text="{x:Static loc:Strings.MainImageLoading}"
                                            Style="{StaticResource Text.Caption}"
                                            Foreground="{DynamicResource FloatingChromeTextBrush}"
-                                           VerticalAlignment="Center" />
+                                           VerticalAlignment="Center"
+                                           AutomationProperties.LiveSetting="Polite"
+                                           a11y:LiveRegionBehavior.AnnounceChanges="True" />
                             </StackPanel>
                         </Border>
                     </Border>
@@ -2285,7 +2293,6 @@
                             MaxWidth="420"
                             Visibility="{Binding ShowOperationStatus, Converter={StaticResource BoolToVis}}"
                             AutomationProperties.Name="{Binding OperationStatusTitle}"
-                            AutomationProperties.LiveSetting="Polite"
                             IsHitTestVisible="False">
                         <Border.Style>
                             <Style TargetType="Border" BasedOn="{StaticResource FloatingChrome}">
@@ -2335,7 +2342,9 @@
                                 <TextBlock Text="{Binding OperationStatusTitle}"
                                            Foreground="{DynamicResource FloatingChromeTextBrush}"
                                            FontSize="12.5"
-                                           FontWeight="SemiBold" />
+                                           FontWeight="SemiBold"
+                                           AutomationProperties.LiveSetting="Polite"
+                                           a11y:LiveRegionBehavior.AnnounceChanges="True" />
                                 <TextBlock Text="{Binding OperationStatusDetail}"
                                            Foreground="{DynamicResource SubtextBrush}"
                                            FontSize="11.5"
@@ -2351,8 +2360,7 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Bottom"
                             Margin="0,0,0,88"
-                            Visibility="{Binding ToastMessage, Converter={StaticResource BoolToVis}}"
-                            AutomationProperties.LiveSetting="Polite">
+                            Visibility="{Binding ToastMessage, Converter={StaticResource BoolToVis}}">
                         <Border.Style>
                             <Style TargetType="Border" BasedOn="{StaticResource Toast}">
                                 <Setter Property="Opacity" Value="0" />
@@ -2411,7 +2419,9 @@
                             <TextBlock Text="{Binding ToastMessage}"
                                        Foreground="{DynamicResource FloatingChromeTextBrush}"
                                        FontSize="13"
-                                       VerticalAlignment="Center" />
+                                       VerticalAlignment="Center"
+                                       AutomationProperties.LiveSetting="Polite"
+                                       a11y:LiveRegionBehavior.AnnounceChanges="True" />
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -3051,8 +3061,7 @@
                             BorderBrush="{DynamicResource AccentBrush}"
                             Margin="0,0,0,20"
                             Visibility="{Binding IsCheckingForUpdates, Converter={StaticResource BoolToVis}}"
-                            AutomationProperties.Name="{loc:Loc AutomationMainWindowUpdateCheckStatus}"
-                            AutomationProperties.LiveSetting="Polite">
+                            AutomationProperties.Name="{loc:Loc AutomationMainWindowUpdateCheckStatus}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -3084,15 +3093,16 @@
                                 <TextBlock Text="{Binding UpdateCheckStatusText}"
                                            Style="{StaticResource Text.Hint}"
                                            TextWrapping="Wrap"
-                                           Margin="0,4,0,0" />
+                                           Margin="0,4,0,0"
+                                           AutomationProperties.LiveSetting="Polite"
+                                           a11y:LiveRegionBehavior.AnnounceChanges="True" />
                             </StackPanel>
                         </Grid>
                     </Border>
 
                     <Border Margin="0,0,0,20"
                             Visibility="{Binding HasSecondaryStatus, Converter={StaticResource BoolToVis}}"
-                            AutomationProperties.Name="{Binding SecondaryStatusTitle}"
-                            AutomationProperties.LiveSetting="Polite">
+                            AutomationProperties.Name="{Binding SecondaryStatusTitle}">
                         <Border.Style>
                             <Style TargetType="{x:Type Border}" BasedOn="{StaticResource Card}">
                                 <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
@@ -3175,7 +3185,9 @@
                                            Style="{StaticResource Text.Caption}"
                                            FontSize="13"
                                            FontWeight="SemiBold"
-                                           Foreground="{DynamicResource TextBrush}" />
+                                           Foreground="{DynamicResource TextBrush}"
+                                           AutomationProperties.LiveSetting="Polite"
+                                           a11y:LiveRegionBehavior.AnnounceChanges="True" />
                                 <TextBlock Text="{Binding SecondaryStatusDetail}"
                                            Style="{StaticResource Text.Hint}"
                                            TextWrapping="Wrap"
@@ -3186,8 +3198,7 @@
 
                     <Border Margin="0,0,0,20"
                             Visibility="{Binding HasBackgroundActivity, Converter={StaticResource BoolToVis}}"
-                            AutomationProperties.Name="{Binding ActivitySummaryText}"
-                            AutomationProperties.LiveSetting="Polite">
+                            AutomationProperties.Name="{Binding ActivitySummaryText}">
                         <Border.Style>
                             <Style TargetType="{x:Type Border}" BasedOn="{StaticResource Card}">
                                 <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
@@ -3226,7 +3237,9 @@
                                     <TextBlock Text="{Binding ActivitySummaryText}"
                                                Style="{StaticResource Text.Hint}"
                                                TextWrapping="Wrap"
-                                               Margin="0,4,0,0" />
+                                               Margin="0,4,0,0"
+                                               AutomationProperties.LiveSetting="Polite"
+                                               a11y:LiveRegionBehavior.AnnounceChanges="True" />
                                 </StackPanel>
                             </Grid>
                             <ItemsControl ItemsSource="{Binding ActivityJobs}"
@@ -3589,8 +3602,7 @@
                         <TextBlock Text="{loc:Loc MainUiBookControls}" Style="{StaticResource SectionLabel}" />
 
                         <Border Style="{StaticResource Card}"
-                                AutomationProperties.Name="{loc:Loc AutomationMainWindowArchiveBookControls}"
-                                AutomationProperties.LiveSetting="Polite">
+                                AutomationProperties.Name="{loc:Loc AutomationMainWindowArchiveBookControls}">
                             <StackPanel>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -3620,7 +3632,9 @@
                                                    FontSize="12.5"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource TextBrush}"
-                                                   TextTrimming="CharacterEllipsis" />
+                                                   TextTrimming="CharacterEllipsis"
+                                                   AutomationProperties.LiveSetting="Polite"
+                                                   a11y:LiveRegionBehavior.AnnounceChanges="True" />
                                         <TextBlock Text="{Binding DecoderUsed}"
                                                    FontSize="11.5"
                                                    Margin="0,3,0,0"

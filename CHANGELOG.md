@@ -6,6 +6,7 @@ All notable changes to **Images** are documented here.
 
 ### Added
 
+- **Screen-reader announcements for asynchronous status changes** - Every dynamic status surface across all 20 WPF windows now raises coalesced `LiveRegionChanged` events with polite semantics, including scans, imports, exports, recovery, model work, background activity, and errors. Static contracts cover every named status surface, while the opt-in rendered matrix now constructs every secondary window under Dark, Latte, High Contrast, and the pseudo-locale.
 - **HDRI decode-time tonemapping** - EXR, Radiance HDR, RAW, AVIF/HEIC/JXL, and high-bit-depth PNG/TIFF content now retains floating-point highlights until Reinhard, Hable, or ACES maps them into the SDR display range. Reinhard is the default, Settings exposes the operator, and decoder provenance identifies when tonemapping was applied.
 - **Authoritative local-data registry and privacy reset** - Settings, `--system-info`, and support bundles now share one inventory covering the real catalog and semantic-index files, caches, models, diagnostics, histories, drafts, backups, and temporary media. A confirmed reset clears registered rebuildable/diagnostic stores while preserving imported models and user-owned content.
 - **Adjustable loupe magnification** - Appearance settings now offer a loupe magnification choice (2×, 3×, 4×, 6×) so the middle-button magnifier can zoom in further than the previous fixed 2×.

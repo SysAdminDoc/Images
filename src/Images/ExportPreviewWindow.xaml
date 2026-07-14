@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:loc="clr-namespace:Images.Localization"
         xmlns:ctl="clr-namespace:Images.Controls"
+        xmlns:a11y="clr-namespace:Images.Services"
         Title="{x:Static loc:Strings.ExportPreviewWindowTitle}"
         Width="1160"
         Height="760"
@@ -151,7 +152,9 @@
                                 <TextBlock x:Name="C2paStatusText"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextBrush}"
-                                           TextWrapping="Wrap" />
+                                           TextWrapping="Wrap"
+                                           AutomationProperties.LiveSetting="Polite"
+                                           a11y:LiveRegionBehavior.AnnounceChanges="True" />
                                 <TextBlock x:Name="C2paDetailText"
                                            Style="{StaticResource Text.Caption}"
                                            TextWrapping="Wrap"
@@ -273,7 +276,9 @@
                            Text="{x:Static loc:Strings.ExportPreviewReadyStatus}"
                            Style="{StaticResource Text.Caption}"
                            TextWrapping="Wrap"
-                           VerticalAlignment="Center" />
+                           VerticalAlignment="Center"
+                           AutomationProperties.LiveSetting="Polite"
+                           a11y:LiveRegionBehavior.AnnounceChanges="True" />
             </StackPanel>
         </Border>
     </Grid>

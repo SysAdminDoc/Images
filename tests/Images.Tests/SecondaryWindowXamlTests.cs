@@ -1,23 +1,120 @@
 using System.Globalization;
+using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Xml.Linq;
 using Images.Localization;
+using IOPath = System.IO.Path;
 
 namespace Images.Tests;
 
 [Collection("WpfSmoke")]
 public sealed class SecondaryWindowXamlTests
 {
+    private static readonly string[] ThemeFiles = ["DarkTheme.xaml", "LatteTheme.xaml", "HighContrastTheme.xaml"];
+
+    private static readonly IReadOnlyDictionary<string, string[]> StatusWindowContract =
+        new Dictionary<string, string[]>(StringComparer.Ordinal)
+        {
+            ["AboutWindow.xaml"] = ["OcrStatusText", "UpdateStatusText"],
+            ["AdjustmentsWindow.xaml"] = ["StatusText"],
+            ["AnnotationsWindow.xaml"] = ["StatusText", "ToolStatusText"],
+            ["BatchProcessorWindow.xaml"] = ["StatusText"],
+            ["DuplicateCleanupWindow.xaml"] = ["StatusText"],
+            ["EditStackWindow.xaml"] = ["StatusText"],
+            ["EffectsWindow.xaml"] = ["StatusText"],
+            ["ExportPreviewWindow.xaml"] = ["C2paStatusText", "StatusText"],
+            ["FileHealthScanWindow.xaml"] = ["StatusText"],
+            ["ImportInboxWindow.xaml"] = ["StatusText"],
+            ["MacroActionWindow.xaml"] = ["StatusText"],
+            ["ModelManagerWindow.xaml"] = ["DetailStatus", "RuntimeStatusText", "StatusText"],
+            ["PerspectiveCorrectionWindow.xaml"] = ["StatusText"],
+            ["RecoveryCenterWindow.xaml"] = ["StatusText", "StatusValueText"],
+            ["ReferenceBoardWindow.xaml"] = ["StatusText"],
+            ["ResizeDialogWindow.xaml"] = ["StatusText"],
+            ["SemanticSearchWindow.xaml"] = ["IndexStatusText", "ProviderStatusText", "StatusText"],
+            ["TagGraphWindow.xaml"] = ["StatusText"],
+        };
+
     private sealed record WindowContractCase(
         string ExpectedTitle,
         Func<Window> CreateWindow,
         string[] RequiredAutomationNames);
+
+    [Fact]
+    public void EveryNamedSecondaryStatusSurfaceIsAnAnnouncingLiveRegion()
+    {
+        var sourceDirectory = IOPath.Combine(RepositoryRoot(), "src", "Images");
+        XNamespace xaml = "http://schemas.microsoft.com/winfx/2006/xaml";
+
+        var discoveredStatusWindows = Directory
+            .EnumerateFiles(sourceDirectory, "*Window.xaml", SearchOption.TopDirectoryOnly)
+            .Select(path => (Path: path, Document: XDocument.Load(path)))
+            .Where(item => item.Document.Descendants().Any(element =>
+                element.Name.LocalName == nameof(TextBlock) &&
+                Regex.IsMatch(element.Attribute(xaml + "Name")?.Value ?? "", "Status", RegexOptions.CultureInvariant)))
+            .Select(item => IOPath.GetFileName(item.Path))
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+
+        Assert.Equal(StatusWindowContract.Keys.Order(StringComparer.Ordinal), discoveredStatusWindows);
+
+        foreach (var xamlPath in Directory.EnumerateFiles(sourceDirectory, "*Window.xaml", SearchOption.TopDirectoryOnly))
+        {
+            var document = XDocument.Load(xamlPath);
+            var liveRegions = document.Descendants()
+                .Where(element => element.Attributes().Any(attribute =>
+                    attribute.Name.LocalName == "AutomationProperties.LiveSetting"))
+                .ToArray();
+
+            foreach (var liveRegion in liveRegions)
+            {
+                var announcesChanges = liveRegion.Attributes()
+                    .SingleOrDefault(attribute => attribute.Name.LocalName == "LiveRegionBehavior.AnnounceChanges")
+                    ?.Value;
+                Assert.True(
+                    string.Equals(announcesChanges, "True", StringComparison.OrdinalIgnoreCase),
+                    $"{IOPath.GetFileName(xamlPath)} {liveRegion.Name.LocalName} live region must raise change events.");
+            }
+        }
+
+        foreach (var (fileName, expectedNames) in StatusWindowContract)
+        {
+            var document = XDocument.Load(IOPath.Combine(sourceDirectory, fileName));
+            var statusElements = document.Descendants()
+                .Where(element => element.Name.LocalName == nameof(TextBlock))
+                .Where(element => expectedNames.Contains(element.Attribute(xaml + "Name")?.Value, StringComparer.Ordinal))
+                .ToArray();
+
+            Assert.Equal(expectedNames.Order(StringComparer.Ordinal), statusElements
+                .Select(element => element.Attribute(xaml + "Name")!.Value)
+                .Order(StringComparer.Ordinal));
+
+            foreach (var statusElement in statusElements)
+            {
+                var name = statusElement.Attribute(xaml + "Name")!.Value;
+                var liveSetting = statusElement.Attributes()
+                    .SingleOrDefault(attribute => attribute.Name.LocalName == "AutomationProperties.LiveSetting")
+                    ?.Value;
+                Assert.True(
+                    liveSetting is "Polite" or "Assertive",
+                    $"{fileName}.{name} must declare a Polite or Assertive live setting.");
+
+                var announcesChanges = statusElement.Attributes()
+                    .SingleOrDefault(attribute => attribute.Name.LocalName == "LiveRegionBehavior.AnnounceChanges")
+                    ?.Value;
+                Assert.Equal("True", announcesChanges);
+            }
+        }
+    }
 
     [Fact]
     [Trait("Category", "SmokeGate")]
@@ -254,13 +351,14 @@ public sealed class SecondaryWindowXamlTests
                     ShutdownMode = ShutdownMode.OnExplicitShutdown
                 };
 
-                application.Resources.MergedDictionaries.Clear();
-                application.Resources.MergedDictionaries.Add(
-                    (ResourceDictionary)Application.LoadComponent(
-                        new Uri("/Images;component/Themes/DarkTheme.xaml", UriKind.Relative)));
+                foreach (var themeFile in ThemeFiles)
+                {
+                    application.Resources.MergedDictionaries.Clear();
+                    application.Resources.MergedDictionaries.Add(LoadThemeDictionary(themeFile));
 
-                foreach (var testCase in CreateWindowContractCases())
-                    AssertWindowContract(testCase);
+                    foreach (var testCase in CreateWindowContractCases())
+                        AssertWindowContract(testCase);
+                }
 
                 if (createdApplication)
                     application.Shutdown();
@@ -307,13 +405,14 @@ public sealed class SecondaryWindowXamlTests
                     ShutdownMode = ShutdownMode.OnExplicitShutdown
                 };
 
-                application.Resources.MergedDictionaries.Clear();
-                application.Resources.MergedDictionaries.Add(
-                    (ResourceDictionary)Application.LoadComponent(
-                        new Uri("/Images;component/Themes/DarkTheme.xaml", UriKind.Relative)));
+                foreach (var themeFile in ThemeFiles)
+                {
+                    application.Resources.MergedDictionaries.Clear();
+                    application.Resources.MergedDictionaries.Add(LoadThemeDictionary(themeFile));
 
-                foreach (var testCase in CreateWindowContractCases())
-                    AssertPseudoWindowContract(testCase);
+                    foreach (var testCase in CreateWindowContractCases())
+                        AssertPseudoWindowContract(testCase);
+                }
 
                 if (createdApplication)
                     application.Shutdown();
@@ -394,8 +493,39 @@ public sealed class SecondaryWindowXamlTests
                 Strings.ImportInboxImportPicasa,
                 Strings.ImportInboxChoose,
                 Strings.ImportInboxStagedFiles
-            ])
+            ]),
+        new(Strings.AdjustmentsWindowTitle, static () => new Images.AdjustmentsWindow(SmokeImagePath(), static _ => { }), []),
+        new(Strings.Get("AnnotationTitle"), static () => new Images.AnnotationsWindow(SmokeImagePath(), static _ => { }), []),
+        new(Strings.BatchTitle, static () => new Images.BatchProcessorWindow(), []),
+        new(Strings.Get("EditHistoryTitle"), static () => new Images.EditStackWindow(), []),
+        new(Strings.Get("EffectsWindowTitle"), static () => new Images.EffectsWindow(SmokeImagePath(), static _ => { }), []),
+        new(Strings.ExportPreviewWindowTitle, static () => new Images.ExportPreviewWindow(SmokeBitmap(), null, ".png"), []),
+        new(Strings.FileHealthScanWindowTitle, static () => new Images.FileHealthScanWindow(), []),
+        new(Strings.MacroWindowTitle, static () => new Images.MacroActionWindow(), []),
+        new(Strings.Get("PerspectiveTitle"), static () => new Images.PerspectiveCorrectionWindow(SmokeImagePath(), static _ => { }), []),
+        new(Strings.RecoveryCenterTitle, static () => new Images.RecoveryCenterWindow(), []),
+        new(Strings.ReferenceBoardWindowTitle, static () => new Images.ReferenceBoardWindow(), []),
+        new(Strings.Get("ResizeTitle"), static () => new Images.ResizeDialogWindow(640, 480), []),
+        new(Strings.TagGraphWindowTitle, static () => new Images.TagGraphWindow(), [])
     ];
+
+    private static string SmokeImagePath()
+        => IOPath.Combine(AppContext.BaseDirectory, "Fixtures", "smoke-test.png");
+
+    private static BitmapSource SmokeBitmap()
+    {
+        var bitmap = BitmapSource.Create(
+            1,
+            1,
+            96,
+            96,
+            PixelFormats.Bgra32,
+            null,
+            new byte[] { 0, 0, 0, 255 },
+            4);
+        bitmap.Freeze();
+        return bitmap;
+    }
 
     private static void AssertCustomButtonTemplate(string styleKey, string[] requiredTemplateParts, Brush? background = null)
     {
@@ -471,6 +601,16 @@ public sealed class SecondaryWindowXamlTests
     private static ResourceDictionary LoadThemeDictionary(string themeFileName)
         => (ResourceDictionary)Application.LoadComponent(
             new Uri($"/Images;component/Themes/{themeFileName}", UriKind.Relative));
+
+    private static string RepositoryRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(IOPath.Combine(directory.FullName, "Images.sln")))
+            directory = directory.Parent;
+
+        return directory?.FullName
+               ?? throw new DirectoryNotFoundException("Could not locate the Images repository root.");
+    }
 
     private static double ContrastRatio(Color foreground, Color background)
     {
