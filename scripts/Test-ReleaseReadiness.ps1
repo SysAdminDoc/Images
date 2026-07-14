@@ -50,6 +50,18 @@ function Invoke-NativeCommand {
     }
 }
 
+function Invoke-RepoNativeCommand {
+    param([Parameter(Mandatory)][scriptblock]$Command)
+
+    $previousLocation = Get-Location
+    try {
+        Set-Location -LiteralPath $RepositoryRoot
+        return Invoke-NativeCommand -Command $Command
+    } finally {
+        Set-Location -LiteralPath $previousLocation
+    }
+}
+
 function Get-ProjectVersion {
     $projectPath = Resolve-RepoPath "src\Images\Images.csproj"
     [xml]$project = Get-Content -Raw -LiteralPath $projectPath
@@ -196,8 +208,16 @@ if (-not (Test-Path -LiteralPath $slnPath)) {
     throw "Images.sln not found at $slnPath."
 }
 
+Write-Host "Validating pinned .NET SDK..."
+$sdkOutput = Invoke-RepoNativeCommand { dotnet --version }
+$sdkExitCode = $script:LastNativeExitCode
+$sdkVersion = ($sdkOutput | Select-Object -First 1).ToString().Trim()
+if ($sdkExitCode -ne 0 -or $sdkVersion -notmatch '^10\.0\.3\d{2}$') {
+    throw "Pinned .NET SDK feature band 10.0.3xx is required; resolved '$sdkVersion'."
+}
+
 Write-Host "Validating NuGet package resolution..."
-$restoreOutput = Invoke-NativeCommand { dotnet restore $slnPath }
+$restoreOutput = Invoke-RepoNativeCommand { dotnet restore $slnPath --locked-mode }
 $restoreExitCode = $script:LastNativeExitCode
 if ($restoreExitCode -ne 0) {
     $errors = $restoreOutput | Where-Object { $_ -match "error NU" }
@@ -206,7 +226,7 @@ if ($restoreExitCode -ne 0) {
 }
 
 Write-Host "Validating solution build..."
-$buildOutput = Invoke-NativeCommand { dotnet build $slnPath -c Release --no-restore }
+$buildOutput = Invoke-RepoNativeCommand { dotnet build $slnPath -c Release --no-restore }
 $buildExitCode = $script:LastNativeExitCode
 if ($buildExitCode -ne 0) {
     $errors = $buildOutput | Where-Object { $_ -match "error CS|error MSB" }
@@ -216,7 +236,7 @@ if ($buildExitCode -ne 0) {
 
 if (-not $SkipTests) {
     Write-Host "Running release test suite..."
-    $testOutput = Invoke-NativeCommand { dotnet test $slnPath -c Release --no-build }
+    $testOutput = Invoke-RepoNativeCommand { dotnet test $slnPath -c Release --no-build }
     $testExitCode = $script:LastNativeExitCode
     if ($testExitCode -ne 0) {
         $failures = $testOutput | Where-Object { $_ -match "Failed|Error Message|Failed!" }
@@ -226,7 +246,7 @@ if (-not $SkipTests) {
 }
 
 Write-Host "Checking for vulnerable NuGet packages..."
-$vulnOutput = Invoke-NativeCommand { dotnet list $slnPath package --vulnerable --include-transitive }
+$vulnOutput = Invoke-RepoNativeCommand { dotnet list $slnPath package --vulnerable --include-transitive }
 $vulnExitCode = $script:LastNativeExitCode
 if ($vulnExitCode -ne 0) {
     $vulnErrorText = ($vulnOutput | Select-Object -First 20 | ForEach-Object { $_.ToString().Trim() }) -join "`n  "

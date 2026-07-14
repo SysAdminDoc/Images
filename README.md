@@ -102,9 +102,12 @@ To associate file types from a portable install: right-click any image → **Ope
 ```bash
 git clone https://github.com/SysAdminDoc/Images.git
 cd Images
+dotnet restore --locked-mode
 dotnet build -c Release
 dotnet run --project src/Images
 ```
+
+The repository pins the .NET 10 SDK feature band in `global.json` and commits NuGet lock files for repeatable restores. Release/SBOM work also starts with `dotnet tool restore`; the local manifest pins the CycloneDX generator used by `scripts/New-Sbom.ps1`.
 
 ### Bundled Ghostscript
 

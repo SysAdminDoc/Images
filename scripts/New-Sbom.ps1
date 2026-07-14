@@ -37,12 +37,31 @@ $propertyGroup = @($project.Project.PropertyGroup) | Where-Object { $_.Version }
 $version = ([string]$propertyGroup.Version).Trim()
 
 $nugetBomPath = Join-Path $OutputDir "bom.json"
+$toolManifestPath = Join-Path $RepositoryRoot ".config\dotnet-tools.json"
+if (-not (Test-Path -LiteralPath $toolManifestPath)) {
+    throw "Local tool manifest not found: $toolManifestPath"
+}
+
+Write-Host "Restoring pinned local SBOM tool..."
+$toolRestoreOutput = & dotnet tool restore --tool-manifest $toolManifestPath 2>&1
+if ($LASTEXITCODE -ne 0) {
+    $toolRestoreText = ($toolRestoreOutput | ForEach-Object { $_.ToString().Trim() }) -join "`n  "
+    throw "Local tool restore failed (exit $LASTEXITCODE):`n  $toolRestoreText"
+}
+
 Write-Host "Generating CycloneDX SBOM from NuGet dependencies..."
 
-$cdxOutput = & dotnet-CycloneDX $projectPath -o $OutputDir --filename bom.json -F Json -t -sn Images -sv $version 2>&1
-if ($LASTEXITCODE -ne 0) {
+$previousLocation = Get-Location
+try {
+    Set-Location -LiteralPath $RepositoryRoot
+    $cdxOutput = & dotnet tool run dotnet-CycloneDX $projectPath -o $OutputDir --filename bom.json -F Json -t -sn Images -sv $version 2>&1
+    $cdxExitCode = $LASTEXITCODE
+} finally {
+    Set-Location -LiteralPath $previousLocation
+}
+if ($cdxExitCode -ne 0) {
     $cdxText = ($cdxOutput | ForEach-Object { $_.ToString().Trim() }) -join "`n  "
-    throw "CycloneDX generation failed (exit $LASTEXITCODE):`n  $cdxText"
+    throw "CycloneDX generation failed (exit $cdxExitCode):`n  $cdxText"
 }
 
 if (-not (Test-Path -LiteralPath $nugetBomPath)) {

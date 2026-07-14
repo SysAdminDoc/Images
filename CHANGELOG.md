@@ -30,6 +30,7 @@ All notable changes to **Images** are documented here.
 
 ### Changed
 
+- **Reproducible local and release builds** - `global.json` pins the .NET 10.0.3xx feature band with patch-only roll-forward, app/test NuGet graphs are committed as lock files, and release readiness restores in locked mode. CycloneDX 6.2.0 is a repo-local tool restored explicitly before SBOM generation, removing dependence on machine-global tools.
 - **Primary windows are fully localization-backed** - MainWindow menus, tooltips, empty/error states, gallery, inspector, controls, shortcuts help, and AboutWindow visible copy now resolve from resources. The localization gate rejects new literal visible text in either window and missing XAML resource keys; the pseudo-locale covers every addition.
 - **Consistent microcopy** - "Auto enhance" menu casing, and the duplicate-cleanup buttons read "Quarantine extras"/"Recycle extras" instead of the awkward "extra(s)".
 

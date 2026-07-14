@@ -1,0 +1,4 @@
+.config/dotnet-tools.json text eol=lf
+global.json text eol=lf
+src/Images/packages.lock.json text eol=lf
+tests/Images.Tests/packages.lock.json text eol=lf
