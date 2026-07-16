@@ -4,6 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Listen mode now compares its loopback session token in constant time and counts a connection against the concurrency cap before the handler task is scheduled, closing a theoretical token-timing side channel and a transient cap overshoot under bursts.
 - Semantic search now caches the model's normalized vectors in memory keyed by the index generation. Repeat queries on an unchanged index no longer re-read and re-deserialize the entire embedding table (up to ~100 MB of blob I/O) per search; a Rebuild or Clear invalidates the cache.
 - The details panel now reports JPEG XL structure: bare codestream, ISOBMFF container, or a lossless JPEG-to-JXL transcode (`jbrd` reconstruction box) — a headline JXL trait no mainstream Windows viewer surfaces.
 - Added an "Invert colours" view toggle (command palette, rebindable) that non-destructively inverts the displayed still image — an aid for reading negatives, low-contrast scans, and for accessibility. The source file and exports are untouched, and the toggle resets on navigation. Animated and tile-backed images keep their normal rendering.

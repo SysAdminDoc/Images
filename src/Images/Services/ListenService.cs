@@ -29,6 +29,17 @@ public sealed class ListenService : IDisposable
 
     public int Port { get; private set; }
     public string SessionToken { get; private set; } = string.Empty;
+
+    private bool TokenMatches(string candidate) => FixedTimeTokenEquals(SessionToken, candidate);
+
+    // Constant-time comparison so the loopback auth token cannot be recovered via a timing side
+    // channel on the byte-by-byte length/prefix of a short-circuiting string compare.
+    internal static bool FixedTimeTokenEquals(string expected, string? candidate)
+    {
+        var expectedBytes = Encoding.UTF8.GetBytes(expected ?? string.Empty);
+        var actualBytes = Encoding.UTF8.GetBytes(candidate ?? string.Empty);
+        return CryptographicOperations.FixedTimeEquals(expectedBytes, actualBytes);
+    }
     public bool IsListening => _listener is not null && !_disposed;
 
     public ListenService(Action<string> onPathReceived)
@@ -93,6 +104,9 @@ public sealed class ListenService : IDisposable
                     continue;
                 }
 
+                // Count the connection here, before the handler task is scheduled, so a burst of
+                // accepts cannot start more than the cap while increments are still pending.
+                Interlocked.Increment(ref _activeConnections);
                 _ = HandleClient(client, ct);
             }
             catch (OperationCanceledException) { break; }
@@ -108,7 +122,8 @@ public sealed class ListenService : IDisposable
 
     private async Task HandleClient(TcpClient client, CancellationToken ct)
     {
-        Interlocked.Increment(ref _activeConnections);
+        // The active-connection counter is incremented by the accept loop before this task is
+        // scheduled; this method only owns the matching decrement in its finally.
         try
         {
             using (client)
@@ -138,7 +153,7 @@ public sealed class ListenService : IDisposable
 
                     if (!authenticated)
                     {
-                        if (string.Equals(trimmed, SessionToken, StringComparison.Ordinal))
+                        if (TokenMatches(trimmed))
                         {
                             authenticated = true;
                             _log.LogDebug("listen-mode: client authenticated");

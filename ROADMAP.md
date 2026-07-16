@@ -57,13 +57,6 @@ Continues the `V###-##` scheme (V110 is the next free hundred-block above V100).
 
 #### P3 — Hardening and hygiene
 
-- [ ] P3 — Constant-time listen-mode token compare + tighten the connection cap (V110-14)
-  Why: `ListenService` uses byte-by-byte `string.Equals` for the session token (theoretical timing side-channel) and increments `_activeConnections` inside the handler so a burst can transiently exceed the cap of 8; both are low-risk given loopback-only bind + rate limiting but are cheap to harden.
-  Evidence: RESEARCH.md Security §; `ListenService.cs:141`, `ListenService.cs:89-111`
-  Touches: `src/Images/Services/ListenService.cs`
-  Acceptance: token comparison uses `CryptographicOperations.FixedTimeEquals` on UTF-8 bytes; the active-connection counter is incremented in the accept loop before the handler is spawned and decremented in the handler's finally.
-  Complexity: S
-
 - [ ] P3 — Dispose the continuous-archive decode gate + Picasa tag-drift prune (V110-15)
   Why: `_continuousArchiveDecodeGate` (`MainViewModel.cs:59`) is the one `SemaphoreSlim` missed by an otherwise thorough `Dispose`; separately, `PicasaImportService` unions `dc:subject`/`lr:hierarchicalSubject` on re-import so renamed albums accumulate stale tags. Both are small correctness/hygiene fixes.
   Evidence: RESEARCH.md Architecture §; `MainViewModel.cs:59`, `PicasaImportService.cs:519-540`

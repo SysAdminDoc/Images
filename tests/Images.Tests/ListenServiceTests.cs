@@ -19,6 +19,19 @@ public sealed class ListenServiceTests
         }
     }
 
+    [Theory]
+    [InlineData("s3cr3t-token", "s3cr3t-token", true)]
+    [InlineData("s3cr3t-token", "s3cr3t-toke", false)]   // prefix, wrong length
+    [InlineData("s3cr3t-token", "S3CR3T-TOKEN", false)]  // case differs
+    [InlineData("s3cr3t-token", "", false)]
+    [InlineData("s3cr3t-token", "totally-different-and-longer", false)]
+    public void FixedTimeTokenEquals_MatchesOnlyTheExactToken(string expected, string candidate, bool matches)
+        => Assert.Equal(matches, ListenService.FixedTimeTokenEquals(expected, candidate));
+
+    [Fact]
+    public void FixedTimeTokenEquals_NullCandidateDoesNotMatch()
+        => Assert.False(ListenService.FixedTimeTokenEquals("token", null));
+
     [Fact]
     public void TryNormalizeIncomingPath_AcceptsExistingLocalFile()
     {
