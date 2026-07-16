@@ -62,6 +62,28 @@ public sealed class SemanticSearchService : IDisposable
     private readonly Func<DateTimeOffset> _clock;
     private readonly bool _isAvailable;
 
+    // In-memory vector cache. Every query previously re-read and re-scored the whole embedding
+    // table (up to ~100 MB of blob I/O per search); instead the normalized vectors are loaded once
+    // per index generation and reused until a Rebuild/Clear bumps the generation.
+    private readonly object _cacheGate = new();
+    private List<CachedVector>? _cachedVectors;
+    private string? _cacheModelId;
+    private string? _cacheProviderId;
+    private int _cacheGeneration = -1;
+    private int _generation;
+    private int _cacheLoadCount;
+
+    internal int CacheLoadCountForTests => Volatile.Read(ref _cacheLoadCount);
+
+    private sealed record CachedVector(
+        string SourcePath,
+        string Fingerprint,
+        string ModelId,
+        string ProviderId,
+        float[] Vector,
+        string MatchedText,
+        DateTimeOffset IndexedUtc);
+
     public SemanticSearchService()
         : this(null)
     {
@@ -160,6 +182,7 @@ public sealed class SemanticSearchService : IDisposable
         foreach (var root in rootList)
             UpsertRoot(conn, tx, root, indexedUtc, rows.Count, catalogResult.FailedCount);
         tx.Commit();
+        Interlocked.Increment(ref _generation);
 
         return new SemanticSearchIndexResult(
             _dbPath,
@@ -189,43 +212,29 @@ public sealed class SemanticSearchService : IDisposable
             limit = Math.Clamp(limit, 1, 500);
             var results = new List<SemanticSearchResult>();
 
-            using var conn = Open();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = """
-                SELECT source_path, fingerprint, model_id, provider_id, dimensions,
-                       embedding, matched_text, indexed_utc
-                FROM semantic_assets
-                WHERE model_id = $model AND provider_id = $provider
-                ORDER BY lower(source_path);
-                """;
-            cmd.Parameters.AddWithValue("$model", _provider.ModelId);
-            cmd.Parameters.AddWithValue("$provider", _provider.ProviderId);
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
+            foreach (var entry in EnsureVectorCache())
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var sourcePath = reader.GetString(0);
-                if (!IsWithinFolderFilter(sourcePath, normalizedFilter))
+                if (!IsWithinFolderFilter(entry.SourcePath, normalizedFilter))
                     continue;
 
-                var vector = ReadVector((byte[])reader["embedding"], reader.GetInt32(4));
-                if (vector.Length != queryVector.Length)
+                if (entry.Vector.Length != queryVector.Length)
                     continue;
 
-                var score = Dot(queryVector, vector);
+                var score = Dot(queryVector, entry.Vector);
                 if (score <= 0)
                     continue;
 
                 results.Add(new SemanticSearchResult(
-                    sourcePath,
-                    Path.GetFileName(sourcePath),
-                    Path.GetDirectoryName(sourcePath) ?? "",
+                    entry.SourcePath,
+                    Path.GetFileName(entry.SourcePath),
+                    Path.GetDirectoryName(entry.SourcePath) ?? "",
                     score,
-                    reader.GetString(6),
-                    reader.GetString(1),
-                    reader.GetString(2),
-                    reader.GetString(3),
-                    FromUnix(reader.GetInt64(7))));
+                    entry.MatchedText,
+                    entry.Fingerprint,
+                    entry.ModelId,
+                    entry.ProviderId,
+                    entry.IndexedUtc));
             }
 
             return results
@@ -238,6 +247,59 @@ public sealed class SemanticSearchService : IDisposable
         {
             Log.LogWarning(ex, "Semantic search failed");
             return [];
+        }
+    }
+
+    // Loads the model/provider's vectors from SQLite once per index generation. A repeat query on
+    // an unchanged index returns the cached list without touching the database again.
+    private IReadOnlyList<CachedVector> EnsureVectorCache()
+    {
+        var generation = Volatile.Read(ref _generation);
+        var modelId = _provider.ModelId;
+        var providerId = _provider.ProviderId;
+
+        lock (_cacheGate)
+        {
+            if (_cachedVectors is not null &&
+                _cacheGeneration == generation &&
+                string.Equals(_cacheModelId, modelId, StringComparison.Ordinal) &&
+                string.Equals(_cacheProviderId, providerId, StringComparison.Ordinal))
+            {
+                return _cachedVectors;
+            }
+
+            var vectors = new List<CachedVector>();
+            using (var conn = Open())
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = """
+                    SELECT source_path, fingerprint, model_id, provider_id, dimensions,
+                           embedding, matched_text, indexed_utc
+                    FROM semantic_assets
+                    WHERE model_id = $model AND provider_id = $provider;
+                    """;
+                cmd.Parameters.AddWithValue("$model", modelId);
+                cmd.Parameters.AddWithValue("$provider", providerId);
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    vectors.Add(new CachedVector(
+                        reader.GetString(0),
+                        reader.GetString(1),
+                        reader.GetString(2),
+                        reader.GetString(3),
+                        ReadVector((byte[])reader["embedding"], reader.GetInt32(4)),
+                        reader.GetString(6),
+                        FromUnix(reader.GetInt64(7))));
+                }
+            }
+
+            Interlocked.Increment(ref _cacheLoadCount);
+            _cachedVectors = vectors;
+            _cacheGeneration = generation;
+            _cacheModelId = modelId;
+            _cacheProviderId = providerId;
+            return vectors;
         }
     }
 
@@ -303,6 +365,7 @@ public sealed class SemanticSearchService : IDisposable
             using var tx = conn.BeginTransaction();
             ClearIndex(conn, tx);
             tx.Commit();
+            Interlocked.Increment(ref _generation);
             return true;
         }
         catch (Exception ex) when (IsRecoverableSemanticFailure(ex))

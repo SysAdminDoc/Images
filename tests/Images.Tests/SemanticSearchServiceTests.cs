@@ -26,6 +26,43 @@ public sealed class SemanticSearchServiceTests
     }
 
     [Fact]
+    public void Search_RepeatQueryOnUnchangedIndex_DoesNotReReadVectorsFromDisk()
+    {
+        using var temp = TestDirectory.Create();
+        WriteImage(temp.Path, "sunset-over-water.png", 16, 8);
+        WriteImage(temp.Path, "receipt-paper-scan.png", 8, 16);
+        var service = CreateService(temp.Path);
+        service.Rebuild([temp.Path]);
+
+        var first = service.Search("sunset water", limit: 5);
+        var loadsAfterFirst = service.CacheLoadCountForTests;
+        var second = service.Search("receipt paper", limit: 5);
+
+        // The second query on the unchanged index reuses the cached vectors: no extra DB load.
+        Assert.Equal(1, loadsAfterFirst);
+        Assert.Equal(loadsAfterFirst, service.CacheLoadCountForTests);
+        Assert.NotEmpty(first);
+        Assert.NotEmpty(second);
+    }
+
+    [Fact]
+    public void Search_AfterRebuild_ReloadsVectorCache()
+    {
+        using var temp = TestDirectory.Create();
+        WriteImage(temp.Path, "sunset-over-water.png", 16, 8);
+        var service = CreateService(temp.Path);
+        service.Rebuild([temp.Path]);
+        service.Search("sunset", limit: 5);
+        var loadsBefore = service.CacheLoadCountForTests;
+
+        service.Rebuild([temp.Path]);
+        service.Search("sunset", limit: 5);
+
+        // A Rebuild bumps the index generation, so the next search reloads rather than serving stale vectors.
+        Assert.Equal(loadsBefore + 1, service.CacheLoadCountForTests);
+    }
+
+    [Fact]
     public void Search_AppliesFolderFilter()
     {
         using var temp = TestDirectory.Create();

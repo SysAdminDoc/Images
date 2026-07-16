@@ -34,13 +34,6 @@ Continues the `V###-##` scheme (V110 is the next free hundred-block above V100).
   Acceptance: for an Ultra HDR/Apple/ISO gain-map file, a command renders the decoded gain map as a grayscale layer over the base image; files without a gain map keep the command disabled. Needs a foreground GUI verification pass.
   Complexity: M
 
-- [ ] P2 — Scale semantic search off the full-table linear scan (V110-07)
-  Why: `Search` selects every row for the active model (no SQL `LIMIT`), deserializes each 512-dim blob, and dot-products in managed code on the calling thread on every query — re-reads/re-scores the whole index each time and will not scale past a few thousand assets.
-  Evidence: RESEARCH.md Architecture §; `SemanticSearchService.cs:194-235`
-  Touches: `src/Images/Services/SemanticSearchService.cs`
-  Acceptance: normalized vectors are cached in memory keyed by index generation (or candidate set capped / ANN-indexed); a repeat query on an unchanged index performs zero blob re-reads; results are unchanged.
-  Complexity: M
-
 - [ ] P2 — Continue extracting the `MainViewModel` god object (V110-09)
   Why: ~8,300 lines / 318 KB owning 20+ services and 4 timers is a change-magnet where any edit risks unrelated regressions (memory notes confirm parallel-agent work on this tree); the team's existing `*Controller` extraction pattern is the proven path.
   Evidence: RESEARCH.md Architecture §; `ViewModels/MainViewModel.cs`
