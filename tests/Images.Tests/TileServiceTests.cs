@@ -156,22 +156,23 @@ public sealed class TileServiceTests
     }
 
     [Fact]
-    public void ClearCache_KeepsBuildLockForDeletedCacheDirectory()
+    public void BuildPyramid_ReleasesBuildLockAfterCompletionSoTheMapDoesNotGrow()
     {
         using var temp = TestDirectory.Create();
-        var source = Path.Combine(temp.Path, "source.png");
-        using (var image = new MagickImage(MagickColors.Red, 64, 64))
-            image.Write(source);
         var cacheRoot = Path.Combine(temp.Path, "tiles");
-        var pyramid = TileService.BuildPyramid(source, cacheRoot, tileSize: 16);
-        var buildLocks = GetBuildLocks();
 
-        Assert.True(buildLocks.ContainsKey(pyramid.CacheDirectory));
+        // Building many distinct huge images in one session must not accumulate build-lock
+        // entries for the process lifetime; each completed build releases its ref-counted gate.
+        for (var i = 0; i < 5; i++)
+        {
+            var source = Path.Combine(temp.Path, $"source-{i}.png");
+            using (var image = new MagickImage(MagickColors.Red, 64, 64))
+                image.Write(source);
+            var pyramid = TileService.BuildPyramid(source, cacheRoot, tileSize: 16);
+            Assert.True(Directory.Exists(pyramid.CacheDirectory));
+        }
 
-        TileService.ClearCache(source, cacheRoot);
-
-        Assert.False(Directory.Exists(pyramid.CacheDirectory));
-        Assert.True(buildLocks.ContainsKey(pyramid.CacheDirectory));
+        Assert.Equal(0, TileService.BuildLockCountForTests);
     }
 
     [Fact]
@@ -340,9 +341,4 @@ public sealed class TileServiceTests
         Assert.Equal(16, tiles.Count);
     }
 
-    private static ConcurrentDictionary<string, object> GetBuildLocks()
-    {
-        var field = typeof(TileService).GetField("BuildLocks", BindingFlags.NonPublic | BindingFlags.Static);
-        return Assert.IsType<ConcurrentDictionary<string, object>>(field?.GetValue(null));
-    }
 }

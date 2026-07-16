@@ -55,7 +55,47 @@ public static class TileService
 
     private static readonly Microsoft.Extensions.Logging.ILogger _log =
         Log.Get("Images.TileService");
-    private static readonly ConcurrentDictionary<string, object> BuildLocks = new(StringComparer.OrdinalIgnoreCase);
+    // Ref-counted per-cache build gate. Evicting the entry when the last waiter leaves keeps the
+    // map from growing for the process lifetime as a session browses many huge images, without the
+    // remove-from-dictionary race a naive delete would introduce (a new caller would otherwise
+    // create a fresh lock object while a build still held the old one). Acquire/release bookkeeping
+    // runs under BuildLockRegistryGate so the count and the map stay consistent.
+    private sealed class BuildGate
+    {
+        public int Waiters;
+    }
+
+    private static readonly Dictionary<string, BuildGate> BuildLocks = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly object BuildLockRegistryGate = new();
+
+    internal static int BuildLockCountForTests
+    {
+        get { lock (BuildLockRegistryGate) return BuildLocks.Count; }
+    }
+
+    private static BuildGate AcquireBuildGate(string cacheDir)
+    {
+        lock (BuildLockRegistryGate)
+        {
+            if (!BuildLocks.TryGetValue(cacheDir, out var gate))
+            {
+                gate = new BuildGate();
+                BuildLocks[cacheDir] = gate;
+            }
+
+            gate.Waiters++;
+            return gate;
+        }
+    }
+
+    private static void ReleaseBuildGate(string cacheDir, BuildGate gate)
+    {
+        lock (BuildLockRegistryGate)
+        {
+            if (--gate.Waiters <= 0)
+                BuildLocks.Remove(cacheDir);
+        }
+    }
     private static readonly ConcurrentDictionary<string, byte> ProtectedCacheDirs = new(StringComparer.OrdinalIgnoreCase);
     private static readonly ConcurrentDictionary<string, byte> BuildingCacheDirs = new(StringComparer.OrdinalIgnoreCase);
 
@@ -144,7 +184,9 @@ public static class TileService
         if (TryReadReusablePyramidInfo(infoPath, sourcePath) is { } existing)
             return existing;
 
-        var buildLock = BuildLocks.GetOrAdd(cacheDir, static _ => new object());
+        var buildLock = AcquireBuildGate(cacheDir);
+        try
+        {
         lock (buildLock)
         {
             if (TryReadReusablePyramidInfo(infoPath, sourcePath) is { } existingInsideLock)
@@ -246,6 +288,11 @@ public static class TileService
             {
                 BuildingCacheDirs.TryRemove(fullCacheDir, out _);
             }
+        }
+        }
+        finally
+        {
+            ReleaseBuildGate(cacheDir, buildLock);
         }
     }
 

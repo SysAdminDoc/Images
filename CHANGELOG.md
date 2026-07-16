@@ -4,6 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Tile-pyramid build locks are now ref-counted and released when the last waiter for a cache directory finishes, so browsing many huge images in one session no longer accumulates lock objects for the process lifetime. Concurrent builds of the same image still share one gate, preserving mutual exclusion.
 - Upgraded SharpCompress 0.49.1 -> 0.50.0 for reduced LZMA/RAR decode allocation (comic-archive pages) and Zip64 non-seekable-stream / entry-metadata-corruption fixes. The 0.50.0 Tar auto-decompress and Detection API breaking changes do not touch the read-only `ArchiveFactory.OpenArchive` path Images uses; the CBZ/CBR/7z/CB7 regression suite passes unchanged.
 - The details panel now surfaces HDR gain maps that Windows silently ignores: it detects Google Ultra HDR, Adobe/ISO `hdrgm` metadata, Apple HDR gain maps, and ISO 21496-1, and reports the flavor, version, and content-boost range (in stops). Read-only inspection — no HDR display or writeback.
 - Animated multi-frame decode now routes through `MagickSafeReader.ReadCollection(bytes)`, which installs the native coder allowlist and resource limits before decoding. Previously the animated path constructed a `MagickImageCollection` directly, so a future caller reaching it before the main load preflight could decode untrusted bytes with the security policy uninitialized.

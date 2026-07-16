@@ -41,13 +41,6 @@ Continues the `V###-##` scheme (V110 is the next free hundred-block above V100).
   Acceptance: normalized vectors are cached in memory keyed by index generation (or candidate set capped / ANN-indexed); a repeat query on an unchanged index performs zero blob re-reads; results are unchanged.
   Complexity: M
 
-- [ ] P2 — Bound `TileService.BuildLocks` growth (V110-08)
-  Why: one lock object is added per distinct huge-image path opened this session and never removed, a slow leak in an otherwise carefully-bounded service.
-  Evidence: RESEARCH.md Architecture §; `TileService.cs:58`, `TileService.cs:147`
-  Touches: `src/Images/Services/TileService.cs`
-  Acceptance: build-lock entries are removed in the build `finally` (or via a size-capped/expiring map) while preserving same-cache mutual exclusion; a test browsing many pyramids shows the map does not grow unbounded.
-  Complexity: S
-
 - [ ] P2 — Continue extracting the `MainViewModel` god object (V110-09)
   Why: ~8,300 lines / 318 KB owning 20+ services and 4 timers is a change-magnet where any edit risks unrelated regressions (memory notes confirm parallel-agent work on this tree); the team's existing `*Controller` extraction pattern is the proven path.
   Evidence: RESEARCH.md Architecture §; `ViewModels/MainViewModel.cs`
