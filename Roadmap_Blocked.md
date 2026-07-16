@@ -13,6 +13,22 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
   - **Blocked by**: human runtime validation requirement.
   - **Unblock when**: the manual smoke pass is scheduled or can be replaced by an accepted automated UI smoke.
 
+- [ ] **V110-16** *P2* — Render the extracted gain map as a grayscale overlay. `GainMapInspectionService` already detects gain maps and reports their metadata (shipped 2026-07-16); the remaining work extracts the MPF/aux gain-map image to a `BitmapSource` and shows it as a grayscale layer over the base image via a viewer command.
+  - **Blocked by**: foreground GUI verification of the overlay rendering (repo rule forbids foreground WPF smoke on an active desktop; the FlaUI smoke harness is skipped in the headless build).
+  - **Unblock when**: a GUI session can verify the grayscale overlay renders and the command disables for non-gain-map files.
+
+- [ ] **V110-12** *P2* — Jump to next/previous archive without leaving the reader (at the last page, Next rolls into the first page of the next CBZ/CBR in folder order; symmetrically for Previous). The adjacent-archive resolution over `DirectoryNavigator`'s file list is straightforward, but the integrated rolling UX — paged vs continuous mode, right-to-left turn direction, page-command enablement at boundaries, and landing-page selection — must be validated in the running app.
+  - **Blocked by**: foreground GUI verification of the archive-to-archive rolling navigation across paged/continuous/RTL modes.
+  - **Unblock when**: a GUI session can confirm the boundary rolling behavior and command enablement match the existing navigation semantics.
+
+- [ ] **V110-13** *P2* — Hold-to-scrub rapid folder fly-through (holding Next/Prev accelerates navigation using preloaded/thumbnail frames without full-decode stutter, settling on a full decode when released). The value is the input-timing feel and stutter-free acceleration, which cannot be judged without running the app.
+  - **Blocked by**: foreground GUI verification of the hold-to-scrub input timing and decode smoothness.
+  - **Unblock when**: a GUI session can confirm the accelerated scrub feels smooth and single presses are unchanged.
+
+- [ ] **V110-09** *P2* — Continue extracting the `MainViewModel` god object (move slideshow, archive-reader, and rename-editor state/commands into dedicated controllers behind the existing `_uiDispatcher`/`() => _isDisposed` convention). Pure maintainability with no behavior change, but it reshapes interactive subsystems (slideshow timing, rename debounce/undo, archive paging) whose regressions surface only at runtime, and the file is under active parallel-agent editing.
+  - **Blocked by**: required runtime validation of the extracted slideshow/rename/archive behaviors plus an exclusive (non-parallel) editing window on this file.
+  - **Unblock when**: a dedicated GUI-verifiable session on an unshared checkout is available to refactor and smoke-test the interactive behaviors.
+
 ## Blocked On Package-Manager Credentials Or Account Setup
 
 - [ ] **D-02** *P0* — **`winget` publishing** via `WinGet Releaser` GitHub Action (`vedantmgoyal9/winget-releaser`). First submission manual via `wingetcreate new`; subsequent releases auto-fire on `release: [published]`. Requires classic PAT + forked `microsoft/winget-pkgs`. Effort: S. [WinGet Releaser action; Grafana k6 PR #5203]
@@ -405,3 +421,14 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
   Why: The current compare mode handles a pair, but top culling tools use temporary sets for 3-8 near-duplicates.
   - **Blocked by**: requires major new multi-image layout surface (2-up and 4-up linked pan/zoom/rotate) that is better built on V20-01 SkiaSharp canvas for consistent rendering across tiles.
   - **Unblock when**: V20-01 SkiaSharp canvas ships or the WPF bitmap-based multi-tile layout is validated for linked transforms.
+
+## Blocked On Documentation Commit Policy
+
+- [ ] *P3* — **Upgrade SharpCompress to 0.50.0 and synchronize runtime provenance**
+  - **Blocked by**: `Test-RuntimeProvenanceDocs.ps1` requires the tracked `docs/archive-runtime-review.md` and `docs/integration-policy.md` to match the package pin, while the current execution contract forbids staging Markdown other than `README.md` and `CHANGELOG.md`.
+  - **Unblock when**: the existing tracked runtime-policy documents may be included in the same dependency commit, or the documentation policy is otherwise reconciled.
+  - **Corrected scope**: retain 0.50.0's CRC/allocation/ZIP64 fixes; do not promise partial CBZ recovery because upstream's `tolerateTruncatedStream` option is BZip2-only.
+
+- [ ] *P3* — **Retire the obsolete OCR implementation guide**
+  - **Blocked by**: `ocr-implementation-guide.md` is tracked, but the current execution contract forbids staging Markdown other than `README.md` and `CHANGELOG.md`; deleting it cannot be delivered without committing that Markdown deletion.
+  - **Unblock when**: deletion of the tracked guide may be staged. No live file references the guide; README already contains the current OCR workflow. Historical `net9.0` entries in CHANGELOG and archived research remain intentionally intact.
