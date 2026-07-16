@@ -1,87 +1,106 @@
 # Research — Images
 
-Date: 2026-07-14 (pass 4) — replaces all prior research.
+Date: 2026-07-16 — replaces all prior research (supersedes the 2026-07-14 pass, whose SQLite floor, `SqliteConnectionPolicy`, `SettingsTransferService`, and `Exif31MetadataReader` items have all since shipped).
 
 ## Executive Summary
-Images is a mature, Windows-only, local-first WPF/.NET 10 image viewer + light DAM + ML editor (v0.2.26, ~1017 tests, 100+ services). It already **leads the OSS Windows-viewer field** on ML/editing (CLIP semantic search over ONNX DirectML — the README's "future work" note is stale, `ClipEmbeddingProvider` runs real ViT-B/32 inference and only falls back to deterministic embeddings when models are absent; LaMa inpaint, super-resolution, background removal, non-destructive levels/curves/HSL/retouch/dodge-burn, C2PA provenance) and matches incumbents on format breadth, archives, OCR, tags, duplicate cleanup, batch, compare, slideshow, and gigapixel tiling. The remaining opportunity is **not more features** — it is **display-pipeline fidelity and untrusted-input hardening**, the two axes where every serious color/photo viewer (FastStone, BandiView, nomacs) still beats it. Most of the marquee display items (true HDR output, full monitor color management, GPS map overlay, Explorer thumbnail handler) are already correctly parked in `Roadmap_Blocked.md`, gated on a SkiaSharp canvas rewrite (V20-01), code signing (D-05), or an ExifTool write wrapper. This pass surfaces the **unblocked, incremental** wins those blocked epics overlook.
 
-Top opportunities, priority order:
-1. **ImageMagick read-coder allowlist + delegate lockdown** — the one real, unblocked security gap (P1).
-2. **Better SDR tonemapping at decode** for HDR/EXR/Radiance/16-bit content — pure `ImageLoader` change, no renderer rewrite (P2).
-3. **Legacy-mode monitor-ICC display output** — wide-gamut accuracy achievable in the *current* WPF pipeline, ahead of the blocked SkiaSharp epic (P2).
-4. **Focus-peaking + highlight/shadow-clipping overlays** for RAW/photo culling (P2).
-5. **HDR-display detection + status badge** (IDXGIOutput6) — cheap, honest, sets up the future path (P2).
-6. **SharpCompress 0.50.0 bump** (CRC verification + truncated-stream tolerance for comic archives) (P3).
-7. **Native-dependency version assertions in diagnostics** (SQLite, ImageMagick) (P3).
+Images is a Windows-only, local-first .NET 10/WPF viewer (v0.2.27, 125 services, 338 source files, zero TODO/FIXME markers) whose feature depth now exceeds every free competitor: it already ships multi-image compare with synced pan/zoom + difference toggle, a hold-button/keyboard loupe, Samsung/Google Motion Photo + Apple Live Photo playback, continuous vertical-scroll archive (webtoon) reading, perspective correction, tile-pyramid rendering, HDR-to-SDR tone mapping, color management, CLIP semantic search, OCR, C2PA inspection, non-destructive edits, background removal, super-resolution, LaMa inpainting, catalog/dedup, Picasa migration, and a Store-extension install-prompt path for HEIC/AVIF/JXL. Most "obvious" competitor gaps are therefore already closed. The remaining high-value direction is **trust/servicing hygiene and read-only standards inspection**, not another feature layer. In priority order: (1) take the July .NET/SQLite servicing bump (17 CVEs, 3 critical RCE); (2) fix the catalog shared-cache SQLite lock hazard that can silently blank the catalog; (3) add HDR gain-map inspection (ISO 21496-1 / UltraHDR / Apple / Adobe) — no Windows viewer does this today; (4) upgrade SharpCompress with a CBR/CBZ/tar regression gate; (5) close the small confirmed UX gaps (invert-colors toggle, next/prev-archive jump, hold-to-scrub fly-through); (6) drain the verified latent-bug backlog (import rollback stranding, animated-decode policy bypass, semantic-search full-scan, unbounded tile locks); (7) continue extracting the 318 KB `MainViewModel` god object.
+
+Top opportunities: gain-map inspection, catalog SQLite-lock fix, dependency servicing, SharpCompress upgrade, semantic-search scaling, import-rollback correctness, MainViewModel decomposition, invert/archive-jump/fly-through UX.
 
 ## Product Map
-- **Core workflows:** open files/folders/sessions/archives/comic-books; navigate; inline rename-while-viewing; compare; inspect metadata/provenance/pixels/loupe; non-destructive edit + Save-a-copy; batch/macro pipelines; semantic/duplicate/health scans; recover destructive actions.
-- **Personas:** Windows power users replacing Photos/ImageGlass/FastStone; photographers/archivists working in local folders; comic/manga readers; technical users valuing portable artifacts, checksums, provenance, and visible network behavior.
-- **Platforms/distribution:** Windows 10/11 x64, `net10.0-windows10.0.22621.0`, MIT; Inno installer + portable ZIP; scripted local release gates; GitHub Releases; framework-dependent; **unsigned** (code signing is a standing blocker for shell-integration features).
-- **Integrations/data flows:** WIC first → Magick.NET-Q16 14.15.0 fallback (embedded-ICC → sRGB); SharpCompress read-only archives; SQLite settings/catalog/semantic-index; XMP sidecars; optional Ghostscript 10.07.0 / jpegtran 3.1.4.1 / ExifTool / c2patool / Windows OCR / ONNX-DirectML CLIP; opt-in GitHub release check logged by `NetworkEgressService`.
+
+- **Core workflows:** open files/folders/clipboard/archives; navigate, zoom, compare (N-pane synced + diff), loupe, present; inspect OCR/metadata/C2PA/gain-map; non-destructive edit + export; catalog, search (text + CLIP), dedup, import, recover.
+- **User personas:** Windows power users replacing Photos/ImageGlass; photographers/archivists working directly in folders; comic/manga/webtoon readers; privacy-conscious users who value portable builds and visible runtime provenance.
+- **Platforms & distribution:** Windows 10/11 x64; `net10.0-windows10.0.22621.0`; MIT; self-contained installer + portable ZIP. Signing and WinGet/Store publication remain externally blocked (`Roadmap_Blocked.md`).
+- **Key integrations & data flows:** WIC-first decode with Magick.NET 14.15.0 (ImageMagick 7.1.2-27) fallback; SharpCompress 0.49.1 read-only archives; SQLite settings/catalog/semantic index; XMP sidecars; optional Ghostscript/jpegtran/ExifTool/c2patool child processes (bounded, egress-logged); Windows OCR; imported ONNX models via ONNX Runtime DirectML 1.24.4; default-off GitHub release checks.
 
 ## Competitive Landscape
-- **FastStone / BandiView / nomacs (color viewers):** all ship **display-ICC monitor-profile** color management; Images converts only to sRGB (`ImageLoader.cs`), so it over-saturates on wide-gamut (P3/AdobeRGB) monitors. Learn: convert embedded → *monitor* profile in legacy (Advanced-Color-off) mode; it's a WPF-native change. Avoid: their heavier, dated UIs. (nomacs #394; FastStone monitor-profile thread.)
-- **ImageGlass 10 / BandiView / MS HDRImageViewer:** do **HDR display** (scRGB/HDR10 swapchain) and SDR tonemapping. Images hard-clips HDR/EXR to sRGB. Learn: at minimum tonemap (ACES/Hable) at decode — every serious viewer looks better for it. Avoid full HDR-swapchain in pure WPF (airspace tax — see Architecture).
-- **FastRawViewer:** focus-peaking + exposure-clipping overlays for fast RAW culling — Images has curves/levels but no culling overlays. Learn: cheap edge/threshold overlays on the decoded buffer.
-- **Honeyview / BandiView (comic):** webtoon/continuous-vertical-scroll reading. Images has RTL + two-page spreads but only paged navigation. Learn: add a continuous-scroll archive mode.
-- **ImageGlass / Pictus:** Explorer **thumbnail provider** for HEIC/AVIF/JXL/RAW/CBZ. Genuinely valuable but already parked (V70-04, blocked on plugin boundary + MSIX + code signing). Avoid re-litigating until D-05 unblocks.
-- **Do NOT adopt (unchanged):** WebView2 dependency, cross-platform rewrite, cloud/multi-user/telemetry.
+
+- **QuickView 5 / qView / JarkViewer:** win on raw first-paint speed — GPU (Direct2D) multithreaded JXL/AVIF decode, ARM64 native, virtualized 10k+ galleries. Learn: decode/first-paint speed is now the reviewer-decisive axis; a rich-but-slow WPF path loses "which is fastest" threads. Avoid: chasing every exotic format at the cost of cold-open latency.
+- **FastStone / nomacs / Butterfly Viewer:** the compare workspace (synced zoom, overlay-opacity, slider/flicker). Images already matches this — the remaining delta is overlay-opacity/slider/flicker *modes* on top of the existing diff toggle. Avoid: nomacs's dense multi-instance organizer complexity.
+- **BandiView / OpenComic:** webtoon continuous reading + archive-to-archive navigation. Images has continuous archive reading; it still lacks jump-to-next/previous-archive. Learn the reader-flow polish; avoid paid-gate/advertising UX.
+- **ImageGlass v9.x:** Explorer sort-order parity, Invert-Colors quick toggle, Live-Photo playback, no-runtime self-contained build. Learn the small quick toggles; avoid the v8→v9 settings break (Images already has versioned settings transfer).
+- **XnView MP:** hierarchical XMP keyword tree + Lightroom/Bridge round-trip and star/color-label DAM. Images intentionally removed the review/rating DAM lane; it retains `TagGraphService` for hierarchical tags. Do not reintroduce a rating workflow (see Rejected).
+- **PicView / IrfanView:** searchable shortcut list, batch convert, TWAIN acquire, panorama. Images covers batch/convert; TWAIN and panorama are niche and out of the viewer-first scope.
+- **FlyPhotos:** hold-arrow "fly-through" rapid folder scrubbing — repeatedly praised in community threads as the antidote to per-image reload stutter. Images has preload but no explicit hold-to-scrub mode.
 
 ## Security, Privacy, and Reliability
-- **[Verified — real gap] No ImageMagick read-coder allowlist.** `MagickSecurityPolicy.cs` sets thorough `ResourceLimits` (memory/disk/area/dimensions/time/threads/list) and a *write*-format blocklist, but no read-side coder allowlist and no `ConfigurationFiles.Policy`/delegate `rights="none"`. Crafted exotic-format inputs (MNG, TIM/PSX, SF3, MSL, Log-colorspace) can still reach the native decoder — precisely the 2025-2026 ImageMagick heap-overflow CVE class (CVE-2025-55004/55005/53014, CVE-2025-66628). Mitigation: inject a deny-all-then-permit-web-safe coder policy + delegate lockdown at init. Effort S-M. (imagemagick.org security-policy; GHSA advisories.)
-- **[Verified — mostly mitigated] Ghostscript.** Bundled **10.07.0** ≥ 10.06.0, so the 2025 GS RCEs (CVE-2025-59798-59801) are patched, and ImageMagick document delegates are gated behind explicit Ghostscript availability. Residual hardening (confirm `-dSAFER`, no network, scratch-dir path sandbox, low-priv token, magic-byte gate before dispatch) is worthwhile but lower urgency given the version floor. (Artifex hardening blog.)
-- **[Verified — not exposed] SharpCompress zip-slip CVE-2026-44788** affects only `WriteToDirectory()`; Images streams archive entries without extracting to disk, so it is safe by construction. Do not introduce `WriteToDirectory` on untrusted archives.
-- **[Likely — verify] Native dependency floors.** Confirm the ImageMagick core inside Magick.NET-Q16 14.15.0 is ≥ 7.1.2-2 (CVE-2025-57803 BMP-encoder, CVSS 9.8) and the SQLite inside `bundle_e_sqlite3 3.0.3` is ≥ 3.50.2 (CVE-2025-6965, CVSS 9.8; low exposure — DB SQL is app-authored). No startup version assertion exists; add one to diagnostics.
-- **Reliability:** several already-tracked hot-path items remain (gallery virtualization, per-nav UI-thread I/O, RAW double-tail) in the existing ROADMAP; not re-listed here.
+
+- **[Verified] July 2026 servicing gap.** `src/Images/Images.csproj` pins `Microsoft.Data.Sqlite` 10.0.9; 10.0.10 (2026-07-14) ships with the .NET 10.0.10 wave that fixes 17 CVEs (3 critical RCE across EncryptedXml/SslStream/HTTP-2). Client-side exposure is limited but the app does HTTPS update checks — take the servicing bump and pin the SDK/runtime to 10.0.10.
+- **[Verified] Catalog SQLite lock hazard (data-visibility).** `CatalogService.Open` uses `SqliteCacheMode.Shared` (`CatalogService.cs:89`) while `SemanticSearchService.Open` uses `Private` (`SemanticSearchService.cs:102`). Under shared-cache + WAL, a background `Rebuild` write transaction (held across many `UpsertAsset` calls, `CatalogService.cs:155-171`) can raise table-level `SQLITE_LOCKED` on a concurrent UI read; the `busy_timeout` handler covers `SQLITE_BUSY` only, and `GetByPath`/`GetAllAssets` swallow `SqliteException` → the user silently sees an empty catalog. Fix: use `Private` cache for the catalog too.
+- **[Verified] Import rollback can strand a moved original.** `ImportInboxService.RollBackFailedTransfer` (`ImportInboxService.cs:325-330`) only restores a moved original `if (!File.Exists(sourcePath))`; if the source slot is re-occupied, the file is left only at the destination while the UI reports failure — perceived data loss. Fix: restore to a unique sibling and surface the recovered path.
+- **[Verified] Animated-decode bypasses the native policy seam.** `ImageLoader.TryLoadAnimated` (`ImageLoader.cs:689`) constructs `new MagickImageCollection(bytes)` directly rather than through `MagickSafeReader`/`CodecRuntime.Configure()`. Safe today only because `ImageLoader.Load` pre-runs `TileService.Preflight`; a future caller reaching this first would decode untrusted bytes before the coder allowlist/resource limits install. Fix: call `CodecRuntime.Configure()` at entry or add `MagickSafeReader.ReadCollection`.
+- **[Verified] ImageMagick CVE posture is current.** Magick.NET 14.15.0 bundles ImageMagick 7.1.2-27, which is past the fix lines for the 2025-2026 decoder overflows (XBM CVE-2026-23876, Sun CVE-2026-25897, MAT CVE-2026-48994, MIFF CVE-2026-46521). `MagickSecurityPolicy`/`CodecRuntime.Configure` already install a coder allowlist + resource limits. No action beyond staying current.
+- **[Verified] SharpCompress 0.49.1 is one minor behind.** 0.50.0 (2026-07-13) reduces LZMA/RAR decode allocation (direct CBR/CBZ benefit) and fixes Zip64 non-seekable streaming + entry-metadata corruption, but breaks Tar auto-decompress and the Detection API — not a blind bump.
+- **[Low] Listen-mode token compare is non-constant-time** (`ListenService.cs:141`, `string.Equals`), and the concurrent-connection cap can be transiently exceeded because `_activeConnections` is incremented inside the handler (`ListenService.cs:89-111`). Both are heavily mitigated by loopback-only bind, `ExclusiveAddressUse`, rate limiting, and a 10 s pre-auth window.
+- **Recovery/rollback:** existing corrupt-DB quarantine, atomic sidecar/temp-swap writes, quarantine-over-delete, and bounded child-process runners are well built and verified — keep them as the fallback contract.
 
 ## Architecture Assessment
-- **Display pipeline is the ceiling.** `ImageLoader.cs` decodes → `TransformColorSpace(SRGB, SRGB)` → 8-bit `WriteableBitmap` Bgra32. This forecloses HDR and monitor-gamut accuracy. Two increments land in this one file **without** the blocked SkiaSharp rewrite: (a) a tonemap operator before 8-bit quantization; (b) a monitor-ICC destination profile (read via `GetICMProfile`/`WcsGetDefaultColorProfile`) in legacy (Advanced-Color-off) mode. The full HDR/managed-display epic (V100-05/06) still needs the new canvas.
-- **HDR in WPF is an XL trap.** Every Windows app doing true HDR display uses a DXGI flip swapchain (UWP/WinUI/native/browser); WPF cannot host one in its compositor. An `HwndHost` swapchain works but incurs the **airspace** problem — Images' rich WPF overlay stack (`ZoomPanImage`, OCR/crop/selection/exposure/red-eye/retouch overlays) can't composite over an HDR child HWND without being ported into D3D. Confirms parking V100-06; the SDR-tonemap + detection increments deliver ~80% of the perceived benefit for ~5% of the effort.
-- **Test/observability gaps:** no runtime assertion of native decoder/SQLite versions; the new tonemap/peaking/coder-policy work should each ship focused tests mirroring `ImageAdjustmentServiceTests` / `MagickSecurityPolicy` patterns.
+
+- **`MainViewModel` god object.** `ViewModels/MainViewModel.cs` is ~8,300 lines / 318 KB owning 20+ services, 4 `DispatcherTimer`s, slideshow, rename editor, archive reader, gallery smart-filter indexing, motion-photo, export, and metadata. The team already extracts `*Controller` helpers (FolderPreview, PhotoMetadata, ColorAnalysis, C2paInspection, Ocr, ExternalEditReload, UpdateCheck) — continue that pattern for slideshow, archive-reader, and rename-editor behind the existing `_uiDispatcher`/`() => _isDisposed` convention. Also dispose `_continuousArchiveDecodeGate` (`MainViewModel.cs:59`), the one semaphore missed by an otherwise thorough `Dispose`.
+- **Semantic search does not scale.** `SemanticSearchService.Search` (`SemanticSearchService.cs:194-235`) selects every row for the active model (no SQL `LIMIT`), deserializes each 512-dim blob, and dot-products in managed code on the calling thread on every query. Cache normalized vectors in memory keyed by index generation, or cap the candidate set / add an ANN index.
+- **`TileService.BuildLocks` leaks.** `TileService.cs:58,147` adds one lock per distinct huge-image path for the process lifetime and never removes it. Remove in the build `finally` or use an expiring map.
+- **Gain-map inspection is greenfield.** No gain-map/UltraHDR code exists (`grep` clean). ISO 21496-1:2025 gain maps are now written by Adobe (LrC v17), Apple (iOS 18/Sequoia), and Google (Android 15 UltraHDR). Windows WIC silently ignores them. A read-only inspector (base + gain-map grayscale layer + min/max content boost + flavor detection) is fully doable via Magick.NET/manual JUMBF/MPF parsing and would beat every mainstream Windows viewer. HDR *display* of gain maps needs a D3D11/D2D scRGB-float swapchain (WPF's SDR pipeline can't composite it) — treat display as a later, blocked renderer decision; ship inspection first.
+- **JXL provenance.** `Exif31MetadataReader` already handles UTF-8 tags correctly; the remaining read-only add is detecting JXL lossless-JPEG *transcode* (recompression) vs native codestream vs ISOBMFF container — a headline JXL trait no viewer surfaces.
+- **DirectML is in maintenance mode** (not deprecated). ONNX Runtime DirectML 1.24.4 is current and supported; the Windows ML migration remains a correctly-blocked renderer/runtime decision, not a current-sprint item.
+- **Category audit:** security/servicing and reliability covered by the SQLite/import/animated-decode fixes; performance by semantic-search + tile-lock work; accessibility by the invert-colors toggle (also a WCAG-adjacent aid); UX by archive-jump and fly-through; docs by undersold-feature README sync. i18n (single shipped locale + Crowdin), signing, Store/WinGet, plugin isolation, GPU-decode renderer swap, face clustering, and lab/VFX format packs are consciously deferred or already parked in `Roadmap_Blocked.md`.
 
 ## Rejected Ideas
-- **True HDR display via `HwndHost` swapchain (now):** XL, breaks WPF overlay compositing (airspace). Already parked as V100-06; do not pull forward. Source: dotnet/wpf #4569, MS Advanced-Color doc.
-- **Explorer thumbnail/preview handler (now):** valuable but blocked on plugin-boundary design + MSIX AppContainer + code signing (D-05). Already parked (V70-04, Scout). Do not duplicate. Source: MS Building Thumbnail Providers.
-- **GPS map overlay (now):** already parked (V20-23) behind ExifTool GPS write wrapper; also, online map tiles conflict with local-first unless offline-tiled or "open in browser." Source: blocked roadmap.
-- **Screen capture:** out of scope — the user maintains a separate tool (SwiftShot); duplicating it bloats the viewer. Source: internal.
-- **SkiaSharp canvas as a research item:** already the P0 linchpin (V20-01) in the blocked roadmap; not re-proposed. Source: blocked roadmap.
-- **Slideshow / MP4 export as net-new:** slideshow already exists (`ToggleSlideshow`/interval/shuffle in `MainViewModel`); only transition shaders + MP4 encode would be new, and MP4 encode needs an encoder dependency — low ROI. Source: code scan.
-- **SQLite FTS5 / SQLCipher encryption:** interesting but the catalog is a rebuildable cache, not a system of record; encryption adds a native-swap (`bundle_e_sqlcipher`) for little gain on local-only data. Source: MDS encryption docs.
+
+- **Star-rating / color-label / review DAM lane:** rejected — repository history deliberately removed the Review/rating workflow; reintroducing it contradicts the viewer-first philosophy. Source: XnView MP, prior CHANGELOG "Review workflow removal."
+- **TWAIN scanner acquire, panorama stitch, WebP2 (`.wp2`) support:** rejected — TWAIN/panorama are editor-suite scope creep; WebP2 is an abandoned Google research codebase with no shipping files, no WIC, no browser. Sources: IrfanView/Imagine; WebP2 repo status.
+- **Multipage-PDF export from a selection:** rejected as low-value — single-image PDF export already exists (`ImageExportService` maps `MagickFormat.Pdf/Pdfa`) and multi-page assembly duplicates the batch/contact-sheet paths.
+- **GPU/Direct2D decode rewrite as a near-term item:** rejected for this pass — real (QuickView-class speed win) but an XL renderer decision that belongs with the blocked libvips/Windows-ML runtime evaluations, not the actionable roadmap. Source: QuickView 5, `Roadmap_Blocked.md` V80-24.
+- **Face detection/clustering:** deferred to Under Consideration, not roadmap — genuine (digiKam) and philosophy-compatible (local ML), but XL, needs a new model class beyond CLIP, and is not community-demanded for this tool. Source: digiKam.
+- **AI image-captioning alt-text via Windows ML:** deferred — a novel accessibility angle, but requires a captioning model and the blocked Windows ML/NPU path; `ClipEmbeddingProvider.DescribeAsset` already gives a lightweight description. Source: Windows AI Foundry (Build 2025).
+- **Second HDR-detection service / immediate DirectML→Windows ML migration:** rejected as duplicates — `DisplayColorService`/`HdrDisplayCapabilityProbe` already cover monitor Advanced-Color state; Windows ML is parked as a blocked runtime decision.
 
 ## Sources
-Code (primary evidence):
-- src/Images/Services/MagickSecurityPolicy.cs (ResourceLimits + write blocklist; no read-coder allowlist)
-- src/Images/Services/ImageLoader.cs (TransformColorSpace→sRGB→Bgra32; no tonemap)
-- src/Images/Services/ClipEmbeddingProvider.cs (real ONNX ViT-B/32 inference)
-- src/Images/Services/ArchiveBookService.cs (streamed, no WriteToDirectory)
-- src/Images/Images.csproj (dep versions); README.md (GS 10.07.0)
 
-Competitors:
+### Competitors and adjacent products
 - https://github.com/d2phap/ImageGlass/releases
-- https://github.com/nomacs/nomacs/issues/394
+- https://nomacs.org/
+- https://github.com/Ruben2776/PicView/releases
+- https://www.xnview.com/mantisbt/changelog_page.php
+- https://www.irfanview.com/history_old.htm
+- https://en.bandisoft.com/bandiview/help/webtoon-mode/
+- https://github.com/justnullname/QuickView
+- https://github.com/jark006/JarkViewer/blob/main/README_EN.md
+- https://github.com/jurplel/qView
+- https://github.com/sylikc/jpegview
 - https://www.faststone.org/FSViewerDetail.htm
-- https://www.bandisoft.com/bandiview/
-- https://www.fastrawviewer.com/usermanual17/focus-peaking-and-overlay-grid
-- https://github.com/13thsymphony/HDRImageViewer
+- https://github.com/olive-groves/butterfly_viewer
 
-HDR / color / platform:
-- https://learn.microsoft.com/en-us/windows/win32/direct3darticles/high-dynamic-range
-- https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_6/nf-dxgi1_6-idxgioutput6-getdesc1
-- https://learn.microsoft.com/en-us/windows/win32/wcs/advanced-color-icc-profiles
-- https://learn.microsoft.com/en-us/windows/win32/wcs/windows-color-system
-- https://github.com/dotnet/wpf/issues/4569
+### Ecosystem and community signal
+- https://www.makeuseof.com/free-windows-photos-app-replacement/
+- https://discuss.privacyguides.net/t/open-source-image-viewer-recommendations/24694
+- https://www.dpreview.com/forums/threads/image-viewer-to-compare-2-or-more-images.4791876/
+- https://news.ycombinator.com/item?id=42868394
+- https://news.ycombinator.com/item?id=44299970
+- https://learn.microsoft.com/en-us/answers/questions/3293744/windows-10-photo-app-works-atrociously-slow
 
-Security / deps:
-- https://imagemagick.org/script/security-policy.php
-- https://imagemagick.org/source/policy-secure.xml
-- https://github.com/advisories/GHSA-hm4x-r5hc-794f (CVE-2025-53014 ImageMagick)
-- https://security.snyk.io/vuln/SNYK-DEBIAN11-IMAGEMAGICK-12202814 (CVE-2025-57803)
-- https://github.com/advisories/GHSA-6c8g-7p36-r338 (CVE-2026-44788 SharpCompress — not exposed)
-- https://github.com/advisories/GHSA-2m69-gcr7-jv3q (CVE-2025-6965 SQLite)
-- https://ghostscript.com/releases/cve/index.html
+### Standards and platform
+- https://www.iso.org/standard/86775.html
+- https://gregbenzphotography.com/hdr-photos/iso-21496-1-gain-maps-share-hdr-photos/
+- https://en.wikipedia.org/wiki/Ultra_HDR
+- https://github.com/microsoft/WindowsAppSDK/issues/4968
+- https://learn.microsoft.com/en-us/windows/win32/wic/heif-codec
+- https://en.wikipedia.org/wiki/JPEG_XL
+- https://spec.c2pa.org/specifications/specifications/2.4/index.html
+- https://www.cipa.jp/e/std/std-sec.html
+- https://www.w3.org/TR/wcag2ict-22/
+
+### Dependencies and advisories
+- https://github.com/dlemstra/Magick.NET/releases
 - https://github.com/adamhathcock/sharpcompress/releases/tag/0.50.0
+- https://www.nuget.org/packages/Microsoft.Data.Sqlite
+- https://devblogs.microsoft.com/dotnet/dotnet-and-dotnet-framework-july-2026-servicing-updates/
+- https://www.sqlite.org/cves.html
+- https://onnxruntime.ai/docs/execution-providers/DirectML-ExecutionProvider.html
+- https://github.com/microsoft/DirectML
+- https://www.sentinelone.com/vulnerability-database/cve-2026-23876/
 
 ## Open Questions
-- Monitor-ICC in legacy mode: apply per-monitor on the current window's display (re-transform on monitor change) or a single primary-display profile? Decides whether the transform is cached per-image or re-run on `WM_DISPLAYCHANGE`/window move — the difference between an M and an L.
-- Tonemap default: ship Reinhard (safe, neutral) as always-on for HDR-class inputs, or expose an operator picker (Reinhard/Hable/ACES) and leave off by default? Decides whether this is a silent quality fix or a user-facing setting.
+
+None that block the actionable additions. HDR gain-map *display* (vs inspection), GPU-decode renderer swap, Windows ML migration, code signing, WinGet/Store publication, Crowdin localization, and lab/VFX format packs remain explicitly parked in `Roadmap_Blocked.md`.

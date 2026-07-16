@@ -13,94 +13,125 @@ Promote to `1.0.0` when those are unblocked.
 
 ## Actionable Work
 
-- [ ] P2 — Gallery grid is not virtualized
-  Why: the gallery `ListBox` uses a `WrapPanel` with `VirtualizingPanel.IsVirtualizing="False"`, so opening it on a large folder realizes a full Button+ContextMenu visual tree for every file at once and queues N thumbnail decodes, freezing the UI on folders of several hundred+ images. The filmstrip and side preview are virtualized; the gallery is the outlier. Needs a virtualizing wrap panel (WPF has no built-in one) — implementation work, not a one-line flag.
-  Where: `src/Images/MainWindow.xaml` (gallery ListBox ItemsPanel, ~line 1422-1433)
-
-- [ ] P2 — Per-navigation synchronous file I/O on the UI thread
-  Why: `CompleteCurrentLoad` runs on the dispatcher and does, per next/prev: up to 2 `.xmp` sidecar `File.Exists` probes (+ synchronous `XDocument.Load`/JSON deserialize when present) via `GetEnabledDisplayEditOperations`, a `new FileInfo(path).Length`, and two `ImageLoader.QuickDimensions` file opens in `EnqueueNeighbours`. Sub-frame on local SSD, but adds tens of ms of input lag per arrow-press on UNC/Dropbox/network paths. Move the sidecar and neighbour-dimension probes off the dispatcher.
-  Where: `src/Images/ViewModels/MainViewModel.cs` (CompleteCurrentLoad ~4508/4582/4617), `PreloadService.cs`, `NonDestructiveEditService.cs`
-
-- [ ] P2 — RAW navigation runs the whole per-nav UI-thread tail twice
-  Why: `LoadCurrentAsync` calls `CompleteCurrentLoad` once for the embedded RAW preview and again for the full decode, re-running the sidecar probe, folder-preview refresh, and metadata/color/C2PA reads (started then cancelled+restarted) on every RAW navigation. Generation-guarded so no wrong data, but wasted work felt when browsing CR2/NEF/ARW folders.
-  Where: `src/Images/ViewModels/MainViewModel.cs` (LoadCurrentAsync ~4370-4386)
-
-- [ ] P2 — MainWindow/AboutWindow visible copy bypasses the localization system
-  Why: ~92 `MenuItem Header=`, ~36 `ToolTip=`, the empty state, rail labels, cheatsheet, and load-error button labels are hardcoded English, plus AboutWindow labels. The localization gate only flags hardcoded `AutomationProperties.Name`, so `Text=`/`Header=`/`ToolTip=` drifted through — a non-English build shows a half-translated shell and screen readers read a localized name over an English label. Extend `Test-LocalizationResources.ps1` to flag these too, then route them through resx.
-  Where: `src/Images/MainWindow.xaml`, `src/Images/AboutWindow.xaml`, `scripts/Test-LocalizationResources.ps1`
-
-- [ ] P3 — Raw exception text still injected into ~25 secondary toasts
-  Why: many `MainViewModel` catch blocks build toasts as `"<action> failed: " + ex.Message`, surfacing decoder/HRESULT jargon. The main decode-error card was cleaned up; the secondary toasts (rotation, wallpaper, export, strip-metadata, etc.) should use `FirstLine(ex.Message)` or a calm localized message consistently.
-  Where: `src/Images/ViewModels/MainViewModel.cs` (various catch blocks)
-
-- [ ] P3 — Incremental rescan re-hashes files whose sidecar check transiently fails
-  Why: `CatalogService.IsUnchanged` treats any exception (e.g. a sidecar momentarily locked by cloud-sync/AV) as "changed", forcing a full SHA-256 re-hash of that file on every rescan under contention. Safe (never misses a real change) but defeats the incremental optimization. Consider distinguishing transient IO errors from genuine change signals.
-  Where: `src/Images/Services/CatalogService.cs` (IsUnchanged / ReadSidecarFileSummary)
-
 The remaining research item is decision-gated (Ghostscript-source AGPL mechanism) and lives in `Roadmap_Blocked.md`. Refill via a research pass (`RESEARCH.md`) when ready.
 
 ## Research-Driven Additions
 
 Unblocked, net-new items only. HDR display (V100-06), full color management (V100-05), GPS map overlay (V20-23), and the Explorer thumbnail handler (V70-04) remain correctly parked in `Roadmap_Blocked.md` and are not duplicated here.
 
-### P1
+### 2026-07-16 research pass (V110 block)
 
-- [ ] P1 — Restrict ImageMagick to a read-coder allowlist and lock down delegates
-  Why: `MagickSecurityPolicy` enforces resource limits and a write-format blocklist but sets no read-side coder policy, so a crafted exotic-format file (MNG/TIM/SF3/MSL/Log-colorspace) still reaches the native decoder — the 2025-2026 ImageMagick heap-overflow CVE class the app is exposed to when opening internet-downloaded images.
-  Evidence: `src/Images/Services/MagickSecurityPolicy.cs` (no `ConfigurationFiles.Policy`/coder allowlist); imagemagick.org/script/security-policy.php; GHSA-hm4x-r5hc-794f (CVE-2025-53014), CVE-2025-55004.
-  Touches: `src/Images/Services/MagickSecurityPolicy.cs`, `tests/Images.Tests/MagickSecurityPolicyTests.cs`
-  Acceptance: at init the app injects a deny-all-then-permit policy allowing only the coders the viewer decodes (JPEG/PNG/GIF/WEBP/BMP/TIFF/HEIC/AVIF + the app's declared set) with delegate/`@`-path indirection set to `rights="none"`; opening an out-of-allowlist exotic format is refused cleanly (no native decode); a test asserts a blocked coder is rejected and an allowed one still decodes.
-  Complexity: M
+Continues the `V###-##` scheme (V110 is the next free hundred-block above V100). Evidence lives in `RESEARCH.md` (2026-07-16). Most 2024-2026 competitor "gaps" were verified as already shipped (compare, loupe, motion/live photo, continuous webtoon archive reading, perspective correction, PDF export, codec-install prompts, UTF-8 Exif) and are intentionally absent below.
 
-### P2
+#### P0 — Security servicing
 
-- [ ] P2 — Tonemap HDR/EXR/Radiance/16-bit content at decode instead of hard-clipping to sRGB
-  Why: the decode path folds everything to sRGB and quantizes to 8-bit, so HDR-class images render as blown/hard-clipped SDR; a tonemap operator before quantization makes every HDR/EXR/RAW image look correct on any display, with no renderer rewrite (distinct from the SkiaSharp-blocked true-HDR epic).
-  Evidence: `src/Images/Services/ImageLoader.cs` (`TransformColorSpace(SRGB,SRGB)` → `WriteableBitmap` Bgra32, no tonemap); MS Advanced-Color doc (Reinhard reference); ImageGlass 10 / HDRImageViewer.
-  Touches: `src/Images/Services/ImageLoader.cs`, new `ToneMapService`, `tests/Images.Tests/`
-  Acceptance: HDR-class inputs (EXR/HDR/16-bit/AVIF-HDR) route through a tonemap operator (Reinhard default; optional Hable/ACES) before 8-bit conversion; an EXR with values >1.0 no longer hard-clips (verified by a unit test on the float buffer); the decoder status string notes when tonemapping was applied.
-  Complexity: M
+- [ ] P0 — Take the July 2026 .NET/SQLite servicing bump (V110-01)
+  Why: `Microsoft.Data.Sqlite` 10.0.9 → 10.0.10 lands with the .NET 10.0.10 wave that fixes 17 CVEs including 3 critical RCEs; the app does HTTPS update checks so the TLS/HTTP surfaces are reachable.
+  Evidence: RESEARCH.md Security §; https://devblogs.microsoft.com/dotnet/dotnet-and-dotnet-framework-july-2026-servicing-updates/ ; `src/Images/Images.csproj`
+  Touches: `src/Images/Images.csproj`, `global.json`, `packages.lock.json`, `scripts/Test-ReleaseReadiness.ps1`
+  Acceptance: csproj pins Microsoft.Data.Sqlite 10.0.10, SDK/runtime resolves 10.0.10, lockfile regenerated, `dotnet list --vulnerable` clean, release-readiness green.
+  Complexity: S
 
-- [ ] P2 — Legacy-mode monitor-ICC display output for wide-gamut accuracy
-  Why: the app converts only to sRGB, so on wide-gamut (P3/AdobeRGB) monitors colors over-saturate; when Windows Advanced Color is OFF (the common case) the correct destination is the monitor's own ICC profile, achievable in the current WPF pipeline ahead of the SkiaSharp-blocked full color-management epic (V100-05).
-  Evidence: `src/Images/Services/ImageLoader.cs`; HDR/color research (GetICMProfile/WcsGetDefaultColorProfile, legacy-mode path); nomacs #394, FastStone monitor-profile support.
-  Touches: `src/Images/Services/ImageLoader.cs` (or a new `DisplayColorService`), settings for opt-in
-  Acceptance: when Advanced Color is off and a non-sRGB monitor profile is present, decode transforms embedded → monitor profile (not sRGB); a P3-gamut test image no longer over-saturates on a wide-gamut display; falls back to sRGB when no profile/Advanced-Color-on; behavior is opt-in and reflected in diagnostics.
+#### P1 — Data safety, trust, and high-value inspection
+
+- [ ] P1 — Fix catalog shared-cache SQLite lock hazard (V110-02)
+  Why: `CatalogService.Open` uses `SqliteCacheMode.Shared` while `SemanticSearchService` uses `Private`; under shared-cache + WAL a background `Rebuild` write transaction can raise table-level `SQLITE_LOCKED` on a concurrent UI read, which `busy_timeout` does not retry, and `GetByPath`/`GetAllAssets` swallow the exception → the catalog silently appears empty.
+  Evidence: RESEARCH.md Security §; `CatalogService.cs:89`, `CatalogService.cs:155-171`, `SemanticSearchService.cs:102`
+  Touches: `src/Images/Services/CatalogService.cs`
+  Acceptance: catalog connections open with `Private` cache; a test that runs a `Rebuild` write transaction concurrent with `GetAllAssets` returns full rows (no empty result, no swallowed `SQLITE_LOCKED`).
+  Complexity: S
+
+- [ ] P1 — Fix import rollback that can strand a moved original (V110-03)
+  Why: `RollBackFailedTransfer` only restores a moved original when the source path is free; if the source slot is re-occupied and a post-import edit throws, the file is left only at the destination while the UI reports failure — perceived data loss.
+  Evidence: RESEARCH.md Security §; `ImportInboxService.cs:325-330`
+  Touches: `src/Images/Services/ImportInboxService.cs`
+  Acceptance: when the source path is occupied during rollback, the original is restored to a unique sibling and the recovered location is surfaced; a test with an occupied source slot proves no file is stranded.
+  Complexity: S
+
+- [ ] P1 — Route animated decode through the native security policy seam (V110-04)
+  Why: `TryLoadAnimated` builds `new MagickImageCollection(bytes)` directly instead of via `MagickSafeReader`/`CodecRuntime.Configure()`; a future caller reaching it before `Load`/`Preflight` would decode untrusted bytes before the coder allowlist and resource limits install.
+  Evidence: RESEARCH.md Security §; `ImageLoader.cs:689`, `ImageLoader.cs:104`
+  Touches: `src/Images/Services/ImageLoader.cs`, `src/Images/Services/MagickSafeReader.cs`
+  Acceptance: `TryLoadAnimated` calls `CodecRuntime.Configure()` (or a new `MagickSafeReader.ReadCollection`) before decode; a test asserts the policy is initialized on the animated path.
+  Complexity: S
+
+- [ ] P1 — HDR gain-map read-only inspection (V110-05)
+  Why: ISO 21496-1:2025 gain maps are now written by Adobe (LrC v17), Apple (iOS 18/Sequoia), and Google (Android 15 UltraHDR); Windows WIC silently ignores them and no mainstream Windows viewer surfaces them — a clean differentiation win that fits the existing read-only metadata-inspection philosophy.
+  Evidence: RESEARCH.md Architecture §; https://www.iso.org/standard/86775.html ; https://en.wikipedia.org/wiki/Ultra_HDR ; grep confirms no gain-map code exists
+  Touches: new `src/Images/Services/GainMapInspectionService.cs`, `ImageMetadataService.cs`/metadata panel, `PhotoMetadataController.cs`
+  Acceptance: for a UltraHDR/ISO-21496-1/Apple gain-map file, the inspector reports gain-map presence, flavor, and min/max content boost, and renders the gain map as a grayscale layer; files without a gain map report absence cleanly. Read-only; no writeback. (HDR *display* stays blocked in `Roadmap_Blocked.md`.)
   Complexity: L
 
-- [ ] P2 — Focus-peaking and highlight/shadow-clipping overlays for RAW/photo culling
-  Why: the app decodes RAW and has curves/levels but no fast-culling overlays; peaking (in-focus edges) and clipping (blown highlights / crushed shadows) let a photographer triage a shoot in-viewer — a table-stakes RAW-workflow feature Images lacks.
-  Evidence: FastRawViewer focus-peaking/overlay docs; no `FocusPeak`/clipping overlay in `src/Images/Services`.
-  Touches: new overlay service + `ZoomPanImage`/overlay stack in `MainWindow.xaml(.cs)`, a toggle command in `CommandShortcutService`
-  Acceptance: a toggle overlays edge-peaking (high-pass/Sobel on the decoded buffer) and a second toggle marks clipped highlights/shadows above/below thresholds; both are command-palette + cheatsheet discoverable, respect reduced-motion, and cost nothing when off.
+- [ ] P1 — Upgrade SharpCompress 0.49.1 → 0.50.0 behind an archive regression gate (V110-06)
+  Why: 0.50.0 reduces LZMA/RAR decode allocation (direct CBR/CBZ benefit) and fixes Zip64 non-seekable streaming + entry-metadata corruption, but breaks Tar auto-decompress and the Detection API — must not be a blind bump.
+  Evidence: RESEARCH.md Security §; https://github.com/adamhathcock/sharpcompress/releases/tag/0.50.0 ; `src/Images/Services/ArchiveBookService.cs`
+  Touches: `src/Images/Images.csproj`, `packages.lock.json`, `src/Images/Services/ArchiveBookService.cs`, archive tests
+  Acceptance: package at 0.50.0; CBZ, CBR, 7z, and any tar path open correctly under new regression fixtures (explicit-decompress for tar, updated detection); no truncated-CBZ claim added.
   Complexity: M
 
-- [ ] P2 — Detect HDR displays and surface an honest tonemapped-to-SDR status
-  Why: on an HDR monitor the app silently tonemaps to SDR with no signal; detecting the display (IDXGIOutput6) lets the UI say "HDR display detected — content shown tonemapped to SDR", setting honest expectations and laying groundwork for a future HDR path.
-  Evidence: MS `IDXGIOutput6::GetDesc1` / DXGI_OUTPUT_DESC1 docs (desktop-usable HDR detection); no HDR/AdvancedColor references in `src/Images`.
-  Touches: new `DisplayCapabilityService` (P/Invoke DXGI), status/diagnostics surface
-  Acceptance: the app reports per-monitor HDR capability (color space, max luminance) in diagnostics and shows a status chip/badge when an HDR-class image is displayed on an HDR monitor; no-op on SDR displays.
-  Complexity: S
+#### P2 — Scale, decomposition, and confirmed UX gaps
 
-### P3
-
-- [ ] P3 — Bump SharpCompress to 0.50.0 for CRC verification and truncated-stream tolerance
-  Why: 0.50.0 turns on CRC verification (catches truncated/corrupt comic archives the streaming reader would otherwise mis-render) and adds `tolerateTruncatedStream` (render partially-downloaded `.cb*` files); the app never calls `WriteToDirectory`, so the unpatched zip-slip CVE-2026-44788 does not apply.
-  Evidence: SharpCompress 0.50.0 release notes; `src/Images/Images.csproj` pins 0.49.1; `ArchiveBookService` streams entries.
-  Touches: `src/Images/Images.csproj`, `src/Images/Services/ArchiveBookService.cs`
-  Acceptance: dependency at 0.50.0, tests green; a truncated CBZ renders available pages instead of erroring; a corrupt entry is reported rather than silently mis-rendered.
-  Complexity: S
-
-- [ ] P3 — Assert native decoder/SQLite versions in diagnostics
-  Why: security posture depends on the native ImageMagick (need ≥ 7.1.2-2 for the 2025 overflow CVEs) and SQLite (need ≥ 3.50.2 for CVE-2025-6965) versions bundled inside the managed packages, which aren't visible today; surfacing and asserting them makes drift detectable.
-  Evidence: CVE-2025-57803 (ImageMagick), CVE-2025-6965 (SQLite); no `MagickNET.Version`/`sqlite_version()` surface in `src/Images`.
-  Touches: `src/Images/Services/DiagnosticsStatusService.cs`, About/diagnostics panel
-  Acceptance: diagnostics show `MagickNET.Version`, the native ImageMagick version, and `SELECT sqlite_version()`; a startup log warns if either is below the known-good floor.
-  Complexity: S
-
-- [ ] P3 — Continuous vertical-scroll (webtoon) reading mode for archives
-  Why: the comic reader supports RTL and two-page spreads but only paged navigation; a continuous vertical-scroll mode is the standard webtoon/long-strip reading experience that BandiView/Honeyview ship and Images' comic audience expects.
-  Evidence: BandiView webtoon/vertical-flow; `src/Images/Services/ArchiveBookService.cs` has no continuous-scroll mode.
-  Touches: `ArchiveBookService`, the book viewer surface in `MainWindow.xaml(.cs)`, a reading-mode toggle
-  Acceptance: a reading-mode toggle stacks archive pages in a single scrollable strip with lazy decode/recycling; the last read position persists like the existing per-book progress; paged and spread modes remain available.
+- [ ] P2 — Scale semantic search off the full-table linear scan (V110-07)
+  Why: `Search` selects every row for the active model (no SQL `LIMIT`), deserializes each 512-dim blob, and dot-products in managed code on the calling thread on every query — re-reads/re-scores the whole index each time and will not scale past a few thousand assets.
+  Evidence: RESEARCH.md Architecture §; `SemanticSearchService.cs:194-235`
+  Touches: `src/Images/Services/SemanticSearchService.cs`
+  Acceptance: normalized vectors are cached in memory keyed by index generation (or candidate set capped / ANN-indexed); a repeat query on an unchanged index performs zero blob re-reads; results are unchanged.
   Complexity: M
+
+- [ ] P2 — Bound `TileService.BuildLocks` growth (V110-08)
+  Why: one lock object is added per distinct huge-image path opened this session and never removed, a slow leak in an otherwise carefully-bounded service.
+  Evidence: RESEARCH.md Architecture §; `TileService.cs:58`, `TileService.cs:147`
+  Touches: `src/Images/Services/TileService.cs`
+  Acceptance: build-lock entries are removed in the build `finally` (or via a size-capped/expiring map) while preserving same-cache mutual exclusion; a test browsing many pyramids shows the map does not grow unbounded.
+  Complexity: S
+
+- [ ] P2 — Continue extracting the `MainViewModel` god object (V110-09)
+  Why: ~8,300 lines / 318 KB owning 20+ services and 4 timers is a change-magnet where any edit risks unrelated regressions (memory notes confirm parallel-agent work on this tree); the team's existing `*Controller` extraction pattern is the proven path.
+  Evidence: RESEARCH.md Architecture §; `ViewModels/MainViewModel.cs`
+  Touches: `src/Images/ViewModels/MainViewModel.cs`, new `Slideshow*/ArchiveReader*/RenameEditor*Controller.cs`
+  Acceptance: slideshow, archive-reader, and rename-editor state/commands move into dedicated controllers behind the existing `_uiDispatcher`/`() => _isDisposed` convention; behavior and tests unchanged; `MainViewModel` shrinks measurably.
+  Complexity: L
+
+- [ ] P2 — Detect JXL lossless-JPEG transcode in the inspector (V110-10)
+  Why: JPEG-to-JXL lossless recompression is a headline JXL capability no viewer surfaces; distinguishing transcoded vs native codestream vs ISOBMFF container is a cheap read-only add on top of the existing metadata panel.
+  Evidence: RESEARCH.md Architecture §; https://en.wikipedia.org/wiki/JPEG_XL ; `src/Images/Services/Exif31MetadataReader.cs`
+  Touches: `src/Images/Services/ImageMetadataService.cs`/metadata panel, `SupportedImageFormats.cs`
+  Acceptance: opening a `.jxl` reports whether it is a JPEG-transcode, a native lossy/lossless codestream, or an ISOBMFF container; non-JXL files are unaffected.
+  Complexity: M
+
+- [ ] P2 — Invert-colors display toggle (V110-11)
+  Why: a quick invert toggle is both an inspection aid (reading low-contrast scans/negatives) and an accessibility affordance; ImageGlass ships it and Images has no display-time color inversion (only transform-matrix math).
+  Evidence: RESEARCH.md Competitive §; https://github.com/d2phap/ImageGlass/releases ; grep shows no invert-display path
+  Touches: `src/Images/Controls/ZoomPanImage.cs`, `src/Images/ViewModels/MainViewModel.cs`, `CommandShortcutService.cs`
+  Acceptance: a command/hotkey toggles a non-destructive inverted rendering of the current image; state clears on navigation; export is unaffected.
+  Complexity: S
+
+- [ ] P2 — Jump to next/previous archive without leaving the reader (V110-12)
+  Why: readers browsing a folder of CBZ/CBR want to roll into the next archive at the last page (and previous at the first) without returning to the folder; PicView ships this and continuous archive reading already exists here.
+  Evidence: RESEARCH.md Competitive §; https://github.com/Ruben2776/PicView/releases ; `src/Images/Services/ArchiveBookService.cs`, `src/Images/Services/DirectoryNavigator.cs`
+  Touches: `src/Images/Services/ArchiveBookService.cs`, `src/Images/ViewModels/MainViewModel.cs`, `DirectoryNavigator.cs`
+  Acceptance: at the last page of an archive, next advances into the first page of the next archive in natural folder order (and symmetrically for previous); wraps or stops per existing navigation semantics; non-archive navigation unchanged.
+  Complexity: M
+
+- [ ] P2 — Hold-to-scrub rapid folder fly-through (V110-13)
+  Why: holding an arrow to fly through a large folder with instant decode is repeatedly praised (FlyPhotos) and directly answers the "per-image reload stutter" complaint; Images has preload but no explicit accelerated scrub mode.
+  Evidence: RESEARCH.md Competitive §; https://www.makeuseof.com/free-windows-photos-app-replacement/
+  Touches: `src/Images/MainWindow.xaml.cs`, `src/Images/ViewModels/MainViewModel.cs`, `src/Images/Services/PreloadService.cs`
+  Acceptance: holding Next/Prev accelerates navigation using thumbnail/preloaded frames without full-decode stutter and settles on a full decode when the key is released; single presses behave as before.
+  Complexity: M
+
+#### P3 — Hardening and hygiene
+
+- [ ] P3 — Constant-time listen-mode token compare + tighten the connection cap (V110-14)
+  Why: `ListenService` uses byte-by-byte `string.Equals` for the session token (theoretical timing side-channel) and increments `_activeConnections` inside the handler so a burst can transiently exceed the cap of 8; both are low-risk given loopback-only bind + rate limiting but are cheap to harden.
+  Evidence: RESEARCH.md Security §; `ListenService.cs:141`, `ListenService.cs:89-111`
+  Touches: `src/Images/Services/ListenService.cs`
+  Acceptance: token comparison uses `CryptographicOperations.FixedTimeEquals` on UTF-8 bytes; the active-connection counter is incremented in the accept loop before the handler is spawned and decremented in the handler's finally.
+  Complexity: S
+
+- [ ] P3 — Dispose the continuous-archive decode gate + Picasa tag-drift prune (V110-15)
+  Why: `_continuousArchiveDecodeGate` (`MainViewModel.cs:59`) is the one `SemaphoreSlim` missed by an otherwise thorough `Dispose`; separately, `PicasaImportService` unions `dc:subject`/`lr:hierarchicalSubject` on re-import so renamed albums accumulate stale tags. Both are small correctness/hygiene fixes.
+  Evidence: RESEARCH.md Architecture §; `MainViewModel.cs:59`, `PicasaImportService.cs:519-540`
+  Touches: `src/Images/ViewModels/MainViewModel.cs`, `src/Images/Services/PicasaImportService.cs`
+  Acceptance: `MainViewModel.Dispose` disposes the semaphore; Picasa-authored tags are namespaced so a re-import prunes its own prior additions; a re-import-after-rename test shows no stale-tag accumulation.
+  Complexity: S
