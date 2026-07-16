@@ -23,15 +23,6 @@ Unblocked, net-new items only. HDR display (V100-06), full color management (V10
 
 Continues the `V###-##` scheme (V110 is the next free hundred-block above V100). Evidence lives in `RESEARCH.md` (2026-07-16). Most 2024-2026 competitor "gaps" were verified as already shipped (compare, loupe, motion/live photo, continuous webtoon archive reading, perspective correction, PDF export, codec-install prompts, UTF-8 Exif) and are intentionally absent below.
 
-#### P0 — Security servicing
-
-- [ ] P0 — Take the July 2026 .NET/SQLite servicing bump (V110-01)
-  Why: `Microsoft.Data.Sqlite` 10.0.9 → 10.0.10 lands with the .NET 10.0.10 wave that fixes 17 CVEs including 3 critical RCEs; the app does HTTPS update checks so the TLS/HTTP surfaces are reachable.
-  Evidence: RESEARCH.md Security §; https://devblogs.microsoft.com/dotnet/dotnet-and-dotnet-framework-july-2026-servicing-updates/ ; `src/Images/Images.csproj`
-  Touches: `src/Images/Images.csproj`, `global.json`, `packages.lock.json`, `scripts/Test-ReleaseReadiness.ps1`
-  Acceptance: csproj pins Microsoft.Data.Sqlite 10.0.10, SDK/runtime resolves 10.0.10, lockfile regenerated, `dotnet list --vulnerable` clean, release-readiness green.
-  Complexity: S
-
 #### P1 — Data safety, trust, and high-value inspection
 
 - [ ] P1 — Fix catalog shared-cache SQLite lock hazard (V110-02)

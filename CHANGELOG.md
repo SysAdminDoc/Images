@@ -4,6 +4,8 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Took the July 2026 servicing bump: `Microsoft.Data.Sqlite` and `Microsoft.Extensions.Logging` 10.0.9 -> 10.0.10, aligning with the .NET 10.0.10 wave (17 CVEs, 3 critical RCE). Lockfile regenerated, vulnerable-package scan clean, runtime-provenance doc synchronized.
+
 ## v0.2.27 - 2026-07-14
 
 - Archive books now offer a persisted continuous vertical-reading mode for webtoons and long strips; the virtualized reader lazily decodes nearby pages, recycles offscreen pixels, preserves per-book position, exposes calm retry states, and remains mutually exclusive with two-page spreads.
