@@ -25,13 +25,6 @@ Continues the `V###-##` scheme (V110 is the next free hundred-block above V100).
 
 #### P1 — Data safety, trust, and high-value inspection
 
-- [ ] P1 — Route animated decode through the native security policy seam (V110-04)
-  Why: `TryLoadAnimated` builds `new MagickImageCollection(bytes)` directly instead of via `MagickSafeReader`/`CodecRuntime.Configure()`; a future caller reaching it before `Load`/`Preflight` would decode untrusted bytes before the coder allowlist and resource limits install.
-  Evidence: RESEARCH.md Security §; `ImageLoader.cs:689`, `ImageLoader.cs:104`
-  Touches: `src/Images/Services/ImageLoader.cs`, `src/Images/Services/MagickSafeReader.cs`
-  Acceptance: `TryLoadAnimated` calls `CodecRuntime.Configure()` (or a new `MagickSafeReader.ReadCollection`) before decode; a test asserts the policy is initialized on the animated path.
-  Complexity: S
-
 - [ ] P1 — HDR gain-map read-only inspection (V110-05)
   Why: ISO 21496-1:2025 gain maps are now written by Adobe (LrC v17), Apple (iOS 18/Sequoia), and Google (Android 15 UltraHDR); Windows WIC silently ignores them and no mainstream Windows viewer surfaces them — a clean differentiation win that fits the existing read-only metadata-inspection philosophy.
   Evidence: RESEARCH.md Architecture §; https://www.iso.org/standard/86775.html ; https://en.wikipedia.org/wiki/Ultra_HDR ; grep confirms no gain-map code exists

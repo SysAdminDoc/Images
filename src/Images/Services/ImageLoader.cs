@@ -686,7 +686,7 @@ public static class ImageLoader
     {
         try
         {
-            using var collection = new MagickImageCollection(bytes);
+            using var collection = MagickSafeReader.ReadCollection(bytes);
             if (collection.Count < 2) return null;
 
             // Coalesce rewrites every frame to full canvas size with disposal methods resolved.

@@ -4,6 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Animated multi-frame decode now routes through `MagickSafeReader.ReadCollection(bytes)`, which installs the native coder allowlist and resource limits before decoding. Previously the animated path constructed a `MagickImageCollection` directly, so a future caller reaching it before the main load preflight could decode untrusted bytes with the security policy uninitialized.
 - Import Inbox rollback no longer strands a moved original at the destination when the source path is re-occupied mid-import: the original is restored to a unique `(recovered)` sibling of the source and the failure message reports where it landed, so a failed move is always recoverable.
 - Catalog SQLite connections now open with a private cache under WAL, matching the semantic index. A background `Rebuild` write transaction can no longer raise shared-cache `SQLITE_LOCKED` on a concurrent UI read (which `GetByPath`/`GetAllAssets` would swallow into an empty catalog); readers observe the last committed snapshot instead.
 - Took the July 2026 servicing bump: `Microsoft.Data.Sqlite` and `Microsoft.Extensions.Logging` 10.0.9 -> 10.0.10, aligning with the .NET 10.0.10 wave (17 CVEs, 3 critical RCE). Lockfile regenerated, vulnerable-package scan clean, runtime-provenance doc synchronized.

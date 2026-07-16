@@ -106,6 +106,19 @@ public static class MagickSafeReader
             : new MagickImageCollection(stream, settings);
     }
 
+    public static MagickImageCollection ReadCollection(byte[] bytes, MagickReadSettings? settings = null)
+    {
+        ArgumentNullException.ThrowIfNull(bytes);
+        // Ensure the native coder allowlist and resource limits are installed before any decode,
+        // so multi-frame reads cannot reach ImageMagick with the policy uninitialized regardless
+        // of caller order. Animations are never SVG, so the MSVG special-casing does not apply.
+        CodecRuntime.Configure();
+        using var stream = new MemoryStream(bytes, writable: false);
+        return settings is null
+            ? new MagickImageCollection(stream)
+            : new MagickImageCollection(stream, settings);
+    }
+
     public static int CountFrames(string path, MagickReadSettings? settings = null)
     {
         CodecRuntime.Configure();
