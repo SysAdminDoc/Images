@@ -86,7 +86,11 @@ public sealed class CatalogService
         {
             DataSource = _dbPath,
             Mode = SqliteOpenMode.ReadWriteCreate,
-            Cache = SqliteCacheMode.Shared,
+            // Private cache under WAL: readers still observe committed writes through the WAL,
+            // but each connection is isolated so a background Rebuild write transaction cannot
+            // raise table-level SQLITE_LOCKED on a concurrent UI read (busy_timeout only retries
+            // SQLITE_BUSY, not shared-cache SQLITE_LOCKED). Matches SemanticSearchService.
+            Cache = SqliteCacheMode.Private,
             DefaultTimeout = 5
         }.ToString();
         _isAvailable = TryEnsureSchema(_dbPath);
@@ -94,6 +98,7 @@ public sealed class CatalogService
 
     public string? CatalogPath => _dbPath;
     public bool IsAvailable => _isAvailable;
+    internal string ConnectionStringForTests => _connectionString;
 
     public CatalogRebuildResult Rebuild(
         IEnumerable<string> roots,

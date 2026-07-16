@@ -51,6 +51,49 @@ public sealed class CatalogServiceTests
     }
 
     [Fact]
+    public void Open_UsesPrivateCacheSoConcurrentWritesDoNotLockReaders()
+    {
+        using var temp = TestDirectory.Create();
+        var service = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+
+        // Private cache under WAL is the contract that keeps a concurrent writer from raising
+        // shared-cache SQLITE_LOCKED on a UI-thread read (which GetAllAssets would swallow to empty).
+        Assert.Contains("Cache=Private", service.ConnectionStringForTests, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Cache=Shared", service.ConnectionStringForTests, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void GetAllAssets_ReturnsCommittedRowsWhileAnotherWriteTransactionIsOpen()
+    {
+        using var temp = TestDirectory.Create();
+        WriteImage(temp.Path, "a.png", 16, 8);
+        WriteImage(temp.Path, "b.png", 16, 8);
+        var service = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+        var rebuilt = service.Rebuild([temp.Path]);
+        Assert.Equal(2, rebuilt.Assets.Count);
+
+        // Hold an uncommitted write transaction on the same database through the service's own
+        // connection string (same cache semantics), then read. Under the old shared cache this
+        // could throw SQLITE_LOCKED and blank the catalog; under WAL + private cache the reader
+        // still observes the last committed snapshot.
+        using var writer = new SqliteConnection(service.ConnectionStringForTests);
+        writer.Open();
+        using (var tx = writer.BeginTransaction())
+        {
+            using var write = writer.CreateCommand();
+            write.Transaction = tx;
+            // Acquire and hold the WAL write lock for the duration of the transaction.
+            write.CommandText = "CREATE TABLE _concurrency_probe(x); INSERT INTO _concurrency_probe VALUES (1);";
+            write.ExecuteNonQuery();
+
+            var assets = service.GetAllAssets();
+            Assert.Equal(2, assets.Count);
+
+            tx.Rollback();
+        }
+    }
+
+    [Fact]
     public void Rebuild_MapsMicrosoftPhotoRatingScale()
     {
         using var temp = TestDirectory.Create();

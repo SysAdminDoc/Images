@@ -25,13 +25,6 @@ Continues the `V###-##` scheme (V110 is the next free hundred-block above V100).
 
 #### P1 — Data safety, trust, and high-value inspection
 
-- [ ] P1 — Fix catalog shared-cache SQLite lock hazard (V110-02)
-  Why: `CatalogService.Open` uses `SqliteCacheMode.Shared` while `SemanticSearchService` uses `Private`; under shared-cache + WAL a background `Rebuild` write transaction can raise table-level `SQLITE_LOCKED` on a concurrent UI read, which `busy_timeout` does not retry, and `GetByPath`/`GetAllAssets` swallow the exception → the catalog silently appears empty.
-  Evidence: RESEARCH.md Security §; `CatalogService.cs:89`, `CatalogService.cs:155-171`, `SemanticSearchService.cs:102`
-  Touches: `src/Images/Services/CatalogService.cs`
-  Acceptance: catalog connections open with `Private` cache; a test that runs a `Rebuild` write transaction concurrent with `GetAllAssets` returns full rows (no empty result, no swallowed `SQLITE_LOCKED`).
-  Complexity: S
-
 - [ ] P1 — Fix import rollback that can strand a moved original (V110-03)
   Why: `RollBackFailedTransfer` only restores a moved original when the source path is free; if the source slot is re-occupied and a post-import edit throws, the file is left only at the destination while the UI reports failure — perceived data loss.
   Evidence: RESEARCH.md Security §; `ImportInboxService.cs:325-330`

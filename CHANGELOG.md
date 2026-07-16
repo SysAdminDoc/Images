@@ -4,6 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Catalog SQLite connections now open with a private cache under WAL, matching the semantic index. A background `Rebuild` write transaction can no longer raise shared-cache `SQLITE_LOCKED` on a concurrent UI read (which `GetByPath`/`GetAllAssets` would swallow into an empty catalog); readers observe the last committed snapshot instead.
 - Took the July 2026 servicing bump: `Microsoft.Data.Sqlite` and `Microsoft.Extensions.Logging` 10.0.9 -> 10.0.10, aligning with the .NET 10.0.10 wave (17 CVEs, 3 critical RCE). Lockfile regenerated, vulnerable-package scan clean, runtime-provenance doc synchronized.
 
 ## v0.2.27 - 2026-07-14
