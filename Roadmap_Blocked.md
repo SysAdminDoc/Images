@@ -422,13 +422,3 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
   - **Blocked by**: requires major new multi-image layout surface (2-up and 4-up linked pan/zoom/rotate) that is better built on V20-01 SkiaSharp canvas for consistent rendering across tiles.
   - **Unblock when**: V20-01 SkiaSharp canvas ships or the WPF bitmap-based multi-tile layout is validated for linked transforms.
 
-## Blocked On Documentation Commit Policy
-
-- [ ] *P3* — **Upgrade SharpCompress to 0.50.0 and synchronize runtime provenance**
-  - **Blocked by**: `Test-RuntimeProvenanceDocs.ps1` requires the tracked `docs/archive-runtime-review.md` and `docs/integration-policy.md` to match the package pin, while the current execution contract forbids staging Markdown other than `README.md` and `CHANGELOG.md`.
-  - **Unblock when**: the existing tracked runtime-policy documents may be included in the same dependency commit, or the documentation policy is otherwise reconciled.
-  - **Corrected scope**: retain 0.50.0's CRC/allocation/ZIP64 fixes; do not promise partial CBZ recovery because upstream's `tolerateTruncatedStream` option is BZip2-only.
-
-- [ ] *P3* — **Retire the obsolete OCR implementation guide**
-  - **Blocked by**: `ocr-implementation-guide.md` is tracked, but the current execution contract forbids staging Markdown other than `README.md` and `CHANGELOG.md`; deleting it cannot be delivered without committing that Markdown deletion.
-  - **Unblock when**: deletion of the tracked guide may be staged. No live file references the guide; README already contains the current OCR workflow. Historical `net9.0` entries in CHANGELOG and archived research remain intentionally intact.
