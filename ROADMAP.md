@@ -25,13 +25,6 @@ Continues the `V###-##` scheme (V110 is the next free hundred-block above V100).
 
 #### P1 — Data safety, trust, and high-value inspection
 
-- [ ] P1 — Fix import rollback that can strand a moved original (V110-03)
-  Why: `RollBackFailedTransfer` only restores a moved original when the source path is free; if the source slot is re-occupied and a post-import edit throws, the file is left only at the destination while the UI reports failure — perceived data loss.
-  Evidence: RESEARCH.md Security §; `ImportInboxService.cs:325-330`
-  Touches: `src/Images/Services/ImportInboxService.cs`
-  Acceptance: when the source path is occupied during rollback, the original is restored to a unique sibling and the recovered location is surfaced; a test with an occupied source slot proves no file is stranded.
-  Complexity: S
-
 - [ ] P1 — Route animated decode through the native security policy seam (V110-04)
   Why: `TryLoadAnimated` builds `new MagickImageCollection(bytes)` directly instead of via `MagickSafeReader`/`CodecRuntime.Configure()`; a future caller reaching it before `Load`/`Preflight` would decode untrusted bytes before the coder allowlist and resource limits install.
   Evidence: RESEARCH.md Security §; `ImageLoader.cs:689`, `ImageLoader.cs:104`

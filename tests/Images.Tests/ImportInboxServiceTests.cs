@@ -251,6 +251,45 @@ public sealed class ImportInboxServiceTests
     }
 
     [Fact]
+    public void RollBackMovedOriginal_RestoresToUniqueSiblingWhenSourceSlotIsReoccupied()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Directory.CreateDirectory(Path.Combine(temp.Path, "source")).FullName;
+        var destination = Directory.CreateDirectory(Path.Combine(temp.Path, "library")).FullName;
+
+        // Simulate the race: the moved original is sitting at the import destination while a
+        // different file has re-occupied the original source path.
+        var sourcePath = WriteFile(source, "photo.jpg", [9, 9, 9]);
+        var destinationPath = WriteFile(destination, "photo.jpg", [1, 2, 3]);
+
+        var recovered = ImportInboxService.RollBackMovedOriginalForTests(sourcePath, destinationPath);
+
+        Assert.NotNull(recovered);
+        Assert.Equal(Path.Combine(source, "photo (recovered).jpg"), recovered);
+        Assert.True(File.Exists(recovered));
+        Assert.Equal([1, 2, 3], File.ReadAllBytes(recovered!));
+        // The moved original is never stranded at the destination, and the re-occupying file is untouched.
+        Assert.False(File.Exists(destinationPath));
+        Assert.Equal([9, 9, 9], File.ReadAllBytes(sourcePath));
+    }
+
+    [Fact]
+    public void RollBackMovedOriginal_RestoresToSourceWhenSlotIsFree()
+    {
+        using var temp = TestDirectory.Create();
+        var source = Directory.CreateDirectory(Path.Combine(temp.Path, "source")).FullName;
+        var destination = Directory.CreateDirectory(Path.Combine(temp.Path, "library")).FullName;
+        var sourcePath = Path.Combine(source, "photo.jpg");
+        var destinationPath = WriteFile(destination, "photo.jpg", [1, 2, 3]);
+
+        var recovered = ImportInboxService.RollBackMovedOriginalForTests(sourcePath, destinationPath);
+
+        Assert.Null(recovered);
+        Assert.True(File.Exists(sourcePath));
+        Assert.False(File.Exists(destinationPath));
+    }
+
+    [Fact]
     public void Commit_CopyWithGpsStripPreviewReadFailureReportsFailureAndDeletesDestinationCopy()
     {
         using var temp = TestDirectory.Create();

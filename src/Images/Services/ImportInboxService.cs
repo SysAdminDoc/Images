@@ -220,9 +220,13 @@ public sealed class ImportInboxService
                     destinationSidecarRollback = CaptureSidecarRollbackState(destinationPath);
                     ApplyPostImportEdits(destinationPath, request);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    RollBackFailedTransfer(sourcePath, destinationPath, request.MoveOriginal, destinationSidecarRollback);
+                    var recoveredPath = RollBackFailedTransfer(sourcePath, destinationPath, request.MoveOriginal, destinationSidecarRollback);
+                    if (recoveredPath is not null)
+                        throw new InvalidOperationException(
+                            $"{ex.Message} The original file could not be returned to its source location and was recovered to \"{recoveredPath}\".",
+                            ex);
                     throw;
                 }
 
@@ -308,7 +312,13 @@ public sealed class ImportInboxService
         return new SidecarRollbackState(sidecarPath, File.ReadAllBytes(sidecarPath));
     }
 
-    private static void RollBackFailedTransfer(
+    /// <summary>
+    /// Reverses a failed transfer. Returns the recovery sibling path when a moved original could
+    /// not be returned to its original source location (because the source slot was re-occupied)
+    /// and had to be restored under a unique sibling name; otherwise returns null. The moved
+    /// original is never left stranded at the import destination.
+    /// </summary>
+    private static string? RollBackFailedTransfer(
         string sourcePath,
         string destinationPath,
         bool movedOriginal,
@@ -320,21 +330,52 @@ public sealed class ImportInboxService
                 RestoreSidecar(sidecarRollback);
 
             if (!File.Exists(destinationPath))
-                return;
+                return null;
 
             if (movedOriginal)
             {
                 if (!File.Exists(sourcePath))
+                {
                     File.Move(destinationPath, sourcePath);
-                return;
+                    return null;
+                }
+
+                // The source slot was re-occupied while the import was in flight. Never abandon
+                // the moved original at the destination — restore it to a unique sibling of the
+                // source and report where it landed so the failure is recoverable.
+                var recoveryPath = ResolveRecoverySiblingPath(sourcePath);
+                File.Move(destinationPath, recoveryPath);
+                return recoveryPath;
             }
 
             File.Delete(destinationPath);
+            return null;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException)
         {
             Log.LogWarning(ex, "Could not roll back failed import from {SourcePath} to {DestinationPath}", sourcePath, destinationPath);
+            return null;
         }
+    }
+
+    internal static string? RollBackMovedOriginalForTests(string sourcePath, string destinationPath)
+        => RollBackFailedTransfer(sourcePath, destinationPath, movedOriginal: true, sidecarRollback: null);
+
+    private static string ResolveRecoverySiblingPath(string sourcePath)
+    {
+        var directory = Path.GetDirectoryName(sourcePath) ?? string.Empty;
+        var stem = Path.GetFileNameWithoutExtension(sourcePath);
+        var extension = Path.GetExtension(sourcePath);
+        for (var attempt = 1; attempt < int.MaxValue; attempt++)
+        {
+            var suffix = attempt == 1 ? " (recovered)" : $" (recovered {attempt})";
+            var candidate = Path.Combine(directory, stem + suffix + extension);
+            if (!File.Exists(candidate))
+                return candidate;
+        }
+
+        // Astronomically unreachable; fall back to a GUID-tagged sibling.
+        return Path.Combine(directory, $"{stem} (recovered {Guid.NewGuid():N}){extension}");
     }
 
     private static void RestoreSidecar(SidecarRollbackState state)
