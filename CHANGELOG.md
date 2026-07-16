@@ -4,6 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Upgraded SharpCompress 0.49.1 -> 0.50.0 for reduced LZMA/RAR decode allocation (comic-archive pages) and Zip64 non-seekable-stream / entry-metadata-corruption fixes. The 0.50.0 Tar auto-decompress and Detection API breaking changes do not touch the read-only `ArchiveFactory.OpenArchive` path Images uses; the CBZ/CBR/7z/CB7 regression suite passes unchanged.
 - The details panel now surfaces HDR gain maps that Windows silently ignores: it detects Google Ultra HDR, Adobe/ISO `hdrgm` metadata, Apple HDR gain maps, and ISO 21496-1, and reports the flavor, version, and content-boost range (in stops). Read-only inspection — no HDR display or writeback.
 - Animated multi-frame decode now routes through `MagickSafeReader.ReadCollection(bytes)`, which installs the native coder allowlist and resource limits before decoding. Previously the animated path constructed a `MagickImageCollection` directly, so a future caller reaching it before the main load preflight could decode untrusted bytes with the security policy uninitialized.
 - Import Inbox rollback no longer strands a moved original at the destination when the source path is re-occupied mid-import: the original is restored to a unique `(recovered)` sibling of the source and the failure message reports where it landed, so a failed move is always recoverable.

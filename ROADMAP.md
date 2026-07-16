@@ -25,13 +25,6 @@ Continues the `V###-##` scheme (V110 is the next free hundred-block above V100).
 
 #### P1 — Data safety, trust, and high-value inspection
 
-- [ ] P1 — Upgrade SharpCompress 0.49.1 → 0.50.0 behind an archive regression gate (V110-06)
-  Why: 0.50.0 reduces LZMA/RAR decode allocation (direct CBR/CBZ benefit) and fixes Zip64 non-seekable streaming + entry-metadata corruption, but breaks Tar auto-decompress and the Detection API — must not be a blind bump.
-  Evidence: RESEARCH.md Security §; https://github.com/adamhathcock/sharpcompress/releases/tag/0.50.0 ; `src/Images/Services/ArchiveBookService.cs`
-  Touches: `src/Images/Images.csproj`, `packages.lock.json`, `src/Images/Services/ArchiveBookService.cs`, archive tests
-  Acceptance: package at 0.50.0; CBZ, CBR, 7z, and any tar path open correctly under new regression fixtures (explicit-decompress for tar, updated detection); no truncated-CBZ claim added.
-  Complexity: M
-
 #### P2 — Scale, decomposition, and confirmed UX gaps
 
 - [ ] P2 — Render the extracted gain map as a grayscale overlay (V110-16)
