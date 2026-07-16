@@ -610,6 +610,7 @@ public static class Strings
     public static string CommandPalette_ZoomLock => Get(nameof(CommandPalette_ZoomLock));
     public static string CommandPalette_Loupe => Get(nameof(CommandPalette_Loupe));
     public static string CommandPalette_TransparencyGrid => Get(nameof(CommandPalette_TransparencyGrid));
+    public static string CommandPalette_InvertColors => Get(nameof(CommandPalette_InvertColors));
     public static string CommandPalette_FocusPeaking => Get(nameof(CommandPalette_FocusPeaking));
     public static string CommandPalette_ExposureClipping => Get(nameof(CommandPalette_ExposureClipping));
     public static string CommandPalette_Gallery => Get(nameof(CommandPalette_Gallery));
@@ -1212,6 +1213,8 @@ public static class Strings
     public static string MainToastZoomLockOff => Get(nameof(MainToastZoomLockOff));
     public static string MainToastTransparencyGridOn => Get(nameof(MainToastTransparencyGridOn));
     public static string MainToastTransparencyGridOff => Get(nameof(MainToastTransparencyGridOff));
+    public static string MainToastInvertColorsOn => Get(nameof(MainToastInvertColorsOn));
+    public static string MainToastInvertColorsOff => Get(nameof(MainToastInvertColorsOff));
     public static string MainToastFocusPeakingOn => Get(nameof(MainToastFocusPeakingOn));
     public static string MainToastFocusPeakingOff => Get(nameof(MainToastFocusPeakingOff));
     public static string MainToastExposureClippingOn => Get(nameof(MainToastExposureClippingOn));

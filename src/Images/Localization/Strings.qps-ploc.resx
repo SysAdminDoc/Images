@@ -3818,6 +3818,12 @@ Details written to:
   <data name="MainToastTransparencyGridOff" xml:space="preserve">
     <value>[!!!!!! Transparency grid off !!!!!!]</value>
   </data>
+  <data name="MainToastInvertColorsOn" xml:space="preserve">
+    <value>[!!!!! Invert colours on !!!!!]</value>
+  </data>
+  <data name="MainToastInvertColorsOff" xml:space="preserve">
+    <value>[!!!!! Invert colours off !!!!!]</value>
+  </data>
   <data name="MainToastFilmstripShown" xml:space="preserve">
     <value>[!!!! Filmstrip shown !!!!]</value>
   </data>
@@ -4257,6 +4263,9 @@ Details written to:
   </data>
   <data name="CommandPalette_TransparencyGrid" xml:space="preserve">
     <value>[!!!!!! Toggle transparency grid !!!!!!]</value>
+  </data>
+  <data name="CommandPalette_InvertColors" xml:space="preserve">
+    <value>[!!!!!! Toggle invert colours !!!!!!]</value>
   </data>
   <data name="CommandPalette_Gallery" xml:space="preserve">
     <value>[!!!! Toggle gallery !!!!]</value>

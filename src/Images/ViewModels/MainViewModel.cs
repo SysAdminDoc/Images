@@ -318,6 +318,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ToggleZoomLockCommand = new RelayCommand(ToggleZoomLock);
         ToggleLoupeCommand = new RelayCommand(() => RequestToggleLoupe?.Invoke(), () => RequestToggleLoupe is not null);
         ToggleTransparencyGridCommand = new RelayCommand(ToggleTransparencyGrid);
+        ToggleInvertColorsCommand = new RelayCommand(ToggleInvertColors);
         ToggleFocusPeakingCommand = new RelayCommand(ToggleFocusPeaking, () => CanUsePhotoCullingOverlays);
         ToggleExposureClippingCommand = new RelayCommand(ToggleExposureClipping, () => CanUsePhotoCullingOverlays);
         PasteFromClipboardCommand = new RelayCommand(PasteFromClipboard, () => !IsOperationBusy);
@@ -1218,6 +1219,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             case CommandIds.TransparencyGrid:
                 ToggleTransparencyGridCommand.Execute(null);
                 return true;
+            case CommandIds.InvertColors:
+                ToggleInvertColorsCommand.Execute(null);
+                return true;
             case CommandIds.FocusPeaking:
                 ToggleFocusPeakingCommand.Execute(null);
                 return true;
@@ -1362,6 +1366,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             PaletteCommand(CommandIds.ZoomLock, ToggleZoomLockCommand, priority: 12, searchText: "keep zoom level lock magnification pixel peep"),
             PaletteCommand(CommandIds.Loupe, ToggleLoupeCommand, priority: 12, searchText: "loupe magnifier lens zoom pixel peep keyboard"),
             PaletteCommand(CommandIds.TransparencyGrid, ToggleTransparencyGridCommand, priority: 12, searchText: "checkerboard alpha transparent background backdrop"),
+            PaletteCommand(CommandIds.InvertColors, ToggleInvertColorsCommand, priority: 12, searchText: "invert colours negative reverse scan low contrast accessibility"),
             PaletteCommand(CommandIds.FocusPeaking, ToggleFocusPeakingCommand, priority: 13, searchText: "sharp edge focus raw photo culling overlay"),
             PaletteCommand(CommandIds.ExposureClipping, ToggleExposureClippingCommand, priority: 13, searchText: "blown highlight crushed shadow exposure clipping raw photo culling overlay"),
             PaletteCommand(CommandIds.Gallery, ToggleGalleryCommand, priority: 12, searchText: "thumbnail grid browser"),
@@ -3156,6 +3161,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Toast(ShowTransparencyGrid ? Strings.MainToastTransparencyGridOn : Strings.MainToastTransparencyGridOff);
     }
 
+    private bool _isColorInverted;
+    // Momentary, per-image display toggle: not persisted, and reset on every navigation/clear.
+    public bool IsColorInverted
+    {
+        get => _isColorInverted;
+        set => Set(ref _isColorInverted, value);
+    }
+
+    private void ToggleInvertColors()
+    {
+        IsColorInverted = !IsColorInverted;
+        Toast(IsColorInverted ? Strings.MainToastInvertColorsOn : Strings.MainToastInvertColorsOff);
+    }
+
     private BitmapSource? _photoCullingOverlay;
     public BitmapSource? PhotoCullingOverlay
     {
@@ -4156,6 +4175,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand ToggleZoomLockCommand { get; }
     public ICommand ToggleLoupeCommand { get; }
     public ICommand ToggleTransparencyGridCommand { get; }
+    public ICommand ToggleInvertColorsCommand { get; }
     public ICommand ToggleFocusPeakingCommand { get; }
     public ICommand ToggleExposureClippingCommand { get; }
     public ICommand PasteFromClipboardCommand { get; }
@@ -4868,6 +4888,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         bool isIntermediatePreview = false)
     {
         _pendingAutoStartCropMode = false;
+        IsColorInverted = false;
         var loaded = false;
         var isArchiveBookPage = SupportedImageFormats.IsArchive(path);
         diskState ??= ReadCurrentLoadDiskState(path, isArchiveBookPage);
@@ -8116,6 +8137,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         StopSlideshow(showToast: false);
         _renameTimer.Stop();
         _externalEditReload.Disarm();
+        IsColorInverted = false;
         IsPinnedOverlayMode = false;
         ClearCompareMode(showToast: false);
         CurrentTilePyramid = null;

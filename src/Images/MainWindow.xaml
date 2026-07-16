@@ -467,6 +467,7 @@
                                    UseNearestNeighborScaling="{Binding InspectorNearestNeighborPreview}"
                                    PreserveViewOnSourceChange="{Binding IsZoomLocked}"
                                    ShowTransparencyGrid="{Binding ShowTransparencyGrid}"
+                                   InvertColors="{Binding IsColorInverted}"
                                    LoupeFactor="{Binding LoupeMagnification}"
                                    Visibility="{Binding ShowPrimaryImageCanvas, Converter={StaticResource BoolToVis}}"
                                    PreviewMouseRightButtonUp="Viewport_PreviewMouseRightButtonUp"

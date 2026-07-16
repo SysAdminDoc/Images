@@ -217,6 +217,19 @@ public sealed class ZoomPanImage : ContentControl
         set => SetValue(UseNearestNeighborScalingProperty, value);
     }
 
+    // Non-destructive colour inversion of the displayed still image. The source file is never
+    // modified and export is unaffected; the toggle only swaps the shown bitmap for an inverted
+    // copy. Animated frames and tile-backed huge images keep their normal rendering.
+    public static readonly DependencyProperty InvertColorsProperty = DependencyProperty.Register(
+        nameof(InvertColors), typeof(bool), typeof(ZoomPanImage),
+        new PropertyMetadata(false, (d, e) => ((ZoomPanImage)d).RefreshStaticDisplaySource()));
+
+    public bool InvertColors
+    {
+        get => (bool)GetValue(InvertColorsProperty);
+        set => SetValue(InvertColorsProperty, value);
+    }
+
     // RD-05: keep the current zoom factor across image changes (pan re-anchors to center) so a
     // series can be pixel-peeped at a fixed magnification.
     public static readonly DependencyProperty PreserveViewOnSourceChangeProperty = DependencyProperty.Register(
@@ -337,7 +350,7 @@ public sealed class ZoomPanImage : ContentControl
         // to raise CurrentImage *before* CurrentAnimation so the final state is "new image,
         // new animation" rather than "new image, stale frames".
         _image.BeginAnimation(Image.SourceProperty, null);
-        _image.Source = src;
+        SetStaticDisplaySource(src);
         if (PreserveViewOnSourceChange && src is not null)
             RecenterPreservingZoom();
         else
@@ -346,6 +359,42 @@ public sealed class ZoomPanImage : ContentControl
         QueueTileRefresh();
         RaiseViewChanged();
         Dispatcher.BeginInvoke(new Action(RaiseViewChanged), System.Windows.Threading.DispatcherPriority.Loaded);
+    }
+
+    private ImageSource? _staticBaseSource;
+    private ImageSource? _invertCacheKey;
+    private ImageSource? _invertCacheValue;
+
+    // Central point where the still-image display source is set, so the InvertColors toggle can
+    // swap in a colour-inverted copy without every caller needing to know about it.
+    private void SetStaticDisplaySource(ImageSource? baseSource)
+    {
+        _staticBaseSource = baseSource;
+        _image.Source = InvertColors ? InvertIfPossible(baseSource) : baseSource;
+    }
+
+    // Re-applies the current base source through the (possibly toggled) inversion. A running
+    // multi-frame animation keeps its frames; only static images invert.
+    private void RefreshStaticDisplaySource()
+    {
+        if (Animation is { Frames.Count: >= 2 })
+            return;
+
+        _image.Source = InvertColors ? InvertIfPossible(_staticBaseSource) : _staticBaseSource;
+    }
+
+    private ImageSource? InvertIfPossible(ImageSource? source)
+    {
+        if (source is not BitmapSource bitmap)
+            return source;
+
+        if (ReferenceEquals(_invertCacheKey, bitmap) && _invertCacheValue is not null)
+            return _invertCacheValue;
+
+        var inverted = Services.ImageInvertService.Invert(bitmap);
+        _invertCacheKey = bitmap;
+        _invertCacheValue = inverted;
+        return inverted;
     }
 
     // RD-05: keep the current zoom scale but re-anchor the pan to center for the incoming image.
@@ -381,7 +430,7 @@ public sealed class ZoomPanImage : ContentControl
         if (seq is null || seq.Frames.Count < 2)
         {
             _image.BeginAnimation(Image.SourceProperty, null);
-            _image.Source = Source;
+            SetStaticDisplaySource(Source);
             return;
         }
 

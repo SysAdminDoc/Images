@@ -207,6 +207,7 @@ public sealed class CommandShortcutService
             new(CommandIds.ZoomLock, Strings.CommandPalette_ZoomLock, view, ""),
             new(CommandIds.Loupe, Strings.CommandPalette_Loupe, view, "L"),
             new(CommandIds.TransparencyGrid, Strings.CommandPalette_TransparencyGrid, view, ""),
+            new(CommandIds.InvertColors, Strings.CommandPalette_InvertColors, view, ""),
             new(CommandIds.FocusPeaking, Strings.CommandPalette_FocusPeaking, view, "F"),
             new(CommandIds.ExposureClipping, Strings.CommandPalette_ExposureClipping, view, "H"),
             new(CommandIds.Gallery, Strings.CommandPalette_Gallery, view, "G"),
@@ -279,6 +280,7 @@ public static class CommandIds
     public const string ZoomLock = "zoom-lock";
     public const string Loupe = "loupe";
     public const string TransparencyGrid = "transparency-grid";
+    public const string InvertColors = "invert-colors";
     public const string FocusPeaking = "focus-peaking";
     public const string ExposureClipping = "exposure-clipping";
     public const string Gallery = "gallery";

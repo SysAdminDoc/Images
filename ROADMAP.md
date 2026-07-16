@@ -55,13 +55,6 @@ Continues the `V###-##` scheme (V110 is the next free hundred-block above V100).
   Acceptance: opening a `.jxl` reports whether it is a JPEG-transcode, a native lossy/lossless codestream, or an ISOBMFF container; non-JXL files are unaffected.
   Complexity: M
 
-- [ ] P2 — Invert-colors display toggle (V110-11)
-  Why: a quick invert toggle is both an inspection aid (reading low-contrast scans/negatives) and an accessibility affordance; ImageGlass ships it and Images has no display-time color inversion (only transform-matrix math).
-  Evidence: RESEARCH.md Competitive §; https://github.com/d2phap/ImageGlass/releases ; grep shows no invert-display path
-  Touches: `src/Images/Controls/ZoomPanImage.cs`, `src/Images/ViewModels/MainViewModel.cs`, `CommandShortcutService.cs`
-  Acceptance: a command/hotkey toggles a non-destructive inverted rendering of the current image; state clears on navigation; export is unaffected.
-  Complexity: S
-
 - [ ] P2 — Jump to next/previous archive without leaving the reader (V110-12)
   Why: readers browsing a folder of CBZ/CBR want to roll into the next archive at the last page (and previous at the first) without returning to the folder; PicView ships this and continuous archive reading already exists here.
   Evidence: RESEARCH.md Competitive §; https://github.com/Ruben2776/PicView/releases ; `src/Images/Services/ArchiveBookService.cs`, `src/Images/Services/DirectoryNavigator.cs`
