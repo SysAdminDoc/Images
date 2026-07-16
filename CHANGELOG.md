@@ -4,6 +4,8 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Rewrote the privacy policy's stored-data table directly from the `LocalDataStoreRegistry` inventory (23 stores instead of a stale 8), listing each store's path, class, and clear-on-privacy-reset behavior, and corrected the analysis note to reflect that OCR and semantic search run only on explicit user action against locally imported models.
+
 ## v0.2.28 - 2026-07-16
 
 - Re-importing a Picasa library after renaming an album or person no longer accumulates stale keywords: the importer prunes its own previously written `album:`/`person:`/`Picasa|Albums|`/`Picasa|People|` tags before writing the current set, while preserving user-authored keywords. `MainViewModel` now also disposes its continuous-archive decode gate.
