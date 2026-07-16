@@ -4,6 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- The details panel now reports JPEG XL structure: bare codestream, ISOBMFF container, or a lossless JPEG-to-JXL transcode (`jbrd` reconstruction box) — a headline JXL trait no mainstream Windows viewer surfaces.
 - Added an "Invert colours" view toggle (command palette, rebindable) that non-destructively inverts the displayed still image — an aid for reading negatives, low-contrast scans, and for accessibility. The source file and exports are untouched, and the toggle resets on navigation. Animated and tile-backed images keep their normal rendering.
 - Tile-pyramid build locks are now ref-counted and released when the last waiter for a cache directory finishes, so browsing many huge images in one session no longer accumulates lock objects for the process lifetime. Concurrent builds of the same image still share one gate, preserving mutual exclusion.
 - Upgraded SharpCompress 0.49.1 -> 0.50.0 for reduced LZMA/RAR decode allocation (comic-archive pages) and Zip64 non-seekable-stream / entry-metadata-corruption fixes. The 0.50.0 Tar auto-decompress and Detection API breaking changes do not touch the read-only `ArchiveFactory.OpenArchive` path Images uses; the CBZ/CBR/7z/CB7 regression suite passes unchanged.

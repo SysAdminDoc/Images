@@ -48,13 +48,6 @@ Continues the `V###-##` scheme (V110 is the next free hundred-block above V100).
   Acceptance: slideshow, archive-reader, and rename-editor state/commands move into dedicated controllers behind the existing `_uiDispatcher`/`() => _isDisposed` convention; behavior and tests unchanged; `MainViewModel` shrinks measurably.
   Complexity: L
 
-- [ ] P2 — Detect JXL lossless-JPEG transcode in the inspector (V110-10)
-  Why: JPEG-to-JXL lossless recompression is a headline JXL capability no viewer surfaces; distinguishing transcoded vs native codestream vs ISOBMFF container is a cheap read-only add on top of the existing metadata panel.
-  Evidence: RESEARCH.md Architecture §; https://en.wikipedia.org/wiki/JPEG_XL ; `src/Images/Services/Exif31MetadataReader.cs`
-  Touches: `src/Images/Services/ImageMetadataService.cs`/metadata panel, `SupportedImageFormats.cs`
-  Acceptance: opening a `.jxl` reports whether it is a JPEG-transcode, a native lossy/lossless codestream, or an ISOBMFF container; non-JXL files are unaffected.
-  Complexity: M
-
 - [ ] P2 — Jump to next/previous archive without leaving the reader (V110-12)
   Why: readers browsing a folder of CBZ/CBR want to roll into the next archive at the last page (and previous at the first) without returning to the folder; PicView ships this and continuous archive reading already exists here.
   Evidence: RESEARCH.md Competitive §; https://github.com/Ruben2776/PicView/releases ; `src/Images/Services/ArchiveBookService.cs`, `src/Images/Services/DirectoryNavigator.cs`

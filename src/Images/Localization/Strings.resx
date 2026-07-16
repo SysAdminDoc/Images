@@ -5583,6 +5583,18 @@ Details written to:
   <data name="MetadataGainMapBoostFormat" xml:space="preserve">
     <value>{0:0.0} to {1:0.0} stops</value>
   </data>
+  <data name="MetadataJxl" xml:space="preserve">
+    <value>JPEG XL</value>
+  </data>
+  <data name="MetadataJxlCodestream" xml:space="preserve">
+    <value>Bare codestream</value>
+  </data>
+  <data name="MetadataJxlContainer" xml:space="preserve">
+    <value>ISOBMFF container</value>
+  </data>
+  <data name="MetadataJxlJpegTranscode" xml:space="preserve">
+    <value>Lossless JPEG transcode</value>
+  </data>
   <data name="MetadataIsoFormat" xml:space="preserve">
     <value>ISO {0}</value>
   </data>

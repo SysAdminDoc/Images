@@ -79,7 +79,11 @@ public static class ImageMetadataService
                     rows.Add(new MetadataFact(Strings.MetadataGps, gps));
             }
 
-            AppendGainMapRows(rows, GainMapInspectionService.Inspect(path));
+            var extension = Path.GetExtension(path);
+            if (CanCarryGainMap(extension))
+                AppendGainMapRows(rows, GainMapInspectionService.Inspect(path));
+            if (extension.Equals(".jxl", StringComparison.OrdinalIgnoreCase))
+                AppendJxlRow(rows, JxlInspectionService.Inspect(path));
 
             return rows.Count == 0 ? PhotoMetadata.Empty : new PhotoMetadata(rows);
         }
@@ -300,6 +304,30 @@ public static class ImageMetadataService
                 Strings.MetadataGainMapBoost,
                 Strings.Format(nameof(Strings.MetadataGainMapBoostFormat), min, max)));
         }
+    }
+
+    // Only formats that actually carry ISO/UltraHDR/Apple gain maps are byte-scanned, so the
+    // details read stays cheap for large TIFF/PNG/RAW files that never contain one.
+    private static bool CanCarryGainMap(string extension) => extension.ToLowerInvariant() switch
+    {
+        ".jpg" or ".jpeg" or ".jpe" or ".jfif" or ".jif" or ".heic" or ".heif" or ".hif"
+            or ".avif" or ".jxl" or ".dng" => true,
+        _ => false,
+    };
+
+    private static void AppendJxlRow(List<MetadataFact> rows, JxlInspection jxl)
+    {
+        if (!jxl.IsJxl)
+            return;
+
+        var detail = jxl.Kind switch
+        {
+            JxlContainerKind.JpegTranscode => Strings.MetadataJxlJpegTranscode,
+            JxlContainerKind.Container => Strings.MetadataJxlContainer,
+            _ => Strings.MetadataJxlCodestream,
+        };
+
+        rows.Add(new MetadataFact(Strings.MetadataJxl, detail));
     }
 
     private static void AppendCorrectionRow(List<MetadataFact> rows, string label, ushort? value)

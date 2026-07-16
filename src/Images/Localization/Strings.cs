@@ -1541,6 +1541,10 @@ public static class Strings
     public static string MetadataGainMapWithVersionFormat => Get(nameof(MetadataGainMapWithVersionFormat));
     public static string MetadataGainMapBoost => Get(nameof(MetadataGainMapBoost));
     public static string MetadataGainMapBoostFormat => Get(nameof(MetadataGainMapBoostFormat));
+    public static string MetadataJxl => Get(nameof(MetadataJxl));
+    public static string MetadataJxlCodestream => Get(nameof(MetadataJxlCodestream));
+    public static string MetadataJxlContainer => Get(nameof(MetadataJxlContainer));
+    public static string MetadataJxlJpegTranscode => Get(nameof(MetadataJxlJpegTranscode));
     public static string MetadataIsoFormat => Get(nameof(MetadataIsoFormat));
     public static string MetadataInvalidValue => Get(nameof(MetadataInvalidValue));
     public static string MetadataLearningIntentOptIn => Get(nameof(MetadataLearningIntentOptIn));

@@ -167,6 +167,20 @@ public sealed class ImageMetadataServiceTests
         Assert.Equal("0.0 to 3.0 stops", FindValue(result, "Content boost"));
     }
 
+    [Fact]
+    public void Read_JpegXlFile_SurfacesJxlStructureRow()
+    {
+        using var temp = TestDirectory.Create();
+        var path = Path.Combine(temp.Path, "image.jxl");
+        using (var image = new MagickImage(MagickColors.SteelBlue, 16, 8) { Format = MagickFormat.Jxl })
+            image.Write(path);
+
+        var result = ImageMetadataService.Read(path);
+
+        // A .jxl is either a bare codestream or an ISOBMFF container; either way the structure is reported.
+        Assert.Contains(result.Rows, row => row.Label == "JPEG XL");
+    }
+
     private static string FindValue(PhotoMetadata metadata, string label)
         => Assert.Single(metadata.Rows, row => row.Label == label).Value;
 }
