@@ -467,14 +467,16 @@ public sealed class PicasaImportService
             .Where(name => !string.IsNullOrWhiteSpace(name))
             .Select(name => "person:" + name!.Trim());
         var flatTags = albums.Select(album => "album:" + album).Concat(faceNames);
-        ReplaceArray(description, Dc + "subject", Rdf + "Bag", MergeExisting(description, Dc + "subject", flatTags));
+        ReplaceArray(description, Dc + "subject", Rdf + "Bag",
+            MergeExisting(description, Dc + "subject", flatTags, "album:", "person:"));
 
         var hierarchicalTags = albums
             .Select(album => "Picasa|Albums|" + album)
             .Concat(faces
                 .Where(face => !string.IsNullOrWhiteSpace(face.Name))
                 .Select(face => "Picasa|People|" + face.Name!.Trim()));
-        ReplaceArray(description, Lr + "hierarchicalSubject", Rdf + "Bag", MergeExisting(description, Lr + "hierarchicalSubject", hierarchicalTags));
+        ReplaceArray(description, Lr + "hierarchicalSubject", Rdf + "Bag",
+            MergeExisting(description, Lr + "hierarchicalSubject", hierarchicalTags, "Picasa|Albums|", "Picasa|People|"));
 
         if (faces.Count > 0)
             ReplaceRegions(description, faces);
@@ -483,7 +485,11 @@ public sealed class PicasaImportService
         SidecarWriter.SaveAtomically(document, sidecarPath);
     }
 
-    private static IReadOnlyList<string> MergeExisting(XElement description, XName arrayName, IEnumerable<string> additions)
+    private static IReadOnlyList<string> MergeExisting(
+        XElement description,
+        XName arrayName,
+        IEnumerable<string> additions,
+        params string[] ownedPrefixes)
     {
         var merged = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         var existing = description.Element(arrayName);
@@ -492,8 +498,16 @@ public sealed class PicasaImportService
             foreach (var item in existing.Descendants().Where(element => element.Name.LocalName.Equals("li", StringComparison.OrdinalIgnoreCase)))
             {
                 var value = item.Value.Trim();
-                if (value.Length > 0)
-                    merged.Add(value);
+                if (value.Length == 0)
+                    continue;
+
+                // Drop this importer's own prior additions (identified by their namespace prefix)
+                // so a re-import after an album/person rename replaces them instead of accumulating
+                // both the old and new tag. Foreign/manual tags are preserved.
+                if (ownedPrefixes.Any(prefix => value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+                    continue;
+
+                merged.Add(value);
             }
         }
 

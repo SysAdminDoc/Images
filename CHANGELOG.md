@@ -4,6 +4,7 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Re-importing a Picasa library after renaming an album or person no longer accumulates stale keywords: the importer prunes its own previously written `album:`/`person:`/`Picasa|Albums|`/`Picasa|People|` tags before writing the current set, while preserving user-authored keywords. `MainViewModel` now also disposes its continuous-archive decode gate.
 - Listen mode now compares its loopback session token in constant time and counts a connection against the concurrency cap before the handler task is scheduled, closing a theoretical token-timing side channel and a transient cap overshoot under bursts.
 - Semantic search now caches the model's normalized vectors in memory keyed by the index generation. Repeat queries on an unchanged index no longer re-read and re-deserialize the entire embedding table (up to ~100 MB of blob I/O) per search; a Rebuild or Clear invalidates the cache.
 - The details panel now reports JPEG XL structure: bare codestream, ISOBMFF container, or a lossless JPEG-to-JXL transcode (`jbrd` reconstruction box) — a headline JXL trait no mainstream Windows viewer surfaces.

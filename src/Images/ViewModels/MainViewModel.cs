@@ -8251,6 +8251,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _folderPreview.Dispose();
         _preload.Dispose();
         _nav.Dispose();
+        _continuousArchiveDecodeGate.Dispose();
 
         GC.SuppressFinalize(this);
     }

@@ -95,6 +95,40 @@ public sealed class PicasaImportServiceTests
     }
 
     [Fact]
+    public void ImportFolder_ReimportAfterAlbumRename_PrunesStaleTagButKeepsForeignTags()
+    {
+        using var temp = TestDirectory.Create();
+        var photo = temp.WriteFile("photo.jpg", "image bytes");
+        File.WriteAllText(Path.Combine(temp.Path, ".picasa.ini"), """
+        [photo.jpg]
+        albums=Trip
+        """);
+        Assert.True(new PicasaImportService().ImportFolder(temp.Path).Success);
+
+        // A user adds their own keyword to the sidecar, then renames the album in Picasa.
+        var sidecarPath = photo + ".xmp";
+        XNamespace dc = "http://purl.org/dc/elements/1.1/";
+        XNamespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+        var document = XDocument.Load(sidecarPath);
+        document.Descendants(dc + "subject").First().Descendants(rdf + "Bag").First()
+            .Add(new XElement(rdf + "li", "manual:keep"));
+        document.Save(sidecarPath);
+
+        File.WriteAllText(Path.Combine(temp.Path, ".picasa.ini"), """
+        [photo.jpg]
+        albums=Vacation
+        """);
+        Assert.True(new PicasaImportService().ImportFolder(temp.Path).Success);
+
+        var imported = new XmpSidecarImportService().ImportForImage(photo);
+        Assert.Contains("album:Vacation", imported.FlatKeywords);
+        Assert.DoesNotContain("album:Trip", imported.FlatKeywords);
+        Assert.Contains("manual:keep", imported.FlatKeywords);
+        Assert.Contains("Picasa|Albums|Vacation", imported.HierarchicalKeywords);
+        Assert.DoesNotContain("Picasa|Albums|Trip", imported.HierarchicalKeywords);
+    }
+
+    [Fact]
     public void ImportFolder_MissingIni_ReturnsFailureWithoutWritingSidecar()
     {
         using var temp = TestDirectory.Create();

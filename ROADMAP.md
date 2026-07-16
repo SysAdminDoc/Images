@@ -57,9 +57,3 @@ Continues the `V###-##` scheme (V110 is the next free hundred-block above V100).
 
 #### P3 — Hardening and hygiene
 
-- [ ] P3 — Dispose the continuous-archive decode gate + Picasa tag-drift prune (V110-15)
-  Why: `_continuousArchiveDecodeGate` (`MainViewModel.cs:59`) is the one `SemaphoreSlim` missed by an otherwise thorough `Dispose`; separately, `PicasaImportService` unions `dc:subject`/`lr:hierarchicalSubject` on re-import so renamed albums accumulate stale tags. Both are small correctness/hygiene fixes.
-  Evidence: RESEARCH.md Architecture §; `MainViewModel.cs:59`, `PicasaImportService.cs:519-540`
-  Touches: `src/Images/ViewModels/MainViewModel.cs`, `src/Images/Services/PicasaImportService.cs`
-  Acceptance: `MainViewModel.Dispose` disposes the semaphore; Picasa-authored tags are namespaced so a re-import prunes its own prior additions; a re-import-after-rename test shows no stale-tag accumulation.
-  Complexity: S
