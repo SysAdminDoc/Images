@@ -5550,6 +5550,30 @@ Details written to:
   <data name="MetadataGps" xml:space="preserve">
     <value>GPS</value>
   </data>
+  <data name="MetadataGainMap" xml:space="preserve">
+    <value>HDR gain map</value>
+  </data>
+  <data name="MetadataGainMapUltraHdr" xml:space="preserve">
+    <value>Ultra HDR (base image + gain map)</value>
+  </data>
+  <data name="MetadataGainMapApple" xml:space="preserve">
+    <value>Apple HDR gain map</value>
+  </data>
+  <data name="MetadataGainMapIso21496" xml:space="preserve">
+    <value>ISO 21496-1 gain map</value>
+  </data>
+  <data name="MetadataGainMapMetadata" xml:space="preserve">
+    <value>Gain map metadata</value>
+  </data>
+  <data name="MetadataGainMapWithVersionFormat" xml:space="preserve">
+    <value>{0} · v{1}</value>
+  </data>
+  <data name="MetadataGainMapBoost" xml:space="preserve">
+    <value>Content boost</value>
+  </data>
+  <data name="MetadataGainMapBoostFormat" xml:space="preserve">
+    <value>{0:0.0} to {1:0.0} stops</value>
+  </data>
   <data name="MetadataIsoFormat" xml:space="preserve">
     <value>ISO {0}</value>
   </data>

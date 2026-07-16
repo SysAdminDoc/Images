@@ -35,50 +35,51 @@ public static class ImageMetadataService
                 BackgroundColor = MagickColors.White
             });
 
+            var rows = new List<MetadataFact>(16);
             var exif = image.GetExifProfile();
-            if (exif is null)
-                return PhotoMetadata.Empty;
+            if (exif is not null)
+            {
+                var captured = MetadataDate.TryFromExif(
+                    Clean(ReadString(exif, ExifTag.DateTimeOriginal)),
+                    Clean(ReadString(exif, ExifTag.OffsetTimeOriginal)));
+                if (captured.HasValue)
+                    rows.Add(new MetadataFact(Strings.MetadataCaptured, captured.ToDisplay(CultureInfo.CurrentCulture)));
 
-            var rows = new List<MetadataFact>(14);
+                var camera = FormatCamera(
+                    Clean(ReadString(exif, ExifTag.Make)),
+                    Clean(ReadString(exif, ExifTag.Model)));
+                if (camera is not null)
+                    rows.Add(new MetadataFact(Strings.MetadataCamera, camera));
 
-            var captured = MetadataDate.TryFromExif(
-                Clean(ReadString(exif, ExifTag.DateTimeOriginal)),
-                Clean(ReadString(exif, ExifTag.OffsetTimeOriginal)));
-            if (captured.HasValue)
-                rows.Add(new MetadataFact(Strings.MetadataCaptured, captured.ToDisplay(CultureInfo.CurrentCulture)));
+                var lens = Clean(ReadString(exif, ExifTag.LensModel));
+                if (lens is not null)
+                    rows.Add(new MetadataFact(Strings.MetadataLens, lens));
 
-            var camera = FormatCamera(
-                Clean(ReadString(exif, ExifTag.Make)),
-                Clean(ReadString(exif, ExifTag.Model)));
-            if (camera is not null)
-                rows.Add(new MetadataFact(Strings.MetadataCamera, camera));
+                var exposure = FormatExposure(
+                    ReadRational(exif, ExifTag.ExposureTime),
+                    ReadRational(exif, ExifTag.FNumber),
+                    ReadIso(exif));
+                if (exposure is not null)
+                    rows.Add(new MetadataFact(Strings.MetadataExposure, exposure));
 
-            var lens = Clean(ReadString(exif, ExifTag.LensModel));
-            if (lens is not null)
-                rows.Add(new MetadataFact(Strings.MetadataLens, lens));
+                var focal = FormatFocalLength(
+                    ReadRational(exif, ExifTag.FocalLength),
+                    ReadUInt16(exif, ExifTag.FocalLengthIn35mmFilm));
+                if (focal is not null)
+                    rows.Add(new MetadataFact(Strings.MetadataFocal, focal));
 
-            var exposure = FormatExposure(
-                ReadRational(exif, ExifTag.ExposureTime),
-                ReadRational(exif, ExifTag.FNumber),
-                ReadIso(exif));
-            if (exposure is not null)
-                rows.Add(new MetadataFact(Strings.MetadataExposure, exposure));
+                AppendExif31Rows(rows, Exif31MetadataReader.Read(stream, exif.ToByteArray()));
 
-            var focal = FormatFocalLength(
-                ReadRational(exif, ExifTag.FocalLength),
-                ReadUInt16(exif, ExifTag.FocalLengthIn35mmFilm));
-            if (focal is not null)
-                rows.Add(new MetadataFact(Strings.MetadataFocal, focal));
+                var gps = FormatGps(
+                    ReadRationalArray(exif, ExifTag.GPSLatitude),
+                    Clean(ReadString(exif, ExifTag.GPSLatitudeRef)),
+                    ReadRationalArray(exif, ExifTag.GPSLongitude),
+                    Clean(ReadString(exif, ExifTag.GPSLongitudeRef)));
+                if (gps is not null)
+                    rows.Add(new MetadataFact(Strings.MetadataGps, gps));
+            }
 
-            AppendExif31Rows(rows, Exif31MetadataReader.Read(stream, exif.ToByteArray()));
-
-            var gps = FormatGps(
-                ReadRationalArray(exif, ExifTag.GPSLatitude),
-                Clean(ReadString(exif, ExifTag.GPSLatitudeRef)),
-                ReadRationalArray(exif, ExifTag.GPSLongitude),
-                Clean(ReadString(exif, ExifTag.GPSLongitudeRef)));
-            if (gps is not null)
-                rows.Add(new MetadataFact(Strings.MetadataGps, gps));
+            AppendGainMapRows(rows, GainMapInspectionService.Inspect(path));
 
             return rows.Count == 0 ? PhotoMetadata.Empty : new PhotoMetadata(rows);
         }
@@ -271,6 +272,33 @@ public static class ImageMetadataService
                     3 => Strings.MetadataNoiseReductionHigh,
                     var value => FormatUnknown(value)
                 }));
+        }
+    }
+
+    private static void AppendGainMapRows(List<MetadataFact> rows, GainMapInspection gainMap)
+    {
+        if (!gainMap.Present)
+            return;
+
+        var flavor = gainMap.Flavor switch
+        {
+            GainMapFlavor.UltraHdr => Strings.MetadataGainMapUltraHdr,
+            GainMapFlavor.AppleGainMap => Strings.MetadataGainMapApple,
+            GainMapFlavor.Iso21496 => Strings.MetadataGainMapIso21496,
+            _ => Strings.MetadataGainMapMetadata,
+        };
+
+        rows.Add(new MetadataFact(
+            Strings.MetadataGainMap,
+            gainMap.Version is { Length: > 0 } version
+                ? Strings.Format(nameof(Strings.MetadataGainMapWithVersionFormat), flavor, version)
+                : flavor));
+
+        if (gainMap.MinBoostStops is { } min && gainMap.MaxBoostStops is { } max)
+        {
+            rows.Add(new MetadataFact(
+                Strings.MetadataGainMapBoost,
+                Strings.Format(nameof(Strings.MetadataGainMapBoostFormat), min, max)));
         }
     }
 

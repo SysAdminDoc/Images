@@ -1530,6 +1530,14 @@ public static class Strings
     public static string MetadataFocalMillimetersFormat => Get(nameof(MetadataFocalMillimetersFormat));
     public static string MetadataFocalWithEquivalentFormat => Get(nameof(MetadataFocalWithEquivalentFormat));
     public static string MetadataGps => Get(nameof(MetadataGps));
+    public static string MetadataGainMap => Get(nameof(MetadataGainMap));
+    public static string MetadataGainMapUltraHdr => Get(nameof(MetadataGainMapUltraHdr));
+    public static string MetadataGainMapApple => Get(nameof(MetadataGainMapApple));
+    public static string MetadataGainMapIso21496 => Get(nameof(MetadataGainMapIso21496));
+    public static string MetadataGainMapMetadata => Get(nameof(MetadataGainMapMetadata));
+    public static string MetadataGainMapWithVersionFormat => Get(nameof(MetadataGainMapWithVersionFormat));
+    public static string MetadataGainMapBoost => Get(nameof(MetadataGainMapBoost));
+    public static string MetadataGainMapBoostFormat => Get(nameof(MetadataGainMapBoostFormat));
     public static string MetadataIsoFormat => Get(nameof(MetadataIsoFormat));
     public static string MetadataInvalidValue => Get(nameof(MetadataInvalidValue));
     public static string MetadataLearningIntentOptIn => Get(nameof(MetadataLearningIntentOptIn));

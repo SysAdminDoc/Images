@@ -4119,7 +4119,7 @@ Details written to:
     <value>[!!! Unavailable !!!]</value>
   </data>
   <data name="MainHdrDisplayTonemappedStatus" xml:space="preserve">
-    <value>[!!!!!!!! HDR display detected — this image is shown tonemapped to SDR !!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! HDR display detected — this image is shown tonemapped to SDR !!!!!!!!!!!!]</value>
   </data>
   <data name="MainUnexpectedError" xml:space="preserve">
     <value>[!!!! Unexpected error !!!!]</value>
@@ -5911,7 +5911,7 @@ Details written to:
     <value>[!! Captured !!]</value>
   </data>
   <data name="MetadataChromaticAberrationCorrection" xml:space="preserve">
-    <value>[!!!! Chromatic correction !!!!]</value>
+    <value>[!!!!! Chromatic correction !!!!!]</value>
   </data>
   <data name="MetadataCorrectionApplied" xml:space="preserve">
     <value>[!! Applied !!]</value>
@@ -5923,31 +5923,31 @@ Details written to:
     <value>[!!! Development !!!]</value>
   </data>
   <data name="MetadataDevelopmentAccurate" xml:space="preserve">
-    <value>[!!!! Accurate reproduction !!!!]</value>
+    <value>[!!!!!! Accurate reproduction !!!!!!]</value>
   </data>
   <data name="MetadataDevelopmentDescription" xml:space="preserve">
-    <value>[!!!! Development details !!!!]</value>
+    <value>[!!!!! Development details !!!!!]</value>
   </data>
   <data name="MetadataDevelopmentExtremeDifferences" xml:space="preserve">
-    <value>[!!!! Extreme differences !!!!]</value>
+    <value>[!!!!! Extreme differences !!!!!]</value>
   </data>
   <data name="MetadataDevelopmentFactoryDefaults" xml:space="preserve">
-    <value>[!!! Factory defaults !!!]</value>
+    <value>[!!!! Factory defaults !!!!]</value>
   </data>
   <data name="MetadataDevelopmentFactoryUnknown" xml:space="preserve">
-    <value>[!!!! Factory setting unknown !!!!]</value>
+    <value>[!!!!!! Factory setting unknown !!!!!!]</value>
   </data>
   <data name="MetadataDevelopmentFormat" xml:space="preserve">
     <value>[!! {0}; {1} !!]</value>
   </data>
   <data name="MetadataDevelopmentNotFactoryDefaults" xml:space="preserve">
-    <value>[!!!! Not factory defaults !!!!]</value>
+    <value>[!!!!! Not factory defaults !!!!!]</value>
   </data>
   <data name="MetadataDevelopmentSmallDifferences" xml:space="preserve">
-    <value>[!!! Small differences !!!]</value>
+    <value>[!!!!! Small differences !!!!!]</value>
   </data>
   <data name="MetadataDistortionCorrection" xml:space="preserve">
-    <value>[!!!! Distortion correction !!!!]</value>
+    <value>[!!!!!! Distortion correction !!!!!!]</value>
   </data>
   <data name="MetadataExposure" xml:space="preserve">
     <value>[!! Exposure !!]</value>
@@ -5967,11 +5967,35 @@ Details written to:
   <data name="MetadataGps" xml:space="preserve">
     <value>[!! GPS !!]</value>
   </data>
+  <data name="MetadataGainMap" xml:space="preserve">
+    <value>[!!! HDR gain map !!!]</value>
+  </data>
+  <data name="MetadataGainMapUltraHdr" xml:space="preserve">
+    <value>[!!!!!!!!! Ultra HDR (base image + gain map) !!!!!!!!!]</value>
+  </data>
+  <data name="MetadataGainMapApple" xml:space="preserve">
+    <value>[!!!!! Apple HDR gain map !!!!!]</value>
+  </data>
+  <data name="MetadataGainMapIso21496" xml:space="preserve">
+    <value>[!!!!! ISO 21496-1 gain map !!!!!]</value>
+  </data>
+  <data name="MetadataGainMapMetadata" xml:space="preserve">
+    <value>[!!!!! Gain map metadata !!!!!]</value>
+  </data>
+  <data name="MetadataGainMapWithVersionFormat" xml:space="preserve">
+    <value>[!!! {0} · v{1} !!!]</value>
+  </data>
+  <data name="MetadataGainMapBoost" xml:space="preserve">
+    <value>[!!!! Content boost !!!!]</value>
+  </data>
+  <data name="MetadataGainMapBoostFormat" xml:space="preserve">
+    <value>[!!!!!! {0:0.0} to {1:0.0} stops !!!!!!]</value>
+  </data>
   <data name="MetadataIsoFormat" xml:space="preserve">
     <value>[!! ISO {0} !!]</value>
   </data>
   <data name="MetadataInvalidValue" xml:space="preserve">
-    <value>[!!! Invalid metadata !!!]</value>
+    <value>[!!!! Invalid metadata !!!!]</value>
   </data>
   <data name="MetadataLearningIntentOptIn" xml:space="preserve">
     <value>[!! Opt-in !!]</value>
@@ -5983,46 +6007,46 @@ Details written to:
     <value>[!!! Unspecified !!!]</value>
   </data>
   <data name="MetadataLearningUse" xml:space="preserve">
-    <value>[!! AI/ML use !!]</value>
+    <value>[!!! AI/ML use !!!]</value>
   </data>
   <data name="MetadataLearningUseDataMining" xml:space="preserve">
-    <value>[!! Data mining !!]</value>
+    <value>[!!! Data mining !!!]</value>
   </data>
   <data name="MetadataLearningUseEntryFormat" xml:space="preserve">
     <value>[!! {0}: {1} !!]</value>
   </data>
   <data name="MetadataLearningUseFoundationModel" xml:space="preserve">
-    <value>[!!!! Foundation-model input !!!!]</value>
+    <value>[!!!!!! Foundation-model input !!!!!!]</value>
   </data>
   <data name="MetadataLearningUseGenerative" xml:space="preserve">
-    <value>[!!!! Generative AI/ML training !!!!]</value>
+    <value>[!!!!!!! Generative AI/ML training !!!!!!!]</value>
   </data>
   <data name="MetadataLearningUseNonGenerative" xml:space="preserve">
-    <value>[!!!!! Non-generative AI/ML training !!!!!]</value>
+    <value>[!!!!!!!! Non-generative AI/ML training !!!!!!!!]</value>
   </data>
   <data name="MetadataLearningUseOther" xml:space="preserve">
-    <value>[!!!! Other or unspecified uses !!!!]</value>
+    <value>[!!!!!!! Other or unspecified uses !!!!!!!]</value>
   </data>
   <data name="MetadataLens" xml:space="preserve">
     <value>[!! Lens !!]</value>
   </data>
   <data name="MetadataMoreItemsFormat" xml:space="preserve">
-    <value>[!!! …and {0} more !!!]</value>
+    <value>[!!!! …and {0} more !!!!]</value>
   </data>
   <data name="MetadataNoiseReduction" xml:space="preserve">
-    <value>[!!! Noise reduction !!!]</value>
+    <value>[!!!! Noise reduction !!!!]</value>
   </data>
   <data name="MetadataNoiseReductionHigh" xml:space="preserve">
-    <value>[!!! High strength !!!]</value>
+    <value>[!!!! High strength !!!!]</value>
   </data>
   <data name="MetadataNoiseReductionLow" xml:space="preserve">
-    <value>[!! Low strength !!]</value>
+    <value>[!!! Low strength !!!]</value>
   </data>
   <data name="MetadataNoiseReductionNormal" xml:space="preserve">
-    <value>[!!! Normal strength !!!]</value>
+    <value>[!!!! Normal strength !!!!]</value>
   </data>
   <data name="MetadataShadingCorrection" xml:space="preserve">
-    <value>[!!! Shading correction !!!]</value>
+    <value>[!!!!! Shading correction !!!!!]</value>
   </data>
   <data name="MetadataShutterFractionFormat" xml:space="preserve">
     <value>[!! 1/{0} s !!]</value>
@@ -6031,10 +6055,10 @@ Details written to:
     <value>[!!! {0:0.##} s !!!]</value>
   </data>
   <data name="MetadataUnknownUseFormat" xml:space="preserve">
-    <value>[!!! Unknown use ({0}) !!!]</value>
+    <value>[!!!!! Unknown use ({0}) !!!!!]</value>
   </data>
   <data name="MetadataUnknownValueFormat" xml:space="preserve">
-    <value>[!! Unknown ({0}) !!]</value>
+    <value>[!!!! Unknown ({0}) !!!!]</value>
   </data>
   <data name="NetworkClipboardBytesFormat" xml:space="preserve">
     <value>[!!!!   Bytes:    {0} !!!!]</value>
@@ -6196,7 +6220,7 @@ Details written to:
     <value>[!!!!! Ghostscript ready !!!!!]</value>
   </data>
   <data name="DiagnosticsHdrSignalFormat" xml:space="preserve">
-    <value>[!!!!!!!! {0}; HDR active ({1}), peak {2:0.#} nits, full-frame {3:0.#} nits !!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! {0}; HDR active ({1}), peak {2:0.#} nits, full-frame {3:0.#} nits !!!!!!!!!!!!]</value>
   </data>
   <data name="DiagnosticsGhostscriptRequired" xml:space="preserve">
     <value>[!!!!!!!!!!!! PDF, EPS, PS, and AI previews need bundled Ghostscript, IMAGES_GHOSTSCRIPT_DIR, or an installed runtime. !!!!!!!!!!!!]</value>
@@ -6259,7 +6283,7 @@ Details written to:
     <value>[!!!!!!! signal format unavailable !!!!!!!]</value>
   </data>
   <data name="DiagnosticsSdrSignalFormat" xml:space="preserve">
-    <value>[!!! {0}; SDR active ({1}) !!!]</value>
+    <value>[!!!!!! {0}; SDR active ({1}) !!!!!!]</value>
   </data>
   <data name="DiagnosticsSrgbFallbackActive" xml:space="preserve">
     <value>[!!!!! sRGB fallback active !!!!!]</value>
@@ -6622,64 +6646,64 @@ Details written to:
     <value>[!!!!!!!!! Move settings between installations !!!!!!!!!]</value>
   </data>
   <data name="DiagnosticsNativeDependencies" xml:space="preserve">
-    <value>[!!!! Native dependencies !!!!]</value>
+    <value>[!!!!! Native dependencies !!!!!]</value>
   </data>
   <data name="DiagnosticsNativeVersionsReady" xml:space="preserve">
-    <value>[!!!! Reviewed versions active !!!!]</value>
+    <value>[!!!!!! Reviewed versions active !!!!!!]</value>
   </data>
   <data name="DiagnosticsNativeVersionsAttention" xml:space="preserve">
-    <value>[!!!!!! Native version needs attention !!!!!!]</value>
+    <value>[!!!!!!!! Native version needs attention !!!!!!!!]</value>
   </data>
   <data name="DiagnosticsNativeVersionsFormat" xml:space="preserve">
-    <value>[!!!!!!!!!! {0}; {1} (minimum ImageMagick {2}); SQLite {3} (minimum {4}). !!!!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! {0}; {1} (minimum ImageMagick {2}); SQLite {3} (minimum {4}). !!!!!!!!!!!!]</value>
   </data>
   <data name="CommandPalette_FocusPeaking" xml:space="preserve">
     <value>[!!!! Focus peaking !!!!]</value>
   </data>
   <data name="CommandPalette_ExposureClipping" xml:space="preserve">
-    <value>[!!!!!! Highlight and shadow clipping !!!!!!]</value>
+    <value>[!!!!!!!! Highlight and shadow clipping !!!!!!!!]</value>
   </data>
   <data name="MainToastFocusPeakingOn" xml:space="preserve">
     <value>[!!!! Focus peaking on !!!!]</value>
   </data>
   <data name="MainToastFocusPeakingOff" xml:space="preserve">
-    <value>[!!!! Focus peaking off !!!!]</value>
+    <value>[!!!!! Focus peaking off !!!!!]</value>
   </data>
   <data name="MainToastExposureClippingOn" xml:space="preserve">
-    <value>[!!!! Exposure clipping on !!!!]</value>
+    <value>[!!!!! Exposure clipping on !!!!!]</value>
   </data>
   <data name="MainToastExposureClippingOff" xml:space="preserve">
-    <value>[!!!! Exposure clipping off !!!!]</value>
+    <value>[!!!!!! Exposure clipping off !!!!!!]</value>
   </data>
   <data name="MainFocusPeakingStatus" xml:space="preserve">
-    <value>[!!!!!! Focus peaking — green edges !!!!!!]</value>
+    <value>[!!!!!!! Focus peaking — green edges !!!!!!!]</value>
   </data>
   <data name="MainExposureClippingStatus" xml:space="preserve">
-    <value>[!!!!!!!! Exposure clipping — red highlights, blue shadows !!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! Exposure clipping — red highlights, blue shadows !!!!!!!!!!!!]</value>
   </data>
   <data name="MainPhotoCullingBothStatus" xml:space="preserve">
-    <value>[!!!!!!!!!! Focus — green edges · Clipping — red highlights, blue shadows !!!!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! Focus — green edges · Clipping — red highlights, blue shadows !!!!!!!!!!!!]</value>
   </data>
   <data name="SettingsArchiveContinuousTitle" xml:space="preserve">
-    <value>[!!!!!! Continuous archive reading !!!!!!]</value>
+    <value>[!!!!!!! Continuous archive reading !!!!!!!]</value>
   </data>
   <data name="SettingsArchiveContinuousDescription" xml:space="preserve">
-    <value>[!!!!!!!!!! Stack comic and webtoon pages in one vertical, memory-conscious scrolling strip. !!!!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! Stack comic and webtoon pages in one vertical, memory-conscious scrolling strip. !!!!!!!!!!!!]</value>
   </data>
   <data name="SettingsArchiveContinuousOnStatus" xml:space="preserve">
-    <value>[!!!!!!!! Continuous archive reading is on. Two-page spreads are off. !!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! Continuous archive reading is on. Two-page spreads are off. !!!!!!!!!!!!]</value>
   </data>
   <data name="SettingsArchiveContinuousOffStatus" xml:space="preserve">
-    <value>[!!!!!! Continuous archive reading is off. !!!!!!]</value>
+    <value>[!!!!!!!!! Continuous archive reading is off. !!!!!!!!!]</value>
   </data>
   <data name="MainArchiveContinuous" xml:space="preserve">
-    <value>[!!!! Continuous reading !!!!]</value>
+    <value>[!!!!! Continuous reading !!!!!]</value>
   </data>
   <data name="MainArchiveContinuousOn" xml:space="preserve">
-    <value>[!!!! Continuous reading on !!!!]</value>
+    <value>[!!!!!! Continuous reading on !!!!!!]</value>
   </data>
   <data name="MainArchiveContinuousHint" xml:space="preserve">
-    <value>[!!!!!!!!!! Stacks pages vertically and loads only the pages near the viewport. Turning this on disables two-page spreads. !!!!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! Stacks pages vertically and loads only the pages near the viewport. Turning this on disables two-page spreads. !!!!!!!!!!!!]</value>
   </data>
   <data name="MainArchiveContinuousPageLabel" xml:space="preserve">
     <value>[!!!! Page {0} of {1} !!!!]</value>
@@ -6688,18 +6712,18 @@ Details written to:
     <value>[!!!! Loading page… !!!!]</value>
   </data>
   <data name="MainArchiveContinuousPageError" xml:space="preserve">
-    <value>[!!!!!!!! This page could not be displayed. The archive was not changed. !!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! This page could not be displayed. The archive was not changed. !!!!!!!!!!!!]</value>
   </data>
   <data name="MainArchiveContinuousRetry" xml:space="preserve">
-    <value>[!!!! Retry page !!!!]</value>
+    <value>[!!! Retry page !!!]</value>
   </data>
   <data name="MainToastContinuousReadingOn" xml:space="preserve">
-    <value>[!!!! Continuous reading on !!!!]</value>
+    <value>[!!!!!! Continuous reading on !!!!!!]</value>
   </data>
   <data name="MainToastContinuousReadingOff" xml:space="preserve">
-    <value>[!!!! Continuous reading off !!!!]</value>
+    <value>[!!!!!! Continuous reading off !!!!!!]</value>
   </data>
   <data name="AutomationMainWindowContinuousArchiveReader" xml:space="preserve">
-    <value>[!!!! Continuous archive reader !!!!]</value>
+    <value>[!!!!!!! Continuous archive reader !!!!!!!]</value>
   </data>
 </root>

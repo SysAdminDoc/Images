@@ -25,13 +25,6 @@ Continues the `V###-##` scheme (V110 is the next free hundred-block above V100).
 
 #### P1 — Data safety, trust, and high-value inspection
 
-- [ ] P1 — HDR gain-map read-only inspection (V110-05)
-  Why: ISO 21496-1:2025 gain maps are now written by Adobe (LrC v17), Apple (iOS 18/Sequoia), and Google (Android 15 UltraHDR); Windows WIC silently ignores them and no mainstream Windows viewer surfaces them — a clean differentiation win that fits the existing read-only metadata-inspection philosophy.
-  Evidence: RESEARCH.md Architecture §; https://www.iso.org/standard/86775.html ; https://en.wikipedia.org/wiki/Ultra_HDR ; grep confirms no gain-map code exists
-  Touches: new `src/Images/Services/GainMapInspectionService.cs`, `ImageMetadataService.cs`/metadata panel, `PhotoMetadataController.cs`
-  Acceptance: for a UltraHDR/ISO-21496-1/Apple gain-map file, the inspector reports gain-map presence, flavor, and min/max content boost, and renders the gain map as a grayscale layer; files without a gain map report absence cleanly. Read-only; no writeback. (HDR *display* stays blocked in `Roadmap_Blocked.md`.)
-  Complexity: L
-
 - [ ] P1 — Upgrade SharpCompress 0.49.1 → 0.50.0 behind an archive regression gate (V110-06)
   Why: 0.50.0 reduces LZMA/RAR decode allocation (direct CBR/CBZ benefit) and fixes Zip64 non-seekable streaming + entry-metadata corruption, but breaks Tar auto-decompress and the Detection API — must not be a blind bump.
   Evidence: RESEARCH.md Security §; https://github.com/adamhathcock/sharpcompress/releases/tag/0.50.0 ; `src/Images/Services/ArchiveBookService.cs`
@@ -40,6 +33,13 @@ Continues the `V###-##` scheme (V110 is the next free hundred-block above V100).
   Complexity: M
 
 #### P2 — Scale, decomposition, and confirmed UX gaps
+
+- [ ] P2 — Render the extracted gain map as a grayscale overlay (V110-16)
+  Why: `GainMapInspectionService` (V110-05) now detects gain maps and reports their metadata, but the extracted gain-map image is not yet shown. A grayscale-layer viewer would let users see the HDR boost map itself, completing the inspection story.
+  Evidence: `src/Images/Services/GainMapInspectionService.cs` (detection + MPF/aux presence already landed); RESEARCH.md Architecture §
+  Touches: `GainMapInspectionService.cs` (add MPF/aux image extraction to a `BitmapSource`), a viewer overlay/command, `CommandShortcutService.cs`
+  Acceptance: for an Ultra HDR/Apple/ISO gain-map file, a command renders the decoded gain map as a grayscale layer over the base image; files without a gain map keep the command disabled. Needs a foreground GUI verification pass.
+  Complexity: M
 
 - [ ] P2 — Scale semantic search off the full-table linear scan (V110-07)
   Why: `Search` selects every row for the active model (no SQL `LIMIT`), deserializes each 512-dim blob, and dot-products in managed code on the calling thread on every query — re-reads/re-scores the whole index each time and will not scale past a few thousand assets.

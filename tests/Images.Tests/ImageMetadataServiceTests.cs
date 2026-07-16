@@ -146,6 +146,27 @@ public sealed class ImageMetadataServiceTests
         Assert.DoesNotContain(result.Rows, row => row.Label == "Distortion correction");
     }
 
+    [Fact]
+    public void Read_UltraHdrGainMapJpeg_SurfacesGainMapRows()
+    {
+        using var temp = TestDirectory.Create();
+        var path = Path.Combine(temp.Path, "ultrahdr.jpg");
+        var xmp = Encoding.UTF8.GetBytes(
+            "<x:xmpmeta xmlns:x=\"adobe:ns:meta/\" xmlns:hdrgm=\"http://ns.adobe.com/hdr-gain-map/1.0/\" " +
+            "hdrgm:Version=\"1.0\" hdrgm:GainMapMin=\"0.0\" hdrgm:GainMapMax=\"3.0\"></x:xmpmeta>");
+        using (var image = new MagickImage(MagickColors.Orange, 16, 8) { Format = MagickFormat.Jpeg })
+        {
+            image.SetProfile(new ImageProfile("xmp", xmp));
+            image.Write(path);
+        }
+
+        var result = ImageMetadataService.Read(path);
+
+        var gainMap = FindValue(result, "HDR gain map");
+        Assert.Contains("gain map", gainMap, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("0.0 to 3.0 stops", FindValue(result, "Content boost"));
+    }
+
     private static string FindValue(PhotoMetadata metadata, string label)
         => Assert.Single(metadata.Rows, row => row.Label == label).Value;
 }
