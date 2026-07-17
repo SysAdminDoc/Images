@@ -1611,6 +1611,9 @@ public static class Strings
     public static string ModelObjectDetectionNotes => Get(nameof(ModelObjectDetectionNotes));
     public static string ModelObjectDetectionPurpose => Get(nameof(ModelObjectDetectionPurpose));
     public static string ModelObjectDetectionRuntime => Get(nameof(ModelObjectDetectionRuntime));
+    public static string ModelOrientationNotes => Get(nameof(ModelOrientationNotes));
+    public static string ModelOrientationPurpose => Get(nameof(ModelOrientationPurpose));
+    public static string ModelOrientationRuntime => Get(nameof(ModelOrientationRuntime));
     public static string ModelReadyAction => Get(nameof(ModelReadyAction));
     public static string ModelRegistrySummaryFormat => Get(nameof(ModelRegistrySummaryFormat));
     public static string ModelReimportAction => Get(nameof(ModelReimportAction));

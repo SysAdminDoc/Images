@@ -223,6 +223,10 @@ public static class CliReport
         sb.AppendLine("  Images.exe --object-xmp <imagePath>");
         sb.AppendLine("    Print an XMP keyword draft; never modifies the image, sidecar, or catalog.");
         sb.AppendLine();
+        sb.AppendLine("  Images.exe --orientation-suggest <imagePath>");
+        sb.AppendLine("    Print a conservative local document-orientation hint as JSON.");
+        sb.AppendLine("    Ambiguous results are withheld; never rotates or modifies any file.");
+        sb.AppendLine();
         sb.AppendLine("  Images.exe --version");
         sb.AppendLine("    Print the version and exit.");
         sb.AppendLine();

@@ -23,7 +23,20 @@ public sealed class ModelManagerServiceTests
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "opencv-face-detection-yunet-2023mar");
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "opencv-face-recognition-sface-2021dec");
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "opencv-object-detection-yolox-2022nov");
+        Assert.Contains(snapshot.Models, model => model.Definition.Id == "fachuan-orientation-convnextv2-2026jun");
         Assert.All(snapshot.Models, model => Assert.Equal(LocalModelAvailability.Missing, model.Availability));
+    }
+
+    [Fact]
+    public void ApprovedOrientationModel_IsRevisionSizeAndHashPinned()
+    {
+        var model = Assert.Single(ModelManagerService.ApprovedModels,
+            item => item.Id == "fachuan-orientation-convnextv2-2026jun");
+
+        Assert.Contains("f21ab96006ad10e6388024751d1b829f5b8ab2c9", model.DownloadUrl, StringComparison.Ordinal);
+        Assert.Equal(13_671_697, model.ExpectedSizeBytes);
+        Assert.Equal("50ec8fd24fb08e23aaac8ae657f2756c9251b5f052b00a1e3af8c128e4796b54", model.ExpectedSha256);
+        Assert.Contains("MIT", model.License, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

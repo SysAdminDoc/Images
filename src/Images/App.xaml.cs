@@ -51,6 +51,13 @@ public partial class App : Application
             return;
         }
 
+        if (OrientationCli.IsOrientationCommand(e.Args))
+        {
+            var exitCode = OrientationCli.Run(e.Args);
+            Shutdown(exitCode);
+            return;
+        }
+
         var info = AppInfo.Current;
         _log.LogInformation("Images {Version} starting — {Runtime} on {Os}",
             info.DisplayVersion, info.RuntimeDescription, info.OsDescription);

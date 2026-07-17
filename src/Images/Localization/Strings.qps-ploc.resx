@@ -6498,6 +6498,15 @@ Details written to:
   <data name="ModelObjectDetectionRuntime" xml:space="preserve">
     <value>[!!!!!!!!!!!! 1x3x640x640 RGB input with 8400x85 output, opset 11; shared hardware fallback. !!!!!!!!!!!!]</value>
   </data>
+  <data name="ModelOrientationNotes" xml:space="preserve">
+    <value>[!!!!!!!!!!!! MIT model-card artifact pinned to repository revision f21ab96. Trained on receipts, invoices, documents, and screenshots; hints are confidence-gated, opt-in, and never write files. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelOrientationPurpose" xml:space="preserve">
+    <value>[!!!!!!!! Conservative local document-orientation suggestions !!!!!!!!]</value>
+  </data>
+  <data name="ModelOrientationRuntime" xml:space="preserve">
+    <value>[!!!!!!!!!!!! 1x3x384x384 ImageNet-normalized RGB input with four-class output, opset 14; shared hardware fallback. !!!!!!!!!!!!]</value>
+  </data>
   <data name="ModelReadyAction" xml:space="preserve">
     <value>[!!!!!!!!!!!! Ready for future model-backed tools once runtime code is enabled. !!!!!!!!!!!!]</value>
   </data>

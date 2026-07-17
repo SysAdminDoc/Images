@@ -262,7 +262,20 @@ public sealed class ModelManagerService
             ExpectedSha256: "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
             ExpectedSizeBytes: 35_858_002,
             RuntimeContract: Strings.ModelObjectDetectionRuntime,
-            Notes: Strings.ModelObjectDetectionNotes)
+            Notes: Strings.ModelObjectDetectionNotes),
+        new(
+            Id: "fachuan-orientation-convnextv2-2026jun",
+            DisplayName: "Fachuan ConvNeXtV2 Orientation Classifier",
+            Purpose: Strings.ModelOrientationPurpose,
+            StorageGroup: "orientation",
+            SourceUrl: "https://huggingface.co/Fachuan/orientation-classifier",
+            DownloadUrl: "https://huggingface.co/Fachuan/orientation-classifier/resolve/f21ab96006ad10e6388024751d1b829f5b8ab2c9/fachuan-orientation-classifier.onnx",
+            License: Strings.ModelMitLicense,
+            FileName: "fachuan-orientation-classifier.onnx",
+            ExpectedSha256: "50ec8fd24fb08e23aaac8ae657f2756c9251b5f052b00a1e3af8c128e4796b54",
+            ExpectedSizeBytes: 13_671_697,
+            RuntimeContract: Strings.ModelOrientationRuntime,
+            Notes: Strings.ModelOrientationNotes)
     ];
 
     public LocalModelManagerSnapshot GetSnapshot()

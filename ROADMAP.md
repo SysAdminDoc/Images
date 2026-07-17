@@ -14,7 +14,6 @@ Promote to `1.0.0` when a release candidate satisfies those three unsigned check
 
 ## Actionable Work
 
-- [ ] **V60-10** *P2* — Opt-in auto-rotate suggestions from a reviewed local orientation classifier; never rotate or write a source without confirmation.
 - [ ] **V60-11** *P2* — Local NIMA-style aesthetic scoring for trip culling, with visible model provenance and no automatic Pick-label writes.
 - [ ] **V60-12** *P2* — Local scene classification feeding smart-album suggestions from reviewed Places365/ANSA-style ONNX weights.
 - [ ] **V60-13** *P2* — Optional, default-off local safety classification from reviewed ONNX weights; keep scores private and out of source metadata unless explicitly exported.
