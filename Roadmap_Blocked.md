@@ -208,16 +208,6 @@ Permanent owner policy: D-05/D-05a and signing-dependent C2PA write/export work 
   - **Blocked by**: requires downloading SigLIP 2 ONNX models from HuggingFace, computing SHA-256 hashes, and pinning them in Model Manager.
   - **Unblock when**: SigLIP 2 base ONNX models are downloaded and SHA-256 values are validated.
 
-- [ ] P2 — **Local face-region review workflow**
-  Why: Images has `person:` tag namespaces and planned Picasa face-region migration, but modern photo managers treat face grouping as core organization; this should land as an explicit local review lane, not an automatic write.
-  - **Blocked by**: requires downloading SCRFD ONNX face detection models, validating SHA-256 hashes, and pinning them in Model Manager.
-  - **Unblock when**: SCRFD face detection ONNX models are downloaded and validated for local inference, and inference runtime is operational.
-
-- [ ] P1 — **AI-assisted culling quality signals**
-  Why: Adobe LrC and Capture One ship AI-assisted review that flags closed eyes and out-of-focus shots. SCRFD face detection models (2-15 MB ONNX) make this feasible locally.
-  - **Blocked by**: requires downloading SCRFD ONNX models, validating SHA-256 hashes, pinning in Model Manager, and designing the review-mode quality signal UX.
-  - **Unblock when**: SCRFD face detection ONNX models are downloaded and validated for local inference.
-
 ## Blocked On External Binary Downloads
 
 - [ ] P1 — **Update bundled Ghostscript 10.07.0 → 10.07.1**

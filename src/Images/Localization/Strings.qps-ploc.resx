@@ -6429,6 +6429,24 @@ Details written to:
   <data name="ModelDeleteFailedFormat" xml:space="preserve">
     <value>[!!!!!! Model delete failed: {0} !!!!!!]</value>
   </data>
+  <data name="ModelFaceDetectionNotes" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Official OpenCV Zoo YuNet artifact pinned to repository revision 3cc26e7. Import is manual and SHA-256 gated; Images never downloads face models automatically. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelFaceDetectionPurpose" xml:space="preserve">
+    <value>[!!!!!!!! Local face detection and landmark extraction !!!!!!!!]</value>
+  </data>
+  <data name="ModelFaceDetectionRuntime" xml:space="preserve">
+    <value>[!!!!!!!!!!!! 1x3x640x640 RGB input, opset 11; Windows ML NPU/GPU first, DirectML and CPU fallback. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelFaceRecognitionNotes" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Official OpenCV Zoo SFace artifact pinned to repository revision 3d70824. Recognition remains opt-in and local; embeddings are derived data and are never written to source files. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelFaceRecognitionPurpose" xml:space="preserve">
+    <value>[!!!!!!!! Local face embeddings for reviewed person grouping !!!!!!!!]</value>
+  </data>
+  <data name="ModelFaceRecognitionRuntime" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Aligned 1x3x112x112 RGB face input with a 128-value embedding output, opset 11; shared hardware fallback. !!!!!!!!!!!!]</value>
+  </data>
   <data name="ModelHashMismatchAction" xml:space="preserve">
     <value>[!!!!!!!!!!!! Delete this file and import the exact approved ONNX artifact. !!!!!!!!!!!!]</value>
   </data>

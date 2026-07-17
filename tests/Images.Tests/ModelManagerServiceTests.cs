@@ -20,7 +20,25 @@ public sealed class ModelManagerServiceTests
         Assert.True(snapshot.Runtime.WindowsMlOsCandidate);
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "opencv-inpainting-lama-2025jan");
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "carve-lama-fp32");
+        Assert.Contains(snapshot.Models, model => model.Definition.Id == "opencv-face-detection-yunet-2023mar");
+        Assert.Contains(snapshot.Models, model => model.Definition.Id == "opencv-face-recognition-sface-2021dec");
         Assert.All(snapshot.Models, model => Assert.Equal(LocalModelAvailability.Missing, model.Availability));
+    }
+
+    [Fact]
+    public void ApprovedFaceModels_PinReviewedOpenCvArtifacts()
+    {
+        var yunet = Assert.Single(ModelManagerService.ApprovedModels,
+            model => model.Id == "opencv-face-detection-yunet-2023mar");
+        var sface = Assert.Single(ModelManagerService.ApprovedModels,
+            model => model.Id == "opencv-face-recognition-sface-2021dec");
+
+        Assert.Equal(232_589, yunet.ExpectedSizeBytes);
+        Assert.Equal("8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4", yunet.ExpectedSha256);
+        Assert.Contains("3cc26e7f1014a5ee5d74a42acee58bafc9d0a310", yunet.DownloadUrl, StringComparison.Ordinal);
+        Assert.Equal(38_696_353, sface.ExpectedSizeBytes);
+        Assert.Equal("0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79", sface.ExpectedSha256);
+        Assert.Contains("3d7082438a6e4551e840c9b2bb60b71e8da4b524", sface.DownloadUrl, StringComparison.Ordinal);
     }
 
     [Fact]

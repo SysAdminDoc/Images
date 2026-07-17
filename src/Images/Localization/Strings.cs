@@ -1588,6 +1588,12 @@ public static class Strings
     public static string ModelClipVisionRuntime => Get(nameof(ModelClipVisionRuntime));
     public static string ModelDefinitionNotApproved => Get(nameof(ModelDefinitionNotApproved));
     public static string ModelDeleteFailedFormat => Get(nameof(ModelDeleteFailedFormat));
+    public static string ModelFaceDetectionNotes => Get(nameof(ModelFaceDetectionNotes));
+    public static string ModelFaceDetectionPurpose => Get(nameof(ModelFaceDetectionPurpose));
+    public static string ModelFaceDetectionRuntime => Get(nameof(ModelFaceDetectionRuntime));
+    public static string ModelFaceRecognitionNotes => Get(nameof(ModelFaceRecognitionNotes));
+    public static string ModelFaceRecognitionPurpose => Get(nameof(ModelFaceRecognitionPurpose));
+    public static string ModelFaceRecognitionRuntime => Get(nameof(ModelFaceRecognitionRuntime));
     public static string ModelHashMismatchAction => Get(nameof(ModelHashMismatchAction));
     public static string ModelImportAction => Get(nameof(ModelImportAction));
     public static string ModelImportedHashMismatchFormat => Get(nameof(ModelImportedHashMismatchFormat));

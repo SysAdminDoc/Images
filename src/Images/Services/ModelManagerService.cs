@@ -223,7 +223,33 @@ public sealed class ModelManagerService
             ExpectedSha256: "ce945ef831c9972c135b5b198a03d8eeb70478cd69c0238f24caf1903a9965e6",
             ExpectedSizeBytes: 780,
             RuntimeContract: Strings.ModelClipPreprocessorRuntime,
-            Notes: Strings.ModelClipPreprocessorNotes)
+            Notes: Strings.ModelClipPreprocessorNotes),
+        new(
+            Id: "opencv-face-detection-yunet-2023mar",
+            DisplayName: "OpenCV YuNet Face Detection",
+            Purpose: Strings.ModelFaceDetectionPurpose,
+            StorageGroup: "faces",
+            SourceUrl: "https://huggingface.co/opencv/face_detection_yunet",
+            DownloadUrl: "https://huggingface.co/opencv/face_detection_yunet/resolve/3cc26e7f1014a5ee5d74a42acee58bafc9d0a310/face_detection_yunet_2023mar.onnx",
+            License: Strings.ModelOpenCvLicense,
+            FileName: "face_detection_yunet_2023mar.onnx",
+            ExpectedSha256: "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4",
+            ExpectedSizeBytes: 232_589,
+            RuntimeContract: Strings.ModelFaceDetectionRuntime,
+            Notes: Strings.ModelFaceDetectionNotes),
+        new(
+            Id: "opencv-face-recognition-sface-2021dec",
+            DisplayName: "OpenCV SFace Recognition",
+            Purpose: Strings.ModelFaceRecognitionPurpose,
+            StorageGroup: "faces",
+            SourceUrl: "https://huggingface.co/opencv/face_recognition_sface",
+            DownloadUrl: "https://huggingface.co/opencv/face_recognition_sface/resolve/3d7082438a6e4551e840c9b2bb60b71e8da4b524/face_recognition_sface_2021dec.onnx",
+            License: Strings.ModelOpenCvLicense,
+            FileName: "face_recognition_sface_2021dec.onnx",
+            ExpectedSha256: "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79",
+            ExpectedSizeBytes: 38_696_353,
+            RuntimeContract: Strings.ModelFaceRecognitionRuntime,
+            Notes: Strings.ModelFaceRecognitionNotes)
     ];
 
     public LocalModelManagerSnapshot GetSnapshot()
