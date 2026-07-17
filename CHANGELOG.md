@@ -6,6 +6,7 @@ All notable changes to **Images** are documented here.
 
 - Added window-free catalog CLI consumers: `--catalog-search "<terms>"` prints assets matching every filename/format/codec/rating/palette/camera/lens/tag term, while `--catalog-near <lat> <lon> <radiusKm>` prints assets inside an exact great-circle radius. Catalog folder, term, and geo predicates now run in SQLite instead of materializing up to 50,000 records for LINQ filtering; focused tests cover multi-term metadata matching, radius exclusion, parsing, and process-friendly path output.
 - Added a safe WPF background-smoke lane. `--uia-background` launches the real app offscreen with isolated mutable storage, no taskbar entry, `ShowActivated=false`, native `WS_EX_NOACTIVATE`, no startup focus/update check, and no persisted test geometry. Six FlaUI cases verify process lifecycle, fixture decode, title, canvas automation, navigation controls, and a two-item filmstrip without global keyboard/mouse input; `scripts/Test-WpfBackgroundSmoke.ps1` runs the lane locally and a Windows GitHub Actions job publishes its TRX result.
+- Reframed the v1.0 milestone around reachable unsigned quality gates: GitHub Releases, checksum-pinned WinGet/Scoop manifests, and the non-activating WPF smoke lane. Code-signing and signing-dependent C2PA-write items are permanently retired by owner policy. The Skia canvas and remaining Windows ML/NPU runtime front-end are now scheduled as actionable keystone efforts instead of circular blocked chains.
 
 ## v0.2.29 - 2026-07-17
 
@@ -840,6 +841,9 @@ Text extraction (OCR) using Windows.Media.Ocr API. Local processing, privacy-fir
 - **Single-region copy only** — no multi-select, Ctrl+click, or Select All. Click one box → copies one line. Phase 2 will add multi-region selection and "Copy all text" button.
 - **No in-app language picker** — users must install language packs via Windows Settings. Phase 2 will add Settings window OCR section with language enumeration and direct link to Windows language settings.
 
+<details>
+<summary>Pre-0.2 release history (v0.1.9 through v0.1.0)</summary>
+
 ## v0.1.9 — 2026-05-04
 
 Settings window, GPS-location strip, and automatic external-edit reload. Three ROADMAP items closed.
@@ -1127,3 +1131,5 @@ Initial release.
 - Recent Renames panel with one-click undo for the last 10 renames.
 - Zoom (wheel / Ctrl+wheel), pan (drag), fit-to-window, 1:1, rotate, delete-to-recycle-bin.
 - Command-line: `Images.exe "C:\path\to\image.jpg"` opens file and populates directory.
+
+</details>

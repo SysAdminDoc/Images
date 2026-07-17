@@ -2,7 +2,7 @@
 
 Status: `IP-17A` decision record  
 Date: 2026-05-05  
-Scope: packaging, package-manager submission, checksum continuity, and signing decisions for the next stable release.
+Scope: packaging, package-manager submission, checksum continuity, and the permanent unsigned-release policy.
 
 ## Current Official Distribution
 
@@ -19,8 +19,8 @@ Both artifacts are produced locally from the same source checkout. `scripts\Test
 - Keep GitHub Releases as the source of truth for bytes and checksums.
 - Add WinGet and Scoop only as install/update entry points that point back to official release artifacts.
 - Keep checksum validation in every release and every package-manager manifest.
-- Make signing status explicit. Do not imply SmartScreen trust that does not exist.
-- Prefer signing that works without a local hardware token, if account geography and identity verification permit it.
+- State plainly that official artifacts are intentionally unsigned and may trigger SmartScreen reputation warnings.
+- Use GitHub release provenance plus SHA-256 continuity as the public verification contract.
 
 ## Release Artifact Requirements
 
@@ -126,33 +126,13 @@ Start with the portable ZIP in the Scoop `extras` bucket. It matches Scoop's str
 5. Submit to Scoop `extras` if the package meets bucket expectations.
 6. If `extras` is rejected, maintain a project-owned bucket rather than weakening the artifact model.
 
-## Code-Signing Decision
+## Permanent Unsigned-Release Decision
 
 ### Decision
 
-Do not block WinGet/Scoop scoping on code signing. Continue publishing checksums and pursue signing as the next release-trust improvement.
+Images does not sign software on any platform. Do not acquire a certificate, create a signing account, add a signing workflow, or treat signing/SmartScreen reputation as a release or v1.0 gate.
 
-Preferred signing path for non-Store distribution is Azure Artifact Signing, if the publisher identity and geography are eligible. Microsoft documents it as the recommended non-Store signing option, with automation support and no hardware token, but also documents that SmartScreen reputation still builds over time. Signing reduces tamper and publisher-identity risk; it does not guarantee an instant SmartScreen-free first run.
-
-### Options Considered
-
-| Option | Cost/trust profile | Decision |
-| --- | --- | --- |
-| No signature | Free but highest SmartScreen and enterprise-block risk. | Current state only; not acceptable long term. |
-| Self-signed certificate | Useful for development or managed enterprise trust only. | Reject for public releases. |
-| OV certificate | Traditional path, annual cost, hardware-token/HSM requirements. | Fallback if Azure Artifact Signing is unavailable. |
-| EV certificate | Higher cost. Microsoft no longer recommends it solely for SmartScreen bypass. | Reject unless enterprise requirements change. |
-| Azure Artifact Signing | Lower monthly cost, managed signing, automation-friendly, geography-limited. | Preferred evaluation path. |
-| Microsoft Store MSIX | Store handles MSIX signing, but requires a different package model. | Future distribution channel, not current Inno/portable path. |
-
-### Signing Rollout
-
-1. Confirm legal publisher identity to use for signatures.
-2. Confirm Azure Artifact Signing availability for that identity.
-3. Prototype signing the published `Images.exe` files and Inno installer on a local release copy.
-4. Verify Authenticode signatures with `Get-AuthenticodeSignature` and `signtool verify /pa`.
-5. Update the local release checklist only after private verification succeeds.
-6. Add signature status to release notes and diagnostics documentation.
+WinGet and Scoop manifests remain valid for unsigned GitHub-hosted artifacts because their install records pin the release URL and SHA-256. Microsoft Store publication is an optional account-gated channel with Store-managed packaging policy; it does not change the unsigned Inno/portable contract.
 
 ## User Verification Copy
 
@@ -161,22 +141,19 @@ Release notes should keep a short verification block:
 ```powershell
 Get-FileHash .\Images-vX.Y.Z-win-x64.zip -Algorithm SHA256
 Get-FileHash .\Images-vX.Y.Z-setup-win-x64.exe -Algorithm SHA256
-Get-AuthenticodeSignature .\Images-vX.Y.Z-setup-win-x64.exe
 ```
 
-If the build is unsigned, say so plainly and direct users to checksum validation. If the build is signed, show the expected publisher name.
+Release notes must say the build is intentionally unsigned and direct users to the published checksum file.
 
 ## Open Follow-Ups
 
 - ~~Create the first WinGet manifest after the next stable release is published.~~ Shipped — `scripts/New-PackageManifests.ps1` generates WinGet multi-file manifests from the local checksum file.
 - ~~Create the first Scoop manifest after the next stable release is published.~~ Shipped — same script generates a Scoop portable manifest with autoupdate metadata.
-- Add a local signing step once credentials are available.
 - Add package-manager installation smoke tests to release validation after the first accepted manifests.
 
 ## Sources
 
 - Microsoft Learn: WinGet manifest creation - <https://learn.microsoft.com/en-us/windows/package-manager/package/manifest>
 - Microsoft Learn: WinGet repository submission - <https://learn.microsoft.com/en-us/windows/package-manager/package/repository>
-- Microsoft Learn: Windows code-signing options - <https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options>
 - Scoop Wiki: App manifests - <https://github.com/ScoopInstaller/Scoop/wiki/App-Manifests>
 - Scoop Wiki: App manifest autoupdate - <https://github.com/ScoopInstaller/Scoop/wiki/App-Manifest-Autoupdate>

@@ -361,4 +361,4 @@ Tag, filter, and move images locally while keeping user intent portable and reve
 - Which dependency review template should be used for ONNX models, archive libraries, and perceptual hashing?
 - Should compare mode be a separate window, an in-window split view, or both over time?
 - What is the maximum acceptable model/download size for local semantic search?
-- Should package-manager distribution wait for code signing or ship with checksum-first guidance?
+- Package-manager distribution follows the permanent unsigned policy: checksum-pinned GitHub artifacts ship without waiting for code signing.

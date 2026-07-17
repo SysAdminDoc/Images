@@ -12,7 +12,7 @@ Top opportunities: gain-map inspection, catalog SQLite-lock fix, dependency serv
 
 - **Core workflows:** open files/folders/clipboard/archives; navigate, zoom, compare (N-pane synced + diff), loupe, present; inspect OCR/metadata/C2PA/gain-map; non-destructive edit + export; catalog, search (text + CLIP), dedup, import, recover.
 - **User personas:** Windows power users replacing Photos/ImageGlass; photographers/archivists working directly in folders; comic/manga/webtoon readers; privacy-conscious users who value portable builds and visible runtime provenance.
-- **Platforms & distribution:** Windows 10/11 x64; `net10.0-windows10.0.22621.0`; MIT; self-contained installer + portable ZIP. Signing and WinGet/Store publication remain externally blocked (`Roadmap_Blocked.md`).
+- **Platforms & distribution:** Windows 10/11 x64; `net10.0-windows10.0.22621.0`; MIT; self-contained installer + portable ZIP. Releases are permanently unsigned by owner policy; checksum-pinned WinGet/Scoop manifests are supported, while account-based WinGet/Store submission remains external follow-up (`Roadmap_Blocked.md`) and does not gate v1.0.
 - **Key integrations & data flows:** WIC-first decode with Magick.NET 14.15.0 (ImageMagick 7.1.2-27) fallback; SharpCompress 0.49.1 read-only archives; SQLite settings/catalog/semantic index; XMP sidecars; optional Ghostscript/jpegtran/ExifTool/c2patool child processes (bounded, egress-logged); Windows OCR; imported ONNX models via ONNX Runtime DirectML 1.24.4; default-off GitHub release checks.
 
 ## Competitive Landscape
@@ -44,7 +44,7 @@ Top opportunities: gain-map inspection, catalog SQLite-lock fix, dependency serv
 - **Gain-map inspection is greenfield.** No gain-map/UltraHDR code exists (`grep` clean). ISO 21496-1:2025 gain maps are now written by Adobe (LrC v17), Apple (iOS 18/Sequoia), and Google (Android 15 UltraHDR). Windows WIC silently ignores them. A read-only inspector (base + gain-map grayscale layer + min/max content boost + flavor detection) is fully doable via Magick.NET/manual JUMBF/MPF parsing and would beat every mainstream Windows viewer. HDR *display* of gain maps needs a D3D11/D2D scRGB-float swapchain (WPF's SDR pipeline can't composite it) — treat display as a later, blocked renderer decision; ship inspection first.
 - **JXL provenance.** `Exif31MetadataReader` already handles UTF-8 tags correctly; the remaining read-only add is detecting JXL lossless-JPEG *transcode* (recompression) vs native codestream vs ISOBMFF container — a headline JXL trait no viewer surfaces.
 - **DirectML is in maintenance mode** (not deprecated). ONNX Runtime DirectML 1.24.4 is current and supported; the Windows ML migration remains a correctly-blocked renderer/runtime decision, not a current-sprint item.
-- **Category audit:** security/servicing and reliability covered by the SQLite/import/animated-decode fixes; performance by semantic-search + tile-lock work; accessibility by the invert-colors toggle (also a WCAG-adjacent aid); UX by archive-jump and fly-through; docs by undersold-feature README sync. i18n (single shipped locale + Crowdin), signing, Store/WinGet, plugin isolation, GPU-decode renderer swap, face clustering, and lab/VFX format packs are consciously deferred or already parked in `Roadmap_Blocked.md`.
+- **Category audit:** security/servicing and reliability covered by the SQLite/import/animated-decode fixes; performance by semantic-search + tile-lock work; accessibility by the invert-colors toggle (also a WCAG-adjacent aid); UX by archive-jump and fly-through; docs by undersold-feature README sync. The Skia renderer and Windows ML front-end are now actionable keystones in `ROADMAP.md`; i18n accounts, Store/WinGet submission, plugin isolation, face clustering, and lab/VFX format packs remain external or predecessor-gated. Signing is retired, not deferred.
 
 ## Rejected Ideas
 
@@ -103,4 +103,4 @@ Top opportunities: gain-map inspection, catalog SQLite-lock fix, dependency serv
 
 ## Open Questions
 
-None that block the actionable additions. HDR gain-map *display* (vs inspection), GPU-decode renderer swap, Windows ML migration, code signing, WinGet/Store publication, Crowdin localization, and lab/VFX format packs remain explicitly parked in `Roadmap_Blocked.md`.
+None that block the actionable additions. HDR gain-map *display* (vs inspection) and downstream ML work remain predecessor-gated; WinGet/Store publication, Crowdin localization, and lab/VFX format packs remain externally gated. The renderer swap and Windows ML migration are now scheduled in `ROADMAP.md`; code signing is permanently retired by owner policy.

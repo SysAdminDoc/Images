@@ -240,7 +240,7 @@ Images carries its own diagnostics surface — no terminal required for the comm
 - [Release checklist](docs/release-checklist.md) — current-state, roadmap-closure, version/date, and runtime checks before publishing.
 - [Codec support policy](docs/codec-support-policy.md) — bundled-vs-optional tiers and the gate every new optional decoder must pass.
 - [Privacy policy](docs/privacy-policy.md) — exactly one network call (the opt-out update check), every file persisted to disk, and a four-step verification recipe.
-- [Distribution trust plan](docs/distribution-trust.md) — WinGet/Scoop scope, checksum continuity, signing options, and verification copy.
+- [Distribution trust plan](docs/distribution-trust.md) — unsigned WinGet/Scoop scope, checksum continuity, and verification copy.
 - [Optional runtime and integration policy](docs/integration-policy.md) — license, provenance, CVE, process-boundary, and release gates for external runtimes.
 - [Archive runtime review](docs/archive-runtime-review.md) — approved SharpCompress RAR/7z reader path plus native 7-Zip/UnRAR fallback gates.
 - [Peek mode](docs/peek-mode.md) — shell-helper invocation, local startup timing diagnostics, and manual smoke steps.

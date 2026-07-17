@@ -3,6 +3,8 @@
 This file holds roadmap work that is real but not currently actionable by an
 agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
 
+Permanent owner policy: D-05/D-05a and signing-dependent C2PA write/export work (P-07, V50-25, V50-34) are retired, never release gates; any future Explorer integration must use an unsigned unpackaged path or be dropped.
+
 ## Blocked On Local GUI Or Human Runtime Smoke
 
 - [ ] **V02-04** *P2* — Recapture main screenshot (DPI-aware, `PrintWindow(hwnd, hdc, 2)` per `screenshots.md`). Requires Windows GUI session.
@@ -35,28 +37,6 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
   - **Blocked by**: first manual `SysAdminDoc.Images` submission to `microsoft/winget-pkgs`, fork ownership, and classic `public_repo` PAT stored as `WINGET_TOKEN`.
   - **Unblock when**: the package exists in WinGet and the repository secret/fork are configured.
 
-## Blocked On Code-Signing Identity Or External Approval
-
-- [ ] **D-05** *P0* — **Azure Artifact Signing** (rebrand of Azure Trusted Signing, now GA April 2026) via `azure/artifact-signing-action` in the release workflow. SmartScreen reputation warm-up still applies (since 2023 even EV is throttled for new publishers) — so no reason to pay for EV. Self-employed individuals now eligible (no 3-yr history requirement); restricted to US/CA/EU/UK businesses/individuals. Effort: M. [[S-ARTIFACT-SIGNING]](https://azure.microsoft.com/en-us/products/artifact-signing) [[S-SMARTSCREEN-REGRESSION]](https://learn.microsoft.com/en-us/answers/questions/5855708/trusted-signing-regression-in-smartscreen-reputati) *Risk flagged 2026-03/04: Microsoft silently rotated issuing CAs (EOC CA 02 → AOC CA 03 → EOC CA 04) which broke SmartScreen reputation for existing customers. Expect the first ~500 installs to trip "Unrecognized app" even with a valid cert. Hanselman has the working GitHub-Actions setup [[S-HANSELMAN-SIGN]](https://www.hanselman.com/blog/automatically-signing-a-windows-exe-with-azure-trusted-signing-dotnet-sign-and-github-actions).*
-  - **Blocked by**: Azure Artifact Signing account, certificate profile, tenant/app credentials, and repository secrets.
-  - **Unblock when**: signing identity and GitHub Actions secrets are provisioned.
-
-- [ ] **D-05a** *P1* — **SignPath.io OSS code-signing evaluation** (new, 2026-04-25 research). Free certificate via SignPath Foundation for OSS projects (used by PicView). Pre-requisite: GitHub Actions integration + SignPath-approved project status. Evaluate in parallel with D-05 — whichever lands first wins; both are fine to keep running simultaneously (dual-signing is supported by Authenticode). Effort: S (application) + M (pipeline). [[S-PV]](https://github.com/Ruben2776/PicView)
-  - **Blocked by**: external SignPath Foundation application and approval.
-  - **Unblock when**: project approval and integration credentials are available.
-
-- [ ] **P-07** *P2* — **C2PA write-on-export** — stamp "edited with Images v0.x" + operation list on every export from v0.3/v0.5. Requires signing identity (Azure Trusted Signing works). Defers until P-05 is stable. Effort: M.
-  - **Blocked by**: C2PA signing identity and certificate choice.
-  - **Unblock when**: D-05 or another accepted signing identity is available.
-
-- [ ] **V50-25** *P2* — **C2PA write-on-export** (P-07). Per-op, opt-in; embeds operation manifest + signing identity. Requires D-05 (Trusted Signing) for the cert.
-  - **Blocked by**: D-05 signing certificate.
-  - **Unblock when**: signing credentials are available and P-07 is active again.
-
-- [ ] **V50-34** *P2* — **Configurable C2PA signing identity** — default to Azure Trusted Signing cert (D-05); allow user-supplied identity.
-  - **Blocked by**: at least one approved signing identity path.
-  - **Unblock when**: Azure Artifact Signing, SignPath, or another accepted signing path is provisioned.
-
 ## Blocked On External Accounts Or Credentials
 
 - [ ] **I-02** *P1* — **Crowdin for OSS** (free tier under 60k words) over GitHub. Ship en + de + fr + es + ja + pt-BR + zh-Hans as v1 locale set. Effort: M. [Crowdin OSS programme]
@@ -70,13 +50,6 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
 - [ ] **D-04** *P1* — **Microsoft Store via MSIX** for discovery, paired with S-07 AppContainer work. GitHub Releases stays primary. Effort: M. [MS Learn MSIX overview]
   - **Blocked by**: S-07 MSIX packaging work + Microsoft Store developer account + Store submission.
   - **Unblock when**: S-07 ships and Store account is provisioned.
-
-## Blocked On Code-Signing Identity
-
-- [ ] P3 — **Scout signed Windows preview/thumbnail handler integration**
-  Why: `--peek` covers external preview workflows, but Explorer Preview Pane and thumbnails require shell-extension trust, install, rollback, and signing evidence before implementation.
-  - **Blocked by**: D-05 code signing — shell extension registration requires signed binaries for trusted Explorer integration.
-  - **Unblock when**: D-05 or D-05a code signing identity is provisioned.
 
 ## Blocked On Research / Evaluation (Not Code-Ready)
 
@@ -131,10 +104,6 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
 - [ ] **P-06** *P2* — **C2PA P/Invoke spike** — bind directly to `c2pa-rs` C API for in-process verify instead of shelling out to `c2patool`. Eliminates ~30 ms per-file process spawn. Effort: L. [c2pa-rs README]
   - **Blocked by**: research spike — c2pa-rs C API binding feasibility and .NET interop approach.
   - **Unblock when**: spike document with P/Invoke binding strategy produced.
-
-- [ ] **V20-01** *P0* — **SkiaSharp canvas** replacing `WriteableBitmap` in `ZoomPanImage`. `SKCodec` decodes to target size (1000x800 buffer for 800x600 view of 4000x3600 source). ~2x load, ~4x thumbnail gen vs ImageSharp. MIT, no strings. Unlocks HDR path and every AI overlay later. [stack: `SkiaSharp`]
-  - **Blocked by**: major architectural change — needs dedicated implementation run; current WPF `WriteableBitmap` pipeline is stable.
-  - **Unblock when**: a dedicated multi-day implementation run is scheduled for the canvas swap.
 
 - [ ] **V40-02** *P0* — **Watched folders** — add/remove library roots, scan-on-start, FSW for deltas. Multi-root w/ offline-prompt behavior (don't delete records on drive eject).
   - **Blocked by**: catalog maturity — V40-01 SQLite catalog schema needs to be stable before watched-folder ingest.
@@ -321,10 +290,6 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
   - **Unblock when**: TWAIN SDK evaluated and MSIX compatibility path decided.
 
 ## Blocked On V60-01 Inference Runtime
-
-- [ ] **V60-01** *P0* — **Inference runtime — dual-path**. On Win11 24H2+: use Windows ML; on older Windows: ship `Microsoft.ML.OnnxRuntime` + DirectML provider. Auto-detect at startup. UI label: "Running on NPU / GPU / CPU". Effort: M.
-  - **Blocked by**: major infrastructure work — dual-path ML runtime needs dedicated implementation run with Windows ML + ONNX Runtime DirectML integration.
-  - **Unblock when**: a dedicated implementation run is scheduled for the inference runtime.
 
 - [ ] **V60-02** *P0* — **CLIP semantic search** (KILLER FEATURE). `ElBruno.LocalEmbeddings.ImageEmbeddings` (MIT). OpenCLIP ViT-B/32 ONNX ~300 MB. Embed library images on ingest; 512-d vectors in sqlite-vec. Effort: XL.
   - **Blocked by**: V60-01 inference runtime — CLIP embedding requires the ML runtime to be operational.
