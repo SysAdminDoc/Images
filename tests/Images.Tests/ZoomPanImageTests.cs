@@ -70,6 +70,19 @@ public sealed class ZoomPanImageTests
     }
 
     [Fact]
+    public void InvertColors_KeepsLiveSkiaPresenter()
+    {
+        RunOnSta(() =>
+        {
+            var control = new ZoomPanImage { Source = MakeBitmap() };
+
+            control.InvertColors = true;
+
+            Assert.True(control.IsSkiaStaticRendererActive);
+        });
+    }
+
+    [Fact]
     public void PreserveViewOnSourceChange_KeepsZoomAndCentersPanForNewImage()
     {
         RunOnSta(() =>

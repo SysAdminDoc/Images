@@ -14,7 +14,6 @@ Promote to `1.0.0` when a release candidate satisfies those three unsigned check
 
 ## Actionable Work
 
-- [ ] **V20-01** *P0* — Replace the still-image presenter inside `ZoomPanImage` with a SkiaSharp-backed canvas while preserving the current live consumer and WPF overlay contract. Land in slices: renderer abstraction + software fallback; still-image/alpha/invert/nearest-neighbor parity; transform/tile/animation coexistence; golden-render fixtures plus the background smoke lane. Do not merge an unused renderer core.
 - [ ] **V60-01** *P0* — Complete the dual-path inference runtime after V20-01: retain the existing ONNX Runtime DirectML/CPU fallback used by CLIP, background removal, LaMa, and super-resolution; add Windows ML auto-detection on supported Windows 11 builds; expose a truthful `NPU` / `GPU` / `CPU` label from the selected adapter; validate one pinned model through each available path.
 
 The remaining research item is decision-gated (Ghostscript-source AGPL mechanism) and lives in `Roadmap_Blocked.md`.

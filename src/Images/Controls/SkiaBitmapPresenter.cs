@@ -38,32 +38,34 @@ internal sealed class SkiaBitmapPresenter : SKElement
     }
 
     protected override void OnPaintSurface(SKPaintSurfaceEventArgs e)
+        => Draw(e.Surface.Canvas, e.Info, _bitmap, _nearestNeighbor);
+
+    internal static void Draw(SKCanvas canvas, SKImageInfo target, SKBitmap? bitmap, bool nearestNeighbor)
     {
-        var canvas = e.Surface.Canvas;
         canvas.Clear(SKColors.Transparent);
 
-        if (_bitmap is not { Width: > 0, Height: > 0 } bitmap ||
-            e.Info.Width <= 0 || e.Info.Height <= 0)
+        if (bitmap is not { Width: > 0, Height: > 0 } ||
+            target.Width <= 0 || target.Height <= 0)
         {
             return;
         }
 
-        var scale = Math.Min((float)e.Info.Width / bitmap.Width, (float)e.Info.Height / bitmap.Height);
+        var scale = Math.Min((float)target.Width / bitmap.Width, (float)target.Height / bitmap.Height);
         var width = bitmap.Width * scale;
         var height = bitmap.Height * scale;
         var destination = SKRect.Create(
-            (e.Info.Width - width) / 2f,
-            (e.Info.Height - height) / 2f,
+            (target.Width - width) / 2f,
+            (target.Height - height) / 2f,
             width,
             height);
-        var sampling = _nearestNeighbor
+        var sampling = nearestNeighbor
             ? new SKSamplingOptions(SKFilterMode.Nearest, SKMipmapMode.None)
             : new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear);
 
         canvas.DrawBitmap(bitmap, destination, sampling);
     }
 
-    private static SKBitmap CopyToSkia(BitmapSource source)
+    internal static SKBitmap CopyToSkia(BitmapSource source)
     {
         BitmapSource premultiplied = source.Format == PixelFormats.Pbgra32
             ? source

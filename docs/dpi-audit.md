@@ -27,8 +27,9 @@ Places that would be fragile if they existed (none do):
 - `Canvas.SetLeft` / `SetTop` with literal pixel math (in `PrintService.cs` we compute `(pageWidth - renderedW) / 2` where both terms come from `PrintDialog.PrintableAreaWidth`, which is already in DIU. Safe.)
 - Raw `HwndSource.SizeToContent` interactions with Win32 windows measured in physical pixels (not used).
 
-## Recommendation for v0.2.x
-When the SkiaSharp canvas migration (V20-01) lands, an audit pass on the new draw-surface geometry is worth it — SkiaSharp's `SKCanvas` takes raw pixels, so every call-site needs to multiply by `VisualTreeHelper.GetDpi(this).PixelsPerDip` to get the right on-screen size. Track this as a V20-01 sub-task.
+## Skia canvas follow-up (v0.2.30)
+
+V20-01 uses `SKElement`'s `SKPaintSurfaceEventArgs.Info` for the target geometry. Those dimensions are already physical surface pixels, so the presenter performs its centered-uniform fit wholly in source/target pixels and does not mix WPF DIU into `SKCanvas` math. A deterministic 2:1-to-square golden fixture proves centered bounds and transparent letterboxing; the offscreen WPF smoke lane covers the per-monitor-v2 host. Future Skia overlays that accept coordinates from WPF layout must convert those DIU inputs with the element's current `VisualTreeHelper.GetDpi(...).PixelsPerDip` before drawing.
 
 ## Conclusion
-**No changes required for v0.1.6.** The XAML is DIU-clean; the manifest is per-monitor-v2; the screenshot-capture guide (`screenshots.md`) already accounts for 125% DPI. Future fragility risk lives in code-behind that bypasses the WPF layout system — we have no such code today.
+The XAML remains DIU-clean; the manifest is per-monitor-v2; the screenshot-capture guide (`screenshots.md`) accounts for 125% DPI; and the v0.2.30 Skia presenter keeps raw surface pixels isolated from WPF layout coordinates. Future fragility risk is limited to new code that crosses that DIU/pixel boundary without an explicit DPI conversion.
