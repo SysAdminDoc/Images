@@ -25,6 +25,13 @@
   "validation": {
     "maximumPyTorchOnnxLogitDelta": 5.979090929031372e-7,
     "modelCardAccuracyPercentOnProprietaryTestSet": 98.56,
+    "benignFixture": {
+      "source": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/beignets-task-guide.png",
+      "sha256": "0ef0c3f7caa3ad4ec92dc8968f9ac0e81ede5b4805aae89648a4c7c4236768df",
+      "runtime": "GPU (DirectML)",
+      "sfwProbability": 0.9382593927768499,
+      "nsfwProbability": 0.06174060722315012
+    },
     "positiveFixturePolicy": "No explicit-content fixture is stored or fetched; live integration validation uses benign public images only."
   }
 }

@@ -1,6 +1,8 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text.Json;
+using ImageMagick;
+using Images.Services;
 using Microsoft.ML.OnnxRuntime;
 
 namespace Images.Tests;
@@ -37,6 +39,26 @@ public sealed class SafetyModelArtifactTests
         Assert.Equal([1, 3, 384, 384], input.Value.Dimensions);
         Assert.Equal("logits", output.Key);
         Assert.Equal([1, 2], output.Value.Dimensions);
+    }
+
+    [Fact]
+    public void StagedArtifact_RunsBenignFixtureThroughSharedLocalRuntime()
+    {
+        var modelPath = Path.Combine(
+            RepositoryRoot(), "models", "safety", "marqo-nsfw-image-detection-384.onnx");
+        using var temp = TestDirectory.Create();
+        var imagePath = Path.Combine(temp.Path, "benign.png");
+        using (var image = new MagickImage(MagickColors.SkyBlue, 640, 480))
+            image.Write(imagePath, MagickFormat.Png);
+
+        using var session = OnnxRuntimeService.CreateSession(modelPath);
+        var result = SafetyClassificationService.RunInference(imagePath, session);
+
+        Assert.True(result.Success);
+        Assert.Equal(2, result.Predictions.Count);
+        Assert.Equal(1, result.Predictions.Sum(item => item.Probability), 8);
+        Assert.All(result.Predictions, item => Assert.InRange(item.Probability, 0, 1));
+        Assert.NotNull(result.Runtime);
     }
 
     private static string Sha256(string path)

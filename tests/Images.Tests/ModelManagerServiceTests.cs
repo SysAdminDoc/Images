@@ -26,6 +26,7 @@ public sealed class ModelManagerServiceTests
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "fachuan-orientation-convnextv2-2026jun");
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "idealo-nima-mobilenet-aesthetic");
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "csail-places365-resnet18");
+        Assert.Contains(snapshot.Models, model => model.Definition.Id == SafetyClassificationService.ModelId);
         Assert.All(snapshot.Models, model => Assert.Equal(LocalModelAvailability.Missing, model.Availability));
     }
 
@@ -39,6 +40,18 @@ public sealed class ModelManagerServiceTests
         Assert.Equal(45_445_531, model.ExpectedSizeBytes);
         Assert.Equal(SceneClassificationService.ArtifactSha256, model.ExpectedSha256);
         Assert.Contains("CC BY", model.License, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ApprovedSafetyModel_IsArtifactCommitSizeAndHashPinned()
+    {
+        var model = Assert.Single(ModelManagerService.ApprovedModels,
+            item => item.Id == SafetyClassificationService.ModelId);
+
+        Assert.Contains("88c18181b5fb84801851e974aea35dea7eed907c", model.DownloadUrl, StringComparison.Ordinal);
+        Assert.Equal(22_489_929, model.ExpectedSizeBytes);
+        Assert.Equal(SafetyClassificationService.ArtifactSha256, model.ExpectedSha256);
+        Assert.Contains("Apache", model.License, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

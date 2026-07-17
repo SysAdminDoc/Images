@@ -301,7 +301,20 @@ public sealed class ModelManagerService
             ExpectedSha256: SceneClassificationService.ArtifactSha256,
             ExpectedSizeBytes: 45_445_531,
             RuntimeContract: Strings.ModelSceneRuntime,
-            Notes: Strings.ModelSceneNotes)
+            Notes: Strings.ModelSceneNotes),
+        new(
+            Id: SafetyClassificationService.ModelId,
+            DisplayName: "Marqo NSFW Image Detection 384",
+            Purpose: Strings.ModelSafetyPurpose,
+            StorageGroup: "safety",
+            SourceUrl: "https://huggingface.co/Marqo/nsfw-image-detection-384",
+            DownloadUrl: "https://raw.githubusercontent.com/SysAdminDoc/Images/88c18181b5fb84801851e974aea35dea7eed907c/models/safety/marqo-nsfw-image-detection-384.onnx",
+            License: Strings.ModelApacheLicense,
+            FileName: "marqo-nsfw-image-detection-384.onnx",
+            ExpectedSha256: SafetyClassificationService.ArtifactSha256,
+            ExpectedSizeBytes: 22_489_929,
+            RuntimeContract: Strings.ModelSafetyRuntime,
+            Notes: Strings.ModelSafetyNotes)
     ];
 
     public LocalModelManagerSnapshot GetSnapshot()

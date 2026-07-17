@@ -1622,6 +1622,9 @@ public static class Strings
     public static string ModelSceneNotes => Get(nameof(ModelSceneNotes));
     public static string ModelScenePurpose => Get(nameof(ModelScenePurpose));
     public static string ModelSceneRuntime => Get(nameof(ModelSceneRuntime));
+    public static string ModelSafetyNotes => Get(nameof(ModelSafetyNotes));
+    public static string ModelSafetyPurpose => Get(nameof(ModelSafetyPurpose));
+    public static string ModelSafetyRuntime => Get(nameof(ModelSafetyRuntime));
     public static string ModelReadyAction => Get(nameof(ModelReadyAction));
     public static string ModelRegistrySummaryFormat => Get(nameof(ModelRegistrySummaryFormat));
     public static string ModelReimportAction => Get(nameof(ModelReimportAction));

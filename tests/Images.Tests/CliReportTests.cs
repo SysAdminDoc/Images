@@ -91,6 +91,8 @@ public sealed class CliReportTests
         Assert.Contains("--orientation-suggest <imagePath>", help, StringComparison.Ordinal);
         Assert.Contains("--aesthetic-score <imagePath> [imagePath ...]", help, StringComparison.Ordinal);
         Assert.Contains("--scene-classify <imagePath> [imagePath ...]", help, StringComparison.Ordinal);
+        Assert.Contains("--safety-classify <imagePath> [imagePath ...]", help, StringComparison.Ordinal);
+        Assert.Contains("Default-off", help, StringComparison.Ordinal);
         Assert.Contains("never modifies the image or sidecar", help, StringComparison.Ordinal);
     }
 }

@@ -57,6 +57,7 @@ The confirmed privacy reset clears every registry entry marked for reset. It pre
 - No EXIF/GPS data is transmitted.
 - No file paths or filenames are transmitted.
 - OCR, semantic search, face/object tools, and other local analysis run only after an explicit user action. Semantic search uses a model that the user imports through Model Manager; Images does not download models automatically, and local model inference does not contact a network service.
+- Safety classification is additionally default-off: it runs only through an explicit `--safety-classify` command, exports its scores only to that command's stdout, and does not store results in source metadata, the catalog, labels, files, or application logs.
 - No advertising SDKs, tracking pixels, or third-party JavaScript.
 - No browser-style file-association telemetry. The optional installer's "Open with" registration writes `Software\RegisteredApplications` keys, which are local-only and removed cleanly on uninstall.
 

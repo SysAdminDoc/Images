@@ -235,6 +235,10 @@ public static class CliReport
         sb.AppendLine("    Print Places365 scene predictions and review-only smart-album keywords.");
         sb.AppendLine("    Never writes keywords, metadata, files, or smart albums.");
         sb.AppendLine();
+        sb.AppendLine("  Images.exe --safety-classify <imagePath> [imagePath ...]");
+        sb.AppendLine("    Explicitly export local NSFW/SFW review scores to stdout as JSON.");
+        sb.AppendLine("    Default-off; never stores scores or modifies files, metadata, or labels.");
+        sb.AppendLine();
         sb.AppendLine("  Images.exe --version");
         sb.AppendLine("    Print the version and exit.");
         sb.AppendLine();

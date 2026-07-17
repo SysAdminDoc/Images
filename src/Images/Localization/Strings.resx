@@ -6114,6 +6114,15 @@ Details written to:
   <data name="ModelSceneRuntime" xml:space="preserve">
     <value>1x3x224x224 ImageNet-normalized input with 365 logits, opset 17; shared hardware fallback.</value>
   </data>
+  <data name="ModelSafetyNotes" xml:space="preserve">
+    <value>Apache-2.0 Marqo ViT-Tiny checkpoint pinned to revision 0c26ec2 and converted by the tracked parity-checked script. Use is explicit and default-off; scores are review-only and never enter source metadata or app logs.</value>
+  </data>
+  <data name="ModelSafetyPurpose" xml:space="preserve">
+    <value>Optional local NSFW/SFW review scores</value>
+  </data>
+  <data name="ModelSafetyRuntime" xml:space="preserve">
+    <value>1x3x384x384 RGB input normalized to [-1,1] with two logits ordered NSFW/SFW, opset 17; shared hardware fallback.</value>
+  </data>
   <data name="ModelReadyAction" xml:space="preserve">
     <value>Ready for future model-backed tools once runtime code is enabled.</value>
   </data>
