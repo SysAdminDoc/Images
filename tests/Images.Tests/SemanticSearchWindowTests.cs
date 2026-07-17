@@ -1,11 +1,40 @@
 using System.Threading;
 using System.Windows;
+using Images.Services;
 
 namespace Images.Tests;
 
 [Collection("WpfSmoke")]
 public sealed class SemanticSearchWindowTests
 {
+    [Fact]
+    public void TagGraphCategorySets_SaveSwapAndDeleteWithoutWritingAnImage()
+    {
+        using var temp = TestDirectory.Create();
+        var sets = new KeywordSetService(System.IO.Path.Combine(temp.Path, "sets.json"));
+        var graph = new TagGraphService(System.IO.Path.Combine(temp.Path, "graph.json"));
+
+        RunOnStaWithTheme(() =>
+        {
+            var window = new TagGraphWindow(graph, sets);
+            try
+            {
+                Assert.True(window.SaveCategorySet("Editorial", "draft\nneeds-review"));
+                window.TagInputBox.Clear();
+
+                Assert.True(window.UseSelectedCategorySet());
+                Assert.Contains("draft", window.TagInputBox.Text);
+                Assert.Contains("needs-review", window.TagInputBox.Text);
+                Assert.True(window.DeleteSelectedCategorySet());
+                Assert.Empty(sets.Sets);
+            }
+            finally
+            {
+                window.Close();
+            }
+        });
+    }
+
     [Fact]
     public void RevealResult_UsesExplorerRevealAction()
     {

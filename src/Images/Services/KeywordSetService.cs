@@ -17,6 +17,8 @@ public sealed record KeywordSetCollection(
 
 public sealed class KeywordSetService
 {
+    private const int MaxSetCount = 100;
+    private const int MaxKeywordsPerSet = 256;
     private static readonly ILogger _log = Log.Get(nameof(KeywordSetService));
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.General)
     {
@@ -38,20 +40,27 @@ public sealed class KeywordSetService
 
     public bool Add(string name, IEnumerable<string> keywords)
     {
-        if (string.IsNullOrWhiteSpace(name)) return false;
-
-        var normalized = keywords
-            .Where(k => !string.IsNullOrWhiteSpace(k))
-            .Select(k => k.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(k => k, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        if (normalized.Count == 0) return false;
+        if (!TryCreateDefinition(name, keywords, out var definition)) return false;
+        if (_sets.Count >= MaxSetCount) return false;
         if (_sets.Any(s => s.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
             return false;
 
-        _sets.Add(new KeywordSetDefinition(name.Trim(), normalized));
+        _sets.Add(definition);
+        Save();
+        return true;
+    }
+
+    public bool Upsert(string name, IEnumerable<string> keywords)
+    {
+        if (!TryCreateDefinition(name, keywords, out var definition)) return false;
+        var index = _sets.FindIndex(set => set.Name.Equals(definition.Name, StringComparison.OrdinalIgnoreCase));
+        if (index >= 0)
+            _sets[index] = definition;
+        else if (_sets.Count < MaxSetCount)
+            _sets.Add(definition);
+        else
+            return false;
+
         Save();
         return true;
     }
@@ -149,6 +158,30 @@ public sealed class KeywordSetService
             _log.LogWarning(ex, "Failed to load keyword sets from {Path}", _storagePath);
             _sets = [];
         }
+    }
+
+    private static bool TryCreateDefinition(
+        string name,
+        IEnumerable<string> keywords,
+        out KeywordSetDefinition definition)
+    {
+        definition = new KeywordSetDefinition(string.Empty, []);
+        if (keywords is null || string.IsNullOrWhiteSpace(name) || name.Trim().Length > 100)
+            return false;
+
+        var normalized = keywords
+            .Where(keyword => !string.IsNullOrWhiteSpace(keyword))
+            .Select(keyword => keyword.Trim())
+            .Where(keyword => keyword.Length <= 256)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(keyword => keyword, StringComparer.OrdinalIgnoreCase)
+            .Take(MaxKeywordsPerSet + 1)
+            .ToList();
+        if (normalized.Count == 0 || normalized.Count > MaxKeywordsPerSet)
+            return false;
+
+        definition = new KeywordSetDefinition(name.Trim(), normalized);
+        return true;
     }
 
     private void Save()

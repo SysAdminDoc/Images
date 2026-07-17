@@ -149,10 +149,6 @@ Permanent owner policy: D-05/D-05a and signing-dependent C2PA write/export work 
 > model (the indexed fingerprint is an exact-match SHA-256, not perceptual); smart collections'
 > face-count criterion still needs V60 face detection; auto-albums still need content classification.
 
-- [ ] **V40-13** *P1* — **Category Sets** — saveable tag-panel layouts, swap per job type (XnView). Effort: M.
-  - **Blocked by**: V40-01 SQLite catalog — category sets need catalog-backed tag persistence.
-  - **Unblock when**: V40-01 catalog schema is stable and tag storage is operational.
-
 - [ ] **V40-22** *P1* — **Near-duplicate stacking** — auto-stack by time+location+hash proximity (PhotoPrism, Google Photos Photo Stacks). Effort: M.
   - **Blocked by**: V40-01 catalog + time/location proximity model — stacking needs indexed metadata for time+location queries.
   - **Unblock when**: V40-01 catalog ships with indexed timestamps and GPS coordinates.

@@ -48,6 +48,22 @@ public sealed class KeywordSetServiceTests
     }
 
     [Fact]
+    public void Upsert_ReplacesExistingCategoryLayoutAndPersists()
+    {
+        using var temp = TestDirectory.Create();
+        var path = Path.Combine(temp.Path, "sets.json");
+        var service = new KeywordSetService(path);
+        service.Add("Editorial", ["draft", "needs-review"]);
+
+        Assert.True(service.Upsert("editorial", ["approved", "publish"]));
+
+        var reloaded = new KeywordSetService(path);
+        var set = Assert.Single(reloaded.Sets);
+        Assert.Equal("editorial", set.Name);
+        Assert.Equal(["approved", "publish"], set.Keywords);
+    }
+
+    [Fact]
     public void Remove_DeletesSetAndPersists()
     {
         using var temp = TestDirectory.Create();

@@ -3137,6 +3137,39 @@ Details written to:
   <data name="TagGraphPreviewedTagsFormat" xml:space="preserve">
     <value>[!!!!!! Previewed {0} tag{1}. !!!!!!]</value>
   </data>
+  <data name="TagGraphCategorySets" xml:space="preserve">
+    <value>[!!!! Category sets !!!!]</value>
+  </data>
+  <data name="TagGraphCategorySetsHint" xml:space="preserve">
+    <value>[!!!!!!!! Save and switch job-specific tag panels. !!!!!!!!]</value>
+  </data>
+  <data name="TagGraphCategorySetName" xml:space="preserve">
+    <value>[!!!!!! Category set name !!!!!!]</value>
+  </data>
+  <data name="TagGraphSaveCategorySet" xml:space="preserve">
+    <value>[!!!! Save current !!!!]</value>
+  </data>
+  <data name="TagGraphUseCategorySet" xml:space="preserve">
+    <value>[!!!! Use selected !!!!]</value>
+  </data>
+  <data name="TagGraphDeleteCategorySet" xml:space="preserve">
+    <value>[!! Delete !!]</value>
+  </data>
+  <data name="TagGraphCategorySetSaveFailed" xml:space="preserve">
+    <value>[!!!!!!!! Enter a name and at least one valid tag. !!!!!!!!]</value>
+  </data>
+  <data name="TagGraphSelectCategorySet" xml:space="preserve">
+    <value>[!!!!!! Select a category set first. !!!!!!]</value>
+  </data>
+  <data name="TagGraphCategorySetSavedFormat" xml:space="preserve">
+    <value>[!!!!!! Saved category set “{0}”. !!!!!!]</value>
+  </data>
+  <data name="TagGraphCategorySetLoadedFormat" xml:space="preserve">
+    <value>[!!!!!!!! Loaded category set “{0}”. Review the tags before exporting. !!!!!!!!]</value>
+  </data>
+  <data name="TagGraphCategorySetDeleted" xml:space="preserve">
+    <value>[!!!!!! Deleted category set. !!!!!!]</value>
+  </data>
   <data name="ReferenceBoardWindowTitle" xml:space="preserve">
     <value>[!!!!!! Images - Reference board !!!!!!]</value>
   </data>

@@ -981,6 +981,17 @@ public static class Strings
     public static string TagGraphEnterAtLeastOneTag => Get(nameof(TagGraphEnterAtLeastOneTag));
     public static string TagGraphNoParents => Get(nameof(TagGraphNoParents));
     public static string TagGraphPreviewedTagsFormat => Get(nameof(TagGraphPreviewedTagsFormat));
+    public static string TagGraphCategorySets => Get(nameof(TagGraphCategorySets));
+    public static string TagGraphCategorySetsHint => Get(nameof(TagGraphCategorySetsHint));
+    public static string TagGraphCategorySetName => Get(nameof(TagGraphCategorySetName));
+    public static string TagGraphSaveCategorySet => Get(nameof(TagGraphSaveCategorySet));
+    public static string TagGraphUseCategorySet => Get(nameof(TagGraphUseCategorySet));
+    public static string TagGraphDeleteCategorySet => Get(nameof(TagGraphDeleteCategorySet));
+    public static string TagGraphCategorySetSaveFailed => Get(nameof(TagGraphCategorySetSaveFailed));
+    public static string TagGraphSelectCategorySet => Get(nameof(TagGraphSelectCategorySet));
+    public static string TagGraphCategorySetSavedFormat => Get(nameof(TagGraphCategorySetSavedFormat));
+    public static string TagGraphCategorySetLoadedFormat => Get(nameof(TagGraphCategorySetLoadedFormat));
+    public static string TagGraphCategorySetDeleted => Get(nameof(TagGraphCategorySetDeleted));
 
     // ---- Reference board window ----
     public static string ReferenceBoardWindowTitle => Get(nameof(ReferenceBoardWindowTitle));

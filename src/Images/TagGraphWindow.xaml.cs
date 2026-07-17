@@ -9,19 +9,28 @@ namespace Images;
 
 public partial class TagGraphWindow : Window
 {
-    private readonly TagGraphService _tagGraph = new();
+    private readonly TagGraphService _tagGraph;
+    private readonly KeywordSetService _categorySets;
     private readonly ObservableCollection<string> _aliasRows = [];
     private readonly ObservableCollection<string> _parentRows = [];
     private readonly ObservableCollection<string> _previewRows = [];
     private string? _currentImagePath;
 
     public TagGraphWindow()
+        : this(null, null)
     {
+    }
+
+    internal TagGraphWindow(TagGraphService? tagGraph, KeywordSetService? categorySets)
+    {
+        _tagGraph = tagGraph ?? new TagGraphService();
+        _categorySets = categorySets ?? new KeywordSetService();
         InitializeComponent();
 
         AliasList.ItemsSource = _aliasRows;
         ParentList.ItemsSource = _parentRows;
         PreviewList.ItemsSource = _previewRows;
+        RefreshCategorySets();
         RefreshSnapshot();
 
         SourceInitialized += (_, _) =>
@@ -127,6 +136,84 @@ public partial class TagGraphWindow : Window
         SetStatus(result.Message, result.Success ? TagGraphStatus.Ready : TagGraphStatus.Error);
         if (result.Success)
             PreviewExpansion();
+    }
+
+    private void SaveCategorySetButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!SaveCategorySet(CategorySetNameBox.Text, TagInputBox.Text))
+        {
+            SetStatus(Strings.TagGraphCategorySetSaveFailed, TagGraphStatus.Warning);
+            return;
+        }
+
+        SetStatus(Strings.Format(nameof(Strings.TagGraphCategorySetSavedFormat), CategorySetNameBox.Text.Trim()), TagGraphStatus.Ready);
+    }
+
+    private void UseCategorySetButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!UseSelectedCategorySet())
+        {
+            SetStatus(Strings.TagGraphSelectCategorySet, TagGraphStatus.Warning);
+            return;
+        }
+
+        SetStatus(Strings.Format(nameof(Strings.TagGraphCategorySetLoadedFormat), CategorySetNameBox.Text), TagGraphStatus.Ready);
+    }
+
+    private void DeleteCategorySetButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!DeleteSelectedCategorySet())
+        {
+            SetStatus(Strings.TagGraphSelectCategorySet, TagGraphStatus.Warning);
+            return;
+        }
+
+        SetStatus(Strings.TagGraphCategorySetDeleted, TagGraphStatus.Ready);
+    }
+
+    private void CategorySetComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (CategorySetComboBox.SelectedItem is KeywordSetDefinition selected)
+            CategorySetNameBox.Text = selected.Name;
+    }
+
+    internal bool SaveCategorySet(string name, string tagInput)
+    {
+        var tags = TagGraphService.ParseTagInput(tagInput);
+        if (!_categorySets.Upsert(name, tags))
+            return false;
+
+        RefreshCategorySets(name.Trim());
+        return true;
+    }
+
+    internal bool UseSelectedCategorySet()
+    {
+        if (CategorySetComboBox.SelectedItem is not KeywordSetDefinition selected)
+            return false;
+
+        CategorySetNameBox.Text = selected.Name;
+        TagInputBox.Text = string.Join(Environment.NewLine, selected.Keywords);
+        PreviewExpansion();
+        return true;
+    }
+
+    internal bool DeleteSelectedCategorySet()
+    {
+        if (CategorySetComboBox.SelectedItem is not KeywordSetDefinition selected || !_categorySets.Remove(selected.Name))
+            return false;
+
+        RefreshCategorySets();
+        CategorySetNameBox.Clear();
+        return true;
+    }
+
+    private void RefreshCategorySets(string? selectedName = null)
+    {
+        CategorySetComboBox.ItemsSource = null;
+        CategorySetComboBox.ItemsSource = _categorySets.Sets;
+        CategorySetComboBox.SelectedItem = _categorySets.Sets.FirstOrDefault(
+            set => string.Equals(set.Name, selectedName, StringComparison.OrdinalIgnoreCase));
     }
 
     private void ApplyMutationResult(TagGraphMutationResult result)

@@ -103,6 +103,41 @@
 
                         <Border Style="{StaticResource Divider}" />
 
+                        <TextBlock Text="{x:Static loc:Strings.TagGraphCategorySets}" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{x:Static loc:Strings.TagGraphCategorySetsHint}"
+                                   Style="{StaticResource Text.Hint}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,4,0,8" />
+                        <ComboBox x:Name="CategorySetComboBox"
+                                  DisplayMemberPath="Name"
+                                  SelectionChanged="CategorySetComboBox_SelectionChanged"
+                                  AutomationProperties.Name="{x:Static loc:Strings.TagGraphCategorySets}" />
+                        <TextBox x:Name="CategorySetNameBox"
+                                 Margin="0,8,0,0"
+                                 AutomationProperties.Name="{x:Static loc:Strings.TagGraphCategorySetName}" />
+                        <WrapPanel Margin="0,8,0,0">
+                            <Button Style="{StaticResource ChromeButton}"
+                                    Margin="0,0,8,8"
+                                    Click="SaveCategorySetButton_Click"
+                                    AutomationProperties.Name="{x:Static loc:Strings.TagGraphSaveCategorySet}">
+                                <TextBlock Text="{x:Static loc:Strings.TagGraphSaveCategorySet}" />
+                            </Button>
+                            <Button Style="{StaticResource ChromeButton}"
+                                    Margin="0,0,8,8"
+                                    Click="UseCategorySetButton_Click"
+                                    AutomationProperties.Name="{x:Static loc:Strings.TagGraphUseCategorySet}">
+                                <TextBlock Text="{x:Static loc:Strings.TagGraphUseCategorySet}" />
+                            </Button>
+                            <Button Style="{StaticResource ChromeButton}"
+                                    Margin="0,0,0,8"
+                                    Click="DeleteCategorySetButton_Click"
+                                    AutomationProperties.Name="{x:Static loc:Strings.TagGraphDeleteCategorySet}">
+                                <TextBlock Text="{x:Static loc:Strings.TagGraphDeleteCategorySet}" />
+                            </Button>
+                        </WrapPanel>
+
+                        <Border Style="{StaticResource Divider}" />
+
                         <TextBlock Text="{x:Static loc:Strings.TagGraphNamespaces}" Style="{StaticResource SectionLabel}" />
                         <Border Style="{StaticResource Card}" Padding="10,8">
                             <StackPanel>
