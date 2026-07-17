@@ -1,0 +1,128 @@
+using System.Globalization;
+using System.IO;
+
+namespace Images.Services;
+
+public enum CatalogCliMode
+{
+    Search,
+    Near,
+}
+
+public sealed record CatalogCliRequest(
+    CatalogCliMode Mode,
+    string? SearchTerms = null,
+    double Latitude = 0,
+    double Longitude = 0,
+    double RadiusKm = 0);
+
+/// <summary>
+/// Scriptable, window-free consumer for the rebuildable catalog. Standard output contains one
+/// matching source path per line; counts and usage errors go to standard error so paths can be
+/// piped safely into other tools.
+/// </summary>
+public static class CatalogCli
+{
+    public static bool IsCatalogCommand(string[] args) =>
+        args.Length > 0 &&
+        (string.Equals(args[0], "--catalog-search", StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(args[0], "--catalog-near", StringComparison.OrdinalIgnoreCase));
+
+    public static bool TryParse(
+        string[] args,
+        out CatalogCliRequest? request,
+        out string? error)
+    {
+        request = null;
+        error = null;
+        if (!IsCatalogCommand(args))
+            return false;
+
+        if (string.Equals(args[0], "--catalog-search", StringComparison.OrdinalIgnoreCase))
+        {
+            if (args.Length != 2 || string.IsNullOrWhiteSpace(args[1]))
+            {
+                error = "Usage: Images.exe --catalog-search \"<terms>\"";
+                return true;
+            }
+
+            request = new CatalogCliRequest(CatalogCliMode.Search, SearchTerms: args[1].Trim());
+            return true;
+        }
+
+        if (args.Length != 4 ||
+            !TryParseFiniteDouble(args[1], out var latitude) || latitude is < -90 or > 90 ||
+            !TryParseFiniteDouble(args[2], out var longitude) || longitude is < -180 or > 180 ||
+            !TryParseFiniteDouble(args[3], out var radiusKm) || radiusKm <= 0)
+        {
+            error = "Usage: Images.exe --catalog-near <lat> <lon> <radiusKm>";
+            return true;
+        }
+
+        request = new CatalogCliRequest(
+            CatalogCliMode.Near,
+            Latitude: latitude,
+            Longitude: longitude,
+            RadiusKm: radiusKm);
+        return true;
+    }
+
+    public static int Run(string[] args)
+    {
+        CliReport.TryAttachConsole();
+        try
+        {
+            if (!TryParse(args, out var request, out var error) || request is null)
+            {
+                Console.Error.WriteLine(error ?? "Unknown catalog command.");
+                return 64;
+            }
+
+            return Execute(request, Console.Out, Console.Error);
+        }
+        finally
+        {
+            try { Console.Out.Flush(); } catch { }
+            try { Console.Error.Flush(); } catch { }
+        }
+    }
+
+    public static int Execute(
+        CatalogCliRequest request,
+        TextWriter output,
+        TextWriter error,
+        CatalogService? catalog = null,
+        int limit = 500)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(output);
+        ArgumentNullException.ThrowIfNull(error);
+
+        catalog ??= new CatalogService();
+        if (!catalog.IsAvailable)
+        {
+            error.WriteLine("Images catalog is unavailable. Open the library and index folders first.");
+            return 2;
+        }
+
+        var query = new CatalogQueryService(catalog);
+        var result = request.Mode switch
+        {
+            CatalogCliMode.Search => query.Search(request.SearchTerms ?? string.Empty, limit),
+            CatalogCliMode.Near => query.FindNear(request.Latitude, request.Longitude, request.RadiusKm, limit),
+            _ => new CatalogQueryResult([], 0, false),
+        };
+
+        foreach (var asset in result.Assets)
+            output.WriteLine(asset.SourcePath);
+
+        error.WriteLine(result.Truncated
+            ? $"Showing {result.Assets.Count.ToString(CultureInfo.InvariantCulture)} of {result.TotalMatched.ToString(CultureInfo.InvariantCulture)} matching catalog assets."
+            : $"Matched {result.TotalMatched.ToString(CultureInfo.InvariantCulture)} catalog assets.");
+        return 0;
+    }
+
+    private static bool TryParseFiniteDouble(string value, out double result) =>
+        double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out result) &&
+        double.IsFinite(result);
+}

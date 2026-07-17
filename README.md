@@ -4,7 +4,7 @@
 
 # Images
 
-[![Version](https://img.shields.io/badge/version-0.2.29-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
+[![Version](https://img.shields.io/badge/version-0.2.30-89b4fa?style=flat-square)](https://github.com/SysAdminDoc/Images/releases)
 [![License](https://img.shields.io/badge/license-MIT-a6e3a1?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-cba6f7?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10.0-f38ba8?style=flat-square)](#)
@@ -57,7 +57,7 @@ Because sometimes you don't know what to call a photo until you actually *see* i
 - **Reference board mode** — press `Ctrl+B` to open a separate local board seeded from the current image. Drop supported files, arrange image cards, add notes and group frames, pin the board above other windows, zoom the canvas, and export the composed board as PNG.
 - **Duplicate cleanup center** — press `Ctrl+Shift+D` or use the side-panel Cleanup card to scan local folders for exact SHA-256 duplicates and perceptually similar images, prefer keep candidates from reference folders, inspect pairs side by side, mark false positives, and move extras to app-local quarantine or the Recycle Bin.
 - **Compare mode** — press `Ctrl+Alt+C` to compare the current image with the next folder item, choose another local image from the side panel or context menu, or send the selected duplicate-cleanup pair into the viewer. 2-up and opacity-overlay layouts share pan, zoom, rotate, flip, A/B swap, and keyboard-accessible opacity controls.
-- **Rebuildable catalog foundation** — Images maintains an app-local SQLite catalog cache for future library-scale workflows. It records source path, SHA-256 fingerprint, dimensions, file dates, codec metadata, XMP sidecar rating/tags, and scan timestamps; sidecars and source files remain authoritative, so deleting `catalog.db` is a valid recovery step. Catalog migrations run forward only with integrity checks, WAL checkpointing, versioned backups, and a schema canary before the cache is reused.
+- **Rebuildable catalog foundation** — Images maintains an app-local SQLite catalog cache for library-scale workflows. It records source path, SHA-256 fingerprint, dimensions, file dates, codec metadata, XMP sidecar rating/tags, GPS, capture time, and camera/lens facts; sidecars and source files remain authoritative, so deleting `catalog.db` is a valid recovery step. `--catalog-search "<terms>"` and `--catalog-near <lat> <lon> <radiusKm>` expose scriptable SQL-backed search without launching the viewer. Catalog migrations run forward only with integrity checks, WAL checkpointing, versioned backups, and a schema canary before the cache is reused.
 - **Semantic search foundation** — open Semantic search from the context menu or Automation card to explicitly index selected folders into app-local `semantic-index.db`, search with a deterministic offline metadata embedding provider, filter by folder, reveal results, open results in the viewer, cancel indexing, and delete derived search data. Approved ONNX CLIP/SigLIP inference remains future work.
 - **File health scan** — press `Ctrl+Shift+H` to find files with mismatched image extensions, corrupt supported images, zero-byte files, and temporary/partial-download artifacts, then rename detected extensions, mark reviewed, or move files to app-local quarantine.
 - **Recovery center** — open it from the context menu or Cleanup card to inspect recent move, rename, quarantine, writeback, and Recycle Bin actions. Moves, renames, and quarantines can be restored with collision-safe targets and matching XMP sidecars when the recovery source still exists; writebacks and Recycle Bin sends show explicit restore guidance.
@@ -118,7 +118,7 @@ Development builds can still detect `IMAGES_GHOSTSCRIPT_DIR` and normal system i
 
 Release builders can use `scripts/Prepare-GhostscriptBundle.ps1`; see `docs/codec-bundling.md`.
 
-To build the installer locally, install [Inno Setup 6](https://jrsoftware.org/isdl.php), stage Ghostscript with `scripts\Prepare-GhostscriptBundle.ps1`, run `dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish`, then `iscc /DMyAppVersion=0.2.29 installer\Images.iss`. Output lands at `installer\output\Images-vX.Y.Z-setup-win-x64.exe`.
+To build the installer locally, install [Inno Setup 6](https://jrsoftware.org/isdl.php), stage Ghostscript with `scripts\Prepare-GhostscriptBundle.ps1`, run `dotnet publish src/Images -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish`, then `iscc /DMyAppVersion=0.2.30 installer\Images.iss`. Output lands at `installer\output\Images-vX.Y.Z-setup-win-x64.exe`.
 
 OCR depends on Microsoft Windows OCR optional capabilities. The installer installs the current Windows UI language OCR capability plus `en-US` fallback when needed; Images cannot legally bundle those Microsoft language packs inside the app folder.
 

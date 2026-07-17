@@ -48,6 +48,10 @@ public sealed record CatalogRebuildResult(
     public int RemovedCount { get; init; }
 }
 
+public sealed record CatalogAssetPage(
+    IReadOnlyList<CatalogAssetRecord> Assets,
+    int TotalMatched);
+
 public sealed class CatalogService
 {
     private const int CurrentSchemaVersion = 3;
@@ -345,6 +349,169 @@ public sealed class CatalogService
         }
 
         return assets;
+    }
+
+    public IReadOnlyList<string> GetIndexedFolders()
+    {
+        var folders = new List<string>();
+        if (!_isAvailable)
+            return folders;
+
+        try
+        {
+            using var conn = Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
+                SELECT DISTINCT path_directory_name(source_path) AS folder
+                FROM catalog_assets
+                WHERE folder IS NOT NULL AND folder <> ''
+                ORDER BY folder COLLATE NOCASE;
+                """;
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+                folders.Add(reader.GetString(0));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or InvalidOperationException or NotSupportedException or SqliteException)
+        {
+            Log.LogWarning(ex, "Could not read indexed catalog folders");
+        }
+
+        return folders;
+    }
+
+    public CatalogAssetPage QueryByFolder(string folder, int limit = 500)
+    {
+        if (!_isAvailable || string.IsNullOrWhiteSpace(folder) || limit <= 0)
+            return new CatalogAssetPage([], 0);
+
+        try
+        {
+            var normalizedFolder = Path.GetFullPath(folder)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            limit = Math.Min(limit, 50_000);
+            using var conn = Open();
+
+            const string predicate = "path_directory_name(a.source_path) = $folder COLLATE NOCASE";
+            var totalMatched = CountAssets(conn, predicate, cmd => cmd.Parameters.AddWithValue("$folder", normalizedFolder));
+            var assets = ReadAssetPage(
+                conn,
+                predicate,
+                "a.source_path COLLATE NOCASE",
+                limit,
+                cmd => cmd.Parameters.AddWithValue("$folder", normalizedFolder));
+            return new CatalogAssetPage(assets, totalMatched);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or InvalidOperationException or NotSupportedException or SqliteException)
+        {
+            Log.LogWarning(ex, "Could not query catalog folder {Folder}", folder);
+            return new CatalogAssetPage([], 0);
+        }
+    }
+
+    public CatalogAssetPage Search(string query, int limit = 200)
+    {
+        if (!_isAvailable || string.IsNullOrWhiteSpace(query) || limit <= 0)
+            return new CatalogAssetPage([], 0);
+
+        var terms = query.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (terms.Length == 0)
+            return new CatalogAssetPage([], 0);
+
+        limit = Math.Min(limit, 50_000);
+        try
+        {
+            using var conn = Open();
+            var predicate = BuildSearchPredicate(terms.Length);
+            Action<SqliteCommand> addParameters = cmd =>
+            {
+                for (var i = 0; i < terms.Length; i++)
+                    cmd.Parameters.AddWithValue($"$term{i}", $"%{EscapeLikePattern(terms[i])}%");
+            };
+
+            var totalMatched = CountAssets(conn, predicate, addParameters);
+            var assets = ReadAssetPage(
+                conn,
+                predicate,
+                "a.source_path COLLATE NOCASE",
+                limit,
+                addParameters);
+            return new CatalogAssetPage(assets, totalMatched);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or InvalidOperationException or NotSupportedException or SqliteException)
+        {
+            Log.LogWarning(ex, "Could not search catalog assets");
+            return new CatalogAssetPage([], 0);
+        }
+    }
+
+    public CatalogAssetPage FindNear(
+        double latitude,
+        double longitude,
+        double radiusKm,
+        int limit = 200)
+    {
+        if (!_isAvailable || limit <= 0 ||
+            !double.IsFinite(latitude) || latitude is < -90 or > 90 ||
+            !double.IsFinite(longitude) || longitude is < -180 or > 180 ||
+            !double.IsFinite(radiusKm) || radiusKm <= 0)
+        {
+            return new CatalogAssetPage([], 0);
+        }
+
+        limit = Math.Min(limit, 50_000);
+        var angularDegrees = radiusKm / EarthRadiusKm * (180d / Math.PI);
+        var minLatitude = Math.Max(-90d, latitude - angularDegrees);
+        var maxLatitude = Math.Min(90d, latitude + angularDegrees);
+        var longitudeScale = Math.Cos(latitude * Math.PI / 180d);
+        var longitudeDelta = Math.Abs(longitudeScale) < 1e-12
+            ? 180d
+            : Math.Min(180d, angularDegrees / Math.Abs(longitudeScale));
+        var minLongitude = NormalizeLongitude(longitude - longitudeDelta);
+        var maxLongitude = NormalizeLongitude(longitude + longitudeDelta);
+
+        var longitudePredicate = longitudeDelta >= 180d
+            ? "1 = 1"
+            : minLongitude <= maxLongitude
+                ? "a.gps_lon BETWEEN $minLon AND $maxLon"
+                : "(a.gps_lon >= $minLon OR a.gps_lon <= $maxLon)";
+        var predicate = $"""
+            a.gps_lat IS NOT NULL AND a.gps_lon IS NOT NULL
+            AND a.gps_lat BETWEEN $minLat AND $maxLat
+            AND {longitudePredicate}
+            AND haversine_km(a.gps_lat, a.gps_lon, $latitude, $longitude) <= $radiusKm
+            """;
+
+        try
+        {
+            using var conn = Open();
+            Action<SqliteCommand> addParameters = cmd =>
+            {
+                cmd.Parameters.AddWithValue("$minLat", minLatitude);
+                cmd.Parameters.AddWithValue("$maxLat", maxLatitude);
+                if (longitudeDelta < 180d)
+                {
+                    cmd.Parameters.AddWithValue("$minLon", minLongitude);
+                    cmd.Parameters.AddWithValue("$maxLon", maxLongitude);
+                }
+                cmd.Parameters.AddWithValue("$latitude", latitude);
+                cmd.Parameters.AddWithValue("$longitude", longitude);
+                cmd.Parameters.AddWithValue("$radiusKm", radiusKm);
+            };
+
+            var totalMatched = CountAssets(conn, predicate, addParameters);
+            var assets = ReadAssetPage(
+                conn,
+                predicate,
+                "haversine_km(a.gps_lat, a.gps_lon, $latitude, $longitude), a.source_path COLLATE NOCASE",
+                limit,
+                addParameters);
+            return new CatalogAssetPage(assets, totalMatched);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or InvalidOperationException or NotSupportedException or SqliteException)
+        {
+            Log.LogWarning(ex, "Could not query catalog assets near {Latitude}, {Longitude}", latitude, longitude);
+            return new CatalogAssetPage([], 0);
+        }
     }
 
     /// <summary>
@@ -729,8 +896,108 @@ public sealed class CatalogService
     private SqliteConnection Open()
     {
         var conn = SqliteConnectionPolicy.Open(_connectionString);
+        conn.CreateFunction<string?, string?>(
+            "path_directory_name",
+            static path => string.IsNullOrWhiteSpace(path) ? null : Path.GetDirectoryName(path),
+            isDeterministic: true);
+        conn.CreateFunction<double, double, double, double, double>(
+            "haversine_km",
+            HaversineDistanceKm,
+            isDeterministic: true);
         ConfigureCatalogPragmas(conn);
         return conn;
+    }
+
+    private static int CountAssets(
+        SqliteConnection conn,
+        string predicate,
+        Action<SqliteCommand> addParameters)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = $"SELECT COUNT(*) FROM catalog_assets AS a WHERE {predicate};";
+        addParameters(cmd);
+        return Convert.ToInt32(cmd.ExecuteScalar() ?? 0, CultureInfo.InvariantCulture);
+    }
+
+    private static IReadOnlyList<CatalogAssetRecord> ReadAssetPage(
+        SqliteConnection conn,
+        string predicate,
+        string orderBy,
+        int limit,
+        Action<SqliteCommand> addParameters)
+    {
+        var assets = new List<CatalogAssetRecord>();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = $"""
+            SELECT a.id, a.source_path, a.fingerprint, a.size_bytes, a.created_utc, a.modified_utc,
+                   a.width, a.height, a.format, a.codec, a.rating, a.sidecar_path, a.sidecar_modified_utc, a.scanned_utc, a.palette,
+                   a.gps_lat, a.gps_lon, a.captured_utc, a.camera_make, a.camera_model, a.lens_model, a.iso, a.focal_length, a.f_number, a.exposure_seconds
+            FROM catalog_assets AS a
+            WHERE {predicate}
+            ORDER BY {orderBy}
+            LIMIT $limit;
+            """;
+        addParameters(cmd);
+        cmd.Parameters.AddWithValue("$limit", limit);
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            assets.Add(ReadAsset(conn, reader));
+        return assets;
+    }
+
+    private static string BuildSearchPredicate(int termCount)
+    {
+        var predicates = new string[termCount];
+        for (var i = 0; i < termCount; i++)
+        {
+            var parameter = $"$term{i}";
+            predicates[i] = $"""
+                (a.source_path LIKE {parameter} ESCAPE '\' COLLATE NOCASE
+                 OR a.format LIKE {parameter} ESCAPE '\' COLLATE NOCASE
+                 OR a.codec LIKE {parameter} ESCAPE '\' COLLATE NOCASE
+                 OR CAST(a.rating AS TEXT) LIKE {parameter} ESCAPE '\'
+                 OR a.palette LIKE {parameter} ESCAPE '\' COLLATE NOCASE
+                 OR a.camera_make LIKE {parameter} ESCAPE '\' COLLATE NOCASE
+                 OR a.camera_model LIKE {parameter} ESCAPE '\' COLLATE NOCASE
+                 OR a.lens_model LIKE {parameter} ESCAPE '\' COLLATE NOCASE
+                 OR EXISTS (
+                     SELECT 1 FROM catalog_tags AS t
+                     WHERE t.asset_id = a.id
+                       AND t.tag LIKE {parameter} ESCAPE '\' COLLATE NOCASE))
+                """;
+        }
+        return string.Join(" AND ", predicates);
+    }
+
+    private static string EscapeLikePattern(string value) => value
+        .Replace("\\", "\\\\", StringComparison.Ordinal)
+        .Replace("%", "\\%", StringComparison.Ordinal)
+        .Replace("_", "\\_", StringComparison.Ordinal);
+
+    private const double EarthRadiusKm = 6371.0088d;
+
+    private static double HaversineDistanceKm(
+        double latitude1,
+        double longitude1,
+        double latitude2,
+        double longitude2)
+    {
+        var latitudeDelta = (latitude2 - latitude1) * Math.PI / 180d;
+        var longitudeDelta = (longitude2 - longitude1) * Math.PI / 180d;
+        var latitude1Radians = latitude1 * Math.PI / 180d;
+        var latitude2Radians = latitude2 * Math.PI / 180d;
+        var a = Math.Pow(Math.Sin(latitudeDelta / 2d), 2d) +
+                Math.Cos(latitude1Radians) * Math.Cos(latitude2Radians) *
+                Math.Pow(Math.Sin(longitudeDelta / 2d), 2d);
+        return EarthRadiusKm * 2d * Math.Atan2(Math.Sqrt(a), Math.Sqrt(Math.Max(0d, 1d - a)));
+    }
+
+    private static double NormalizeLongitude(double longitude)
+    {
+        var normalized = (longitude + 180d) % 360d;
+        if (normalized < 0d)
+            normalized += 360d;
+        return normalized - 180d;
     }
 
     private CatalogAssetRecord BuildAsset(

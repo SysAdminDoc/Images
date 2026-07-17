@@ -20,13 +20,7 @@ public sealed class CatalogQueryService
 
     public IReadOnlyList<string> ListIndexedFolders(bool redactPaths = false)
     {
-        var assets = _catalog.GetAllAssets(50_000);
-        var folders = assets
-            .Select(a => a.Folder)
-            .Where(f => !string.IsNullOrWhiteSpace(f))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        var folders = _catalog.GetIndexedFolders();
 
         if (!redactPaths) return folders;
 
@@ -40,22 +34,13 @@ public sealed class CatalogQueryService
         int limit = 500,
         bool redactPaths = false)
     {
-        var all = _catalog.GetAllAssets(50_000);
-        if (!TryNormalizeFolder(folder, out var normalizedFolder))
-            return new CatalogQueryResult([], 0, false);
-
-        var matched = all
-            .Where(a => TryNormalizeFolder(a.Folder, out var assetFolder) &&
-                assetFolder.Equals(normalizedFolder, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        var truncated = matched.Count > limit;
-        var results = matched.Take(limit).ToList();
+        var page = _catalog.QueryByFolder(folder, limit);
+        var results = page.Assets.ToList();
 
         if (redactPaths)
             results = results.Select(RedactAsset).ToList();
 
-        return new CatalogQueryResult(results, matched.Count, truncated);
+        return new CatalogQueryResult(results, page.TotalMatched, page.TotalMatched > results.Count);
     }
 
     public CatalogQueryResult Search(
@@ -66,18 +51,29 @@ public sealed class CatalogQueryService
         if (string.IsNullOrWhiteSpace(query))
             return new CatalogQueryResult([], 0, false);
 
-        var all = _catalog.GetAllAssets(50_000);
-        var terms = query.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-        var matched = all.Where(a => MatchesAllTerms(a, terms)).ToList();
-
-        var truncated = matched.Count > limit;
-        var results = matched.Take(limit).ToList();
+        var page = _catalog.Search(query, limit);
+        var results = page.Assets.ToList();
 
         if (redactPaths)
             results = results.Select(RedactAsset).ToList();
 
-        return new CatalogQueryResult(results, matched.Count, truncated);
+        return new CatalogQueryResult(results, page.TotalMatched, page.TotalMatched > results.Count);
+    }
+
+    public CatalogQueryResult FindNear(
+        double latitude,
+        double longitude,
+        double radiusKm,
+        int limit = 200,
+        bool redactPaths = false)
+    {
+        var page = _catalog.FindNear(latitude, longitude, radiusKm, limit);
+        var results = page.Assets.ToList();
+
+        if (redactPaths)
+            results = results.Select(RedactAsset).ToList();
+
+        return new CatalogQueryResult(results, page.TotalMatched, page.TotalMatched > results.Count);
     }
 
     public CatalogAssetRecord? GetByPath(string path, bool redactPaths = false)
@@ -85,19 +81,6 @@ public sealed class CatalogQueryService
         var asset = _catalog.GetByPath(path);
         if (asset is null) return null;
         return redactPaths ? RedactAsset(asset) : asset;
-    }
-
-    private static bool MatchesAllTerms(CatalogAssetRecord asset, string[] terms)
-    {
-        var searchable = string.Join(" ",
-            asset.FileName,
-            asset.Format,
-            asset.Codec,
-            string.Join(" ", asset.Tags),
-            asset.Rating?.ToString() ?? "");
-
-        return terms.All(t =>
-            searchable.Contains(t, StringComparison.OrdinalIgnoreCase));
     }
 
     private static CatalogAssetRecord RedactAsset(CatalogAssetRecord a)
@@ -122,21 +105,4 @@ public sealed class CatalogQueryService
         return string.Join(Path.DirectorySeparatorChar, redacted);
     }
 
-    private static bool TryNormalizeFolder(string folder, out string normalized)
-    {
-        normalized = "";
-        if (string.IsNullOrWhiteSpace(folder))
-            return false;
-
-        try
-        {
-            normalized = Path.GetFullPath(folder)
-                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            return !string.IsNullOrWhiteSpace(normalized);
-        }
-        catch
-        {
-            return false;
-        }
-    }
 }

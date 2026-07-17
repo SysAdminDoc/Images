@@ -62,6 +62,40 @@ public sealed class CatalogQueryServiceTests
     }
 
     [Fact]
+    public void Search_MatchesEveryTermInSqlBackedMetadataQuery()
+    {
+        using var temp = TestDirectory.Create();
+        WriteImageWithExif(temp.Path, "paris-trip.jpg");
+        WriteImage(temp.Path, "paris-map.png", 4, 4);
+        var catalog = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+        catalog.Rebuild([temp.Path]);
+        var query = new CatalogQueryService(catalog);
+
+        var result = query.Search("paris TestCam");
+
+        Assert.Equal(1, result.TotalMatched);
+        Assert.EndsWith("paris-trip.jpg", result.Assets[0].SourcePath, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void FindNear_ReturnsOnlyAssetsInsideGreatCircleRadius()
+    {
+        using var temp = TestDirectory.Create();
+        WriteImageWithExif(temp.Path, "eiffel.jpg");
+        WriteImage(temp.Path, "no-gps.png", 4, 4);
+        var catalog = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+        catalog.Rebuild([temp.Path]);
+        var query = new CatalogQueryService(catalog);
+
+        var nearby = query.FindNear(48.8583, 2.2945, 1);
+        var farAway = query.FindNear(52.5200, 13.4050, 10);
+
+        Assert.Single(nearby.Assets);
+        Assert.EndsWith("eiffel.jpg", nearby.Assets[0].SourcePath, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(farAway.Assets);
+    }
+
+    [Fact]
     public void Search_EmptyQuery_ReturnsEmpty()
     {
         using var temp = TestDirectory.Create();
@@ -97,6 +131,21 @@ public sealed class CatalogQueryServiceTests
     {
         var path = Path.Combine(folder, name);
         using var image = new MagickImage(MagickColors.Red, width, height) { Format = MagickFormat.Png };
+        image.Write(path);
+        return path;
+    }
+
+    private static string WriteImageWithExif(string folder, string name)
+    {
+        var path = Path.Combine(folder, name);
+        using var image = new MagickImage(MagickColors.Blue, 16, 12) { Format = MagickFormat.Jpeg };
+        var exif = new ExifProfile();
+        exif.SetValue(ExifTag.GPSLatitude, [new Rational(48, 1), new Rational(51, 1), new Rational(30, 1)]);
+        exif.SetValue(ExifTag.GPSLatitudeRef, "N");
+        exif.SetValue(ExifTag.GPSLongitude, [new Rational(2, 1), new Rational(17, 1), new Rational(40, 1)]);
+        exif.SetValue(ExifTag.GPSLongitudeRef, "E");
+        exif.SetValue(ExifTag.Make, "TestCam");
+        image.SetProfile(exif);
         image.Write(path);
         return path;
     }

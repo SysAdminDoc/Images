@@ -200,6 +200,12 @@ public static class CliReport
         sb.AppendLine("  Images.exe --perf-report");
         sb.AppendLine("    Print the performance-budget report (launch timings and thresholds).");
         sb.AppendLine();
+        sb.AppendLine("  Images.exe --catalog-search \"<terms>\"");
+        sb.AppendLine("    Print indexed assets matching every filename, metadata, or tag term.");
+        sb.AppendLine();
+        sb.AppendLine("  Images.exe --catalog-near <lat> <lon> <radiusKm>");
+        sb.AppendLine("    Print indexed assets within the requested great-circle radius.");
+        sb.AppendLine();
         sb.AppendLine("  Images.exe --version");
         sb.AppendLine("    Print the version and exit.");
         sb.AppendLine();
@@ -227,7 +233,7 @@ public static class CliReport
     /// through to whatever WPF gave us — there's no terminal to render into anyway, so the
     /// user is expected to redirect (`> info.txt`) or pipe.
     /// </summary>
-    private static bool TryAttachConsole()
+    internal static bool TryAttachConsole()
     {
         try
         {

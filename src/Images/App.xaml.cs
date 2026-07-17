@@ -30,6 +30,13 @@ public partial class App : Application
             return;
         }
 
+        if (CatalogCli.IsCatalogCommand(e.Args))
+        {
+            var exitCode = CatalogCli.Run(e.Args);
+            Shutdown(exitCode);
+            return;
+        }
+
         var info = AppInfo.Current;
         _log.LogInformation("Images {Version} starting — {Runtime} on {Os}",
             info.DisplayVersion, info.RuntimeDescription, info.OsDescription);

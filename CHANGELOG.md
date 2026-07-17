@@ -4,6 +4,8 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+- Added window-free catalog CLI consumers: `--catalog-search "<terms>"` prints assets matching every filename/format/codec/rating/palette/camera/lens/tag term, while `--catalog-near <lat> <lon> <radiusKm>` prints assets inside an exact great-circle radius. Catalog folder, term, and geo predicates now run in SQLite instead of materializing up to 50,000 records for LINQ filtering; focused tests cover multi-term metadata matching, radius exclusion, parsing, and process-friendly path output.
+
 ## v0.2.29 - 2026-07-17
 
 - The folder catalog now indexes geo/time/camera EXIF (catalog schema v3): GPS latitude/longitude (decimal degrees, paired and range-validated), capture time (`DateTimeOriginal` + offset, normalized to UTC), camera make/model, lens, ISO, focal length, aperture, and shutter. Existing catalogs migrate in place — the new columns are nullable and backfill on the next rescan — and a new `CatalogService.FindWithinBounds` geo bounding-box query (antimeridian-aware) backs future map, trip, and near-duplicate features. Extraction reuses the details panel's GPS/ISO logic via the new `CatalogExifExtractor`.
