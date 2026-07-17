@@ -69,7 +69,7 @@ public sealed class MainWindowInputTests
             try
             {
                 Assert.Equal(52, Assert.IsType<Border>(window.FindName("WorkflowRail")).Width);
-                Assert.Equal(340, Assert.IsType<Border>(window.FindName("RightSidePanel")).Width);
+                Assert.Equal(316, Assert.IsType<Border>(window.FindName("RightSidePanel")).Width);
                 Assert.Equal(78, Assert.IsType<ListBox>(window.FindName("FilmstripItems")).MaxHeight);
 
                 Assert.NotNull(window.FindName("ImageContextBar"));

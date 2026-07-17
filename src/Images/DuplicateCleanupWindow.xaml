@@ -389,7 +389,7 @@
                                                 Style="{StaticResource Badge}"
                                                 Margin="0,0,8,8">
                                             <TextBlock Text="{x:Static loc:Strings.DuplicateCleanupKeepCandidate}"
-                                                       FontSize="11"
+                                                       FontSize="12"
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource AccentBrush}" />
                                         </Border>
@@ -433,7 +433,7 @@
                                                 Style="{StaticResource Badge}"
                                                 Margin="0,0,8,8">
                                             <TextBlock Text="{x:Static loc:Strings.DuplicateCleanupExtraCandidate}"
-                                                       FontSize="11"
+                                                       FontSize="12"
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource YellowBrush}" />
                                         </Border>

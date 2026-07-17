@@ -321,7 +321,7 @@ Details written to:
     <value>Corners</value>
   </data>
   <data name="PerspectiveDescription" xml:space="preserve">
-    <value>Drag the four source corners, then add a perspective correction edit.</value>
+    <value>Adjust four corners, then add the edit.</value>
   </data>
   <data name="PerspectiveDragCornerStatus" xml:space="preserve">
     <value>Drag a corner handle or use a keystone nudge.</value>
@@ -402,7 +402,7 @@ Details written to:
     <value>Copies</value>
   </data>
   <data name="EditHistoryDescription" xml:space="preserve">
-    <value>Inspect sidecar edits, fork virtual copies, and export with provenance.</value>
+    <value>Review edits, virtual copies, and export provenance.</value>
   </data>
   <data name="EditHistoryHeading" xml:space="preserve">
     <value>Edit history</value>
@@ -588,7 +588,7 @@ Details written to:
     <value>Note</value>
   </data>
   <data name="AnnotationDescription" xml:space="preserve">
-    <value>Draw markup or redaction regions, then add them to the edit history.</value>
+    <value>Draw markup or redactions, then add the edit.</value>
   </data>
   <data name="AnnotationFontSizeAutomationName" xml:space="preserve">
     <value>Annotation text size</value>
@@ -807,7 +807,7 @@ Details written to:
     <value>Sharpen</value>
   </data>
   <data name="EffectsSubtitle" xml:space="preserve">
-    <value>Preview sharpen, noise reduction, and vignette before adding an edit.</value>
+    <value>Preview finishing effects before adding an edit.</value>
   </data>
   <data name="EffectsSummaryNoiseFormat" xml:space="preserve">
     <value>noise {0:0.#}%</value>
@@ -840,7 +840,7 @@ Details written to:
     <value>Adjustments</value>
   </data>
   <data name="AdjustmentsSubtitle" xml:space="preserve">
-    <value>Preview levels, curve, and HSL before adding an edit.</value>
+    <value>Preview tone and color before adding an edit.</value>
   </data>
   <data name="AdjustmentsEnterApplies" xml:space="preserve">
     <value>Enter applies</value>
@@ -930,7 +930,7 @@ Details written to:
     <value>Model manager</value>
   </data>
   <data name="ModelManagerSubtitle" xml:space="preserve">
-    <value>Approved local model files stay under app data. Downloads are manual and SHA-256 verified before future AI tools can use them.</value>
+    <value>Import approved local models with verified hashes.</value>
   </data>
   <data name="ModelManagerRefreshAutomationName" xml:space="preserve">
     <value>Refresh model status</value>
@@ -1059,7 +1059,7 @@ Details written to:
     <value>Recovery center</value>
   </data>
   <data name="RecoveryCenterSubtitle" xml:space="preserve">
-    <value>Review recent moves, quarantines, writebacks, and Recycle Bin actions recorded locally.</value>
+    <value>Review recorded file moves and writebacks.</value>
   </data>
   <data name="RecoveryCenterRefreshAutomationName" xml:space="preserve">
     <value>Refresh recovery records</value>
@@ -1149,7 +1149,7 @@ Details written to:
     <value>Batch processor</value>
   </data>
   <data name="BatchSubtitle" xml:space="preserve">
-    <value>Preview resize/convert settings, save presets, and export collision-safe copies.</value>
+    <value>Preview a preset, then export collision-safe copies.</value>
   </data>
   <data name="BatchLoadPresetAutomationName" xml:space="preserve">
     <value>Load batch preset</value>
@@ -1365,7 +1365,7 @@ Details written to:
     <value>Duplicate cleanup</value>
   </data>
   <data name="DuplicateCleanupSubtitle" xml:space="preserve">
-    <value>Local scan for exact duplicates and visually similar images. Nothing leaves this device.</value>
+    <value>Find exact and similar images locally.</value>
   </data>
   <data name="DuplicateCleanupAddFolderButton" xml:space="preserve">
     <value>Add folder</value>
@@ -2235,7 +2235,7 @@ Details written to:
     <value>Macro actions</value>
   </data>
   <data name="MacroSubtitle" xml:space="preserve">
-    <value>Build inspectable JSON actions, preview them, then run them against local files.</value>
+    <value>Build, preview, and run local JSON actions.</value>
   </data>
   <data name="MacroLoadJsonAutomationName" xml:space="preserve">
     <value>Load macro action JSON</value>
@@ -2493,7 +2493,7 @@ Details written to:
     <value>Import inbox</value>
   </data>
   <data name="ImportInboxSubtitle" xml:space="preserve">
-    <value>Stage new images, resolve duplicates, add sidecar tags and ratings, then import locally.</value>
+    <value>Stage, review, and import new images locally.</value>
   </data>
   <data name="ImportInboxAddFiles" xml:space="preserve">
     <value>Add files</value>
@@ -2769,7 +2769,7 @@ Details written to:
     <value>File health scan</value>
   </data>
   <data name="FileHealthScanSubtitle" xml:space="preserve">
-    <value>Find bad extensions, broken images, zero-byte files, and temporary artifacts locally.</value>
+    <value>Find damaged, mismatched, empty, and temporary files.</value>
   </data>
   <data name="FileHealthScanAddFolder" xml:space="preserve">
     <value>Add folder</value>
@@ -3006,7 +3006,7 @@ Details written to:
     <value>Tag relationships</value>
   </data>
   <data name="TagGraphSubtitle" xml:space="preserve">
-    <value>Private local namespaces, aliases, parents, and XMP sidecar import/export.</value>
+    <value>Manage private tags, aliases, parents, and XMP exchange.</value>
   </data>
   <data name="TagGraphRefresh" xml:space="preserve">
     <value>Refresh</value>
@@ -3135,7 +3135,7 @@ Details written to:
     <value>Reference board</value>
   </data>
   <data name="ReferenceBoardSubtitle" xml:space="preserve">
-    <value>Local canvas for arranging references, notes, and exportable groups.</value>
+    <value>Arrange local references, notes, and groups.</value>
   </data>
   <data name="ReferenceBoardAddImages" xml:space="preserve">
     <value>Add images</value>
@@ -6401,7 +6401,7 @@ Details written to:
   </data>
   <data name="FaceReviewWindowTitle" xml:space="preserve"><value>Images - Face review</value></data>
   <data name="FaceReviewHeading" xml:space="preserve"><value>Face-region review</value></data>
-  <data name="FaceReviewSubtitle" xml:space="preserve"><value>Inspect local YuNet detections and SFace clusters, then explicitly accept, reject, and name every region before XMP writeback.</value></data>
+  <data name="FaceReviewSubtitle" xml:space="preserve"><value>Review local face regions, decisions, names, and XMP writeback.</value></data>
   <data name="FaceReviewAnalyzeCurrent" xml:space="preserve"><value>Analyze current image</value></data>
   <data name="FaceReviewAnalyzeFolder" xml:space="preserve"><value>Analyze folder (up to 100)</value></data>
   <data name="FaceReviewDetectedRegions" xml:space="preserve"><value>Detected regions by local cluster</value></data>

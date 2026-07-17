@@ -17,30 +17,30 @@
 
     <Window.Resources>
         <Style x:Key="SettingsCard" TargetType="Border" BasedOn="{StaticResource Card}">
-            <Setter Property="Padding" Value="16,14" />
-            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="Padding" Value="0,8" />
+            <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
 
         <Style x:Key="SettingsDivider" TargetType="Border">
             <Setter Property="Height" Value="1" />
             <Setter Property="Background" Value="{DynamicResource HairlineBrush}" />
-            <Setter Property="Margin" Value="0,14" />
+            <Setter Property="Margin" Value="0,9" />
         </Style>
 
         <Style x:Key="SettingsIconTile" TargetType="Border" BasedOn="{StaticResource IconTile}">
-            <Setter Property="Width" Value="40" />
-            <Setter Property="Height" Value="40" />
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="34" />
         </Style>
     </Window.Resources>
 
-    <Grid Margin="28,24,28,24">
+    <Grid Margin="22,16,22,18">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,16">
+        <Grid Grid.Row="0" Margin="0,0,0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -51,7 +51,7 @@
                            Text="{x:Static loc:Strings.SettingsHeading}" />
                 <TextBlock Style="{StaticResource Text.Subtitle}"
                            Text="{x:Static loc:Strings.SettingsSubtitle}"
-                           Margin="0,5,0,0"
+                           Margin="0,3,0,0"
                            MaxWidth="540"
                            HorizontalAlignment="Left"
                            TextAlignment="Left" />
@@ -656,7 +656,7 @@
                                                                 </Style>
                                                             </Border.Style>
                                                             <TextBlock Text="{Binding StateText}"
-                                                                       FontSize="10.5"
+                                                                       FontSize="12"
                                                                        FontWeight="SemiBold">
                                                                 <TextBlock.Style>
                                                                     <Style TargetType="TextBlock">
@@ -755,7 +755,7 @@
                                                 </Style>
                                             </Border.Style>
                                             <TextBlock Text="{Binding OcrStatusBadge}"
-                                                       FontSize="10.5"
+                                                       FontSize="12"
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource TextBrush}" />
                                         </Border>

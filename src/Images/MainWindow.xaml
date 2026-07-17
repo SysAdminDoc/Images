@@ -53,10 +53,10 @@
 
                 <Border Width="32"
                         Height="32"
-                        CornerRadius="{StaticResource Radius.Md.CR}"
-                        Background="{DynamicResource AccentWarmPanelBrush}"
-                        BorderBrush="{DynamicResource AccentWarmBrush}"
-                        BorderThickness="1"
+                        CornerRadius="0"
+                        Background="Transparent"
+                        BorderBrush="Transparent"
+                        BorderThickness="0"
                         HorizontalAlignment="Center"
                         ToolTip="{loc:Loc MainUiImagesWorkspace}">
                     <TextBlock Text="&#xEB9F;"
@@ -139,7 +139,7 @@
                                    VerticalAlignment="Center" />
                         <TextBlock Text="{Binding CurrentFolder, Converter={x:Static vm:PathToFileNameConverter.Instance}}"
                                    Foreground="{DynamicResource SubtextBrush}"
-                                   FontSize="12"
+                                   FontSize="14"
                                    TextTrimming="CharacterEllipsis"
                                    MaxWidth="220"
                                    VerticalAlignment="Center" />
@@ -151,7 +151,7 @@
                                    VerticalAlignment="Center" />
                         <TextBlock Text="{Binding CurrentFileName}"
                                    Foreground="{DynamicResource TextBrush}"
-                                   FontSize="12.5"
+                                   FontSize="14.5"
                                    FontWeight="SemiBold"
                                    TextTrimming="CharacterEllipsis"
                                    MaxWidth="360"
@@ -583,7 +583,7 @@
                                                 BorderBrush="{DynamicResource FloatingChromeBorderBrush}"
                                                 BorderThickness="1">
                                             <TextBlock Text="{Binding PageLabel}"
-                                                       FontSize="11"
+                                                       FontSize="12"
                                                        Foreground="{DynamicResource FloatingChromeTextBrush}" />
                                         </Border>
                                     </Grid>
@@ -643,7 +643,7 @@
                                     BorderThickness="1">
                                 <StackPanel>
                                     <TextBlock Text="A"
-                                               FontSize="11"
+                                               FontSize="12"
                                                FontWeight="SemiBold"
                                                Foreground="{DynamicResource AccentBrush}" />
                                     <TextBlock Text="{Binding ComparePrimaryFileName}"
@@ -675,7 +675,7 @@
                                     BorderThickness="1">
                                 <StackPanel>
                                     <TextBlock Text="B"
-                                               FontSize="11"
+                                               FontSize="12"
                                                FontWeight="SemiBold"
                                                Foreground="{DynamicResource YellowBrush}" />
                                     <TextBlock Text="{Binding CompareSecondaryFileName}"
@@ -718,7 +718,7 @@
                                 BorderThickness="1">
                             <StackPanel>
                                 <TextBlock Text="{loc:Loc MainUiOverlayAB}"
-                                           FontSize="11"
+                                           FontSize="12"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource AccentBrush}" />
                                 <TextBlock Text="{Binding CompareStatusText}"
@@ -1800,9 +1800,9 @@
                                                        FontWeight="SemiBold"
                                                        TextTrimming="CharacterEllipsis"
                                                        Margin="1,8,1,0" />
-                                            <TextBlock Text="{Binding PositionText}"
-                                                       Foreground="{DynamicResource OverlayBrush}"
-                                                       FontSize="10.5"
+                                        <TextBlock Text="{Binding PositionText}"
+                                               Foreground="{DynamicResource OverlayBrush}"
+                                                       FontSize="12"
                                                        Margin="1,2,1,0" />
                                         </StackPanel>
                                     </Button>
@@ -2036,13 +2036,13 @@
                                                 MaxWidth="250">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="{Binding Label}"
-                                                           FontSize="10"
+                                                           FontSize="12"
                                                            FontWeight="SemiBold"
                                                            Foreground="{DynamicResource OverlayBrush}"
                                                            VerticalAlignment="Center"
                                                            Margin="0,0,6,0" />
                                                 <TextBlock Text="{Binding Value}"
-                                                           FontSize="11"
+                                                           FontSize="12.5"
                                                            Foreground="{DynamicResource FloatingChromeTextBrush}"
                                                            TextTrimming="CharacterEllipsis"
                                                            MaxWidth="170"
@@ -2155,8 +2155,8 @@
                                            a11y:LiveRegionBehavior.AnnounceChanges="True" />
                                 <TextBlock Text="{Binding OcrStatusDetail}"
                                            Foreground="{DynamicResource SubtextBrush}"
-                                           FontSize="11.5"
-                                           LineHeight="16"
+                                           FontSize="12.5"
+                                           LineHeight="17"
                                            TextWrapping="Wrap"
                                            Margin="0,3,0,0" />
                             </StackPanel>
@@ -2472,7 +2472,7 @@
                                                 <TextBlock Grid.Column="0"
                                                            Text="{Binding Category}"
                                                            Foreground="{DynamicResource SubtextBrush}"
-                                                           FontSize="11"
+                                                           FontSize="12"
                                                            VerticalAlignment="Center"
                                                            Margin="0,0,8,0"
                                                            MinWidth="60" />
@@ -2485,7 +2485,7 @@
                                                 <TextBlock Grid.Column="2"
                                                            Text="{Binding Shortcut}"
                                                            Foreground="{DynamicResource OverlayBrush}"
-                                                           FontSize="11"
+                                                           FontSize="12"
                                                            VerticalAlignment="Center"
                                                            Margin="12,0,0,0" />
                                             </Grid>
@@ -2600,8 +2600,8 @@
                                            a11y:LiveRegionBehavior.AnnounceChanges="True" />
                                 <TextBlock Text="{Binding OperationStatusDetail}"
                                            Foreground="{DynamicResource SubtextBrush}"
-                                           FontSize="11.5"
-                                           LineHeight="16"
+                                           FontSize="12.5"
+                                           LineHeight="17"
                                            TextWrapping="Wrap"
                                            Margin="0,3,0,0" />
                             </StackPanel>
@@ -2919,7 +2919,7 @@
                                                    Margin="0,0,6,0"
                                                    VerticalAlignment="Center" />
                                         <TextBlock Text="{Binding FolderSortLabel}"
-                                                   FontSize="11.5"
+                                                   FontSize="12.5"
                                                    FontWeight="SemiBold"
                                                    VerticalAlignment="Center" />
                                     </StackPanel>
@@ -2961,7 +2961,7 @@
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,5,0" />
                                         <TextBlock Text="{Binding PagePositionText}"
-                                                   FontSize="10.5"
+                                                   FontSize="12"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource MauveBrush}"
                                                    VerticalAlignment="Center" />
@@ -2988,7 +2988,7 @@
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,5,0" />
                                         <TextBlock Text="{Binding AnimationFrameCountText}"
-                                                   FontSize="10.5"
+                                                   FontSize="12"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center" />
@@ -3010,7 +3010,7 @@
                                         Cursor="Hand"
                                         MouseLeftButtonUp="ChannelChip_Click">
                                     <TextBlock Text="{Binding ChannelModeLabel}"
-                                               FontSize="10.5"
+                                               FontSize="12"
                                                FontWeight="SemiBold"
                                                Foreground="{DynamicResource AccentBrush}"
                                                VerticalAlignment="Center" />
@@ -3035,7 +3035,7 @@
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,4,0" />
                                         <TextBlock Text="{Binding ListenPortLabel}"
-                                                   FontSize="10.5"
+                                                   FontSize="12"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center" />
@@ -3067,7 +3067,7 @@
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,4,0" />
                                         <TextBlock Text="{Binding SlideshowStatusText}"
-                                                   FontSize="10.5"
+                                                   FontSize="12"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center" />
@@ -3154,16 +3154,16 @@
 
         <!-- ============ RIGHT: Contextual details panel ============ -->
         <Border x:Name="RightSidePanel" Grid.Column="2"
-                Width="340"
+                Width="316"
                 Visibility="{Binding IsFullscreen, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}"
                 Background="{DynamicResource InspectorPanelBrush}"
                 BorderBrush="{DynamicResource HairlineBrush}"
                 BorderThickness="1,0,0,0">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
-                <StackPanel Margin="18,20,18,26">
+                <StackPanel Margin="16,16,16,22">
 
                     <!-- Panel header -->
-                    <Grid Margin="0,0,0,16">
+                    <Grid Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
@@ -3197,46 +3197,40 @@
                     <!-- Overview first: identity and the four facts users most often scan.
                          Deeper metadata remains available in the collapsed sections below. -->
                     <StackPanel x:Name="InspectorOverview"
-                                Margin="0,0,0,17"
+                                Margin="0,0,0,12"
                                 Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}">
                         <TextBlock Text="{Binding CurrentFileName}"
                                    Foreground="{DynamicResource TextBrush}"
-                                   FontSize="15"
+                                   FontSize="16"
                                    FontWeight="SemiBold"
                                    TextTrimming="CharacterEllipsis"
                                    ToolTip="{Binding CurrentFileName}" />
                         <TextBlock Text="{Binding CurrentFolder}"
                                    Foreground="{DynamicResource OverlayBrush}"
-                                   FontSize="11.5"
-                                   Margin="0,4,0,9"
+                                   FontSize="12.5"
+                                   Margin="0,3,0,10"
                                    TextTrimming="CharacterEllipsis"
                                    ToolTip="{Binding CurrentFolder}" />
-                        <UniformGrid Columns="2" Rows="2" Margin="-3,0,-3,0">
-                            <Border Style="{StaticResource InspectorFactTile}">
-                                <StackPanel>
-                                    <TextBlock Text="{loc:Loc ExportPreviewSize}" Style="{StaticResource Text.Hint}" />
-                                    <TextBlock Text="{Binding FileSizeText}" Margin="0,4,0,0" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource InspectorFactTile}">
-                                <StackPanel>
-                                    <TextBlock Text="{loc:Loc ExportPreviewPixels}" Style="{StaticResource Text.Hint}" />
-                                    <TextBlock Text="{Binding DimensionsText}" Margin="0,4,0,0" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource InspectorFactTile}">
-                                <StackPanel>
-                                    <TextBlock Text="{loc:Loc MainUiDecoder}" Style="{StaticResource Text.Hint}" />
-                                    <TextBlock Text="{Binding DecoderUsed}" Margin="0,4,0,0" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis" ToolTip="{Binding DecoderUsed}" />
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource InspectorFactTile}">
-                                <StackPanel>
-                                    <TextBlock Text="{loc:Loc FileHealthScanMetaFolder}" Style="{StaticResource Text.Hint}" />
-                                    <TextBlock Text="{Binding CurrentFolder, Converter={x:Static vm:PathToFileNameConverter.Instance}}" Margin="0,4,0,0" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis" ToolTip="{Binding CurrentFolder}" />
-                                </StackPanel>
-                            </Border>
-                        </UniformGrid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="{loc:Loc ExportPreviewSize}" Style="{StaticResource MetaLabel}" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding FileSizeText}" Style="{StaticResource MetaValue}" />
+                            <TextBlock Grid.Row="1" Text="{loc:Loc ExportPreviewPixels}" Style="{StaticResource MetaLabel}" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DimensionsText}" Style="{StaticResource MetaValue}" />
+                            <TextBlock Grid.Row="2" Text="{loc:Loc MainUiDecoder}" Style="{StaticResource MetaLabel}" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DecoderUsed}" Style="{StaticResource MetaValue}" ToolTip="{Binding DecoderUsed}" />
+                            <TextBlock Grid.Row="3" Text="{loc:Loc FileHealthScanMetaFolder}" Style="{StaticResource MetaLabel}" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CurrentFolder, Converter={x:Static vm:PathToFileNameConverter.Instance}}" Style="{StaticResource MetaValue}" ToolTip="{Binding CurrentFolder}" />
+                        </Grid>
                     </StackPanel>
 
                     <Border Style="{StaticResource Card}"
@@ -3650,13 +3644,13 @@
                                                 </Border>
                                                 <TextBlock Text="{Binding FileName}"
                                                            Foreground="{DynamicResource TextBrush}"
-                                                           FontSize="11.5"
+                                                           FontSize="12.5"
                                                            FontWeight="SemiBold"
                                                            TextTrimming="CharacterEllipsis"
                                                            Margin="1,7,1,0" />
                                                 <TextBlock Text="{Binding PositionText}"
                                                            Foreground="{DynamicResource OverlayBrush}"
-                                                           FontSize="10.5"
+                                                           FontSize="12"
                                                            Margin="1,1,1,0" />
                                             </StackPanel>
                                         </Button>
@@ -3865,7 +3859,7 @@
                                                    AutomationProperties.LiveSetting="Polite"
                                                    a11y:LiveRegionBehavior.AnnounceChanges="True" />
                                         <TextBlock Text="{Binding DecoderUsed}"
-                                                   FontSize="11.5"
+                                                   FontSize="12.5"
                                                    Margin="0,3,0,0"
                                                    Foreground="{DynamicResource OverlayBrush}"
                                                    TextTrimming="CharacterEllipsis" />
@@ -3931,7 +3925,7 @@
                                                   AutomationProperties.Name="{loc:Loc AutomationMainWindowRightToLeftBookPageTurns}" />
                                         <TextBlock Text="{Binding ArchivePageTurnModeHint}"
                                                    Margin="28,5,0,0"
-                                                   FontSize="11.5"
+                                                   FontSize="12"
                                                    Foreground="{DynamicResource OverlayBrush}"
                                                    TextWrapping="Wrap" />
                                         <CheckBox IsChecked="{Binding ArchiveOldScanFilterEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -3941,7 +3935,7 @@
                                                   AutomationProperties.Name="{loc:Loc AutomationMainWindowCleanOldArchiveScans}" />
                                         <TextBlock Text="{Binding ArchiveOldScanFilterHint}"
                                                    Margin="28,5,0,0"
-                                                   FontSize="11.5"
+                                                   FontSize="12"
                                                    Foreground="{DynamicResource OverlayBrush}"
                                                    TextWrapping="Wrap" />
                                         <CheckBox IsChecked="{Binding ArchiveSpreadModeEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -3951,7 +3945,7 @@
                                                   AutomationProperties.Name="{loc:Loc AutomationMainWindowTwoPageArchiveSpreads}" />
                                         <TextBlock Text="{Binding ArchiveSpreadModeHint}"
                                                    Margin="28,5,0,0"
-                                                   FontSize="11.5"
+                                                   FontSize="12"
                                                    Foreground="{DynamicResource OverlayBrush}"
                                                    TextWrapping="Wrap" />
                                         <CheckBox IsChecked="{Binding ArchiveContinuousModeEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -3961,7 +3955,7 @@
                                                   AutomationProperties.Name="{loc:Loc AutomationMainWindowContinuousArchiveReader}" />
                                         <TextBlock Text="{Binding ArchiveContinuousModeHint}"
                                                    Margin="28,5,0,0"
-                                                   FontSize="11.5"
+                                                   FontSize="12"
                                                    Foreground="{DynamicResource OverlayBrush}"
                                                    TextWrapping="Wrap" />
                                     </StackPanel>
@@ -4080,7 +4074,7 @@
                                                            TextTrimming="CharacterEllipsis"
                                                            Foreground="{DynamicResource TextBrush}" />
                                                 <TextBlock Text="{Binding Converter={x:Static vm:PathToParentConverter.Instance}, Mode=OneWay}"
-                                                           FontSize="11.5"
+                                                           FontSize="12"
                                                            Margin="0,2,0,0"
                                                            TextTrimming="CharacterEllipsis"
                                                            Foreground="{DynamicResource OverlayBrush}" />
@@ -4142,7 +4136,7 @@
                                                            TextTrimming="CharacterEllipsis"
                                                            Foreground="{DynamicResource TextBrush}" />
                                                 <TextBlock Text="{Binding Path, Converter={x:Static vm:PathToParentConverter.Instance}, Mode=OneWay}"
-                                                           FontSize="11.5"
+                                                           FontSize="12"
                                                            Margin="0,2,0,0"
                                                            TextTrimming="CharacterEllipsis"
                                                            Foreground="{DynamicResource OverlayBrush}" />
@@ -4153,7 +4147,7 @@
                                                     Margin="10,0,0,0"
                                                     VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding ProgressText}"
-                                                           FontSize="11"
+                                                           FontSize="12"
                                                            FontWeight="SemiBold"
                                                            Foreground="{DynamicResource SubtextBrush}" />
                                             </Border>
@@ -4210,7 +4204,7 @@
                             <Border Style="{StaticResource Badge}"
                                     VerticalAlignment="Center">
                                 <TextBlock Text="{Binding DecoderUsed}"
-                                           FontSize="11"
+                                           FontSize="12"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource SubtextBrush}" />
                             </Border>
@@ -4223,7 +4217,7 @@
                                 <TextBlock Text="{Binding HdrDisplayStatus}"
                                            MaxWidth="250"
                                            TextWrapping="Wrap"
-                                           FontSize="10.5"
+                                           FontSize="12"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextBrush}"
                                            AutomationProperties.LiveSetting="Polite"
