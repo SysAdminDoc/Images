@@ -14,6 +14,7 @@
     <PackageReference Include="FlaUI.Core" Version="5.0.0" />
     <PackageReference Include="FlaUI.UIA3" Version="5.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
     <PackageReference Include="xunit.v3" Version="3.2.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
   </ItemGroup>
@@ -32,6 +33,7 @@
     <None Include="Fixtures\onnx-test-add.onnx" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Fixtures\smoke-test.png" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Fixtures\codec-corpus\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\render\**\*" Link="render\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <!-- Use a fixed cap so timing/async assertions are not starved on high-core machines. -->
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

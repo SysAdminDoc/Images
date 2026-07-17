@@ -1,0 +1,8 @@
+P3
+# 4x4 golden fixture for a 2x2 RGBA Skia bitmap rendered at 96 DPI with nearest-neighbor sampling.
+4 4
+255
+255 0 0   255 0 0   0 255 0   0 255 0
+255 0 0   255 0 0   0 255 0   0 255 0
+0 0 255   0 0 255   255 255 0   255 255 0
+0 0 255   0 0 255   255 255 0   255 255 0

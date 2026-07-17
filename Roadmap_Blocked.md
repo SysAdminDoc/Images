@@ -119,10 +119,6 @@ Permanent owner policy: D-05/D-05a and signing-dependent C2PA write/export work 
   - **Blocked by**: Windows version detection research — needs reliable `windowscodecs.dll` version probing.
   - **Unblock when**: version-detection approach validated and tested.
 
-- [ ] **T-03** *P2* — **Golden-image render tests** under `tests/render/`, DPI-pinned, per-pixel RGBA compare with tolerance via ImageSharp. Catches canvas-engine regressions when SkiaSharp lands in V20-01. Effort: M. [ImageSharp repo]
-  - **Blocked by**: ImageSharp NuGet reference + V20-01 SkiaSharp canvas (render tests primarily guard SkiaSharp regressions).
-  - **Unblock when**: V20-01 SkiaSharp canvas ships and ImageSharp is added.
-
 - [ ] **I-03** *P2* — **RTL audit pass**. `FlowDirection="RightToLeft"` at window root mirrors layout, but `Canvas`, `Image`, custom `DrawingVisual`, negative-`X` `ScaleTransform`, and `DataGrid` column order need manual mirroring. Arabic + Hebrew test fixtures. Effort: L. [MS Learn localization-overview]
   - **Blocked by**: locale infrastructure maturity — I-01 string extraction + I-02 Crowdin should be stable first.
   - **Unblock when**: I-01 fully complete and at least one RTL locale has translators.
