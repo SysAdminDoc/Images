@@ -912,6 +912,9 @@ public static class Strings
     public static string SemanticSearchReadyStatus => Get(nameof(SemanticSearchReadyStatus));
     public static string SemanticSearchAddFolderDialogTitle => Get(nameof(SemanticSearchAddFolderDialogTitle));
     public static string SemanticSearchAddedRootFormat => Get(nameof(SemanticSearchAddedRootFormat));
+    public static string SemanticSearchRootOnline => Get(nameof(SemanticSearchRootOnline));
+    public static string SemanticSearchRootOffline => Get(nameof(SemanticSearchRootOffline));
+    public static string SemanticSearchOfflineRootsFormat => Get(nameof(SemanticSearchOfflineRootsFormat));
     public static string SemanticSearchAddFolderBeforeIndexing => Get(nameof(SemanticSearchAddFolderBeforeIndexing));
     public static string SemanticSearchBuildingIndex => Get(nameof(SemanticSearchBuildingIndex));
     public static string SemanticSearchIndexedResultFormat => Get(nameof(SemanticSearchIndexedResultFormat));

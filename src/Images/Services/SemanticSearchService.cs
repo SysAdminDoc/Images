@@ -130,6 +130,7 @@ public sealed class SemanticSearchService : IDisposable
     public string? IndexPath => _dbPath;
     public bool IsAvailable => _isAvailable;
     public ISemanticEmbeddingProvider Provider => _provider;
+    public CatalogService Catalog => _catalog;
     internal string ConnectionStringForTests => _connectionString;
 
     public string? ClipFallbackReason { get; }

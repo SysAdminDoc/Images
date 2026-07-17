@@ -7,6 +7,10 @@ public enum CatalogCliMode
 {
     Search,
     Near,
+    RootAdd,
+    RootRemove,
+    RootList,
+    Rescan,
 }
 
 public sealed record CatalogCliRequest(
@@ -14,7 +18,8 @@ public sealed record CatalogCliRequest(
     string? SearchTerms = null,
     double Latitude = 0,
     double Longitude = 0,
-    double RadiusKm = 0);
+    double RadiusKm = 0,
+    string? RootPath = null);
 
 /// <summary>
 /// Scriptable, window-free consumer for the rebuildable catalog. Standard output contains one
@@ -26,7 +31,11 @@ public static class CatalogCli
     public static bool IsCatalogCommand(string[] args) =>
         args.Length > 0 &&
         (string.Equals(args[0], "--catalog-search", StringComparison.OrdinalIgnoreCase) ||
-         string.Equals(args[0], "--catalog-near", StringComparison.OrdinalIgnoreCase));
+         string.Equals(args[0], "--catalog-near", StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(args[0], "--catalog-root-add", StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(args[0], "--catalog-root-remove", StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(args[0], "--catalog-root-list", StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(args[0], "--catalog-rescan", StringComparison.OrdinalIgnoreCase));
 
     public static bool TryParse(
         string[] args,
@@ -47,6 +56,39 @@ public static class CatalogCli
             }
 
             request = new CatalogCliRequest(CatalogCliMode.Search, SearchTerms: args[1].Trim());
+            return true;
+        }
+
+        if (string.Equals(args[0], "--catalog-root-add", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(args[0], "--catalog-root-remove", StringComparison.OrdinalIgnoreCase))
+        {
+            if (args.Length != 2 || string.IsNullOrWhiteSpace(args[1]))
+            {
+                error = $"Usage: Images.exe {args[0]} <folder>";
+                return true;
+            }
+
+            request = new CatalogCliRequest(
+                string.Equals(args[0], "--catalog-root-add", StringComparison.OrdinalIgnoreCase)
+                    ? CatalogCliMode.RootAdd
+                    : CatalogCliMode.RootRemove,
+                RootPath: args[1].Trim());
+            return true;
+        }
+
+        if (string.Equals(args[0], "--catalog-root-list", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(args[0], "--catalog-rescan", StringComparison.OrdinalIgnoreCase))
+        {
+            if (args.Length != 1)
+            {
+                error = $"Usage: Images.exe {args[0]}";
+                return true;
+            }
+
+            request = new CatalogCliRequest(
+                string.Equals(args[0], "--catalog-root-list", StringComparison.OrdinalIgnoreCase)
+                    ? CatalogCliMode.RootList
+                    : CatalogCliMode.Rescan);
             return true;
         }
 
@@ -103,6 +145,49 @@ public static class CatalogCli
         {
             error.WriteLine("Images catalog is unavailable. Open the library and index folders first.");
             return 2;
+        }
+
+        if (request.Mode == CatalogCliMode.RootAdd)
+        {
+            if (!catalog.RegisterRoot(request.RootPath ?? string.Empty))
+            {
+                error.WriteLine("Catalog root was not added. Confirm the folder exists and is accessible.");
+                return 2;
+            }
+
+            var rebuildResult = catalog.Rebuild(catalog.GetRoots().Select(root => root.RootPath));
+            error.WriteLine($"Catalog root added; indexed {rebuildResult.IndexedCount.ToString(CultureInfo.InvariantCulture)} assets.");
+            return 0;
+        }
+
+        if (request.Mode == CatalogCliMode.RootRemove)
+        {
+            if (!catalog.RemoveRoot(request.RootPath ?? string.Empty))
+            {
+                error.WriteLine("Catalog root was not found.");
+                return 2;
+            }
+
+            error.WriteLine("Catalog root and its cached assets were removed.");
+            return 0;
+        }
+
+        if (request.Mode == CatalogCliMode.RootList)
+        {
+            var roots = catalog.GetRoots();
+            foreach (var root in roots)
+                output.WriteLine(root.RootPath);
+            var offline = roots.Count(root => !root.IsOnline);
+            error.WriteLine($"Listed {roots.Count.ToString(CultureInfo.InvariantCulture)} catalog roots; {offline.ToString(CultureInfo.InvariantCulture)} offline (cached assets retained).");
+            return 0;
+        }
+
+        if (request.Mode == CatalogCliMode.Rescan)
+        {
+            var roots = catalog.GetRoots();
+            var rebuildResult = catalog.Rebuild(roots.Select(root => root.RootPath));
+            error.WriteLine($"Catalog rescan indexed {rebuildResult.IndexedCount.ToString(CultureInfo.InvariantCulture)} assets; {rebuildResult.OfflineRoots.Count.ToString(CultureInfo.InvariantCulture)} roots offline (cached assets retained).");
+            return 0;
         }
 
         var query = new CatalogQueryService(catalog);

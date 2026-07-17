@@ -166,6 +166,49 @@ public sealed class CatalogServiceTests
     }
 
     [Fact]
+    public void Rebuild_PreservesCachedAssetsWhenOneRegisteredRootIsOffline()
+    {
+        using var temp = TestDirectory.Create();
+        var onlineRoot = Directory.CreateDirectory(Path.Combine(temp.Path, "online")).FullName;
+        var offlineRoot = Directory.CreateDirectory(Path.Combine(temp.Path, "removable")).FullName;
+        var onlineAsset = WriteImage(onlineRoot, "online.png", 8, 8);
+        var offlineAsset = WriteImage(offlineRoot, "offline.png", 8, 8);
+        var service = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+        service.Rebuild([onlineRoot, offlineRoot]);
+        Directory.Move(offlineRoot, offlineRoot + "-disconnected");
+
+        var result = service.Rebuild([onlineRoot, offlineRoot]);
+
+        Assert.Equal(2, result.Assets.Count);
+        Assert.Contains(result.Assets, asset => asset.SourcePath == onlineAsset);
+        Assert.Contains(result.Assets, asset => asset.SourcePath == offlineAsset);
+        Assert.Equal(offlineRoot, Assert.Single(result.OfflineRoots));
+        Assert.False(service.GetRoots().Single(root => root.RootPath == offlineRoot).IsOnline);
+    }
+
+    [Fact]
+    public void RegisterAndRemoveRoot_PersistsLifecycleAndDeletesOnlyOwnedAssets()
+    {
+        using var temp = TestDirectory.Create();
+        var firstRoot = Directory.CreateDirectory(Path.Combine(temp.Path, "first")).FullName;
+        var secondRoot = Directory.CreateDirectory(Path.Combine(temp.Path, "second")).FullName;
+        var firstAsset = WriteImage(firstRoot, "first.png", 8, 8);
+        var secondAsset = WriteImage(secondRoot, "second.png", 8, 8);
+        var service = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+
+        Assert.True(service.RegisterRoot(firstRoot));
+        Assert.True(service.RegisterRoot(secondRoot));
+        service.Rebuild(service.GetRoots().Select(root => root.RootPath));
+        Assert.Equal(2, service.GetRoots().Count);
+
+        Assert.True(service.RemoveRoot(firstRoot));
+
+        Assert.Null(service.GetByPath(firstAsset));
+        Assert.NotNull(service.GetByPath(secondAsset));
+        Assert.Equal(secondRoot, Assert.Single(service.GetRoots()).RootPath);
+    }
+
+    [Fact]
     public void Rebuild_SkipsReparsePointDirectories()
     {
         using var temp = TestDirectory.Create();

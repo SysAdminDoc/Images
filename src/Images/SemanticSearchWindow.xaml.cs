@@ -22,12 +22,14 @@ public sealed record SemanticSearchResultRow(
     string ScoreText,
     string MatchedText);
 
+public sealed record SemanticSearchRootRow(string RootPath, bool IsOnline, string StateText);
+
 public partial class SemanticSearchWindow : Window
 {
     private readonly SemanticSearchService _semanticSearch;
     private readonly bool _ownsSemanticSearch;
     private readonly Action<string> _revealPathInExplorer;
-    private readonly ObservableCollection<string> _roots = [];
+    private readonly ObservableCollection<SemanticSearchRootRow> _roots = [];
     private readonly ObservableCollection<SemanticSearchResultRow> _results = [];
     private CancellationTokenSource? _indexCancellation;
     private Task<SemanticSearchIndexResult>? _indexTask;
@@ -49,7 +51,11 @@ public partial class SemanticSearchWindow : Window
 
         RootsList.ItemsSource = _roots;
         ResultsList.ItemsSource = _results;
+        LoadRegisteredRoots();
         RefreshStatus();
+        var offlineCount = _roots.Count(root => !root.IsOnline);
+        if (offlineCount > 0)
+            SetStatus(Strings.Format(nameof(Strings.SemanticSearchOfflineRootsFormat), offlineCount), SearchStatus.Warning);
         UpdateResultState();
 
         SourceInitialized += (_, _) =>
@@ -63,10 +69,12 @@ public partial class SemanticSearchWindow : Window
     public void AddSearchRoot(string folder)
     {
         if (TryNormalizeFolder(folder, out var normalized) &&
-            !_roots.Contains(normalized, StringComparer.OrdinalIgnoreCase))
+            !_roots.Any(root => string.Equals(root.RootPath, normalized, StringComparison.OrdinalIgnoreCase)) &&
+            _semanticSearch.Catalog.RegisterRoot(normalized))
         {
-            _roots.Add(normalized);
-            RootsList.SelectedItem = normalized;
+            var row = CreateRootRow(normalized, isOnline: true);
+            _roots.Add(row);
+            RootsList.SelectedItem = row;
             SetStatus(Strings.Format(nameof(Strings.SemanticSearchAddedRootFormat), normalized), SearchStatus.Ready);
         }
     }
@@ -93,7 +101,7 @@ public partial class SemanticSearchWindow : Window
         _indexCancellation = new CancellationTokenSource();
         var indexCancellation = _indexCancellation;
         var token = indexCancellation.Token;
-        var roots = _roots.ToArray();
+        var roots = _roots.Select(root => root.RootPath).ToArray();
 
         SetBusy(true);
         SetStatus(Strings.SemanticSearchBuildingIndex, SearchStatus.Busy);
@@ -152,12 +160,16 @@ public partial class SemanticSearchWindow : Window
 
     private void RemoveRootButton_Click(object sender, RoutedEventArgs e)
     {
-        if (RootsList.SelectedItem is string folder)
-            _roots.Remove(folder);
+        if (RootsList.SelectedItem is SemanticSearchRootRow root && _semanticSearch.Catalog.RemoveRoot(root.RootPath))
+            _roots.Remove(root);
     }
 
     private void ClearRootsButton_Click(object sender, RoutedEventArgs e)
-        => _roots.Clear();
+    {
+        foreach (var root in _roots.ToArray())
+            _semanticSearch.Catalog.RemoveRoot(root.RootPath);
+        LoadRegisteredRoots();
+    }
 
     private void ClearIndexButton_Click(object sender, RoutedEventArgs e)
     {
@@ -176,12 +188,25 @@ public partial class SemanticSearchWindow : Window
 
     private void UseSelectedRootButton_Click(object sender, RoutedEventArgs e)
     {
-        if (RootsList.SelectedItem is string folder)
+        if (RootsList.SelectedItem is SemanticSearchRootRow root)
         {
-            FolderFilterTextBox.Text = folder;
+            FolderFilterTextBox.Text = root.RootPath;
             SetStatus(Strings.SemanticSearchFilterSet, SearchStatus.Ready);
         }
     }
+
+    private void LoadRegisteredRoots()
+    {
+        _roots.Clear();
+        foreach (var root in _semanticSearch.Catalog.GetRoots())
+            _roots.Add(CreateRootRow(root.RootPath, root.IsOnline));
+    }
+
+    private static SemanticSearchRootRow CreateRootRow(string rootPath, bool isOnline)
+        => new(
+            rootPath,
+            isOnline,
+            isOnline ? Strings.SemanticSearchRootOnline : Strings.SemanticSearchRootOffline);
 
     private void SearchButton_Click(object sender, RoutedEventArgs e)
         => RunSearch();

@@ -2936,6 +2936,15 @@ Details written to:
   <data name="SemanticSearchAddedRootFormat" xml:space="preserve">
     <value>Added search root: {0}</value>
   </data>
+  <data name="SemanticSearchRootOnline" xml:space="preserve">
+    <value>Watching for changes</value>
+  </data>
+  <data name="SemanticSearchRootOffline" xml:space="preserve">
+    <value>Offline — cached assets retained</value>
+  </data>
+  <data name="SemanticSearchOfflineRootsFormat" xml:space="preserve">
+    <value>{0} library root(s) offline. Reconnect them to resume scanning; cached assets were retained.</value>
+  </data>
   <data name="SemanticSearchAddFolderBeforeIndexing" xml:space="preserve">
     <value>Add at least one folder before indexing.</value>
   </data>

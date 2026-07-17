@@ -11,6 +11,7 @@ namespace Images;
 public partial class App : Application
 {
     private readonly Microsoft.Extensions.Logging.ILogger _log = Log.For<App>();
+    private CatalogWatchService? _catalogWatch;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -142,7 +143,11 @@ public partial class App : Application
             args.SetObserved();
         };
 
-        Exit += (_, _) => Log.Shutdown();
+        Exit += (_, _) =>
+        {
+            _catalogWatch?.Dispose();
+            Log.Shutdown();
+        };
 
         // I-05: apply persisted locale before any UI is created so x:Static bindings
         // resolve against the chosen culture from the first paint.
@@ -211,6 +216,11 @@ public partial class App : Application
 
         _ = Task.Run(EmailShareService.PruneOldDrafts);
         _ = Task.Run(() => NetworkEgressService.LoadPersistedEntries());
+        if (!uiaBackground)
+        {
+            _catalogWatch = new CatalogWatchService();
+            _ = BackgroundTaskTracker.Queue("catalog-scan-on-start", () => _catalogWatch.StartAsync());
+        }
 
         if (listenPort is not null)
         {

@@ -206,6 +206,18 @@ public static class CliReport
         sb.AppendLine("  Images.exe --catalog-near <lat> <lon> <radiusKm>");
         sb.AppendLine("    Print indexed assets within the requested great-circle radius.");
         sb.AppendLine();
+        sb.AppendLine("  Images.exe --catalog-root-add <folder>");
+        sb.AppendLine("    Register and scan a watched library folder.");
+        sb.AppendLine();
+        sb.AppendLine("  Images.exe --catalog-root-remove <folder>");
+        sb.AppendLine("    Remove a watched folder and its rebuildable cached rows.");
+        sb.AppendLine();
+        sb.AppendLine("  Images.exe --catalog-root-list");
+        sb.AppendLine("    List watched folders; offline roots retain their cached rows.");
+        sb.AppendLine();
+        sb.AppendLine("  Images.exe --catalog-rescan");
+        sb.AppendLine("    Rescan all registered roots without deleting offline-root rows.");
+        sb.AppendLine();
         sb.AppendLine("  Images.exe --face-detect <imagePath>");
         sb.AppendLine("    Run the approved local YuNet model and print reviewable face/landmark JSON.");
         sb.AppendLine("    Requires a verified manual model import; never modifies the image or sidecar.");

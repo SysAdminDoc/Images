@@ -105,10 +105,6 @@ Permanent owner policy: D-05/D-05a and signing-dependent C2PA write/export work 
   - **Blocked by**: research spike — c2pa-rs C API binding feasibility and .NET interop approach.
   - **Unblock when**: spike document with P/Invoke binding strategy produced.
 
-- [ ] **V40-02** *P0* — **Watched folders** — add/remove library roots, scan-on-start, FSW for deltas. Multi-root w/ offline-prompt behavior (don't delete records on drive eject).
-  - **Blocked by**: catalog maturity — V40-01 SQLite catalog schema needs to be stable before watched-folder ingest.
-  - **Unblock when**: V40-01 catalog schema is stable and tested.
-
 ## Blocked On Predecessor Features
 
 - [ ] *P3* — **Contact sheet caller should pass theme colors**. `ContactSheetOptions` accepts TextColor/PlaceholderColor/BackgroundColor but no caller passes theme-appropriate colors yet. Where: `src/Images/Services/ContactSheetService.cs`.

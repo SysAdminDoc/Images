@@ -46,7 +46,15 @@ public sealed record CatalogRebuildResult(
     public int ReusedCount { get; init; }
     public int UpdatedCount { get; init; }
     public int RemovedCount { get; init; }
+    public IReadOnlyList<string> OfflineRoots { get; init; } = [];
 }
+
+public sealed record CatalogRootRecord(
+    string RootPath,
+    DateTimeOffset? LastScannedUtc,
+    int IndexedCount,
+    int FailedCount,
+    bool IsOnline);
 
 public sealed record CatalogAssetPage(
     IReadOnlyList<CatalogAssetRecord> Assets,
@@ -62,6 +70,8 @@ public sealed class CatalogService
     private readonly bool _isAvailable;
     private readonly Func<string, CatalogSidecarFileSummary> _readSidecarFileSummary;
     private readonly Func<string, CancellationToken, string> _computeSha256;
+
+    public static event EventHandler<string>? RootRegistryChanged;
 
     public CatalogService()
         : this(CreateDefaultPath())
@@ -120,17 +130,24 @@ public sealed class CatalogService
 
         var existing = LoadExistingState();
         var currentPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var onlineRoots = normalizedRoots.Where(IsRootOnline).ToList();
+        var offlineRoots = normalizedRoots.Except(onlineRoots, StringComparer.OrdinalIgnoreCase).ToArray();
+        foreach (var path in existing.Keys)
+        {
+            if (offlineRoots.Any(root => IsPathWithinRoot(path, root)))
+                currentPaths.Add(path);
+        }
 
         var failed = 0;
         var reused = 0;
         var updated = 0;
         var assets = new List<CatalogAssetRecord>();
-        var rootStats = normalizedRoots.ToDictionary(
+        var rootStats = onlineRoots.ToDictionary(
             root => root,
             _ => new CatalogRootScanStats(),
             StringComparer.OrdinalIgnoreCase);
 
-        foreach (var candidate in CollectCandidateFiles(normalizedRoots, cancellationToken))
+        foreach (var candidate in CollectCandidateFiles(onlineRoots, cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             var path = candidate.Path;
@@ -170,17 +187,20 @@ public sealed class CatalogService
 
         var removed = RemoveStalePaths(conn, tx, existing.Keys, currentPaths);
         TouchScannedUtc(conn, tx, scannedUtc, currentPaths, existing.Keys);
+        RemoveUnrequestedRoots(conn, tx, normalizedRoots);
 
         foreach (var asset in assets)
         {
             cancellationToken.ThrowIfCancellationRequested();
             UpsertAsset(conn, tx, asset);
         }
-        foreach (var root in normalizedRoots)
+        foreach (var root in onlineRoots)
         {
             var stats = rootStats[root];
             UpsertRoot(conn, tx, root, scannedUtc, stats.IndexedCount, stats.FailedCount);
         }
+        foreach (var root in offlineRoots)
+            EnsureRoot(conn, tx, root);
         tx.Commit();
 
         var allAssets = LoadAllAssets(conn);
@@ -189,8 +209,107 @@ public sealed class CatalogService
         {
             ReusedCount = reused,
             UpdatedCount = updated,
-            RemovedCount = removed
+            RemovedCount = removed,
+            OfflineRoots = offlineRoots
         };
+    }
+
+    public IReadOnlyList<CatalogRootRecord> GetRoots()
+    {
+        var roots = new List<CatalogRootRecord>();
+        if (!_isAvailable)
+            return roots;
+
+        try
+        {
+            using var conn = Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT root_path, last_scanned_utc, indexed_count, failed_count FROM catalog_roots ORDER BY root_path COLLATE NOCASE;";
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var path = reader.GetString(0);
+                var scanned = reader.GetInt64(1);
+                roots.Add(new CatalogRootRecord(
+                    path,
+                    scanned > 0 ? DateTimeOffset.FromUnixTimeSeconds(scanned) : null,
+                    reader.GetInt32(2),
+                    reader.GetInt32(3),
+                    IsRootOnline(path)));
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or InvalidOperationException or NotSupportedException or SqliteException)
+        {
+            Log.LogWarning(ex, "Could not read catalog roots");
+        }
+
+        return roots;
+    }
+
+    public bool RegisterRoot(string root)
+    {
+        if (!_isAvailable || !TryNormalizeRoot(root, out var normalized) || !Directory.Exists(normalized))
+            return false;
+
+        try
+        {
+            using var conn = Open();
+            using var tx = conn.BeginTransaction();
+            EnsureRoot(conn, tx, normalized);
+            tx.Commit();
+            RootRegistryChanged?.Invoke(this, _dbPath ?? string.Empty);
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or InvalidOperationException or NotSupportedException or SqliteException)
+        {
+            Log.LogWarning(ex, "Could not register catalog root {Root}", root);
+            return false;
+        }
+    }
+
+    public bool RemoveRoot(string root, bool deleteAssets = true)
+    {
+        if (!_isAvailable || !TryNormalizeRoot(root, out var normalized))
+            return false;
+
+        try
+        {
+            var retainedRoots = GetRoots()
+                .Select(item => item.RootPath)
+                .Where(path => !string.Equals(path, normalized, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            var ownedPaths = deleteAssets
+                ? LoadExistingState().Keys
+                    .Where(path => IsPathWithinRoot(path, normalized))
+                    .Where(path => !retainedRoots.Any(retainedRoot => IsPathWithinRoot(path, retainedRoot)))
+                    .ToArray()
+                : [];
+            using var conn = Open();
+            using var tx = conn.BeginTransaction();
+            foreach (var path in ownedPaths)
+            {
+                using var deleteAsset = conn.CreateCommand();
+                deleteAsset.Transaction = tx;
+                deleteAsset.CommandText = "DELETE FROM catalog_assets WHERE source_path = $path;";
+                deleteAsset.Parameters.AddWithValue("$path", path);
+                deleteAsset.ExecuteNonQuery();
+            }
+
+            using var deleteRoot = conn.CreateCommand();
+            deleteRoot.Transaction = tx;
+            deleteRoot.CommandText = "DELETE FROM catalog_roots WHERE root_path = $root;";
+            deleteRoot.Parameters.AddWithValue("$root", normalized);
+            var removed = deleteRoot.ExecuteNonQuery() > 0;
+            tx.Commit();
+            if (removed)
+                RootRegistryChanged?.Invoke(this, _dbPath ?? string.Empty);
+            return removed;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or InvalidOperationException or NotSupportedException or SqliteException)
+        {
+            Log.LogWarning(ex, "Could not remove catalog root {Root}", root);
+            return false;
+        }
     }
 
     private CatalogFileChangeState GetChangeState(string path, CatalogFileSummary cached)
@@ -1098,24 +1217,38 @@ public sealed class CatalogService
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var root in roots)
         {
-            if (string.IsNullOrWhiteSpace(root))
-                continue;
-
-            string fullPath;
-            try
-            {
-                fullPath = Path.GetFullPath(root);
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
-            {
-                continue;
-            }
-
-            if (!File.Exists(fullPath) && !Directory.Exists(fullPath))
-                continue;
-            if (seen.Add(fullPath))
+            if (TryNormalizeRoot(root, out var fullPath) && seen.Add(fullPath))
                 yield return fullPath;
         }
+    }
+
+    private static bool TryNormalizeRoot(string? root, out string fullPath)
+    {
+        fullPath = string.Empty;
+        if (string.IsNullOrWhiteSpace(root))
+            return false;
+
+        try
+        {
+            fullPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
+            return fullPath.Length > 0;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        {
+            return false;
+        }
+    }
+
+    private static bool IsRootOnline(string root) => Directory.Exists(root) || File.Exists(root);
+
+    internal static bool IsPathWithinRoot(string path, string root)
+    {
+        if (string.Equals(path, root, StringComparison.OrdinalIgnoreCase))
+            return true;
+        var prefix = root.EndsWith(Path.DirectorySeparatorChar) || root.EndsWith(Path.AltDirectorySeparatorChar)
+            ? root
+            : root + Path.DirectorySeparatorChar;
+        return path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
     }
 
     private static IEnumerable<CatalogCandidateFile> CollectCandidateFiles(
@@ -1262,6 +1395,37 @@ public sealed class CatalogService
         cmd.Parameters.AddWithValue("$indexed", indexedCount);
         cmd.Parameters.AddWithValue("$failed", failedCount);
         cmd.ExecuteNonQuery();
+    }
+
+    private static void EnsureRoot(SqliteConnection conn, SqliteTransaction tx, string root)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = "INSERT OR IGNORE INTO catalog_roots (root_path, last_scanned_utc, indexed_count, failed_count) VALUES ($root, 0, 0, 0);";
+        cmd.Parameters.AddWithValue("$root", root);
+        cmd.ExecuteNonQuery();
+    }
+
+    private static void RemoveUnrequestedRoots(SqliteConnection conn, SqliteTransaction tx, IReadOnlyCollection<string> requestedRoots)
+    {
+        using var read = conn.CreateCommand();
+        read.Transaction = tx;
+        read.CommandText = "SELECT root_path FROM catalog_roots;";
+        var stored = new List<string>();
+        using (var reader = read.ExecuteReader())
+        {
+            while (reader.Read())
+                stored.Add(reader.GetString(0));
+        }
+
+        foreach (var root in stored.Where(root => !requestedRoots.Contains(root, StringComparer.OrdinalIgnoreCase)))
+        {
+            using var delete = conn.CreateCommand();
+            delete.Transaction = tx;
+            delete.CommandText = "DELETE FROM catalog_roots WHERE root_path = $root;";
+            delete.Parameters.AddWithValue("$root", root);
+            delete.ExecuteNonQuery();
+        }
     }
 
     private static void AddAssetParameters(SqliteCommand cmd, CatalogAssetRecord asset)

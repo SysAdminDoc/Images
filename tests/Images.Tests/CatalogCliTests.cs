@@ -33,6 +33,23 @@ public sealed class CatalogCliTests
     }
 
     [Fact]
+    public void TryParse_RootLifecycleCommands_RequireExactArguments()
+    {
+        Assert.True(CatalogCli.TryParse(["--catalog-root-add", @"C:\Photos"], out var add, out var error));
+        Assert.Null(error);
+        Assert.Equal(CatalogCliMode.RootAdd, add!.Mode);
+        Assert.Equal(@"C:\Photos", add.RootPath);
+
+        Assert.True(CatalogCli.TryParse(["--catalog-root-list"], out var list, out error));
+        Assert.Null(error);
+        Assert.Equal(CatalogCliMode.RootList, list!.Mode);
+
+        Assert.True(CatalogCli.TryParse(["--catalog-rescan", "extra"], out var invalid, out error));
+        Assert.Null(invalid);
+        Assert.Contains("Usage:", error);
+    }
+
+    [Fact]
     public void Execute_Search_PrintsOneMatchingPathPerLine()
     {
         using var temp = TestDirectory.Create();
@@ -52,6 +69,29 @@ public sealed class CatalogCliTests
         Assert.Equal(0, exitCode);
         Assert.Equal(expected, output.ToString().Trim());
         Assert.Contains("Matched 1 catalog assets.", error.ToString());
+    }
+
+    [Fact]
+    public void Execute_RootLifecycle_AddsListsRescansAndRemovesWithoutWindows()
+    {
+        using var temp = TestDirectory.Create();
+        var image = WriteImage(temp.Path, "watched.png");
+        var catalog = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+
+        Assert.Equal(0, CatalogCli.Execute(new CatalogCliRequest(CatalogCliMode.RootAdd, RootPath: temp.Path), output, error, catalog));
+        Assert.NotNull(catalog.GetByPath(image));
+
+        output.GetStringBuilder().Clear();
+        error.GetStringBuilder().Clear();
+        Assert.Equal(0, CatalogCli.Execute(new CatalogCliRequest(CatalogCliMode.RootList), output, error, catalog));
+        Assert.Equal(temp.Path, output.ToString().Trim());
+
+        Assert.Equal(0, CatalogCli.Execute(new CatalogCliRequest(CatalogCliMode.Rescan), output, error, catalog));
+        Assert.Equal(0, CatalogCli.Execute(new CatalogCliRequest(CatalogCliMode.RootRemove, RootPath: temp.Path), output, error, catalog));
+        Assert.Empty(catalog.GetRoots());
+        Assert.Null(catalog.GetByPath(image));
     }
 
     private static string WriteImage(string folder, string name)
