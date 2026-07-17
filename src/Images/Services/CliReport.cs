@@ -210,6 +210,13 @@ public static class CliReport
         sb.AppendLine("    Run the approved local YuNet model and print reviewable face/landmark JSON.");
         sb.AppendLine("    Requires a verified manual model import; never modifies the image or sidecar.");
         sb.AppendLine();
+        sb.AppendLine("  Images.exe --face-xmp <imagePath>");
+        sb.AppendLine("    Print an MWG-rs XMP draft with unassigned detected face regions.");
+        sb.AppendLine();
+        sb.AppendLine("  Images.exe --face-cluster <imagePath> <imagePath> [...]");
+        sb.AppendLine("    Align/embed quality-approved faces locally and print SFace clusters as JSON.");
+        sb.AppendLine("    Embedding vectors remain private and are never included in command output.");
+        sb.AppendLine();
         sb.AppendLine("  Images.exe --version");
         sb.AppendLine("    Print the version and exit.");
         sb.AppendLine();

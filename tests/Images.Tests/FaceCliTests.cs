@@ -61,4 +61,47 @@ public sealed class FaceCliTests
         Assert.Empty(output.ToString());
         Assert.Contains("Import YuNet first", error.ToString());
     }
+
+    [Fact]
+    public void ExecuteCluster_EmitsMembershipWithoutEmbeddingVectors()
+    {
+        var detection = new FaceDetection(10, 10, 50, 50, 0.95, []);
+        FaceRecognitionResult Analyze(string path) => new(
+            true,
+            null,
+            path,
+            "CPU (ONNX Runtime)",
+            [new FaceEmbedding(path, 0, detection, FaceEmbeddingQuality.Accepted, null, [1, 0])]);
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+
+        var exitCode = FaceCli.ExecuteCluster(["one.jpg", "two.jpg"], output, error, Analyze);
+
+        Assert.Equal(0, exitCode);
+        Assert.DoesNotContain("vector", output.ToString(), StringComparison.OrdinalIgnoreCase);
+        using var json = JsonDocument.Parse(output.ToString());
+        Assert.Equal(2, json.RootElement.GetProperty("clusters")[0].GetProperty("members").GetArrayLength());
+        Assert.Contains("No files were modified", error.ToString());
+    }
+
+    [Fact]
+    public void ExecuteXmp_PrintsMwgDraftWithoutWritingAFile()
+    {
+        var result = new FaceDetectionResult(
+            FaceDetectionStatus.Success,
+            null,
+            "portrait.jpg",
+            100,
+            100,
+            "CPU",
+            [new FaceDetection(20, 20, 40, 40, 0.95, [])]);
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+
+        var exitCode = FaceCli.ExecuteXmp("portrait.jpg", output, error, _ => result);
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains("mwg-rs:Regions", output.ToString(), StringComparison.Ordinal);
+        Assert.Contains("No files were modified", error.ToString());
+    }
 }

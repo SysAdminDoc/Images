@@ -79,6 +79,9 @@ public static class OnnxRuntimeService
     }
 
     public static InferenceSession CreateSession(string modelPath)
+        => CreateSession(modelPath, OrtLoggingLevel.ORT_LOGGING_LEVEL_WARNING);
+
+    internal static InferenceSession CreateSession(string modelPath, OrtLoggingLevel logSeverity)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(modelPath);
         Exception? lastError = null;
@@ -88,6 +91,7 @@ public static class OnnxRuntimeService
             try
             {
                 using var options = CreateSessionOptions(candidate);
+                options.LogSeverityLevel = logSeverity;
                 var session = new InferenceSession(modelPath, options);
                 Volatile.Write(ref _activeRuntime, candidate.Info);
                 return session;

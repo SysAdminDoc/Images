@@ -14,12 +14,13 @@ Promote to `1.0.0` when a release candidate satisfies those three unsigned check
 
 ## Actionable Work
 
-- [ ] **V60-03** *P0* — Face detection, recognition, quality gating, and clustering with reviewed YuNet/SCRFD plus ArcFace/SFace ONNX models and MWG-rs region output.
 - [ ] **V60-04** *P0* — Object-detection auto-tagging with a permissively licensed ONNX detector and reviewed model weights; map the initial COCO label set into catalog keywords.
 - [ ] **V60-10** *P2* — Opt-in auto-rotate suggestions from a reviewed local orientation classifier; never rotate or write a source without confirmation.
 - [ ] **V60-11** *P2* — Local NIMA-style aesthetic scoring for trip culling, with visible model provenance and no automatic Pick-label writes.
 - [ ] **V60-12** *P2* — Local scene classification feeding smart-album suggestions from reviewed Places365/ANSA-style ONNX weights.
 - [ ] **V60-13** *P2* — Optional, default-off local safety classification from reviewed ONNX weights; keep scores private and out of source metadata unless explicitly exported.
+- [ ] **V60-14** *P1* — Face-region review workbench over the shipped YuNet/SFace pipeline: inspect detections and clusters visually, accept/reject/name regions, and only then merge reviewed MWG-rs data into XMP sidecars.
+- [ ] **V60-15** *P1* — Face-aware culling signals for closed eyes and local blur, presented as review-only hints with no automatic Pick/Reject writes.
 
 The remaining research item is decision-gated (Ghostscript-source AGPL mechanism) and lives in `Roadmap_Blocked.md`.
 
