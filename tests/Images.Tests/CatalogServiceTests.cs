@@ -343,6 +343,23 @@ public sealed class CatalogServiceTests
     }
 
     [Fact]
+    public void GetGeoTimedAssets_PushesRequiredMetadataPredicatesIntoSql()
+    {
+        using var temp = TestDirectory.Create();
+        WriteImageWithExif(temp.Path, "older.jpg");
+        var newer = WriteImageWithExif(temp.Path, "newer.jpg");
+        WriteImage(temp.Path, "plain.png", 8, 8);
+        var dbPath = Path.Combine(temp.Path, "catalog.db");
+        var service = new CatalogService(dbPath);
+        service.Rebuild([temp.Path]);
+        ExecuteSql(dbPath, "UPDATE catalog_assets SET captured_utc = CASE WHEN source_path LIKE '%older.jpg' THEN 1 ELSE 2 END WHERE captured_utc IS NOT NULL;");
+
+        var assets = service.GetGeoTimedAssets(limit: 1);
+
+        Assert.Equal(newer, Assert.Single(assets).SourcePath);
+    }
+
+    [Fact]
     public void FindWithinBounds_ReturnsOnlyAssetsInsideBox()
     {
         using var temp = TestDirectory.Create();

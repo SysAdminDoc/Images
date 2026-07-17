@@ -13,6 +13,7 @@ public enum CatalogCliMode
     RootList,
     Rescan,
     Stacks,
+    Trips,
 }
 
 public sealed record CatalogCliRequest(
@@ -24,12 +25,16 @@ public sealed record CatalogCliRequest(
     string? RootPath = null,
     int MaxHashDistance = 6,
     double MaxCaptureSeconds = 120,
-    double MaxGeoDistanceMeters = 250);
+    double MaxGeoDistanceMeters = 250,
+    double HomeLatitude = 0,
+    double HomeLongitude = 0,
+    double MinTripDistanceKm = 50,
+    int MaxTripGapDays = 1);
 
 /// <summary>
-/// Scriptable, window-free consumer for the rebuildable catalog. Standard output contains one
-/// matching source path per line; counts and usage errors go to standard error so paths can be
-/// piped safely into other tools.
+/// Scriptable, window-free consumer for the rebuildable catalog. Search commands write one source
+/// path per line; grouped commands write one JSON object per line. Counts and usage errors go to
+/// standard error so standard output can be piped safely into other tools.
 /// </summary>
 public static class CatalogCli
 {
@@ -41,7 +46,8 @@ public static class CatalogCli
          string.Equals(args[0], "--catalog-root-remove", StringComparison.OrdinalIgnoreCase) ||
          string.Equals(args[0], "--catalog-root-list", StringComparison.OrdinalIgnoreCase) ||
          string.Equals(args[0], "--catalog-rescan", StringComparison.OrdinalIgnoreCase) ||
-         string.Equals(args[0], "--catalog-stacks", StringComparison.OrdinalIgnoreCase));
+         string.Equals(args[0], "--catalog-stacks", StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(args[0], "--catalog-trips", StringComparison.OrdinalIgnoreCase));
 
     public static bool TryParse(
         string[] args,
@@ -120,6 +126,29 @@ public static class CatalogCli
                 MaxHashDistance: hashDistance,
                 MaxCaptureSeconds: seconds,
                 MaxGeoDistanceMeters: meters);
+            return true;
+        }
+
+        if (string.Equals(args[0], "--catalog-trips", StringComparison.OrdinalIgnoreCase))
+        {
+            var distanceKm = 50d;
+            var gapDays = 1;
+            if (args.Length is not (3 or 5) ||
+                !TryParseFiniteDouble(args[1], out var homeLatitude) || homeLatitude is < -90 or > 90 ||
+                !TryParseFiniteDouble(args[2], out var homeLongitude) || homeLongitude is < -180 or > 180 ||
+                (args.Length == 5 && (!TryParseFiniteDouble(args[3], out distanceKm) || distanceKm <= 0 ||
+                                     !int.TryParse(args[4], NumberStyles.Integer, CultureInfo.InvariantCulture, out gapDays) || gapDays is < 0 or > 31)))
+            {
+                error = "Usage: Images.exe --catalog-trips <homeLat> <homeLon> [<minDistanceKm> <maxGapDays>]";
+                return true;
+            }
+
+            request = new CatalogCliRequest(
+                CatalogCliMode.Trips,
+                HomeLatitude: homeLatitude,
+                HomeLongitude: homeLongitude,
+                MinTripDistanceKm: distanceKm,
+                MaxTripGapDays: gapDays);
             return true;
         }
 
@@ -243,6 +272,33 @@ public static class CatalogCli
             }
 
             error.WriteLine($"Found {stacks.Count.ToString(CultureInfo.InvariantCulture)} near-duplicate stacks.");
+            return 0;
+        }
+
+        if (request.Mode == CatalogCliMode.Trips)
+        {
+            var trips = new TripDetectionService().Build(
+                catalog.GetGeoTimedAssets(50_000),
+                request.HomeLatitude,
+                request.HomeLongitude,
+                request.MinTripDistanceKm,
+                request.MaxTripGapDays,
+                limit);
+            foreach (var trip in trips)
+            {
+                output.WriteLine(JsonSerializer.Serialize(new
+                {
+                    tripId = trip.TripId,
+                    cover = trip.Cover.SourcePath,
+                    startedUtc = trip.StartedUtc,
+                    endedUtc = trip.EndedUtc,
+                    centroid = new { latitude = trip.CentroidLatitude, longitude = trip.CentroidLongitude },
+                    maxDistanceFromHomeKm = trip.MaxDistanceFromHomeKm,
+                    assets = trip.Assets.Select(asset => asset.SourcePath)
+                }));
+            }
+
+            error.WriteLine($"Found {trips.Count.ToString(CultureInfo.InvariantCulture)} catalog trips.");
             return 0;
         }
 

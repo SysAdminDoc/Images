@@ -221,6 +221,9 @@ public static class CliReport
         sb.AppendLine("  Images.exe --catalog-stacks [<maxHashDistance> <maxSeconds> <maxMeters>]");
         sb.AppendLine("    Print near-duplicate catalog stacks as JSON Lines (defaults: 6, 120, 250).");
         sb.AppendLine();
+        sb.AppendLine("  Images.exe --catalog-trips <homeLat> <homeLon> [<minDistanceKm> <maxGapDays>]");
+        sb.AppendLine("    Print GPS/capture-time trip groups as JSON Lines (defaults: 50 km, 1 day).");
+        sb.AppendLine();
         sb.AppendLine("  Images.exe --face-detect <imagePath>");
         sb.AppendLine("    Run the approved local YuNet model and print reviewable face/landmark JSON.");
         sb.AppendLine("    Requires a verified manual model import; never modifies the image or sidecar.");

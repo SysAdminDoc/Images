@@ -474,6 +474,39 @@ public sealed class CatalogService
         return assets;
     }
 
+    public IReadOnlyList<CatalogAssetRecord> GetGeoTimedAssets(int limit = 1000)
+    {
+        var assets = new List<CatalogAssetRecord>();
+        if (!_isAvailable || limit <= 0)
+            return assets;
+
+        limit = Math.Min(limit, 50_000);
+        try
+        {
+            using var conn = Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
+                SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
+                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette,
+                       gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds, perceptual_hash
+                FROM catalog_assets
+                WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL AND captured_utc IS NOT NULL
+                ORDER BY captured_utc DESC, source_path COLLATE NOCASE
+                LIMIT $limit;
+                """;
+            cmd.Parameters.AddWithValue("$limit", limit);
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+                assets.Add(ReadAsset(conn, reader));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or InvalidOperationException or NotSupportedException or SqliteException)
+        {
+            Log.LogWarning(ex, "Could not read geo/time catalog assets");
+        }
+
+        return assets;
+    }
+
     public IReadOnlyList<string> GetIndexedFolders()
     {
         var folders = new List<string>();

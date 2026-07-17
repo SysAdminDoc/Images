@@ -70,6 +70,25 @@ public sealed class CatalogCliTests
     }
 
     [Fact]
+    public void TryParse_Trips_AcceptsDefaultsOrValidatedThresholds()
+    {
+        Assert.True(CatalogCli.TryParse(["--catalog-trips", "48.8566", "2.3522"], out var defaults, out var error));
+        Assert.Null(error);
+        Assert.Equal(CatalogCliMode.Trips, defaults!.Mode);
+        Assert.Equal(50, defaults.MinTripDistanceKm);
+        Assert.Equal(1, defaults.MaxTripGapDays);
+
+        Assert.True(CatalogCli.TryParse(["--catalog-trips", "48.8566", "2.3522", "100", "3"], out var custom, out error));
+        Assert.Null(error);
+        Assert.Equal(100, custom!.MinTripDistanceKm);
+        Assert.Equal(3, custom.MaxTripGapDays);
+
+        Assert.True(CatalogCli.TryParse(["--catalog-trips", "91", "2"], out var invalid, out error));
+        Assert.Null(invalid);
+        Assert.Contains("Usage:", error);
+    }
+
+    [Fact]
     public void Execute_Search_PrintsOneMatchingPathPerLine()
     {
         using var temp = TestDirectory.Create();
@@ -139,6 +158,29 @@ public sealed class CatalogCliTests
         Assert.Contains("Found 1 near-duplicate stacks.", error.ToString());
     }
 
+    [Fact]
+    public void Execute_Trips_PrintsCatalogBackedJsonObject()
+    {
+        using var temp = TestDirectory.Create();
+        var away = WriteImageWithExif(temp.Path, "paris.jpg");
+        var catalog = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+        catalog.Rebuild([temp.Path]);
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+
+        var exitCode = CatalogCli.Execute(
+            new CatalogCliRequest(CatalogCliMode.Trips, HomeLatitude: 40.7128, HomeLongitude: -74.0060),
+            output,
+            error,
+            catalog);
+
+        Assert.Equal(0, exitCode);
+        using var document = JsonDocument.Parse(output.ToString().Trim());
+        Assert.Equal(away, document.RootElement.GetProperty("cover").GetString());
+        Assert.Equal(away, Assert.Single(document.RootElement.GetProperty("assets").EnumerateArray()).GetString());
+        Assert.Contains("Found 1 catalog trips.", error.ToString());
+    }
+
     private static string WriteImage(string folder, string name)
         => WriteImage(folder, name, MagickColors.Red);
 
@@ -146,6 +188,22 @@ public sealed class CatalogCliTests
     {
         var path = Path.Combine(folder, name);
         using var image = new MagickImage(color, 4, 4) { Format = MagickFormat.Png };
+        image.Write(path);
+        return path;
+    }
+
+    private static string WriteImageWithExif(string folder, string name)
+    {
+        var path = Path.Combine(folder, name);
+        using var image = new MagickImage(MagickColors.Blue, 16, 12) { Format = MagickFormat.Jpeg };
+        var exif = new ExifProfile();
+        exif.SetValue(ExifTag.GPSLatitude, [new Rational(48, 1), new Rational(51, 1), new Rational(30, 1)]);
+        exif.SetValue(ExifTag.GPSLatitudeRef, "N");
+        exif.SetValue(ExifTag.GPSLongitude, [new Rational(2, 1), new Rational(17, 1), new Rational(40, 1)]);
+        exif.SetValue(ExifTag.GPSLongitudeRef, "E");
+        exif.SetValue(ExifTag.DateTimeOriginal, "2026:07:15 14:30:00");
+        exif.SetValue(ExifTag.OffsetTimeOriginal, "+00:00");
+        image.SetProfile(exif);
         image.Write(path);
         return path;
     }

@@ -143,8 +143,8 @@ Permanent owner policy: D-05/D-05a and signing-dependent C2PA write/export work 
 
 > Data-layer note (catalog schema v4, 2026-07-17): the catalog is built and stable, and now
 > indexes rating, tags, palette, exact/perceptual hashes, file timestamps, **GPS latitude/longitude,
-> capture time, and camera/lens/ISO/focal/aperture/shutter EXIF**, with geo, search, and near-duplicate
-> stack CLI consumers. Smart collections' face-count criterion still needs V60 face detection;
+> capture time, and camera/lens/ISO/focal/aperture/shutter EXIF**, with geo, search, near-duplicate,
+> and trip-detection CLI consumers. Smart collections' face-count criterion still needs V60 face detection;
 > auto-albums still need content classification.
 
 - [ ] **V40-23** *P2* — **Sketch-based fuzzy search** — draw rough color blobs, match (digiKam Sketch tab — delightful differentiator). Effort: L.
@@ -158,10 +158,6 @@ Permanent owner policy: D-05/D-05a and signing-dependent C2PA write/export work 
 - [ ] **V40-41** *P2* — **Auto-albums by pattern** — screenshots, receipts, notes, documents (Google Photos OCR+shape). Effort: L.
   - **Blocked by**: V40-01 catalog + OCR/shape classification — auto-album detection needs indexed content analysis.
   - **Unblock when**: V40-01 catalog and content classification pipeline are operational.
-
-- [ ] **V40-42** *P2* — **Trip detection** — contiguous days + distance >threshold from home (Apple Memories engine). Effort: L.
-  - **Blocked by**: V40-01 catalog + GPS/date indexing — trip detection needs indexed geo+temporal data.
-  - **Unblock when**: V40-01 catalog ships with geo and date indexing.
 
 - [ ] **V40-43** *P2* — **Events view** — date-based clusters with key-photo thumbnail (Shotwell). Effort: M.
   - **Blocked by**: V40-01 catalog — event clustering queries against catalog-indexed dates.
