@@ -276,19 +276,19 @@ public static class CodecCapabilityService
                     : "Install a Windows OCR language capability from Windows language settings."),
 
             new(
-                Name: "ONNX Runtime DirectML",
+                Name: "Windows ML / ONNX Runtime",
                 Kind: "NuGet",
-                Source: "NuGet: https://www.nuget.org/packages/Microsoft.ML.OnnxRuntime.DirectML; ONNX Runtime: https://onnxruntime.ai",
+                Source: "NuGet: https://www.nuget.org/packages/Microsoft.Windows.AI.MachineLearning; Windows ML: https://learn.microsoft.com/windows/ai/new-windows-ml/overview",
                 Version: GetOnnxRuntimeVersion(),
                 Path: GetOnnxRuntimeAssemblyPath(),
                 Sha256: TrySha256(GetOnnxRuntimeAssemblyPath()),
-                AdvisoryStatus: "ONNX Runtime DirectML provides GPU-accelerated inference for CLIP semantic search, LaMa inpainting, and future AI features.",
-                Action: "Keep runtime versions current and run model smoke tests before enabling AI tools."),
+                AdvisoryStatus: $"Selected path: {OnnxRuntimeService.ProviderDetail}. Windows ML registers only already-ready certified providers; no provider is downloaded silently.",
+                Action: "Keep the Windows ML runtime current and run the pinned add-model smoke through every detected NPU, GPU, and CPU path."),
 
             new(
                 Name: "AI inference runtime",
                 Kind: "Runtime",
-                Source: "Windows ML: https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview; ONNX Runtime DirectML: https://onnxruntime.ai/docs/execution-providers/DirectML-ExecutionProvider.html",
+                Source: "Windows ML: https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview; execution providers: https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/supported-execution-providers",
                 Version: modelSnapshot.Runtime.PreferredBackend,
                 Path: null,
                 Sha256: null,
@@ -447,7 +447,7 @@ public static class CodecCapabilityService
         if (provenance.C2paToolSha256 is not null)
             sb.AppendLine($"- c2patool SHA-256: {provenance.C2paToolSha256}");
         sb.AppendLine($"- JXL WIC codec: {(IsJxlWicAvailable() ? "installed (native decode preferred)" : "not installed (Magick.NET fallback)")}");
-        sb.AppendLine($"- ONNX Runtime DirectML: {GetOnnxRuntimeVersion()}");
+        sb.AppendLine($"- Windows ML / ONNX Runtime: {GetOnnxRuntimeVersion()} ({OnnxRuntimeService.ProviderDetail})");
         sb.AppendLine();
 
         AppendDependencyProvenance(sb, dependencyRows);

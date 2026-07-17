@@ -71,14 +71,11 @@ public sealed class ClipEmbeddingProvider : ISemanticEmbeddingProvider, IDisposa
             var tokenizer = ClipTokenizer.Load(tokenizerModel.InstalledPath!);
             var preprocessor = ClipImagePreprocessor.Load(preprocessorModel.InstalledPath!);
 
-            using var sessionOptions = OnnxRuntimeService.CreateSessionOptions();
-            var (textSession, visionSession) = CreateSessionPair(
-                sessionOptions,
-                options => new InferenceSession(textModel.InstalledPath!, options),
-                options => new InferenceSession(visionModel.InstalledPath!, options),
-                session => session.Dispose());
+            var (textSession, visionSession, runtime) = OnnxRuntimeService.CreateSessionPair(
+                textModel.InstalledPath!,
+                visionModel.InstalledPath!);
 
-            var statusText = $"CLIP ViT-B/32 ready ({OnnxRuntimeService.ProviderLabel})";
+            var statusText = $"CLIP ViT-B/32 ready ({runtime.DetailLabel})";
 
             return new ClipEmbeddingProvider(textSession, visionSession, tokenizer, preprocessor, statusText);
         }

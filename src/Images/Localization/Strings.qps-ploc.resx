@@ -6379,7 +6379,7 @@ Details written to:
     <value>[!!!!!!!! Content-aware repair fallback !!!!!!!!]</value>
   </data>
   <data name="ModelCarveRuntime" xml:space="preserve">
-    <value>[!!!!!!!!!!!! Fixed 512x512 input, opset 17; ONNX Runtime DirectML first, CPU fallback. !!!!!!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! Fixed 512x512 input, opset 17; Windows ML NPU/GPU first, DirectML and CPU fallback. !!!!!!!!!!!!]</value>
   </data>
   <data name="ModelChooseExistingFile" xml:space="preserve">
     <value>[!!!!!!!!!!! Choose an existing local ONNX model file. !!!!!!!!!!!]</value>
@@ -6469,7 +6469,7 @@ Details written to:
     <value>[!!!!! Content-aware repair !!!!!]</value>
   </data>
   <data name="ModelOpenCvRuntime" xml:space="preserve">
-    <value>[!!!!!!!!!!!! ONNX Runtime DirectML first; CPU fallback with visible slow-path status. !!!!!!!!!!!!]</value>
+    <value>[!!!!!!!!!!!! Windows ML NPU/GPU first; DirectML and CPU fallback with visible hardware status. !!!!!!!!!!!!]</value>
   </data>
   <data name="ModelReadyAction" xml:space="preserve">
     <value>[!!!!!!!!!!!! Ready for future model-backed tools once runtime code is enabled. !!!!!!!!!!!!]</value>
@@ -6493,7 +6493,7 @@ Details written to:
     <value>[!!!!!!!!!!!! Active provider: {0}. Windows 11 24H2+ detected; Windows ML is the preferred future runtime. !!!!!!!!!!!!]</value>
   </data>
   <data name="ModelRuntimeDirectMlFallback" xml:space="preserve">
-    <value>[!!!!!!!!!! ONNX Runtime DirectML fallback required !!!!!!!!!!]</value>
+    <value>[!!!!!!!!!! Windows ML or ONNX Runtime fallback required !!!!!!!!!!]</value>
   </data>
   <data name="ModelRuntimeNotReferenced" xml:space="preserve">
     <value>[!!!! Not referenced !!!!]</value>

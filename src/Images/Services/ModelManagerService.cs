@@ -452,29 +452,16 @@ public sealed class ModelManagerService
     {
         var osVersion = _getOsVersion();
         var windowsMlOsCandidate = OperatingSystem.IsWindows() && osVersion >= new Version(10, 0, 26100);
-        var windowsMlReferenced = IsAssemblyLoaded("Microsoft.Windows.AI.MachineLearning");
-        var onnxDirectMlReferenced = IsAssemblyLoaded("Microsoft.ML.OnnxRuntime.DirectML") ||
-                                     IsAssemblyLoaded("Microsoft.ML.OnnxRuntime");
-
-        var probedProvider = OnnxRuntimeService.Provider;
-        var providerLabel = probedProvider switch
-        {
-            OnnxProvider.DirectML => Strings.ModelRuntimeOnnxDirectMl,
-            OnnxProvider.Cpu => Strings.ModelRuntimeOnnxCpu,
-            _ => Strings.ModelRuntimeUnavailable
-        };
-
-        var preferred = windowsMlOsCandidate
-            ? Strings.ModelRuntimeWindowsMlCandidate
-            : probedProvider == OnnxProvider.DirectML
-                ? Strings.ModelRuntimeOnnxDirectMl
-                : probedProvider == OnnxProvider.Cpu
-                    ? Strings.ModelRuntimeOnnxCpu
-                    : Strings.ModelRuntimeDirectMlFallback;
-        var status = windowsMlReferenced
+        // This build has a compile-time package reference; assembly-load timing is not a reliable
+        // readiness signal because the WinRT projection is loaded lazily by the catalog probe.
+        var windowsMlReferenced = true;
+        var onnxDirectMlReferenced = IsAssemblyLoaded("Microsoft.ML.OnnxRuntime");
+        var providerLabel = OnnxRuntimeService.ProviderDetail;
+        var preferred = OnnxRuntimeService.AvailablePaths.FirstOrDefault()?.DetailLabel ?? Strings.ModelRuntimeUnavailable;
+        var status = windowsMlReferenced && OnnxRuntimeService.WindowsMlCatalogAvailable
             ? Strings.ModelRuntimeWindowsMlReferenced
             : Strings.Format(
-                windowsMlOsCandidate
+                windowsMlReferenced
                     ? nameof(Strings.ModelRuntimeActiveProviderWindowsMlFormat)
                     : nameof(Strings.ModelRuntimeActiveProviderOnnxFormat),
                 providerLabel);

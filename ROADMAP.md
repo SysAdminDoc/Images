@@ -14,7 +14,12 @@ Promote to `1.0.0` when a release candidate satisfies those three unsigned check
 
 ## Actionable Work
 
-- [ ] **V60-01** *P0* — Complete the dual-path inference runtime after V20-01: retain the existing ONNX Runtime DirectML/CPU fallback used by CLIP, background removal, LaMa, and super-resolution; add Windows ML auto-detection on supported Windows 11 builds; expose a truthful `NPU` / `GPU` / `CPU` label from the selected adapter; validate one pinned model through each available path.
+- [ ] **V60-03** *P0* — Face detection, recognition, quality gating, and clustering with reviewed YuNet/SCRFD plus ArcFace/SFace ONNX models and MWG-rs region output.
+- [ ] **V60-04** *P0* — Object-detection auto-tagging with a permissively licensed ONNX detector and reviewed model weights; map the initial COCO label set into catalog keywords.
+- [ ] **V60-10** *P2* — Opt-in auto-rotate suggestions from a reviewed local orientation classifier; never rotate or write a source without confirmation.
+- [ ] **V60-11** *P2* — Local NIMA-style aesthetic scoring for trip culling, with visible model provenance and no automatic Pick-label writes.
+- [ ] **V60-12** *P2* — Local scene classification feeding smart-album suggestions from reviewed Places365/ANSA-style ONNX weights.
+- [ ] **V60-13** *P2* — Optional, default-off local safety classification from reviewed ONNX weights; keep scores private and out of source metadata unless explicitly exported.
 
 The remaining research item is decision-gated (Ghostscript-source AGPL mechanism) and lives in `Roadmap_Blocked.md`.
 

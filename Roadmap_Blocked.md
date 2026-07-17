@@ -210,7 +210,7 @@ Permanent owner policy: D-05/D-05a and signing-dependent C2PA write/export work 
 
 - [ ] P2 — **Local face-region review workflow**
   Why: Images has `person:` tag namespaces and planned Picasa face-region migration, but modern photo managers treat face grouping as core organization; this should land as an explicit local review lane, not an automatic write.
-  - **Blocked by**: requires downloading SCRFD ONNX face detection models, validating SHA-256 hashes, pinning in Model Manager, and V60-01 inference runtime.
+  - **Blocked by**: requires downloading SCRFD ONNX face detection models, validating SHA-256 hashes, and pinning them in Model Manager.
   - **Unblock when**: SCRFD face detection ONNX models are downloaded and validated for local inference, and inference runtime is operational.
 
 - [ ] P1 — **AI-assisted culling quality signals**
@@ -289,51 +289,11 @@ Permanent owner policy: D-05/D-05a and signing-dependent C2PA write/export work 
   - **Blocked by**: TWAIN SDK evaluation + MSIX AppContainer compatibility — `Saraff.Twain.NET` needs evaluation, and TWAIN breaks under MSIX sandbox.
   - **Unblock when**: TWAIN SDK evaluated and MSIX compatibility path decided.
 
-## Blocked On V60-01 Inference Runtime
-
-- [ ] **V60-02** *P0* — **CLIP semantic search** (KILLER FEATURE). `ElBruno.LocalEmbeddings.ImageEmbeddings` (MIT). OpenCLIP ViT-B/32 ONNX ~300 MB. Embed library images on ingest; 512-d vectors in sqlite-vec. Effort: XL.
-  - **Blocked by**: V60-01 inference runtime — CLIP embedding requires the ML runtime to be operational.
-  - **Unblock when**: V60-01 inference runtime ships.
-
-- [ ] **V60-03** *P0* — **Face detection + recognition + clustering**. YuNet + ArcFace/SFace + FIQA gating + HDBSCAN clustering + MWG-rs:Regions XMP. Effort: XL.
-  - **Blocked by**: V60-01 inference runtime — face detection/recognition models require the ML runtime.
-  - **Unblock when**: V60-01 inference runtime ships.
-
-- [ ] **V60-04** *P0* — **Object detection auto-tagging**. YoloDotNet + YOLO-World or MIT-weighted older-gen. COCO 80 classes. Effort: L.
-  - **Blocked by**: V60-01 inference runtime — object detection models require the ML runtime.
-  - **Unblock when**: V60-01 inference runtime ships.
-
-- [ ] **V60-06** *P0* — **Background removal**. BiRefNet / IS-Net / U2-Net / silueta ONNX models. Effort: L.
-  - **Blocked by**: V60-01 inference runtime — background removal models require the ML runtime.
-  - **Unblock when**: V60-01 inference runtime ships.
-
-- [ ] **V60-07** *P1* — **AI upscaling**. RealESRGAN 4x default + HAT-L/SPAN-S/Anime 6B downloadable options. OpenModelDB JSON index. Effort: L.
-  - **Blocked by**: V60-01 inference runtime — upscaling models require the ML runtime.
-  - **Unblock when**: V60-01 inference runtime ships.
-
-- [ ] **V60-08** *P1* — **Generative Erase (LaMa)**. Opt-in local LaMa ONNX via Windows ML first, ONNX Runtime DirectML fallback. Effort: L.
-  - **Blocked by**: V60-01 inference runtime — LaMa inpainting requires the ML runtime.
-  - **Unblock when**: V60-01 inference runtime ships.
+## Blocked On Copilot+ NPU Hardware
 
 - [ ] **V60-09** *P2* — **Restyle Image** (Copilot+ PCs only). Windows App SDK `ImageGenerator` API. Requires NPU. Effort: M.
-  - **Blocked by**: V60-01 inference runtime + Copilot+ PC NPU — requires both ML runtime and NPU hardware path.
-  - **Unblock when**: V60-01 inference runtime ships and Copilot+ PC testing is available.
-
-- [ ] **V60-10** *P2* — **Auto-rotate** — scene classifier detects upside-down orientation. Effort: S.
-  - **Blocked by**: V60-01 inference runtime — scene classification model requires the ML runtime.
-  - **Unblock when**: V60-01 inference runtime ships.
-
-- [ ] **V60-11** *P2* — **NIMA aesthetic quality score** — digiKam's Pick-label source. "Best of trip" auto-suggestions. Effort: M.
-  - **Blocked by**: V60-01 inference runtime — NIMA model requires the ML runtime.
-  - **Unblock when**: V60-01 inference runtime ships.
-
-- [ ] **V60-12** *P2* — **Scene classification** — Places365 or ANSA-style multi-task. Feed into smart-album auto-creation. Effort: M.
-  - **Blocked by**: V60-01 inference runtime — scene classification model requires the ML runtime.
-  - **Unblock when**: V60-01 inference runtime ships.
-
-- [ ] **V60-13** *P2* — **NSFW safety classifier** (opt-in) — open_nsfw2 ONNX, off by default. Effort: S.
-  - **Blocked by**: V60-01 inference runtime — NSFW classification model requires the ML runtime.
-  - **Unblock when**: V60-01 inference runtime ships.
+  - **Blocked by**: no Copilot+ NPU is available in the safe background test environment, and the Windows App SDK `ImageGenerator` path requires device evidence.
+  - **Unblock when**: Copilot+ PC testing is available without touching the user's active desktop.
 
 ## Blocked On X-01 Plugin Boundary Design Doc
 

@@ -1,18 +1,18 @@
 # Content-aware inpaint runtime decision
 
-Status: decision scoped for E12 / V60-08; V7-30 model manager shipped approved local model import and hash validation, but no inference runtime is enabled yet.
+Status: implemented for V60-08; approved local model import, hash validation, LaMa inference, and the shared Windows ML / DirectML / CPU runtime are shipped.
 Date: 2026-05-17
 
 ## Decision
 
-Images will implement future content-aware repair as an opt-in, local-only LaMa ONNX workflow. The first approved target is an Apache-2.0 LaMa ONNX model, with OpenCV's `opencv/inpainting_lama` package as the primary reference implementation and Carve's `LaMa-ONNX` `lama_fp32.onnx` as the fallback validation candidate.
+Images implements content-aware repair as an opt-in, local-only LaMa ONNX workflow. The approved targets are the Apache-2.0 OpenCV `opencv/inpainting_lama` package and Carve's `LaMa-ONNX` `lama_fp32.onnx` validation candidate.
 
-The feature must not ship inside the core viewer until the V60 AI runtime foundation exists. E12 only records the model/runtime choice so the editor roadmap does not drift into an unbounded generative-image stack.
+The feature remains opt-in and local-only: it is enabled only after the user imports a model whose SHA-256 matches the approved registry.
 
 ## Runtime choice
 
-1. Primary runtime: Windows ML through `Microsoft.Windows.AI.MachineLearning` / Windows App SDK ML on supported Windows 11 24H2+ systems. Windows ML is the preferred path because Windows manages the shared ONNX Runtime and can install/update hardware execution providers without Images bundling vendor SDKs.
-2. Fallback runtime: `Microsoft.ML.OnnxRuntime.DirectML` for supported older Windows systems. DirectML remains supported for ONNX Runtime on Windows and gives broad DirectX 12 GPU coverage, but new Windows ML work is the forward path.
+1. Primary runtime: self-contained `Microsoft.Windows.AI.MachineLearning` 2.1.74. On Windows 11 24H2+, Images registers only certified providers already marked ready by the Windows ML catalog, selects an NPU before a GPU, and never invokes provider acquisition automatically.
+2. Fallback runtime: the same Windows ML package supplies bundled DirectML and ONNX Runtime CPU paths. Session creation retries per model, so an incompatible NPU/GPU provider cannot strand CLIP, background removal, LaMa, or super-resolution.
 3. CPU fallback: allowed only as an explicit slow-path fallback with visible status and cancellation. It must not run silently on large masks.
 4. Rejected for Images v0.x: Stable Diffusion inpainting as the default repair tool. It is too large, too slow, and too generative for a fast local viewer/editor workflow.
 
@@ -56,9 +56,9 @@ Original research reference:
 ## Implementation shape
 
 - `ModelManagerService`: shipped shared registry/storage foundation for approved model IDs, expected hashes, source URLs, app-local grouped folders, SHA-256 verification, import/delete/reveal actions, and runtime status copy.
-- `InpaintModelRegistry`: future inpaint-specific tensor shape, opset, preprocessing, mask, and tiling contract layered over the shared model manager.
+- `InpaintModelRegistry`: shipped tensor-shape, preprocessing, mask, and fixed-input contract layered over the shared model manager.
 - `ModelStorage`: app-data model folder and SHA-256 verification are shipped; future user-initiated download and license/readme retention remain unimplemented.
-- `InpaintRuntime`: future runtime uses ONNX Runtime DirectML first and CPU fallback. Windows ML is the planned forward path for Win11 24H2+ when V60-01 inference runtime ships.
+- `InpaintRuntime`: shipped through the shared `OnnxRuntimeService`, with Windows ML NPU/GPU selection and per-model DirectML/CPU fallback plus truthful hardware labels.
 - `InpaintPlanner`: converts a pixel selection or mask into 512 x 512 tiles with mask dilation and overlap.
 - `InpaintOperation`: XMP edit-stack operation with model ID/hash, mask bounds, tile grid, and renderer version. Store raster patch sidecars if exact replay is not stable across runtime updates.
 - `InpaintRenderer`: deterministic apply path used by preview, Save a copy, and future original overwrite flows.
@@ -75,7 +75,7 @@ Original research reference:
 | Update cadence | Pin approved model IDs and hashes; manual review before adding or replacing a model. |
 | CVE/advisory tracking | Windows ML / Windows App SDK ML, ONNX Runtime DirectML, and model-source repository advisories. |
 | Binary provenance | SHA-256 is required for every approved model file before the setup UI marks it ready. |
-| Process boundary | In-process managed runtime only after V60-01 review; no Python, no OpenCV native dependency in the first Images implementation. |
+| Process boundary | Reviewed in-process Windows ML/ONNX runtime; no Python or OpenCV native dependency. |
 | File access boundary | Current image pixels, mask/selection, model folder, and temp files under app data. |
 | Network behavior | No automatic download. User-initiated download only, logged and checksum-verified. |
 | Failure mode | Disabled action with setup copy when missing; cancellable progress; no source overwrite on failure. |
@@ -84,7 +84,7 @@ Original research reference:
 
 ## Deferrals
 
-- No implementation in the current E12 crop/selection slice.
+- No bundled model or silent model/provider acquisition.
 - No Stable Diffusion, SUPIR, Flux, or other large diffusion model path in the viewer/editor.
 - No OpenCvSharp dependency just to run the OpenCV sample. Revisit only if pure ONNX preprocessing is insufficient.
 - No automatic model marketplace. Model sources are project-approved and disabled until verified.

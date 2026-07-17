@@ -65,6 +65,24 @@ This policy applies to:
 - Test corpus: generated BGRA/PBGRA control fixtures, animation/tile fallback tests, then golden-render fixtures and the non-activating background smoke lane as migration slices land.
 - Release impact: adds SkiaSharp Windows native assets and WPF view dependencies; no installer, service, account, or startup-network requirement.
 
+## Integration Review: Windows ML
+
+- Version: `Microsoft.Windows.AI.MachineLearning` 2.1.74, including its pinned ONNX Runtime and DirectML payload.
+- Source: [official NuGet package](https://www.nuget.org/packages/Microsoft.Windows.AI.MachineLearning/2.1.74); [Windows ML documentation](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview).
+- Release artifact: nuget.org package graph restored into the app's self-contained Windows publish output.
+- License: Microsoft Windows ML Runtime terms plus the package's third-party notices; the terms explicitly permit redistribution of NuGet-binplaced files with an application, subject to their distribution requirements.
+- Redistribution permission: accepted for unchanged app-local runtime files; license and third-party notices remain in the package/release inventory.
+- Source-use boundary: in-process binary package reference; no copied Microsoft or provider source.
+- Update cadence: explicit dependency review per servicing release; package and solution lockfiles move together.
+- CVE/advisory tracking: NuGet vulnerability scan plus Windows ML, ONNX Runtime, DirectML, and ready provider advisory review.
+- Binary provenance: NuGet content hashes are pinned in all solution lockfiles; locked restore is a release gate.
+- Process boundary: in-process managed/WinRT runtime. Only providers already `Certified` and `Ready` are registered; DirectML and CPU stay available as bundled fallbacks.
+- File access boundary: imported, SHA-256-approved ONNX models and in-memory image tensors; the runtime router does not discover arbitrary models or folders.
+- Network behavior: Images never invokes `EnsureReadyAsync` or another provider-acquisition API, and disables ONNX Runtime telemetry. Windows servicing of already-installed system/provider packages remains governed by Windows settings.
+- Failure mode: session creation retries the ordered NPU, GPU, DirectML, and CPU candidates per model; failure leaves the source image untouched and surfaces the model/runtime error.
+- Test corpus: ONNX upstream `test_add` model, 129 bytes, SHA-256 `93CF0438706CDDABF683ADC8B13C8A17C4B8B12D8BCCB1B041268E1F4DFF0A2D`, sourced from `onnx/backend/test/data/node/test_add/model.onnx`; tests require 60 exact Add outputs through every detected path.
+- Release impact: about 41-48 MB of self-contained Windows ML/ONNX/DirectML runtime files, replacing the previous standalone ONNX Runtime DirectML package rather than adding a second ORT copy.
+
 ## Process Isolation Rules
 
 | Risk level | Examples | Required boundary |
@@ -108,10 +126,11 @@ Copy this block into a new design or decision document before adding the integra
 | Ghostscript 10.07.0 | Conditionally accepted | Optional app-local/system runtime; bundling requires exact approved artifact and SHA-256 continuity. See `docs/codec-bundling.md`. |
 | SharpCompress 0.50.0 | Accepted | Managed MIT NuGet dependency for read-only RAR/CBR and 7z/CB7 archive books. Upgraded from 0.49.1 for the LZMA/RAR decode allocation reductions and Zip64 non-seekable-stream / entry-metadata-corruption fixes; the 0.50.0 Tar auto-decompress and Detection API breaking changes do not affect the `ArchiveFactory.OpenArchive` + `IArchive.Entries` path Images uses. See `docs/archive-runtime-review.md`. |
 | Microsoft.Data.Sqlite 10.0.10 + SQLitePCLRaw.bundle_e_sqlite3 3.0.3 | Accepted | App-local catalog, settings, and semantic index storage use managed ADO.NET over the bundled SQLitePCLRaw e_sqlite3 runtime; release readiness keeps package and vulnerability gates local. |
+| Microsoft.Windows.AI.MachineLearning 2.1.74 | Accepted for self-contained Windows-only inference | NuGet-binplaced Windows ML, ONNX Runtime, and DirectML files are redistributable under the included Microsoft Windows ML Runtime terms. Images disables ORT telemetry, never calls provider acquisition, registers only already-ready certified catalog providers, and falls back to bundled DirectML/CPU. The pinned ONNX Add fixture validates every detected path. |
 | Windows.Media.Ocr | Accepted | In-box Windows API; no bundled runtime. |
 | 7-Zip/UnRAR native archive readers | Not reviewed | Native sidecars remain unapproved; ZIP/CBZ use .NET built-in APIs and RAR/7z use the reviewed managed SharpCompress path. |
 | jpegtran.exe | Accepted for release staging through reviewed libjpeg-turbo 3.1.4.1 artifact | Lossless JPEG crop/rotation planning, runtime diagnostics, exact MCU-aligned writeback, right-angle rotation writeback, confirmed-trim UI, exact artifact URL, license files, `jpegtran.exe` plus `jpeg62.dll` SHA-256 provenance, staging script, and release diagnostics smoke are documented in `docs/lossless-jpeg-transform-policy.md` and `src/Images/Codecs/JpegTran/PROVENANCE.md`. Runtime binaries remain ignored by git and are staged only for build/publish output. |
-| LaMa inpainting ONNX | Decision scoped, not bundled | Content-aware repair will use opt-in local LaMa ONNX through ONNX Runtime DirectML (current) with Windows ML as the planned forward path when V60-01 ships. See `docs/inpaint-runtime-decision.md`. |
+| LaMa inpainting ONNX | Accepted, opt-in model not bundled | Content-aware repair uses user-imported, hash-pinned LaMa ONNX through the shared Windows ML / DirectML / CPU runtime. See `docs/inpaint-runtime-decision.md`. |
 | ExifTool | Not reviewed | Required before sidecar or metadata write workflows. |
 | ONNX models | Not reviewed | Required before semantic search, AI tagging, background removal, upscaling, or face recognition. |
 | OpenSlide/Bio-Formats | Not reviewed | Required before lab/scientific image packs. |

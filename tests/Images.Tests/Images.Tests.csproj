@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <None Include="Fixtures\catalog.v1.db" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Fixtures\onnx-test-add.onnx" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Fixtures\smoke-test.png" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Fixtures\codec-corpus\**\*" CopyToOutputDirectory="PreserveNewest" />
     <!-- Use a fixed cap so timing/async assertions are not starved on high-core machines. -->
