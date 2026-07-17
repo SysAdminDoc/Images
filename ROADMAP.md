@@ -14,7 +14,6 @@ Promote to `1.0.0` when a release candidate satisfies those three unsigned check
 
 ## Actionable Work
 
-- [ ] **V60-04** *P0* — Object-detection auto-tagging with a permissively licensed ONNX detector and reviewed model weights; map the initial COCO label set into catalog keywords.
 - [ ] **V60-10** *P2* — Opt-in auto-rotate suggestions from a reviewed local orientation classifier; never rotate or write a source without confirmation.
 - [ ] **V60-11** *P2* — Local NIMA-style aesthetic scoring for trip culling, with visible model provenance and no automatic Pick-label writes.
 - [ ] **V60-12** *P2* — Local scene classification feeding smart-album suggestions from reviewed Places365/ANSA-style ONNX weights.

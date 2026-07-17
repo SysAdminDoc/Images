@@ -22,6 +22,7 @@ public sealed class ModelManagerServiceTests
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "carve-lama-fp32");
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "opencv-face-detection-yunet-2023mar");
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "opencv-face-recognition-sface-2021dec");
+        Assert.Contains(snapshot.Models, model => model.Definition.Id == "opencv-object-detection-yolox-2022nov");
         Assert.All(snapshot.Models, model => Assert.Equal(LocalModelAvailability.Missing, model.Availability));
     }
 
@@ -39,6 +40,17 @@ public sealed class ModelManagerServiceTests
         Assert.Equal(38_696_353, sface.ExpectedSizeBytes);
         Assert.Equal("0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79", sface.ExpectedSha256);
         Assert.Contains("3d7082438a6e4551e840c9b2bb60b71e8da4b524", sface.DownloadUrl, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ApprovedObjectModel_PinsReviewedOpenCvYoloXArtifact()
+    {
+        var model = Assert.Single(ModelManagerService.ApprovedModels,
+            item => item.Id == "opencv-object-detection-yolox-2022nov");
+
+        Assert.Equal(35_858_002, model.ExpectedSizeBytes);
+        Assert.Equal("c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063", model.ExpectedSha256);
+        Assert.Contains("78c368f74ce73ee28fc7a1be418a598c71b58b52", model.DownloadUrl, StringComparison.Ordinal);
     }
 
     [Fact]

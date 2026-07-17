@@ -217,6 +217,12 @@ public static class CliReport
         sb.AppendLine("    Align/embed quality-approved faces locally and print SFace clusters as JSON.");
         sb.AppendLine("    Embedding vectors remain private and are never included in command output.");
         sb.AppendLine();
+        sb.AppendLine("  Images.exe --object-detect <imagePath>");
+        sb.AppendLine("    Print reviewed YOLOX COCO detections and object: keyword suggestions as JSON.");
+        sb.AppendLine();
+        sb.AppendLine("  Images.exe --object-xmp <imagePath>");
+        sb.AppendLine("    Print an XMP keyword draft; never modifies the image, sidecar, or catalog.");
+        sb.AppendLine();
         sb.AppendLine("  Images.exe --version");
         sb.AppendLine("    Print the version and exit.");
         sb.AppendLine();

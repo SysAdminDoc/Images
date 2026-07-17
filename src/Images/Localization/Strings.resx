@@ -6072,6 +6072,15 @@ Details written to:
   <data name="ModelOpenCvRuntime" xml:space="preserve">
     <value>Windows ML NPU/GPU first; DirectML and CPU fallback with visible hardware status.</value>
   </data>
+  <data name="ModelObjectDetectionNotes" xml:space="preserve">
+    <value>Official Apache-2.0 OpenCV Zoo YOLOX-S artifact pinned to repository revision 78c368f. Import is manual and SHA-256 gated; object suggestions remain local until reviewed.</value>
+  </data>
+  <data name="ModelObjectDetectionPurpose" xml:space="preserve">
+    <value>Local COCO object detection and keyword suggestions</value>
+  </data>
+  <data name="ModelObjectDetectionRuntime" xml:space="preserve">
+    <value>1x3x640x640 RGB input with 8400x85 output, opset 11; shared hardware fallback.</value>
+  </data>
   <data name="ModelReadyAction" xml:space="preserve">
     <value>Ready for future model-backed tools once runtime code is enabled.</value>
   </data>

@@ -1608,6 +1608,9 @@ public static class Strings
     public static string ModelOpenCvNotes => Get(nameof(ModelOpenCvNotes));
     public static string ModelOpenCvPurpose => Get(nameof(ModelOpenCvPurpose));
     public static string ModelOpenCvRuntime => Get(nameof(ModelOpenCvRuntime));
+    public static string ModelObjectDetectionNotes => Get(nameof(ModelObjectDetectionNotes));
+    public static string ModelObjectDetectionPurpose => Get(nameof(ModelObjectDetectionPurpose));
+    public static string ModelObjectDetectionRuntime => Get(nameof(ModelObjectDetectionRuntime));
     public static string ModelReadyAction => Get(nameof(ModelReadyAction));
     public static string ModelRegistrySummaryFormat => Get(nameof(ModelRegistrySummaryFormat));
     public static string ModelReimportAction => Get(nameof(ModelReimportAction));

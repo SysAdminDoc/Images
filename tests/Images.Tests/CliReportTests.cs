@@ -86,6 +86,8 @@ public sealed class CliReportTests
         Assert.Contains("--face-detect <imagePath>", help, StringComparison.Ordinal);
         Assert.Contains("--face-xmp <imagePath>", help, StringComparison.Ordinal);
         Assert.Contains("--face-cluster <imagePath> <imagePath> [...]", help, StringComparison.Ordinal);
+        Assert.Contains("--object-detect <imagePath>", help, StringComparison.Ordinal);
+        Assert.Contains("--object-xmp <imagePath>", help, StringComparison.Ordinal);
         Assert.Contains("never modifies the image or sidecar", help, StringComparison.Ordinal);
     }
 }

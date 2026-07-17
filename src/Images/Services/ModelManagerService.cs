@@ -249,7 +249,20 @@ public sealed class ModelManagerService
             ExpectedSha256: "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79",
             ExpectedSizeBytes: 38_696_353,
             RuntimeContract: Strings.ModelFaceRecognitionRuntime,
-            Notes: Strings.ModelFaceRecognitionNotes)
+            Notes: Strings.ModelFaceRecognitionNotes),
+        new(
+            Id: "opencv-object-detection-yolox-2022nov",
+            DisplayName: "OpenCV YOLOX-S Object Detection",
+            Purpose: Strings.ModelObjectDetectionPurpose,
+            StorageGroup: "objects",
+            SourceUrl: "https://huggingface.co/opencv/object_detection_yolox",
+            DownloadUrl: "https://huggingface.co/opencv/object_detection_yolox/resolve/78c368f74ce73ee28fc7a1be418a598c71b58b52/object_detection_yolox_2022nov.onnx",
+            License: Strings.ModelOpenCvLicense,
+            FileName: "object_detection_yolox_2022nov.onnx",
+            ExpectedSha256: "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+            ExpectedSizeBytes: 35_858_002,
+            RuntimeContract: Strings.ModelObjectDetectionRuntime,
+            Notes: Strings.ModelObjectDetectionNotes)
     ];
 
     public LocalModelManagerSnapshot GetSnapshot()
