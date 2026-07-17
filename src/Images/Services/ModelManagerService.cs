@@ -288,7 +288,20 @@ public sealed class ModelManagerService
             ExpectedSha256: AestheticScoringService.ArtifactSha256,
             ExpectedSizeBytes: 12_842_033,
             RuntimeContract: Strings.ModelAestheticRuntime,
-            Notes: Strings.ModelAestheticNotes)
+            Notes: Strings.ModelAestheticNotes),
+        new(
+            Id: "csail-places365-resnet18",
+            DisplayName: "CSAIL Places365 ResNet-18",
+            Purpose: Strings.ModelScenePurpose,
+            StorageGroup: "scenes",
+            SourceUrl: "https://github.com/CSAILVision/places365",
+            DownloadUrl: "https://raw.githubusercontent.com/SysAdminDoc/Images/f064916ab8abb4816fc65b1d1b6bf1624466e6a9/models/places365/places365-resnet18.onnx",
+            License: Strings.ModelPlacesLicense,
+            FileName: "places365-resnet18.onnx",
+            ExpectedSha256: SceneClassificationService.ArtifactSha256,
+            ExpectedSizeBytes: 45_445_531,
+            RuntimeContract: Strings.ModelSceneRuntime,
+            Notes: Strings.ModelSceneNotes)
     ];
 
     public LocalModelManagerSnapshot GetSnapshot()

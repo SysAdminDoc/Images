@@ -6102,6 +6102,18 @@ Details written to:
   <data name="ModelOrientationRuntime" xml:space="preserve">
     <value>1x3x384x384 ImageNet-normalized RGB input with four-class output, opset 14; shared hardware fallback.</value>
   </data>
+  <data name="ModelPlacesLicense" xml:space="preserve">
+    <value>CC BY attribution required; upstream does not state a version</value>
+  </data>
+  <data name="ModelSceneNotes" xml:space="preserve">
+    <value>Official Places365 ResNet-18 checkpoint pinned by SHA-256 and converted by the tracked parity-checked script. Attribution is preserved; scene and environment keywords remain review-only suggestions.</value>
+  </data>
+  <data name="ModelScenePurpose" xml:space="preserve">
+    <value>Local 365-class scene and indoor/outdoor suggestions</value>
+  </data>
+  <data name="ModelSceneRuntime" xml:space="preserve">
+    <value>1x3x224x224 ImageNet-normalized input with 365 logits, opset 17; shared hardware fallback.</value>
+  </data>
   <data name="ModelReadyAction" xml:space="preserve">
     <value>Ready for future model-backed tools once runtime code is enabled.</value>
   </data>

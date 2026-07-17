@@ -25,7 +25,20 @@ public sealed class ModelManagerServiceTests
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "opencv-object-detection-yolox-2022nov");
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "fachuan-orientation-convnextv2-2026jun");
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "idealo-nima-mobilenet-aesthetic");
+        Assert.Contains(snapshot.Models, model => model.Definition.Id == "csail-places365-resnet18");
         Assert.All(snapshot.Models, model => Assert.Equal(LocalModelAvailability.Missing, model.Availability));
+    }
+
+    [Fact]
+    public void ApprovedSceneModel_IsArtifactCommitSizeAndHashPinned()
+    {
+        var model = Assert.Single(ModelManagerService.ApprovedModels,
+            item => item.Id == "csail-places365-resnet18");
+
+        Assert.Contains("f064916ab8abb4816fc65b1d1b6bf1624466e6a9", model.DownloadUrl, StringComparison.Ordinal);
+        Assert.Equal(45_445_531, model.ExpectedSizeBytes);
+        Assert.Equal(SceneClassificationService.ArtifactSha256, model.ExpectedSha256);
+        Assert.Contains("CC BY", model.License, StringComparison.Ordinal);
     }
 
     [Fact]

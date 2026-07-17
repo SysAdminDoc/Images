@@ -231,6 +231,10 @@ public static class CliReport
         sb.AppendLine("    Rank a batch with the approved local NIMA model and print score distributions.");
         sb.AppendLine("    Relative culling hint only; never writes Pick/Reject labels or metadata.");
         sb.AppendLine();
+        sb.AppendLine("  Images.exe --scene-classify <imagePath> [imagePath ...]");
+        sb.AppendLine("    Print Places365 scene predictions and review-only smart-album keywords.");
+        sb.AppendLine("    Never writes keywords, metadata, files, or smart albums.");
+        sb.AppendLine();
         sb.AppendLine("  Images.exe --version");
         sb.AppendLine("    Print the version and exit.");
         sb.AppendLine();

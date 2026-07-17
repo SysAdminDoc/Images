@@ -1618,6 +1618,10 @@ public static class Strings
     public static string ModelOrientationNotes => Get(nameof(ModelOrientationNotes));
     public static string ModelOrientationPurpose => Get(nameof(ModelOrientationPurpose));
     public static string ModelOrientationRuntime => Get(nameof(ModelOrientationRuntime));
+    public static string ModelPlacesLicense => Get(nameof(ModelPlacesLicense));
+    public static string ModelSceneNotes => Get(nameof(ModelSceneNotes));
+    public static string ModelScenePurpose => Get(nameof(ModelScenePurpose));
+    public static string ModelSceneRuntime => Get(nameof(ModelSceneRuntime));
     public static string ModelReadyAction => Get(nameof(ModelReadyAction));
     public static string ModelRegistrySummaryFormat => Get(nameof(ModelRegistrySummaryFormat));
     public static string ModelReimportAction => Get(nameof(ModelReimportAction));

@@ -24,6 +24,8 @@
   <ItemGroup>
     <Resource Include="Resources\icon.ico" />
     <Resource Include="Resources\logo.png" />
+    <EmbeddedResource Include="..\..\models\places365\categories_places365.txt" LogicalName="Images.Models.categories_places365.txt" />
+    <EmbeddedResource Include="..\..\models\places365\IO_places365.txt" LogicalName="Images.Models.IO_places365.txt" />
   </ItemGroup>
 
   <ItemGroup>
