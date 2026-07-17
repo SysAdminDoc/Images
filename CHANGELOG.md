@@ -5,6 +5,7 @@ All notable changes to **Images** are documented here.
 ## Unreleased
 
 - Added window-free catalog CLI consumers: `--catalog-search "<terms>"` prints assets matching every filename/format/codec/rating/palette/camera/lens/tag term, while `--catalog-near <lat> <lon> <radiusKm>` prints assets inside an exact great-circle radius. Catalog folder, term, and geo predicates now run in SQLite instead of materializing up to 50,000 records for LINQ filtering; focused tests cover multi-term metadata matching, radius exclusion, parsing, and process-friendly path output.
+- Added a safe WPF background-smoke lane. `--uia-background` launches the real app offscreen with isolated mutable storage, no taskbar entry, `ShowActivated=false`, native `WS_EX_NOACTIVATE`, no startup focus/update check, and no persisted test geometry. Six FlaUI cases verify process lifecycle, fixture decode, title, canvas automation, navigation controls, and a two-item filmstrip without global keyboard/mouse input; `scripts/Test-WpfBackgroundSmoke.ps1` runs the lane locally and a Windows GitHub Actions job publishes its TRX result.
 
 ## v0.2.29 - 2026-07-17
 

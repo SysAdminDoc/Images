@@ -1,5 +1,6 @@
 using System.IO;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
@@ -8,6 +9,7 @@ using FlaUI.Core.Definitions;
 using FlaUI.Core.Input;
 using FlaUI.Core.WindowsAPI;
 using FlaUI.UIA3;
+using Images.Services;
 
 namespace Images.Tests;
 
@@ -22,8 +24,13 @@ public sealed class WpfSmokeTests : IDisposable
 
     private Application? _app;
     private UIA3Automation? _automation;
+    private readonly string _isolatedDataRoot = Path.Combine(
+        Path.GetTempPath(),
+        "Images-WpfSmoke",
+        Guid.NewGuid().ToString("N"));
     private const uint SwpNoZOrder = 0x0004;
     private const uint SwpShowWindow = 0x0040;
+    private const int GwlExStyle = -20;
 
     private static string FindAppExe()
     {
@@ -35,25 +42,93 @@ public sealed class WpfSmokeTests : IDisposable
         return exePath;
     }
 
-    private (Application App, Window MainWindow) LaunchApp(string? imagePath = null)
+    private (Application App, Window MainWindow) LaunchApp(
+        string? imagePath = null,
+        bool background = true)
     {
         if (!File.Exists(AppExePath))
             throw new FileNotFoundException(
                 $"App executable not found at {AppExePath}. Build in Release first.");
 
-        var args = imagePath is not null ? $"\"{imagePath}\"" : "";
+        Directory.CreateDirectory(_isolatedDataRoot);
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = AppExePath,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+        if (background)
+            startInfo.ArgumentList.Add("--uia-background");
+        if (imagePath is not null)
+            startInfo.ArgumentList.Add(imagePath);
+        startInfo.Environment["IMAGES_DATA_ROOT"] = _isolatedDataRoot;
+
         _automation = new UIA3Automation();
-        _app = Application.Launch(AppExePath, args);
-        var mainWindow = _app.GetMainWindow(_automation, TimeSpan.FromSeconds(10));
+        _app = Application.Launch(startInfo);
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+        Window? mainWindow = null;
+        while (mainWindow is null && DateTime.UtcNow < deadline)
+        {
+            mainWindow = _app.GetAllTopLevelWindows(_automation).FirstOrDefault();
+            if (mainWindow is null)
+                System.Threading.Thread.Sleep(100);
+        }
         Assert.NotNull(mainWindow);
+        if (background)
+        {
+            var windowHandle = new IntPtr(mainWindow.Properties.NativeWindowHandle.ValueOrDefault);
+            Assert.NotEqual(IntPtr.Zero, windowHandle);
+            Assert.NotEqual(windowHandle, GetForegroundWindow());
+            Assert.True(OverlayWindowService.IsBackgroundSmokeStyle(
+                GetWindowLong(windowHandle, GwlExStyle)));
+        }
         return (_app, mainWindow);
     }
 
-    private static void SkipUnlessSmoke()
+    private static void CloseApp(Application app, Window window)
+    {
+        window.Close();
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+        while (!app.HasExited && DateTime.UtcNow < deadline)
+            System.Threading.Thread.Sleep(50);
+        Assert.True(app.HasExited);
+    }
+
+    private string CreateSmokeFolder(int imageCount)
+    {
+        var folder = Path.Combine(_isolatedDataRoot, "fixtures");
+        Directory.CreateDirectory(folder);
+        for (var i = 0; i < imageCount; i++)
+            File.Copy(FixtureImage, Path.Combine(folder, $"smoke-{i + 1}.png"), overwrite: true);
+        return folder;
+    }
+
+    private static void SkipUnlessBackgroundSmoke()
+    {
+        if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("RUN_BACKGROUND_SMOKE_TESTS")))
+            Assert.Skip("Set RUN_BACKGROUND_SMOKE_TESTS=1 to run offscreen WPF smoke tests.");
+    }
+
+    private static void SkipUnlessInteractiveSmoke()
     {
         if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("RUN_SMOKE_TESTS")))
-            Assert.Skip("Set RUN_SMOKE_TESTS=1 to run WPF smoke tests (requires display session).");
+            Assert.Skip("Set RUN_SMOKE_TESTS=1 to run foreground-only input smoke tests.");
     }
+
+    private static void SkipUnlessAnySmoke()
+    {
+        if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("RUN_BACKGROUND_SMOKE_TESTS")) &&
+            string.IsNullOrEmpty(Environment.GetEnvironmentVariable("RUN_SMOKE_TESTS")))
+        {
+            Assert.Skip("Set RUN_BACKGROUND_SMOKE_TESTS=1 or RUN_SMOKE_TESTS=1 to run WPF smoke tests.");
+        }
+    }
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool SetWindowPos(
@@ -99,20 +174,21 @@ public sealed class WpfSmokeTests : IDisposable
 
     [Fact]
     [Trait("Category", "SmokeGate")]
+    [Trait("Category", "BackgroundSmoke")]
     public void LaunchAndClose()
     {
-        SkipUnlessSmoke();
+        SkipUnlessBackgroundSmoke();
         var (app, window) = LaunchApp();
         Assert.Contains("Images", window.Title);
-        app.Close();
-        Assert.True(app.HasExited);
+        CloseApp(app, window);
     }
 
     [Fact]
     [Trait("Category", "SmokeGate")]
+    [Trait("Category", "BackgroundSmoke")]
     public void OpenFixtureImage()
     {
-        SkipUnlessSmoke();
+        SkipUnlessBackgroundSmoke();
         if (!File.Exists(FixtureImage))
             throw new FileNotFoundException($"Fixture image missing: {FixtureImage}");
 
@@ -122,35 +198,36 @@ public sealed class WpfSmokeTests : IDisposable
         var imageElement = FindImageCanvas(window);
         Assert.NotNull(imageElement);
 
-        app.Close();
+        CloseApp(app, window);
     }
 
     [Fact]
     public void NavigateNextPrevious()
     {
-        SkipUnlessSmoke();
+        SkipUnlessAnySmoke();
         if (!File.Exists(FixtureImage))
             throw new FileNotFoundException($"Fixture image missing: {FixtureImage}");
 
         var (app, window) = LaunchApp(FixtureImage);
 
-        window.Focus();
-        System.Threading.Thread.Sleep(500);
-
-        FlaUI.Core.Input.Keyboard.Press(FlaUI.Core.WindowsAPI.VirtualKeyShort.RIGHT);
-        System.Threading.Thread.Sleep(300);
-        FlaUI.Core.Input.Keyboard.Press(FlaUI.Core.WindowsAPI.VirtualKeyShort.LEFT);
-        System.Threading.Thread.Sleep(300);
+        var next = WaitForElement(
+            () => window.FindFirstDescendant(cf => cf.ByName("Next image")),
+            "Next image button").AsButton();
+        var previous = WaitForElement(
+            () => window.FindFirstDescendant(cf => cf.ByName("Previous image")),
+            "Previous image button").AsButton();
+        next.Invoke();
+        previous.Invoke();
 
         Assert.False(app.HasExited);
-        app.Close();
+        CloseApp(app, window);
     }
 
     [Fact]
     public void EscapeClosesApp()
     {
-        SkipUnlessSmoke();
-        var (app, window) = LaunchApp();
+        SkipUnlessInteractiveSmoke();
+        var (app, window) = LaunchApp(background: false);
         window.Focus();
         System.Threading.Thread.Sleep(500);
         FlaUI.Core.Input.Keyboard.Press(FlaUI.Core.WindowsAPI.VirtualKeyShort.ESCAPE);
@@ -159,9 +236,10 @@ public sealed class WpfSmokeTests : IDisposable
 
     [Fact]
     [Trait("Category", "SmokeGate")]
+    [Trait("Category", "BackgroundSmoke")]
     public void CanvasHasDocumentedAutomationNameAndHelpText()
     {
-        SkipUnlessSmoke();
+        SkipUnlessBackgroundSmoke();
         if (!File.Exists(FixtureImage))
             throw new FileNotFoundException($"Fixture image missing: {FixtureImage}");
 
@@ -179,14 +257,15 @@ public sealed class WpfSmokeTests : IDisposable
         Assert.NotNull(help);
         Assert.Contains("arrow keys", help, StringComparison.OrdinalIgnoreCase);
 
-        app.Close();
+        CloseApp(app, window);
     }
 
     [Fact]
     [Trait("Category", "SmokeGate")]
+    [Trait("Category", "BackgroundSmoke")]
     public void WindowTitleContainsFilenameWhenImageLoaded()
     {
-        SkipUnlessSmoke();
+        SkipUnlessBackgroundSmoke();
         if (!File.Exists(FixtureImage))
             throw new FileNotFoundException($"Fixture image missing: {FixtureImage}");
 
@@ -196,13 +275,14 @@ public sealed class WpfSmokeTests : IDisposable
         Assert.Contains("smoke-test", window.Title, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Images", window.Title, StringComparison.OrdinalIgnoreCase);
 
-        app.Close();
+        CloseApp(app, window);
     }
 
     [Fact]
+    [Trait("Category", "BackgroundSmoke")]
     public void NavigationButtonsHaveAutomationNames()
     {
-        SkipUnlessSmoke();
+        SkipUnlessBackgroundSmoke();
         if (!File.Exists(FixtureImage))
             throw new FileNotFoundException($"Fixture image missing: {FixtureImage}");
 
@@ -214,13 +294,13 @@ public sealed class WpfSmokeTests : IDisposable
         Assert.NotNull(prev);
         Assert.NotNull(next);
 
-        app.Close();
+        CloseApp(app, window);
     }
 
     [Fact]
     public void ToolbarButtonsHaveAutomationNames()
     {
-        SkipUnlessSmoke();
+        SkipUnlessAnySmoke();
         var (app, window) = LaunchApp();
         System.Threading.Thread.Sleep(1000);
 
@@ -233,34 +313,63 @@ public sealed class WpfSmokeTests : IDisposable
         var diagBtn = window.FindFirstDescendant(cf => cf.ByName("Open diagnostics"));
         Assert.NotNull(diagBtn);
 
-        app.Close();
+        CloseApp(app, window);
     }
 
     [Fact]
     public void FolderPositionChipExistsWhenImageLoaded()
     {
-        SkipUnlessSmoke();
+        SkipUnlessAnySmoke();
         if (!File.Exists(FixtureImage))
             throw new FileNotFoundException($"Fixture image missing: {FixtureImage}");
 
-        var (app, window) = LaunchApp(FixtureImage);
+        var folder = CreateSmokeFolder(2);
+        var (app, window) = LaunchApp(Path.Combine(folder, "smoke-1.png"));
         System.Threading.Thread.Sleep(1500);
 
         var posChip = window.FindFirstDescendant(cf => cf.ByName("Folder position"));
         Assert.NotNull(posChip);
 
-        app.Close();
+        CloseApp(app, window);
+    }
+
+    [Fact]
+    [Trait("Category", "SmokeGate")]
+    [Trait("Category", "BackgroundSmoke")]
+    public void FolderFilmstripContainsFixtureImage()
+    {
+        SkipUnlessBackgroundSmoke();
+        if (!File.Exists(FixtureImage))
+            throw new FileNotFoundException($"Fixture image missing: {FixtureImage}");
+
+        var folder = CreateSmokeFolder(2);
+        var (app, window) = LaunchApp(Path.Combine(folder, "smoke-1.png"));
+        var filmstrip = WaitForElement(
+            () => window.FindFirstDescendant(cf => cf.ByAutomationId("FolderFilmstrip")),
+            "folder filmstrip");
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+        AutomationElement[] items;
+        do
+        {
+            items = filmstrip.FindAllChildren(cf => cf.ByControlType(ControlType.ListItem));
+            if (items.Length > 0)
+                break;
+            System.Threading.Thread.Sleep(100);
+        } while (DateTime.UtcNow < deadline);
+
+        Assert.Equal(2, items.Length);
+        CloseApp(app, window);
     }
 
     [Fact]
     [Trait("Category", "SmokeGate")]
     public void ViewportContextMenuIsBoundedAndKeyboardReachable()
     {
-        SkipUnlessSmoke();
+        SkipUnlessInteractiveSmoke();
         if (!File.Exists(FixtureImage))
             throw new FileNotFoundException($"Fixture image missing: {FixtureImage}");
 
-        var (app, window) = LaunchApp(FixtureImage);
+        var (app, window) = LaunchApp(FixtureImage, background: false);
         ResizeWindow(app, width: 760, height: 560);
         window.SetForeground();
         System.Threading.Thread.Sleep(1000);
@@ -311,13 +420,24 @@ public sealed class WpfSmokeTests : IDisposable
         Assert.False(compareWith.IsOffscreen);
 
         Keyboard.Press(VirtualKeyShort.ESCAPE);
-        app.Close();
+        CloseApp(app, window);
     }
 
     public void Dispose()
     {
-        try { _app?.Close(); } catch { }
+        try
+        {
+            if (_app is { HasExited: false })
+                _app.Kill();
+        }
+        catch { }
         try { _app?.Dispose(); } catch { }
         _automation?.Dispose();
+        try
+        {
+            if (Directory.Exists(_isolatedDataRoot))
+                Directory.Delete(_isolatedDataRoot, recursive: true);
+        }
+        catch { }
     }
 }

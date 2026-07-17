@@ -31,6 +31,23 @@ public sealed class LaunchModeTests
         Assert.Equal(string.Empty, path);
     }
 
+    [Theory]
+    [InlineData("--uia-background")]
+    [InlineData("--UIA-BACKGROUND", "photo.jpg")]
+    public void IsUiaBackgroundLaunch_AcceptsExactFlagAnywhere(params string[] args)
+    {
+        Assert.True(Images.App.IsUiaBackgroundLaunch(args));
+    }
+
+    [Theory]
+    [InlineData()]
+    [InlineData("--uia-background-extra")]
+    [InlineData("photo.jpg")]
+    public void IsUiaBackgroundLaunch_RejectsMissingOrPrefixOnlyFlag(params string[] args)
+    {
+        Assert.False(Images.App.IsUiaBackgroundLaunch(args));
+    }
+
     [Fact]
     public void LaunchTimingSnapshot_ClampsNegativeProcessElapsed()
     {

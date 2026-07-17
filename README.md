@@ -232,6 +232,7 @@ Images carries its own diagnostics surface — no terminal required for the comm
 - **About → Codec report** copies the per-format capability matrix, supported-extension list, and runtime/dependency provenance rows to the clipboard.
 - `Images.exe --system-info` and `Images.exe --codec-report` print the same provenance rows to stdout for support tickets and CI smoke tests.
 - `Images.exe --perf-report` measures cold-start time, directory scan, cache health, settings access, and memory against budgeted thresholds for regression tracking.
+- `scripts/Test-WpfBackgroundSmoke.ps1` builds Release and drives six offscreen, non-activating FlaUI checks against an isolated data root; it never uses global mouse/keyboard input or the signed-in user's Images settings.
 
 ## Policies
 

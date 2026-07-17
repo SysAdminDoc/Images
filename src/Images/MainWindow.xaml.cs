@@ -46,6 +46,7 @@ public partial class MainWindow : Window
     private bool _continuousArchiveScrollQueued;
     private string? _dragPathVerdictKey;
     private string? _dragPathVerdict;
+    private bool _isUiaBackground;
 
     public MainWindow()
     {
@@ -116,9 +117,10 @@ public partial class MainWindow : Window
         LocationChanged += (_, _) => RefreshDisplayColorState(force: false);
         Loaded += (_, _) =>
         {
-            Focus();
+            if (!_isUiaBackground)
+                Focus();
             QueueCenterCurrentPreviewItems();
-            if (Vm.IsPeekMode) return;
+            if (Vm.IsPeekMode || _isUiaBackground) return;
 
             // P-04: kick off a throttled update check 3 seconds after UI is interactive so the
             // first image load isn't competing with HTTPS handshake. Fire-and-forget; any
@@ -351,6 +353,8 @@ public partial class MainWindow : Window
         // Flip the native title bar to dark so the Catppuccin Mocha interior doesn't sit inside a
         // default light caption. Best-effort — pre-20H1 no-ops cleanly via the service.
         var hwnd = new WindowInteropHelper(this).Handle;
+        if (_isUiaBackground)
+            OverlayWindowService.ApplyBackgroundSmokeStyle(hwnd);
         WindowChrome.ApplyDarkCaption(hwnd);
         _hwndSource = HwndSource.FromHwnd(hwnd);
         _hwndSource?.AddHook(WndProc);
@@ -672,7 +676,7 @@ public partial class MainWindow : Window
 
     private void SaveWindowState(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        if (Vm.IsPeekMode) return;
+        if (Vm.IsPeekMode || _isUiaBackground) return;
 
         var settings = SettingsService.Instance;
         if (!settings.GetBool(Keys.RememberWindowPlacement, true)) return;
@@ -698,6 +702,24 @@ public partial class MainWindow : Window
             settings.SetDouble(Keys.WindowHeight + suffix, bounds.Height);
             settings.SetBool(Keys.WindowMaximized + suffix, WindowState == WindowState.Maximized);
         }
+    }
+
+    /// <summary>
+    /// Test-only launch posture for UI Automation: fixed-size, far offscreen, absent from the
+    /// taskbar, and created with WS_EX_NOACTIVATE. It must be applied before Show().
+    /// </summary>
+    internal void PrepareUiaBackground()
+    {
+        _isUiaBackground = true;
+        ShowActivated = false;
+        ShowInTaskbar = false;
+        Topmost = false;
+        WindowState = WindowState.Normal;
+        WindowStartupLocation = WindowStartupLocation.Manual;
+        Left = -32_000;
+        Top = -32_000;
+        Width = Math.Max(MinWidth, 1200);
+        Height = Math.Max(MinHeight, 800);
     }
 
     /// <summary>

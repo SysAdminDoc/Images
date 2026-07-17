@@ -150,10 +150,6 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
   - **Blocked by**: Windows version detection research — needs reliable `windowscodecs.dll` version probing.
   - **Unblock when**: version-detection approach validated and tested.
 
-- [ ] **T-02** *P2* — **FlaUI smoke suite** — launch, open fixture folder, assert filmstrip count + title bar text. Runs as a gated CI job on windows-latest. Effort: M. [FlaUI repo + docs]
-  - **Blocked by**: FlaUI test harness setup — NuGet reference, test project scaffold, and CI runner configuration.
-  - **Unblock when**: FlaUI NuGet added and basic test project scaffolded.
-
 - [ ] **T-03** *P2* — **Golden-image render tests** under `tests/render/`, DPI-pinned, per-pixel RGBA compare with tolerance via ImageSharp. Catches canvas-engine regressions when SkiaSharp lands in V20-01. Effort: M. [ImageSharp repo]
   - **Blocked by**: ImageSharp NuGet reference + V20-01 SkiaSharp canvas (render tests primarily guard SkiaSharp regressions).
   - **Unblock when**: V20-01 SkiaSharp canvas ships and ImageSharp is added.

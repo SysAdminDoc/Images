@@ -65,6 +65,13 @@ public static class AppStorage
 
     private static IEnumerable<string> GetCandidateRoot()
     {
+        // Test/background automation can isolate every mutable store from the signed-in user's
+        // profile. The caller still lands under an "Images" child and all relative-segment
+        // traversal guards remain in force.
+        var overrideRoot = Environment.GetEnvironmentVariable("IMAGES_DATA_ROOT");
+        if (!string.IsNullOrWhiteSpace(overrideRoot))
+            yield return overrideRoot;
+
         yield return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         yield return Path.GetTempPath();
     }

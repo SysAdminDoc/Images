@@ -10,7 +10,9 @@ public static class OverlayWindowService
 
     private const int GwlExStyle = -20;
     private const int WsExTransparent = 0x00000020;
+    private const int WsExToolWindow = 0x00000080;
     private const int WsExLayered = 0x00080000;
+    private const int WsExNoActivate = 0x08000000;
     private const uint ModAlt = 0x0001;
     private const uint ModControl = 0x0002;
 
@@ -23,6 +25,23 @@ public static class OverlayWindowService
 
     public static bool IsClickThroughStyle(int style)
         => (style & WsExTransparent) == WsExTransparent;
+
+    public static int BuildBackgroundSmokeExtendedStyle(int currentStyle)
+        => currentStyle | WsExToolWindow | WsExNoActivate;
+
+    public static bool IsBackgroundSmokeStyle(int style)
+        => (style & (WsExToolWindow | WsExNoActivate)) == (WsExToolWindow | WsExNoActivate);
+
+    public static void ApplyBackgroundSmokeStyle(IntPtr hwnd)
+    {
+        if (hwnd == IntPtr.Zero)
+            return;
+
+        var current = GetWindowLong(hwnd, GwlExStyle);
+        var next = BuildBackgroundSmokeExtendedStyle(current);
+        if (next != current)
+            SetWindowLong(hwnd, GwlExStyle, next);
+    }
 
     public static void ApplyClickThrough(IntPtr hwnd, bool clickThrough)
     {

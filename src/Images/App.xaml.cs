@@ -121,6 +121,9 @@ public partial class App : Application
         ThemeService.Initialize(this, SettingsService.Instance);
 
         var window = new MainWindow();
+        var uiaBackground = IsUiaBackgroundLaunch(e.Args);
+        if (uiaBackground)
+            window.PrepareUiaBackground();
         LaunchTiming.Log(_log, "main-window-created");
 
         // V20-32: `--peek <path>` enters chromeless preview mode (PowerToys Peek invocation
@@ -143,6 +146,10 @@ public partial class App : Application
         var resolvedPaths = new List<string>();
         for (int i = 0; i < e.Args.Length; i++)
         {
+            if (string.Equals(e.Args[i], "--uia-background", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
             if ((string.Equals(e.Args[i], "-l", StringComparison.OrdinalIgnoreCase) ||
                  string.Equals(e.Args[i], "--listen", StringComparison.OrdinalIgnoreCase))
                 && i + 1 < e.Args.Length)
@@ -179,7 +186,7 @@ public partial class App : Application
             window.OpenPath(resolvedPaths[0]);
             LaunchTiming.Log(_log, "argv-open-complete", Path.GetFileName(resolvedPaths[0]));
         }
-        else if (listenPort is null)
+        else if (listenPort is null && !uiaBackground)
         {
             // RD-09: opt-in session restore — with no file passed on launch, reopen the last
             // image (its folder position follows). Missing file falls back to the empty state.
@@ -213,6 +220,9 @@ public partial class App : Application
         if (!string.Equals(args[0], "--peek", StringComparison.OrdinalIgnoreCase)) return false;
         return TryResolveArgPath(args[1], out resolved);
     }
+
+    internal static bool IsUiaBackgroundLaunch(string[] args) =>
+        args.Any(arg => string.Equals(arg, "--uia-background", StringComparison.OrdinalIgnoreCase));
 
     internal static bool TryResolveArgPath(string raw, out string resolved)
     {

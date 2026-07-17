@@ -28,4 +28,15 @@ public sealed class OverlayWindowServiceTests
         Assert.False(OverlayWindowService.IsClickThroughStyle(disabled));
         Assert.True((disabled & 0x00040000) == 0x00040000);
     }
+
+    [Fact]
+    public void BuildBackgroundSmokeExtendedStyle_AddsToolWindowAndNoActivateWithoutClearingFlags()
+    {
+        const int existingFlag = 0x00040000;
+
+        var style = OverlayWindowService.BuildBackgroundSmokeExtendedStyle(existingFlag);
+
+        Assert.True(OverlayWindowService.IsBackgroundSmokeStyle(style));
+        Assert.True((style & existingFlag) == existingFlag);
+    }
 }
