@@ -6492,6 +6492,18 @@ Details written to:
   <data name="ModelObjectDetectionNotes" xml:space="preserve">
     <value>[!!!!!!!!!!!! Official Apache-2.0 OpenCV Zoo YOLOX-S artifact pinned to repository revision 78c368f. Import is manual and SHA-256 gated; object suggestions remain local until reviewed. !!!!!!!!!!!!]</value>
   </data>
+  <data name="ModelAestheticNotes" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Apache-2.0 idealo checkpoint pinned to source revision dceaf7c and converted by the tracked parity-checked script. AVA-trained scores are relative culling hints only and never write Pick/Reject labels. !!!!!!!!!!!!]</value>
+  </data>
+  <data name="ModelApacheLicense" xml:space="preserve">
+    <value>[!!!!!! Apache-2.0 / Apache License 2.0 !!!!!!]</value>
+  </data>
+  <data name="ModelAestheticPurpose" xml:space="preserve">
+    <value>[!!!!!!!! Local NIMA aesthetic score distributions and batch ranking !!!!!!!!]</value>
+  </data>
+  <data name="ModelAestheticRuntime" xml:space="preserve">
+    <value>[!!!!!!!!!!!! 1x224x224x3 MobileNet-normalized NHWC input with a ten-bin opinion distribution, opset 17; shared hardware fallback. !!!!!!!!!!!!]</value>
+  </data>
   <data name="ModelObjectDetectionPurpose" xml:space="preserve">
     <value>[!!!!!!!! Local COCO object detection and keyword suggestions !!!!!!!!]</value>
   </data>

@@ -227,6 +227,10 @@ public static class CliReport
         sb.AppendLine("    Print a conservative local document-orientation hint as JSON.");
         sb.AppendLine("    Ambiguous results are withheld; never rotates or modifies any file.");
         sb.AppendLine();
+        sb.AppendLine("  Images.exe --aesthetic-score <imagePath> [imagePath ...]");
+        sb.AppendLine("    Rank a batch with the approved local NIMA model and print score distributions.");
+        sb.AppendLine("    Relative culling hint only; never writes Pick/Reject labels or metadata.");
+        sb.AppendLine();
         sb.AppendLine("  Images.exe --version");
         sb.AppendLine("    Print the version and exit.");
         sb.AppendLine();

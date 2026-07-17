@@ -1611,6 +1611,10 @@ public static class Strings
     public static string ModelObjectDetectionNotes => Get(nameof(ModelObjectDetectionNotes));
     public static string ModelObjectDetectionPurpose => Get(nameof(ModelObjectDetectionPurpose));
     public static string ModelObjectDetectionRuntime => Get(nameof(ModelObjectDetectionRuntime));
+    public static string ModelAestheticNotes => Get(nameof(ModelAestheticNotes));
+    public static string ModelAestheticPurpose => Get(nameof(ModelAestheticPurpose));
+    public static string ModelAestheticRuntime => Get(nameof(ModelAestheticRuntime));
+    public static string ModelApacheLicense => Get(nameof(ModelApacheLicense));
     public static string ModelOrientationNotes => Get(nameof(ModelOrientationNotes));
     public static string ModelOrientationPurpose => Get(nameof(ModelOrientationPurpose));
     public static string ModelOrientationRuntime => Get(nameof(ModelOrientationRuntime));

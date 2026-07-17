@@ -89,6 +89,7 @@ public sealed class CliReportTests
         Assert.Contains("--object-detect <imagePath>", help, StringComparison.Ordinal);
         Assert.Contains("--object-xmp <imagePath>", help, StringComparison.Ordinal);
         Assert.Contains("--orientation-suggest <imagePath>", help, StringComparison.Ordinal);
+        Assert.Contains("--aesthetic-score <imagePath> [imagePath ...]", help, StringComparison.Ordinal);
         Assert.Contains("never modifies the image or sidecar", help, StringComparison.Ordinal);
     }
 }

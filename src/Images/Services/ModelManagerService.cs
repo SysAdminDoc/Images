@@ -275,7 +275,20 @@ public sealed class ModelManagerService
             ExpectedSha256: "50ec8fd24fb08e23aaac8ae657f2756c9251b5f052b00a1e3af8c128e4796b54",
             ExpectedSizeBytes: 13_671_697,
             RuntimeContract: Strings.ModelOrientationRuntime,
-            Notes: Strings.ModelOrientationNotes)
+            Notes: Strings.ModelOrientationNotes),
+        new(
+            Id: "idealo-nima-mobilenet-aesthetic",
+            DisplayName: "idealo NIMA MobileNet Aesthetic",
+            Purpose: Strings.ModelAestheticPurpose,
+            StorageGroup: "aesthetic",
+            SourceUrl: "https://github.com/idealo/image-quality-assessment",
+            DownloadUrl: "https://raw.githubusercontent.com/SysAdminDoc/Images/4b7be8b54cb0969cc5e826f8c17557211de84358/models/nima/idealo-nima-mobilenet-aesthetic.onnx",
+            License: Strings.ModelApacheLicense,
+            FileName: "idealo-nima-mobilenet-aesthetic.onnx",
+            ExpectedSha256: AestheticScoringService.ArtifactSha256,
+            ExpectedSizeBytes: 12_842_033,
+            RuntimeContract: Strings.ModelAestheticRuntime,
+            Notes: Strings.ModelAestheticNotes)
     ];
 
     public LocalModelManagerSnapshot GetSnapshot()

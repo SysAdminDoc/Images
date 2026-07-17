@@ -24,7 +24,20 @@ public sealed class ModelManagerServiceTests
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "opencv-face-recognition-sface-2021dec");
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "opencv-object-detection-yolox-2022nov");
         Assert.Contains(snapshot.Models, model => model.Definition.Id == "fachuan-orientation-convnextv2-2026jun");
+        Assert.Contains(snapshot.Models, model => model.Definition.Id == "idealo-nima-mobilenet-aesthetic");
         Assert.All(snapshot.Models, model => Assert.Equal(LocalModelAvailability.Missing, model.Availability));
+    }
+
+    [Fact]
+    public void ApprovedAestheticModel_IsArtifactCommitSizeAndHashPinned()
+    {
+        var model = Assert.Single(ModelManagerService.ApprovedModels,
+            item => item.Id == "idealo-nima-mobilenet-aesthetic");
+
+        Assert.Contains("4b7be8b54cb0969cc5e826f8c17557211de84358", model.DownloadUrl, StringComparison.Ordinal);
+        Assert.Equal(12_842_033, model.ExpectedSizeBytes);
+        Assert.Equal(AestheticScoringService.ArtifactSha256, model.ExpectedSha256);
+        Assert.Contains("Apache", model.License, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
