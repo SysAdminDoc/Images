@@ -1,0 +1,17 @@
+Places365 ResNet-18 pretrained scene-classification model
+
+Model source: https://github.com/CSAILVision/places365
+Project page: http://places2.csail.mit.edu/
+Source revision: 8a953ed56438726dc98bdef3796d042e7f1f171e
+
+The upstream project states that pretrained Places-CNN models may be used under
+the Creative Commons Attribution license (CC BY) and requests appropriate credit.
+It does not state a CC BY version. This distribution preserves that attribution
+and does not relabel the weights as MIT.
+
+Please credit:
+Bolei Zhou, Agata Lapedriza, Aditya Khosla, Aude Oliva, and Antonio Torralba,
+"Places: A 10 million Image Database for Scene Recognition," IEEE TPAMI, 2017.
+https://doi.org/10.1109/TPAMI.2017.2723009
+
+The repository code license is preserved separately in CODE-LICENSE.txt.
