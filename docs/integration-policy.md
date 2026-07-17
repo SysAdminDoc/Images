@@ -47,6 +47,24 @@ This policy applies to:
 - Reject integrations that require silent network access.
 - Reject original-file writes until the workflow has confirmation, rollback, and regression coverage.
 
+## Integration Review: SkiaSharp WPF
+
+- Version: `SkiaSharp.Views.WPF` 4.150.1, with NuGet-resolved SkiaSharp/native and OpenTK dependencies pinned in `packages.lock.json`.
+- Source: [mono/SkiaSharp](https://github.com/mono/SkiaSharp); [official NuGet package](https://www.nuget.org/packages/SkiaSharp.Views.WPF/4.150.1).
+- Release artifact: the NuGet package graph from nuget.org, including `SkiaSharp.NativeAssets.Win32`; no separately downloaded binary.
+- License: MIT for SkiaSharp; transitive licenses remain subject to the release inventory/audit gate.
+- Redistribution permission: MIT permits bundling; published builds redistribute the lockfile-resolved Windows native assets inside the app package.
+- Source-use boundary: in-process package reference; no copied upstream source.
+- Update cadence: reviewed with dependency servicing and before release; upgrades are explicit package/lockfile changes.
+- CVE/advisory tracking: `dotnet list package --vulnerable --include-transitive` plus upstream GitHub/NuGet advisory review.
+- Binary provenance: nuget.org package hashes are pinned by the three solution lockfiles and validated by locked restore.
+- Process boundary: in-process software `SKElement`; the initial static-image slice does not activate the OpenGL WPF surface.
+- File access boundary: none; it receives a premultiplied pixel copy from the existing bounded decoder and does not open user files.
+- Network behavior: none at runtime.
+- Failure mode: allocation/conversion failure falls back to the existing WPF `Image` presenter without changing source or export data.
+- Test corpus: generated BGRA/PBGRA control fixtures, animation/tile fallback tests, then golden-render fixtures and the non-activating background smoke lane as migration slices land.
+- Release impact: adds SkiaSharp Windows native assets and WPF view dependencies; no installer, service, account, or startup-network requirement.
+
 ## Process Isolation Rules
 
 | Risk level | Examples | Required boundary |

@@ -22,6 +22,7 @@ public readonly record struct ZoomPanViewState(double Scale, double TranslateX, 
 public sealed class ZoomPanImage : ContentControl
 {
     private readonly Image _image = new() { Stretch = Stretch.Uniform };
+    private readonly SkiaBitmapPresenter _skiaImage = new() { IsHitTestVisible = false };
     private readonly Image _analysisOverlay = new()
     {
         Stretch = Stretch.Uniform,
@@ -302,6 +303,7 @@ public sealed class ZoomPanImage : ContentControl
         _root.ClipToBounds = true;
         _tileViewbox.Child = _tileCanvas;
         _visual.Children.Add(_transparencyGrid);
+        _visual.Children.Add(_skiaImage);
         _visual.Children.Add(_image);
         _visual.Children.Add(_tileViewbox);
         _visual.Children.Add(_analysisOverlay);
@@ -312,6 +314,7 @@ public sealed class ZoomPanImage : ContentControl
         Content = _root;
 
         _image.SizeChanged += (_, _) => UpdateTransparencyGrid();
+        _skiaImage.SizeChanged += (_, _) => UpdateTransparencyGrid();
 
         MouseWheel += OnWheel;
         MouseLeftButtonDown += OnDown;
@@ -370,7 +373,7 @@ public sealed class ZoomPanImage : ContentControl
     private void SetStaticDisplaySource(ImageSource? baseSource)
     {
         _staticBaseSource = baseSource;
-        _image.Source = InvertColors ? InvertIfPossible(baseSource) : baseSource;
+        SetStaticPresenterSource(InvertColors ? InvertIfPossible(baseSource) : baseSource);
     }
 
     // Re-applies the current base source through the (possibly toggled) inversion. A running
@@ -380,8 +383,36 @@ public sealed class ZoomPanImage : ContentControl
         if (Animation is { Frames.Count: >= 2 })
             return;
 
-        _image.Source = InvertColors ? InvertIfPossible(_staticBaseSource) : _staticBaseSource;
+        SetStaticPresenterSource(InvertColors ? InvertIfPossible(_staticBaseSource) : _staticBaseSource);
     }
+
+    private void SetStaticPresenterSource(ImageSource? source)
+    {
+        _image.Source = source;
+
+        try
+        {
+            var skiaReady = source is BitmapSource bitmap && _skiaImage.SetSource(bitmap);
+            SetStillPresenter(skiaReady);
+        }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or
+            NotSupportedException or DllNotFoundException or TypeInitializationException or OutOfMemoryException)
+        {
+            _skiaImage.SetSource(null);
+            SetStillPresenter(false);
+        }
+    }
+
+    private void SetStillPresenter(bool useSkia)
+    {
+        var canUseSkia = useSkia && TilePyramid is null && Animation is not { Frames.Count: >= 2 };
+        _skiaImage.Visibility = canUseSkia ? Visibility.Visible : Visibility.Hidden;
+        // Hidden preserves the Image's arranged box for the loupe/checkerboard/overlay contract.
+        _image.Visibility = canUseSkia ? Visibility.Hidden : Visibility.Visible;
+    }
+
+    internal bool IsSkiaStaticRendererActive =>
+        _skiaImage.HasBitmap && _skiaImage.Visibility == Visibility.Visible;
 
     private ImageSource? InvertIfPossible(ImageSource? source)
     {
@@ -409,6 +440,7 @@ public sealed class ZoomPanImage : ContentControl
         ClearTileImages();
         _renderedTileLevel = null;
         _tileViewbox.Visibility = pyramid is null ? Visibility.Collapsed : Visibility.Visible;
+        SetStillPresenter(_skiaImage.HasBitmap);
         if (pyramid is not null)
             QueueTileRefresh();
         UpdateTransparencyGrid();
@@ -434,6 +466,7 @@ public sealed class ZoomPanImage : ContentControl
             return;
         }
 
+        SetStillPresenter(false);
         _image.Source = seq.Frames[Math.Clamp(index, 0, seq.Frames.Count - 1)];
     }
 
@@ -1008,6 +1041,7 @@ public sealed class ZoomPanImage : ContentControl
 
     private void ApplyScalingMode(bool nearestNeighbor)
     {
+        _skiaImage.SetNearestNeighbor(nearestNeighbor);
         RenderOptions.SetBitmapScalingMode(
             _image,
             nearestNeighbor ? BitmapScalingMode.NearestNeighbor : BitmapScalingMode.HighQuality);

@@ -215,7 +215,8 @@ src/Images/
 │   ├── ThumbnailCache.cs       # Disposable WebP thumbnail cache for the folder preview strip
 │   └── RenameService.cs        # Debounced File.Move, conflict resolution, undo history
 ├── Controls/
-│   └── ZoomPanImage.cs         # Wheel-zoom + drag-pan image host
+│   ├── ZoomPanImage.cs         # Wheel-zoom + drag-pan image host and renderer routing
+│   └── SkiaBitmapPresenter.cs  # Software Skia surface for static BitmapSource presentation
 ├── Themes/
 │   ├── DarkTheme.xaml          # Catppuccin Mocha tokens + control styles
 │   └── HighContrastTheme.xaml  # SystemColors-backed high-contrast overrides

@@ -5,11 +5,70 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Images.Controls;
+using Images.Services;
 
 namespace Images.Tests;
 
 public sealed class ZoomPanImageTests
 {
+    [Fact]
+    public void StaticBitmap_UsesLiveSkiaPresenter()
+    {
+        RunOnSta(() =>
+        {
+            var control = new ZoomPanImage { Source = MakeBitmap() };
+            Arrange(control, 400, 300);
+
+            Assert.True(control.IsSkiaStaticRendererActive);
+        });
+    }
+
+    [Fact]
+    public void ClearingStaticBitmap_ClearsSkiaPresenter()
+    {
+        RunOnSta(() =>
+        {
+            var control = new ZoomPanImage { Source = MakeBitmap() };
+            control.Source = null;
+
+            Assert.False(control.IsSkiaStaticRendererActive);
+        });
+    }
+
+    [Fact]
+    public void Animation_UsesWpfFallbackAndRestoresSkiaForStillImage()
+    {
+        RunOnSta(() =>
+        {
+            var control = new ZoomPanImage { Source = MakeBitmap() };
+            control.Animation = new AnimationSequence(
+                [MakeBitmap(), MakeBitmap()],
+                [TimeSpan.FromMilliseconds(40), TimeSpan.FromMilliseconds(40)],
+                loopCount: 0);
+
+            Assert.False(control.IsSkiaStaticRendererActive);
+
+            control.Animation = null;
+            Assert.True(control.IsSkiaStaticRendererActive);
+        });
+    }
+
+    [Fact]
+    public void TilePyramid_UsesTileFallbackAndRestoresSkiaWhenCleared()
+    {
+        RunOnSta(() =>
+        {
+            var control = new ZoomPanImage { Source = MakeBitmap() };
+            control.TilePyramid = new TilePyramidInfo(
+                "source.png", "cache", 2048, 1024, 256, 1, 11, 64);
+
+            Assert.False(control.IsSkiaStaticRendererActive);
+
+            control.TilePyramid = null;
+            Assert.True(control.IsSkiaStaticRendererActive);
+        });
+    }
+
     [Fact]
     public void PreserveViewOnSourceChange_KeepsZoomAndCentersPanForNewImage()
     {
