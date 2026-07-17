@@ -4,6 +4,9 @@ All notable changes to **Images** are documented here.
 
 ## Unreleased
 
+## v0.2.29 - 2026-07-17
+
+- The folder catalog now indexes geo/time/camera EXIF (catalog schema v3): GPS latitude/longitude (decimal degrees, paired and range-validated), capture time (`DateTimeOriginal` + offset, normalized to UTC), camera make/model, lens, ISO, focal length, aperture, and shutter. Existing catalogs migrate in place — the new columns are nullable and backfill on the next rescan — and a new `CatalogService.FindWithinBounds` geo bounding-box query (antimeridian-aware) backs future map, trip, and near-duplicate features. Extraction reuses the details panel's GPS/ISO logic via the new `CatalogExifExtractor`.
 - Rewrote the privacy policy's stored-data table directly from the `LocalDataStoreRegistry` inventory (23 stores instead of a stale 8), listing each store's path, class, and clear-on-privacy-reset behavior, and corrected the analysis note to reflect that OCR and semantic search run only on explicit user action against locally imported models.
 
 ## v0.2.28 - 2026-07-16

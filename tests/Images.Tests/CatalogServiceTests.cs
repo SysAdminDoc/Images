@@ -201,8 +201,8 @@ public sealed class CatalogServiceTests
         var service = new CatalogService(dbPath);
 
         Assert.True(service.IsAvailable);
-        Assert.Equal(2, ReadInt(dbPath, "PRAGMA user_version;"));
-        Assert.Equal(2, ReadInt(dbPath, "SELECT schema_version FROM catalog_schema_canary WHERE id = 1;"));
+        Assert.Equal(3, ReadInt(dbPath, "PRAGMA user_version;"));
+        Assert.Equal(3, ReadInt(dbPath, "SELECT schema_version FROM catalog_schema_canary WHERE id = 1;"));
         var backupPath = dbPath + ".bak.v0-1";
         Assert.True(File.Exists(backupPath));
         Assert.Equal("kept-before-migration", ReadString(backupPath, "SELECT value FROM legacy_marker LIMIT 1;"));
@@ -243,6 +243,96 @@ public sealed class CatalogServiceTests
         Assert.False(service.IsAvailable);
         Assert.Equal(99, ReadInt(dbPath, "PRAGMA user_version;"));
         Assert.False(File.Exists(dbPath + ".bak.v99-100"));
+    }
+
+    [Fact]
+    public void Rebuild_IndexesGpsAndCameraExifIntoCatalog()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteImageWithExif(temp.Path, "geotagged.jpg");
+        var service = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+
+        var result = service.Rebuild([temp.Path]);
+
+        var asset = Assert.Single(result.Assets);
+        var exif = asset.ExifFacts;
+        Assert.True(exif.HasGeo);
+        Assert.Equal(48.8583, exif.Latitude!.Value, 2);
+        Assert.Equal(2.2945, exif.Longitude!.Value, 2);
+        Assert.Equal("TestCam", exif.CameraMake);
+        Assert.Equal(200, exif.Iso);
+        Assert.Equal(new DateTimeOffset(2021, 7, 15, 14, 30, 0, TimeSpan.Zero), exif.CapturedUtc!.Value);
+    }
+
+    [Fact]
+    public void GetByPath_RoundTripsPersistedExifFacts()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteImageWithExif(temp.Path, "geotagged.jpg");
+        var service = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+        service.Rebuild([temp.Path]);
+
+        var reloaded = service.GetByPath(source);
+
+        Assert.NotNull(reloaded);
+        Assert.True(reloaded.ExifFacts.HasGeo);
+        Assert.Equal(48.8583, reloaded.ExifFacts.Latitude!.Value, 2);
+        Assert.Equal("TestCam", reloaded.ExifFacts.CameraMake);
+    }
+
+    [Fact]
+    public void FindWithinBounds_ReturnsOnlyAssetsInsideBox()
+    {
+        using var temp = TestDirectory.Create();
+        WriteImageWithExif(temp.Path, "paris.jpg");        // 48.8583, 2.2945
+        WriteImage(temp.Path, "no-gps.png", 8, 8);          // no EXIF at all
+        var service = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+        service.Rebuild([temp.Path]);
+
+        var inside = service.FindWithinBounds(48.0, 49.0, 2.0, 3.0);
+        Assert.Single(inside);
+        Assert.EndsWith("paris.jpg", inside[0].SourcePath);
+
+        var outside = service.FindWithinBounds(-10.0, 10.0, -10.0, 10.0);
+        Assert.Empty(outside);
+    }
+
+    [Fact]
+    public void FindWithinBounds_AntimeridianBoxWrapsLongitude()
+    {
+        using var temp = TestDirectory.Create();
+        WriteImageWithExif(temp.Path, "paris.jpg");        // lon 2.29, should be excluded
+        var service = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+        service.Rebuild([temp.Path]);
+
+        // Box crossing the antimeridian: lon >= 170 OR lon <= -170. Paris (2.29) is not in it.
+        var wrapped = service.FindWithinBounds(40.0, 50.0, 170.0, -170.0);
+        Assert.Empty(wrapped);
+    }
+
+    private static string WriteImageWithExif(string folder, string name)
+    {
+        var path = Path.Combine(folder, name);
+        using var image = new MagickImage(MagickColors.Blue, 16, 12)
+        {
+            Format = MagickFormat.Jpeg
+        };
+
+        var exif = new ExifProfile();
+        // Eiffel Tower: 48°51'30"N, 2°17'40"E
+        exif.SetValue(ExifTag.GPSLatitude, [new Rational(48, 1), new Rational(51, 1), new Rational(30, 1)]);
+        exif.SetValue(ExifTag.GPSLatitudeRef, "N");
+        exif.SetValue(ExifTag.GPSLongitude, [new Rational(2, 1), new Rational(17, 1), new Rational(40, 1)]);
+        exif.SetValue(ExifTag.GPSLongitudeRef, "E");
+        exif.SetValue(ExifTag.Make, "TestCam");
+        exif.SetValue(ExifTag.Model, "Model-X");
+        exif.SetValue(ExifTag.ISOSpeedRatings, new ushort[] { 200 });
+        exif.SetValue(ExifTag.DateTimeOriginal, "2021:07:15 14:30:00");
+        exif.SetValue(ExifTag.OffsetTimeOriginal, "+00:00");
+        image.SetProfile(exif);
+
+        image.Write(path);
+        return path;
     }
 
     private static string WriteImage(string folder, string name, uint width, uint height)

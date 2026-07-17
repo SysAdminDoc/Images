@@ -188,6 +188,14 @@ agent. Move an item back to `ROADMAP.md` only when its blocker is cleared.
 
 ## Blocked On V40-01 SQLite Catalog
 
+> Data-layer note (catalog schema v3, 2026-07-17): the catalog is built and stable, and now
+> indexes rating, tags, palette, file timestamps, **GPS latitude/longitude, capture time, and
+> camera/lens/ISO/focal/aperture/shutter EXIF**, with a `FindWithinBounds` geo query. The remaining
+> blocker for the geo/time-dependent items below is therefore the **GUI surface** (and, where noted,
+> a still-missing model): near-duplicate stacking additionally needs a perceptual-hash proximity
+> model (the indexed fingerprint is an exact-match SHA-256, not perceptual); smart collections'
+> face-count criterion still needs V60 face detection; auto-albums still need content classification.
+
 - [ ] **V40-13** *P1* — **Category Sets** — saveable tag-panel layouts, swap per job type (XnView). Effort: M.
   - **Blocked by**: V40-01 SQLite catalog — category sets need catalog-backed tag persistence.
   - **Unblock when**: V40-01 catalog schema is stable and tag storage is operational.

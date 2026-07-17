@@ -24,11 +24,15 @@ public sealed record CatalogAssetRecord(
     string? SidecarPath,
     DateTimeOffset? SidecarModifiedUtc,
     DateTimeOffset ScannedUtc,
-    string? Palette = null)
+    string? Palette = null,
+    CatalogExifFacts? Exif = null)
 {
     public string FileName => Path.GetFileName(SourcePath);
     public string Folder => Path.GetDirectoryName(SourcePath) ?? "";
     public string DimensionsText => Width > 0 && Height > 0 ? $"{Width} x {Height}" : "Unknown";
+
+    /// <summary>Geo/time/camera EXIF facts, never null in practice (defaults to Empty).</summary>
+    public CatalogExifFacts ExifFacts => Exif ?? CatalogExifFacts.Empty;
 }
 
 public sealed record CatalogRebuildResult(
@@ -46,7 +50,7 @@ public sealed record CatalogRebuildResult(
 
 public sealed class CatalogService
 {
-    private const int CurrentSchemaVersion = 2;
+    private const int CurrentSchemaVersion = 3;
     private const int SchemaCanaryId = 1;
     private static readonly ILogger Log = Images.Services.Log.Get(nameof(CatalogService));
     private readonly string? _dbPath;
@@ -291,7 +295,8 @@ public sealed class CatalogService
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
                 SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
-                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette
+                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette,
+                       gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds
                 FROM catalog_assets
                 WHERE source_path = $path
                 LIMIT 1;
@@ -323,7 +328,8 @@ public sealed class CatalogService
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
                 SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
-                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette
+                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette,
+                       gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds
                 FROM catalog_assets
                 ORDER BY source_path COLLATE NOCASE
                 LIMIT $limit;
@@ -336,6 +342,59 @@ public sealed class CatalogService
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or InvalidOperationException or NotSupportedException or SqliteException)
         {
             Log.LogWarning(ex, "Could not read catalog assets");
+        }
+
+        return assets;
+    }
+
+    /// <summary>
+    /// Returns catalogued assets whose GPS coordinates fall inside the bounding box, ordered by
+    /// capture time (undated last). The primitive geo query behind trip detection, near-duplicate
+    /// stacking, and geo-bounded smart collections. When <paramref name="minLongitude"/> is greater
+    /// than <paramref name="maxLongitude"/> the box is treated as crossing the antimeridian.
+    /// </summary>
+    public IReadOnlyList<CatalogAssetRecord> FindWithinBounds(
+        double minLatitude,
+        double maxLatitude,
+        double minLongitude,
+        double maxLongitude,
+        int limit = 1000)
+    {
+        var assets = new List<CatalogAssetRecord>();
+        if (!_isAvailable || limit <= 0)
+            return assets;
+
+        limit = Math.Min(limit, 50_000);
+        var lonClause = minLongitude <= maxLongitude
+            ? "gps_lon BETWEEN $minLon AND $maxLon"
+            : "(gps_lon >= $minLon OR gps_lon <= $maxLon)";
+        try
+        {
+            using var conn = Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = $"""
+                SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
+                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette,
+                       gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds
+                FROM catalog_assets
+                WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL
+                  AND gps_lat BETWEEN $minLat AND $maxLat
+                  AND {lonClause}
+                ORDER BY captured_utc IS NULL, captured_utc, source_path COLLATE NOCASE
+                LIMIT $limit;
+                """;
+            cmd.Parameters.AddWithValue("$minLat", minLatitude);
+            cmd.Parameters.AddWithValue("$maxLat", maxLatitude);
+            cmd.Parameters.AddWithValue("$minLon", minLongitude);
+            cmd.Parameters.AddWithValue("$maxLon", maxLongitude);
+            cmd.Parameters.AddWithValue("$limit", limit);
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+                assets.Add(ReadAsset(conn, reader));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or InvalidOperationException or NotSupportedException or SqliteException)
+        {
+            Log.LogWarning(ex, "Could not query catalog assets by bounds");
         }
 
         return assets;
@@ -450,6 +509,12 @@ public sealed class CatalogService
             return;
         }
 
+        if (fromVersion == 2 && toVersion == 3)
+        {
+            Migrate_2_to_3(conn, tx);
+            return;
+        }
+
         throw new InvalidOperationException($"No catalog migration exists for v{fromVersion} to v{toVersion}.");
     }
 
@@ -458,6 +523,27 @@ public sealed class CatalogService
         using var cmd = conn.CreateCommand();
         cmd.Transaction = tx;
         cmd.CommandText = "ALTER TABLE catalog_assets ADD COLUMN palette TEXT NULL;";
+        cmd.ExecuteNonQuery();
+    }
+
+    private static void Migrate_2_to_3(SqliteConnection conn, SqliteTransaction tx)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            ALTER TABLE catalog_assets ADD COLUMN gps_lat REAL NULL;
+            ALTER TABLE catalog_assets ADD COLUMN gps_lon REAL NULL;
+            ALTER TABLE catalog_assets ADD COLUMN captured_utc INTEGER NULL;
+            ALTER TABLE catalog_assets ADD COLUMN camera_make TEXT NULL;
+            ALTER TABLE catalog_assets ADD COLUMN camera_model TEXT NULL;
+            ALTER TABLE catalog_assets ADD COLUMN lens_model TEXT NULL;
+            ALTER TABLE catalog_assets ADD COLUMN iso INTEGER NULL;
+            ALTER TABLE catalog_assets ADD COLUMN focal_length REAL NULL;
+            ALTER TABLE catalog_assets ADD COLUMN f_number REAL NULL;
+            ALTER TABLE catalog_assets ADD COLUMN exposure_seconds REAL NULL;
+            CREATE INDEX IF NOT EXISTS ix_catalog_assets_captured ON catalog_assets(captured_utc);
+            CREATE INDEX IF NOT EXISTS ix_catalog_assets_geo ON catalog_assets(gps_lat, gps_lon);
+            """;
         cmd.ExecuteNonQuery();
     }
 
@@ -662,6 +748,7 @@ public sealed class CatalogService
         var sidecar = ReadSidecarState(info.FullName);
 
         var palette = TryExtractPalette(info.FullName);
+        var exif = CatalogExifExtractor.Extract(image);
 
         return new CatalogAssetRecord(
             info.FullName,
@@ -678,7 +765,8 @@ public sealed class CatalogService
             sidecar.Path,
             sidecar.ModifiedUtc,
             scannedUtc,
-            palette);
+            palette,
+            exif);
     }
 
     private static string? TryExtractPalette(string path)
@@ -825,11 +913,13 @@ public sealed class CatalogService
         cmd.CommandText = """
             INSERT INTO catalog_assets (
                 source_path, fingerprint, size_bytes, created_utc, modified_utc,
-                width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette
+                width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette,
+                gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds
             )
             VALUES (
                 $path, $fingerprint, $size, $created, $modified,
-                $width, $height, $format, $codec, $rating, $sidecar, $sidecarModified, $scanned, $palette
+                $width, $height, $format, $codec, $rating, $sidecar, $sidecarModified, $scanned, $palette,
+                $gpsLat, $gpsLon, $captured, $cameraMake, $cameraModel, $lensModel, $iso, $focalLength, $fNumber, $exposureSeconds
             )
             ON CONFLICT(source_path) DO UPDATE SET
                 fingerprint = excluded.fingerprint,
@@ -844,7 +934,17 @@ public sealed class CatalogService
                 sidecar_path = excluded.sidecar_path,
                 sidecar_modified_utc = excluded.sidecar_modified_utc,
                 scanned_utc = excluded.scanned_utc,
-                palette = excluded.palette;
+                palette = excluded.palette,
+                gps_lat = excluded.gps_lat,
+                gps_lon = excluded.gps_lon,
+                captured_utc = excluded.captured_utc,
+                camera_make = excluded.camera_make,
+                camera_model = excluded.camera_model,
+                lens_model = excluded.lens_model,
+                iso = excluded.iso,
+                focal_length = excluded.focal_length,
+                f_number = excluded.f_number,
+                exposure_seconds = excluded.exposure_seconds;
             """;
         AddAssetParameters(cmd, asset);
         cmd.ExecuteNonQuery();
@@ -913,6 +1013,18 @@ public sealed class CatalogService
         cmd.Parameters.AddWithValue("$sidecarModified", asset.SidecarModifiedUtc is null ? DBNull.Value : asset.SidecarModifiedUtc.Value.ToUnixTimeSeconds());
         cmd.Parameters.AddWithValue("$scanned", asset.ScannedUtc.ToUnixTimeSeconds());
         cmd.Parameters.AddWithValue("$palette", asset.Palette is null ? DBNull.Value : asset.Palette);
+
+        var exif = asset.ExifFacts;
+        cmd.Parameters.AddWithValue("$gpsLat", exif.Latitude is null ? DBNull.Value : exif.Latitude.Value);
+        cmd.Parameters.AddWithValue("$gpsLon", exif.Longitude is null ? DBNull.Value : exif.Longitude.Value);
+        cmd.Parameters.AddWithValue("$captured", exif.CapturedUtc is null ? DBNull.Value : exif.CapturedUtc.Value.ToUnixTimeSeconds());
+        cmd.Parameters.AddWithValue("$cameraMake", exif.CameraMake is null ? DBNull.Value : exif.CameraMake);
+        cmd.Parameters.AddWithValue("$cameraModel", exif.CameraModel is null ? DBNull.Value : exif.CameraModel);
+        cmd.Parameters.AddWithValue("$lensModel", exif.LensModel is null ? DBNull.Value : exif.LensModel);
+        cmd.Parameters.AddWithValue("$iso", exif.Iso is null ? DBNull.Value : exif.Iso.Value);
+        cmd.Parameters.AddWithValue("$focalLength", exif.FocalLengthMm is null ? DBNull.Value : exif.FocalLengthMm.Value);
+        cmd.Parameters.AddWithValue("$fNumber", exif.FNumber is null ? DBNull.Value : exif.FNumber.Value);
+        cmd.Parameters.AddWithValue("$exposureSeconds", exif.ExposureSeconds is null ? DBNull.Value : exif.ExposureSeconds.Value);
     }
 
     private static CatalogAssetRecord ReadAsset(SqliteConnection conn, SqliteDataReader reader)
@@ -933,7 +1045,27 @@ public sealed class CatalogService
             reader.IsDBNull(11) ? null : reader.GetString(11),
             reader.IsDBNull(12) ? null : FromUnix(reader.GetInt64(12)),
             FromUnix(reader.GetInt64(13)),
-            reader.FieldCount > 14 && !reader.IsDBNull(14) ? reader.GetString(14) : null);
+            reader.FieldCount > 14 && !reader.IsDBNull(14) ? reader.GetString(14) : null,
+            ReadExifFacts(reader));
+    }
+
+    private static CatalogExifFacts ReadExifFacts(SqliteDataReader reader)
+    {
+        // Defensive against readers selecting the pre-v3 column set (palette was the last column).
+        if (reader.FieldCount <= 24)
+            return CatalogExifFacts.Empty;
+
+        return new CatalogExifFacts(
+            reader.IsDBNull(15) ? null : reader.GetDouble(15),
+            reader.IsDBNull(16) ? null : reader.GetDouble(16),
+            reader.IsDBNull(17) ? null : FromUnix(reader.GetInt64(17)),
+            reader.IsDBNull(18) ? null : reader.GetString(18),
+            reader.IsDBNull(19) ? null : reader.GetString(19),
+            reader.IsDBNull(20) ? null : reader.GetString(20),
+            reader.IsDBNull(21) ? null : reader.GetInt32(21),
+            reader.IsDBNull(22) ? null : reader.GetDouble(22),
+            reader.IsDBNull(23) ? null : reader.GetDouble(23),
+            reader.IsDBNull(24) ? null : reader.GetDouble(24));
     }
 
     private static IReadOnlyList<string> ReadTags(SqliteConnection conn, long assetId)
@@ -1103,7 +1235,8 @@ public sealed class CatalogService
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
                 SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
-                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette
+                       width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette,
+                       gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds
                 FROM catalog_assets
                 ORDER BY source_path COLLATE NOCASE;
                 """;
@@ -1140,7 +1273,8 @@ public sealed class CatalogService
             SidecarPath: reader.IsDBNull(11) ? null : reader.GetString(11),
             SidecarModifiedUtc: reader.IsDBNull(12) ? null : FromUnix(reader.GetInt64(12)),
             ScannedUtc: FromUnix(reader.GetInt64(13)),
-            Palette: reader.FieldCount > 14 && !reader.IsDBNull(14) ? reader.GetString(14) : null);
+            Palette: reader.FieldCount > 14 && !reader.IsDBNull(14) ? reader.GetString(14) : null,
+            Exif: ReadExifFacts(reader));
     }
 
     private static IReadOnlyList<string> LoadTagsForAsset(SqliteConnection conn, long assetId)
