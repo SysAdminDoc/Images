@@ -65,7 +65,9 @@ public sealed class WpfSmokeTests : IDisposable
 
         _automation = new UIA3Automation();
         _app = Application.Launch(startInfo);
-        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+        // Cold WPF/native-runtime startup can exceed ten seconds on a loaded CI host.
+        // Keep polling offscreen rather than turning a scheduling delay into a false failure.
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(30);
         Window? mainWindow = null;
         while (mainWindow is null && DateTime.UtcNow < deadline)
         {
