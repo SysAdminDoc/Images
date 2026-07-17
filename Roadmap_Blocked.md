@@ -115,10 +115,6 @@ Permanent owner policy: D-05/D-05a and signing-dependent C2PA write/export work 
   - **Blocked by**: no contact-sheet UI exists in the main app, so the service currently has no caller to wire theme colors through.
   - **Unblock when**: a contact-sheet UI/command is added; wire Catppuccin palette colors through at that time.
 
-- [ ] **S-06** *P1* — **WIC JPEG re-encode gate**. On pre-patch `windowscodecs.dll` (< 10.0.26100.4946), thumbnails skip the 12-bit / 16-bit re-encode path that triggers CVE-2025-50165. Toast "Windows update recommended" once. Effort: M. [ESET CVE-2025-50165]
-  - **Blocked by**: Windows version detection research — needs reliable `windowscodecs.dll` version probing.
-  - **Unblock when**: version-detection approach validated and tested.
-
 - [ ] **I-03** *P2* — **RTL audit pass**. `FlowDirection="RightToLeft"` at window root mirrors layout, but `Canvas`, `Image`, custom `DrawingVisual`, negative-`X` `ScaleTransform`, and `DataGrid` column order need manual mirroring. Arabic + Hebrew test fixtures. Effort: L. [MS Learn localization-overview]
   - **Blocked by**: locale infrastructure maturity — I-01 string extraction + I-02 Crowdin should be stable first.
   - **Unblock when**: I-01 fully complete and at least one RTL locale has translators.

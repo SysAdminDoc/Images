@@ -4022,6 +4022,9 @@ Details written to:
   <data name="MainToastJxlNeedsUpdate" xml:space="preserve">
     <value>[!!!!!!!!!! JPEG XL needs Windows 11 24H2 or later !!!!!!!!!!]</value>
   </data>
+  <data name="MainToastWicJpegUpdateRecommended" xml:space="preserve">
+    <value>[!!!!!!!!!!!! Windows update recommended; JPEG opened with the safer fallback !!!!!!!!!!!!]</value>
+  </data>
   <data name="MainToastFilenameInvalid" xml:space="preserve">
     <value>[!!!!!!!!!!! Filename needs at least one valid character !!!!!!!!!!!]</value>
   </data>

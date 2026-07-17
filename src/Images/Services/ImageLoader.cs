@@ -34,7 +34,8 @@ public static class ImageLoader
         TilePyramidInfo? TilePyramid = null,
         FormatMismatchInfo? FormatMismatch = null,
         MotionPhotoInfo? MotionPhoto = null,
-        bool IsPreview = false);
+        bool IsPreview = false,
+        bool WicJpegSecurityFallback = false);
 
     // Extensions worth probing for animated content. Pure-photo formats (JPEG, RAW, etc.) skip the
     // MagickImageCollection path so we don't pay for a second decoder on every single-frame image.
@@ -161,7 +162,11 @@ public static class ImageLoader
         return info is null ? result : result with { MotionPhoto = info };
     }
 
-    private static LoadResult LoadRasterBytes(byte[] bytes, string displayName, string extension)
+    internal static LoadResult LoadRasterBytes(
+        byte[] bytes,
+        string displayName,
+        string extension,
+        WicJpegSecurityStatus? wicSecurityStatus = null)
     {
         // Animation probe first — only for formats that actually support it. If the file is a
         // multi-frame GIF / animated WebP / APNG, return the full sequence so the canvas can play it.
@@ -188,42 +193,49 @@ public static class ImageLoader
         var evtSrc = ImageEventSource.Instance;
         evtSrc.RecordDecodeAttempt();
         var sw = Stopwatch.StartNew();
-        evtSrc.DecodeStarted(displayName, "WIC");
+        var bypassWicJpeg = WicJpegSecurityPolicy.ShouldBypassWic(extension, wicSecurityStatus);
+        if (!bypassWicJpeg)
+            evtSrc.DecodeStarted(displayName, "WIC");
 
         // Primary: WIC via BitmapImage. CacheOption.OnLoad fully reads the stream during EndInit,
         // so the MemoryStream can be disposed immediately after.
-        try
+        if (!bypassWicJpeg)
         {
-            using var ms = new MemoryStream(bytes, writable: false);
-            var bmp = new BitmapImage();
-            bmp.BeginInit();
-            bmp.CacheOption = BitmapCacheOption.OnLoad;
-            bmp.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
-            bmp.StreamSource = ms;
-            bmp.EndInit();
-            bmp.Freeze();
+            try
+            {
+                using var ms = new MemoryStream(bytes, writable: false);
+                var bmp = new BitmapImage();
+                bmp.BeginInit();
+                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+                bmp.StreamSource = ms;
+                bmp.EndInit();
+                bmp.Freeze();
 
-            sw.Stop();
-            evtSrc.RecordWicDecode();
-            evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
-            evtSrc.DecodeCompleted(displayName, "WIC", (long)sw.Elapsed.TotalMilliseconds);
-            return new LoadResult(bmp, bmp.PixelWidth, bmp.PixelHeight, "WIC");
-        }
-        // Narrow: only fall through for decode/format failures. Let OOM, stack overflow,
-        // and thread aborts bubble up — those aren't "try the other decoder" situations.
-        catch (Exception ex) when (
-            ex is NotSupportedException or
-                  System.Runtime.InteropServices.COMException or
-                  FileFormatException or
-                  InvalidOperationException or
-                  ArgumentException)
-        {
-            // Fall through to Magick.NET
+                sw.Stop();
+                evtSrc.RecordWicDecode();
+                evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
+                evtSrc.DecodeCompleted(displayName, "WIC", (long)sw.Elapsed.TotalMilliseconds);
+                return new LoadResult(bmp, bmp.PixelWidth, bmp.PixelHeight, "WIC");
+            }
+            // Narrow: only fall through for decode/format failures. Let OOM, stack overflow,
+            // and thread aborts bubble up — those aren't "try the other decoder" situations.
+            catch (Exception ex) when (
+                ex is NotSupportedException or
+                      System.Runtime.InteropServices.COMException or
+                      FileFormatException or
+                      InvalidOperationException or
+                      ArgumentException)
+            {
+                // Fall through to Magick.NET
+            }
         }
 
         // Fallback: Magick.NET decodes to BGRA bytes → WriteableBitmap.
         sw.Restart();
-        evtSrc.DecodeStarted(displayName, "Magick.NET");
+        evtSrc.DecodeStarted(
+            displayName,
+            bypassWicJpeg ? "Magick.NET (WIC JPEG security fallback)" : "Magick.NET");
         try
         {
             using var image = MagickSafeReader.Read(bytes, extension);
@@ -234,8 +246,15 @@ public static class ImageLoader
             evtSrc.RecordMagickFallbackDecode();
             evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
             var decoder = WithToneMapStatus("Magick.NET", toneMapped);
+            if (bypassWicJpeg)
+                decoder += " · WIC JPEG disabled; Windows update recommended";
             evtSrc.DecodeCompleted(displayName, decoder, (long)sw.Elapsed.TotalMilliseconds);
-            return new LoadResult(wb, wb.PixelWidth, wb.PixelHeight, decoder);
+            return new LoadResult(
+                wb,
+                wb.PixelWidth,
+                wb.PixelHeight,
+                decoder,
+                WicJpegSecurityFallback: bypassWicJpeg);
         }
         catch (Exception ex)
         {
@@ -610,13 +629,15 @@ public static class ImageLoader
         var displayName = Path.GetFileName(path);
         evtSrc.RecordDecodeAttempt();
         var sw = Stopwatch.StartNew();
-        evtSrc.DecodeStarted(displayName, "WIC (memory-mapped)");
+        var bypassWicJpeg = WicJpegSecurityPolicy.ShouldBypassWic(path);
+        if (!bypassWicJpeg)
+            evtSrc.DecodeStarted(displayName, "WIC (memory-mapped)");
 
         try
         {
             // Primary: WIC via BitmapImage. HDR candidates skip WIC because its SDR surface can
             // quantize extended samples before the HDRI tonemap sees them.
-            if (!ToneMapService.IsCandidateExtension(Path.GetExtension(path)))
+            if (!bypassWicJpeg && !ToneMapService.IsCandidateExtension(Path.GetExtension(path)))
             {
                 try
                 {
@@ -648,7 +669,11 @@ public static class ImageLoader
 
             // Fallback: Magick.NET reads the mapping directly.
             sw.Restart();
-            evtSrc.DecodeStarted(displayName, "Magick.NET (memory-mapped)");
+            evtSrc.DecodeStarted(
+                displayName,
+                bypassWicJpeg
+                    ? "Magick.NET (memory-mapped WIC JPEG security fallback)"
+                    : "Magick.NET (memory-mapped)");
             try
             {
                 using var view = mmf.CreateViewStream(0, 0, MemoryMappedFileAccess.Read);
@@ -660,8 +685,15 @@ public static class ImageLoader
                 evtSrc.RecordMagickFallbackDecode();
                 evtSrc.RecordDecodeDuration(sw.Elapsed.TotalMilliseconds);
                 var decoder = WithToneMapStatus("Magick.NET (memory-mapped)", toneMapped);
+                if (bypassWicJpeg)
+                    decoder += " · WIC JPEG disabled; Windows update recommended";
                 evtSrc.DecodeCompleted(displayName, decoder, (long)sw.Elapsed.TotalMilliseconds);
-                return new LoadResult(wb, wb.PixelWidth, wb.PixelHeight, decoder);
+                return new LoadResult(
+                    wb,
+                    wb.PixelWidth,
+                    wb.PixelHeight,
+                    decoder,
+                    WicJpegSecurityFallback: bypassWicJpeg);
             }
             catch (Exception ex)
             {
@@ -898,6 +930,12 @@ public static class ImageLoader
     {
         try
         {
+            if (WicJpegSecurityPolicy.ShouldBypassWic(path))
+            {
+                using var image = MagickSafeReader.Ping(path);
+                return (checked((int)image.Width), checked((int)image.Height));
+            }
+
             using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
             var frame = BitmapFrame.Create(fs, BitmapCreateOptions.DelayCreation, BitmapCacheOption.OnLoad);
             return (frame.PixelWidth, frame.PixelHeight);
@@ -927,6 +965,9 @@ public static class ImageLoader
 
     private static BitmapSource? TryLoadWicPreview(string path, int maxPixelDimension)
     {
+        if (WicJpegSecurityPolicy.ShouldBypassWic(path))
+            return null;
+
         try
         {
             int width;

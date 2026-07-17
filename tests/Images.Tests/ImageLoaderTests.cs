@@ -66,6 +66,33 @@ public sealed class ImageLoaderTests
     }
 
     [Fact]
+    public void LoadRasterBytes_PrePatchWicJpeg_UsesMagickSecurityFallback()
+    {
+        using var image = new MagickImage(MagickColors.Coral, 8, 6) { Format = MagickFormat.Jpeg };
+        var bytes = image.ToByteArray();
+        var prePatch = WicJpegSecurityPolicy.Evaluate(new Version(10, 0, 26100, 4945));
+
+        var result = ImageLoader.LoadRasterBytes(bytes, "fixture.jpg", ".jpg", prePatch);
+
+        Assert.True(result.WicJpegSecurityFallback);
+        Assert.Contains("Magick.NET", result.DecoderUsed, StringComparison.Ordinal);
+        Assert.Contains("Windows update recommended", result.DecoderUsed, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void LoadRasterBytes_PatchedWicJpeg_KeepsNativeDecode()
+    {
+        using var image = new MagickImage(MagickColors.Coral, 8, 6) { Format = MagickFormat.Jpeg };
+        var bytes = image.ToByteArray();
+        var patched = WicJpegSecurityPolicy.Evaluate(new Version(10, 0, 26100, 4946));
+
+        var result = ImageLoader.LoadRasterBytes(bytes, "fixture.jpg", ".jpg", patched);
+
+        Assert.False(result.WicJpegSecurityFallback);
+        Assert.Equal("WIC", result.DecoderUsed);
+    }
+
+    [Fact]
     public void Load_SixteenBitTiff_ReportsTonemappedDecode()
     {
         using var temp = TestDirectory.Create();

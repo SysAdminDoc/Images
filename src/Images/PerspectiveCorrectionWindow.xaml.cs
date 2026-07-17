@@ -47,19 +47,22 @@ public partial class PerspectiveCorrectionWindow : Window
 
         try
         {
-            var bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.UriSource = new Uri(_imagePath, UriKind.Absolute);
-            bitmap.EndInit();
-            bitmap.Freeze();
+            var bitmap = ImageLoader.LoadPreviewImage(_imagePath, int.MaxValue) as BitmapSource
+                ?? throw new InvalidOperationException("The perspective preview did not produce a bitmap.");
 
             _imageWidth = bitmap.PixelWidth;
             _imageHeight = bitmap.PixelHeight;
             PreviewImage.Source = bitmap;
             ResizePreviewImage();
         }
-        catch (Exception ex) when (ex is NotSupportedException or FileFormatException or InvalidOperationException or IOException or UriFormatException)
+        catch (Exception ex) when (
+            ex is NotSupportedException or
+                  FileFormatException or
+                  InvalidOperationException or
+                  IOException or
+                  UnauthorizedAccessException or
+                  ArgumentException or
+                  ImageMagick.MagickException)
         {
             // WIC can reject files the viewer decoded via the Magick fallback,
             // or the file may be gone/locked since the command was invoked.
