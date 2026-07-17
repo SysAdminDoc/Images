@@ -360,6 +360,22 @@ public sealed class CatalogServiceTests
     }
 
     [Fact]
+    public void GetTimelineAssets_AppliesNewestFirstLimitInSql()
+    {
+        using var temp = TestDirectory.Create();
+        WriteImage(temp.Path, "older.png", 8, 8);
+        var newer = WriteImage(temp.Path, "newer.png", 8, 8);
+        var dbPath = Path.Combine(temp.Path, "catalog.db");
+        var service = new CatalogService(dbPath);
+        service.Rebuild([temp.Path]);
+        ExecuteSql(dbPath, "UPDATE catalog_assets SET modified_utc = CASE WHEN source_path LIKE '%older.png' THEN 1 ELSE 2 END;");
+
+        var assets = service.GetTimelineAssets(limit: 1);
+
+        Assert.Equal(newer, Assert.Single(assets).SourcePath);
+    }
+
+    [Fact]
     public void FindWithinBounds_ReturnsOnlyAssetsInsideBox()
     {
         using var temp = TestDirectory.Create();

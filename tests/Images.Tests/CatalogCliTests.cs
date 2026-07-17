@@ -89,6 +89,23 @@ public sealed class CatalogCliTests
     }
 
     [Fact]
+    public void TryParse_Events_AcceptsDefaultOrValidatedGap()
+    {
+        Assert.True(CatalogCli.TryParse(["--catalog-events"], out var defaults, out var error));
+        Assert.Null(error);
+        Assert.Equal(CatalogCliMode.Events, defaults!.Mode);
+        Assert.Equal(6, defaults.MaxEventGapHours);
+
+        Assert.True(CatalogCli.TryParse(["--catalog-events", "12.5"], out var custom, out error));
+        Assert.Null(error);
+        Assert.Equal(12.5, custom!.MaxEventGapHours);
+
+        Assert.True(CatalogCli.TryParse(["--catalog-events", "745"], out var invalid, out error));
+        Assert.Null(invalid);
+        Assert.Contains("Usage:", error);
+    }
+
+    [Fact]
     public void Execute_Search_PrintsOneMatchingPathPerLine()
     {
         using var temp = TestDirectory.Create();
@@ -179,6 +196,32 @@ public sealed class CatalogCliTests
         Assert.Equal(away, document.RootElement.GetProperty("cover").GetString());
         Assert.Equal(away, Assert.Single(document.RootElement.GetProperty("assets").EnumerateArray()).GetString());
         Assert.Contains("Found 1 catalog trips.", error.ToString());
+    }
+
+    [Fact]
+    public void Execute_Events_PrintsCatalogBackedJsonObjectWithKeyPhoto()
+    {
+        using var temp = TestDirectory.Create();
+        var first = WriteImage(temp.Path, "first.png", MagickColors.Red);
+        var second = WriteImage(temp.Path, "second.png", MagickColors.Blue);
+        var catalog = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+        catalog.Rebuild([temp.Path]);
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+
+        var exitCode = CatalogCli.Execute(
+            new CatalogCliRequest(CatalogCliMode.Events),
+            output,
+            error,
+            catalog);
+
+        Assert.Equal(0, exitCode);
+        using var document = JsonDocument.Parse(output.ToString().Trim());
+        Assert.Contains(document.RootElement.GetProperty("keyPhoto").GetString(), new[] { first, second });
+        var assets = document.RootElement.GetProperty("assets").EnumerateArray().Select(item => item.GetString()).ToArray();
+        Assert.Contains(first, assets);
+        Assert.Contains(second, assets);
+        Assert.Contains("Found 1 catalog events.", error.ToString());
     }
 
     private static string WriteImage(string folder, string name)

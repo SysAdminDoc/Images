@@ -14,6 +14,7 @@ public enum CatalogCliMode
     Rescan,
     Stacks,
     Trips,
+    Events,
 }
 
 public sealed record CatalogCliRequest(
@@ -29,7 +30,8 @@ public sealed record CatalogCliRequest(
     double HomeLatitude = 0,
     double HomeLongitude = 0,
     double MinTripDistanceKm = 50,
-    int MaxTripGapDays = 1);
+    int MaxTripGapDays = 1,
+    double MaxEventGapHours = 6);
 
 /// <summary>
 /// Scriptable, window-free consumer for the rebuildable catalog. Search commands write one source
@@ -47,7 +49,8 @@ public static class CatalogCli
          string.Equals(args[0], "--catalog-root-list", StringComparison.OrdinalIgnoreCase) ||
          string.Equals(args[0], "--catalog-rescan", StringComparison.OrdinalIgnoreCase) ||
          string.Equals(args[0], "--catalog-stacks", StringComparison.OrdinalIgnoreCase) ||
-         string.Equals(args[0], "--catalog-trips", StringComparison.OrdinalIgnoreCase));
+         string.Equals(args[0], "--catalog-trips", StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(args[0], "--catalog-events", StringComparison.OrdinalIgnoreCase));
 
     public static bool TryParse(
         string[] args,
@@ -149,6 +152,25 @@ public static class CatalogCli
                 HomeLongitude: homeLongitude,
                 MinTripDistanceKm: distanceKm,
                 MaxTripGapDays: gapDays);
+            return true;
+        }
+
+        if (string.Equals(args[0], "--catalog-events", StringComparison.OrdinalIgnoreCase))
+        {
+            if (args.Length == 1)
+            {
+                request = new CatalogCliRequest(CatalogCliMode.Events);
+                return true;
+            }
+
+            if (args.Length != 2 ||
+                !TryParseFiniteDouble(args[1], out var gapHours) || gapHours is < 0 or > 744)
+            {
+                error = "Usage: Images.exe --catalog-events [<maxGapHours>]";
+                return true;
+            }
+
+            request = new CatalogCliRequest(CatalogCliMode.Events, MaxEventGapHours: gapHours);
             return true;
         }
 
@@ -299,6 +321,29 @@ public static class CatalogCli
             }
 
             error.WriteLine($"Found {trips.Count.ToString(CultureInfo.InvariantCulture)} catalog trips.");
+            return 0;
+        }
+
+        if (request.Mode == CatalogCliMode.Events)
+        {
+            var events = new CatalogEventService().Build(
+                catalog.GetTimelineAssets(50_000),
+                TimeSpan.FromHours(request.MaxEventGapHours),
+                limit);
+            foreach (var item in events)
+            {
+                output.WriteLine(JsonSerializer.Serialize(new
+                {
+                    eventId = item.EventId,
+                    keyPhoto = item.KeyPhoto.SourcePath,
+                    startedUtc = item.StartedUtc,
+                    endedUtc = item.EndedUtc,
+                    durationSeconds = item.Duration.TotalSeconds,
+                    assets = item.Assets.Select(asset => asset.SourcePath)
+                }));
+            }
+
+            error.WriteLine($"Found {events.Count.ToString(CultureInfo.InvariantCulture)} catalog events.");
             return 0;
         }
 
