@@ -37,6 +37,13 @@ public partial class App : Application
             return;
         }
 
+        if (FaceCli.IsFaceCommand(e.Args))
+        {
+            var exitCode = FaceCli.Run(e.Args);
+            Shutdown(exitCode);
+            return;
+        }
+
         var info = AppInfo.Current;
         _log.LogInformation("Images {Version} starting — {Runtime} on {Os}",
             info.DisplayVersion, info.RuntimeDescription, info.OsDescription);

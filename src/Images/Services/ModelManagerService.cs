@@ -231,7 +231,7 @@ public sealed class ModelManagerService
             StorageGroup: "faces",
             SourceUrl: "https://huggingface.co/opencv/face_detection_yunet",
             DownloadUrl: "https://huggingface.co/opencv/face_detection_yunet/resolve/3cc26e7f1014a5ee5d74a42acee58bafc9d0a310/face_detection_yunet_2023mar.onnx",
-            License: Strings.ModelOpenCvLicense,
+            License: Strings.ModelMitLicense,
             FileName: "face_detection_yunet_2023mar.onnx",
             ExpectedSha256: "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4",
             ExpectedSizeBytes: 232_589,

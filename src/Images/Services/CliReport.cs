@@ -206,6 +206,10 @@ public static class CliReport
         sb.AppendLine("  Images.exe --catalog-near <lat> <lon> <radiusKm>");
         sb.AppendLine("    Print indexed assets within the requested great-circle radius.");
         sb.AppendLine();
+        sb.AppendLine("  Images.exe --face-detect <imagePath>");
+        sb.AppendLine("    Run the approved local YuNet model and print reviewable face/landmark JSON.");
+        sb.AppendLine("    Requires a verified manual model import; never modifies the image or sidecar.");
+        sb.AppendLine();
         sb.AppendLine("  Images.exe --version");
         sb.AppendLine("    Print the version and exit.");
         sb.AppendLine();

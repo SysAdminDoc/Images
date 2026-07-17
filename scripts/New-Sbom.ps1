@@ -137,7 +137,7 @@ $modelDefinitions = @(
     @{ name = "lama_fp32.onnx"; purpose = "Content-aware repair fallback"; license = "Apache-2.0"; sha256 = "1faef5301d78db7dda502fe59966957ec4b79dd64e16f03ed96913c7a4eb68d6"; source = "https://huggingface.co/Carve/LaMa-ONNX" },
     @{ name = "clip-vit-b32-text.onnx"; purpose = "Semantic search text embeddings"; license = "MIT"; sha256 = "4dbe762b11e36488304471e439cde89da053ad7acaddbf9e096745d142ec8d8b"; source = "https://huggingface.co/Qdrant/clip-ViT-B-32-text" },
     @{ name = "clip-vit-b32-vision.onnx"; purpose = "Semantic search image embeddings"; license = "MIT"; sha256 = "c68d3d9a200ddd2a8c8a5510b576d4c94d1ae383bf8b36dd8c084f94e1fb4d63"; source = "https://huggingface.co/Qdrant/clip-ViT-B-32-vision" },
-    @{ name = "face_detection_yunet_2023mar.onnx"; purpose = "Face detection and landmarks"; license = "Apache-2.0"; sha256 = "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4"; source = "https://huggingface.co/opencv/face_detection_yunet" },
+    @{ name = "face_detection_yunet_2023mar.onnx"; purpose = "Face detection and landmarks"; license = "MIT"; sha256 = "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4"; source = "https://huggingface.co/opencv/face_detection_yunet" },
     @{ name = "face_recognition_sface_2021dec.onnx"; purpose = "Face recognition embeddings"; license = "Apache-2.0"; sha256 = "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79"; source = "https://huggingface.co/opencv/face_recognition_sface" }
 )
 

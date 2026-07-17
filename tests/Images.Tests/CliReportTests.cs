@@ -77,4 +77,13 @@ public sealed class CliReportTests
         Assert.Contains("Magick limits:", report, StringComparison.Ordinal);
         Assert.Contains("Magick blocked:", report, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void BuildHelpText_IncludesWindowFreeFaceDetectionCommand()
+    {
+        var help = CliReport.BuildHelpText();
+
+        Assert.Contains("--face-detect <imagePath>", help, StringComparison.Ordinal);
+        Assert.Contains("never modifies the image or sidecar", help, StringComparison.Ordinal);
+    }
 }
