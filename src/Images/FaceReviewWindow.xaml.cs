@@ -350,7 +350,18 @@ public sealed class FaceReviewItemViewModel : ObservableObject
     public string ClusterLabel => Candidate.ClusterId is { } id
         ? Strings.Format("FaceReviewClusterFormat", id)
         : Strings.Get("FaceReviewUnclustered");
-    public string QualityText => Candidate.QualityNote ?? Candidate.EmbeddingQuality.ToString();
+    public string QualityText
+    {
+        get
+        {
+            var quality = Candidate.QualityNote ?? Candidate.EmbeddingQuality.ToString();
+            if (Candidate.CullingHint is not { } hint) return quality;
+            var signals = hint.ReviewHints.Count == 0
+                ? Strings.Get("FaceReviewNoCullingHints")
+                : string.Join("; ", hint.ReviewHints);
+            return $"{quality}. {signals}. Local sharpness {hint.LocalSharpness:0.0000}. Review hint only; no automatic culling.";
+        }
+    }
 
     public FaceReviewDecision Decision
     {

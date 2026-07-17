@@ -6849,4 +6849,5 @@ Details written to:
   <data name="FaceReviewAccepted" xml:space="preserve"><value>[!!!! Accepted for named XMP region !!!!]</value></data>
   <data name="FaceReviewRejected" xml:space="preserve"><value>[!!!! Rejected - omitted from XMP !!!!]</value></data>
   <data name="FaceReviewPending" xml:space="preserve"><value>[!!!! Pending review !!!!]</value></data>
+  <data name="FaceReviewNoCullingHints" xml:space="preserve"><value>[!!!! No blur or closed-eye hint !!!!]</value></data>
 </root>

@@ -19,7 +19,8 @@ public sealed record FaceReviewCandidate(
     FaceDetection Detection,
     FaceEmbeddingQuality EmbeddingQuality,
     string? QualityNote,
-    int? ClusterId);
+    int? ClusterId,
+    FaceCullingHint? CullingHint = null);
 
 public sealed record FaceReviewEntry(FaceReviewKey Key, FaceReviewDecision Decision, string? Name);
 
@@ -67,6 +68,20 @@ public static class FaceReviewService
                     new FaceReviewKey(member.SourcePath, member.FaceIndex),
                     cluster.ClusterId)))
             .ToDictionary(pair => pair.Key, pair => pair.Value, FaceReviewKeyComparer.Instance);
+        var cullingHints = new Dictionary<FaceReviewKey, FaceCullingHint>(FaceReviewKeyComparer.Instance);
+        foreach (var result in successful.Where(result => File.Exists(result.SourcePath)))
+        {
+            try
+            {
+                foreach (var pair in FaceCullingHintService.Analyze(result.SourcePath, result.Faces))
+                    cullingHints[pair.Key] = pair.Value;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or MagickException)
+            {
+                // Culling signals are optional review hints; detection and cluster review remain
+                // available when a source cannot be sampled for these secondary metrics.
+            }
+        }
 
         var candidates = embeddings.Select(face =>
         {
@@ -76,7 +91,8 @@ public static class FaceReviewService
                 face.Detection,
                 face.Quality,
                 face.RejectionReason,
-                clusterIds.GetValueOrDefault(key));
+                clusterIds.GetValueOrDefault(key),
+                cullingHints.GetValueOrDefault(key));
         }).ToArray();
         return new FaceReviewAnalysis(candidates, analyses.Where(result => !result.Success).ToArray());
     }

@@ -14,7 +14,6 @@ Promote to `1.0.0` when a release candidate satisfies those three unsigned check
 
 ## Actionable Work
 
-- [ ] **V60-15** *P1* — Face-aware culling signals for closed eyes and local blur, presented as review-only hints with no automatic Pick/Reject writes.
 
 The remaining research item is decision-gated (Ghostscript-source AGPL mechanism) and lives in `Roadmap_Blocked.md`.
 
