@@ -100,7 +100,6 @@ public sealed record DuplicateCleanupQuarantineResult(
 
 public sealed class DuplicateCleanupService
 {
-    private const int HashSize = 8;
     private const int MaxSimilarPairFindings = 1000;
     private readonly Func<string?> _getQuarantineRoot;
 
@@ -122,7 +121,7 @@ public sealed class DuplicateCleanupService
         var references = NormalizeReferenceRoots(referenceRoots);
         var paths = CollectCandidateFiles(scanRoots, ref failures, cancellationToken);
         var candidates = new List<DuplicateCleanupCandidate>(paths.Count);
-        Span<double> hashLuminance = stackalloc double[HashSize * HashSize];
+        Span<double> hashLuminance = stackalloc double[PerceptualHashService.SampleCount];
 
         foreach (var path in paths)
         {
@@ -138,7 +137,7 @@ public sealed class DuplicateCleanupService
                 }
 
                 var sha256 = ComputeSha256(path, cancellationToken);
-                var perceptualHash = TryComputeAverageHash(path, hashLuminance, cancellationToken);
+                var perceptualHash = PerceptualHashService.TryComputeAverageHash(path, hashLuminance, cancellationToken);
                 if (perceptualHash is null)
                     failures++;
 
@@ -411,58 +410,6 @@ public sealed class DuplicateCleanupService
         }
 
         return Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant();
-    }
-
-    private static ulong? TryComputeAverageHash(string path, Span<double> luminance, CancellationToken cancellationToken)
-    {
-        try
-        {
-            CodecRuntime.Configure();
-            cancellationToken.ThrowIfCancellationRequested();
-
-            using var image = MagickSafeReader.Read(path);
-            image.AutoOrient();
-            image.BackgroundColor = MagickColors.White;
-            image.Alpha(AlphaOption.Remove);
-            image.Resize(new MagickGeometry((uint)HashSize, (uint)HashSize) { IgnoreAspectRatio = true });
-            image.Format = MagickFormat.Bgra;
-
-            cancellationToken.ThrowIfCancellationRequested();
-            var pixels = image.GetPixelsUnsafe().ToByteArray(PixelMapping.BGRA);
-            if (pixels is null || pixels.Length < HashSize * HashSize * 4)
-                return null;
-
-            luminance.Clear();
-            var sum = 0.0;
-            for (var i = 0; i < luminance.Length; i++)
-            {
-                var offset = i * 4;
-                var blue = pixels[offset];
-                var green = pixels[offset + 1];
-                var red = pixels[offset + 2];
-                var value = (0.299 * red) + (0.587 * green) + (0.114 * blue);
-                luminance[i] = value;
-                sum += value;
-            }
-
-            var average = sum / luminance.Length;
-            var hash = 0UL;
-            for (var i = 0; i < luminance.Length; i++)
-            {
-                if (luminance[i] >= average)
-                    hash |= 1UL << i;
-            }
-
-            return hash;
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception ex) when (ex is MagickException or IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException or InvalidOperationException)
-        {
-            return null;
-        }
     }
 
     private static IReadOnlyList<string> NormalizeReferenceRoots(IEnumerable<string>? referenceRoots)

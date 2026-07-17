@@ -25,7 +25,8 @@ public sealed record CatalogAssetRecord(
     DateTimeOffset? SidecarModifiedUtc,
     DateTimeOffset ScannedUtc,
     string? Palette = null,
-    CatalogExifFacts? Exif = null)
+    CatalogExifFacts? Exif = null,
+    ulong? PerceptualHash = null)
 {
     public string FileName => Path.GetFileName(SourcePath);
     public string Folder => Path.GetDirectoryName(SourcePath) ?? "";
@@ -62,7 +63,7 @@ public sealed record CatalogAssetPage(
 
 public sealed class CatalogService
 {
-    private const int CurrentSchemaVersion = 3;
+    private const int CurrentSchemaVersion = 4;
     private const int SchemaCanaryId = 1;
     private static readonly ILogger Log = Images.Services.Log.Get(nameof(CatalogService));
     private readonly string? _dbPath;
@@ -314,6 +315,9 @@ public sealed class CatalogService
 
     private CatalogFileChangeState GetChangeState(string path, CatalogFileSummary cached)
     {
+        if (!cached.PerceptualHashAttempted)
+            return CatalogFileChangeState.Changed;
+
         try
         {
             var info = new FileInfo(path);
@@ -419,7 +423,7 @@ public sealed class CatalogService
             cmd.CommandText = """
                 SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
                        width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette,
-                       gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds
+                       gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds, perceptual_hash
                 FROM catalog_assets
                 WHERE source_path = $path
                 LIMIT 1;
@@ -452,7 +456,7 @@ public sealed class CatalogService
             cmd.CommandText = """
                 SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
                        width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette,
-                       gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds
+                       gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds, perceptual_hash
                 FROM catalog_assets
                 ORDER BY source_path COLLATE NOCASE
                 LIMIT $limit;
@@ -661,7 +665,7 @@ public sealed class CatalogService
             cmd.CommandText = $"""
                 SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
                        width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette,
-                       gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds
+                       gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds, perceptual_hash
                 FROM catalog_assets
                 WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL
                   AND gps_lat BETWEEN $minLat AND $maxLat
@@ -801,6 +805,12 @@ public sealed class CatalogService
             return;
         }
 
+        if (fromVersion == 3 && toVersion == 4)
+        {
+            Migrate_3_to_4(conn, tx);
+            return;
+        }
+
         throw new InvalidOperationException($"No catalog migration exists for v{fromVersion} to v{toVersion}.");
     }
 
@@ -829,6 +839,17 @@ public sealed class CatalogService
             ALTER TABLE catalog_assets ADD COLUMN exposure_seconds REAL NULL;
             CREATE INDEX IF NOT EXISTS ix_catalog_assets_captured ON catalog_assets(captured_utc);
             CREATE INDEX IF NOT EXISTS ix_catalog_assets_geo ON catalog_assets(gps_lat, gps_lon);
+            """;
+        cmd.ExecuteNonQuery();
+    }
+
+    private static void Migrate_3_to_4(SqliteConnection conn, SqliteTransaction tx)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            ALTER TABLE catalog_assets ADD COLUMN perceptual_hash BLOB NULL;
+            ALTER TABLE catalog_assets ADD COLUMN perceptual_hash_state INTEGER NOT NULL DEFAULT 0;
             """;
         cmd.ExecuteNonQuery();
     }
@@ -1050,7 +1071,7 @@ public sealed class CatalogService
         cmd.CommandText = $"""
             SELECT a.id, a.source_path, a.fingerprint, a.size_bytes, a.created_utc, a.modified_utc,
                    a.width, a.height, a.format, a.codec, a.rating, a.sidecar_path, a.sidecar_modified_utc, a.scanned_utc, a.palette,
-                   a.gps_lat, a.gps_lon, a.captured_utc, a.camera_make, a.camera_model, a.lens_model, a.iso, a.focal_length, a.f_number, a.exposure_seconds
+                   a.gps_lat, a.gps_lon, a.captured_utc, a.camera_make, a.camera_model, a.lens_model, a.iso, a.focal_length, a.f_number, a.exposure_seconds, a.perceptual_hash
             FROM catalog_assets AS a
             WHERE {predicate}
             ORDER BY {orderBy}
@@ -1135,6 +1156,8 @@ public sealed class CatalogService
 
         var palette = TryExtractPalette(info.FullName);
         var exif = CatalogExifExtractor.Extract(image);
+        Span<double> luminance = stackalloc double[PerceptualHashService.SampleCount];
+        var perceptualHash = PerceptualHashService.TryComputeAverageHash(info.FullName, luminance, cancellationToken);
 
         return new CatalogAssetRecord(
             info.FullName,
@@ -1152,7 +1175,8 @@ public sealed class CatalogService
             sidecar.ModifiedUtc,
             scannedUtc,
             palette,
-            exif);
+            exif,
+            perceptualHash);
     }
 
     private static string? TryExtractPalette(string path)
@@ -1314,12 +1338,12 @@ public sealed class CatalogService
             INSERT INTO catalog_assets (
                 source_path, fingerprint, size_bytes, created_utc, modified_utc,
                 width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette,
-                gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds
+                gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds, perceptual_hash, perceptual_hash_state
             )
             VALUES (
                 $path, $fingerprint, $size, $created, $modified,
                 $width, $height, $format, $codec, $rating, $sidecar, $sidecarModified, $scanned, $palette,
-                $gpsLat, $gpsLon, $captured, $cameraMake, $cameraModel, $lensModel, $iso, $focalLength, $fNumber, $exposureSeconds
+                $gpsLat, $gpsLon, $captured, $cameraMake, $cameraModel, $lensModel, $iso, $focalLength, $fNumber, $exposureSeconds, $perceptualHash, 1
             )
             ON CONFLICT(source_path) DO UPDATE SET
                 fingerprint = excluded.fingerprint,
@@ -1344,7 +1368,9 @@ public sealed class CatalogService
                 iso = excluded.iso,
                 focal_length = excluded.focal_length,
                 f_number = excluded.f_number,
-                exposure_seconds = excluded.exposure_seconds;
+                exposure_seconds = excluded.exposure_seconds,
+                perceptual_hash = excluded.perceptual_hash,
+                perceptual_hash_state = excluded.perceptual_hash_state;
             """;
         AddAssetParameters(cmd, asset);
         cmd.ExecuteNonQuery();
@@ -1456,6 +1482,9 @@ public sealed class CatalogService
         cmd.Parameters.AddWithValue("$focalLength", exif.FocalLengthMm is null ? DBNull.Value : exif.FocalLengthMm.Value);
         cmd.Parameters.AddWithValue("$fNumber", exif.FNumber is null ? DBNull.Value : exif.FNumber.Value);
         cmd.Parameters.AddWithValue("$exposureSeconds", exif.ExposureSeconds is null ? DBNull.Value : exif.ExposureSeconds.Value);
+        cmd.Parameters.AddWithValue("$perceptualHash", asset.PerceptualHash is null
+            ? DBNull.Value
+            : PerceptualHashService.ToBytes(asset.PerceptualHash.Value));
     }
 
     private static CatalogAssetRecord ReadAsset(SqliteConnection conn, SqliteDataReader reader)
@@ -1477,7 +1506,8 @@ public sealed class CatalogService
             reader.IsDBNull(12) ? null : FromUnix(reader.GetInt64(12)),
             FromUnix(reader.GetInt64(13)),
             reader.FieldCount > 14 && !reader.IsDBNull(14) ? reader.GetString(14) : null,
-            ReadExifFacts(reader));
+            ReadExifFacts(reader),
+            ReadPerceptualHash(reader));
     }
 
     private static CatalogExifFacts ReadExifFacts(SqliteDataReader reader)
@@ -1497,6 +1527,14 @@ public sealed class CatalogService
             reader.IsDBNull(22) ? null : reader.GetDouble(22),
             reader.IsDBNull(23) ? null : reader.GetDouble(23),
             reader.IsDBNull(24) ? null : reader.GetDouble(24));
+    }
+
+    private static ulong? ReadPerceptualHash(SqliteDataReader reader)
+    {
+        if (reader.FieldCount <= 25 || reader.IsDBNull(25))
+            return null;
+        var bytes = (byte[])reader.GetValue(25);
+        return bytes.Length == sizeof(ulong) ? PerceptualHashService.FromBytes(bytes) : null;
     }
 
     private static IReadOnlyList<string> ReadTags(SqliteConnection conn, long assetId)
@@ -1610,7 +1648,8 @@ public sealed class CatalogService
         long SizeBytes,
         DateTimeOffset ModifiedUtc,
         string? SidecarPath,
-        DateTimeOffset? SidecarModifiedUtc);
+        DateTimeOffset? SidecarModifiedUtc,
+        bool PerceptualHashAttempted);
 
     internal readonly record struct CatalogSidecarFileSummary(string? Path, DateTimeOffset? ModifiedUtc);
 
@@ -1638,7 +1677,7 @@ public sealed class CatalogService
         {
             using var conn = Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT source_path, size_bytes, modified_utc, sidecar_path, sidecar_modified_utc FROM catalog_assets;";
+            cmd.CommandText = "SELECT source_path, size_bytes, modified_utc, sidecar_path, sidecar_modified_utc, perceptual_hash_state FROM catalog_assets;";
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
@@ -1647,7 +1686,7 @@ public sealed class CatalogService
                 var mtime = FromUnix(reader.GetInt64(2));
                 var sidecarPath = reader.IsDBNull(3) ? null : reader.GetString(3);
                 DateTimeOffset? sidecarModifiedUtc = reader.IsDBNull(4) ? null : FromUnix(reader.GetInt64(4));
-                map[path] = new CatalogFileSummary(size, mtime, sidecarPath, sidecarModifiedUtc);
+                map[path] = new CatalogFileSummary(size, mtime, sidecarPath, sidecarModifiedUtc, reader.GetInt32(5) != 0);
             }
         }
         catch (Exception ex) when (ex is SqliteException or IOException)
@@ -1667,7 +1706,7 @@ public sealed class CatalogService
             cmd.CommandText = """
                 SELECT id, source_path, fingerprint, size_bytes, created_utc, modified_utc,
                        width, height, format, codec, rating, sidecar_path, sidecar_modified_utc, scanned_utc, palette,
-                       gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds
+                       gps_lat, gps_lon, captured_utc, camera_make, camera_model, lens_model, iso, focal_length, f_number, exposure_seconds, perceptual_hash
                 FROM catalog_assets
                 ORDER BY source_path COLLATE NOCASE;
                 """;
@@ -1705,7 +1744,8 @@ public sealed class CatalogService
             SidecarModifiedUtc: reader.IsDBNull(12) ? null : FromUnix(reader.GetInt64(12)),
             ScannedUtc: FromUnix(reader.GetInt64(13)),
             Palette: reader.FieldCount > 14 && !reader.IsDBNull(14) ? reader.GetString(14) : null,
-            Exif: ReadExifFacts(reader));
+            Exif: ReadExifFacts(reader),
+            PerceptualHash: ReadPerceptualHash(reader));
     }
 
     private static IReadOnlyList<string> LoadTagsForAsset(SqliteConnection conn, long assetId)

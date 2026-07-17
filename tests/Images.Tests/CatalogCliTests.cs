@@ -1,6 +1,7 @@
 using System.IO;
 using ImageMagick;
 using Images.Services;
+using System.Text.Json;
 
 namespace Images.Tests;
 
@@ -50,6 +51,25 @@ public sealed class CatalogCliTests
     }
 
     [Fact]
+    public void TryParse_Stacks_AcceptsDefaultsOrValidatedThresholds()
+    {
+        Assert.True(CatalogCli.TryParse(["--catalog-stacks"], out var defaults, out var error));
+        Assert.Null(error);
+        Assert.Equal(CatalogCliMode.Stacks, defaults!.Mode);
+        Assert.Equal(6, defaults.MaxHashDistance);
+
+        Assert.True(CatalogCli.TryParse(["--catalog-stacks", "4", "30", "100"], out var custom, out error));
+        Assert.Null(error);
+        Assert.Equal(4, custom!.MaxHashDistance);
+        Assert.Equal(30, custom.MaxCaptureSeconds);
+        Assert.Equal(100, custom.MaxGeoDistanceMeters);
+
+        Assert.True(CatalogCli.TryParse(["--catalog-stacks", "65", "30", "100"], out var invalid, out error));
+        Assert.Null(invalid);
+        Assert.Contains("Usage:", error);
+    }
+
+    [Fact]
     public void Execute_Search_PrintsOneMatchingPathPerLine()
     {
         using var temp = TestDirectory.Create();
@@ -94,10 +114,38 @@ public sealed class CatalogCliTests
         Assert.Null(catalog.GetByPath(image));
     }
 
+    [Fact]
+    public void Execute_Stacks_PrintsOneJsonObjectPerNearDuplicateGroup()
+    {
+        using var temp = TestDirectory.Create();
+        var first = WriteImage(temp.Path, "burst-a.png", MagickColors.Red);
+        var second = WriteImage(temp.Path, "burst-b.png", MagickColors.Blue);
+        var catalog = new CatalogService(Path.Combine(temp.Path, "catalog.db"));
+        catalog.Rebuild([temp.Path]);
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+
+        var exitCode = CatalogCli.Execute(
+            new CatalogCliRequest(CatalogCliMode.Stacks),
+            output,
+            error,
+            catalog);
+
+        Assert.Equal(0, exitCode);
+        using var document = JsonDocument.Parse(output.ToString().Trim());
+        var assets = document.RootElement.GetProperty("assets").EnumerateArray().Select(item => item.GetString()).ToArray();
+        Assert.Contains(first, assets);
+        Assert.Contains(second, assets);
+        Assert.Contains("Found 1 near-duplicate stacks.", error.ToString());
+    }
+
     private static string WriteImage(string folder, string name)
+        => WriteImage(folder, name, MagickColors.Red);
+
+    private static string WriteImage(string folder, string name, IMagickColor<float> color)
     {
         var path = Path.Combine(folder, name);
-        using var image = new MagickImage(MagickColors.Red, 4, 4) { Format = MagickFormat.Png };
+        using var image = new MagickImage(color, 4, 4) { Format = MagickFormat.Png };
         image.Write(path);
         return path;
     }

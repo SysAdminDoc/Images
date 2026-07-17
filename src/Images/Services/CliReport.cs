@@ -218,6 +218,9 @@ public static class CliReport
         sb.AppendLine("  Images.exe --catalog-rescan");
         sb.AppendLine("    Rescan all registered roots without deleting offline-root rows.");
         sb.AppendLine();
+        sb.AppendLine("  Images.exe --catalog-stacks [<maxHashDistance> <maxSeconds> <maxMeters>]");
+        sb.AppendLine("    Print near-duplicate catalog stacks as JSON Lines (defaults: 6, 120, 250).");
+        sb.AppendLine();
         sb.AppendLine("  Images.exe --face-detect <imagePath>");
         sb.AppendLine("    Run the approved local YuNet model and print reviewable face/landmark JSON.");
         sb.AppendLine("    Requires a verified manual model import; never modifies the image or sidecar.");

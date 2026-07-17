@@ -51,6 +51,24 @@ public sealed class CatalogServiceTests
     }
 
     [Fact]
+    public void Rebuild_StoresPerceptualHashAndBackfillsAnUnattemptedV3Row()
+    {
+        using var temp = TestDirectory.Create();
+        var source = WriteImage(temp.Path, "hash.png", 16, 8);
+        var dbPath = Path.Combine(temp.Path, "catalog.db");
+        var service = new CatalogService(dbPath);
+        var first = service.Rebuild([temp.Path]);
+        Assert.NotNull(Assert.Single(first.Assets).PerceptualHash);
+
+        ExecuteSql(dbPath, "UPDATE catalog_assets SET perceptual_hash = NULL, perceptual_hash_state = 0;");
+        var backfilled = service.Rebuild([temp.Path]);
+
+        Assert.Equal(1, backfilled.UpdatedCount);
+        Assert.NotNull(service.GetByPath(source)!.PerceptualHash);
+        Assert.Equal(1, ReadInt(dbPath, "SELECT perceptual_hash_state FROM catalog_assets LIMIT 1;"));
+    }
+
+    [Fact]
     public void Open_UsesPrivateCacheSoConcurrentWritesDoNotLockReaders()
     {
         using var temp = TestDirectory.Create();
@@ -244,8 +262,9 @@ public sealed class CatalogServiceTests
         var service = new CatalogService(dbPath);
 
         Assert.True(service.IsAvailable);
-        Assert.Equal(3, ReadInt(dbPath, "PRAGMA user_version;"));
-        Assert.Equal(3, ReadInt(dbPath, "SELECT schema_version FROM catalog_schema_canary WHERE id = 1;"));
+        Assert.Equal(4, ReadInt(dbPath, "PRAGMA user_version;"));
+        Assert.Equal(4, ReadInt(dbPath, "SELECT schema_version FROM catalog_schema_canary WHERE id = 1;"));
+        Assert.Equal(1, ReadInt(dbPath, "SELECT COUNT(*) FROM pragma_table_info('catalog_assets') WHERE name = 'perceptual_hash';"));
         var backupPath = dbPath + ".bak.v0-1";
         Assert.True(File.Exists(backupPath));
         Assert.Equal("kept-before-migration", ReadString(backupPath, "SELECT value FROM legacy_marker LIMIT 1;"));

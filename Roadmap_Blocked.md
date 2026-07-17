@@ -141,17 +141,11 @@ Permanent owner policy: D-05/D-05a and signing-dependent C2PA write/export work 
 
 ## Blocked On V40-01 SQLite Catalog
 
-> Data-layer note (catalog schema v3, 2026-07-17): the catalog is built and stable, and now
-> indexes rating, tags, palette, file timestamps, **GPS latitude/longitude, capture time, and
-> camera/lens/ISO/focal/aperture/shutter EXIF**, with a `FindWithinBounds` geo query. The remaining
-> blocker for the geo/time-dependent items below is therefore the **GUI surface** (and, where noted,
-> a still-missing model): near-duplicate stacking additionally needs a perceptual-hash proximity
-> model (the indexed fingerprint is an exact-match SHA-256, not perceptual); smart collections'
-> face-count criterion still needs V60 face detection; auto-albums still need content classification.
-
-- [ ] **V40-22** *P1* — **Near-duplicate stacking** — auto-stack by time+location+hash proximity (PhotoPrism, Google Photos Photo Stacks). Effort: M.
-  - **Blocked by**: V40-01 catalog + time/location proximity model — stacking needs indexed metadata for time+location queries.
-  - **Unblock when**: V40-01 catalog ships with indexed timestamps and GPS coordinates.
+> Data-layer note (catalog schema v4, 2026-07-17): the catalog is built and stable, and now
+> indexes rating, tags, palette, exact/perceptual hashes, file timestamps, **GPS latitude/longitude,
+> capture time, and camera/lens/ISO/focal/aperture/shutter EXIF**, with geo, search, and near-duplicate
+> stack CLI consumers. Smart collections' face-count criterion still needs V60 face detection;
+> auto-albums still need content classification.
 
 - [ ] **V40-23** *P2* — **Sketch-based fuzzy search** — draw rough color blobs, match (digiKam Sketch tab — delightful differentiator). Effort: L.
   - **Blocked by**: V40-01 catalog + palette extraction engine — sketch search needs indexed color data to query against.

@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.IO;
+using System.Text.Json;
 
 namespace Images.Services;
 
@@ -11,6 +12,7 @@ public enum CatalogCliMode
     RootRemove,
     RootList,
     Rescan,
+    Stacks,
 }
 
 public sealed record CatalogCliRequest(
@@ -19,7 +21,10 @@ public sealed record CatalogCliRequest(
     double Latitude = 0,
     double Longitude = 0,
     double RadiusKm = 0,
-    string? RootPath = null);
+    string? RootPath = null,
+    int MaxHashDistance = 6,
+    double MaxCaptureSeconds = 120,
+    double MaxGeoDistanceMeters = 250);
 
 /// <summary>
 /// Scriptable, window-free consumer for the rebuildable catalog. Standard output contains one
@@ -35,7 +40,8 @@ public static class CatalogCli
          string.Equals(args[0], "--catalog-root-add", StringComparison.OrdinalIgnoreCase) ||
          string.Equals(args[0], "--catalog-root-remove", StringComparison.OrdinalIgnoreCase) ||
          string.Equals(args[0], "--catalog-root-list", StringComparison.OrdinalIgnoreCase) ||
-         string.Equals(args[0], "--catalog-rescan", StringComparison.OrdinalIgnoreCase));
+         string.Equals(args[0], "--catalog-rescan", StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(args[0], "--catalog-stacks", StringComparison.OrdinalIgnoreCase));
 
     public static bool TryParse(
         string[] args,
@@ -89,6 +95,31 @@ public static class CatalogCli
                 string.Equals(args[0], "--catalog-root-list", StringComparison.OrdinalIgnoreCase)
                     ? CatalogCliMode.RootList
                     : CatalogCliMode.Rescan);
+            return true;
+        }
+
+        if (string.Equals(args[0], "--catalog-stacks", StringComparison.OrdinalIgnoreCase))
+        {
+            if (args.Length == 1)
+            {
+                request = new CatalogCliRequest(CatalogCliMode.Stacks);
+                return true;
+            }
+
+            if (args.Length != 4 ||
+                !int.TryParse(args[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var hashDistance) || hashDistance is < 0 or > 64 ||
+                !TryParseFiniteDouble(args[2], out var seconds) || seconds < 0 ||
+                !TryParseFiniteDouble(args[3], out var meters) || meters < 0)
+            {
+                error = "Usage: Images.exe --catalog-stacks [<maxHashDistance> <maxSeconds> <maxMeters>]";
+                return true;
+            }
+
+            request = new CatalogCliRequest(
+                CatalogCliMode.Stacks,
+                MaxHashDistance: hashDistance,
+                MaxCaptureSeconds: seconds,
+                MaxGeoDistanceMeters: meters);
             return true;
         }
 
@@ -187,6 +218,31 @@ public static class CatalogCli
             var roots = catalog.GetRoots();
             var rebuildResult = catalog.Rebuild(roots.Select(root => root.RootPath));
             error.WriteLine($"Catalog rescan indexed {rebuildResult.IndexedCount.ToString(CultureInfo.InvariantCulture)} assets; {rebuildResult.OfflineRoots.Count.ToString(CultureInfo.InvariantCulture)} roots offline (cached assets retained).");
+            return 0;
+        }
+
+        if (request.Mode == CatalogCliMode.Stacks)
+        {
+            var stacks = new NearDuplicateStackService().Build(
+                catalog.GetAllAssets(50_000),
+                request.MaxHashDistance,
+                TimeSpan.FromSeconds(request.MaxCaptureSeconds),
+                request.MaxGeoDistanceMeters,
+                limit);
+            foreach (var stack in stacks)
+            {
+                output.WriteLine(JsonSerializer.Serialize(new
+                {
+                    stackId = stack.StackId,
+                    cover = stack.Cover.SourcePath,
+                    maxHashDistance = stack.MaxHashDistance,
+                    captureSpanSeconds = stack.CaptureSpan.TotalSeconds,
+                    maxGeoDistanceMeters = stack.MaxGeoDistanceMeters,
+                    assets = stack.Assets.Select(asset => asset.SourcePath)
+                }));
+            }
+
+            error.WriteLine($"Found {stacks.Count.ToString(CultureInfo.InvariantCulture)} near-duplicate stacks.");
             return 0;
         }
 

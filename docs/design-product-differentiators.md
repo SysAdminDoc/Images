@@ -84,7 +84,7 @@ Find exact duplicates and visually similar files, compare them quickly, keep the
 ### MVP Scope
 
 - Exact duplicate pass using file size + strong content hash.
-- Near-duplicate pass using perceptual hash after dependency review or an internal implementation spike.
+- Near-duplicate stacks use the catalog's internal 64-bit average hash plus time, aspect, and optional GPS proximity; exact SHA-256 copies remain in Duplicate Cleanup.
 - Results grouped into duplicate sets with a recommended keep candidate.
 - Actions: keep selected, move rejects to Recycle Bin, move rejects to folder, reveal, open compare.
 - Always show why a recommendation was made: larger dimensions, newer modified time, preferred folder, or exact hash match.
@@ -358,7 +358,7 @@ Tag, filter, and move images locally while keeping user intent portable and reve
 
 - Which app-local catalog schema owns asset identity, and how much is shared with settings?
 - Is the first portable sidecar XMP, JSON, or both?
-- Which dependency review template should be used for ONNX models, archive libraries, and perceptual hashing?
+- Which dependency review template should be used for ONNX models and archive libraries?
 - Should compare mode be a separate window, an in-window split view, or both over time?
 - What is the maximum acceptable model/download size for local semantic search?
 - Package-manager distribution follows the permanent unsigned policy: checksum-pinned GitHub artifacts ship without waiting for code signing.
