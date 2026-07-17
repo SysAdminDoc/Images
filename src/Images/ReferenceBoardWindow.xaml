@@ -45,7 +45,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE8E5;"
                                        FontFamily="{StaticResource IconFontFamily}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center" />
                             <TextBlock Text="{x:Static loc:Strings.ReferenceBoardAddImages}" VerticalAlignment="Center" />
@@ -58,7 +58,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE70F;"
                                        FontFamily="{StaticResource IconFontFamily}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center" />
                             <TextBlock Text="{x:Static loc:Strings.ReferenceBoardNote}" VerticalAlignment="Center" />
@@ -71,7 +71,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE8B7;"
                                        FontFamily="{StaticResource IconFontFamily}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center" />
                             <TextBlock Text="{x:Static loc:Strings.ReferenceBoardGroup}" VerticalAlignment="Center" />
@@ -84,7 +84,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE74E;"
                                        FontFamily="{StaticResource IconFontFamily}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center" />
                             <TextBlock Text="{x:Static loc:Strings.ReferenceBoardExport}" VerticalAlignment="Center" />
@@ -97,7 +97,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE8B3;"
                                        FontFamily="{StaticResource IconFontFamily}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center" />
                             <TextBlock Text="{x:Static loc:Strings.ReferenceBoardResetButton}" VerticalAlignment="Center" />
@@ -110,7 +110,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE74D;"
                                        FontFamily="{StaticResource IconFontFamily}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center" />
                             <TextBlock Text="{x:Static loc:Strings.Clear}" VerticalAlignment="Center" />

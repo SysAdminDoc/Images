@@ -33,14 +33,14 @@
         </Style>
     </Window.Resources>
 
-    <Grid Margin="22,16,22,18">
+    <Grid Margin="18,12,18,14">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,10">
+        <Grid Grid.Row="0" Margin="0,0,0,8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -51,7 +51,7 @@
                            Text="{x:Static loc:Strings.SettingsHeading}" />
                 <TextBlock Style="{StaticResource Text.Subtitle}"
                            Text="{x:Static loc:Strings.SettingsSubtitle}"
-                           Margin="0,3,0,0"
+                           Margin="0,2,0,0"
                            MaxWidth="540"
                            HorizontalAlignment="Left"
                            TextAlignment="Left" />
@@ -636,7 +636,7 @@
                                                                  MinWidth="104"
                                                                  MinHeight="30"
                                                                  Padding="8,4"
-                                                                 FontSize="12.5"
+                                                                 FontSize="13.5"
                                                                  ToolTip="{x:Static loc:Strings.SettingsHotkeyShortcutHelp}"
                                                                  AutomationProperties.Name="{Binding ActionName}"
                                                                  AutomationProperties.HelpText="{x:Static loc:Strings.SettingsHotkeyShortcutHelp}" />
@@ -656,7 +656,7 @@
                                                                 </Style>
                                                             </Border.Style>
                                                             <TextBlock Text="{Binding StateText}"
-                                                                       FontSize="12"
+                                                                       FontSize="13"
                                                                        FontWeight="SemiBold">
                                                                 <TextBlock.Style>
                                                                     <Style TargetType="TextBlock">
@@ -755,7 +755,7 @@
                                                 </Style>
                                             </Border.Style>
                                             <TextBlock Text="{Binding OcrStatusBadge}"
-                                                       FontSize="12"
+                                                       FontSize="13"
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource TextBrush}" />
                                         </Border>
@@ -784,7 +784,7 @@
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                             <TextBlock Text="&#xE713;"
                                                        FontFamily="{StaticResource IconFontFamily}"
-                                                       FontSize="11"
+                                                       FontSize="12"
                                                        Margin="0,0,7,0"
                                                        VerticalAlignment="Center" />
                                             <TextBlock Text="{x:Static loc:Strings.SettingsOcrLanguagesButton}"
@@ -801,7 +801,7 @@
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                             <TextBlock Text="&#xE72C;"
                                                        FontFamily="{StaticResource IconFontFamily}"
-                                                       FontSize="11"
+                                                       FontSize="12"
                                                        Margin="0,0,7,0"
                                                        VerticalAlignment="Center" />
                                             <TextBlock Text="{x:Static loc:Strings.SettingsOcrRefreshButton}"
@@ -817,7 +817,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE72E;"
                                            FontFamily="{StaticResource IconFontFamily}"
-                                           FontSize="12"
+                                           FontSize="13"
                                            Foreground="{DynamicResource OverlayBrush}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,9,0" />
@@ -852,7 +852,7 @@
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="&#xE838;"
                                                        FontFamily="{StaticResource IconFontFamily}"
-                                                       FontSize="11"
+                                                       FontSize="12"
                                                        Margin="0,0,7,0"
                                                        VerticalAlignment="Center" />
                                             <TextBlock Text="{x:Static loc:Strings.SettingsAppDataButton}"
@@ -869,7 +869,7 @@
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="&#xE8A5;"
                                                        FontFamily="{StaticResource IconFontFamily}"
-                                                       FontSize="11"
+                                                       FontSize="12"
                                                        Margin="0,0,7,0"
                                                        VerticalAlignment="Center" />
                                             <TextBlock Text="{x:Static loc:Strings.SettingsLogsButton}"
@@ -945,7 +945,7 @@
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="&#xE72C;"
                                                        FontFamily="{StaticResource IconFontFamily}"
-                                                       FontSize="11"
+                                                       FontSize="12"
                                                        Margin="0,0,7,0"
                                                        VerticalAlignment="Center" />
                                             <TextBlock Text="Refresh" VerticalAlignment="Center" />
@@ -1016,7 +1016,7 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding SettingsStatusIcon}"
                                FontFamily="{StaticResource IconFontFamily}"
-                               FontSize="12"
+                               FontSize="13"
                                VerticalAlignment="Center"
                                Margin="0,0,9,0">
                         <TextBlock.Style>

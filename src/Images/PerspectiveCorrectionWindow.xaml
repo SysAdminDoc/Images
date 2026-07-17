@@ -52,7 +52,7 @@
                           VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                     <TextBlock Text="{loc:Loc PerspectiveShape}" Style="{StaticResource SectionLabel}" />
-                    <Border Style="{StaticResource Card}" Padding="14">
+                    <Border Style="{StaticResource Card}" Padding="10,8">
                         <StackPanel>
                             <Button Style="{StaticResource ChromeButton}"
                                     Click="ResetButton_Click"
@@ -71,7 +71,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <TextBlock Text="{loc:Loc PerspectiveKeystone}" Style="{StaticResource SectionLabel}" />
-                    <Border Style="{StaticResource Card}" Padding="14">
+                    <Border Style="{StaticResource Card}" Padding="10,8">
                         <StackPanel>
                             <UniformGrid Columns="2">
                                 <Button Style="{StaticResource ChromeButton}"
@@ -104,7 +104,7 @@
 
                     <Border Style="{StaticResource Divider}" />
 
-                    <Border Style="{StaticResource Card}" Padding="14">
+                    <Border Style="{StaticResource Card}" Padding="10,8">
                         <StackPanel>
                             <TextBlock Text="{loc:Loc PerspectiveCorners}"
                                        FontWeight="SemiBold"
@@ -116,7 +116,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Style="{StaticResource Card}" Padding="14" Margin="0,12,0,0">
+                    <Border Style="{StaticResource Card}" Padding="10,8" Margin="0,12,0,0">
                         <TextBlock Text="{loc:Loc PerspectivePreviewNote}"
                                    Style="{StaticResource Text.Hint}"
                                    TextWrapping="Wrap" />
@@ -126,7 +126,7 @@
 
             <Border Grid.Column="2"
                     Style="{StaticResource Card}"
-                    Padding="14"
+                    Padding="10,8"
                     ClipToBounds="True">
                 <Canvas x:Name="PreviewCanvas"
                         Background="{DynamicResource ViewerSurfaceBrush}"

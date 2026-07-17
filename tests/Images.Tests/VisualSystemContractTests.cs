@@ -1,4 +1,5 @@
 using System.IO;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace Images.Tests;
@@ -15,17 +16,20 @@ public sealed class VisualSystemContractTests
 
         AssertSetter(theme, "ChromeButton", "Background", "Transparent");
         AssertSetter(theme, "ChromeButton", "BorderThickness", "0");
-        AssertSetter(theme, "ChromeButton", "FontSize", "14");
+        AssertSetter(theme, "ChromeButton", "FontSize", "15");
         AssertSetter(theme, "Card", "Background", "Transparent");
         AssertSetter(theme, "Card", "BorderThickness", "0");
         AssertSetter(theme, "Badge", "BorderThickness", "0");
         AssertSetter(theme, "ToolbarGroup", "BorderThickness", "0");
         AssertSetter(theme, "InspectorFactTile", "BorderThickness", "0");
-        AssertSetter(theme, "SectionLabel", "FontSize", "12");
-        AssertSetter(theme, "Text.Hint", "FontSize", "12");
-        AssertSetter(theme, "ToolWindowHeader", "Padding", "18,10");
-        AssertSetter(theme, "ToolWindowHeader", "MinHeight", "52");
-        AssertSetter(theme, "ImageContextBar", "MinHeight", "44");
+        AssertSetter(theme, "Text.Body", "FontSize", "15");
+        AssertSetter(theme, "Text.Caption", "FontSize", "13.5");
+        AssertSetter(theme, "SectionLabel", "FontSize", "13");
+        AssertSetter(theme, "Text.Hint", "FontSize", "13");
+        AssertSetter(theme, "StatusCard", "BorderThickness", "2,0,0,0");
+        AssertSetter(theme, "ToolWindowHeader", "Padding", "16,8");
+        AssertSetter(theme, "ToolWindowHeader", "MinHeight", "48");
+        AssertSetter(theme, "ImageContextBar", "MinHeight", "42");
 
         var sectionLabel = FindStyle(theme, "SectionLabel");
         Assert.DoesNotContain(
@@ -35,7 +39,36 @@ public sealed class VisualSystemContractTests
         var tabStyle = theme.Descendants(Presentation + "Style")
             .Single(style => (string?)style.Attribute("TargetType") == "TabItem" && style.Attribute(Xaml + "Key") is null);
         Assert.Equal("0,0,0,2", SetterValue(tabStyle, "BorderThickness"));
-        Assert.Equal("14", SetterValue(tabStyle, "FontSize"));
+        Assert.Equal("15", SetterValue(tabStyle, "FontSize"));
+    }
+
+    [Fact]
+    public void LiteralTextNeverDropsBelowReadableCaptionSize()
+    {
+        var sourceRoot = Path.Combine(RepositoryRoot(), "src", "Images");
+        var failures = new List<string>();
+
+        foreach (var path in Directory.GetFiles(sourceRoot, "*.xaml", SearchOption.AllDirectories))
+        {
+            var document = XDocument.Load(path, LoadOptions.SetLineInfo);
+            foreach (var textBlock in document.Descendants(Presentation + "TextBlock"))
+            {
+                var rawSize = (string?)textBlock.Attribute("FontSize");
+                if (!double.TryParse(rawSize, System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture, out var size) || size >= 13)
+                    continue;
+
+                var fontFamily = (string?)textBlock.Attribute("FontFamily") ?? "";
+                if (fontFamily.Contains("IconFontFamily", StringComparison.Ordinal) ||
+                    fontFamily.Contains("Segoe MDL2", StringComparison.Ordinal))
+                    continue;
+
+                var line = ((IXmlLineInfo)textBlock).LineNumber;
+                failures.Add($"{Path.GetFileName(path)}:{line} uses {size:0.#}pt text.");
+            }
+        }
+
+        Assert.Empty(failures);
     }
 
     [Fact]
@@ -69,7 +102,7 @@ public sealed class VisualSystemContractTests
     {
         var root = RepositoryRoot();
         var xaml = File.ReadAllText(Path.Combine(root, "src", "Images", "MainWindow.xaml"));
-        var mockup = new FileInfo(Path.Combine(root, "assets", "mockups", "premium-viewer-v0.3.1-concept.png"));
+        var mockup = new FileInfo(Path.Combine(root, "assets", "mockups", "premium-viewer-v0.3.2-concept.png"));
 
         Assert.Contains("x:Name=\"WorkflowRail\"", xaml, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"ImageContextBar\"", xaml, StringComparison.Ordinal);

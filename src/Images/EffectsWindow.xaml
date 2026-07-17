@@ -52,7 +52,7 @@
                           VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                     <TextBlock Text="{loc:Loc EffectsPresetsHeading}" Style="{StaticResource SectionLabel}" />
-                    <Border Style="{StaticResource Card}" Padding="14">
+                    <Border Style="{StaticResource Card}" Padding="10,8">
                         <StackPanel>
                             <Button Style="{StaticResource ChromeButton}"
                                     Click="CrispButton_Click"
@@ -77,7 +77,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <TextBlock Text="{loc:Loc EffectsDetailHeading}" Style="{StaticResource SectionLabel}" />
-                    <Border Style="{StaticResource Card}" Padding="14">
+                    <Border Style="{StaticResource Card}" Padding="10,8">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -128,7 +128,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <TextBlock Text="{loc:Loc EffectsEdgesHeading}" Style="{StaticResource SectionLabel}" />
-                    <Border Style="{StaticResource Card}" Padding="14">
+                    <Border Style="{StaticResource Card}" Padding="10,8">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -156,7 +156,7 @@
 
                     <Border Style="{StaticResource Divider}" />
 
-                    <Border Style="{StaticResource Card}" Padding="14">
+                    <Border Style="{StaticResource Card}" Padding="10,8">
                         <TextBlock Text="{loc:Loc EffectsEditNotice}"
                                    Style="{StaticResource Text.Hint}"
                                    TextWrapping="Wrap" />
@@ -166,7 +166,7 @@
 
             <Border Grid.Column="2"
                     Style="{StaticResource Card}"
-                    Padding="14"
+                    Padding="10,8"
                     ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>

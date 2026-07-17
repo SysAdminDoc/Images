@@ -30,7 +30,7 @@
                       VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="18">
                 <TextBlock Text="{loc:Loc ResizeDimensions}" Style="{StaticResource SectionLabel}" />
-                <Border Style="{StaticResource Card}" Padding="14">
+                <Border Style="{StaticResource Card}" Padding="10,8">
                     <StackPanel>
                         <TextBlock x:Name="SourceText"
                                    Style="{StaticResource Text.Caption}"
@@ -104,7 +104,7 @@
                 <Border Style="{StaticResource Divider}" />
 
                 <TextBlock Text="{loc:Loc ResizeFilter}" Style="{StaticResource SectionLabel}" />
-                <Border Style="{StaticResource Card}" Padding="14">
+                <Border Style="{StaticResource Card}" Padding="10,8">
                     <StackPanel>
                         <ComboBox x:Name="FilterCombo"
                                   DisplayMemberPath="Label"
@@ -120,7 +120,7 @@
                 <Border Style="{StaticResource Divider}" />
 
                 <TextBlock Text="{loc:Loc ResizePreview}" Style="{StaticResource SectionLabel}" />
-                <Border Style="{StaticResource Card}" Padding="14">
+                <Border Style="{StaticResource Card}" Padding="10,8">
                     <StackPanel>
                         <TextBlock x:Name="PreviewText"
                                    Style="{StaticResource Text.Body}"

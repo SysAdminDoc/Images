@@ -58,7 +58,7 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <TextBlock Text="{x:Static loc:Strings.BatchSourcesHeading}" Style="{StaticResource SectionLabel}" />
-                        <Border Style="{StaticResource Card}" Padding="12">
+                        <Border Style="{StaticResource Card}" Padding="10,7">
                             <StackPanel>
                                 <WrapPanel>
                                     <Button x:Name="AddFilesButton"
@@ -89,7 +89,7 @@
                         <Border Style="{StaticResource Divider}" />
 
                         <TextBlock Text="{x:Static loc:Strings.BatchPresetHeading}" Style="{StaticResource SectionLabel}" />
-                        <Border Style="{StaticResource Card}" Padding="12">
+                        <Border Style="{StaticResource Card}" Padding="10,7">
                             <StackPanel>
                                 <ComboBox x:Name="PresetCombo"
                                           SelectionChanged="PresetCombo_SelectionChanged"
@@ -143,7 +143,7 @@
                         <Border Style="{StaticResource Divider}" />
 
                         <TextBlock Text="{x:Static loc:Strings.BatchOperationsHeading}" Style="{StaticResource SectionLabel}" />
-                        <Border Style="{StaticResource Card}" Padding="12">
+                        <Border Style="{StaticResource Card}" Padding="10,7">
                             <StackPanel>
                                 <TextBlock Text="{x:Static loc:Strings.BatchOperationsHint}"
                                            Style="{StaticResource Text.Caption}"
@@ -222,7 +222,7 @@
                         <Border Style="{StaticResource Divider}" />
 
                         <TextBlock Text="{x:Static loc:Strings.BatchOutputHeading}" Style="{StaticResource SectionLabel}" />
-                        <Border Style="{StaticResource Card}" Padding="12">
+                        <Border Style="{StaticResource Card}" Padding="10,7">
                             <StackPanel>
                                 <TextBlock x:Name="OutputFolderText"
                                            Text="{x:Static loc:Strings.BatchOutputFolderDefault}"
@@ -259,7 +259,7 @@
 
                 <Border Grid.Row="0"
                         Style="{StaticResource Card}"
-                        Padding="12"
+                        Padding="10,7"
                         Margin="0,0,0,14">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -283,7 +283,7 @@
 
                 <Border Grid.Row="1"
                         Style="{StaticResource Card}"
-                        Padding="14">
+                        Padding="10,8">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -296,7 +296,7 @@
                                  AutomationProperties.Name="{x:Static loc:Strings.BatchPreviewItemsAutomationName}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Padding="12,10" Style="{StaticResource Card}">
+                                    <Border Padding="10,7" Style="{StaticResource Card}">
                                         <StackPanel>
                                             <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
                                             <TextBlock Text="{Binding StatusText}" Style="{StaticResource Text.Caption}" Margin="0,3,0,0" />
@@ -315,7 +315,7 @@
 
                 <Border Grid.Row="2"
                         Style="{StaticResource Card}"
-                        Padding="14"
+                        Padding="10,8"
                         Margin="0,16,0,0">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -332,7 +332,7 @@
 
                 <Border Grid.Row="3"
                         Style="{StaticResource Card}"
-                        Padding="12"
+                        Padding="10,7"
                         Margin="0,16,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>

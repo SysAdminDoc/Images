@@ -24,7 +24,7 @@
                                VerticalAlignment="Top"
                                Margin="8"
                                Padding="7,3"
-                               FontSize="12"
+                               FontSize="13"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource FloatingChromeTextBrush}"
                                Background="{DynamicResource FloatingChromeBrush}" />
@@ -48,7 +48,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock FontFamily="{StaticResource IconFontFamily}"
                                    Text="&#xE8C8;"
-                                   FontSize="11"
+                                   FontSize="12"
                                    Margin="0,0,7,0"
                                    VerticalAlignment="Center" />
                         <TextBlock Text="{loc:Loc Copy}"

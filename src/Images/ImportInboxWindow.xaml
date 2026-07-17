@@ -79,7 +79,7 @@
 
                     <StackPanel Grid.Row="0">
                         <TextBlock Text="{x:Static loc:Strings.ImportInboxDestination}" Style="{StaticResource SectionLabel}" />
-                        <Border Style="{StaticResource Card}" Padding="12">
+                        <Border Style="{StaticResource Card}" Padding="10,7">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -183,7 +183,7 @@
 
                 <Border Grid.Row="0"
                         Style="{StaticResource Card}"
-                        Padding="14"
+                        Padding="10,8"
                         Margin="0,0,0,14">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -243,7 +243,7 @@
 
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="{x:Static loc:Strings.ImportInboxMetadata}" Style="{StaticResource SectionLabel}" />
-                        <Border Style="{StaticResource Card}" Padding="13,12">
+                        <Border Style="{StaticResource Card}" Padding="10,8">
                             <StackPanel x:Name="MetadataEditorPanel">
                                 <TextBlock Text="{x:Static loc:Strings.ImportInboxTags}"
                                            FontWeight="SemiBold"
@@ -290,7 +290,7 @@
                         <Border Style="{StaticResource Divider}" />
 
                         <TextBlock Text="{x:Static loc:Strings.ImportInboxAction}" Style="{StaticResource SectionLabel}" />
-                        <Border Style="{StaticResource Card}" Padding="13,12">
+                        <Border Style="{StaticResource Card}" Padding="10,8">
                             <StackPanel>
                                 <CheckBox x:Name="MoveOriginalsCheckBox"
                                           Content="{x:Static loc:Strings.ImportInboxMoveOriginals}"
@@ -306,7 +306,7 @@
 
                 <Border Grid.Row="2"
                         Style="{StaticResource Card}"
-                        Padding="12"
+                        Padding="10,7"
                         Margin="0,14,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>

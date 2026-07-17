@@ -133,7 +133,7 @@
                                 VerticalAlignment="Center">
                         <TextBlock Text="&#xE8B7;"
                                    FontFamily="{StaticResource IconFontFamily}"
-                                   FontSize="12"
+                                   FontSize="13"
                                    Foreground="{DynamicResource OverlayBrush}"
                                    Margin="0,0,9,0"
                                    VerticalAlignment="Center" />
@@ -145,7 +145,7 @@
                                    VerticalAlignment="Center" />
                         <TextBlock Text="&#xE76C;"
                                    FontFamily="{StaticResource IconFontFamily}"
-                                   FontSize="9"
+                                   FontSize="10"
                                    Foreground="{DynamicResource OverlayBrush}"
                                    Margin="8,0"
                                    VerticalAlignment="Center" />
@@ -583,7 +583,7 @@
                                                 BorderBrush="{DynamicResource FloatingChromeBorderBrush}"
                                                 BorderThickness="1">
                                             <TextBlock Text="{Binding PageLabel}"
-                                                       FontSize="12"
+                                                       FontSize="13"
                                                        Foreground="{DynamicResource FloatingChromeTextBrush}" />
                                         </Border>
                                     </Grid>
@@ -643,7 +643,7 @@
                                     BorderThickness="1">
                                 <StackPanel>
                                     <TextBlock Text="A"
-                                               FontSize="12"
+                                               FontSize="13"
                                                FontWeight="SemiBold"
                                                Foreground="{DynamicResource AccentBrush}" />
                                     <TextBlock Text="{Binding ComparePrimaryFileName}"
@@ -675,7 +675,7 @@
                                     BorderThickness="1">
                                 <StackPanel>
                                     <TextBlock Text="B"
-                                               FontSize="12"
+                                               FontSize="13"
                                                FontWeight="SemiBold"
                                                Foreground="{DynamicResource YellowBrush}" />
                                     <TextBlock Text="{Binding CompareSecondaryFileName}"
@@ -718,7 +718,7 @@
                                 BorderThickness="1">
                             <StackPanel>
                                 <TextBlock Text="{loc:Loc MainUiOverlayAB}"
-                                           FontSize="12"
+                                           FontSize="13"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource AccentBrush}" />
                                 <TextBlock Text="{Binding CompareStatusText}"
@@ -820,7 +820,7 @@
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="{Binding OverlayModeText}"
-                                       FontSize="12.5"
+                                       FontSize="13.5"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource FloatingChromeTextBrush}" />
                             <TextBlock Text="{Binding OverlayStatusText}"
@@ -1003,7 +1003,7 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE77F;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="12"
+                                               FontSize="13"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc MainUiPaste}" VerticalAlignment="Center" />
@@ -1018,7 +1018,7 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE713;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="12"
+                                               FontSize="13"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc SettingsWindowTitle}" VerticalAlignment="Center" />
@@ -1033,7 +1033,7 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE946;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="12"
+                                               FontSize="13"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc SettingsSectionDiagnostics}" VerticalAlignment="Center" />
@@ -1049,7 +1049,7 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE8B5;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="12"
+                                               FontSize="13"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc ImportInboxHeading}" VerticalAlignment="Center" />
@@ -1161,7 +1161,7 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE8E5;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="12"
+                                               FontSize="13"
                                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
@@ -1178,7 +1178,7 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE946;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="12"
+                                               FontSize="13"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc MainUiCodecDetails}" VerticalAlignment="Center" />
@@ -1192,7 +1192,7 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE719;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="12"
+                                               FontSize="13"
                                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
@@ -1208,7 +1208,7 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE838;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="12"
+                                               FontSize="13"
                                                Margin="0,0,8,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc MainUiRevealFile}" VerticalAlignment="Center" />
@@ -1325,7 +1325,7 @@
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE895;"
                                                    FontFamily="{StaticResource IconFontFamily}"
-                                                   FontSize="10"
+                                                   FontSize="11"
                                                    Margin="0,0,6,0"
                                                    VerticalAlignment="Center" />
                                         <TextBlock Text="{loc:Loc MainUiIndexingFilters}"
@@ -1344,7 +1344,7 @@
                                     AutomationProperties.Name="{loc:Loc AutomationMainWindowCloseGallery}">
                                 <TextBlock Text="&#xE8BB;"
                                            FontFamily="{StaticResource IconFontFamily}"
-                                           FontSize="12"
+                                           FontSize="13"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center" />
                             </Button>
@@ -1371,7 +1371,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="&#xE721;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="11"
+                                               FontSize="12"
                                                Foreground="{DynamicResource OverlayBrush}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,8,0" />
@@ -1400,7 +1400,7 @@
                                         </Button.Style>
                                         <TextBlock Text="&#xE711;"
                                                    FontFamily="{StaticResource IconFontFamily}"
-                                                   FontSize="10"
+                                                   FontSize="11"
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center" />
                                     </Button>
@@ -1425,7 +1425,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE8CB;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="11"
+                                               FontSize="12"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc BatchPresetName}" VerticalAlignment="Center" />
@@ -1451,7 +1451,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE8B7;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="11"
+                                               FontSize="12"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc MainUiExplorer}" VerticalAlignment="Center" />
@@ -1476,7 +1476,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE823;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="11"
+                                               FontSize="12"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc MainUiNewest}" VerticalAlignment="Center" />
@@ -1501,7 +1501,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE8B7;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="11"
+                                               FontSize="12"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc RecoveryCenterMetaType}" VerticalAlignment="Center" />
@@ -1527,7 +1527,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE8EF;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="11"
+                                               FontSize="12"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc ExportPreviewSize}" VerticalAlignment="Center" />
@@ -1545,7 +1545,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE809;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="11"
+                                               FontSize="12"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc MainUiLandscape}" VerticalAlignment="Center" />
@@ -1563,7 +1563,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE91B;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="11"
+                                               FontSize="12"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc MainUiPortrait}" VerticalAlignment="Center" />
@@ -1581,7 +1581,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE823;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="11"
+                                               FontSize="12"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc MainUiRecent}" VerticalAlignment="Center" />
@@ -1599,7 +1599,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE740;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="11"
+                                               FontSize="12"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc MainUiLarge}" VerticalAlignment="Center" />
@@ -1617,7 +1617,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE8C8;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="11"
+                                               FontSize="12"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc MainUiDuplicates}" VerticalAlignment="Center" />
@@ -1638,7 +1638,7 @@
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock Text="&#xE71E;"
                                            FontFamily="{StaticResource IconFontFamily}"
-                                           FontSize="12"
+                                           FontSize="13"
                                            Foreground="{DynamicResource OverlayBrush}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,6,0" />
@@ -1796,13 +1796,13 @@
                                             </Border>
                                             <TextBlock Text="{Binding FileName}"
                                                        Foreground="{DynamicResource TextBrush}"
-                                                       FontSize="12"
+                                                       FontSize="13"
                                                        FontWeight="SemiBold"
                                                        TextTrimming="CharacterEllipsis"
                                                        Margin="1,8,1,0" />
                                         <TextBlock Text="{Binding PositionText}"
                                                Foreground="{DynamicResource OverlayBrush}"
-                                                       FontSize="12"
+                                                       FontSize="13"
                                                        Margin="1,2,1,0" />
                                         </StackPanel>
                                     </Button>
@@ -1924,7 +1924,7 @@
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowFolderPosition}">
                         <TextBlock Text="{Binding PositionText}"
                                    Foreground="{DynamicResource FloatingChromeTextBrush}"
-                                   FontSize="12"
+                                   FontSize="13"
                                    FontWeight="SemiBold"
                                    AutomationProperties.LiveSetting="Polite"
                                    a11y:LiveRegionBehavior.AnnounceChanges="True" />
@@ -1940,7 +1940,7 @@
                             <Button Style="{StaticResource ToolbarButton}"
                                     Width="30"
                                     Height="26"
-                                    FontSize="11"
+                                    FontSize="12"
                                     Content="&#xE76B;"
                                     Command="{Binding PrevPageCommand}"
                                     ToolTip="{loc:Loc AutomationMainWindowPreviousPage}"
@@ -1961,7 +1961,7 @@
                                     AutomationProperties.HelpText="{loc:Loc MainUiDragToJumpToAnotherPageInTheCurrent}" />
                             <TextBlock Text="{Binding PagePositionText}"
                                        Foreground="{DynamicResource FloatingChromeTextBrush}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        FontWeight="SemiBold"
                                        Margin="8,0"
                                        VerticalAlignment="Center"
@@ -1970,7 +1970,7 @@
                             <Button Style="{StaticResource ToolbarButton}"
                                     Width="30"
                                     Height="26"
-                                    FontSize="11"
+                                    FontSize="12"
                                     Content="&#xE76C;"
                                     Command="{Binding NextPageCommand}"
                                     ToolTip="{loc:Loc AutomationMainWindowNextPage}"
@@ -1993,13 +1993,13 @@
                                             VerticalAlignment="Center">
                                     <TextBlock Text="&#xE946;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="12"
+                                               FontSize="13"
                                                Foreground="{DynamicResource AccentBrush}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,8,0" />
                                     <TextBlock Text="{loc:Loc AutomationMainWindowPhotoMetadata}"
                                                Foreground="{DynamicResource FloatingChromeTextBrush}"
-                                               FontSize="12"
+                                               FontSize="13"
                                                FontWeight="SemiBold"
                                                VerticalAlignment="Center"
                                                AutomationProperties.LiveSetting="Polite"
@@ -2036,13 +2036,13 @@
                                                 MaxWidth="250">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="{Binding Label}"
-                                                           FontSize="12"
+                                                           FontSize="13"
                                                            FontWeight="SemiBold"
                                                            Foreground="{DynamicResource OverlayBrush}"
                                                            VerticalAlignment="Center"
                                                            Margin="0,0,6,0" />
                                                 <TextBlock Text="{Binding Value}"
-                                                           FontSize="12.5"
+                                                           FontSize="13.5"
                                                            Foreground="{DynamicResource FloatingChromeTextBrush}"
                                                            TextTrimming="CharacterEllipsis"
                                                            MaxWidth="170"
@@ -2059,7 +2059,7 @@
                                         Visibility="{Binding MetadataStatusText, Converter={StaticResource BoolToVis}}">
                                 <TextBlock Text="&#xE946;"
                                            FontFamily="{StaticResource IconFontFamily}"
-                                           FontSize="11"
+                                           FontSize="12"
                                            Foreground="{DynamicResource OverlayBrush}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,8,0" />
@@ -2074,7 +2074,7 @@
                                         Visibility="{Binding HoverPixelText, Converter={StaticResource BoolToVis}}">
                                 <TextBlock Text="&#xEF3C;"
                                            FontFamily="{StaticResource IconFontFamily}"
-                                           FontSize="11"
+                                           FontSize="12"
                                            Foreground="{DynamicResource AccentBrush}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,8,0" />
@@ -2149,13 +2149,13 @@
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding OcrStatusTitle}"
                                            Foreground="{DynamicResource FloatingChromeTextBrush}"
-                                           FontSize="12.5"
+                                           FontSize="13.5"
                                            FontWeight="SemiBold"
                                            AutomationProperties.LiveSetting="Polite"
                                            a11y:LiveRegionBehavior.AnnounceChanges="True" />
                                 <TextBlock Text="{Binding OcrStatusDetail}"
                                            Foreground="{DynamicResource SubtextBrush}"
-                                           FontSize="12.5"
+                                           FontSize="13.5"
                                            LineHeight="17"
                                            TextWrapping="Wrap"
                                            Margin="0,3,0,0" />
@@ -2207,7 +2207,7 @@
                                        Margin="0,0,10,0" />
                             <TextBlock Text="{loc:Loc MainUiScrollToZoomDragToPanDoubleClickTo}"
                                        Foreground="{DynamicResource FloatingChromeTextBrush}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        VerticalAlignment="Center"
                                        AutomationProperties.LiveSetting="Polite"
                                        a11y:LiveRegionBehavior.AnnounceChanges="True" />
@@ -2472,7 +2472,7 @@
                                                 <TextBlock Grid.Column="0"
                                                            Text="{Binding Category}"
                                                            Foreground="{DynamicResource SubtextBrush}"
-                                                           FontSize="12"
+                                                           FontSize="13"
                                                            VerticalAlignment="Center"
                                                            Margin="0,0,8,0"
                                                            MinWidth="60" />
@@ -2485,7 +2485,7 @@
                                                 <TextBlock Grid.Column="2"
                                                            Text="{Binding Shortcut}"
                                                            Foreground="{DynamicResource OverlayBrush}"
-                                                           FontSize="12"
+                                                           FontSize="13"
                                                            VerticalAlignment="Center"
                                                            Margin="12,0,0,0" />
                                             </Grid>
@@ -2594,13 +2594,13 @@
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding OperationStatusTitle}"
                                            Foreground="{DynamicResource FloatingChromeTextBrush}"
-                                           FontSize="12.5"
+                                           FontSize="13.5"
                                            FontWeight="SemiBold"
                                            AutomationProperties.LiveSetting="Polite"
                                            a11y:LiveRegionBehavior.AnnounceChanges="True" />
                                 <TextBlock Text="{Binding OperationStatusDetail}"
                                            Foreground="{DynamicResource SubtextBrush}"
-                                           FontSize="12.5"
+                                           FontSize="13.5"
                                            LineHeight="17"
                                            TextWrapping="Wrap"
                                            Margin="0,3,0,0" />
@@ -2698,7 +2698,7 @@
                         Background="{DynamicResource WorkspaceTopBarBrush}"
                         BorderBrush="{DynamicResource WorkspaceTopBarBorderBrush}"
                         BorderThickness="0,1,0,0">
-                    <Grid Margin="14,8,14,9">
+                    <Grid Margin="12,6,12,7">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
@@ -2706,7 +2706,7 @@
                         </Grid.RowDefinitions>
 
                         <Border Grid.Row="0"
-                                Margin="0,0,0,8"
+                                Margin="0,0,0,6"
                                 Visibility="{Binding ShowFilmstrip, Converter={StaticResource BoolToVis}}">
                             <ListBox x:Name="FilmstripItems"
                                      AutomationProperties.AutomationId="FolderFilmstrip"
@@ -2714,7 +2714,7 @@
                                      Background="Transparent"
                                      BorderThickness="0"
                                      Padding="0,0,0,4"
-                                     MaxHeight="78"
+                                     MaxHeight="74"
                                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                      ScrollViewer.VerticalScrollBarVisibility="Disabled"
                                      ScrollViewer.CanContentScroll="True"
@@ -2749,9 +2749,9 @@
                                             <Button Command="{Binding DataContext.OpenPreviewItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                     CommandParameter="{Binding}"
                                                     Loaded="PreviewThumbnail_Loaded"
-                                                    Width="108"
-                                                    MinHeight="68"
-                                                    Margin="0,0,8,0"
+                                                    Width="100"
+                                                    MinHeight="64"
+                                                    Margin="0,0,7,0"
                                                     Padding="3"
                                                     HorizontalContentAlignment="Stretch"
                                                     VerticalContentAlignment="Stretch"
@@ -2801,7 +2801,7 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Button.Style>
-                                                <Border Height="62"
+                                                <Border Height="58"
                                                             CornerRadius="{StaticResource Radius.Sm.CR}"
                                                             Background="{DynamicResource ViewportBrush}"
                                                             BorderBrush="{DynamicResource HairlineBrush}"
@@ -2915,11 +2915,11 @@
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock Text="&#xE8CB;"
                                                    FontFamily="{StaticResource IconFontFamily}"
-                                                   FontSize="11"
+                                                   FontSize="12"
                                                    Margin="0,0,6,0"
                                                    VerticalAlignment="Center" />
                                         <TextBlock Text="{Binding FolderSortLabel}"
-                                                   FontSize="12.5"
+                                                   FontSize="13.5"
                                                    FontWeight="SemiBold"
                                                    VerticalAlignment="Center" />
                                     </StackPanel>
@@ -2956,12 +2956,12 @@
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE8A5;"
                                                    FontFamily="{StaticResource IconFontFamily}"
-                                                   FontSize="10"
+                                                   FontSize="11"
                                                    Foreground="{DynamicResource MauveBrush}"
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,5,0" />
                                         <TextBlock Text="{Binding PagePositionText}"
-                                                   FontSize="12"
+                                                   FontSize="13"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource MauveBrush}"
                                                    VerticalAlignment="Center" />
@@ -2983,12 +2983,12 @@
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE768;"
                                                    FontFamily="{StaticResource IconFontFamily}"
-                                                   FontSize="10"
+                                                   FontSize="11"
                                                    Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,5,0" />
                                         <TextBlock Text="{Binding AnimationFrameCountText}"
-                                                   FontSize="12"
+                                                   FontSize="13"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center" />
@@ -3010,7 +3010,7 @@
                                         Cursor="Hand"
                                         MouseLeftButtonUp="ChannelChip_Click">
                                     <TextBlock Text="{Binding ChannelModeLabel}"
-                                               FontSize="12"
+                                               FontSize="13"
                                                FontWeight="SemiBold"
                                                Foreground="{DynamicResource AccentBrush}"
                                                VerticalAlignment="Center" />
@@ -3030,12 +3030,12 @@
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE703;"
                                                    FontFamily="{StaticResource IconFontFamily}"
-                                                   FontSize="10"
+                                                   FontSize="11"
                                                    Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,4,0" />
                                         <TextBlock Text="{Binding ListenPortLabel}"
-                                                   FontSize="12"
+                                                   FontSize="13"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center" />
@@ -3062,12 +3062,12 @@
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE768;"
                                                    FontFamily="{StaticResource IconFontFamily}"
-                                                   FontSize="10"
+                                                   FontSize="11"
                                                    Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,4,0" />
                                         <TextBlock Text="{Binding SlideshowStatusText}"
-                                                   FontSize="12"
+                                                   FontSize="13"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource GreenBrush}"
                                                    VerticalAlignment="Center" />
@@ -3160,11 +3160,10 @@
                 BorderBrush="{DynamicResource HairlineBrush}"
                 BorderThickness="1,0,0,0">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
-                <StackPanel Margin="16,16,16,22">
+                <StackPanel Margin="16,12,16,18">
 
                     <!-- Panel header -->
-                    <Grid Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
+                    <Grid Margin="0,0,0,10">                        <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
@@ -3207,7 +3206,7 @@
                                    ToolTip="{Binding CurrentFileName}" />
                         <TextBlock Text="{Binding CurrentFolder}"
                                    Foreground="{DynamicResource OverlayBrush}"
-                                   FontSize="12.5"
+                                   FontSize="13.5"
                                    Margin="0,3,0,10"
                                    TextTrimming="CharacterEllipsis"
                                    ToolTip="{Binding CurrentFolder}" />
@@ -3253,7 +3252,7 @@
                                        VerticalAlignment="Top" />
                             <StackPanel Grid.Column="1">
                                 <TextBlock Text="{Binding LatestUpdateTag, StringFormat=Update {0} is available}"
-                                           FontSize="12.5"
+                                           FontSize="13.5"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextBrush}" />
                                 <TextBlock Text="{loc:Loc MainUiOpenTheReleasePageWhenYouAreReadyTo}"
@@ -3271,7 +3270,7 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE8A7;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="11"
+                                               FontSize="12"
                                                Margin="0,0,7,0"
                                                VerticalAlignment="Center" />
                                     <TextBlock Text="{loc:Loc AboutViewUpdate}" VerticalAlignment="Center" />
@@ -3644,13 +3643,13 @@
                                                 </Border>
                                                 <TextBlock Text="{Binding FileName}"
                                                            Foreground="{DynamicResource TextBrush}"
-                                                           FontSize="12.5"
+                                                           FontSize="13.5"
                                                            FontWeight="SemiBold"
                                                            TextTrimming="CharacterEllipsis"
                                                            Margin="1,7,1,0" />
                                                 <TextBlock Text="{Binding PositionText}"
                                                            Foreground="{DynamicResource OverlayBrush}"
-                                                           FontSize="12"
+                                                           FontSize="13"
                                                            Margin="1,1,1,0" />
                                             </StackPanel>
                                         </Button>
@@ -3704,7 +3703,7 @@
                                 <!-- Locked padlock -->
                                 <TextBlock Text="&#xE72E;"
                                            FontFamily="{StaticResource IconFontFamily}"
-                                           FontSize="11"
+                                           FontSize="12"
                                            VerticalAlignment="Center"
                                            Margin="0,0,7,0"
                                            Foreground="{DynamicResource SubtextBrush}"
@@ -3712,7 +3711,7 @@
                                 <!-- Unlocked pencil-edit -->
                                 <TextBlock Text="&#xE70F;"
                                            FontFamily="{StaticResource IconFontFamily}"
-                                           FontSize="11"
+                                           FontSize="12"
                                            VerticalAlignment="Center"
                                            Margin="0,0,7,0"
                                            Foreground="{DynamicResource YellowBrush}"
@@ -3736,7 +3735,7 @@
                         <StackPanel>
                             <TextBlock Text="{loc:Loc MainUiChangingTheExtensionOnlyRenamesTheFileUseA}"
                                        Foreground="{DynamicResource YellowBrush}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        LineHeight="17"
                                        TextWrapping="Wrap" />
                             <TextBox Text="{Binding Extension, UpdateSourceTrigger=PropertyChanged}"
@@ -3805,11 +3804,11 @@
                             <StackPanel Grid.Column="1">
                                 <TextBlock Text="{Binding RenameStatusText}"
                                            Foreground="{DynamicResource TextBrush}"
-                                           FontSize="12.5"
+                                           FontSize="13.5"
                                            FontWeight="SemiBold" />
                                 <TextBlock Text="{Binding RenamePreview}"
                                            Foreground="{DynamicResource SubtextBrush}"
-                                           FontSize="12"
+                                           FontSize="13"
                                            Margin="0,3,0,0"
                                            TextTrimming="CharacterEllipsis" />
                             </StackPanel>
@@ -3852,14 +3851,14 @@
 
                                     <StackPanel Grid.Column="1">
                                         <TextBlock Text="{Binding CurrentArchiveProgressText}"
-                                                   FontSize="12.5"
+                                                   FontSize="13.5"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource TextBrush}"
                                                    TextTrimming="CharacterEllipsis"
                                                    AutomationProperties.LiveSetting="Polite"
                                                    a11y:LiveRegionBehavior.AnnounceChanges="True" />
                                         <TextBlock Text="{Binding DecoderUsed}"
-                                                   FontSize="12.5"
+                                                   FontSize="13.5"
                                                    Margin="0,3,0,0"
                                                    Foreground="{DynamicResource OverlayBrush}"
                                                    TextTrimming="CharacterEllipsis" />
@@ -3875,7 +3874,7 @@
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowFirstBookPage}">
                                         <TextBlock Text="&#xE892;"
                                                    FontFamily="{StaticResource IconFontFamily}"
-                                                   FontSize="12"
+                                                   FontSize="13"
                                                    HorizontalAlignment="Center" />
                                     </Button>
                                     <Button Style="{StaticResource ChromeButton}"
@@ -3886,7 +3885,7 @@
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowPreviousBookPage}">
                                         <TextBlock Text="&#xE76B;"
                                                    FontFamily="{StaticResource IconFontFamily}"
-                                                   FontSize="12"
+                                                   FontSize="13"
                                                    HorizontalAlignment="Center" />
                                     </Button>
                                     <Button Style="{StaticResource ChromeButton}"
@@ -3897,7 +3896,7 @@
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowNextBookPage}">
                                         <TextBlock Text="&#xE76C;"
                                                    FontFamily="{StaticResource IconFontFamily}"
-                                                   FontSize="12"
+                                                   FontSize="13"
                                                    HorizontalAlignment="Center" />
                                     </Button>
                                     <Button Style="{StaticResource ChromeButton}"
@@ -3907,7 +3906,7 @@
                                             AutomationProperties.Name="{loc:Loc AutomationMainWindowLastBookPage}">
                                         <TextBlock Text="&#xE893;"
                                                    FontFamily="{StaticResource IconFontFamily}"
-                                                   FontSize="12"
+                                                   FontSize="13"
                                                    HorizontalAlignment="Center" />
                                     </Button>
                                 </UniformGrid>
@@ -3925,7 +3924,7 @@
                                                   AutomationProperties.Name="{loc:Loc AutomationMainWindowRightToLeftBookPageTurns}" />
                                         <TextBlock Text="{Binding ArchivePageTurnModeHint}"
                                                    Margin="28,5,0,0"
-                                                   FontSize="12"
+                                                   FontSize="13"
                                                    Foreground="{DynamicResource OverlayBrush}"
                                                    TextWrapping="Wrap" />
                                         <CheckBox IsChecked="{Binding ArchiveOldScanFilterEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -3935,7 +3934,7 @@
                                                   AutomationProperties.Name="{loc:Loc AutomationMainWindowCleanOldArchiveScans}" />
                                         <TextBlock Text="{Binding ArchiveOldScanFilterHint}"
                                                    Margin="28,5,0,0"
-                                                   FontSize="12"
+                                                   FontSize="13"
                                                    Foreground="{DynamicResource OverlayBrush}"
                                                    TextWrapping="Wrap" />
                                         <CheckBox IsChecked="{Binding ArchiveSpreadModeEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -3945,7 +3944,7 @@
                                                   AutomationProperties.Name="{loc:Loc AutomationMainWindowTwoPageArchiveSpreads}" />
                                         <TextBlock Text="{Binding ArchiveSpreadModeHint}"
                                                    Margin="28,5,0,0"
-                                                   FontSize="12"
+                                                   FontSize="13"
                                                    Foreground="{DynamicResource OverlayBrush}"
                                                    TextWrapping="Wrap" />
                                         <CheckBox IsChecked="{Binding ArchiveContinuousModeEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -3955,7 +3954,7 @@
                                                   AutomationProperties.Name="{loc:Loc AutomationMainWindowContinuousArchiveReader}" />
                                         <TextBlock Text="{Binding ArchiveContinuousModeHint}"
                                                    Margin="28,5,0,0"
-                                                   FontSize="12"
+                                                   FontSize="13"
                                                    Foreground="{DynamicResource OverlayBrush}"
                                                    TextWrapping="Wrap" />
                                     </StackPanel>
@@ -3974,11 +3973,11 @@
                         <StackPanel>
                             <TextBlock Text="{loc:Loc MainUiNoRenamesYet}"
                                        Foreground="{DynamicResource TextBrush}"
-                                       FontSize="12.5"
+                                       FontSize="13.5"
                                        FontWeight="SemiBold" />
                             <TextBlock Text="{loc:Loc MainUiYourUndoListWillAppearHere}"
                                        Foreground="{DynamicResource OverlayBrush}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        LineHeight="17"
                                        TextWrapping="Wrap"
                                        Margin="0,4,0,0" />
@@ -4001,11 +4000,11 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <StackPanel Grid.Column="0">
-                                            <TextBlock FontSize="12" TextTrimming="CharacterEllipsis">
+                                            <TextBlock FontSize="13" TextTrimming="CharacterEllipsis">
                                                 <Run Text="{Binding FromPath, Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}"
                                                      Foreground="{DynamicResource SubtextBrush}" />
                                             </TextBlock>
-                                            <TextBlock FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,2,0,0">
+                                            <TextBlock FontSize="13" TextTrimming="CharacterEllipsis" Margin="0,2,0,0">
                                                 <Run Text="→ " Foreground="{DynamicResource OverlayBrush}" />
                                                 <Run Text="{Binding ToPath, Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}"
                                                      Foreground="{DynamicResource TextBrush}" />
@@ -4023,7 +4022,7 @@
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                 <TextBlock Text="&#xE7A7;"
                                                            FontFamily="{StaticResource IconFontFamily}"
-                                                           FontSize="11"
+                                                           FontSize="12"
                                                            Margin="0,0,7,0"
                                                            VerticalAlignment="Center" />
                                                 <TextBlock Text="{loc:Loc Undo}" VerticalAlignment="Center" />
@@ -4069,12 +4068,12 @@
                                                        Margin="0,0,10,0" />
                                             <StackPanel Grid.Column="1">
                                                 <TextBlock Text="{Binding Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}"
-                                                           FontSize="12.5"
+                                                           FontSize="13.5"
                                                            FontWeight="SemiBold"
                                                            TextTrimming="CharacterEllipsis"
                                                            Foreground="{DynamicResource TextBrush}" />
                                                 <TextBlock Text="{Binding Converter={x:Static vm:PathToParentConverter.Instance}, Mode=OneWay}"
-                                                           FontSize="12"
+                                                           FontSize="13"
                                                            Margin="0,2,0,0"
                                                            TextTrimming="CharacterEllipsis"
                                                            Foreground="{DynamicResource OverlayBrush}" />
@@ -4123,7 +4122,7 @@
                                                     Margin="0,0,10,0">
                                                 <TextBlock Text="&#xE8A5;"
                                                            FontFamily="{StaticResource IconFontFamily}"
-                                                           FontSize="12"
+                                                           FontSize="13"
                                                            Foreground="{DynamicResource AccentBrush}"
                                                            HorizontalAlignment="Center"
                                                            VerticalAlignment="Center" />
@@ -4131,12 +4130,12 @@
 
                                             <StackPanel Grid.Column="1">
                                                 <TextBlock Text="{Binding Path, Converter={x:Static vm:PathToFileNameConverter.Instance}, Mode=OneWay}"
-                                                           FontSize="12.5"
+                                                           FontSize="13.5"
                                                            FontWeight="SemiBold"
                                                            TextTrimming="CharacterEllipsis"
                                                            Foreground="{DynamicResource TextBrush}" />
                                                 <TextBlock Text="{Binding Path, Converter={x:Static vm:PathToParentConverter.Instance}, Mode=OneWay}"
-                                                           FontSize="12"
+                                                           FontSize="13"
                                                            Margin="0,2,0,0"
                                                            TextTrimming="CharacterEllipsis"
                                                            Foreground="{DynamicResource OverlayBrush}" />
@@ -4147,7 +4146,7 @@
                                                     Margin="10,0,0,0"
                                                     VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding ProgressText}"
-                                                           FontSize="12"
+                                                           FontSize="13"
                                                            FontWeight="SemiBold"
                                                            Foreground="{DynamicResource SubtextBrush}" />
                                             </Border>
@@ -4204,7 +4203,7 @@
                             <Border Style="{StaticResource Badge}"
                                     VerticalAlignment="Center">
                                 <TextBlock Text="{Binding DecoderUsed}"
-                                           FontSize="12"
+                                           FontSize="13"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource SubtextBrush}" />
                             </Border>
@@ -4217,7 +4216,7 @@
                                 <TextBlock Text="{Binding HdrDisplayStatus}"
                                            MaxWidth="250"
                                            TextWrapping="Wrap"
-                                           FontSize="12"
+                                           FontSize="13"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextBrush}"
                                            AutomationProperties.LiveSetting="Polite"
@@ -4239,7 +4238,7 @@
                     <!-- ORGANIZATION section -->
                     <TextBlock Text="{loc:Loc MainUiOrganization}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
-                            Padding="13,12"
+                            Padding="10,8"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowOrganizationControls}">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -4261,7 +4260,7 @@
                                         Style="{StaticResource SidePanelToolButton}"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenTagRelationships}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="&#xE8EC;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="&#xE8EC;" FontFamily="{StaticResource IconFontFamily}" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="{loc:Loc ImportInboxTags}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
@@ -4270,7 +4269,7 @@
                                         Margin="0,8,0,0"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenImportInbox}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="&#xE8B7;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="&#xE8B7;" FontFamily="{StaticResource IconFontFamily}" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="{loc:Loc MainUiInbox}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
@@ -4283,7 +4282,7 @@
                     <!-- AUTOMATION section -->
                     <TextBlock Text="{loc:Loc MainUiAutomation}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
-                            Padding="13,12"
+                            Padding="10,8"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowAutomationControls}">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -4305,7 +4304,7 @@
                                         Style="{StaticResource SidePanelToolButton}"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenMacroActions}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="&#xE945;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="&#xE945;" FontFamily="{StaticResource IconFontFamily}" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="{loc:Loc MainUiMacros}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
@@ -4314,7 +4313,7 @@
                                         Margin="0,8,0,0"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenBatchProcessor}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="&#xE8EF;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="&#xE8EF;" FontFamily="{StaticResource IconFontFamily}" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="{loc:Loc MainUiBatch}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
@@ -4323,7 +4322,7 @@
                                         Margin="0,8,0,0"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenModelManager}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="&#xE950;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="&#xE950;" FontFamily="{StaticResource IconFontFamily}" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="{loc:Loc MainUiModels}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
@@ -4332,7 +4331,7 @@
                                         Margin="0,8,0,0"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenSemanticSearch}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFontFamily}" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="{loc:Loc SemanticSearchSearch}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
@@ -4345,7 +4344,7 @@
                     <!-- CLEANUP section -->
                     <TextBlock Text="{loc:Loc MainUiCleanup}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
-                            Padding="13,12"
+                            Padding="10,8"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowCleanupControls}">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -4367,7 +4366,7 @@
                                         Style="{StaticResource SidePanelToolButton}"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenDuplicateCleanup}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="&#xE8C8;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="&#xE8C8;" FontFamily="{StaticResource IconFontFamily}" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="{loc:Loc MainUiDuplicates}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
@@ -4376,7 +4375,7 @@
                                         Margin="0,8,0,0"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenFileHealthScan}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFontFamily}" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="{loc:Loc MainUiFileHealth}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
@@ -4385,7 +4384,7 @@
                                         Margin="0,8,0,0"
                                         AutomationProperties.Name="{loc:Loc AutomationMainWindowOpenRecoveryCenter}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="&#xE777;" FontFamily="{StaticResource IconFontFamily}" FontSize="11" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="&#xE777;" FontFamily="{StaticResource IconFontFamily}" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" />
                                         <TextBlock Text="{loc:Loc MainUiRecovery}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
@@ -4398,7 +4397,7 @@
                     <!-- COMPARE section -->
                     <TextBlock Text="{loc:Loc DuplicateCleanupCompareButton}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
-                            Padding="13,12"
+                            Padding="10,8"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowCompareControls}">
                         <StackPanel>
                             <Grid>
@@ -4489,7 +4488,7 @@
                     <!-- OVERLAY section -->
                     <TextBlock Text="{loc:Loc MainCompareOverlay}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
-                            Padding="13,12"
+                            Padding="10,8"
                             AutomationProperties.Name="{loc:Loc AutomationMainWindowPinnedOverlayControls}">
                         <StackPanel>
                             <Grid>
@@ -4561,7 +4560,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE946;"
                                                FontFamily="{StaticResource IconFontFamily}"
-                                               FontSize="12"
+                                               FontSize="13"
                                                Foreground="{DynamicResource AccentBrush}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,9,0" />
@@ -4589,7 +4588,7 @@
                         <!-- ANIMATION section -->
                         <TextBlock Text="{loc:Loc MainUiAnimation}" Style="{StaticResource SectionLabel}" />
                         <Border Style="{StaticResource Card}"
-                                Padding="13,12"
+                                Padding="10,8"
                                 AutomationProperties.Name="{loc:Loc AutomationMainWindowAnimationFrameWorkbench}">
                             <StackPanel>
                                 <Grid>
@@ -4778,7 +4777,7 @@
                     <!-- SELECTION section -->
                     <TextBlock Text="{loc:Loc MainUiSelection}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
-                            Padding="13,12"
+                            Padding="10,8"
                             IsEnabled="{Binding CanUseSelection}">
                         <StackPanel>
                             <Grid>
@@ -4849,7 +4848,7 @@
                     <!-- CROP section -->
                     <TextBlock Text="{loc:Loc MainUiCrop}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
-                            Padding="13,12"
+                            Padding="10,8"
                             IsEnabled="{Binding CanUseCrop}">
                         <StackPanel>
                             <Grid>
@@ -4987,7 +4986,7 @@
                     <!-- LOCAL EXPOSURE section -->
                     <TextBlock Text="{loc:Loc MainUiLocalExposure}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
-                            Padding="13,12"
+                            Padding="10,8"
                             IsEnabled="{Binding CanUseExposureBrush}">
                         <StackPanel>
                             <Grid>
@@ -5118,7 +5117,7 @@
                     <!-- RED-EYE section -->
                     <TextBlock Text="{loc:Loc MainUiRedEyeCorrection}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
-                            Padding="13,12"
+                            Padding="10,8"
                             IsEnabled="{Binding CanUseRedEyeCorrection}">
                         <StackPanel>
                             <Grid>
@@ -5243,7 +5242,7 @@
                     <!-- RETOUCH section -->
                     <TextBlock Text="{loc:Loc MainUiCloneHeal}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
-                            Padding="13,12"
+                            Padding="10,8"
                             IsEnabled="{Binding CanUseRetouch}">
                         <StackPanel>
                             <Grid>
@@ -5383,7 +5382,7 @@
                     <!-- INSPECTOR section -->
                     <TextBlock Text="{loc:Loc MainUiInspector}" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource Card}"
-                            Padding="13,12"
+                            Padding="10,8"
                             IsEnabled="{Binding CanUseInspector}">
                         <StackPanel>
                             <Grid>
@@ -5546,7 +5545,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE7BA;"
                                            FontFamily="{StaticResource IconFontFamily}"
-                                           FontSize="12"
+                                           FontSize="13"
                                            Foreground="{DynamicResource YellowBrush}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,9,0" />
@@ -5563,7 +5562,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE946;"
                                            FontFamily="{StaticResource IconFontFamily}"
-                                           FontSize="12"
+                                           FontSize="13"
                                            Foreground="{DynamicResource OverlayBrush}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,9,0" />
@@ -5637,7 +5636,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE946;"
                                        FontFamily="{StaticResource IconFontFamily}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        Foreground="{DynamicResource OverlayBrush}"
                                        VerticalAlignment="Center"
                                        Margin="0,0,9,0" />

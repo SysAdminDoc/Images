@@ -52,7 +52,7 @@
                           VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                     <TextBlock Text="{x:Static loc:Strings.AdjustmentsLevelsHeading}" Style="{StaticResource SectionLabel}" />
-                    <Border Style="{StaticResource Card}" Padding="14">
+                    <Border Style="{StaticResource Card}" Padding="10,8">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -151,7 +151,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <TextBlock Text="{x:Static loc:Strings.AdjustmentsColorHeading}" Style="{StaticResource SectionLabel}" />
-                    <Border Style="{StaticResource Card}" Padding="14">
+                    <Border Style="{StaticResource Card}" Padding="10,8">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -223,7 +223,7 @@
 
                     <Border Style="{StaticResource Divider}" />
 
-                    <Border Style="{StaticResource Card}" Padding="14">
+                    <Border Style="{StaticResource Card}" Padding="10,8">
                         <TextBlock Text="{x:Static loc:Strings.AdjustmentsEditNotice}"
                                    Style="{StaticResource Text.Hint}"
                                    TextWrapping="Wrap" />
@@ -233,7 +233,7 @@
 
             <Border Grid.Column="2"
                     Style="{StaticResource Card}"
-                    Padding="14"
+                    Padding="10,8"
                     ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>

@@ -53,7 +53,7 @@
                                  Padding="2,0"
                                  MinWidth="0"
                                  MinHeight="0"
-                                 FontSize="12"
+                                 FontSize="13"
                                  FontWeight="SemiBold"
                                  TextWrapping="Wrap"
                                  AcceptsReturn="True"

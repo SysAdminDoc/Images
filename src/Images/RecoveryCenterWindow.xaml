@@ -39,7 +39,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE72C;"
                                        FontFamily="{StaticResource IconFontFamily}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center" />
                             <TextBlock Text="{x:Static loc:Strings.RecoveryCenterRefresh}" />
@@ -53,7 +53,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE8B7;"
                                        FontFamily="{StaticResource IconFontFamily}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center" />
                             <TextBlock Text="{x:Static loc:Strings.RecoveryCenterReveal}" />
@@ -67,7 +67,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE777;"
                                        FontFamily="{StaticResource IconFontFamily}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center" />
                             <TextBlock Text="{x:Static loc:Strings.RecoveryCenterRestore}" />
@@ -181,7 +181,7 @@
 
                         <Border Grid.Row="0"
                                 Style="{StaticResource Card}"
-                                Padding="14"
+                                Padding="10,8"
                                 Margin="0,0,0,14">
                             <StackPanel>
                                 <TextBlock x:Name="DetailTitle" Style="{StaticResource Text.Title}" TextWrapping="Wrap" />
@@ -194,7 +194,7 @@
 
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                             <StackPanel>
-                                <Border Style="{StaticResource Card}" Padding="14">
+                                <Border Style="{StaticResource Card}" Padding="10,8">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
@@ -231,7 +231,7 @@
 
                                 <Border x:Name="SidecarsPanel"
                                         Style="{StaticResource Card}"
-                                        Padding="14"
+                                        Padding="10,8"
                                         Margin="0,14,0,0">
                                     <StackPanel>
                                         <TextBlock Text="{x:Static loc:Strings.RecoveryCenterSidecars}" Style="{StaticResource SectionLabel}" />
@@ -262,12 +262,12 @@
 
                         <Border Grid.Row="2"
                                 Style="{StaticResource Card}"
-                                Padding="12"
+                                Padding="10,7"
                                 Margin="0,14,0,0">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE946;"
                                            FontFamily="{StaticResource IconFontFamily}"
-                                           FontSize="12"
+                                           FontSize="13"
                                            Foreground="{DynamicResource AccentBrush}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,9,0" />

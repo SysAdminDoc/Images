@@ -204,7 +204,7 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <TextBlock Text="{loc:Loc FaceReviewDecision}" Style="{StaticResource SectionLabel}" />
-                        <Border Style="{StaticResource Card}" Padding="14">
+                        <Border Style="{StaticResource Card}" Padding="10,8">
                             <StackPanel>
                                 <Border Height="170"
                                         Background="{DynamicResource SurfaceRaisedBrush}"
@@ -249,7 +249,7 @@
                         </Border>
 
                         <TextBlock Text="{loc:Loc FaceReviewWriteGate}" Style="{StaticResource SectionLabel}" Margin="0,18,0,0" />
-                        <Border Style="{StaticResource Card}" Padding="14">
+                        <Border Style="{StaticResource Card}" Padding="10,8">
                             <StackPanel>
                                 <TextBlock Text="{Binding MergeGateText}"
                                            Style="{StaticResource Text.Body}"

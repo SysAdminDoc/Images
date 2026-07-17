@@ -37,7 +37,7 @@
             <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                     <TextBlock Text="{loc:Loc AnnotationTool}" Style="{StaticResource SectionLabel}" />
-                    <Border Style="{StaticResource Card}" Padding="14">
+                    <Border Style="{StaticResource Card}" Padding="10,8">
                         <UniformGrid Columns="2">
                             <Button Style="{StaticResource ChromeButton}" Tag="Arrow" Click="ToolButton_Click" Margin="0,0,8,8">
                                 <TextBlock Text="{loc:Loc AnnotationArrowTool}" />
@@ -69,7 +69,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <TextBlock Text="{loc:Loc AnnotationTextTool}" Style="{StaticResource SectionLabel}" />
-                    <Border Style="{StaticResource Card}" Padding="14">
+                    <Border Style="{StaticResource Card}" Padding="10,8">
                         <TextBox x:Name="AnnotationTextBox"
                                  Text="{loc:Loc AnnotationDefaultText}"
                                  MinHeight="34"
@@ -79,7 +79,7 @@
                     <Border Style="{StaticResource Divider}" />
 
                     <TextBlock Text="{loc:Loc Style}" Style="{StaticResource SectionLabel}" />
-                    <Border Style="{StaticResource Card}" Padding="14">
+                    <Border Style="{StaticResource Card}" Padding="10,8">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -129,7 +129,7 @@
 
                     <Border Style="{StaticResource Divider}" />
 
-                    <Border Style="{StaticResource Card}" Padding="14">
+                    <Border Style="{StaticResource Card}" Padding="10,8">
                         <TextBlock x:Name="ToolStatusText"
                                    Style="{StaticResource Text.Caption}"
                                    TextWrapping="Wrap"

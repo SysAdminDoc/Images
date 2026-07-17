@@ -1623,19 +1623,19 @@ Details written to:
     <value>[!!!!!!! Reopen last image on launch !!!!!!!]</value>
   </data>
   <data name="SettingsRestoreSessionDescription" xml:space="preserve">
-    <value>[!!!!!!!!!!!! When Images starts with no file, reopens the last image you viewed. If that file is gone, opens to the empty state. !!!!!!!!!!!!]</value>
+    <value>[!!!!!!!! Reopen the last image when Images starts without a file. !!!!!!!!]</value>
   </data>
   <data name="SettingsColorManagementTitle" xml:space="preserve">
     <value>[!!!!!! Color-managed display !!!!!!]</value>
   </data>
   <data name="SettingsColorManagementDescription" xml:space="preserve">
-    <value>[!!!!!!!!!!!! Honors embedded ICC profiles. With Windows Advanced Color off, wide-gamut images target the active monitor profile; with Advanced Color on or unavailable, Images safely outputs sRGB. Applies immediately and decodes through Magick.NET. !!!!!!!!!!!!]</value>
+    <value>[!!!!!!!! Honor embedded ICC profiles and target the active monitor when Windows Advanced Color is off. Otherwise output sRGB. !!!!!!!!]</value>
   </data>
   <data name="SettingsToneMapTitle" xml:space="preserve">
     <value>[!!!! HDR tonemapping !!!!]</value>
   </data>
   <data name="SettingsToneMapDescription" xml:space="preserve">
-    <value>[!!!!!!!!!!!! Compresses extended highlights into the SDR display range before 8-bit conversion. Reinhard is the neutral default; Hable and ACES offer filmic contrast. !!!!!!!!!!!!]</value>
+    <value>[!!!!!!!! Map extended highlights into SDR. Reinhard is neutral; Hable and ACES add filmic contrast. !!!!!!!!]</value>
   </data>
   <data name="SettingsToneMapReinhard" xml:space="preserve">
     <value>[!! Reinhard !!]</value>
@@ -1653,7 +1653,7 @@ Details written to:
     <value>[!! Theme !!]</value>
   </data>
   <data name="SettingsThemeDescription" xml:space="preserve">
-    <value>[!!!!!!!!!!!! Choose a dark or light workspace, or follow your Windows preference. Changes apply immediately. !!!!!!!!!!!!]</value>
+    <value>[!!!!!!!! Choose dark, light, high contrast, or follow Windows. !!!!!!!!]</value>
   </data>
   <data name="SettingsThemeDark" xml:space="preserve">
     <value>[!! Dark !!]</value>
@@ -1698,7 +1698,7 @@ Details written to:
     <value>[!!!!!!! Sibling folder auto-switch !!!!!!!]</value>
   </data>
   <data name="SettingsSiblingFolderDescription" xml:space="preserve">
-    <value>[!!!!!!!!!!!! When reaching the last or first image in a folder, continue into the next or previous sibling folder instead of wrapping. !!!!!!!!!!!!]</value>
+    <value>[!!!!!!!! Continue into the next or previous sibling folder at folder boundaries. !!!!!!!!]</value>
   </data>
   <data name="SettingsSiblingFolderOnStatus" xml:space="preserve">
     <value>[!!!!!!!!!!!! Sibling folder auto-switch enabled. Navigation continues into adjacent folders. !!!!!!!!!!!!]</value>
@@ -1710,7 +1710,7 @@ Details written to:
     <value>[!!!!!!! Stop at first and last image !!!!!!!]</value>
   </data>
   <data name="SettingsStopAtEndsDescription" xml:space="preserve">
-    <value>[!!!!!!!!!!!! Prev/Next stop at the ends of the folder with a brief nudge instead of wrapping around. Takes precedence over sibling folder auto-switch. !!!!!!!!!!!!]</value>
+    <value>[!!!!!!!! Stop at folder boundaries instead of wrapping. Overrides sibling-folder switching. !!!!!!!!]</value>
   </data>
   <data name="SettingsStopAtEndsOnStatus" xml:space="preserve">
     <value>[!!!!!!!!!!!! Navigation will stop at the first and last image. !!!!!!!!!!!!]</value>
@@ -1923,7 +1923,7 @@ Details written to:
     <value>[!!!!!!!!! Automatic update checks disabled. !!!!!!!!!]</value>
   </data>
   <data name="SettingsUpdateCheckDescription" xml:space="preserve">
-    <value>[!!!!!!!!!!!! Off by default. When enabled, Images pings github.com/SysAdminDoc/Images at startup. No usage data is sent. !!!!!!!!!!!!]</value>
+    <value>[!!!!!!!! Off by default. Check GitHub Releases at startup; no usage data is sent. !!!!!!!!]</value>
   </data>
   <data name="SettingsHotkeySummary" xml:space="preserve">
     <value>[!!!!!!!!!!!! Ctrl+, Settings; Ctrl+Shift+B Batch; Ctrl+Shift+D Duplicate cleanup; Ctrl+Shift+H File health; Ctrl+Shift+E Edit history; Ctrl+Alt+A Adjustments; Ctrl+Alt+F Effects; Ctrl+Alt+P Perspective; C Crop; S Selection. !!!!!!!!!!!!]</value>
@@ -6688,7 +6688,7 @@ Details written to:
     <value>[!!!! All files (*.*) !!!!]</value>
   </data>
   <data name="SettingsTransferDescription" xml:space="preserve">
-    <value>[!!!!!!!!!!!! Export portable preferences and custom shortcuts. Private paths, window position, history, and update-check consent are never included. !!!!!!!!!!!!]</value>
+    <value>[!!!!!!!! Export preferences and shortcuts without private paths, history, window position, or update consent. !!!!!!!!]</value>
   </data>
   <data name="SettingsTransferExportAutomationName" xml:space="preserve">
     <value>[!!!!!! Export portable settings !!!!!!]</value>
