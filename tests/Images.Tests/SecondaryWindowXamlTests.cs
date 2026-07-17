@@ -33,6 +33,7 @@ public sealed class SecondaryWindowXamlTests
             ["EffectsWindow.xaml"] = ["StatusText"],
             ["ExportPreviewWindow.xaml"] = ["C2paStatusText", "StatusText"],
             ["FileHealthScanWindow.xaml"] = ["StatusText"],
+            ["FaceReviewWindow.xaml"] = ["StatusValueText"],
             ["ImportInboxWindow.xaml"] = ["StatusText"],
             ["MacroActionWindow.xaml"] = ["StatusText"],
             ["ModelManagerWindow.xaml"] = ["DetailStatus", "RuntimeStatusText", "StatusText"],
@@ -483,6 +484,15 @@ public sealed class SecondaryWindowXamlTests
                 Strings.ModelManagerImportAutomationName,
                 "Validate CLIP pipeline runtime",
                 Strings.ModelManagerApprovedLocalModelsAutomationName
+            ]),
+        new(
+            Strings.Get("FaceReviewWindowTitle"),
+            static () => new Images.FaceReviewWindow(),
+            [
+                Strings.Get("FaceReviewAnalyzeCurrent"),
+                Strings.Get("FaceReviewAnalyzeFolder"),
+                Strings.Get("FaceReviewDetectedRegions"),
+                Strings.Get("FaceReviewMergeSidecars")
             ]),
         new(
             Strings.ImportInboxWindowTitle,

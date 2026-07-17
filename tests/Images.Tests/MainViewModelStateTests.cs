@@ -184,7 +184,7 @@ public sealed class MainViewModelStateTests
     }
 
     [Fact]
-    public void CommandPalette_ReviewQueryDoesNotReturnRetiredReviewCommands()
+    public void CommandPalette_ReviewQueryReturnsOnlyFaceRegionWorkbench()
     {
         RunOnSta(() =>
         {
@@ -193,7 +193,9 @@ public sealed class MainViewModelStateTests
 
             viewModel.CommandPaletteFilterText = "review";
 
-            Assert.Empty(viewModel.FilteredCommandPaletteItems);
+            var item = Assert.Single(viewModel.FilteredCommandPaletteItems);
+            Assert.Equal(Images.Localization.Strings.Get("FaceReviewHeading"), item.Name);
+            Assert.Equal("Advanced tools", item.Category);
         });
     }
 

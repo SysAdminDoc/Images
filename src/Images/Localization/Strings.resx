@@ -6399,4 +6399,37 @@ Details written to:
   <data name="AutomationMainWindowContinuousArchiveReader" xml:space="preserve">
     <value>Continuous archive reader</value>
   </data>
+  <data name="FaceReviewWindowTitle" xml:space="preserve"><value>Images - Face review</value></data>
+  <data name="FaceReviewHeading" xml:space="preserve"><value>Face-region review</value></data>
+  <data name="FaceReviewSubtitle" xml:space="preserve"><value>Inspect local YuNet detections and SFace clusters, then explicitly accept, reject, and name every region before XMP writeback.</value></data>
+  <data name="FaceReviewAnalyzeCurrent" xml:space="preserve"><value>Analyze current image</value></data>
+  <data name="FaceReviewAnalyzeFolder" xml:space="preserve"><value>Analyze folder (up to 100)</value></data>
+  <data name="FaceReviewDetectedRegions" xml:space="preserve"><value>Detected regions by local cluster</value></data>
+  <data name="FaceReviewSelectRegion" xml:space="preserve"><value>Select a detected face region</value></data>
+  <data name="FaceReviewSelectRegionHint" xml:space="preserve"><value>The full image, region overlay, and local face crop will appear here.</value></data>
+  <data name="FaceReviewOverlayHint" xml:space="preserve"><value>Green = accepted, red = rejected, amber = pending. The selected region has a thicker outline.</value></data>
+  <data name="FaceReviewDecision" xml:space="preserve"><value>Review decision</value></data>
+  <data name="FaceReviewPersonName" xml:space="preserve"><value>Person name</value></data>
+  <data name="FaceReviewNameHint" xml:space="preserve"><value>Accepted regions require a name. Rejected regions are omitted from the sidecar.</value></data>
+  <data name="FaceReviewAccept" xml:space="preserve"><value>Accept region</value></data>
+  <data name="FaceReviewReject" xml:space="preserve"><value>Reject region</value></data>
+  <data name="FaceReviewWriteGate" xml:space="preserve"><value>Reviewed XMP write gate</value></data>
+  <data name="FaceReviewWriteGateHint" xml:space="preserve"><value>The merge button remains disabled until every detected region is accepted or rejected and every accepted region has a name. Existing non-Images regions are preserved.</value></data>
+  <data name="FaceReviewMergeSidecars" xml:space="preserve"><value>Merge reviewed regions into XMP</value></data>
+  <data name="FaceReviewReadyStatus" xml:space="preserve"><value>Ready. Face analysis stays local and starts only after an explicit workbench action.</value></data>
+  <data name="FaceReviewNoRegions" xml:space="preserve"><value>No detected face regions are available to review.</value></data>
+  <data name="FaceReviewAnalyzingStatusFormat" xml:space="preserve"><value>Analyzing {0} image(s) locally...</value></data>
+  <data name="FaceReviewAnalyzedStatusFormat" xml:space="preserve"><value>Found {0} face region(s) across {1} image(s). No files were modified.</value></data>
+  <data name="FaceReviewAnalyzedWithFailuresStatusFormat" xml:space="preserve"><value>Found {0} face region(s); {1} image(s) could not be analyzed. No files were modified.</value></data>
+  <data name="FaceReviewAnalyzeFailedFormat" xml:space="preserve"><value>Face analysis failed: {0}</value></data>
+  <data name="FaceReviewMergingStatus" xml:space="preserve"><value>Merging only the fully reviewed face regions into XMP sidecars...</value></data>
+  <data name="FaceReviewSummaryFormat" xml:space="preserve"><value>{0} total - {1} accepted - {2} rejected - {3} pending</value></data>
+  <data name="FaceReviewPreviewFailedFormat" xml:space="preserve"><value>Could not preview this face region: {0}</value></data>
+  <data name="FaceReviewRegionFormat" xml:space="preserve"><value>{0} - face {1}</value></data>
+  <data name="FaceReviewConfidenceFormat" xml:space="preserve"><value>Detection confidence {0:P1}</value></data>
+  <data name="FaceReviewClusterFormat" xml:space="preserve"><value>Local cluster {0}</value></data>
+  <data name="FaceReviewUnclustered" xml:space="preserve"><value>Unclustered or quality-gated</value></data>
+  <data name="FaceReviewAccepted" xml:space="preserve"><value>Accepted for named XMP region</value></data>
+  <data name="FaceReviewRejected" xml:space="preserve"><value>Rejected - omitted from XMP</value></data>
+  <data name="FaceReviewPending" xml:space="preserve"><value>Pending review</value></data>
 </root>

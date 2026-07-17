@@ -116,6 +116,8 @@ Each editing overlay on the canvas has an `AutomationProperties.Name`:
 
 The animation frame workbench (`Name="Animation frame workbench"`) exposes: "Play or pause animation", frame scrubber, first/prev/next/last frame buttons, playback speed slider, frame timeline, per-frame `Name="{FrameText}"`, "Copy selected animation frame", "Export selected animation frame".
 
+The face-region review workbench exposes named controls for current-image and bounded-folder analysis, the cluster-grouped detected-region list, person-name editing, accept/reject decisions, and the reviewed XMP merge gate. Decision state is conveyed in text as well as color, the selected region has a thicker overlay, and status changes use a polite live region.
+
 ## Dialogs
 
 All secondary windows use `AutomationProperties.Name` on interactive controls:

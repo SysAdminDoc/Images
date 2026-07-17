@@ -1,0 +1,301 @@
+<Window x:Class="Images.FaceReviewWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:Images.Localization"
+        xmlns:a11y="clr-namespace:Images.Services"
+        Title="{loc:Loc FaceReviewWindowTitle}"
+        Width="1320"
+        Height="820"
+        MinWidth="1040"
+        MinHeight="650"
+        WindowStartupLocation="CenterOwner"
+        AutomationProperties.Name="{loc:Loc FaceReviewHeading}">
+    <Grid Background="{DynamicResource BaseBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource ToolWindowHeader}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="{loc:Loc FaceReviewHeading}" Style="{StaticResource Text.Title}" />
+                    <TextBlock Text="{loc:Loc FaceReviewSubtitle}"
+                               Style="{StaticResource Text.Caption}"
+                               Margin="0,3,0,0" />
+                </StackPanel>
+                <WrapPanel Grid.Column="1" VerticalAlignment="Center">
+                    <Button x:Name="AnalyzeCurrentButton"
+                            Style="{StaticResource ChromeButton}"
+                            Margin="8,0,0,0"
+                            Click="AnalyzeCurrentButton_Click"
+                            AutomationProperties.Name="{loc:Loc FaceReviewAnalyzeCurrent}">
+                        <TextBlock Text="{loc:Loc FaceReviewAnalyzeCurrent}" />
+                    </Button>
+                    <Button x:Name="AnalyzeFolderButton"
+                            Style="{StaticResource PrimaryButton}"
+                            Margin="8,0,0,0"
+                            Click="AnalyzeFolderButton_Click"
+                            AutomationProperties.Name="{loc:Loc FaceReviewAnalyzeFolder}">
+                        <TextBlock Text="{loc:Loc FaceReviewAnalyzeFolder}" />
+                    </Button>
+                </WrapPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="350" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="310" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource ToolWindowSidebar}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="{loc:Loc FaceReviewDetectedRegions}" Style="{StaticResource SectionLabel}" />
+                        <TextBlock Text="{Binding ReviewSummary}"
+                                   Style="{StaticResource Text.Hint}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ListBox x:Name="FaceList"
+                             Grid.Row="1"
+                             SelectionChanged="FaceList_SelectionChanged"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             AutomationProperties.Name="{loc:Loc FaceReviewDetectedRegions}">
+                        <ListBox.GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}"
+                                                   Style="{StaticResource SectionLabel}"
+                                                   Margin="4,12,4,5" />
+                                    </DataTemplate>
+                                </GroupStyle.HeaderTemplate>
+                            </GroupStyle>
+                        </ListBox.GroupStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="4,5" MinHeight="72">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="72" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="64" Height="64"
+                                            Background="{DynamicResource SurfaceRaisedBrush}"
+                                            BorderBrush="{DynamicResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            ClipToBounds="True">
+                                        <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding DisplayName}"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextBrush}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding ConfidenceText}"
+                                                   Style="{StaticResource Text.Caption}"
+                                                   Margin="0,3,0,0" />
+                                        <TextBlock Text="{Binding DecisionText}"
+                                                   Style="{StaticResource Text.Hint}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <Border Grid.Column="2" Background="{Binding DecisionBrush}" CornerRadius="3" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <GridSplitter Grid.Column="1" Style="{StaticResource VerticalGridSplitter}" />
+
+            <Border Grid.Column="2" Style="{StaticResource ToolWindowWorkspace}">
+                <Grid>
+                    <Border x:Name="PreviewEmptyState"
+                            Style="{StaticResource EmptyStateCard}"
+                            AutomationProperties.Name="{loc:Loc FaceReviewSelectRegion}">
+                        <StackPanel>
+                            <Border Style="{StaticResource EmptyStateIcon}">
+                                <TextBlock Text="&#xE8B9;"
+                                           FontFamily="{StaticResource IconFontFamily}"
+                                           FontSize="18"
+                                           Foreground="{DynamicResource AccentBrush}"
+                                           HorizontalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="{loc:Loc FaceReviewSelectRegion}"
+                                       Style="{StaticResource Text.Display}"
+                                       TextAlignment="Center" />
+                            <TextBlock Text="{loc:Loc FaceReviewSelectRegionHint}"
+                                       Style="{StaticResource Text.Subtitle}"
+                                       TextAlignment="Center"
+                                       Margin="0,10,0,0" />
+                        </StackPanel>
+                    </Border>
+                    <Grid x:Name="PreviewPanel" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="{Binding SelectedItem.SourceFileName}"
+                                       Style="{StaticResource Text.Title}"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{loc:Loc FaceReviewOverlayHint}"
+                                       Style="{StaticResource Text.Caption}"
+                                       Margin="0,3,0,0" />
+                        </StackPanel>
+                        <Border Grid.Row="1"
+                                Background="#FF111317"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                ClipToBounds="True">
+                            <Viewbox Stretch="Uniform">
+                                <Grid Width="{Binding SelectedImageWidth}" Height="{Binding SelectedImageHeight}">
+                                    <Image Source="{Binding SelectedImageSource}"
+                                           Width="{Binding SelectedImageWidth}"
+                                           Height="{Binding SelectedImageHeight}"
+                                           Stretch="Fill"
+                                           RenderOptions.BitmapScalingMode="HighQuality" />
+                                    <ItemsControl ItemsSource="{Binding Overlays}" IsHitTestVisible="False">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate><Canvas /></ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemContainerStyle>
+                                            <Style TargetType="ContentPresenter">
+                                                <Setter Property="Canvas.Left" Value="{Binding X}" />
+                                                <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                                            </Style>
+                                        </ItemsControl.ItemContainerStyle>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Width="{Binding Width}"
+                                                        Height="{Binding Height}"
+                                                        BorderBrush="{Binding Brush}"
+                                                        BorderThickness="{Binding Thickness}"
+                                                        Background="{Binding Fill}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Grid>
+                            </Viewbox>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <GridSplitter Grid.Column="3" Style="{StaticResource VerticalGridSplitter}" />
+
+            <Border Grid.Column="4" Style="{StaticResource ToolWindowSidebar}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="{loc:Loc FaceReviewDecision}" Style="{StaticResource SectionLabel}" />
+                        <Border Style="{StaticResource Card}" Padding="14">
+                            <StackPanel>
+                                <Border Height="170"
+                                        Background="{DynamicResource SurfaceRaisedBrush}"
+                                        CornerRadius="8"
+                                        ClipToBounds="True">
+                                    <Image Source="{Binding SelectedItem.Thumbnail}" Stretch="Uniform" />
+                                </Border>
+                                <TextBlock Text="{Binding SelectedItem.ClusterLabel}"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextBrush}"
+                                           Margin="0,12,0,0" />
+                                <TextBlock Text="{Binding SelectedItem.QualityText}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,4,0,0" />
+                                <TextBlock Text="{loc:Loc FaceReviewPersonName}"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextBrush}"
+                                           Margin="0,14,0,4" />
+                                <TextBox x:Name="NameBox"
+                                         Text="{Binding SelectedItem.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="{loc:Loc FaceReviewPersonName}" />
+                                <TextBlock Text="{loc:Loc FaceReviewNameHint}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,5,0,0" />
+                                <UniformGrid Columns="2" Margin="0,14,0,0">
+                                    <Button Style="{StaticResource PrimaryButton}"
+                                            Margin="0,0,4,0"
+                                            Click="AcceptButton_Click"
+                                            AutomationProperties.Name="{loc:Loc FaceReviewAccept}">
+                                        <TextBlock Text="{loc:Loc FaceReviewAccept}" />
+                                    </Button>
+                                    <Button Style="{StaticResource DangerButton}"
+                                            Margin="4,0,0,0"
+                                            Click="RejectButton_Click"
+                                            AutomationProperties.Name="{loc:Loc FaceReviewReject}">
+                                        <TextBlock Text="{loc:Loc FaceReviewReject}" />
+                                    </Button>
+                                </UniformGrid>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="{loc:Loc FaceReviewWriteGate}" Style="{StaticResource SectionLabel}" Margin="0,18,0,0" />
+                        <Border Style="{StaticResource Card}" Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="{Binding MergeGateText}"
+                                           Style="{StaticResource Text.Body}"
+                                           TextWrapping="Wrap" />
+                                <TextBlock Text="{loc:Loc FaceReviewWriteGateHint}"
+                                           Style="{StaticResource Text.Hint}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,7,0,0" />
+                                <Button x:Name="MergeButton"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Margin="0,14,0,0"
+                                        Click="MergeButton_Click"
+                                        AutomationProperties.Name="{loc:Loc FaceReviewMergeSidecars}">
+                                    <TextBlock Text="{loc:Loc FaceReviewMergeSidecars}" />
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Style="{StaticResource ToolWindowFooter}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="{DynamicResource AccentBrush}" VerticalAlignment="Center" />
+                <TextBlock x:Name="StatusValueText"
+                           Grid.Column="1"
+                           Text="{Binding StatusText}"
+                           Style="{StaticResource Text.Caption}"
+                           Margin="9,0,12,0"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"
+                           AutomationProperties.LiveSetting="Polite"
+                           a11y:LiveRegionBehavior.AnnounceChanges="True" />
+                <Button Grid.Column="2"
+                        Style="{StaticResource ChromeButton}"
+                        Click="CloseButton_Click"
+                        AutomationProperties.Name="{loc:Loc Close}">
+                    <TextBlock Text="{loc:Loc Close}" />
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

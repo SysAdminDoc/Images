@@ -317,6 +317,7 @@
                             </MenuItem.Icon>
                             <MenuItem Header="{loc:Loc ReferenceBoardHeading}" Command="{Binding OpenReferenceBoardCommand}" InputGestureText="{Binding ShortcutTexts[reference-board]}" />
                             <MenuItem Header="{loc:Loc DuplicateCleanupHeading}" Command="{Binding OpenDuplicateCleanupCommand}" InputGestureText="{Binding ShortcutTexts[duplicate-cleanup]}" />
+                            <MenuItem Header="{loc:Loc FaceReviewHeading}" Command="{Binding OpenFaceReviewCommand}" />
                             <MenuItem Header="{loc:Loc SemanticSearchHeading}" Command="{Binding OpenSemanticSearchCommand}" />
                             <MenuItem Header="{loc:Loc TagGraphHeading}" Command="{Binding OpenTagGraphCommand}" InputGestureText="{Binding ShortcutTexts[tag-graph]}" />
                             <MenuItem Header="{loc:Loc ImportInboxHeading}" Command="{Binding OpenImportInboxCommand}" InputGestureText="{Binding ShortcutTexts[import-inbox]}" />

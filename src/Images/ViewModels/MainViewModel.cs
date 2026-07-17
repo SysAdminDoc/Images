@@ -293,6 +293,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenFileHealthScanCommand = new RelayCommand(OpenFileHealthScan);
         OpenRecoveryCenterCommand = new RelayCommand(OpenRecoveryCenter);
         OpenModelManagerCommand = new RelayCommand(OpenModelManager);
+        OpenFaceReviewCommand = new RelayCommand(OpenFaceReview);
         OpenSemanticSearchCommand = new RelayCommand(OpenSemanticSearch);
         OpenTagGraphCommand = new RelayCommand(OpenTagGraph);
         OpenImportInboxCommand = new RelayCommand(OpenImportInbox);
@@ -1422,6 +1423,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             PaletteCommand(CommandIds.FileHealthScan, OpenFileHealthScanCommand, priority: 80, category: advancedTools, searchText: "advanced tool corrupt extension health audit"),
             new() { Name = Strings.CommandPalette_RecoveryCenter, Category = advancedTools, Priority = 80, SearchText = "restore undo recycle quarantine writeback rollback", Command = OpenRecoveryCenterCommand },
             new() { Name = Strings.CommandPalette_ModelManager, Category = advancedTools, Priority = 80, SearchText = "local model onnx inference ai", Command = OpenModelManagerCommand },
+            new() { Name = Strings.Get("FaceReviewHeading"), Category = advancedTools, Priority = 80, SearchText = "faces people regions clusters review MWG XMP", Command = OpenFaceReviewCommand },
             new() { Name = Strings.CommandPalette_SemanticSearch, Category = advancedTools, Priority = 80, SearchText = "search ai clip text embedding find", Command = OpenSemanticSearchCommand },
             PaletteCommand(CommandIds.TagGraph, OpenTagGraphCommand, priority: 80, category: advancedTools, searchText: "advanced tool tags relationships taxonomy sidecar"),
             PaletteCommand(CommandIds.ImportInbox, OpenImportInboxCommand, priority: 80, category: advancedTools, searchText: "advanced tool import ingest stage sidecar"),
@@ -4152,6 +4154,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenFileHealthScanCommand { get; }
     public ICommand OpenRecoveryCenterCommand { get; }
     public ICommand OpenModelManagerCommand { get; }
+    public ICommand OpenFaceReviewCommand { get; }
     public ICommand OpenSemanticSearchCommand { get; }
     public ICommand OpenTagGraphCommand { get; }
     public ICommand OpenImportInboxCommand { get; }
@@ -7729,6 +7732,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         };
 
         manager.Show();
+    }
+
+    private void OpenFaceReview()
+    {
+        var workbench = new Images.FaceReviewWindow(
+            CurrentPath,
+            _nav.Files.ToArray(),
+            analyze: null,
+            merge: null)
+        {
+            Owner = TryGetApplicationMainWindow()
+        };
+
+        workbench.Show();
     }
 
     private void OpenSemanticSearch()

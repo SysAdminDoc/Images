@@ -14,7 +14,6 @@ Promote to `1.0.0` when a release candidate satisfies those three unsigned check
 
 ## Actionable Work
 
-- [ ] **V60-14** *P1* — Face-region review workbench over the shipped YuNet/SFace pipeline: inspect detections and clusters visually, accept/reject/name regions, and only then merge reviewed MWG-rs data into XMP sidecars.
 - [ ] **V60-15** *P1* — Face-aware culling signals for closed eyes and local blur, presented as review-only hints with no automatic Pick/Reject writes.
 
 The remaining research item is decision-gated (Ghostscript-source AGPL mechanism) and lives in `Roadmap_Blocked.md`.
