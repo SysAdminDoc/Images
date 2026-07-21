@@ -4,6 +4,7 @@ using System.Buffers.Binary;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Images.Services;
+using SharpCompress.Archives;
 using SharpCompress.Common;
 using SharpCompress.Writers;
 using SharpCompress.Writers.SevenZip;
@@ -339,6 +340,43 @@ public sealed class ArchiveBookServiceTests
         Assert.NotNull(loaded.Pages);
         Assert.Equal(0, loaded.Pages.PageIndex);
         Assert.Contains("archive cover, page 1 of 2", loaded.DecoderUsed, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // V120-03: SharpCompress 0.50.0 changed the Detection API. ArchiveBookService's CRC gate
+    // (ManagedArchiveReader.ExpectedCrc) only verifies page checksums when the detected archive
+    // type is Zip, Rar, or SevenZip, so a detection regression would silently disable CRC checks.
+    // Pin the detected type for the CBZ and CB7 fixtures so such a regression fails a test.
+    [Theory]
+    [InlineData("book.cbz", ArchiveType.Zip)]
+    [InlineData("book.cb7", ArchiveType.SevenZip)]
+    public void Detection_PinsSharpCompressArchiveTypeForManagedBooks(string fileName, ArchiveType expected)
+    {
+        using var temp = TestDirectory.Create();
+        var archivePath = Path.Combine(temp.Path, fileName);
+        if (expected == ArchiveType.Zip)
+            WriteArchive(archivePath, ("page1.png", 0x00, 0x00, 0xFF));
+        else
+            WriteSevenZipArchive(archivePath, ("page1.png", 0x00, 0x00, 0xFF));
+
+        using var stream = File.OpenRead(archivePath);
+        using var archive = ArchiveFactory.OpenArchive(stream, new SharpCompress.Readers.ReaderOptions());
+
+        Assert.Equal(expected, archive.Type);
+    }
+
+    [Fact]
+    public void LoadPage_WithValidCbz_PassesCrcVerificationAndReturnsExactBytes()
+    {
+        using var temp = TestDirectory.Create();
+        var archivePath = Path.Combine(temp.Path, "book.cbz");
+        var payload = CreatePngBytes(0x12, 0x34, 0x56);
+        using (var archive = ZipFile.Open(archivePath, ZipArchiveMode.Create))
+            WriteBytesEntry(archive, "page1.png", payload);
+
+        // CRC verification is default-on in SharpCompress 0.50.0; a valid archive must not be rejected.
+        var page = ArchiveBookService.LoadPage(archivePath, requestedPageIndex: 0);
+
+        Assert.Equal(payload, page.Bytes);
     }
 
     private static void WriteArchive(string path, params (string Name, byte Red, byte Green, byte Blue)[] entries)

@@ -29,17 +29,5 @@ The actionable V110 items shipped (see CHANGELOG and git history). The remaining
 
 Net-new, code-ready items surfacing from the local-ML wave (v0.2.27 → v0.2.30) and the SharpCompress 0.50.0 bump. The prior catalog shared-cache lock, archive-gate dispose, and invert-colors toggle all shipped and are not re-listed. Inline video playback (largest community-validated gap) and gain-map *display* are decision-/renderer-gated and stay out of this actionable set — see `RESEARCH.md` "Under Consideration". SigLIP-2 semantic upgrade, WinGet/Store submission, and gain-map display remain in `Roadmap_Blocked.md`.
 
-- [ ] **V120-03** P2 — Add a SharpCompress-0.50.0 archive-detection/CRC regression gate.
-  Why: 0.50.0 changed the Detection API and CRC defaults (and stopped `TarArchive` auto-decompress); no fixtures pin CBZ/CBR/CB7 detection + page-CRC behavior after the bump, so a future SharpCompress update could silently alter archive reading.
-  Evidence: SharpCompress 0.50.0 release notes (breaking Detection API, CRC default-on, Tar no auto-decompress); `Services/ArchiveBookService.cs` (advertised-CRC verification path).
-  Touches: `tests/Images.Tests/` (new archive fixtures + detection/CRC assertions), small CBZ/CBR/CB7 test fixtures.
-  Acceptance: tests open a known-good CBZ/CBR/CB7, assert correct format detection, page count, and per-page CRC verification, and fail if SharpCompress detection/CRC semantics regress.
-  Complexity: S
-
-- [ ] **V120-05** P3 — Cap the semantic-search in-RAM cosine scan with a configurable candidate ceiling.
-  Why: `SemanticSearchService.Search` scores every cached vector before `Take(limit)`; a dependency-free candidate ceiling / early-out bounds per-query cost as libraries grow (distinct from the blocked SigLIP-2 model swap).
-  Evidence: `SemanticSearchService.cs:216-239` (full scan, `Take` applied after scoring); `EnsureVectorCache` already removes per-query deserialization.
-  Touches: `Services/SemanticSearchService.cs`, settings surface for the ceiling.
-  Acceptance: a configurable maximum candidate count bounds the scan; top-k results are unchanged for libraries under the ceiling; a test asserts the ceiling is honored on a large synthetic vector set.
-  Complexity: M
+CBR/RAR detection shares the same `ArchiveFactory` path and CRC gate as CBZ/CB7, so the detection-type pin covers it; a committed RAR fixture (binary provenance) would be the only way to exercise it end-to-end and is deferred.
 
