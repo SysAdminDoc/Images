@@ -60,7 +60,63 @@ public static class FaceDetectionService
         string imagePath,
         ModelManagerService? modelManager = null,
         float confidenceThreshold = 0.9f,
-        float nmsThreshold = 0.3f)
+        float nmsThreshold = 0.3f) =>
+        DetectMany([imagePath], modelManager, confidenceThreshold, nmsThreshold).Single();
+
+    // Reuses one InferenceSession across the batch (a single detection session for the whole run
+    // instead of one per image) and honors cancellation between images.
+    public static IReadOnlyList<FaceDetectionResult> DetectMany(
+        IReadOnlyList<string> imagePaths,
+        ModelManagerService? modelManager = null,
+        float confidenceThreshold = 0.9f,
+        float nmsThreshold = 0.3f,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(imagePaths);
+        if (imagePaths.Count == 0)
+            return [];
+
+        var manager = modelManager ?? new ModelManagerService();
+        var installedPath = manager.GetSnapshot().Models
+            .FirstOrDefault(item => item.Definition.Id == YuNetModelId && item.IsReady)?.InstalledPath;
+        var session = TryCreateSession(installedPath);
+        try
+        {
+            var results = new List<FaceDetectionResult>(imagePaths.Count);
+            foreach (var imagePath in imagePaths)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                results.Add(DetectOne(imagePath, installedPath, session, confidenceThreshold, nmsThreshold));
+            }
+            return results;
+        }
+        finally
+        {
+            session?.Dispose();
+        }
+    }
+
+    private static InferenceSession? TryCreateSession(string? installedPath)
+    {
+        if (installedPath is null)
+            return null;
+        try
+        {
+            return OnnxRuntimeService.CreateSession(installedPath);
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "The YuNet face-detection model could not be loaded.");
+            return null;
+        }
+    }
+
+    private static FaceDetectionResult DetectOne(
+        string imagePath,
+        string? installedPath,
+        InferenceSession? session,
+        float confidenceThreshold,
+        float nmsThreshold)
     {
         var normalizedPath = NormalizeExistingPath(imagePath);
         if (normalizedPath is null)
@@ -69,30 +125,30 @@ public static class FaceDetectionService
                 FaceDetectionStatus.Failed,
                 "Choose an existing local image file.",
                 imagePath ?? string.Empty,
-                0,
-                0,
-                null,
-                []);
+                0, 0, null, []);
         }
 
-        var manager = modelManager ?? new ModelManagerService();
-        var model = manager.GetSnapshot().Models.FirstOrDefault(item =>
-            item.Definition.Id == YuNetModelId && item.IsReady);
-        if (model?.InstalledPath is null)
+        if (installedPath is null)
         {
             return new FaceDetectionResult(
                 FaceDetectionStatus.ModelUnavailable,
                 "The approved OpenCV YuNet model is not imported. Open Model Manager and import the pinned model file first.",
                 normalizedPath,
-                0,
-                0,
-                null,
-                []);
+                0, 0, null, []);
+        }
+
+        if (session is null)
+        {
+            return new FaceDetectionResult(
+                FaceDetectionStatus.Failed,
+                "The face-detection model could not be loaded. Check diagnostics for technical details.",
+                normalizedPath,
+                0, 0, null, []);
         }
 
         try
         {
-            return RunInference(normalizedPath, model.InstalledPath, confidenceThreshold, nmsThreshold);
+            return RunInference(normalizedPath, session, confidenceThreshold, nmsThreshold);
         }
         catch (Exception ex)
         {
@@ -101,16 +157,23 @@ public static class FaceDetectionService
                 FaceDetectionStatus.Failed,
                 "Face detection could not analyze this image. Check diagnostics for technical details.",
                 normalizedPath,
-                0,
-                0,
-                null,
-                []);
+                0, 0, null, []);
         }
     }
 
     internal static FaceDetectionResult RunInference(
         string imagePath,
         string modelPath,
+        float confidenceThreshold = 0.9f,
+        float nmsThreshold = 0.3f)
+    {
+        using var session = OnnxRuntimeService.CreateSession(modelPath);
+        return RunInference(imagePath, session, confidenceThreshold, nmsThreshold);
+    }
+
+    internal static FaceDetectionResult RunInference(
+        string imagePath,
+        InferenceSession session,
         float confidenceThreshold = 0.9f,
         float nmsThreshold = 0.3f)
     {
@@ -135,7 +198,6 @@ public static class FaceDetectionService
         var scaledHeight = Math.Clamp((int)Math.Round(imageHeight * scale), 1, InputSize);
         var tensor = BuildInputTensor(image, scaledWidth, scaledHeight);
 
-        using var session = OnnxRuntimeService.CreateSession(modelPath);
         using var results = session.Run(
         [
             NamedOnnxValue.CreateFromTensor(
@@ -162,7 +224,7 @@ public static class FaceDetectionService
                 confidenceThreshold));
         }
 
-        var selected = ApplyNonMaximumSuppression(candidates, nmsThreshold, topK: 5000);
+        var selected = ApplyNonMaximumSuppression(candidates, nmsThreshold, topK: 5000, maxSelected: 1024);
         var faces = selected
             .Select(candidate => MapToSource(candidate, scale, imageWidth, imageHeight))
             .Where(face => face.Width > 0 && face.Height > 0)
@@ -244,20 +306,28 @@ public static class FaceDetectionService
     internal static IReadOnlyList<YuNetCandidate> ApplyNonMaximumSuppression(
         IEnumerable<YuNetCandidate> candidates,
         float threshold,
-        int topK)
+        int topK,
+        int maxSelected = int.MaxValue)
     {
         if (threshold is < 0 or > 1)
             throw new ArgumentOutOfRangeException(nameof(threshold));
         if (topK <= 0)
             throw new ArgumentOutOfRangeException(nameof(topK));
+        if (maxSelected <= 0)
+            throw new ArgumentOutOfRangeException(nameof(maxSelected));
 
         var ordered = candidates
             .OrderByDescending(candidate => candidate.Confidence)
             .Take(topK)
             .ToArray();
+        // Bound the O(k^2) suppression: a real image never has thousands of faces, so cap the
+        // number of kept boxes. Highest-confidence candidates are considered first, so the cap
+        // never drops a face that would survive on a normal image.
         var selected = new List<YuNetCandidate>();
         foreach (var candidate in ordered)
         {
+            if (selected.Count >= maxSelected)
+                break;
             if (selected.All(kept => IntersectionOverUnion(candidate, kept) < threshold))
                 selected.Add(candidate);
         }

@@ -45,4 +45,20 @@ public sealed class SceneCliTests
         Assert.Equal(2, exitCode);
         Assert.Contains("model missing", error.ToString());
     }
+
+    [Fact]
+    public void Execute_ReturnsDistinctExitCodeWhenModelLoadFails()
+    {
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+        SceneClassificationResult[] results =
+        [
+            new(SceneClassificationStatus.ModelLoadFailed, "model could not be loaded", "photo.jpg", 0, 0, null, null, 0, [], []),
+        ];
+
+        var exitCode = SceneCli.Execute(["photo.jpg"], output, error, _ => results);
+
+        Assert.Equal(3, exitCode);
+        Assert.Contains("could not be loaded", error.ToString());
+    }
 }

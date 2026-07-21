@@ -63,6 +63,22 @@ public sealed class AestheticCliTests
         Assert.Contains("model missing", error.ToString());
     }
 
+    [Fact]
+    public void Execute_ReturnsDistinctExitCodeWhenModelLoadFails()
+    {
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+        AestheticScoreResult[] results =
+        [
+            new(AestheticScoreStatus.ModelLoadFailed, "model could not be loaded", "photo.jpg", 0, 0, null, 0, 0, []),
+        ];
+
+        var exitCode = AestheticCli.Execute(["photo.jpg"], output, error, _ => results);
+
+        Assert.Equal(3, exitCode);
+        Assert.Contains("could not be loaded", error.ToString());
+    }
+
     private static AestheticScoreResult Success(string path, double mean) => new(
         AestheticScoreStatus.Success, null, path, 100, 80, "DirectML", mean, 1.2,
         [0.01, 0.02, 0.05, 0.15, 0.3, 0.25, 0.12, 0.06, 0.03, 0.01]);

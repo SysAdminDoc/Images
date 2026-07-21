@@ -48,40 +48,82 @@ public static class OrientationSuggestionService
         string imagePath,
         ModelManagerService? modelManager = null,
         double confidenceThreshold = DefaultConfidenceThreshold,
-        double marginThreshold = DefaultMarginThreshold)
+        double marginThreshold = DefaultMarginThreshold) =>
+        SuggestMany([imagePath], modelManager, confidenceThreshold, marginThreshold).Single();
+
+    // Reuses one InferenceSession across the whole batch and honors cancellation between images.
+    public static IReadOnlyList<OrientationSuggestionResult> SuggestMany(
+        IReadOnlyList<string> imagePaths,
+        ModelManagerService? modelManager = null,
+        double confidenceThreshold = DefaultConfidenceThreshold,
+        double marginThreshold = DefaultMarginThreshold,
+        CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(imagePaths);
+        if (imagePaths.Count == 0)
+            return [];
+
         var manager = modelManager ?? new ModelManagerService();
         var model = manager.GetSnapshot().Models.FirstOrDefault(item =>
             item.Definition.Id == ModelId && item.IsReady);
         if (model?.InstalledPath is null)
         {
-            return Failure(
+            return imagePaths.Select(path => Failure(
                 OrientationSuggestionStatus.ModelUnavailable,
                 "The approved orientation model is not imported. Open Model Manager and import the pinned model file first.",
-                imagePath);
+                path)).ToArray();
         }
 
+        InferenceSession session;
         try
         {
-            return RunInference(
-                Path.GetFullPath(imagePath),
-                model.InstalledPath,
-                confidenceThreshold,
-                marginThreshold);
+            session = OnnxRuntimeService.CreateSession(model.InstalledPath);
         }
         catch (Exception ex)
         {
-            _log.LogWarning(ex, "Orientation suggestion failed for {Path}", imagePath);
-            return Failure(
+            _log.LogWarning(ex, "The orientation model could not be loaded.");
+            return imagePaths.Select(path => Failure(
                 OrientationSuggestionStatus.Failed,
-                "Orientation analysis could not inspect this image. Check diagnostics for technical details.",
-                imagePath);
+                "The orientation model could not be loaded. Check diagnostics for technical details.",
+                path)).ToArray();
+        }
+
+        using (session)
+        {
+            var results = new List<OrientationSuggestionResult>(imagePaths.Count);
+            foreach (var imagePath in imagePaths)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                try
+                {
+                    results.Add(RunInference(Path.GetFullPath(imagePath), session, confidenceThreshold, marginThreshold));
+                }
+                catch (Exception ex)
+                {
+                    _log.LogWarning(ex, "Orientation suggestion failed for {Path}", imagePath);
+                    results.Add(Failure(
+                        OrientationSuggestionStatus.Failed,
+                        "Orientation analysis could not inspect this image. Check diagnostics for technical details.",
+                        imagePath));
+                }
+            }
+            return results;
         }
     }
 
     internal static OrientationSuggestionResult RunInference(
         string imagePath,
         string modelPath,
+        double confidenceThreshold = DefaultConfidenceThreshold,
+        double marginThreshold = DefaultMarginThreshold)
+    {
+        using var session = OnnxRuntimeService.CreateSession(modelPath);
+        return RunInference(imagePath, session, confidenceThreshold, marginThreshold);
+    }
+
+    internal static OrientationSuggestionResult RunInference(
+        string imagePath,
+        InferenceSession session,
         double confidenceThreshold = DefaultConfidenceThreshold,
         double marginThreshold = DefaultMarginThreshold)
     {
@@ -93,7 +135,6 @@ public static class OrientationSuggestionService
         var height = checked((int)image.Height);
         var input = BuildInputTensor(image);
 
-        using var session = OnnxRuntimeService.CreateSession(modelPath);
         using var results = session.Run(
         [
             NamedOnnxValue.CreateFromTensor(

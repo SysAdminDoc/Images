@@ -85,6 +85,22 @@ public sealed class FaceCliTests
     }
 
     [Fact]
+    public void ExecuteCluster_HonorsCancellation()
+    {
+        var detection = new FaceDetection(10, 10, 50, 50, 0.95, []);
+        FaceRecognitionResult Analyze(string path) => new(
+            true, null, path, "CPU (ONNX Runtime)",
+            [new FaceEmbedding(path, 0, detection, FaceEmbeddingQuality.Accepted, null, [1, 0])]);
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        Assert.Throws<OperationCanceledException>(() =>
+            FaceCli.ExecuteCluster(["one.jpg", "two.jpg"], output, error, Analyze, cts.Token));
+    }
+
+    [Fact]
     public void ExecuteXmp_PrintsMwgDraftWithoutWritingAFile()
     {
         var result = new FaceDetectionResult(

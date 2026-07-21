@@ -53,6 +53,23 @@ public sealed class FaceDetectionServiceTests
     }
 
     [Fact]
+    public void NonMaximumSuppression_CapsSurvivorsToBoundQuadraticCost()
+    {
+        var landmarks = Enumerable.Repeat(new FaceLandmark(1, 1), 5).ToArray();
+        // 50 non-overlapping boxes on a grid; without a cap every one survives (O(k^2)).
+        var candidates = Enumerable.Range(0, 50)
+            .Select(index => new YuNetCandidate(index * 100, 0, 50, 50, 0.9f - index * 0.001f, landmarks))
+            .ToArray();
+
+        var selected = FaceDetectionService.ApplyNonMaximumSuppression(
+            candidates, threshold: 0.3f, topK: 5000, maxSelected: 8);
+
+        Assert.Equal(8, selected.Count);
+        // The cap keeps the highest-confidence survivors first.
+        Assert.Equal(0.9f, selected[0].Confidence, 4);
+    }
+
+    [Fact]
     public void FaceDetection_NormalizedAreaUsesMwgCenterCoordinates()
     {
         var face = new FaceDetection(20, 10, 40, 20, 0.9, []);

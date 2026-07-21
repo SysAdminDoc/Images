@@ -14,6 +14,7 @@ public static class SceneCli
     public static int Run(string[] args)
     {
         CliReport.TryAttachConsole();
+        using var cancellation = CliCancellation.OnCtrlC();
         try
         {
             if (args.Length < 2 || args.Skip(1).Any(string.IsNullOrWhiteSpace))
@@ -21,7 +22,12 @@ public static class SceneCli
                 Console.Error.WriteLine("Usage: Images.exe --scene-classify <imagePath> [imagePath ...]");
                 return 64;
             }
-            return Execute(args.Skip(1).ToArray(), Console.Out, Console.Error);
+            return Execute(args.Skip(1).ToArray(), Console.Out, Console.Error, cancellationToken: cancellation.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            Console.Error.WriteLine("Scene classification was canceled. No files were modified.");
+            return 130;
         }
         finally
         {
@@ -34,9 +40,10 @@ public static class SceneCli
         IReadOnlyList<string> imagePaths,
         TextWriter output,
         TextWriter error,
-        Func<IReadOnlyList<string>, IReadOnlyList<SceneClassificationResult>>? classifier = null)
+        Func<IReadOnlyList<string>, IReadOnlyList<SceneClassificationResult>>? classifier = null,
+        CancellationToken cancellationToken = default)
     {
-        classifier ??= paths => SceneClassificationService.ClassifyMany(paths);
+        classifier ??= paths => SceneClassificationService.ClassifyMany(paths, cancellationToken: cancellationToken);
         var results = classifier(imagePaths);
         var successful = results.Where(result => result.Success).ToArray();
         var failures = results.Where(result => !result.Success).ToArray();
@@ -44,7 +51,11 @@ public static class SceneCli
         {
             foreach (var message in failures.Select(result => result.ErrorMessage).Distinct(StringComparer.Ordinal))
                 error.WriteLine(message);
-            return failures.Any(result => result.Status == SceneClassificationStatus.ModelUnavailable) ? 2 : 1;
+            if (failures.Any(result => result.Status == SceneClassificationStatus.ModelUnavailable))
+                return 2;
+            if (failures.Any(result => result.Status == SceneClassificationStatus.ModelLoadFailed))
+                return 3;
+            return 1;
         }
 
         output.WriteLine(JsonSerializer.Serialize(new

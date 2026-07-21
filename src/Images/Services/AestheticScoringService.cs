@@ -10,6 +10,7 @@ public enum AestheticScoreStatus
 {
     Success,
     ModelUnavailable,
+    ModelLoadFailed,
     Failed
 }
 
@@ -40,7 +41,8 @@ public static class AestheticScoringService
 
     public static IReadOnlyList<AestheticScoreResult> ScoreMany(
         IReadOnlyList<string> imagePaths,
-        ModelManagerService? modelManager = null)
+        ModelManagerService? modelManager = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(imagePaths);
         if (imagePaths.Count == 0)
@@ -66,7 +68,7 @@ public static class AestheticScoringService
         {
             _log.LogWarning(ex, "The NIMA aesthetic model could not be loaded.");
             return imagePaths.Select(path => Failure(
-                AestheticScoreStatus.Failed,
+                AestheticScoreStatus.ModelLoadFailed,
                 "The aesthetic model could not be loaded. Check diagnostics for technical details.",
                 path)).ToArray();
         }
@@ -76,6 +78,7 @@ public static class AestheticScoringService
             var results = new List<AestheticScoreResult>(imagePaths.Count);
             foreach (var imagePath in imagePaths)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
                     results.Add(RunInference(Path.GetFullPath(imagePath), session));

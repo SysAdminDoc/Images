@@ -37,6 +37,7 @@ public static class FaceCli
     public static int Run(string[] args)
     {
         CliReport.TryAttachConsole();
+        using var cancellation = CliCancellation.OnCtrlC();
         try
         {
             if (args.Length > 0 && string.Equals(args[0], "--face-cluster", StringComparison.OrdinalIgnoreCase))
@@ -46,7 +47,15 @@ public static class FaceCli
                     Console.Error.WriteLine("Usage: Images.exe --face-cluster <imagePath> <imagePath> [...]");
                     return 64;
                 }
-                return ExecuteCluster(args.Skip(1).ToArray(), Console.Out, Console.Error);
+                try
+                {
+                    return ExecuteCluster(args.Skip(1).ToArray(), Console.Out, Console.Error, cancellationToken: cancellation.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    Console.Error.WriteLine("Face clustering was canceled. No files were modified.");
+                    return 130;
+                }
             }
 
             if (args.Length > 0 && string.Equals(args[0], "--face-xmp", StringComparison.OrdinalIgnoreCase))
@@ -98,7 +107,8 @@ public static class FaceCli
         IReadOnlyList<string> imagePaths,
         TextWriter output,
         TextWriter error,
-        Func<string, FaceRecognitionResult>? analyzer = null)
+        Func<string, FaceRecognitionResult>? analyzer = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(imagePaths);
         ArgumentNullException.ThrowIfNull(output);
@@ -109,8 +119,15 @@ public static class FaceCli
             return 64;
         }
 
-        analyzer ??= path => FaceRecognitionService.Analyze(path);
-        var analyses = imagePaths.Select(analyzer).ToArray();
+        // Production path reuses one detection + one recognition session across the batch and
+        // honors cancellation; tests inject a per-path analyzer to exercise the aggregation logic.
+        var analyses = analyzer is null
+            ? FaceRecognitionService.AnalyzeMany(imagePaths, cancellationToken: cancellationToken)
+            : imagePaths.Select(path =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                return analyzer(path);
+            }).ToArray();
         var successful = analyses.Where(result => result.Success).ToArray();
         if (successful.Length == 0)
         {

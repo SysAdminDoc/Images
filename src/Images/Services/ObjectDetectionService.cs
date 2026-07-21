@@ -62,44 +62,83 @@ public static class ObjectDetectionService
         string imagePath,
         ModelManagerService? modelManager = null,
         float confidenceThreshold = 0.35f,
-        float nmsThreshold = 0.5f)
+        float nmsThreshold = 0.5f) =>
+        DetectMany([imagePath], modelManager, confidenceThreshold, nmsThreshold).Single();
+
+    // Reuses one InferenceSession across the whole batch; a single --object-detect over N images
+    // no longer reloads the YOLOX model per image. Honors cancellation between images.
+    public static IReadOnlyList<ObjectDetectionResult> DetectMany(
+        IReadOnlyList<string> imagePaths,
+        ModelManagerService? modelManager = null,
+        float confidenceThreshold = 0.35f,
+        float nmsThreshold = 0.5f,
+        CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(imagePaths);
+        if (imagePaths.Count == 0)
+            return [];
+
         var manager = modelManager ?? new ModelManagerService();
         var model = manager.GetSnapshot().Models.FirstOrDefault(item =>
             item.Definition.Id == ModelId && item.IsReady);
         if (model?.InstalledPath is null)
         {
-            return new ObjectDetectionResult(
+            return imagePaths.Select(path => new ObjectDetectionResult(
                 false,
                 "The approved OpenCV YOLOX-S model is not imported. Open Model Manager and import the pinned model file first.",
-                imagePath,
-                0,
-                0,
-                null,
-                []);
+                path, 0, 0, null, [])).ToArray();
         }
 
+        InferenceSession session;
         try
         {
-            return RunInference(Path.GetFullPath(imagePath), model.InstalledPath, confidenceThreshold, nmsThreshold);
+            session = OnnxRuntimeService.CreateSession(model.InstalledPath);
         }
         catch (Exception ex)
         {
-            _log.LogWarning(ex, "Object detection failed for {Path}", imagePath);
-            return new ObjectDetectionResult(
+            _log.LogWarning(ex, "The YOLOX object-detection model could not be loaded.");
+            return imagePaths.Select(path => new ObjectDetectionResult(
                 false,
-                "Object detection could not analyze this image. Check diagnostics for technical details.",
-                imagePath,
-                0,
-                0,
-                null,
-                []);
+                "The object-detection model could not be loaded. Check diagnostics for technical details.",
+                path, 0, 0, null, [])).ToArray();
+        }
+
+        using (session)
+        {
+            var results = new List<ObjectDetectionResult>(imagePaths.Count);
+            foreach (var imagePath in imagePaths)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                try
+                {
+                    results.Add(RunInference(Path.GetFullPath(imagePath), session, confidenceThreshold, nmsThreshold));
+                }
+                catch (Exception ex)
+                {
+                    _log.LogWarning(ex, "Object detection failed for {Path}", imagePath);
+                    results.Add(new ObjectDetectionResult(
+                        false,
+                        "Object detection could not analyze this image. Check diagnostics for technical details.",
+                        imagePath, 0, 0, null, []));
+                }
+            }
+            return results;
         }
     }
 
     internal static ObjectDetectionResult RunInference(
         string imagePath,
         string modelPath,
+        float confidenceThreshold = 0.35f,
+        float nmsThreshold = 0.5f)
+    {
+        using var session = OnnxRuntimeService.CreateSession(modelPath);
+        return RunInference(imagePath, session, confidenceThreshold, nmsThreshold);
+    }
+
+    internal static ObjectDetectionResult RunInference(
+        string imagePath,
+        InferenceSession session,
         float confidenceThreshold = 0.35f,
         float nmsThreshold = 0.5f)
     {
@@ -116,7 +155,6 @@ public static class ObjectDetectionService
         var scaledHeight = Math.Clamp((int)(height * scale), 1, InputSize);
         var input = BuildInputTensor(image, scaledWidth, scaledHeight);
 
-        using var session = OnnxRuntimeService.CreateSession(modelPath);
         using var results = session.Run(
         [
             NamedOnnxValue.CreateFromTensor(

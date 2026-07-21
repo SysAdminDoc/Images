@@ -11,6 +11,7 @@ public enum SceneClassificationStatus
 {
     Success,
     ModelUnavailable,
+    ModelLoadFailed,
     Failed
 }
 
@@ -57,7 +58,8 @@ public static class SceneClassificationService
 
     public static IReadOnlyList<SceneClassificationResult> ClassifyMany(
         IReadOnlyList<string> imagePaths,
-        ModelManagerService? modelManager = null)
+        ModelManagerService? modelManager = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(imagePaths);
         if (imagePaths.Count == 0)
@@ -83,7 +85,7 @@ public static class SceneClassificationService
         {
             _log.LogWarning(ex, "The Places365 scene model could not be loaded.");
             return imagePaths.Select(path => Failure(
-                SceneClassificationStatus.Failed,
+                SceneClassificationStatus.ModelLoadFailed,
                 "The scene model could not be loaded. Check diagnostics for technical details.",
                 path)).ToArray();
         }
@@ -93,6 +95,7 @@ public static class SceneClassificationService
             var results = new List<SceneClassificationResult>(imagePaths.Count);
             foreach (var imagePath in imagePaths)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
                     results.Add(RunInference(Path.GetFullPath(imagePath), session));

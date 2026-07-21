@@ -29,20 +29,6 @@ The actionable V110 items shipped (see CHANGELOG and git history). The remaining
 
 Net-new, code-ready items surfacing from the local-ML wave (v0.2.27 → v0.2.30) and the SharpCompress 0.50.0 bump. The prior catalog shared-cache lock, archive-gate dispose, and invert-colors toggle all shipped and are not re-listed. Inline video playback (largest community-validated gap) and gain-map *display* are decision-/renderer-gated and stay out of this actionable set — see `RESEARCH.md` "Under Consideration". SigLIP-2 semantic upgrade, WinGet/Store submission, and gain-map display remain in `Roadmap_Blocked.md`.
 
-- [ ] **V120-01** P2 — Reuse one ONNX `InferenceSession` across the single-shot face/object/orientation batch paths.
-  Why: `--face-cluster` over N images builds ~2N sessions (detect + recognize per image); scene/aesthetic/safety already cache one session per batch — face/object/orientation should match, cutting model-load overhead on multi-file runs.
-  Evidence: `FaceDetectionService.cs:138`, `FaceRecognitionService.cs:63,115`, `ObjectDetectionService.cs:119`, `OrientationSuggestionService.cs:96` each call `OnnxRuntimeService.CreateSession` per image; `AestheticScoringService.cs:74-93` / `SceneClassificationService.cs:91-110` show the target `using(session){foreach…}` pattern.
-  Touches: `Services/FaceDetectionService.cs`, `Services/FaceRecognitionService.cs`, `Services/FaceClusterService.cs`, `Services/ObjectDetectionService.cs`, `Services/OrientationSuggestionService.cs`, `Services/FaceCli.cs`.
-  Acceptance: a multi-image `--face-cluster`/`--object-detect`/`--orientation-suggest` run creates one detection (and one recognition) session total, not one per image; existing per-image results unchanged; tests cover the batched overload.
-  Complexity: M
-
-- [ ] **V120-02** P2 — Thread `CancellationToken` through the ML batch APIs and CLI drivers.
-  Why: Long `--scene-classify`/`--aesthetic-score`/`--safety-classify`/`--face-cluster` runs over hundreds of files are currently uninterruptible; catalog/semantic rebuilds already thread cancellation correctly, so this closes the last gap.
-  Evidence: `AestheticScoringService.ScoreMany` (`:41`), `SceneClassificationService.ClassifyMany` (`:58`), `SafetyClassificationService.ClassifyMany` (`:44`), `FaceCli.ExecuteCluster` (`:97`) take no token; `CatalogService.cs:153,195` / `SemanticSearchService.cs:152,180` show the pattern.
-  Touches: `Services/AestheticScoringService.cs`, `Services/SceneClassificationService.cs`, `Services/SafetyClassificationService.cs`, `Services/FaceCli.cs`, `Services/SceneCli.cs`, `Services/AestheticCli.cs`, `Services/SafetyCli.cs`, `Services/ObjectCli.cs`.
-  Acceptance: each batch loop honors a `CancellationToken` (Ctrl+C in CLI cancels promptly); a cancellation test asserts partial results + `OperationCanceledException` handling; no behavior change when no token is passed.
-  Complexity: M
-
 - [ ] **V120-03** P2 — Add a SharpCompress-0.50.0 archive-detection/CRC regression gate.
   Why: 0.50.0 changed the Detection API and CRC defaults (and stopped `TarArchive` auto-decompress); no fixtures pin CBZ/CBR/CB7 detection + page-CRC behavior after the bump, so a future SharpCompress update could silently alter archive reading.
   Evidence: SharpCompress 0.50.0 release notes (breaking Detection API, CRC default-on, Tar no auto-decompress); `Services/ArchiveBookService.cs` (advertised-CRC verification path).
@@ -64,16 +50,3 @@ Net-new, code-ready items surfacing from the local-ML wave (v0.2.27 → v0.2.30)
   Acceptance: deterministic-fixture tests assert pHash stability/Hamming distance on known image pairs and Exif 3.1 tag decode (incl. UTF-8 and version/shape gating); both run in the existing suite.
   Complexity: S
 
-- [ ] **V120-04** P3 — Distinguish "model load failed" from "N images failed" in the ML CLI exit codes.
-  Why: A model-load exception in `ScoreMany`/`ClassifyMany` fans a generic `Failed` result across every path, so the CLI cannot report whether the model is broken or a single image was bad.
-  Evidence: `AestheticScoringService.cs:65`, `SceneClassificationService.cs:82`, `SafetyClassificationService.cs:68` (identical fan-out); `SceneCli`/`AestheticCli`/`SafetyCli`/`ObjectCli` collapse both to one exit code.
-  Touches: `Services/AestheticScoringService.cs`, `Services/SceneClassificationService.cs`, `Services/SafetyClassificationService.cs`, `Services/ObjectDetectionService.cs`, the four `*Cli.cs` drivers.
-  Acceptance: model-unavailable/load-failure returns a distinct non-zero exit code from per-image decode failures; the difference is documented in `--help`/README CLI table; tests assert both codes.
-  Complexity: S
-
-- [ ] **V120-08** P3 — Cap survivors before the O(k²) face NMS.
-  Why: `ApplyNonMaximumSuppression` runs a linear `selected.All(...)` scan inside the loop over up to `topK=5000` candidates — bounded but worst-case quadratic on dense/pathological detections (YOLOX NMS is already class-partitioned and capped at 300).
-  Evidence: `FaceDetectionService.cs:165,259-263`.
-  Touches: `Services/FaceDetectionService.cs`.
-  Acceptance: face NMS caps candidate survivors to a sane bound before suppression; detection results on normal images are unchanged; a stress test with many overlapping boxes stays within a bounded time budget.
-  Complexity: S

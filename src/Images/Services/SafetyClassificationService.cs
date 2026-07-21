@@ -10,6 +10,7 @@ public enum SafetyClassificationStatus
 {
     Success,
     ModelUnavailable,
+    ModelLoadFailed,
     Failed
 }
 
@@ -43,7 +44,8 @@ public static class SafetyClassificationService
 
     public static IReadOnlyList<SafetyClassificationResult> ClassifyMany(
         IReadOnlyList<string> imagePaths,
-        ModelManagerService? modelManager = null)
+        ModelManagerService? modelManager = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(imagePaths);
         if (imagePaths.Count == 0)
@@ -69,7 +71,7 @@ public static class SafetyClassificationService
         {
             _log.LogWarning(ex, "The safety classifier could not be loaded.");
             return imagePaths.Select(path => Failure(
-                SafetyClassificationStatus.Failed,
+                SafetyClassificationStatus.ModelLoadFailed,
                 "The safety classifier could not be loaded. Check diagnostics for technical details.",
                 path)).ToArray();
         }
@@ -79,6 +81,7 @@ public static class SafetyClassificationService
             var results = new List<SafetyClassificationResult>(imagePaths.Count);
             foreach (var imagePath in imagePaths)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
                     results.Add(RunInference(Path.GetFullPath(imagePath), session));

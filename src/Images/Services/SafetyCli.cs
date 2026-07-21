@@ -14,6 +14,7 @@ public static class SafetyCli
     public static int Run(string[] args)
     {
         CliReport.TryAttachConsole();
+        using var cancellation = CliCancellation.OnCtrlC();
         try
         {
             if (args.Length < 2 || args.Skip(1).Any(string.IsNullOrWhiteSpace))
@@ -21,7 +22,12 @@ public static class SafetyCli
                 Console.Error.WriteLine("Usage: Images.exe --safety-classify <imagePath> [imagePath ...]");
                 return 64;
             }
-            return Execute(args.Skip(1).ToArray(), Console.Out, Console.Error);
+            return Execute(args.Skip(1).ToArray(), Console.Out, Console.Error, cancellationToken: cancellation.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            Console.Error.WriteLine("Safety classification was canceled. No files were modified.");
+            return 130;
         }
         finally
         {
@@ -34,9 +40,10 @@ public static class SafetyCli
         IReadOnlyList<string> imagePaths,
         TextWriter output,
         TextWriter error,
-        Func<IReadOnlyList<string>, IReadOnlyList<SafetyClassificationResult>>? classifier = null)
+        Func<IReadOnlyList<string>, IReadOnlyList<SafetyClassificationResult>>? classifier = null,
+        CancellationToken cancellationToken = default)
     {
-        classifier ??= paths => SafetyClassificationService.ClassifyMany(paths);
+        classifier ??= paths => SafetyClassificationService.ClassifyMany(paths, cancellationToken: cancellationToken);
         var results = classifier(imagePaths);
         var successful = results.Where(result => result.Success).ToArray();
         var failures = results.Where(result => !result.Success).ToArray();
@@ -44,7 +51,11 @@ public static class SafetyCli
         {
             foreach (var message in failures.Select(result => result.ErrorMessage).Distinct(StringComparer.Ordinal))
                 error.WriteLine(message);
-            return failures.Any(result => result.Status == SafetyClassificationStatus.ModelUnavailable) ? 2 : 1;
+            if (failures.Any(result => result.Status == SafetyClassificationStatus.ModelUnavailable))
+                return 2;
+            if (failures.Any(result => result.Status == SafetyClassificationStatus.ModelLoadFailed))
+                return 3;
+            return 1;
         }
 
         output.WriteLine(JsonSerializer.Serialize(new

@@ -57,45 +57,90 @@ public static class FaceRecognitionService
 
     public static FaceRecognitionResult Analyze(
         string imagePath,
-        ModelManagerService? modelManager = null)
+        ModelManagerService? modelManager = null) =>
+        AnalyzeMany([imagePath], modelManager).Single();
+
+    // Reuses one detection session and one recognition session across the whole batch
+    // (previously each image loaded both models). Honors cancellation between images.
+    public static IReadOnlyList<FaceRecognitionResult> AnalyzeMany(
+        IReadOnlyList<string> imagePaths,
+        ModelManagerService? modelManager = null,
+        CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(imagePaths);
+        if (imagePaths.Count == 0)
+            return [];
+
         var manager = modelManager ?? new ModelManagerService();
-        var detection = FaceDetectionService.Detect(imagePath, manager);
-        if (!detection.Success)
-        {
-            return new FaceRecognitionResult(
-                false,
-                detection.ErrorMessage,
-                detection.SourcePath,
-                detection.Runtime,
-                []);
-        }
+        var detections = FaceDetectionService.DetectMany(imagePaths, manager, cancellationToken: cancellationToken);
+        var installedPath = manager.GetSnapshot().Models
+            .FirstOrDefault(item => item.Definition.Id == SFaceModelId && item.IsReady)?.InstalledPath;
 
-        var model = manager.GetSnapshot().Models.FirstOrDefault(item =>
-            item.Definition.Id == SFaceModelId && item.IsReady);
-        if (model?.InstalledPath is null)
-        {
-            return new FaceRecognitionResult(
-                false,
-                "The approved OpenCV SFace model is not imported. Open Model Manager and import the pinned model file first.",
-                detection.SourcePath,
-                detection.Runtime,
-                []);
-        }
-
+        // The official 2021 SFace export exposes legacy initializers as overridable inputs.
+        // ORT emits one graph warning per initializer even though the reviewed data input and
+        // fc1 output are valid; retain errors while keeping CLI output usable.
+        var session = TryCreateRecognitionSession(installedPath);
         try
         {
-            return RunInference(detection, model.InstalledPath);
+            var results = new List<FaceRecognitionResult>(imagePaths.Count);
+            foreach (var detection in detections)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (!detection.Success)
+                {
+                    results.Add(new FaceRecognitionResult(
+                        false, detection.ErrorMessage, detection.SourcePath, detection.Runtime, []));
+                    continue;
+                }
+                if (installedPath is null)
+                {
+                    results.Add(new FaceRecognitionResult(
+                        false,
+                        "The approved OpenCV SFace model is not imported. Open Model Manager and import the pinned model file first.",
+                        detection.SourcePath, detection.Runtime, []));
+                    continue;
+                }
+                if (session is null)
+                {
+                    results.Add(new FaceRecognitionResult(
+                        false,
+                        "The face-recognition model could not be loaded. Check diagnostics for technical details.",
+                        detection.SourcePath, detection.Runtime, []));
+                    continue;
+                }
+                try
+                {
+                    results.Add(RunInference(detection, session));
+                }
+                catch (Exception ex)
+                {
+                    _log.LogWarning(ex, "Face recognition failed for {Path}", detection.SourcePath);
+                    results.Add(new FaceRecognitionResult(
+                        false,
+                        "Face recognition could not analyze this image. Check diagnostics for technical details.",
+                        detection.SourcePath, detection.Runtime, []));
+                }
+            }
+            return results;
+        }
+        finally
+        {
+            session?.Dispose();
+        }
+    }
+
+    private static InferenceSession? TryCreateRecognitionSession(string? installedPath)
+    {
+        if (installedPath is null)
+            return null;
+        try
+        {
+            return OnnxRuntimeService.CreateSession(installedPath, OrtLoggingLevel.ORT_LOGGING_LEVEL_ERROR);
         }
         catch (Exception ex)
         {
-            _log.LogWarning(ex, "Face recognition failed for {Path}", detection.SourcePath);
-            return new FaceRecognitionResult(
-                false,
-                "Face recognition could not analyze this image. Check diagnostics for technical details.",
-                detection.SourcePath,
-                detection.Runtime,
-                []);
+            _log.LogWarning(ex, "The SFace recognition model could not be loaded.");
+            return null;
         }
     }
 
@@ -103,18 +148,22 @@ public static class FaceRecognitionService
         FaceDetectionResult detection,
         string modelPath)
     {
+        using var session = OnnxRuntimeService.CreateSession(
+            modelPath,
+            OrtLoggingLevel.ORT_LOGGING_LEVEL_ERROR);
+        return RunInference(detection, session);
+    }
+
+    internal static FaceRecognitionResult RunInference(
+        FaceDetectionResult detection,
+        InferenceSession session)
+    {
         using var image = MagickSafeReader.Read(
             detection.SourcePath,
             new MagickReadSettings { FrameIndex = 0, FrameCount = 1 });
         image.AutoOrient();
         image.ColorSpace = ColorSpace.sRGB;
 
-        // The official 2021 SFace export exposes legacy initializers as overridable inputs.
-        // ORT emits one graph warning per initializer even though the reviewed data input and
-        // fc1 output are valid; retain errors while keeping CLI output usable.
-        using var session = OnnxRuntimeService.CreateSession(
-            modelPath,
-            OrtLoggingLevel.ORT_LOGGING_LEVEL_ERROR);
         var faces = new List<FaceEmbedding>(detection.Faces.Count);
         for (var index = 0; index < detection.Faces.Count; index++)
         {

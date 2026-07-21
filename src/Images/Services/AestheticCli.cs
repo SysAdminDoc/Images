@@ -14,6 +14,7 @@ public static class AestheticCli
     public static int Run(string[] args)
     {
         CliReport.TryAttachConsole();
+        using var cancellation = CliCancellation.OnCtrlC();
         try
         {
             if (args.Length < 2 || args.Skip(1).Any(string.IsNullOrWhiteSpace))
@@ -21,7 +22,12 @@ public static class AestheticCli
                 Console.Error.WriteLine("Usage: Images.exe --aesthetic-score <imagePath> [imagePath ...]");
                 return 64;
             }
-            return Execute(args.Skip(1).ToArray(), Console.Out, Console.Error);
+            return Execute(args.Skip(1).ToArray(), Console.Out, Console.Error, cancellationToken: cancellation.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            Console.Error.WriteLine("Aesthetic scoring was canceled. No files were modified.");
+            return 130;
         }
         finally
         {
@@ -34,9 +40,10 @@ public static class AestheticCli
         IReadOnlyList<string> imagePaths,
         TextWriter output,
         TextWriter error,
-        Func<IReadOnlyList<string>, IReadOnlyList<AestheticScoreResult>>? scorer = null)
+        Func<IReadOnlyList<string>, IReadOnlyList<AestheticScoreResult>>? scorer = null,
+        CancellationToken cancellationToken = default)
     {
-        scorer ??= paths => AestheticScoringService.ScoreMany(paths);
+        scorer ??= paths => AestheticScoringService.ScoreMany(paths, cancellationToken: cancellationToken);
         var results = scorer(imagePaths);
         var successful = results.Where(result => result.Success)
             .OrderByDescending(result => result.MeanScore)
@@ -48,7 +55,11 @@ public static class AestheticCli
         {
             foreach (var message in failures.Select(result => result.ErrorMessage).Distinct(StringComparer.Ordinal))
                 error.WriteLine(message);
-            return failures.Any(result => result.Status == AestheticScoreStatus.ModelUnavailable) ? 2 : 1;
+            if (failures.Any(result => result.Status == AestheticScoreStatus.ModelUnavailable))
+                return 2;
+            if (failures.Any(result => result.Status == AestheticScoreStatus.ModelLoadFailed))
+                return 3;
+            return 1;
         }
 
         output.WriteLine(JsonSerializer.Serialize(new
