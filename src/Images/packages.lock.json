@@ -293,42 +293,6 @@
         "resolved": "9.0.0",
         "contentHash": "hyJB4UlpAi19Xr9AXzu2NuagKC4lPfHObNMEAA0HmqFz2rX7wKgzeYzO/jM/eBHDhnUGFFEjk5cOoJaxqg5J4A=="
       }
-    },
-    "net10.0-windows10.0.22621/win-x64": {
-      "Magick.NET-Q16-HDRI-AnyCPU": {
-        "type": "Direct",
-        "requested": "[14.15.0, )",
-        "resolved": "14.15.0",
-        "contentHash": "W9kdbBPijaAMmXsvv7AzQCPe1LXyEgzaYq7TrQf84tH4u+bZSYVOcnr46+kFNmuo3kZqCFmvXtgjK32flHuwvw==",
-        "dependencies": {
-          "Magick.NET.Core": "14.15.0"
-        }
-      },
-      "Microsoft.Windows.AI.MachineLearning": {
-        "type": "Direct",
-        "requested": "[2.1.74, )",
-        "resolved": "2.1.74",
-        "contentHash": "/Z1yAQ0J53eD1RrOl5anTDS0UQOgneERY//hLljwGcWeUX9ynCvOl5qUxAsfWvwsZZGcvV4WKjAvnAtA6N5i+w==",
-        "dependencies": {
-          "System.Numerics.Tensors": "9.0.0"
-        }
-      },
-      "SourceGear.sqlite3": {
-        "type": "Direct",
-        "requested": "[3.53.3, )",
-        "resolved": "3.53.3",
-        "contentHash": "PaDT7JwQ00HmXZT1xSGSC0c24A5lVpJYHMrXBuJATdpB2t0nf4Kq9HyPaZhxVW0elPq4XI1s5BLh7qLuObmzFA=="
-      },
-      "OpenTK.redist.glfw": {
-        "type": "Transitive",
-        "resolved": "3.3.0-pre20200830200122",
-        "contentHash": "EKE9pJCFHScbqOv/t0zG1h5Eh24nWr44SXYnpYtAWDhJhzAoUoI8TwDRXGvTGhDeCBp8ONEaVsq9xRC+OQIxQA=="
-      },
-      "SkiaSharp.NativeAssets.Win32": {
-        "type": "Transitive",
-        "resolved": "4.150.1",
-        "contentHash": "qrLSL8OonbkMJdSH8heK0Jl39Y2xxZGdd7Ru4cyBXk2ITdx+Fu1sCFLmvCKmnMaYs//mlN/YSpSpOurEXErcQw=="
-      }
     }
   }
 }
