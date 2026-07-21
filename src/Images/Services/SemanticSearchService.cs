@@ -53,6 +53,15 @@ public sealed record SemanticSearchStatus(
 public sealed class SemanticSearchService : IDisposable
 {
     private const int CurrentSchemaVersion = 1;
+
+    /// <summary>
+    /// V120-05: upper bound on how many candidate vectors a single <see cref="Search"/> call
+    /// scores. Search is a brute-force in-RAM cosine scan with no ANN index; for libraries below
+    /// this ceiling the scan is exhaustive and top-k is exact. Above it the scan stops early and
+    /// logs a notice, so a runaway library cannot make one query unbounded. Configurable at startup.
+    /// </summary>
+    public static int DefaultMaxSearchCandidates { get; set; } = 50_000;
+
     private static readonly ILogger Log = Images.Services.Log.Get(nameof(SemanticSearchService));
     private readonly string? _dbPath;
     private readonly string _connectionString;
@@ -198,7 +207,8 @@ public sealed class SemanticSearchService : IDisposable
         string query,
         int limit = 50,
         string? folderFilter = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        int maxCandidates = 0)
     {
         if (!_isAvailable || string.IsNullOrWhiteSpace(query))
             return [];
@@ -211,7 +221,10 @@ public sealed class SemanticSearchService : IDisposable
 
             var normalizedFilter = NormalizeFolderFilter(folderFilter);
             limit = Math.Clamp(limit, 1, 500);
+            var ceiling = maxCandidates > 0 ? maxCandidates : Math.Max(1, DefaultMaxSearchCandidates);
             var results = new List<SemanticSearchResult>();
+            var scored = 0;
+            var capped = false;
 
             foreach (var entry in EnsureVectorCache())
             {
@@ -221,6 +234,15 @@ public sealed class SemanticSearchService : IDisposable
 
                 if (entry.Vector.Length != queryVector.Length)
                     continue;
+
+                // Dependency-free early-out: bound the number of cosine products a single query
+                // performs. Exhaustive (exact) below the ceiling; approximate above it.
+                if (scored >= ceiling)
+                {
+                    capped = true;
+                    break;
+                }
+                scored++;
 
                 var score = Dot(queryVector, entry.Vector);
                 if (score <= 0)
@@ -236,6 +258,13 @@ public sealed class SemanticSearchService : IDisposable
                     entry.ModelId,
                     entry.ProviderId,
                     entry.IndexedUtc));
+            }
+
+            if (capped)
+            {
+                Log.LogWarning(
+                    "Semantic search scored the first {Ceiling} candidate vectors and stopped; results may be approximate for very large libraries.",
+                    ceiling);
             }
 
             return results

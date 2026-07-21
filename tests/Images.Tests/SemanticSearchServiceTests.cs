@@ -95,6 +95,24 @@ public sealed class SemanticSearchServiceTests
     }
 
     [Fact]
+    public void Search_HonorsCandidateCeiling()
+    {
+        using var temp = TestDirectory.Create();
+        WriteImage(temp.Path, "dog-one.png", 16, 8);
+        WriteImage(temp.Path, "dog-two.png", 16, 8);
+        WriteImage(temp.Path, "dog-three.png", 16, 8);
+        var service = CreateService(temp.Path);
+        service.Rebuild([temp.Path]);
+
+        var exhaustive = service.Search("dog", limit: 50);
+        var bounded = service.Search("dog", limit: 50, maxCandidates: 1);
+
+        // Below the ceiling the scan is exhaustive; the ceiling caps how many candidates are scored.
+        Assert.True(exhaustive.Count >= 2);
+        Assert.True(bounded.Count <= 1);
+    }
+
+    [Fact]
     public void GetStatus_WhenClipProviderFallsBack_ReportsReason()
     {
         using var temp = TestDirectory.Create();
