@@ -43,10 +43,3 @@ Net-new, code-ready items surfacing from the local-ML wave (v0.2.27 → v0.2.30)
   Acceptance: a configurable maximum candidate count bounds the scan; top-k results are unchanged for libraries under the ceiling; a test asserts the ceiling is honored on a large synthetic vector set.
   Complexity: M
 
-- [ ] **V120-06** P3 — Add dedicated unit tests for `PerceptualHashService` and `Exif31MetadataReader`.
-  Why: pHash feeds near-duplicate stacking (a wrong hash silently mis-stacks) and Exif 3.1 reading is provenance/security-relevant; both currently lack a dedicated test file.
-  Evidence: audit found no `PerceptualHashService*Tests` / `Exif31MetadataReader*Tests`; near-dup stacking depends on pHash output.
-  Touches: `tests/Images.Tests/PerceptualHashServiceTests.cs`, `tests/Images.Tests/Exif31MetadataReaderTests.cs`.
-  Acceptance: deterministic-fixture tests assert pHash stability/Hamming distance on known image pairs and Exif 3.1 tag decode (incl. UTF-8 and version/shape gating); both run in the existing suite.
-  Complexity: S
-
