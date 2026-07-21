@@ -2,7 +2,15 @@
 
 All notable changes to **Images** are documented here.
 
-## Unreleased
+## v0.2.31 - 2026-07-20
+
+- Local ML batch commands now reuse a single inference session for the whole run. `--face-cluster`, `--object-detect`, and `--orientation-suggest` previously reloaded their ONNX model once per image (`--face-cluster` loaded both a detection and a recognition model per image); they now open one session per model per batch, matching the scene/aesthetic/safety commands.
+- Long-running ML batch commands are now cancellable. `--scene-classify`, `--aesthetic-score`, `--safety-classify`, and `--face-cluster` respond to Ctrl+C by stopping between images and exiting with code 130 without modifying any files.
+- ML classification commands now return a distinct exit code (3) when the approved model is imported but cannot be loaded, separating that from a missing import (2) and per-image decode failures (1).
+- Semantic search is now bounded by a configurable candidate ceiling (default 50,000). The in-memory cosine scan stays exact and exhaustive below the ceiling and stops early with a logged notice above it, so a single query on a very large library can no longer run unbounded.
+- Hardened the local face detector's non-maximum suppression with a survivor cap so a pathological detection grid cannot trigger worst-case quadratic work; normal results are unchanged.
+
+## v0.2.30 - 2026-07-20
 
 - Added catalog-backed event grouping. `--catalog-events [<maxGapHours>]` reads the newest effective timestamps directly from SQLite, clusters capture/file times by a configurable gap, emits deterministic JSON Lines event IDs and assets, and selects a rated/high-resolution key-photo path near the event midpoint without opening a window.
 - Added catalog-backed trip detection. `--catalog-trips <homeLat> <homeLon> [<minDistanceKm> <maxGapDays>]` emits deterministic JSON Lines groups from GPS-tagged assets with real capture timestamps, excludes the configurable home radius, splits non-contiguous travel days, selects a rated/high-resolution cover, and reports antimeridian-safe centroids plus maximum distance from home without opening a window.
