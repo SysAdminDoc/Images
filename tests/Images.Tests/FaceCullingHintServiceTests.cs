@@ -45,9 +45,15 @@ public sealed class FaceCullingHintServiceTests
         var detection = new FaceDetection(
             30, 20, 100, 90, 0.95,
             [new FaceLandmark(65, 55), new FaceLandmark(100, 55)]);
-        FaceRecognitionResult Analyze(string _) => new(
-            true, null, path, "CPU",
-            [new FaceEmbedding(path, 0, detection, FaceEmbeddingQuality.Accepted, null, [1, 0])]);
+        IReadOnlyList<FaceRecognitionResult> Analyze(IReadOnlyList<string> _) =>
+        [
+            new FaceRecognitionResult(
+                true,
+                null,
+                path,
+                "CPU",
+                [new FaceEmbedding(path, 0, detection, FaceEmbeddingQuality.Accepted, null, [1, 0])])
+        ];
 
         var result = FaceReviewService.Analyze([path], Analyze);
         var candidate = Assert.Single(result.Candidates);

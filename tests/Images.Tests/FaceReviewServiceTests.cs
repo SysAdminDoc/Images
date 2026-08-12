@@ -15,14 +15,16 @@ public sealed class FaceReviewServiceTests
     public void Analyze_ExposesClustersAndQualityWithoutPrivateVectors()
     {
         var detection = new FaceDetection(10, 10, 50, 50, 0.95, []);
-        FaceRecognitionResult Analyze(string path) => new(
-            true,
-            null,
-            path,
-            "CPU",
-            path.EndsWith("a.jpg", StringComparison.Ordinal)
-                ? [new FaceEmbedding(path, 0, detection, FaceEmbeddingQuality.Accepted, null, [1, 0])]
-                : [new FaceEmbedding(path, 0, detection, FaceEmbeddingQuality.Accepted, null, [0.99f, 0.02f])]);
+        IReadOnlyList<FaceRecognitionResult> Analyze(IReadOnlyList<string> paths) => paths
+            .Select(path => new FaceRecognitionResult(
+                true,
+                null,
+                path,
+                "CPU",
+                path.EndsWith("a.jpg", StringComparison.Ordinal)
+                    ? [new FaceEmbedding(path, 0, detection, FaceEmbeddingQuality.Accepted, null, [1, 0])]
+                    : [new FaceEmbedding(path, 0, detection, FaceEmbeddingQuality.Accepted, null, [0.99f, 0.02f])]))
+            .ToArray();
 
         var result = FaceReviewService.Analyze(["a.jpg", "b.jpg"], Analyze);
 
@@ -32,6 +34,25 @@ public sealed class FaceReviewServiceTests
         Assert.DoesNotContain(
             typeof(FaceReviewCandidate).GetProperties(),
             property => property.Name.Contains("Vector", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Analyze_UsesOneBatchDelegateAndStopsBeforePublishingCanceledResults()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var invocations = 0;
+        IReadOnlyList<FaceRecognitionResult> Analyze(IReadOnlyList<string> paths)
+        {
+            invocations++;
+            cancellation.Cancel();
+            return paths
+                .Select(path => new FaceRecognitionResult(true, null, path, "CPU", []))
+                .ToArray();
+        }
+
+        Assert.Throws<OperationCanceledException>(() =>
+            FaceReviewService.Analyze(["a.jpg", "b.jpg"], Analyze, cancellation.Token));
+        Assert.Equal(1, invocations);
     }
 
     [Fact]

@@ -21,7 +21,8 @@ public static class FaceCullingHintService
 
     public static IReadOnlyDictionary<FaceReviewKey, FaceCullingHint> Analyze(
         string imagePath,
-        IReadOnlyList<FaceEmbedding> faces)
+        IReadOnlyList<FaceEmbedding> faces,
+        CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(imagePath);
         ArgumentNullException.ThrowIfNull(faces);
@@ -30,9 +31,13 @@ public static class FaceCullingHintService
             new MagickReadSettings { FrameIndex = 0, FrameCount = 1 });
         image.AutoOrient();
         image.ColorSpace = ColorSpace.sRGB;
-        return faces.ToDictionary(
-            face => new FaceReviewKey(face.SourcePath, face.FaceIndex),
-            face => Evaluate(image, face.Detection));
+        var hints = new Dictionary<FaceReviewKey, FaceCullingHint>();
+        foreach (var face in faces)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            hints[new FaceReviewKey(face.SourcePath, face.FaceIndex)] = Evaluate(image, face.Detection);
+        }
+        return hints;
     }
 
     internal static FaceCullingHint Evaluate(MagickImage image, FaceDetection face)

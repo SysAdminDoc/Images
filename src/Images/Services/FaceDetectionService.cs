@@ -86,7 +86,13 @@ public static class FaceDetectionService
             foreach (var imagePath in imagePaths)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                results.Add(DetectOne(imagePath, installedPath, session, confidenceThreshold, nmsThreshold));
+                results.Add(DetectOne(
+                    imagePath,
+                    installedPath,
+                    session,
+                    confidenceThreshold,
+                    nmsThreshold,
+                    cancellationToken));
             }
             return results;
         }
@@ -116,8 +122,10 @@ public static class FaceDetectionService
         string? installedPath,
         InferenceSession? session,
         float confidenceThreshold,
-        float nmsThreshold)
+        float nmsThreshold,
+        CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var normalizedPath = NormalizeExistingPath(imagePath);
         if (normalizedPath is null)
         {
@@ -148,7 +156,9 @@ public static class FaceDetectionService
 
         try
         {
-            return RunInference(normalizedPath, session, confidenceThreshold, nmsThreshold);
+            var result = RunInference(normalizedPath, session, confidenceThreshold, nmsThreshold);
+            cancellationToken.ThrowIfCancellationRequested();
+            return result;
         }
         catch (Exception ex)
         {

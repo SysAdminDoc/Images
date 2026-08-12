@@ -6,13 +6,6 @@ Actionable work only. Historical and completed roadmap material is archived in C
 
 - [ ] Every release generates checksum-pinned WinGet and Scoop manifests through `New-PackageManifests.ps1` and passes the package-manifest hash gate. Account-based submission is optional distribution follow-up, not a version gate.
 
-- [ ] **V130-01** P2 — Make the in-app face-review workbench batch-reuse ONNX sessions and be cancellable.
-  Why: `FaceReviewWindow` analyzes up to 100 images by calling per-image `FaceRecognitionService.Analyze` in a `.Select` loop (~200 ONNX session opens instead of 2) on a background task with no `CancellationToken` — the one interactive, repeated, long-running ML surface uses neither the V120 batched `AnalyzeMany` nor its cancellation.
-  Evidence: `FaceReviewWindow.xaml.cs:150` (`Task.Run(() => _analyze(paths))`, no token, only a post-hoc `_closed` guard); `FaceReviewService.cs:51-61` (single-path `Func<string,FaceRecognitionResult>` blocks `AnalyzeMany`); `FaceRecognitionService.cs:65` (`AnalyzeMany` exists, unused in-app).
-  Touches: `Services/FaceReviewService.cs` (delegate → `Func<IReadOnlyList<string>,IReadOnlyList<FaceRecognitionResult>>` + accept `CancellationToken`), `FaceReviewWindow.xaml(.cs)` (CTS cancelled on close; optional visible Cancel button).
-  Acceptance: a folder analyze routes through `AnalyzeMany` (one detection + one recognition session per run, asserted by a session-reuse test) and a cancelled token stops it promptly with partial results discarded; cancel-on-close verified headlessly, a visible Cancel button verified in a GUI session.
-  Complexity: M
-
 - [ ] **V130-02** P2 — Bring `ObjectCli`/`OrientationCli` to full V120 CLI parity.
   Why: These two of six ML CLIs are still single-image with no Ctrl+C cancellation, no multi-path batch, and no distinct model-load exit code — even though `DetectMany`/`SuggestMany` already support batches; an incomplete rollout of the shipped pattern.
   Evidence: `ObjectCli.cs:21` / `OrientationCli.cs:19` (`args.Length != 2`); `SceneCli`/`AestheticCli`/`SafetyCli` show the target multi-path + `CliCancellation.OnCtrlC()` + exit-3 pattern; `ModelLoadFailed` exists only on Aesthetic/Scene/Safety status enums.

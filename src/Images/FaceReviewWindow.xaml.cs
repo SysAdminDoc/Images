@@ -18,8 +18,9 @@ public partial class FaceReviewWindow : Window, INotifyPropertyChanged
     internal const int MaximumFolderImages = 100;
     private readonly string? _currentPath;
     private readonly IReadOnlyList<string> _folderPaths;
-    private readonly Func<IReadOnlyList<string>, FaceReviewAnalysis> _analyze;
+    private readonly Func<IReadOnlyList<string>, CancellationToken, FaceReviewAnalysis> _analyze;
     private readonly Func<IReadOnlyList<FaceReviewCandidate>, IReadOnlyList<FaceReviewEntry>, FaceReviewMergeResult> _merge;
+    private CancellationTokenSource? _analysisCts;
     private FaceReviewItemViewModel? _selectedItem;
     private ImageSource? _selectedImageSource;
     private double _selectedImageWidth = 1;
@@ -38,12 +39,14 @@ public partial class FaceReviewWindow : Window, INotifyPropertyChanged
     internal FaceReviewWindow(
         string? currentPath,
         IReadOnlyList<string>? folderPaths,
-        Func<IReadOnlyList<string>, FaceReviewAnalysis>? analyze,
+        Func<IReadOnlyList<string>, CancellationToken, FaceReviewAnalysis>? analyze,
         Func<IReadOnlyList<FaceReviewCandidate>, IReadOnlyList<FaceReviewEntry>, FaceReviewMergeResult>? merge)
     {
         _currentPath = string.IsNullOrWhiteSpace(currentPath) ? null : currentPath;
         _folderPaths = folderPaths ?? [];
-        _analyze = analyze ?? (paths => FaceReviewService.Analyze(paths));
+        _analyze = analyze ?? ((paths, cancellationToken) => FaceReviewService.Analyze(
+            paths,
+            cancellationToken: cancellationToken));
         _merge = merge ?? FaceReviewService.MergeReviewedRegions;
         _statusText = Strings.Get("FaceReviewReadyStatus");
         _reviewSummary = Strings.Get("FaceReviewNoRegions");
@@ -56,6 +59,7 @@ public partial class FaceReviewWindow : Window, INotifyPropertyChanged
         FaceList.ItemsSource = view;
         AnalyzeCurrentButton.IsEnabled = _currentPath is not null;
         AnalyzeFolderButton.IsEnabled = _folderPaths.Count > 0;
+        CancelButton.IsEnabled = false;
         MergeButton.IsEnabled = false;
 
         Loaded += async (_, _) =>
@@ -63,7 +67,11 @@ public partial class FaceReviewWindow : Window, INotifyPropertyChanged
             if (_currentPath is not null && Items.Count == 0)
                 await AnalyzeAsync([_currentPath]);
         };
-        Closed += (_, _) => _closed = true;
+        Closing += (_, _) =>
+        {
+            _closed = true;
+            CancelAnalysis();
+        };
         SourceInitialized += (_, _) =>
         {
             var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
@@ -140,14 +148,19 @@ public partial class FaceReviewWindow : Window, INotifyPropertyChanged
         await AnalyzeAsync(paths);
     }
 
-    private async Task AnalyzeAsync(IReadOnlyList<string> paths)
+    internal async Task AnalyzeAsync(IReadOnlyList<string> paths)
     {
         if (_isBusy || paths.Count == 0) return;
+        using var analysisCts = new CancellationTokenSource();
+        _analysisCts = analysisCts;
         SetBusy(true);
         StatusText = Strings.Format("FaceReviewAnalyzingStatusFormat", paths.Count);
         try
         {
-            var analysis = await Task.Run(() => _analyze(paths));
+            var analysis = await Task.Run(
+                () => _analyze(paths, analysisCts.Token),
+                analysisCts.Token);
+            analysisCts.Token.ThrowIfCancellationRequested();
             if (_closed) return;
 
             foreach (var item in Items)
@@ -166,13 +179,31 @@ public partial class FaceReviewWindow : Window, INotifyPropertyChanged
                 : Strings.Format("FaceReviewAnalyzedWithFailuresStatusFormat", Items.Count, analysis.Failures.Count);
             RefreshGate();
         }
+        catch (OperationCanceledException) when (analysisCts.IsCancellationRequested)
+        {
+            if (!_closed)
+                StatusText = Strings.Get("FaceReviewAnalyzeCanceled");
+        }
         catch (Exception ex)
         {
-            StatusText = Strings.Format("FaceReviewAnalyzeFailedFormat", ex.Message);
+            if (!_closed)
+                StatusText = Strings.Format("FaceReviewAnalyzeFailedFormat", ex.Message);
         }
         finally
         {
+            if (ReferenceEquals(_analysisCts, analysisCts))
+                _analysisCts = null;
             if (!_closed) SetBusy(false);
+        }
+    }
+
+    internal void CancelAnalysis()
+    {
+        if (_analysisCts is { IsCancellationRequested: false } analysisCts)
+        {
+            analysisCts.Cancel();
+            if (!_closed)
+                StatusText = Strings.Get("FaceReviewAnalyzeCanceled");
         }
     }
 
@@ -220,6 +251,8 @@ public partial class FaceReviewWindow : Window, INotifyPropertyChanged
 
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
 
+    private void CancelButton_Click(object sender, RoutedEventArgs e) => CancelAnalysis();
+
     private void Item_ReviewChanged(object? sender, EventArgs e)
     {
         RefreshGate();
@@ -246,6 +279,7 @@ public partial class FaceReviewWindow : Window, INotifyPropertyChanged
         _isBusy = busy;
         AnalyzeCurrentButton.IsEnabled = !busy && _currentPath is not null;
         AnalyzeFolderButton.IsEnabled = !busy && _folderPaths.Count > 0;
+        CancelButton.IsEnabled = busy && _analysisCts is not null;
         FaceList.IsEnabled = !busy;
         RefreshGate();
     }

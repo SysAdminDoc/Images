@@ -110,7 +110,11 @@ public static class FaceRecognitionService
                 }
                 try
                 {
-                    results.Add(RunInference(detection, session));
+                    results.Add(RunInference(detection, session, cancellationToken));
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
                 }
                 catch (Exception ex)
                 {
@@ -156,7 +160,8 @@ public static class FaceRecognitionService
 
     internal static FaceRecognitionResult RunInference(
         FaceDetectionResult detection,
-        InferenceSession session)
+        InferenceSession session,
+        CancellationToken cancellationToken = default)
     {
         using var image = MagickSafeReader.Read(
             detection.SourcePath,
@@ -167,6 +172,7 @@ public static class FaceRecognitionService
         var faces = new List<FaceEmbedding>(detection.Faces.Count);
         for (var index = 0; index < detection.Faces.Count; index++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var face = detection.Faces[index];
             if (Math.Min(face.Width, face.Height) < MinimumFacePixels)
             {

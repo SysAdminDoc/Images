@@ -2,6 +2,10 @@
 
 All notable changes to **Images** are documented here.
 
+## Unreleased
+
+- The in-app face-review workbench now sends a folder through the existing batched YuNet/SFace inference path, reuses one session per model, and can cancel analysis from the workbench or when the window closes without publishing partial results.
+
 ## v0.2.31 - 2026-07-20
 
 - Local ML batch commands now reuse a single inference session for the whole run. `--face-cluster`, `--object-detect`, and `--orientation-suggest` previously reloaded their ONNX model once per image (`--face-cluster` loaded both a detection and a recognition model per image); they now open one session per model per batch, matching the scene/aesthetic/safety commands.

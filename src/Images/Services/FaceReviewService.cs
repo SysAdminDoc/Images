@@ -50,18 +50,28 @@ public static class FaceReviewService
 
     public static FaceReviewAnalysis Analyze(
         IReadOnlyList<string> imagePaths,
-        Func<string, FaceRecognitionResult>? analyzer = null)
+        Func<IReadOnlyList<string>, IReadOnlyList<FaceRecognitionResult>>? analyzer = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(imagePaths);
-        analyzer ??= path => FaceRecognitionService.Analyze(path);
-        var analyses = imagePaths
+        cancellationToken.ThrowIfCancellationRequested();
+        var paths = imagePaths
             .Where(path => !string.IsNullOrWhiteSpace(path))
             .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Select(analyzer)
             .ToArray();
+        if (paths.Length == 0)
+            return new FaceReviewAnalysis([], []);
+
+        analyzer ??= paths => FaceRecognitionService.AnalyzeMany(
+            paths,
+            cancellationToken: cancellationToken);
+        var analyses = analyzer(paths);
+        cancellationToken.ThrowIfCancellationRequested();
         var successful = analyses.Where(result => result.Success).ToArray();
         var embeddings = successful.SelectMany(result => result.Faces).ToArray();
+        cancellationToken.ThrowIfCancellationRequested();
         var clusters = FaceClusterService.Cluster(embeddings);
+        cancellationToken.ThrowIfCancellationRequested();
         var clusterIds = clusters.Clusters
             .SelectMany(cluster => cluster.Members.Select(member =>
                 new KeyValuePair<FaceReviewKey, int>(
@@ -71,9 +81,13 @@ public static class FaceReviewService
         var cullingHints = new Dictionary<FaceReviewKey, FaceCullingHint>(FaceReviewKeyComparer.Instance);
         foreach (var result in successful.Where(result => File.Exists(result.SourcePath)))
         {
+            cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                foreach (var pair in FaceCullingHintService.Analyze(result.SourcePath, result.Faces))
+                foreach (var pair in FaceCullingHintService.Analyze(
+                             result.SourcePath,
+                             result.Faces,
+                             cancellationToken))
                     cullingHints[pair.Key] = pair.Value;
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or MagickException)
@@ -82,6 +96,8 @@ public static class FaceReviewService
                 // available when a source cannot be sampled for these secondary metrics.
             }
         }
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         var candidates = embeddings.Select(face =>
         {

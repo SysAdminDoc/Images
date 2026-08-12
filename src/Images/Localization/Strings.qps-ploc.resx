@@ -6884,6 +6884,7 @@ Details written to:
   <data name="FaceReviewAnalyzedStatusFormat" xml:space="preserve"><value>[!!!! Found {0} face region(s) across {1} image(s). No files were modified. !!!!]</value></data>
   <data name="FaceReviewAnalyzedWithFailuresStatusFormat" xml:space="preserve"><value>[!!!! Found {0} face region(s); {1} image(s) could not be analyzed. No files were modified. !!!!]</value></data>
   <data name="FaceReviewAnalyzeFailedFormat" xml:space="preserve"><value>[!!!! Face analysis failed: {0} !!!!]</value></data>
+  <data name="FaceReviewAnalyzeCanceled" xml:space="preserve"><value>[!!!! Face analysis canceled. No files were modified. !!!!]</value></data>
   <data name="FaceReviewMergingStatus" xml:space="preserve"><value>[!!!! Merging only the fully reviewed face regions into XMP sidecars... !!!!]</value></data>
   <data name="FaceReviewSummaryFormat" xml:space="preserve"><value>[!!!! {0} total - {1} accepted - {2} rejected - {3} pending !!!!]</value></data>
   <data name="FaceReviewPreviewFailedFormat" xml:space="preserve"><value>[!!!! Could not preview this face region: {0} !!!!]</value></data>
